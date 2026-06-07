@@ -7,8 +7,8 @@ import org.koin.core.annotation.Single
 import java.io.File
 
 @Single
-internal actual class DriverFactory {
-    actual inline fun <reified T : RoomDatabase> createBuilder(
+public actual class DriverFactory {
+    public actual inline fun <reified T : RoomDatabase> createBuilder(
         name: String,
         isCache: Boolean,
     ): RoomDatabase.Builder<T> {
@@ -24,7 +24,7 @@ internal actual class DriverFactory {
         )
     }
 
-    actual fun deleteDatabase(
+    public actual fun deleteDatabase(
         name: String,
         isCache: Boolean,
     ) {

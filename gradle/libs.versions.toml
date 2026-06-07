@@ -84,6 +84,7 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup", version.ref = "ksoup" }
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
+koog-agents-features-memory = { module = "ai.koog:agents-features-memory", version.ref = "koog" }
 koog-http-client-ktor = { module = "ai.koog:http-client-ktor", version.ref = "koog" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }

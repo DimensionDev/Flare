@@ -2,17 +2,19 @@ package dev.dimension.flare.feature.agent.presenter.status
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.feature.agent.common.AgentTrace
+import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
 import dev.dimension.flare.feature.agent.status.StatusInsightAgentUseCase
-import dev.dimension.flare.feature.agent.status.StatusInsightEvent
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.combine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -28,85 +30,115 @@ public class StatusInsightPresenter(
     @Immutable
     public interface State {
         public val insight: UiState<String>
+        public val messages: ImmutableList<Message>
+        public val input: String
+        public val isRunning: Boolean
         public val post: UiTimelineV2.Post?
-        public val currentTrace: StatusInsightEvent.Trace?
+        public val currentTrace: AgentTrace?
+        public val error: Throwable?
+        public val canSend: Boolean
+
+        public fun setInput(value: String)
+
+        public fun sendMessage()
     }
 
     @Composable
     override fun body(): State {
-        val state =
-            produceState<State>(
-                initialValue = StateImpl(),
-                accountType,
-                statusKey,
-            ) {
+        val key = "$accountType:$statusKey"
+        val conversationId =
+            remember(accountType, statusKey) {
+                "status-insight:$accountType:$statusKey"
+            }
+        val contextFlow =
+            remember(accountType) {
                 accountService
                     .accountServiceFlow(accountType)
-                    .combine(accountService.allAccountServicesFlow()) { service, searchDataSources ->
-                        service to searchDataSources
-                    }.collectLatest { (service, searchDataSources) ->
-                        var post: UiTimelineV2.Post? = null
-                        var currentTrace: StatusInsightEvent.Trace? = null
-
-                        fun update(
-                            insight: UiState<String>,
-                            postValue: UiTimelineV2.Post? = post,
-                            currentTraceValue: StatusInsightEvent.Trace? = currentTrace,
-                        ) {
-                            value =
-                                StateImpl(
-                                    insight = insight,
-                                    post = postValue,
-                                    currentTrace = currentTraceValue,
-                                )
-                        }
-
-                        update(UiState.Loading())
-
-                        val postDataSource =
-                            service as? PostDataSource
-                                ?: run {
-                                    update(UiState.Error(IllegalStateException("Current account does not support post data source")))
-                                    return@collectLatest
-                                }
-
-                        try {
-                            statusInsightAgentUseCase(
+                    .combine(accountService.allAccountServicesFlow()) { service, availableSearchDataSources ->
+                        (service as? PostDataSource)?.let { postDataSource ->
+                            StatusInsightContext(
                                 postDataSource = postDataSource,
-                                statusKey = statusKey,
-                                searchDataSources = searchDataSources,
-                            ).collect { event ->
-                                when (event) {
-                                    is StatusInsightEvent.PostLoaded -> {
-                                        post = event.post
-                                        update(UiState.Loading())
-                                    }
-
-                                    is StatusInsightEvent.Trace -> {
-                                        currentTrace = event
-                                        update(UiState.Loading())
-                                    }
-
-                                    is StatusInsightEvent.Result -> {
-                                        currentTrace = null
-                                        update(UiState.Success(event.text))
-                                    }
-                                }
-                            }
-                        } catch (throwable: Throwable) {
-                            currentTrace = null
-                            update(UiState.Error(throwable))
+                                searchDataSources = availableSearchDataSources,
+                            )
                         }
                     }
             }
+        val controller =
+            rememberAgentChatPresenterController(
+                key = key,
+                conversationId = conversationId,
+                contextFlow = contextFlow,
+                runAgent = { context, userInput, currentConversationId ->
+                    statusInsightAgentUseCase(
+                        postDataSource = context.postDataSource,
+                        statusKey = statusKey,
+                        searchDataSources = context.searchDataSources,
+                        userInput = userInput,
+                        conversationId = currentConversationId,
+                    )
+                },
+                userMessage = Message::User,
+                assistantMessage = Message::Assistant,
+                isAssistantMessage = { it is Message.Assistant },
+                messageText = Message::text,
+                missingContextError = {
+                    IllegalStateException("Current account does not support post data source")
+                },
+            )
 
-        return state.value
+        return StateImpl(
+            messages = controller.messages,
+            input = controller.input,
+            isRunning = controller.isRunning,
+            post = controller.content,
+            currentTrace = controller.currentTrace,
+            error = controller.error,
+            insight = controller.insight,
+            canSend = controller.canSend,
+            onSetInput = controller::setInput,
+            onSendMessage = controller::sendMessage,
+        )
+    }
+
+    @Immutable
+    public sealed interface Message {
+        public val text: String
+
+        @Immutable
+        public data class User(
+            override val text: String,
+        ) : Message
+
+        @Immutable
+        public data class Assistant(
+            override val text: String,
+        ) : Message
     }
 
     @Immutable
     private data class StateImpl(
-        override val insight: UiState<String> = UiState.Loading(),
-        override val post: UiTimelineV2.Post? = null,
-        override val currentTrace: StatusInsightEvent.Trace? = null,
-    ) : State
+        override val messages: ImmutableList<Message>,
+        override val input: String,
+        override val isRunning: Boolean,
+        override val post: UiTimelineV2.Post?,
+        override val currentTrace: AgentTrace?,
+        override val error: Throwable?,
+        override val insight: UiState<String>,
+        override val canSend: Boolean,
+        private val onSetInput: (String) -> Unit,
+        private val onSendMessage: () -> Unit,
+    ) : State {
+        override fun setInput(value: String) {
+            onSetInput.invoke(value)
+        }
+
+        override fun sendMessage() {
+            onSendMessage.invoke()
+        }
+    }
+
+    private data class StatusInsightContext(
+        val postDataSource: PostDataSource,
+        val searchDataSources: List<AccountMicroblogDataSource>,
+    )
 }

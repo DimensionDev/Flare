@@ -1,32 +1,25 @@
 package dev.dimension.flare.feature.agent.status
 
-import ai.koog.agents.core.agent.AIAgent
-import ai.koog.agents.core.dsl.builder.node
-import ai.koog.agents.core.dsl.builder.strategy
-import ai.koog.agents.core.dsl.extension.nodeExecuteTools
-import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResults
-import ai.koog.agents.core.dsl.extension.onTextMessage
-import ai.koog.agents.core.dsl.extension.onToolCalls
-import ai.koog.agents.core.tools.ToolRegistry
-import ai.koog.agents.core.utils.ConfigureAction
-import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.Prompt
 import ai.koog.prompt.message.AttachmentContent
 import ai.koog.prompt.message.AttachmentSource
-import ai.koog.prompt.message.Message
 import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostTranslationDisplay
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
+import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
+import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentPhase
+import dev.dimension.flare.feature.agent.common.AgentToolContext
+import dev.dimension.flare.feature.agent.common.AgentTrace
+import dev.dimension.flare.feature.agent.common.FlareAgentRequest
+import dev.dimension.flare.feature.agent.common.FlareAgentRunner
+import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
-import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntime
-import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CancellationException
@@ -42,44 +35,67 @@ import org.koin.core.annotation.Single
 
 @Single
 internal class StatusInsightAgentUseCase(
-    private val runtimeProvider: FlareAgentRuntimeProvider,
+    private val agentRunner: FlareAgentRunner,
+    private val chatHistoryProvider: AgentChatHistoryProvider,
 ) {
     operator fun invoke(
         postDataSource: PostDataSource,
         statusKey: MicroBlogKey,
         searchDataSources: List<AccountMicroblogDataSource>,
-    ): Flow<StatusInsightEvent> =
+        userInput: String? = null,
+        conversationId: String = statusKey.statusInsightConversationId(),
+    ): Flow<AgentConversationEvent<UiTimelineV2.Post, AgentTrace>> =
         channelFlow {
-            run(postDataSource, statusKey, searchDataSources)
+            run(postDataSource, statusKey, searchDataSources, userInput, conversationId)
         }
 
-    private suspend fun SendChannel<StatusInsightEvent>.run(
+    private suspend fun SendChannel<AgentConversationEvent<UiTimelineV2.Post, AgentTrace>>.run(
         postDataSource: PostDataSource,
         statusKey: MicroBlogKey,
         searchDataSources: List<AccountMicroblogDataSource>,
+        userInput: String?,
+        conversationId: String,
     ) {
-        val runtime =
-            runtimeProvider.createRuntime()
-                ?: throw StatusInsightAgentUnavailableException(runtimeProvider.availability())
-        send(StatusInsightEvent.Trace(StatusInsightPhase.LoadingPostContext))
+        val userInputValue = userInput?.trim().orEmpty()
+        if (userInputValue.isBlank()) {
+            agentRunner.clearConversation(conversationId)
+        }
+        send(AgentTrace(AgentPhase.LoadingPostContext).toConversationEvent())
         val post = postDataSource.loadPost(statusKey)
-        send(StatusInsightEvent.PostLoaded(post))
-        send(StatusInsightEvent.Trace(StatusInsightPhase.PostContextLoaded))
+        chatHistoryProvider.storeStatusInsightSourcePosts(
+            conversationId = conversationId,
+            posts = listOf(post),
+        )
+        send(AgentConversationEvent.ContentLoaded(post))
+        send(AgentTrace(AgentPhase.PostContextLoaded).toConversationEvent())
         val imageAttachments = post.aiImageAttachments()
         if (imageAttachments.isNotEmpty()) {
-            send(StatusInsightEvent.Trace(StatusInsightPhase.PreparingImages))
+            send(AgentTrace(AgentPhase.PreparingImages).toConversationEvent())
         }
-        val searchTargets = postDataSource.statusInsightSearchTargets(searchDataSources, post.platformType)
-        val toolRegistry = postDataSource.statusInsightToolRegistry(statusKey, searchTargets)
-        val systemPrompt = STATUS_INSIGHT_SYSTEM_PROMPT.withSearchPlatformGuidance(searchTargets)
+        val toolContext =
+            AgentToolContext(
+                status =
+                    AgentToolContext.StatusContext(
+                        postDataSource = postDataSource,
+                        statusKey = statusKey,
+                        currentPlatformType = post.platformType,
+                    ),
+                searchDataSources = searchDataSources,
+            )
         val result =
             try {
-                runtime.runAgent(
-                    prompt = post.toInsightPrompt(Locale.language, includeImages = true),
-                    toolRegistry = toolRegistry,
-                    systemPrompt = systemPrompt,
+                val prompt =
+                    post.toInsightPrompt(
+                        targetLanguage = Locale.language,
+                        userInput = userInputValue,
+                        includeImages = true,
+                    )
+                agentRunner.runStatusInsightAgent(
+                    prompt = prompt,
+                    toolContext = toolContext,
+                    conversationId = conversationId,
                 ) { event ->
-                    send(event)
+                    send(event.toConversationEvent())
                 }
             } catch (throwable: Throwable) {
                 if (throwable is CancellationException) {
@@ -88,162 +104,53 @@ internal class StatusInsightAgentUseCase(
                 if (imageAttachments.isEmpty() || !throwable.isImageContentUnsupported()) {
                     throw throwable
                 }
-                send(StatusInsightEvent.Trace(StatusInsightPhase.ImagesUnsupportedFallback))
-                runtime.runAgent(
-                    prompt = post.toInsightPrompt(Locale.language, includeImages = false),
-                    toolRegistry = toolRegistry,
-                    systemPrompt = systemPrompt,
+                send(AgentTrace(AgentPhase.ImagesUnsupportedFallback).toConversationEvent())
+                val prompt =
+                    post.toInsightPrompt(
+                        targetLanguage = Locale.language,
+                        userInput = userInputValue,
+                        includeImages = false,
+                    )
+                agentRunner.runStatusInsightAgent(
+                    prompt = prompt,
+                    toolContext = toolContext,
+                    conversationId = conversationId,
                 ) { event ->
-                    send(event)
+                    send(event.toConversationEvent())
                 }
             }
 
-        send(StatusInsightEvent.Result(result.cleanPlainText()))
+        send(AgentConversationEvent.Result(result.cleanPlainText()))
     }
 
-    private suspend fun FlareAgentRuntime.runAgent(
+    private suspend fun FlareAgentRunner.runStatusInsightAgent(
         prompt: Prompt,
-        toolRegistry: ToolRegistry,
-        systemPrompt: String,
-        onEvent: suspend (StatusInsightEvent.Trace) -> Unit,
-    ): String {
-        val agent = createAgent(toolRegistry, systemPrompt, onEvent)
-        return try {
-            agent.run(prompt)
-        } finally {
-            agent.close()
+        toolContext: AgentToolContext,
+        conversationId: String,
+        onEvent: suspend (AgentTrace) -> Unit,
+    ): String =
+        try {
+            run(
+                request =
+                    FlareAgentRequest(
+                        prompt = prompt,
+                        systemPrompt = STATUS_INSIGHT_SYSTEM_PROMPT,
+                        agentId = "flare-status-insight",
+                        strategyName = "status_insight_multimodal",
+                        analyzeNodeName = "analyze_post",
+                        executeToolsNodeName = "execute_status_insight_tools",
+                        sendToolResultsNodeName = "send_status_insight_tool_results",
+                        toolContext = toolContext,
+                        temperature = 0.2,
+                        maxIterations = MAX_AGENT_ITERATIONS,
+                        chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
+                    ),
+                conversationId = conversationId,
+                onTrace = onEvent,
+            )
+        } catch (throwable: FlareAgentUnavailableException) {
+            throw StatusInsightAgentUnavailableException(throwable.availability)
         }
-    }
-
-    private fun FlareAgentRuntime.createAgent(
-        toolRegistry: ToolRegistry,
-        systemPrompt: String,
-        onEvent: suspend (StatusInsightEvent.Trace) -> Unit,
-    ): AIAgent<Prompt, String> =
-        AIAgent
-            .builder()
-            .promptExecutor(promptExecutor)
-            .llmModel(model)
-            .toolRegistry(toolRegistry)
-            .id("flare-status-insight")
-            .systemPrompt(systemPrompt)
-            .temperature(0.2)
-            .maxIterations(MAX_AGENT_ITERATIONS)
-            .graphStrategy(
-                strategy<Prompt, String>("status_insight_multimodal") {
-                    val nodeAnalyze by node<Prompt, Message.Assistant>("analyze_post") { prompt ->
-                        llm.writeSession {
-                            appendPrompt {
-                                messages(prompt.messages)
-                            }
-                            requestLLM()
-                        }
-                    }
-                    val nodeExecuteTools by nodeExecuteTools("execute_status_insight_tools")
-                    val nodeSendToolResults by nodeLLMSendToolResults("send_status_insight_tool_results")
-
-                    edge(nodeStart forwardTo nodeAnalyze)
-                    edge(nodeAnalyze forwardTo nodeExecuteTools onToolCalls { true })
-                    edge(nodeAnalyze forwardTo nodeFinish onTextMessage { true })
-                    edge(nodeExecuteTools forwardTo nodeSendToolResults)
-                    edge(nodeSendToolResults forwardTo nodeExecuteTools onToolCalls { true })
-                    edge(nodeSendToolResults forwardTo nodeFinish onTextMessage { true })
-                },
-            ).install(
-                EventHandler,
-                ConfigureAction { config ->
-                    config.onAgentStarting {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.AgentStarted))
-                    }
-                    config.onStrategyStarting {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StrategyStarted))
-                    }
-                    config.onStrategyCompleted {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StrategyCompleted))
-                    }
-                    config.onSubgraphExecutionStarting {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.SubgraphStarted))
-                    }
-                    config.onSubgraphExecutionCompleted {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.SubgraphCompleted))
-                    }
-                    config.onSubgraphExecutionFailed {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.SubgraphFailed))
-                    }
-                    config.onLLMCallStarting {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.AskingModel, it.model.id))
-                    }
-                    config.onLLMCallCompleted {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.ModelResponseReceived))
-                    }
-                    config.onLLMStreamingStarting {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StreamingStarted, it.model.id))
-                    }
-                    config.onLLMStreamingFrameReceived {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StreamingResponse))
-                    }
-                    config.onLLMStreamingCompleted {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StreamingCompleted))
-                    }
-                    config.onLLMStreamingFailed {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StreamingFailed))
-                    }
-                    config.onNodeExecutionStarting {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.RunningStep))
-                    }
-                    config.onNodeExecutionCompleted {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StepCompleted))
-                    }
-                    config.onNodeExecutionFailed {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.StepFailed))
-                    }
-                    config.onToolCallStarting {
-                        onEvent(
-                            StatusInsightEvent.Trace(
-                                phase = StatusInsightPhase.ToolCallStarted,
-                                detail = it.toolName,
-                                key = it.toolName.toToolTraceKey(StatusInsightPhase.ToolCallStarted),
-                            ),
-                        )
-                    }
-                    config.onToolCallCompleted {
-                        onEvent(
-                            StatusInsightEvent.Trace(
-                                phase = StatusInsightPhase.ToolCallCompleted,
-                                detail = it.toolName,
-                                key = it.toolName.toToolTraceKey(StatusInsightPhase.ToolCallCompleted),
-                            ),
-                        )
-                    }
-                    config.onToolValidationFailed {
-                        onEvent(
-                            StatusInsightEvent.Trace(
-                                phase = StatusInsightPhase.ToolValidationFailed,
-                                detail = it.toolName,
-                                key = it.toolName.toToolTraceKey(StatusInsightPhase.ToolValidationFailed),
-                            ),
-                        )
-                    }
-                    config.onToolCallFailed {
-                        onEvent(
-                            StatusInsightEvent.Trace(
-                                phase = StatusInsightPhase.ToolCallFailed,
-                                detail = it.toolName,
-                                key = it.toolName.toToolTraceKey(StatusInsightPhase.ToolCallFailed),
-                            ),
-                        )
-                    }
-                    config.onAgentCompleted {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.AgentCompleted))
-                    }
-                    config.onAgentExecutionFailed {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.AgentFailed))
-                    }
-                    config.onAgentClosing {
-                        onEvent(StatusInsightEvent.Trace(StatusInsightPhase.AgentClosing))
-                    }
-                },
-            ).build()
 
     private suspend fun PostDataSource.loadPost(statusKey: MicroBlogKey): UiTimelineV2.Post =
         coroutineScope {
@@ -271,37 +178,20 @@ internal class StatusInsightAgentUseCase(
             data.await()
         }
 
-    private fun PostDataSource.statusInsightSearchTargets(
-        searchDataSources: List<AccountMicroblogDataSource>,
-        currentPlatformType: PlatformType,
-    ): List<StatusSearchTarget> {
-        val microblogDataSource = this as? MicroblogDataSource
-        return buildList {
-            addAll(searchDataSources.toStatusSearchTargets())
-            if (microblogDataSource != null && none { it.dataSource === microblogDataSource }) {
-                add(StatusSearchTarget(platformType = currentPlatformType, dataSource = microblogDataSource))
-            }
-        }
-    }
-
-    private fun PostDataSource.statusInsightToolRegistry(
-        statusKey: MicroBlogKey,
-        searchTargets: List<StatusSearchTarget>,
-    ): ToolRegistry {
-        val microblogDataSource = this as? MicroblogDataSource ?: return ToolRegistry.EMPTY
-        return ToolRegistry {
-            tool(LoadStatusContextTool(microblogDataSource, statusKey))
-            tool(SearchStatusTool(searchTargets))
-        }
-    }
-
     private fun UiTimelineV2.Post.toInsightPrompt(
         targetLanguage: String,
+        userInput: String,
         includeImages: Boolean,
     ): Prompt =
         Prompt.build("status-insight") {
             user {
-                text(toInsightPromptInput(targetLanguage))
+                text(
+                    if (userInput.isBlank()) {
+                        toInsightPromptInput(targetLanguage)
+                    } else {
+                        toInsightChatPromptInput(targetLanguage, userInput)
+                    },
+                )
                 if (includeImages) {
                     aiImageAttachments().forEachIndexed { index, image ->
                         text("Image ${index + 1}: ${image.description.orEmpty()}")
@@ -314,6 +204,24 @@ internal class StatusInsightAgentUseCase(
                     )
                 }
             }
+        }
+
+    private fun UiTimelineV2.Post.toInsightChatPromptInput(
+        targetLanguage: String,
+        userInput: String,
+    ): String =
+        buildString {
+            appendLine("Continue the conversation about this social post.")
+            appendLine("Answer the user's latest question directly.")
+            appendLine("Use previous messages from chat memory when available, but do not repeat the full earlier explanation.")
+            appendLine("Return plain text only.")
+            appendLine("Respond in this language: $targetLanguage.")
+            appendLine()
+            appendLine("Latest user question:")
+            appendLine(userInput)
+            appendLine()
+            appendLine("Current post snapshot:")
+            append(toInsightPromptInput(targetLanguage))
         }
 
     private fun UiTimelineV2.Post.toInsightPromptInput(targetLanguage: String): String =
@@ -469,128 +377,7 @@ internal class StatusInsightAgentUseCase(
             )
     }
 
-    private fun String.toToolTraceKey(phase: StatusInsightPhase): StatusInsightTraceKey? =
-        when (phase) {
-            StatusInsightPhase.ToolCallStarted -> {
-                toToolCallStartedKey()
-            }
-
-            StatusInsightPhase.ToolCallCompleted -> {
-                toToolCallCompletedKey()
-            }
-
-            StatusInsightPhase.ToolValidationFailed -> {
-                toToolValidationFailedKey()
-            }
-
-            StatusInsightPhase.ToolCallFailed -> {
-                toToolCallFailedKey()
-            }
-
-            else -> {
-                null
-            }
-        }
-
-    private fun String.toToolCallStartedKey(): StatusInsightTraceKey? =
-        when (this) {
-            "load_status_context" -> {
-                StatusInsightTraceKey.LoadStatusContextStarted
-            }
-
-            "search_status" -> {
-                StatusInsightTraceKey.SearchStatusStarted
-            }
-
-            else -> {
-                null
-            }
-        }
-
-    private fun String.toToolCallCompletedKey(): StatusInsightTraceKey? =
-        when (this) {
-            "load_status_context" -> {
-                StatusInsightTraceKey.LoadStatusContextCompleted
-            }
-
-            "search_status" -> {
-                StatusInsightTraceKey.SearchStatusCompleted
-            }
-
-            else -> {
-                null
-            }
-        }
-
-    private fun String.toToolValidationFailedKey(): StatusInsightTraceKey? =
-        when (this) {
-            "load_status_context" -> {
-                StatusInsightTraceKey.LoadStatusContextValidationFailed
-            }
-
-            "search_status" -> {
-                StatusInsightTraceKey.SearchStatusValidationFailed
-            }
-
-            else -> {
-                null
-            }
-        }
-
-    private fun String.toToolCallFailedKey(): StatusInsightTraceKey? =
-        when (this) {
-            "load_status_context" -> {
-                StatusInsightTraceKey.LoadStatusContextFailed
-            }
-
-            "search_status" -> {
-                StatusInsightTraceKey.SearchStatusFailed
-            }
-
-            else -> {
-                null
-            }
-        }
-
-    private fun String.withSearchPlatformGuidance(searchTargets: List<StatusSearchTarget>): String {
-        val platformTypes =
-            searchTargets
-                .mapNotNull { it.platformType }
-                .distinct()
-        val guidance =
-            if (platformTypes.isEmpty()) {
-                """
-
-                Search platform guidance:
-                - No searchable signed-in platforms are currently available.
-                - If you use search, leave the platform list empty.
-                """
-            } else {
-                val platformLines =
-                    platformTypes.joinToString(separator = "\n") { platformType ->
-                        buildString {
-                            append("- ")
-                            append(platformType.name)
-                            val aliases = platformType.searchAliases()
-                            if (aliases.isNotEmpty()) {
-                                append(" (aliases: ")
-                                append(aliases.joinToString())
-                                append(")")
-                            }
-                        }
-                    }
-                """
-
-                Search platform guidance:
-                - Available searchable platforms are:
-                $platformLines
-                - Use these exact platform names in the search tool's platform list when limiting search.
-                - You may use the listed aliases; they resolve to the corresponding platform.
-                - Leave the platform list empty to search every available platform.
-                """
-            }
-        return trimEnd() + "\n\n" + guidance.trimIndent()
-    }
+    private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
 
     private companion object {
         const val MAX_RELATED_POSTS = 3
@@ -598,6 +385,7 @@ internal class StatusInsightAgentUseCase(
         const val MAX_IMAGE_ATTACHMENTS = 4
         val SUPPORTED_IMAGE_FORMATS = setOf("jpg", "jpeg", "png", "webp", "gif")
         const val MAX_AGENT_ITERATIONS = 16
+        const val CHAT_MEMORY_WINDOW_SIZE = 20
 
         const val STATUS_INSIGHT_SYSTEM_PROMPT =
             """
@@ -627,11 +415,9 @@ internal class StatusInsightAgentUseCase(
            
             Tool use:
             - Use the post context tool when the post depends on a missing thread, reply chain, quoted post, or conversation setup.
-            - Use the search tool when the post refers to current events, claims, statistics, memes, public controversies, or unclear phrases that may need outside posts for context.
-            - When searching, explicitly choose whether you need posts, users, or both.
-            - Search users when the key missing context is who an account is, whether an account appears official, or how an account describes itself.
-            - Search posts when the key missing context is what people are saying, whether a topic is spreading, or what phrase/meme/event the post refers to.
-            - Search both users and posts when both account identity and surrounding discussion matter.
+            - Use search_posts when the post refers to current events, claims, statistics, memes, public controversies, unclear phrases, or surrounding discussion.
+            - Use search_users when the key missing context is who an account is, whether an account appears official, or how an account describes itself.
+            - Use both search_posts and search_users only when both account identity and surrounding discussion matter.
             - Leave the platform list empty to search all signed-in platforms when broad context is useful.
             - Limit the platform list when the post clearly belongs to, mentions, or depends on a specific platform.
             - Search across diverse signed-in platforms only when the first query needs broad coverage. Do not run separate searches per platform.
@@ -656,61 +442,7 @@ internal class StatusInsightAgentUseCase(
     }
 }
 
-public sealed interface StatusInsightEvent {
-    public data class PostLoaded(
-        public val post: UiTimelineV2.Post,
-    ) : StatusInsightEvent
-
-    public data class Trace(
-        public val phase: StatusInsightPhase,
-        public val detail: String? = null,
-        public val key: StatusInsightTraceKey? = null,
-    ) : StatusInsightEvent
-
-    public data class Result(
-        public val text: String,
-    ) : StatusInsightEvent
-}
-
-public enum class StatusInsightPhase {
-    LoadingPostContext,
-    PostContextLoaded,
-    PreparingImages,
-    ImagesUnsupportedFallback,
-    AgentStarted,
-    StrategyStarted,
-    StrategyCompleted,
-    SubgraphStarted,
-    SubgraphCompleted,
-    SubgraphFailed,
-    AskingModel,
-    ModelResponseReceived,
-    StreamingStarted,
-    StreamingResponse,
-    StreamingCompleted,
-    StreamingFailed,
-    RunningStep,
-    StepCompleted,
-    StepFailed,
-    ToolCallStarted,
-    ToolCallCompleted,
-    ToolValidationFailed,
-    ToolCallFailed,
-    AgentCompleted,
-    AgentFailed,
-    AgentClosing,
-}
-
-public enum class StatusInsightTraceKey {
-    LoadStatusContextStarted,
-    LoadStatusContextCompleted,
-    LoadStatusContextValidationFailed,
-    LoadStatusContextFailed,
-    SearchStatusStarted,
-    SearchStatusCompleted,
-    SearchStatusValidationFailed,
-    SearchStatusFailed,
-}
+private fun MicroBlogKey.statusInsightConversationId(): String = "status-insight:$host:$id"
 
 public class StatusInsightAgentUnavailableException public constructor(
     public val availability: AgentAvailability,

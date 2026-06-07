@@ -36,10 +36,12 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
+import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
+import dev.dimension.flare.ask_ai
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
@@ -70,6 +72,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.users
 import io.github.composefluent.ExperimentalFluentApi
+import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.AutoSuggestBoxDefaults
 import io.github.composefluent.component.AutoSuggestionBox
 import io.github.composefluent.component.ListItem
@@ -89,6 +92,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun DiscoverScreen(
     toUser: (AccountType, MicroBlogKey) -> Unit,
     toSearch: (AccountType, String) -> Unit,
+    toAskAi: (String?) -> Unit,
 ) {
     val state by producePresenter(
         key = "discover",
@@ -107,8 +111,10 @@ internal fun DiscoverScreen(
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AutoSuggestionBox(
                         expanded = state.isHistoryExpanded,
@@ -188,6 +194,18 @@ internal fun DiscoverScreen(
                                 modifier = Modifier.flyoutSize(matchAnchorWidth = true),
                             )
                         }
+                    }
+                    if (LocalTimelineAppearance.current.aiConfig.agent) {
+                        AskAiButton(
+                            onClick = {
+                                toAskAi(
+                                    state.textState.text
+                                        .toString()
+                                        .trim()
+                                        .takeIf { it.isNotEmpty() },
+                                )
+                            },
+                        )
                     }
                 }
             }
@@ -456,6 +474,23 @@ internal fun DiscoverScreen(
                     }
                     status(state.status)
                 }
+        }
+    }
+}
+
+@Composable
+internal fun AskAiButton(onClick: () -> Unit) {
+    AccentButton(onClick = onClick) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Robot,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(text = stringResource(Res.string.ask_ai))
         }
     }
 }

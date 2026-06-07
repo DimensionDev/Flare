@@ -27,7 +27,16 @@ private class BottomSheetScene<T : Any>(
 
     override val content: @Composable (() -> Unit) = {
         sheetState =
-            rememberBottomSheetState(initialValue = if (properties.expandFully) SheetValue.Expanded else SheetValue.PartiallyExpanded)
+            rememberBottomSheetState(
+                initialValue =
+                    if (properties.expandFully) SheetValue.Expanded else SheetValue.PartiallyExpanded,
+                enabledValues =
+                    if (properties.expandFully) {
+                        setOf(SheetValue.Expanded, SheetValue.Hidden)
+                    } else {
+                        setOf(SheetValue.PartiallyExpanded, SheetValue.Expanded, SheetValue.Hidden)
+                    },
+            )
         ModalBottomSheet(
             onDismissRequest = { onBack() },
             properties = properties.properties,

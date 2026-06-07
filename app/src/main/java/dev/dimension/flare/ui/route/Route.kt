@@ -119,6 +119,9 @@ internal sealed interface Route : NavKey {
         data object LocalHistory : Settings
 
         @Serializable
+        data object AgentHistory : Settings
+
+        @Serializable
         data object AiConfig : Settings
 
         @Serializable
@@ -212,6 +215,12 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data object DraftBox : Route
+
+    @Serializable
+    data class AgentChat(
+        val conversationId: String = "generic-chat",
+        val initialMessage: String? = null,
+    ) : Route
 
     @Serializable
     sealed interface Profile : Route {

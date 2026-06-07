@@ -104,6 +104,10 @@
     <string name="status_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_share_via_fixvx">Share via Fixvx</string>
     <string name="status_insight_title">Post insight</string>
+    <string name="agent_chat_title">AI Chat</string>
+    <string name="agent_chat_input_placeholder">Ask anything…</string>
+    <string name="agent_chat_send">Send</string>
+    <string name="agent_chat_thinking">Thinking…</string>
     <string name="status_insight_analyzing">Analyzing this post…</string>
     <string name="status_insight_error">Unable to analyze this post.</string>
     <string name="status_insight_trace_loading_post_context">Loading post context…</string>
@@ -140,6 +144,7 @@
     <string name="status_insight_trace_agent_completed">Finishing analysis…</string>
     <string name="status_insight_trace_agent_failed">Analysis failed</string>
     <string name="status_insight_trace_agent_closing">Closing analysis…</string>
+    <string name="ask_ai">Ask AI</string>
 
     <string name="list_add">Add list</string>
     <string name="list_edit">Edit list</string>
@@ -222,6 +227,9 @@
     <string name="settings_guest_setting_description">Choose which server guest mode connects to</string>
     <string name="settings_local_history_title">Local History</string>
     <string name="settings_local_history_description">Search posts and profiles cached on this device</string>
+    <string name="settings_agent_history_title">Flare Agent</string>
+    <string name="settings_agent_history_description">View local Flare Agent chat history</string>
+    <string name="agent_history_empty">No agent chat history yet.</string>
     <string name="settings_app_logging_title">App logs</string>
     <string name="settings_app_logging_save">Save logs</string>
     <string name="settings_app_logging_clear">Clear logs</string>

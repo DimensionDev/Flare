@@ -7,30 +7,31 @@ struct StatusInsightSheet: View {
     @StateObject private var presenter: KotlinPresenter<StatusInsightPresenterState>
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                if let post = presenter.state.post {
-                    StatusInsightPostPreview(post: post)
-                }
-
-                StateView(state: presenter.state.insight) { text in
-                    Text(verbatim: String(text))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
-                } errorContent: { throwable in
-                    Text(verbatim: throwable.message ?? String(localized: "status_insight_error"))
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                } loadingContent: {
-                    StatusInsightCurrentTrace(
-                        trace: presenter.state.currentTrace?.localizedLabel ?? String(localized: "status_insight_analyzing")
-                    )
-                }
+        AgentChatView(
+            messages: Array(presenter.state.messages),
+            input: presenter.state.input,
+            isRunning: presenter.state.isRunning,
+            canSend: presenter.state.canSend,
+            error: presenter.state.error,
+            runningTrace: presenter.state.currentTrace?.localizedLabel ?? String(localized: "status_insight_analyzing"),
+            inputPlaceholder: String(localized: "agent_chat_input_placeholder"),
+            messageText: { $0.text },
+            isUserMessage: { message in
+                String(describing: type(of: message)).contains("User")
+            },
+            onInputChange: presenter.state.setInput,
+            onSend: presenter.state.sendMessage,
+            leadingContent: {
+                AnyView(
+                    Group {
+                        if let post = presenter.state.post {
+                            StatusInsightPostPreview(post: post)
+                        }
+                    }
+                )
             }
-            .padding(.horizontal)
-            .padding(.bottom, 24)
-        }
-        .navigationTitle(Text("status_insight_title"))
+        )
+        .navigationTitle(String(localized: "status_insight_title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -66,7 +67,7 @@ extension StatusInsightSheet {
     }
 }
 
-private struct StatusInsightPostPreview: View {
+struct StatusInsightPostPreview: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     let post: UiTimelineV2.Post
 
@@ -90,7 +91,7 @@ private struct StatusInsightPostPreview: View {
     }
 }
 
-private struct StatusInsightCurrentTrace: View {
+struct StatusInsightCurrentTrace: View {
     let trace: String
 
     var body: some View {
@@ -142,10 +143,10 @@ private extension View {
     }
 }
 
-private extension StatusInsightEventTrace {
+private extension AgentTrace {
     var localizedLabel: String {
-        if let key {
-            return key.localizedLabel
+        if let toolKey {
+            return toolKey.localizedLabel
         }
 
         switch phase {
@@ -205,7 +206,7 @@ private extension StatusInsightEventTrace {
     }
 }
 
-private extension StatusInsightTraceKey {
+private extension AgentToolKey {
     var localizedLabel: String {
         switch self {
         case .loadStatusContextStarted:
@@ -216,13 +217,13 @@ private extension StatusInsightTraceKey {
             return String(localized: "status_insight_trace_tool_load_status_context_validation_failed")
         case .loadStatusContextFailed:
             return String(localized: "status_insight_trace_tool_load_status_context_failed")
-        case .searchStatusStarted:
+        case .searchPostsStarted, .searchUsersStarted:
             return String(localized: "status_insight_trace_tool_search_status_started")
-        case .searchStatusCompleted:
+        case .searchPostsCompleted, .searchUsersCompleted:
             return String(localized: "status_insight_trace_tool_search_status_completed")
-        case .searchStatusValidationFailed:
+        case .searchPostsValidationFailed, .searchUsersValidationFailed:
             return String(localized: "status_insight_trace_tool_search_status_validation_failed")
-        case .searchStatusFailed:
+        case .searchPostsFailed, .searchUsersFailed:
             return String(localized: "status_insight_trace_tool_search_status_failed")
         }
     }

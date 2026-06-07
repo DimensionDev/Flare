@@ -6,6 +6,8 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.screen.agent.AgentChatHistoryScreen
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
@@ -163,6 +165,26 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
     ) {
         LocalCacheSearchScreen(
             onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.AgentHistory>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        AgentChatHistoryScreen(
+            onBack = onBack,
+            onConversationClick = { conversationId ->
+                navigate(Route.AgentChat(conversationId = conversationId))
+            },
+            onNewConversationClick = {
+                navigate(
+                    Route.AgentChat(
+                        conversationId = "generic-chat:${Clock.System.now().toEpochMilliseconds()}",
+                    ),
+                )
+            },
         )
     }
 

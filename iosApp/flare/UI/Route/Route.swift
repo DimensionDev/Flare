@@ -53,13 +53,17 @@ enum Route: Hashable, Identifiable {
         case .notification:
             NotificationScreen()
         case .discover:
-            DiscoverScreen()
+            DiscoverScreen { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
         case .accountManagement:
             AccountManagementScreen()
         case .nostrRelays(let accountKey):
             NostrRelaysScreen(accountKey: accountKey)
         case .search(let accountType, let query):
-            SearchScreen(accountType: accountType, initialQuery: query)
+            SearchScreen(accountType: accountType, initialQuery: query) { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
         case .composeNew:
             ComposeScreen(accountType: nil)
         case .composeDraft(let groupId):
@@ -92,6 +96,12 @@ enum Route: Hashable, Identifiable {
             LocalFilterScreen()
         case .aiConfig:
             AiConfigScreen()
+        case .agentHistory:
+            AgentChatHistoryScreen {
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), nil))
+            }
+        case .agentChat(let conversationId, let initialMessage):
+            AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage)
         case .translationConfig:
             TranslationConfigScreen()
         case .tabSettings:
@@ -189,6 +199,8 @@ enum Route: Hashable, Identifiable {
     case localHostory
     case moreMenuCustomize
     case aiConfig
+    case agentHistory
+    case agentChat(String, String?)
     case translationConfig
     case storage
     case appearanceTheme
@@ -221,6 +233,10 @@ enum Route: Hashable, Identifiable {
     case rssManagement
     case draftBox
     case secondaryMenu
+
+    private static func newGenericChatConversationId() -> String {
+        "generic-chat:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

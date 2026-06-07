@@ -1,54 +1,38 @@
 package dev.dimension.flare.ui.screen.status.action
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.feature.agent.common.AgentPhase
+import dev.dimension.flare.feature.agent.common.AgentToolKey
+import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.status.StatusInsightPresenter
-import dev.dimension.flare.feature.agent.status.StatusInsightEvent
-import dev.dimension.flare.feature.agent.status.StatusInsightPhase
-import dev.dimension.flare.feature.agent.status.StatusInsightTraceKey
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.agent.AgentChatScaffold
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StatusInsightSheet(
     accountType: AccountType,
@@ -64,53 +48,44 @@ internal fun StatusInsightSheet(
         }.invoke()
     }
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = screenHorizontalPadding)
-                .padding(bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            FAIcon(
-                imageVector = FontAwesomeIcons.Solid.Robot,
-                contentDescription = null,
-            )
-            Text(
-                text = stringResource(id = R.string.status_insight_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-        }
+    val title = stringResource(id = R.string.status_insight_title)
 
-        state.post?.let { post ->
-            StatusInsightPostPreview(post = post)
-        }
-
-        state.insight
-            .onLoading {
-                StatusInsightCurrentTrace(
-                    trace = state.currentTrace?.label() ?: stringResource(id = R.string.status_insight_analyzing),
-                )
-            }.onError { throwable ->
-                Text(
-                    text = throwable.message ?: stringResource(id = R.string.status_insight_error),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }.onSuccess { text ->
-                Text(
-                    text = text,
-                )
+    AgentChatScaffold(
+        messages = state.messages,
+        input = state.input,
+        isRunning = state.isRunning,
+        canSend = state.canSend,
+        error = state.error,
+        runningTrace = state.currentTrace?.label() ?: stringResource(id = R.string.status_insight_analyzing),
+        inputPlaceholder = stringResource(id = R.string.status_insight_input_placeholder),
+        sendContentDescription = stringResource(id = R.string.status_insight_send),
+        messageText = StatusInsightPresenter.Message::text,
+        isUserMessage = { it is StatusInsightPresenter.Message.User },
+        onInputChange = state::setInput,
+        onSend = state::sendMessage,
+        modifier = modifier,
+        topBar = {
+            FlareTopAppBar(
+                title = {
+                    Text(text = title)
+                },
+                windowInsets = WindowInsets(0),
+            )
+        },
+        reserveBottomBarHeight = false,
+        leadingContentItemCount = if (state.post != null) 1 else 0,
+        leadingContent = {
+            state.post?.let { post ->
+                item {
+                    StatusInsightPostPreview(post = post)
+                }
             }
-    }
+        },
+    )
 }
 
 @Composable
-private fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
+internal fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -140,205 +115,172 @@ private fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
 }
 
 @Composable
-private fun StatusInsightEvent.Trace.label(): String =
-    key?.label()
+private fun AgentTrace.label(): String =
+    toolKey?.label()
         ?: when (phase) {
-            StatusInsightPhase.LoadingPostContext -> {
+            AgentPhase.LoadingPostContext -> {
                 stringResource(id = R.string.status_insight_trace_loading_post_context)
             }
 
-            StatusInsightPhase.PostContextLoaded -> {
+            AgentPhase.PostContextLoaded -> {
                 stringResource(id = R.string.status_insight_trace_post_context_loaded)
             }
 
-            StatusInsightPhase.PreparingImages -> {
+            AgentPhase.PreparingImages -> {
                 stringResource(id = R.string.status_insight_trace_preparing_images)
             }
 
-            StatusInsightPhase.ImagesUnsupportedFallback -> {
+            AgentPhase.ImagesUnsupportedFallback -> {
                 stringResource(id = R.string.status_insight_trace_images_unsupported_fallback)
             }
 
-            StatusInsightPhase.AgentStarted -> {
+            AgentPhase.AgentStarted -> {
                 stringResource(id = R.string.status_insight_trace_agent_started)
             }
 
-            StatusInsightPhase.StrategyStarted -> {
+            AgentPhase.StrategyStarted -> {
                 stringResource(id = R.string.status_insight_trace_strategy_started)
             }
 
-            StatusInsightPhase.StrategyCompleted -> {
+            AgentPhase.StrategyCompleted -> {
                 stringResource(id = R.string.status_insight_trace_strategy_completed)
             }
 
-            StatusInsightPhase.SubgraphStarted -> {
+            AgentPhase.SubgraphStarted -> {
                 stringResource(id = R.string.status_insight_trace_subgraph_started)
             }
 
-            StatusInsightPhase.SubgraphCompleted -> {
+            AgentPhase.SubgraphCompleted -> {
                 stringResource(id = R.string.status_insight_trace_subgraph_completed)
             }
 
-            StatusInsightPhase.SubgraphFailed -> {
+            AgentPhase.SubgraphFailed -> {
                 stringResource(id = R.string.status_insight_trace_subgraph_failed)
             }
 
-            StatusInsightPhase.AskingModel -> {
+            AgentPhase.AskingModel -> {
                 stringResource(
                     id = R.string.status_insight_trace_asking_model,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ModelResponseReceived -> {
+            AgentPhase.ModelResponseReceived -> {
                 stringResource(id = R.string.status_insight_trace_model_response_received)
             }
 
-            StatusInsightPhase.StreamingStarted -> {
+            AgentPhase.StreamingStarted -> {
                 stringResource(
                     id = R.string.status_insight_trace_streaming_started,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.StreamingResponse -> {
+            AgentPhase.StreamingResponse -> {
                 stringResource(id = R.string.status_insight_trace_streaming_response)
             }
 
-            StatusInsightPhase.StreamingCompleted -> {
+            AgentPhase.StreamingCompleted -> {
                 stringResource(id = R.string.status_insight_trace_streaming_completed)
             }
 
-            StatusInsightPhase.StreamingFailed -> {
+            AgentPhase.StreamingFailed -> {
                 stringResource(id = R.string.status_insight_trace_streaming_failed)
             }
 
-            StatusInsightPhase.RunningStep -> {
+            AgentPhase.RunningStep -> {
                 stringResource(id = R.string.status_insight_trace_running_step)
             }
 
-            StatusInsightPhase.StepCompleted -> {
+            AgentPhase.StepCompleted -> {
                 stringResource(id = R.string.status_insight_trace_step_completed)
             }
 
-            StatusInsightPhase.StepFailed -> {
+            AgentPhase.StepFailed -> {
                 stringResource(id = R.string.status_insight_trace_step_failed)
             }
 
-            StatusInsightPhase.ToolCallStarted -> {
+            AgentPhase.ToolCallStarted -> {
                 stringResource(
                     id = R.string.status_insight_trace_tool_call_started,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ToolCallCompleted -> {
+            AgentPhase.ToolCallCompleted -> {
                 stringResource(
                     id = R.string.status_insight_trace_tool_call_completed,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ToolValidationFailed -> {
+            AgentPhase.ToolValidationFailed -> {
                 stringResource(
                     id = R.string.status_insight_trace_tool_validation_failed,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ToolCallFailed -> {
+            AgentPhase.ToolCallFailed -> {
                 stringResource(
                     id = R.string.status_insight_trace_tool_call_failed,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.AgentCompleted -> {
+            AgentPhase.AgentCompleted -> {
                 stringResource(id = R.string.status_insight_trace_agent_completed)
             }
 
-            StatusInsightPhase.AgentFailed -> {
+            AgentPhase.AgentFailed -> {
                 stringResource(id = R.string.status_insight_trace_agent_failed)
             }
 
-            StatusInsightPhase.AgentClosing -> {
+            AgentPhase.AgentClosing -> {
                 stringResource(id = R.string.status_insight_trace_agent_closing)
             }
         }
 
 @Composable
-private fun StatusInsightTraceKey.label(): String =
+private fun AgentToolKey.label(): String =
     when (this) {
-        StatusInsightTraceKey.LoadStatusContextStarted -> {
+        AgentToolKey.LoadStatusContextStarted -> {
             stringResource(id = R.string.status_insight_trace_tool_load_status_context_started)
         }
 
-        StatusInsightTraceKey.LoadStatusContextCompleted -> {
+        AgentToolKey.LoadStatusContextCompleted -> {
             stringResource(id = R.string.status_insight_trace_tool_load_status_context_completed)
         }
 
-        StatusInsightTraceKey.LoadStatusContextValidationFailed -> {
+        AgentToolKey.LoadStatusContextValidationFailed -> {
             stringResource(id = R.string.status_insight_trace_tool_load_status_context_validation_failed)
         }
 
-        StatusInsightTraceKey.LoadStatusContextFailed -> {
+        AgentToolKey.LoadStatusContextFailed -> {
             stringResource(id = R.string.status_insight_trace_tool_load_status_context_failed)
         }
 
-        StatusInsightTraceKey.SearchStatusStarted -> {
+        AgentToolKey.SearchPostsStarted,
+        AgentToolKey.SearchUsersStarted,
+        -> {
             stringResource(id = R.string.status_insight_trace_tool_search_status_started)
         }
 
-        StatusInsightTraceKey.SearchStatusCompleted -> {
+        AgentToolKey.SearchPostsCompleted,
+        AgentToolKey.SearchUsersCompleted,
+        -> {
             stringResource(id = R.string.status_insight_trace_tool_search_status_completed)
         }
 
-        StatusInsightTraceKey.SearchStatusValidationFailed -> {
+        AgentToolKey.SearchPostsValidationFailed,
+        AgentToolKey.SearchUsersValidationFailed,
+        -> {
             stringResource(id = R.string.status_insight_trace_tool_search_status_validation_failed)
         }
 
-        StatusInsightTraceKey.SearchStatusFailed -> {
+        AgentToolKey.SearchPostsFailed,
+        AgentToolKey.SearchUsersFailed,
+        -> {
             stringResource(id = R.string.status_insight_trace_tool_search_status_failed)
         }
     }
-
-@Composable
-private fun StatusInsightCurrentTrace(trace: String) {
-    val transition = rememberInfiniteTransition()
-    val shimmerOffset by transition.animateFloat(
-        initialValue = -240f,
-        targetValue = 480f,
-        animationSpec =
-            infiniteRepeatable(
-                animation = tween(durationMillis = 1200, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart,
-            ),
-    )
-    val color = MaterialTheme.colorScheme.onSurfaceVariant
-    val shimmerBrush =
-        Brush.linearGradient(
-            colors =
-                listOf(
-                    color.copy(alpha = 0.35f),
-                    color,
-                    color.copy(alpha = 0.35f),
-                ),
-            start = Offset(shimmerOffset, 0f),
-            end = Offset(shimmerOffset + 220f, 0f),
-        )
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        FAIcon(
-            imageVector = FontAwesomeIcons.Solid.Robot,
-            contentDescription = null,
-        )
-        Text(
-            text = trace,
-            style = MaterialTheme.typography.bodyMedium.copy(brush = shimmerBrush),
-        )
-    }
-}

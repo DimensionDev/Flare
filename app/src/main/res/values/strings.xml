@@ -47,6 +47,8 @@
     <string name="compose_save_draft">Save</string>
     <string name="compose_close_discard">Discard</string>
     <string name="status_insight_title">Post insight</string>
+    <string name="status_insight_input_placeholder">Ask a follow-up…</string>
+    <string name="status_insight_send">Send</string>
     <string name="status_insight_analyzing">Analyzing this post…</string>
     <string name="status_insight_error">Unable to analyze this post.</string>
     <string name="status_insight_trace_loading_post_context">Loading post context…</string>
@@ -83,6 +85,13 @@
     <string name="status_insight_trace_agent_completed">Finishing analysis…</string>
     <string name="status_insight_trace_agent_failed">Analysis failed</string>
     <string name="status_insight_trace_agent_closing">Closing analysis…</string>
+    <string name="ask_ai">Ask AI</string>
+    <string name="agent_chat_title">AI Chat</string>
+    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_empty">No agent chat history yet.</string>
+    <string name="agent_chat_input_placeholder">Ask anything…</string>
+    <string name="agent_chat_send">Send</string>
+    <string name="agent_chat_thinking">Thinking…</string>
     <string name="draft_box_title">Drafts</string>
     <string name="draft_box_empty">No drafts yet</string>
     <string name="draft_box_edit">Edit</string>

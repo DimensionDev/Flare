@@ -62,6 +62,13 @@ struct SecondaryTabsScreen: View {
                             Image("fa-clock-rotate-left")
                         }
                     }
+                    NavigationLink(value: Route.agentHistory) {
+                        Label {
+                            Text("settings_agent_history_title")
+                        } icon: {
+                            Image("fa-robot")
+                        }
+                    }
                     NavigationLink(value: Route.settings) {
                         Label {
                             Text("settings_title")

@@ -3,11 +3,10 @@ package dev.dimension.flare.feature.agent.status
 import ai.koog.agents.core.tools.SimpleTool
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.serialization.typeToken
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
-import dev.dimension.flare.data.repository.AccountMicroblogDataSource
-import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.feature.agent.common.AgentSearchTarget
+import dev.dimension.flare.feature.agent.common.AgentToolSession
+import dev.dimension.flare.feature.agent.common.filterByPlatformNames
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -17,11 +16,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
 
 internal class LoadStatusContextTool(
-    private val dataSource: MicroblogDataSource,
-    private val statusKey: MicroBlogKey,
+    private val session: AgentToolSession,
 ) : SimpleTool<LoadStatusContextTool.Args>(
         argsType = typeToken<Args>(),
-        name = "load_status_context",
+        name = NAME,
         description =
             "Load the current post's conversation context, including surrounding replies or thread posts. " +
                 "Use this only when the post depends on missing conversation context. " +
@@ -33,8 +31,10 @@ internal class LoadStatusContextTool(
         val reason: String? = null,
     )
 
-    override suspend fun execute(args: Args): String =
-        dataSource
+    override suspend fun execute(args: Args): String {
+        val dataSource = session.statusMicroblogDataSource() ?: return session.statusContextUnavailableMessage()
+        val statusKey = session.statusKey() ?: return session.statusContextUnavailableMessage()
+        return dataSource
             .context(statusKey)
             .load(
                 pageSize = STATUS_CONTEXT_PAGE_SIZE,
@@ -46,24 +46,27 @@ internal class LoadStatusContextTool(
                 emptyMessage = "No additional context posts were returned.",
                 maxItems = STATUS_CONTEXT_PAGE_SIZE,
             )
+    }
+
+    companion object {
+        const val NAME = "load_status_context"
+    }
 }
 
-internal class SearchStatusTool(
-    private val searchTargets: List<StatusSearchTarget>,
-) : SimpleTool<SearchStatusTool.Args>(
+internal class SearchPostsTool(
+    private val session: AgentToolSession,
+) : SimpleTool<SearchPostsTool.Args>(
         argsType = typeToken<Args>(),
-        name = "search_status",
+        name = NAME,
         description =
-            "Search public or account-visible posts or users across the user's signed-in social platforms. " +
-                "Use this only when external posts or user profiles may explain a phrase, meme, event, account, " +
-                "or why a post is spreading. Use one concise query, then answer from the returned results.",
+            "Search public or account-visible posts across the user's signed-in social platforms. " +
+                "Use this when posts may explain a phrase, meme, event, claim, or why something is spreading. " +
+                "Use one concise query, then answer from the returned results.",
     ) {
     @Serializable
     internal data class Args(
         @property:LLMDescription("Search query. Keep it concise and use terms from the post.")
         val query: String,
-        @property:LLMDescription("What to search for: Post, User, or Both.")
-        val target: SearchStatusTarget = SearchStatusTarget.Post,
         @property:LLMDescription(
             "Platform names to search. Leave empty to search all signed-in platforms. " +
                 "Use the platform names or aliases supplied in the system instructions.",
@@ -76,160 +79,130 @@ internal class SearchStatusTool(
         if (query.isBlank()) {
             return "Search query is blank."
         }
-        val platformFilter = args.platforms.toPlatformFilter()
         val targets =
-            searchTargets
+            session.searchTargets
                 .distinctBy { it.platformType }
-                .filterByPlatform(platformFilter)
+                .filterByPlatformNames(args.platforms)
         if (targets.isEmpty()) {
-            return if (platformFilter.isEmpty()) {
+            return if (args.platforms.isEmpty()) {
                 "No signed-in accounts are available for search."
             } else {
                 "No signed-in accounts are available for the requested platforms: ${args.platforms.joinToString()}."
             }
         }
-        val postResults =
-            if (args.target.searchPosts) {
-                targets.searchPosts(query)
-            } else {
-                emptyList()
-            }
-        val userResults =
-            if (args.target.searchUsers) {
-                targets.searchUsers(query)
-            } else {
-                emptyList()
-            }
+        val postResults = targets.searchPosts(query)
         return buildString {
             appendLine("Search query: \"$query\"")
-            appendLine("Search target: ${args.target.name}")
+            appendLine("Search target: Posts")
             appendLine("Platforms searched: ${targets.joinToString { it.platformType?.name ?: "Unknown" }}")
-            if (args.target.searchPosts) {
-                appendLine()
-                append(
-                    postResults.toInsightPostToolListText(
-                        title = "Post search results",
-                        emptyMessage = "No matching posts were returned.",
-                        maxItems = STATUS_SEARCH_PAGE_SIZE,
-                    ),
-                )
-            }
-            if (args.target.searchUsers) {
-                appendLine()
-                append(
-                    userResults.toInsightUserToolListText(
-                        title = "User search results",
-                        emptyMessage = "No matching users were returned.",
-                        maxItems = USER_SEARCH_PAGE_SIZE,
-                    ),
-                )
-            }
+            appendLine()
+            append(
+                postResults.toInsightPostToolListText(
+                    title = "Post search results",
+                    emptyMessage = "No matching posts were returned.",
+                    maxItems = STATUS_SEARCH_PAGE_SIZE,
+                ),
+            )
         }.take(MAX_TOOL_RESULT_LENGTH)
     }
 
-    private suspend fun List<StatusSearchTarget>.searchPosts(query: String): List<UiTimelineV2.Post> =
-        coroutineScope {
-            map { target ->
-                async {
-                    runCatching {
-                        target.dataSource
-                            .searchStatus(query)
-                            .load(
-                                pageSize = STATUS_SEARCH_PAGE_SIZE,
-                                request = PagingRequest.Refresh,
-                            ).data
-                            .filterIsInstance<UiTimelineV2.Post>()
-                    }.getOrElse { emptyList() }
-                }
-            }.awaitAll()
-        }.flatten()
-            .distinctBy { it.platformType to it.statusKey }
-
-    private suspend fun List<StatusSearchTarget>.searchUsers(query: String): List<UiProfile> =
-        coroutineScope {
-            map { target ->
-                async {
-                    runCatching {
-                        target.dataSource
-                            .searchUser(query)
-                            .load(
-                                pageSize = USER_SEARCH_PAGE_SIZE,
-                                request = PagingRequest.Refresh,
-                            ).data
-                    }.getOrElse { emptyList() }
-                }
-            }.awaitAll()
-        }.flatten()
-            .distinctBy { it.platformType to it.key }
-
-    private fun List<StatusSearchTarget>.filterByPlatform(platformFilter: Set<PlatformType>): List<StatusSearchTarget> {
-        if (platformFilter.isEmpty()) {
-            return this
-        }
-        return filter { it.platformType in platformFilter }
+    companion object {
+        const val NAME = "search_posts"
     }
-
-    private fun List<String>.toPlatformFilter(): Set<PlatformType> = mapNotNull { it.toPlatformTypeOrNull() }.toSet()
-
-    private fun String.toPlatformTypeOrNull(): PlatformType? {
-        val normalized =
-            trim()
-                .lowercase()
-                .replace("-", "")
-                .replace("_", "")
-                .replace(" ", "")
-        if (normalized == "all" || normalized == "*") {
-            return null
-        }
-        return PlatformType.entries.firstOrNull { platformType ->
-            normalized == platformType.searchNameKey() ||
-                platformType.searchAliases().any { alias -> normalized == alias.searchPlatformKey() }
-        }
-    }
-
-    @Serializable
-    internal enum class SearchStatusTarget {
-        Post,
-        User,
-        Both,
-    }
-
-    private val SearchStatusTarget.searchPosts: Boolean
-        get() = this == SearchStatusTarget.Post || this == SearchStatusTarget.Both
-
-    private val SearchStatusTarget.searchUsers: Boolean
-        get() = this == SearchStatusTarget.User || this == SearchStatusTarget.Both
 }
 
-internal data class StatusSearchTarget(
-    val platformType: PlatformType?,
-    val dataSource: MicroblogDataSource,
-)
-
-internal fun List<AccountMicroblogDataSource>.toStatusSearchTargets(): List<StatusSearchTarget> =
-    map { item ->
-        StatusSearchTarget(
-            platformType = item.platformType,
-            dataSource = item.dataSource,
+internal class SearchUsersTool(
+    private val session: AgentToolSession,
+) : SimpleTool<SearchUsersTool.Args>(
+        argsType = typeToken<Args>(),
+        name = NAME,
+        description =
+            "Search public or account-visible user profiles across the user's signed-in social platforms. " +
+                "Use this when account identity, official status, bio, handle, or profile context may explain a post. " +
+                "Use one concise query, then answer from the returned results.",
+    ) {
+    @Serializable
+    internal data class Args(
+        @property:LLMDescription("Search query. Keep it concise and use terms from the post or account.")
+        val query: String,
+        @property:LLMDescription(
+            "Platform names to search. Leave empty to search all signed-in platforms. " +
+                "Use the platform names or aliases supplied in the system instructions.",
         )
+        val platforms: List<String> = emptyList(),
+    )
+
+    override suspend fun execute(args: Args): String {
+        val query = args.query.trim()
+        if (query.isBlank()) {
+            return "Search query is blank."
+        }
+        val targets =
+            session.searchTargets
+                .distinctBy { it.platformType }
+                .filterByPlatformNames(args.platforms)
+        if (targets.isEmpty()) {
+            return if (args.platforms.isEmpty()) {
+                "No signed-in accounts are available for search."
+            } else {
+                "No signed-in accounts are available for the requested platforms: ${args.platforms.joinToString()}."
+            }
+        }
+        val userResults = targets.searchUsers(query)
+        return buildString {
+            appendLine("Search query: \"$query\"")
+            appendLine("Search target: Users")
+            appendLine("Platforms searched: ${targets.joinToString { it.platformType?.name ?: "Unknown" }}")
+            appendLine()
+            append(
+                userResults.toInsightUserToolListText(
+                    title = "User search results",
+                    emptyMessage = "No matching users were returned.",
+                    maxItems = USER_SEARCH_PAGE_SIZE,
+                ),
+            )
+        }.take(MAX_TOOL_RESULT_LENGTH)
     }
 
-internal fun PlatformType.searchAliases(): List<String> =
-    when (name) {
-        PlatformType.Bluesky.name -> listOf("bsky")
-        PlatformType.xQt.name -> listOf("x", "twitter")
-        PlatformType.VVo.name -> listOf("weibo")
-        else -> emptyList()
+    companion object {
+        const val NAME = "search_users"
     }
+}
 
-internal fun PlatformType.searchNameKey(): String = name.searchPlatformKey()
+private suspend fun List<AgentSearchTarget>.searchPosts(query: String): List<UiTimelineV2.Post> =
+    coroutineScope {
+        map { target ->
+            async {
+                runCatching {
+                    target.dataSource
+                        .searchStatus(query)
+                        .load(
+                            pageSize = STATUS_SEARCH_PAGE_SIZE,
+                            request = PagingRequest.Refresh,
+                        ).data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                }.getOrElse { emptyList() }
+            }
+        }.awaitAll()
+    }.flatten()
+        .distinctBy { it.platformType to it.statusKey }
 
-private fun String.searchPlatformKey(): String =
-    trim()
-        .lowercase()
-        .replace("-", "")
-        .replace("_", "")
-        .replace(" ", "")
+private suspend fun List<AgentSearchTarget>.searchUsers(query: String): List<UiProfile> =
+    coroutineScope {
+        map { target ->
+            async {
+                runCatching {
+                    target.dataSource
+                        .searchUser(query)
+                        .load(
+                            pageSize = USER_SEARCH_PAGE_SIZE,
+                            request = PagingRequest.Refresh,
+                        ).data
+                }.getOrElse { emptyList() }
+            }
+        }.awaitAll()
+    }.flatten()
+        .distinctBy { it.platformType to it.key }
 
 private fun List<UiTimelineV2.Post>.toInsightPostToolListText(
     title: String,

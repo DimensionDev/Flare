@@ -240,6 +240,13 @@ internal sealed interface Route : NavKey {
 
     data object LocalCache : ScreenRoute
 
+    data object AgentHistory : ScreenRoute
+
+    data class AgentChat(
+        val conversationId: String = "generic-chat",
+        val initialMessage: String? = null,
+    ) : ScreenRoute
+
     data class NostrRelays(
         val accountKey: MicroBlogKey,
     ) : ScreenRoute

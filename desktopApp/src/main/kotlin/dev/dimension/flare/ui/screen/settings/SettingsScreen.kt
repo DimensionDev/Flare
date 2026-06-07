@@ -47,6 +47,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.LocalWindowPadding
@@ -88,6 +89,8 @@ import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
 import dev.dimension.flare.settings_accounts_remove_confirm
 import dev.dimension.flare.settings_accounts_title
+import dev.dimension.flare.settings_agent_history_description
+import dev.dimension.flare.settings_agent_history_title
 import dev.dimension.flare.settings_ai_config_agent_description
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
@@ -296,6 +299,7 @@ internal fun SettingsScreen(
     toLogin: () -> Unit,
     toDraftBox: () -> Unit,
     toLocalCache: () -> Unit,
+    toAgentHistory: () -> Unit,
     toAppLog: () -> Unit,
     toRSSManagement: () -> Unit,
     toNostrRelays: (MicroBlogKey) -> Unit,
@@ -1143,6 +1147,33 @@ internal fun SettingsScreen(
                         Text(stringResource(Res.string.settings_local_history_description))
                     },
                     icon = null,
+                )
+            }
+            AnimatedVisibility(
+                state.aiConfigState.aiAgent,
+            ) {
+                CardExpanderItem(
+                    onClick = toAgentHistory,
+                    heading = {
+                        Text(stringResource(Res.string.settings_agent_history_title))
+                    },
+                    trailing = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.AngleRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                        )
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_agent_history_description))
+                    },
+                    icon = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Robot,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    },
                 )
             }
             CardExpanderItem(

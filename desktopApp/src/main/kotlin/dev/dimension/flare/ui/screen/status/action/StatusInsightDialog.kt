@@ -37,11 +37,13 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.Res
+import dev.dimension.flare.agent_chat_input_placeholder
+import dev.dimension.flare.agent_chat_send
 import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.feature.agent.common.AgentPhase
+import dev.dimension.flare.feature.agent.common.AgentToolKey
+import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.status.StatusInsightPresenter
-import dev.dimension.flare.feature.agent.status.StatusInsightEvent
-import dev.dimension.flare.feature.agent.status.StatusInsightPhase
-import dev.dimension.flare.feature.agent.status.StatusInsightTraceKey
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ok
@@ -84,11 +86,9 @@ import dev.dimension.flare.status_insight_trace_tool_search_status_validation_fa
 import dev.dimension.flare.status_insight_trace_tool_validation_failed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.agent.AgentChatScaffold
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -148,31 +148,31 @@ internal fun StatusInsightDialog(
                 )
             }
 
-            Column(
+            AgentChatScaffold(
+                messages = state.messages,
+                input = state.input,
+                isRunning = state.isRunning,
+                canSend = state.canSend,
+                error = state.error,
+                runningTrace = state.currentTrace?.label() ?: stringResource(Res.string.status_insight_analyzing),
+                inputPlaceholder = stringResource(Res.string.agent_chat_input_placeholder),
+                sendContentDescription = stringResource(Res.string.agent_chat_send),
+                messageText = StatusInsightPresenter.Message::text,
+                isUserMessage = { it is StatusInsightPresenter.Message.User },
+                onInputChange = state::setInput,
+                onSend = state::sendMessage,
+                leadingContentItemCount = if (state.post != null) 1 else 0,
+                leadingContent = {
+                    state.post?.let { post ->
+                        item {
+                            StatusInsightPostPreview(post = post)
+                        }
+                    }
+                },
                 modifier =
                     Modifier
-                        .weight(1f, fill = false)
-                        .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                state.post?.let { post ->
-                    StatusInsightPostPreview(post = post)
-                }
-
-                state.insight
-                    .onLoading {
-                        StatusInsightCurrentTrace(
-                            trace = state.currentTrace?.label() ?: stringResource(Res.string.status_insight_analyzing),
-                        )
-                    }.onError { throwable ->
-                        Text(
-                            text = throwable.message ?: stringResource(Res.string.status_insight_error),
-                            color = Color.Red,
-                        )
-                    }.onSuccess { text ->
-                        Text(text = text)
-                    }
-            }
+                        .weight(1f, fill = true),
+            )
 
             AccentButton(
                 onClick = onBack,
@@ -185,7 +185,7 @@ internal fun StatusInsightDialog(
 }
 
 @Composable
-private fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
+internal fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
     Column(
         modifier =
             Modifier
@@ -220,164 +220,172 @@ private fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
 }
 
 @Composable
-private fun StatusInsightEvent.Trace.label(): String =
-    key?.label()
+private fun AgentTrace.label(): String =
+    toolKey?.label()
         ?: when (phase) {
-            StatusInsightPhase.LoadingPostContext -> {
+            AgentPhase.LoadingPostContext -> {
                 stringResource(Res.string.status_insight_trace_loading_post_context)
             }
 
-            StatusInsightPhase.PostContextLoaded -> {
+            AgentPhase.PostContextLoaded -> {
                 stringResource(Res.string.status_insight_trace_post_context_loaded)
             }
 
-            StatusInsightPhase.PreparingImages -> {
+            AgentPhase.PreparingImages -> {
                 stringResource(Res.string.status_insight_trace_preparing_images)
             }
 
-            StatusInsightPhase.ImagesUnsupportedFallback -> {
+            AgentPhase.ImagesUnsupportedFallback -> {
                 stringResource(Res.string.status_insight_trace_images_unsupported_fallback)
             }
 
-            StatusInsightPhase.AgentStarted -> {
+            AgentPhase.AgentStarted -> {
                 stringResource(Res.string.status_insight_trace_agent_started)
             }
 
-            StatusInsightPhase.StrategyStarted -> {
+            AgentPhase.StrategyStarted -> {
                 stringResource(Res.string.status_insight_trace_strategy_started)
             }
 
-            StatusInsightPhase.StrategyCompleted -> {
+            AgentPhase.StrategyCompleted -> {
                 stringResource(Res.string.status_insight_trace_strategy_completed)
             }
 
-            StatusInsightPhase.SubgraphStarted -> {
+            AgentPhase.SubgraphStarted -> {
                 stringResource(Res.string.status_insight_trace_subgraph_started)
             }
 
-            StatusInsightPhase.SubgraphCompleted -> {
+            AgentPhase.SubgraphCompleted -> {
                 stringResource(Res.string.status_insight_trace_subgraph_completed)
             }
 
-            StatusInsightPhase.SubgraphFailed -> {
+            AgentPhase.SubgraphFailed -> {
                 stringResource(Res.string.status_insight_trace_subgraph_failed)
             }
 
-            StatusInsightPhase.AskingModel -> {
+            AgentPhase.AskingModel -> {
                 stringResource(
                     Res.string.status_insight_trace_asking_model,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ModelResponseReceived -> {
+            AgentPhase.ModelResponseReceived -> {
                 stringResource(Res.string.status_insight_trace_model_response_received)
             }
 
-            StatusInsightPhase.StreamingStarted -> {
+            AgentPhase.StreamingStarted -> {
                 stringResource(
                     Res.string.status_insight_trace_streaming_started,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.StreamingResponse -> {
+            AgentPhase.StreamingResponse -> {
                 stringResource(Res.string.status_insight_trace_streaming_response)
             }
 
-            StatusInsightPhase.StreamingCompleted -> {
+            AgentPhase.StreamingCompleted -> {
                 stringResource(Res.string.status_insight_trace_streaming_completed)
             }
 
-            StatusInsightPhase.StreamingFailed -> {
+            AgentPhase.StreamingFailed -> {
                 stringResource(Res.string.status_insight_trace_streaming_failed)
             }
 
-            StatusInsightPhase.RunningStep -> {
+            AgentPhase.RunningStep -> {
                 stringResource(Res.string.status_insight_trace_running_step)
             }
 
-            StatusInsightPhase.StepCompleted -> {
+            AgentPhase.StepCompleted -> {
                 stringResource(Res.string.status_insight_trace_step_completed)
             }
 
-            StatusInsightPhase.StepFailed -> {
+            AgentPhase.StepFailed -> {
                 stringResource(Res.string.status_insight_trace_step_failed)
             }
 
-            StatusInsightPhase.ToolCallStarted -> {
+            AgentPhase.ToolCallStarted -> {
                 stringResource(
                     Res.string.status_insight_trace_tool_call_started,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ToolCallCompleted -> {
+            AgentPhase.ToolCallCompleted -> {
                 stringResource(
                     Res.string.status_insight_trace_tool_call_completed,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ToolValidationFailed -> {
+            AgentPhase.ToolValidationFailed -> {
                 stringResource(
                     Res.string.status_insight_trace_tool_validation_failed,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.ToolCallFailed -> {
+            AgentPhase.ToolCallFailed -> {
                 stringResource(
                     Res.string.status_insight_trace_tool_call_failed,
                     detail.orEmpty(),
                 )
             }
 
-            StatusInsightPhase.AgentCompleted -> {
+            AgentPhase.AgentCompleted -> {
                 stringResource(Res.string.status_insight_trace_agent_completed)
             }
 
-            StatusInsightPhase.AgentFailed -> {
+            AgentPhase.AgentFailed -> {
                 stringResource(Res.string.status_insight_trace_agent_failed)
             }
 
-            StatusInsightPhase.AgentClosing -> {
+            AgentPhase.AgentClosing -> {
                 stringResource(Res.string.status_insight_trace_agent_closing)
             }
         }
 
 @Composable
-private fun StatusInsightTraceKey.label(): String =
+private fun AgentToolKey.label(): String =
     when (this) {
-        StatusInsightTraceKey.LoadStatusContextStarted -> {
+        AgentToolKey.LoadStatusContextStarted -> {
             stringResource(Res.string.status_insight_trace_tool_load_status_context_started)
         }
 
-        StatusInsightTraceKey.LoadStatusContextCompleted -> {
+        AgentToolKey.LoadStatusContextCompleted -> {
             stringResource(Res.string.status_insight_trace_tool_load_status_context_completed)
         }
 
-        StatusInsightTraceKey.LoadStatusContextValidationFailed -> {
+        AgentToolKey.LoadStatusContextValidationFailed -> {
             stringResource(Res.string.status_insight_trace_tool_load_status_context_validation_failed)
         }
 
-        StatusInsightTraceKey.LoadStatusContextFailed -> {
+        AgentToolKey.LoadStatusContextFailed -> {
             stringResource(Res.string.status_insight_trace_tool_load_status_context_failed)
         }
 
-        StatusInsightTraceKey.SearchStatusStarted -> {
+        AgentToolKey.SearchPostsStarted,
+        AgentToolKey.SearchUsersStarted,
+        -> {
             stringResource(Res.string.status_insight_trace_tool_search_status_started)
         }
 
-        StatusInsightTraceKey.SearchStatusCompleted -> {
+        AgentToolKey.SearchPostsCompleted,
+        AgentToolKey.SearchUsersCompleted,
+        -> {
             stringResource(Res.string.status_insight_trace_tool_search_status_completed)
         }
 
-        StatusInsightTraceKey.SearchStatusValidationFailed -> {
+        AgentToolKey.SearchPostsValidationFailed,
+        AgentToolKey.SearchUsersValidationFailed,
+        -> {
             stringResource(Res.string.status_insight_trace_tool_search_status_validation_failed)
         }
 
-        StatusInsightTraceKey.SearchStatusFailed -> {
+        AgentToolKey.SearchPostsFailed,
+        AgentToolKey.SearchUsersFailed,
+        -> {
             stringResource(Res.string.status_insight_trace_tool_search_status_failed)
         }
     }

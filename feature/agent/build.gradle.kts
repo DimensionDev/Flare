@@ -6,8 +6,10 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -19,6 +21,9 @@ kotlin {
             FlarePlatform.IOS,
             FlarePlatform.WEB,
         )
+        ksp(
+            libs.room.compiler,
+        )
     }
 
     sourceSets {
@@ -28,11 +33,19 @@ kotlin {
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
                 implementation(libs.koog.agents)
+                implementation(libs.koog.agents.features.memory)
                 implementation(libs.koog.http.client.ktor)
                 implementation(libs.bundles.kotlinx)
+                implementation(libs.room.runtime)
+                implementation(libs.sqlite)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.annotations)
+            }
+        }
+        val nonWebMain by getting {
+            dependencies {
+                implementation(libs.sqlite.bundled)
             }
         }
         val commonTest by getting {
@@ -42,4 +55,8 @@ kotlin {
             }
         }
     }
+}
+
+room3 {
+    schemaDirectory("$projectDir/schemas")
 }

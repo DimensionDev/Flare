@@ -53,6 +53,7 @@ import compose.icons.fontawesomeicons.solid.House
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.PenToSquare
+import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
@@ -78,6 +79,7 @@ import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
 import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AiAgentEnabledPresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.screen.splash.SplashScreen
@@ -312,6 +314,23 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     Text(text = stringResource(id = R.string.settings_local_history_title))
                                 },
                             )
+                            if (state.aiAgentEnabled) {
+                                item(
+                                    selected = currentRoute is Route.Settings.AgentHistory,
+                                    onClick = {
+                                        state.navigate(Route.Settings.AgentHistory)
+                                    },
+                                    icon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Robot,
+                                            contentDescription = stringResource(id = R.string.agent_history_title),
+                                        )
+                                    },
+                                    label = {
+                                        Text(text = stringResource(id = R.string.agent_history_title))
+                                    },
+                                )
+                            }
                         }
                         state.secondaryTabsState.onSuccess { secondaryTabs ->
                             secondaryTabs.forEach { item ->
@@ -424,6 +443,23 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     Text(text = stringResource(id = R.string.settings_local_history_title))
                                 },
                             )
+                            if (state.aiAgentEnabled) {
+                                item(
+                                    selected = currentRoute is Route.Settings.AgentHistory,
+                                    onClick = {
+                                        state.navigate(Route.Settings.AgentHistory)
+                                    },
+                                    icon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Robot,
+                                            contentDescription = stringResource(id = R.string.agent_history_title),
+                                        )
+                                    },
+                                    label = {
+                                        Text(text = stringResource(id = R.string.agent_history_title))
+                                    },
+                                )
+                            }
                         }
                         item(
                             selected = currentRoute is Route.Settings.Main,
@@ -531,6 +567,10 @@ private fun presenter(uriHandler: UriHandler) =
             remember {
                 AllNotificationBadgePresenter()
             }.invoke()
+        val aiAgentEnabledState =
+            remember {
+                AiAgentEnabledPresenter()
+            }.invoke()
         val firstDirection =
             remember(tabs.tabs) {
                 tabs.tabs.map {
@@ -544,15 +584,22 @@ private fun presenter(uriHandler: UriHandler) =
                 }
             }
         val topLevelRoutes =
-            remember(tabs.tabs) {
+            remember(tabs.tabs, aiAgentEnabledState.enabled) {
                 tabs.tabs.map { state ->
                     state.map { it.route }.toSet() +
-                        setOf(
-                            Route.Settings.Main,
-                            Route.DraftBox,
-                            Route.Rss.Sources,
-                            Route.Settings.LocalHistory,
-                        )
+                        buildSet {
+                            addAll(
+                                setOf(
+                                    Route.Settings.Main,
+                                    Route.DraftBox,
+                                    Route.Rss.Sources,
+                                    Route.Settings.LocalHistory,
+                                ),
+                            )
+                            if (aiAgentEnabledState.enabled) {
+                                add(Route.Settings.AgentHistory)
+                            }
+                        }
                 }
             }
         val scope = rememberCoroutineScope()
@@ -586,6 +633,7 @@ private fun presenter(uriHandler: UriHandler) =
             val wideNavigationRailState = wideNavigationRailState
             val loggedInState = loggedInState.isLoggedIn
             val canComposeState = canComposeState.canCompose
+            val aiAgentEnabled = aiAgentEnabledState.enabled
 
             fun navigate(route: Route) {
                 navigate(

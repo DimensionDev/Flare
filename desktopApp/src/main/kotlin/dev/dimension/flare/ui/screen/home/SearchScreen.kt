@@ -51,6 +51,7 @@ import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
@@ -83,6 +84,7 @@ fun SearchScreen(
     initialQuery: String?,
     accountType: AccountType,
     toUser: (AccountType, MicroBlogKey) -> Unit,
+    toAskAi: (String?) -> Unit,
 ) {
     val state by producePresenter("search_${accountType}_$initialQuery") {
         presenter(initialQuery, accountType)
@@ -102,8 +104,10 @@ fun SearchScreen(
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AutoSuggestionBox(
                             expanded = state.isHistoryExpanded,
@@ -175,6 +179,18 @@ fun SearchScreen(
                                     modifier = Modifier.flyoutSize(matchAnchorWidth = true),
                                 )
                             }
+                        }
+                        if (LocalTimelineAppearance.current.aiConfig.agent) {
+                            AskAiButton(
+                                onClick = {
+                                    toAskAi(
+                                        state.textState.text
+                                            .toString()
+                                            .trim()
+                                            .takeIf { it.isNotEmpty() },
+                                    )
+                                },
+                            )
                         }
                     }
                 }

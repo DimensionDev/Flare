@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.database
 
 import androidx.sqlite.SQLiteDriver
+import kotlin.native.HiddenFromObjC
 
-internal expect fun createDatabaseDriver(): SQLiteDriver
+@HiddenFromObjC
+public expect fun createDatabaseDriver(): SQLiteDriver

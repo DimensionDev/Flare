@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
 import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.screen.agent.AgentChatScreen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
@@ -63,10 +64,20 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             onUserClick = { accountType, userKey ->
                 navigate(Route.Profile.User(accountType, userKey))
             },
+            onAskAiClick = { initialMessage ->
+                navigate(Route.AgentChat(initialMessage = initialMessage))
+            },
         )
     }
     entry<Route.Notification> {
         NotificationScreen()
+    }
+    entry<Route.AgentChat> {
+        AgentChatScreen(
+            conversationId = it.conversationId,
+            initialMessage = it.initialMessage,
+            onBack = onBack,
+        )
     }
     entry<Route.Search> { args ->
         SearchScreen(
@@ -74,6 +85,9 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             accountType = args.accountType,
             onUserClick = { accountType, userKey ->
                 navigate(Route.Profile.User(accountType, userKey))
+            },
+            onAskAiClick = { initialMessage ->
+                navigate(Route.AgentChat(initialMessage = initialMessage))
             },
         )
     }

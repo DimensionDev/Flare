@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -19,13 +20,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Robot
+import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
@@ -43,6 +51,7 @@ internal fun SearchScreen(
     initialQuery: String,
     accountType: AccountType,
     onUserClick: (AccountType, MicroBlogKey) -> Unit,
+    onAskAiClick: (String?) -> Unit,
 ) {
     val state by producePresenter("search_${accountType}_$initialQuery") {
         presenter(
@@ -52,6 +61,7 @@ internal fun SearchScreen(
     }
     val lazyListState = rememberLazyStaggeredGridState()
     val isBigScreen = isBigScreen()
+    val showAskAi = LocalTimelineAppearance.current.aiConfig.agent
     RegisterTabCallback(
         lazyListState = lazyListState,
         onRefresh = {
@@ -115,6 +125,33 @@ internal fun SearchScreen(
                             } else {
                                 null
                             }
+                        },
+                    historyFloatingActionButton =
+                        if (showAskAi) {
+                            {
+                                ExtendedFloatingActionButton(
+                                    onClick = {
+                                        onAskAiClick(
+                                            state.queryTextState
+                                                .text
+                                                .toString()
+                                                .trim()
+                                                .takeIf { it.isNotEmpty() },
+                                        )
+                                    },
+                                    icon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Robot,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = {
+                                        Text(text = stringResource(id = R.string.ask_ai))
+                                    },
+                                )
+                            }
+                        } else {
+                            null
                         },
                 )
             }

@@ -84,6 +84,8 @@ import dev.dimension.flare.ui.screen.rss.ImportOPMLScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
+import dev.dimension.flare.ui.screen.settings.AgentChatScreen
+import dev.dimension.flare.ui.screen.settings.AgentHistoryScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
@@ -117,6 +119,14 @@ internal fun Router(
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
     val isBigScreen = isBigScreen()
+    val navigateToAgentChat: (String?) -> Unit = { initialMessage ->
+        navigate(
+            Route.AgentChat(
+                conversationId = "generic-chat:${kotlin.time.Clock.System.now().toEpochMilliseconds()}",
+                initialMessage = initialMessage,
+            ),
+        )
+    }
     if (enableDeepLinkHandler) {
         OnDeepLink {
             val route = Route.parse(it)
@@ -520,6 +530,7 @@ internal fun Router(
                                 ),
                             )
                         },
+                        toAskAi = navigateToAgentChat,
                     )
                 }
 
@@ -535,6 +546,7 @@ internal fun Router(
                                 ),
                             )
                         },
+                        toAskAi = navigateToAgentChat,
                     )
                 }
 
@@ -632,6 +644,9 @@ internal fun Router(
                         },
                         toLocalCache = {
                             navigate(Route.LocalCache)
+                        },
+                        toAgentHistory = {
+                            navigate(Route.AgentHistory)
                         },
                         toAppLog = {
                             navigate(Route.AppLogging)
@@ -929,6 +944,29 @@ internal fun Router(
 
                 entry<Route.LocalCache> {
                     LocalCacheScreen()
+                }
+
+                entry<Route.AgentHistory> {
+                    AgentHistoryScreen(
+                        onConversationClick = { conversationId ->
+                            navigate(Route.AgentChat(conversationId = conversationId))
+                        },
+                        onNewConversationClick = {
+                            navigate(
+                                Route.AgentChat(
+                                    conversationId = "generic-chat:${kotlin.time.Clock.System.now().toEpochMilliseconds()}",
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.AgentChat> { args ->
+                    AgentChatScreen(
+                        conversationId = args.conversationId,
+                        initialMessage = args.initialMessage,
+                        onBack = onBack,
+                    )
                 }
 
                 entry<Route.NostrRelays> { args ->

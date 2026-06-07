@@ -121,7 +121,9 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     }
 
     entry<Route.Status.Insight>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
+        metadata = BottomSheetSceneStrategy.bottomSheet(
+            expandFully = true,
+        )
     ) { args ->
         StatusInsightSheet(
             accountType = args.accountType,

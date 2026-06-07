@@ -55,6 +55,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
 import compose.icons.fontawesomeicons.solid.Reply
+import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Tv
 import dev.dimension.flare.compose.ui.Res
@@ -121,6 +122,7 @@ import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuDivider
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
+import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
@@ -235,6 +237,32 @@ public fun CommonStatusComponent(
                                 style = PlatformTheme.typography.caption,
                                 color = PlatformTheme.colorScheme.caption,
                             )
+                        }
+                        if (appearanceSettings.aiConfig.agent) {
+                            PlatformIconButton(
+                                onClick = {
+                                    uriHandler.openUri(
+                                        DeeplinkRoute
+                                            .Status
+                                            .Insight(
+                                                accountType = item.accountType,
+                                                statusKey = item.statusKey,
+                                            ).toUri(),
+                                    )
+                                },
+                                modifier =
+                                    Modifier
+                                        .size(24.dp),
+                            ) {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Robot,
+                                    contentDescription = null,
+                                    modifier =
+                                        Modifier
+                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                    tint = PlatformTheme.colorScheme.caption,
+                                )
+                            }
                         }
                     }
                 }

@@ -1124,9 +1124,6 @@
         }
       }
     },
-    "+%lld" : {
-
-    },
     "about_description" : {
       "localizations" : {
         "af" : {
@@ -3015,6 +3012,167 @@
         }
       }
     },
+    "ask_ai" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask AI"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AIに聞く"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "问问 AI"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問問 AI"
+          }
+        }
+      }
+    },
+    "agent_chat_input_placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask anything..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AIに聞く..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "问问 AI..."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問問 AI..."
+          }
+        }
+      }
+    },
+    "agent_chat_send" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "送信"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发送"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "發送"
+          }
+        }
+      }
+    },
+    "agent_chat_thinking" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thinking..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "考え中..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "思考中..."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "思考中..."
+          }
+        }
+      }
+    },
+    "agent_chat_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Chat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AIチャット"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 聊天"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 對話"
+          }
+        }
+      }
+    },
+    "agent_history_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No agent chat history yet."
+          }
+        }
+      }
+    },
+    "agent_history_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flare Agent"
+          }
+        }
+      }
+    },
     "AI" : {
       "comment" : "The name of the AI translation service.",
       "localizations" : {
@@ -4141,6 +4299,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "AI 功能"
+          }
+        }
+      }
+    },
+    "ai_config_post_insight" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用 AI agent"
+          }
+        }
+      }
+    },
+    "ai_config_post_insight_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后，在已配置 OpenAI 兼容模型时，会在应用内相关位置显示 AI agent 功能入口。"
           }
         }
       }
@@ -115241,6 +115419,27 @@
         }
       }
     },
+    "settings_agent_history_description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View local Flare Agent chat history"
+          }
+        }
+      }
+    },
+    "settings_agent_history_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flare Agent"
+          }
+        }
+      }
+    },
     "settings_privacy_policy" : {
       "localizations" : {
         "en" : {
@@ -119045,6 +119244,374 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "狀態詳情"
+          }
+        }
+      }
+    },
+    "status_insight_analyzing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyzing this post..."
+          }
+        }
+      }
+    },
+    "status_insight_error" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to analyze this post."
+          }
+        }
+      }
+    },
+    "status_insight_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post insight"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投稿インサイト"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帖子洞察"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貼文洞察"
+          }
+        }
+      }
+    },
+    "status_insight_trace_agent_closing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closing analysis..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_agent_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finishing analysis..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_agent_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis failed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_agent_started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting analysis..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_asking_model" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asking %@..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_images_unsupported_fallback" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Images are unsupported; retrying with text..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_loading_post_context" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading post context..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_model_response_received" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reading model response..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_post_context_loaded" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post context loaded"
+          }
+        }
+      }
+    },
+    "status_insight_trace_preparing_images" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing images..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_running_step" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running analysis step..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_step_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis step completed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_step_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis step failed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_strategy_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis plan completed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_strategy_started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planning analysis..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_streaming_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Response stream completed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_streaming_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Response stream failed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_streaming_response" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receiving response..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_streaming_started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streaming from %@..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_subgraph_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis stage completed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_subgraph_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis stage failed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_subgraph_started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entering analysis stage..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_call_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool call failed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_load_status_context_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post context loaded"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_load_status_context_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to load post context"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_load_status_context_started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading post context..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_load_status_context_validation_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post context input was rejected"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_search_status_completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search completed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_search_status_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search failed"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_search_status_started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching..."
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_search_status_validation_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search input was rejected"
+          }
+        }
+      }
+    },
+    "status_insight_trace_tool_validation_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool input was rejected"
           }
         }
       }

@@ -3,6 +3,8 @@ import SwiftUI
 
 struct SearchScreen: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
+    let onAskAi: (String?) -> Void
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
     @State var searchText = ""
@@ -10,7 +12,12 @@ struct SearchScreen: View {
     @State private var isSearchPresented = false
     @State private var didRecordInitialQuery = false
     
-    init(accountType: AccountType, initialQuery: String) {
+    init(
+        accountType: AccountType,
+        initialQuery: String,
+        onAskAi: @escaping (String?) -> Void = { _ in }
+    ) {
+        self.onAskAi = onAskAi
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: accountType, initialQuery: initialQuery)))
         self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
         self._searchText = .init(initialValue: initialQuery)
@@ -116,6 +123,13 @@ struct SearchScreen: View {
             }
         }
         .searchable(text: $searchText, isPresented: $isSearchPresented)
+        .safeAreaInset(edge: .bottom) {
+            if agentEnabled && isSearchPresented {
+                AskAiSearchAccessory {
+                    askAi()
+                }
+            }
+        }
         .searchSuggestions {
             SearchHistorySuggestions(
                 state: searchHistoryPresenter.state,
@@ -157,5 +171,33 @@ struct SearchScreen: View {
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
         searchPresenter.state.search(query: query)
         isSearchPresented = false
+    }
+
+    private func askAi() {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        isSearchPresented = false
+        onAskAi(query.isEmpty ? nil : query)
+    }
+}
+
+struct AskAiSearchAccessory: View {
+    let action: () -> Void
+
+    var body: some View {
+        HStack {
+            Button(action: action) {
+                Label {
+                    Text("ask_ai")
+                } icon: {
+                    Image("fa-robot")
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(.regularMaterial)
     }
 }

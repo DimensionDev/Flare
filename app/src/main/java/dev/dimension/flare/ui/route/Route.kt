@@ -78,6 +78,12 @@ internal sealed interface Route : NavKey {
             val fxShareUrl: String? = null,
             val fixvxShareUrl: String? = null,
         ) : Status
+
+        @Serializable
+        data class Insight(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : Status
     }
 
     @Serializable
@@ -111,6 +117,9 @@ internal sealed interface Route : NavKey {
 
         @Serializable
         data object LocalHistory : Settings
+
+        @Serializable
+        data object AgentHistory : Settings
 
         @Serializable
         data object AiConfig : Settings
@@ -206,6 +215,12 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data object DraftBox : Route
+
+    @Serializable
+    data class AgentChat(
+        val conversationId: String = "generic-chat",
+        val initialMessage: String? = null,
+    ) : Route
 
     @Serializable
     sealed interface Profile : Route {
@@ -612,6 +627,13 @@ internal sealed interface Route : NavKey {
                     Status.Detail(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
+                    )
+                }
+
+                is DeeplinkRoute.Status.Insight -> {
+                    Status.Insight(
+                        accountType = deeplinkRoute.accountType,
+                        statusKey = deeplinkRoute.statusKey,
                     )
                 }
 

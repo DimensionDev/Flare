@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -37,6 +38,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -123,6 +126,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                         .width(72.dp)
                         .verticalScroll(rememberScrollState())
                         .padding(top = LocalWindowPadding.current.calculateTopPadding()),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 state.isLoggedIn
                     .onSuccess { loggedIn ->
@@ -282,26 +286,6 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
-                            if (state.canComposeState.takeSuccess() == true) {
-                                Button(
-                                    onClick = {
-                                        state.navigate(
-                                            Route.Compose.New,
-                                        )
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                            .fillMaxWidth(),
-                                    iconOnly = true,
-                                ) {
-                                    Icon(
-                                        FontAwesomeIcons.Solid.Pen,
-                                        contentDescription = stringResource(Res.string.home_compose),
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                }
-                            }
                         }
 //                        SubtleButton(
 //                            onClick = {
@@ -431,6 +415,33 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             FluentTheme.colors.system.neutral
                         },
                 )
+                if (state.canComposeState.takeSuccess() == true) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier =
+                            Modifier
+                                .shadow(4.dp, CircleShape)
+                                .background(
+                                    FluentTheme.colors.fillAccent.secondary,
+                                    CircleShape,
+                                ).fillMaxWidth(0.66f)
+                                .aspectRatio(1f)
+                                .clip(CircleShape)
+                                .clickable {
+                                    state.navigate(
+                                        Route.Compose.New,
+                                    )
+                                },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            FontAwesomeIcons.Solid.Pen,
+                            contentDescription = stringResource(Res.string.home_compose),
+                            modifier = Modifier.size(16.dp),
+                            tint = FluentTheme.colors.text.onAccent.primary,
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 NavigationItem(
                     icon = {
@@ -459,6 +470,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     },
                 )
             }
+//            CommandBarSeparator()
             CompositionLocalProvider(
                 LocalUriHandler provides
                     remember {
@@ -483,6 +495,14 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                     ?: persistentListOf(),
                             navigate = { route -> state.navigate(route) },
                             onBack = { state.goBack() },
+                        )
+                        Spacer(
+                            modifier =
+                                Modifier
+                                    .fillMaxHeight()
+                                    .width(1.dp)
+                                    .background(FluentTheme.colors.stroke.divider.default)
+                                    .align(Alignment.CenterStart),
                         )
                         InAppNotificationComponent(
                             modifier =

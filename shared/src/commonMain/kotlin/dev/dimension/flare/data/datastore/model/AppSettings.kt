@@ -61,6 +61,7 @@ public data class AppSettings(
             level = DeprecationLevel.ERROR,
         )
         val preTranslation: Boolean = false,
+        val agent: Boolean = true,
     ) {
         public companion object {
             // for iOS

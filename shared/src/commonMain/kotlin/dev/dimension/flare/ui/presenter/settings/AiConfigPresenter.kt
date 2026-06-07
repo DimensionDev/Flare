@@ -83,6 +83,7 @@ public class AiConfigPresenter :
         public val supportedTranslateProviders: ImmutableList<TranslateProviderOption>
         public val serverSuggestions: ImmutableList<String>
         public val aiTldr: Boolean
+        public val aiAgent: Boolean
         public val translatePrompt: String
         public val tldrPrompt: String
         public val preTranslate: Boolean
@@ -117,6 +118,8 @@ public class AiConfigPresenter :
         public fun setLibreTranslateApiKey(value: String)
 
         public fun setAITldr(value: Boolean)
+
+        public fun setAIAgent(value: Boolean)
 
         public fun setTranslatePrompt(value: String)
 
@@ -278,6 +281,7 @@ public class AiConfigPresenter :
                 (appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI)?.extraBody ?: ""
 
             override val aiTldr: Boolean = appSettings.aiConfig.tldr
+            override val aiAgent: Boolean = appSettings.aiConfig.agent
             override val translatePrompt: String = appSettings.aiConfig.translatePrompt
             override val tldrPrompt: String = appSettings.aiConfig.tldrPrompt
             override val preTranslate: Boolean = appSettings.translateConfig.preTranslate
@@ -288,6 +292,14 @@ public class AiConfigPresenter :
                 update {
                     copy(
                         tldr = value,
+                    )
+                }
+            }
+
+            override fun setAIAgent(value: Boolean) {
+                update {
+                    copy(
+                        agent = value,
                     )
                 }
             }

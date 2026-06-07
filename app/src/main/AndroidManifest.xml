@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-sdk tools:overrideLibrary="ai.koog.agents.core,ai.koog.agents.features.event.handler,ai.koog.agents.features.memory,ai.koog.agents.features.opentelemetry,ai.koog.agents.features.snapshot,ai.koog.agents.features.tokenizer,ai.koog.agents.features.trace,ai.koog.agents.mcp.metadata,ai.koog.agents.tools,ai.koog.agents.utils,ai.koog.embeddings.base,ai.koog.embeddings.llm,ai.koog.http.client.core,ai.koog.http.client.ktor,ai.koog.koog.agents,ai.koog.prompt.cache.files,ai.koog.prompt.cache.model,ai.koog.prompt.executor.anthropic.client,ai.koog.prompt.executor.bedrock.client,ai.koog.prompt.executor.cached,ai.koog.prompt.executor.clients,ai.koog.prompt.executor.model,ai.koog.prompt.executor.ollama.client,ai.koog.prompt.executor.openai.client,ai.koog.prompt.executor.openai.client.base,ai.koog.prompt.llm,ai.koog.prompt.markdown,ai.koog.prompt.model,ai.koog.prompt.processor,ai.koog.prompt.structure,ai.koog.prompt.tokenizer,ai.koog.prompt.xml,ai.koog.rag.base,ai.koog.serialization.core,ai.koog.utils" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />

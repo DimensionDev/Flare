@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
+import dev.dimension.flare.ui.screen.status.action.StatusInsightSheet
 import dev.dimension.flare.ui.screen.status.action.StatusShareSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -116,6 +117,17 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
             fxShareUrl = args.fxShareUrl,
             fixvxShareUrl = args.fixvxShareUrl,
             onBack = onBack
+        )
+    }
+
+    entry<Route.Status.Insight>(
+        metadata = BottomSheetSceneStrategy.bottomSheet(
+            expandFully = true,
+        )
+    ) { args ->
+        StatusInsightSheet(
+            accountType = args.accountType,
+            statusKey = args.statusKey,
         )
     }
 

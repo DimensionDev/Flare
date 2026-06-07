@@ -166,6 +166,20 @@ struct AiConfigScreen: View {
             Section {
                 Toggle(
                     isOn: Binding(
+                        get: { presenter.state.aiAgent },
+                        set: { newValue in
+                            presenter.state.setAIAgent(value: newValue)
+                        }
+                    )
+                ) {
+                    Text("ai_config_post_insight")
+                    Text("ai_config_post_insight_description")
+                }
+            }
+
+            Section {
+                Toggle(
+                    isOn: Binding(
                         get: { presenter.state.aiTldr },
                         set: { newValue in
                             presenter.state.setAITldr(value: newValue)

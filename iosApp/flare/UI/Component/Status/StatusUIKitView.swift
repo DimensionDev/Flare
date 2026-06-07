@@ -638,7 +638,18 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             post: data,
             showPlatformLogo: appearance.showPlatformLogo,
             absoluteTimestamp: appearance.absoluteTimestamp,
-            isDetail: isDetail
+            isDetail: isDetail,
+            showAgentInsight: appearance.aiAgentEnabled && !isQuote,
+            onInsightTapped: { [weak self] in
+                guard let self else { return }
+                let route = DeeplinkRoute.StatusInsight(
+                    accountType: data.accountType,
+                    statusKey: data.statusKey
+                )
+                if let url = URL(string: route.toUri()) {
+                    self.openURL?(url)
+                }
+            }
         )
         let onClicked: () -> Void = { [weak self] in self?.onUserTapped() }
 

@@ -3,6 +3,7 @@ package dev.dimension.flare.di
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -47,6 +48,10 @@ private object TestInAppNotification : InAppNotification {
 
 private object TestAccountService : AccountService {
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = unsupported()
+
+    override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> {
+        unsupported()
+    }
 
     override fun <T : Any> addAccount(
         account: UiAccount,

@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -34,6 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isLoading
 import dev.dimension.flare.common.isRefreshing
@@ -45,6 +49,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -71,10 +76,14 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
+internal fun DiscoverScreen(
+    onUserClick: (AccountType, MicroBlogKey) -> Unit,
+    onAskAiClick: (String?) -> Unit,
+) {
     val state by producePresenter("discover") { discoverPresenter() }
     val lazyListState = rememberLazyStaggeredGridState()
     val isBigScreen = isBigScreen()
+    val showAskAi = LocalTimelineAppearance.current.aiConfig.agent
     RegisterTabCallback(
         lazyListState = lazyListState,
         onRefresh = {
@@ -142,6 +151,33 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                             } else {
                                 null
                             }
+                        },
+                    historyFloatingActionButton =
+                        if (showAskAi) {
+                            {
+                                ExtendedFloatingActionButton(
+                                    onClick = {
+                                        onAskAiClick(
+                                            state.queryTextState
+                                                .text
+                                                .toString()
+                                                .trim()
+                                                .takeIf { it.isNotEmpty() },
+                                        )
+                                    },
+                                    icon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Robot,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = {
+                                        Text(text = stringResource(id = R.string.ask_ai))
+                                    },
+                                )
+                            }
+                        } else {
+                            null
                         },
                 )
             }

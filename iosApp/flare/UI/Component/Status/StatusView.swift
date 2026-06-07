@@ -9,6 +9,7 @@ struct StatusView: View {
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.timelineAppearance.showPlatformLogo) private var showPlatformLogo
     @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @Environment(\.openURL) private var openURL
     let data: UiTimelineV2.Post
     var isDetail: Bool = false
@@ -295,6 +296,23 @@ struct StatusView: View {
                 DateTimeText(data: data.createdAt)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+            if agentEnabled, !isQuote {
+                Button {
+                    let route = DeeplinkRoute.StatusInsight(
+                        accountType: data.accountType,
+                        statusKey: data.statusKey
+                    )
+                    if let url = URL(string: route.toUri()) {
+                        openURL(url)
+                    }
+                } label: {
+                    Image("fa-robot")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("status_insight_title"))
             }
         }
     }

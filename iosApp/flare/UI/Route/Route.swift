@@ -53,13 +53,17 @@ enum Route: Hashable, Identifiable {
         case .notification:
             NotificationScreen()
         case .discover:
-            DiscoverScreen()
+            DiscoverScreen { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
         case .accountManagement:
             AccountManagementScreen()
         case .nostrRelays(let accountKey):
             NostrRelaysScreen(accountKey: accountKey)
         case .search(let accountType, let query):
-            SearchScreen(accountType: accountType, initialQuery: query)
+            SearchScreen(accountType: accountType, initialQuery: query) { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
         case .composeNew:
             ComposeScreen(accountType: nil)
         case .composeDraft(let groupId):
@@ -92,6 +96,12 @@ enum Route: Hashable, Identifiable {
             LocalFilterScreen()
         case .aiConfig:
             AiConfigScreen()
+        case .agentHistory:
+            AgentChatHistoryScreen {
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), nil))
+            }
+        case .agentChat(let conversationId, let initialMessage):
+            AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage)
         case .translationConfig:
             TranslationConfigScreen()
         case .tabSettings:
@@ -112,6 +122,8 @@ enum Route: Hashable, Identifiable {
             MisskeyReportSheet(accountType: accountType, userKey: userKey, statusKey: statusKey)
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+        case .statusInsight(let accountType, let statusKey):
+            StatusInsightSheet(accountType: accountType, statusKey: statusKey)
         case .userFans(let account, let userKey):
             UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
         case .userFollowing(let account, let userKey):
@@ -174,6 +186,7 @@ enum Route: Hashable, Identifiable {
     case statusBlueskyReport(AccountType, MicroBlogKey)
     case statusDeleteConfirm(AccountType, MicroBlogKey)
     case statusDetail(AccountType, MicroBlogKey)
+    case statusInsight(AccountType, MicroBlogKey)
     case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusVVOComment(AccountType, MicroBlogKey)
@@ -186,6 +199,8 @@ enum Route: Hashable, Identifiable {
     case localHostory
     case moreMenuCustomize
     case aiConfig
+    case agentHistory
+    case agentChat(String, String?)
     case translationConfig
     case storage
     case appearanceTheme
@@ -218,6 +233,10 @@ enum Route: Hashable, Identifiable {
     case rssManagement
     case draftBox
     case secondaryMenu
+
+    private static func newGenericChatConversationId() -> String {
+        "generic-chat:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {
@@ -264,6 +283,8 @@ enum Route: Hashable, Identifiable {
             return Route.statusDeleteConfirm(data.accountType, data.statusKey)
         case .detail(let data):
             return Route.statusDetail(data.accountType, data.statusKey)
+        case .insight(let data):
+            return Route.statusInsight(data.accountType, data.statusKey)
         case .mastodonReport(let data):
             return Route.statusMastodonReport(data.accountType, data.userKey, data.statusKey)
         case .misskeyReport(let data):

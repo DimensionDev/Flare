@@ -4,6 +4,8 @@ import Flow
 
 struct DiscoverScreen: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
+    let onAskAi: (String?) -> Void
     @StateObject private var presenter: KotlinPresenter<DiscoverState>
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
@@ -11,7 +13,8 @@ struct DiscoverScreen: View {
     @State private var committedSearchText = ""
     @State private var isSearchPresented = false
     
-    init() {
+    init(onAskAi: @escaping (String?) -> Void = { _ in }) {
+        self.onAskAi = onAskAi
         self._presenter = .init(wrappedValue: .init(presenter: DiscoverPresenter()))
         self._searchPresenter = .init(wrappedValue: .init(presenter: SearchPresenter(accountType: AccountType.Guest.shared, initialQuery: "")))
         self._searchHistoryPresenter = .init(wrappedValue: .init(presenter: SearchHistoryPresenter()))
@@ -81,6 +84,13 @@ struct DiscoverScreen: View {
             }
         }
         .searchable(text: $searchText, isPresented: $isSearchPresented)
+        .safeAreaInset(edge: .bottom) {
+            if agentEnabled && isSearchPresented {
+                AskAiSearchAccessory {
+                    askAi()
+                }
+            }
+        }
         .searchSuggestions {
             SearchHistorySuggestions(
                 state: searchHistoryPresenter.state,
@@ -249,5 +259,11 @@ struct DiscoverScreen: View {
         searchHistoryPresenter.state.addSearchHistory(keyword: query)
         searchPresenter.state.search(query: query)
         isSearchPresented = false
+    }
+
+    private func askAi() {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        isSearchPresented = false
+        onAskAi(query.isEmpty ? nil : query)
     }
 }

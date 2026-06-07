@@ -45,6 +45,11 @@
     <string name="compose_close_confirm_message">您有未儲存的變更。是否在關閉前將其儲存為草稿？</string>
     <string name="compose_save_draft">儲存</string>
     <string name="compose_close_discard">捨棄</string>
+    <string name="ask_ai">問問AI</string>
+    <string name="agent_chat_title">AI 聊天</string>
+    <string name="agent_chat_input_placeholder">想問什麼都可以…</string>
+    <string name="agent_chat_send">發送</string>
+    <string name="agent_chat_thinking">正在思考…</string>
     <string name="draft_box_title">草稿</string>
     <string name="draft_box_empty">目前沒有草稿</string>
     <string name="draft_box_edit">編輯</string>

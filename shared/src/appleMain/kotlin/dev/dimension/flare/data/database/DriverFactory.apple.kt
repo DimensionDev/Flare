@@ -11,10 +11,12 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringWithString
+import kotlin.native.HiddenFromObjC
 
 @Single
-internal actual class DriverFactory {
-    actual inline fun <reified T : RoomDatabase> createBuilder(
+@HiddenFromObjC
+public actual class DriverFactory {
+    public actual inline fun <reified T : RoomDatabase> createBuilder(
         name: String,
         isCache: Boolean,
     ): RoomDatabase.Builder<T> {
@@ -32,7 +34,7 @@ internal actual class DriverFactory {
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    actual fun deleteDatabase(
+    public actual fun deleteDatabase(
         name: String,
         isCache: Boolean,
     ) {
@@ -44,6 +46,7 @@ internal actual class DriverFactory {
         }
     }
 
+    @PublishedApi
     internal fun databaseDirPath(): String = iosDirPath("databases")
 
     @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.UnsafeNumber::class)

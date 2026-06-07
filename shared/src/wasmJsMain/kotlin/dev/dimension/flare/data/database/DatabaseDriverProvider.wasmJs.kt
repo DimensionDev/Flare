@@ -6,7 +6,7 @@ import org.w3c.dom.Worker
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.js
 
-internal actual fun createDatabaseDriver(): SQLiteDriver =
+public actual fun createDatabaseDriver(): SQLiteDriver =
     SerialWebSQLiteDriver(
         delegate = WebWorkerSQLiteDriver(createSQLiteWorker()),
     )

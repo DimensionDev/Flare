@@ -6,6 +6,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -64,6 +67,7 @@ internal fun SearchBar(
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
+    historyFloatingActionButton: @Composable (() -> Unit)? = null,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     SearchContent(
@@ -85,6 +89,7 @@ internal fun SearchBar(
         },
         queryTextState = state.queryTextState,
         trailingIcon = trailingIcon,
+        historyFloatingActionButton = historyFloatingActionButton,
     )
 }
 
@@ -102,6 +107,7 @@ private fun SearchContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
+    historyFloatingActionButton: @Composable (() -> Unit)? = null,
 ) {
     androidx.compose.material3.SearchBar(
         inputField = {
@@ -137,33 +143,54 @@ private fun SearchContent(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
     ) {
-        LazyColumn(
-            modifier = Modifier.imePadding(),
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .imePadding(),
         ) {
-            historyState.onSuccess { history ->
-                items(history.size) { index ->
-                    val item = history[index]
-                    ListItem(
-                        headlineContent = {
-                            Text(text = item.keyword)
-                        },
-                        modifier =
-                            Modifier
-                                .clickable {
-                                    onSearch(item.keyword)
-                                },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        trailingContent = {
-                            IconButton(onClick = {
-                                onDelete.invoke(item)
-                            }) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Xmark,
-                                    contentDescription = stringResource(R.string.delete),
-                                )
-                            }
-                        },
-                    )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding =
+                    PaddingValues(
+                        bottom = if (historyFloatingActionButton != null) 88.dp else 0.dp,
+                    ),
+            ) {
+                historyState.onSuccess { history ->
+                    items(history.size) { index ->
+                        val item = history[index]
+                        ListItem(
+                            headlineContent = {
+                                Text(text = item.keyword)
+                            },
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        onSearch(item.keyword)
+                                    },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            trailingContent = {
+                                IconButton(onClick = {
+                                    onDelete.invoke(item)
+                                }) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Xmark,
+                                        contentDescription = stringResource(R.string.delete),
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+            historyFloatingActionButton?.let { fab ->
+                Box(
+                    modifier =
+                        Modifier
+                            .align(androidx.compose.ui.Alignment.BottomCenter)
+                            .padding(bottom = 16.dp),
+                ) {
+                    fab()
                 }
             }
         }

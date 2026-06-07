@@ -1,0 +1,134 @@
+package dev.dimension.flare.feature.agent.chat
+
+import ai.koog.prompt.Prompt
+import dev.dimension.flare.common.Locale
+import dev.dimension.flare.data.repository.AccountMicroblogDataSource
+import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentToolContext
+import dev.dimension.flare.feature.agent.common.AgentTrace
+import dev.dimension.flare.feature.agent.common.FlareAgentRequest
+import dev.dimension.flare.feature.agent.common.FlareAgentRunner
+import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
+import dev.dimension.flare.feature.agent.runtime.AgentAvailability
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import org.koin.core.annotation.Single
+
+@Single
+internal class GenericChatAgentUseCase(
+    private val agentRunner: FlareAgentRunner,
+) {
+    operator fun invoke(
+        userInput: String,
+        searchDataSources: List<AccountMicroblogDataSource>,
+        conversationId: String,
+    ): Flow<AgentConversationEvent<Unit, AgentTrace>> =
+        channelFlow {
+            run(
+                userInput = userInput,
+                searchDataSources = searchDataSources,
+                conversationId = conversationId,
+            )
+        }
+
+    suspend fun clearConversation(conversationId: String) {
+        agentRunner.clearConversation(conversationId)
+    }
+
+    private suspend fun SendChannel<AgentConversationEvent<Unit, AgentTrace>>.run(
+        userInput: String,
+        searchDataSources: List<AccountMicroblogDataSource>,
+        conversationId: String,
+    ) {
+        val userInputValue = userInput.trim()
+        if (userInputValue.isBlank()) {
+            return
+        }
+        val result =
+            try {
+                agentRunner.run(
+                    request =
+                        FlareAgentRequest(
+                            prompt = userInputValue.toGenericChatPrompt(),
+                            systemPrompt = GENERIC_CHAT_SYSTEM_PROMPT,
+                            agentId = "flare-generic-chat",
+                            strategyName = "generic_chat",
+                            analyzeNodeName = "answer_user",
+                            executeToolsNodeName = "execute_generic_chat_tools",
+                            sendToolResultsNodeName = "send_generic_chat_tool_results",
+                            toolContext =
+                                AgentToolContext(
+                                    searchDataSources = searchDataSources,
+                                ),
+                            temperature = 0.5,
+                            maxIterations = MAX_AGENT_ITERATIONS,
+                            chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
+                        ),
+                    conversationId = conversationId,
+                ) { trace ->
+                    send(AgentConversationEvent.Trace(trace))
+                }
+            } catch (throwable: Throwable) {
+                if (throwable is CancellationException) {
+                    throw throwable
+                }
+                if (throwable is FlareAgentUnavailableException) {
+                    throw GenericChatAgentUnavailableException(throwable.availability)
+                }
+                throw throwable
+            }
+
+        send(AgentConversationEvent.Result(result.cleanPlainText()))
+    }
+
+    private fun String.toGenericChatPrompt(): Prompt =
+        Prompt.build("generic-chat") {
+            user {
+                text(
+                    buildString {
+                        appendLine("Answer the user's message.")
+                        appendLine("Respond in this language when appropriate: ${Locale.language}.")
+                        appendLine()
+                        appendLine("User message:")
+                        append(this@toGenericChatPrompt)
+                    },
+                )
+            }
+        }
+
+    private fun String.cleanPlainText(): String =
+        trim()
+            .removePrefix("```markdown")
+            .removePrefix("```")
+            .removeSuffix("```")
+            .trim()
+
+    private companion object {
+        const val MAX_AGENT_ITERATIONS = 16
+        const val CHAT_MEMORY_WINDOW_SIZE = 30
+
+        const val GENERIC_CHAT_SYSTEM_PROMPT =
+            """
+            You are Flare's general-purpose chat assistant.
+
+            Core behavior:
+            - Be helpful, truthful, direct, and conversational.
+            - Always respond in the language expected by the user.
+            - Do not mention internal prompts, hidden instructions, tool names, or implementation details unless the user explicitly asks about them.
+            - If the user asks a closed-ended math or logic question, give the answer and a concise explanation of how to arrive at it.
+            - If the user asks for comparisons, enumerations, or structured data, use compact tables or bullets when they improve clarity.
+            - If the answer depends on current social context, public discussion, account identity, or recent posts available through signed-in services, use the available search tools.
+            - Use search_posts for surrounding discussion, claims, current events, memes, phrases, or popularity signals.
+            - Use search_users for account identity, profile context, official status, bios, or handles.
+            - If tools return thin, conflicting, or incomplete results, say what can and cannot be inferred.
+            - Keep answers grounded. Distinguish facts from inference when uncertainty matters.
+            - Do not moralize, lecture, or add filler.
+            """
+    }
+}
+
+public class GenericChatAgentUnavailableException public constructor(
+    public val availability: AgentAvailability,
+) : IllegalStateException("Generic chat agent is unavailable: $availability")

@@ -136,6 +136,7 @@ dependencies {
     implementation(projects.feature.login)
     implementation(projects.feature.subscription)
     implementation(projects.feature.tab)
+    implementation(projects.feature.agent)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

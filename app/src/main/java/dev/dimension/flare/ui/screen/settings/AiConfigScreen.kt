@@ -452,6 +452,31 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
             SegmentedListItem(
                 onClick = {
+                    state.setAIAgent(!state.aiAgent)
+                },
+                shapes = ListItemDefaults.single(),
+                content = {
+                    Text(
+                        text = stringResource(id = R.string.settings_ai_config_enable_agent),
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(id = R.string.settings_ai_config_agent_description),
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = state.aiAgent,
+                        onCheckedChange = {
+                            state.setAIAgent(it)
+                        },
+                    )
+                },
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            SegmentedListItem(
+                onClick = {
                     state.setAITldr(!state.aiTldr)
                 },
                 shapes =

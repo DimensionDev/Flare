@@ -5,6 +5,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -17,9 +18,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -40,7 +43,10 @@ public class PostHandler(
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    public fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {
+    public fun post(
+        postKey: MicroBlogKey,
+        translationDisplay: PostTranslationDisplay = PostTranslationDisplay.UserSettings,
+    ): Cacheable<UiTimelineV2> {
         val pagingKey = "post_only_$postKey"
         return Cacheable(
             fetchSource = {
@@ -71,7 +77,7 @@ public class PostHandler(
                             .get(pagingKey, accountType = dbAccountType)
                             .filterNotNull(),
                     ),
-                    translationDisplayFlow,
+                    translationDisplay.optionsFlow(translationDisplayFlow),
                 ) { status, translationDisplayOptions ->
                     TimelinePagingMapper.toUi(
                         item = status,
@@ -103,3 +109,26 @@ public class PostHandler(
             }
         }
 }
+
+@HiddenFromObjC
+public enum class PostTranslationDisplay {
+    UserSettings,
+    Original,
+}
+
+private fun PostTranslationDisplay.optionsFlow(userSettingsFlow: Flow<TranslationDisplayOptions>): Flow<TranslationDisplayOptions> =
+    when (this) {
+        PostTranslationDisplay.UserSettings -> {
+            userSettingsFlow
+        }
+
+        PostTranslationDisplay.Original -> {
+            flowOf(
+                TranslationDisplayOptions(
+                    translationEnabled = false,
+                    autoDisplayEnabled = false,
+                    providerCacheKey = "",
+                ),
+            )
+        }
+    }

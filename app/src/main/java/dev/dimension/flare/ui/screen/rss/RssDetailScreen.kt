@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
+import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentMapOf
@@ -91,9 +92,15 @@ internal fun RssDetailScreen(
     val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val color =
+        if (isLightTheme()) {
+            MaterialTheme.colorScheme.surface
+        } else {
+            MaterialTheme.colorScheme.background
+        }
     FlareScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = color,
         topBar = {
             FlareTopAppBar(
                 title = {},
@@ -103,8 +110,8 @@ internal fun RssDetailScreen(
                 scrollBehavior = scrollBehavior,
                 colors =
                     TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = color,
+                        scrolledContainerColor = color,
                         actionIconContentColor = MaterialTheme.colorScheme.primary,
                     ),
                 actions = {

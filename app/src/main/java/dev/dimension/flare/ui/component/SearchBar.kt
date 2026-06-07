@@ -42,6 +42,7 @@ import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -55,6 +56,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
 internal fun SearchBar(
@@ -194,6 +196,15 @@ internal fun LazyStaggeredGridScope.searchContent(
             ) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier =
+                        Modifier
+                            .let {
+                                if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain) {
+                                    it.padding(horizontal = screenHorizontalPadding)
+                                } else {
+                                    it
+                                }
+                            },
                 ) {
                     items(itemCount) {
                         val item = get(it)

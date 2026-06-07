@@ -49,7 +49,6 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
-import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -256,9 +255,6 @@ internal fun ProfileScreen(
                         ) {
                             Column {
                                 ProfileHeader(
-                                    modifier =
-                                        Modifier
-                                            .ignoreHorizontalParentPadding(screenHorizontalPadding),
                                     state = state.state,
                                     menu = {
                                         ProfileMenu(
@@ -285,7 +281,11 @@ internal fun ProfileScreen(
                                     onFansListClick = onFansListClick,
                                 )
                                 state.state.tabs.onSuccess { tabs ->
-                                    LiteFilter {
+                                    LiteFilter(
+                                        modifier =
+                                            Modifier
+                                                .padding(horizontal = screenHorizontalPadding),
+                                    ) {
                                         repeat(tabs.size) { index ->
                                             val tab = tabs.get(index)
                                             PillButton(

@@ -118,7 +118,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                 modifier =
                     Modifier
                         .background(
-                            FluentTheme.colors.background.layerOnMicaBaseAlt.secondary,
+                            FluentTheme.colors.background.mica.base,
                         ).fillMaxHeight()
                         .width(72.dp)
                         .verticalScroll(rememberScrollState())

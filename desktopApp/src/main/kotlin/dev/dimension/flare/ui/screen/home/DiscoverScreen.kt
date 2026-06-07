@@ -43,6 +43,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.delete
 import dev.dimension.flare.hashtags
 import dev.dimension.flare.model.AccountType
@@ -53,7 +54,9 @@ import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
@@ -64,6 +67,7 @@ import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.users
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.component.AutoSuggestBoxDefaults
@@ -157,7 +161,10 @@ internal fun DiscoverScreen(
                                         ListItem(
                                             onClick = {
                                                 state.selectedAccount?.let { user ->
-                                                    toSearch(AccountType.Specific(user.key), it.keyword)
+                                                    toSearch(
+                                                        AccountType.Specific(user.key),
+                                                        it.keyword,
+                                                    )
                                                 }
                                                 state.setHistoryExpanded(false)
                                             },
@@ -192,7 +199,15 @@ internal fun DiscoverScreen(
                         LiteFilter(
                             modifier =
                                 Modifier
-                                    .padding(top = 8.dp),
+                                    .let {
+                                        if (!isBigScreen() &&
+                                            LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                        ) {
+                                            it.padding(horizontal = screenHorizontalPadding)
+                                        } else {
+                                            it
+                                        }
+                                    }.padding(top = 8.dp),
                         ) {
                             accounts.forEach { profile ->
                                 PillButton(
@@ -227,13 +242,36 @@ internal fun DiscoverScreen(
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        Header(stringResource(Res.string.users))
+                        Header(
+                            stringResource(Res.string.users),
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (!isBigScreen() &&
+                                            LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                        ) {
+                                            it.padding(horizontal = screenHorizontalPadding)
+                                        } else {
+                                            it
+                                        }
+                                    },
+                        )
                     }
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
                         LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (!isBigScreen() &&
+                                            LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                        ) {
+                                            it.padding(horizontal = screenHorizontalPadding)
+                                        } else {
+                                            it
+                                        }
+                                    }.height(128.dp),
                             rows = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -275,14 +313,37 @@ internal fun DiscoverScreen(
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        Header(stringResource(Res.string.users))
+                        Header(
+                            stringResource(Res.string.users),
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (!isBigScreen() &&
+                                            LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                        ) {
+                                            it.padding(horizontal = screenHorizontalPadding)
+                                        } else {
+                                            it
+                                        }
+                                    },
+                        )
                     }
 
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
                         LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (!isBigScreen() &&
+                                            LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                        ) {
+                                            it.padding(horizontal = screenHorizontalPadding)
+                                        } else {
+                                            it
+                                        }
+                                    }.height(128.dp),
                             rows = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -305,7 +366,20 @@ internal fun DiscoverScreen(
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    Header(stringResource(Res.string.hashtags))
+                    Header(
+                        stringResource(Res.string.hashtags),
+                        modifier =
+                            Modifier
+                                .let {
+                                    if (!isBigScreen() &&
+                                        LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                    ) {
+                                        it.padding(horizontal = screenHorizontalPadding)
+                                    } else {
+                                        it
+                                    }
+                                },
+                    )
                 }
                 item(
                     span = StaggeredGridItemSpan.FullLine,
@@ -313,6 +387,17 @@ internal fun DiscoverScreen(
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier =
+                            Modifier
+                                .let {
+                                    if (!isBigScreen() &&
+                                        LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain
+                                    ) {
+                                        it.padding(horizontal = screenHorizontalPadding)
+                                    } else {
+                                        it
+                                    }
+                                },
                     ) {
                         repeat(
                             itemCount,

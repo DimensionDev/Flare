@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
@@ -29,10 +31,12 @@ import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
+import dev.dimension.flare.ui.theme.isLightTheme
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -56,6 +60,24 @@ internal fun StatusScreen(
     FlareScaffold(
         topBar = {
             FlareTopAppBar(
+                colors =
+                    when (LocalTimelineAppearance.current.timelineDisplayMode) {
+                        TimelineDisplayMode.Plain if isLightTheme() && isCompatScreen() -> {
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                                actionIconContentColor = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+
+                        else -> {
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background,
+                                scrolledContainerColor = MaterialTheme.colorScheme.background,
+                                actionIconContentColor = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    },
                 scrollBehavior = topAppBarScrollBehavior,
                 title = {
                     Text(text = stringResource(id = R.string.status_title))

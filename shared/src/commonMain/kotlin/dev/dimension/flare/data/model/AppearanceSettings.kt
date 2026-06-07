@@ -36,7 +36,7 @@ internal data class AppearanceSettings(
     val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
     val absoluteTimestamp: Boolean = false,
     val showPlatformLogo: Boolean = true,
-    val timelineDisplayMode: TimelineDisplayMode = TimelineDisplayMode.Card,
+    val timelineDisplayMode: TimelineDisplayMode = TimelineDisplayMode.Plain,
 ) {
     companion object {
         // for iOS

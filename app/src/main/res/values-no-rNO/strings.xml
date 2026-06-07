@@ -1,22 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="login_button">Logg inn</string>
     <string name="navigate_back">Gå tilbake</string>
-
     <string name="home_tab_home_title">Hjem</string>
     <string name="home_tab_notifications_title">Varslinger</string>
     <string name="home_tab_me_title">Meg</string>
     <string name="home_tab_discover_title">Oppdag</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d nytt innlegg</item>
         <item quantity="other">%1$d nye innlegg</item>
     </plurals>
-
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Omtaler</string>
     <string name="notification_tab_comments_title">Kommentarer</string>
     <string name="notification_tab_likes_title">Liker</string>
-
     <string name="compose_title">Skriv</string>
     <string name="compose_reply_title">Svar</string>
     <string name="compose_quote_title">Sitat</string>
@@ -44,26 +41,63 @@
     <string name="compose_close_confirm_message">Du har ulagrede endringer. Vil du lagre som utkast før du lukker?</string>
     <string name="compose_save_draft">Lagre</string>
     <string name="compose_close_discard">Forkast</string>
+    <string name="status_insight_title">Post innsikt</string>
+    <string name="status_insight_input_placeholder">Spør om oppfølging…</string>
+    <string name="status_insight_send">Sende</string>
+    <string name="status_insight_analyzing">Analyserer dette innlegget…</string>
+    <string name="status_insight_error">Kunne ikke analysere innlegget.</string>
+    <string name="status_insight_trace_loading_post_context">Henter post kontekst…</string>
+    <string name="status_insight_trace_post_context_loaded">Post sammenheng lastet</string>
+    <string name="status_insight_trace_preparing_images">Forbereder bilder…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Bilder støttes ikke; Prøv på nytt med tekst…</string>
+    <string name="status_insight_trace_agent_started">Starter analyse…</string>
+    <string name="status_insight_trace_strategy_started">Planlegging av analyse…</string>
+    <string name="status_insight_trace_strategy_completed">Analyssplan fullført</string>
+    <string name="status_insight_trace_subgraph_started">Legger til analysestase…</string>
+    <string name="status_insight_trace_subgraph_completed">Analyseringsstadium er fullført</string>
+    <string name="status_insight_trace_subgraph_failed">Analyseringsfasen mislyktes</string>
+    <string name="status_insight_trace_model_response_received">Leser modelrespons…</string>
+    <string name="status_insight_trace_streaming_started">Strømmer fra %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Mottar svar…</string>
+    <string name="status_insight_trace_streaming_completed">Respons strøm fullført</string>
+    <string name="status_insight_trace_streaming_failed">Responsstrøm mislyktes</string>
+    <string name="status_insight_trace_running_step">Kjører analyse-trinn…</string>
+    <string name="status_insight_trace_step_completed">Analysetrinn fullført</string>
+    <string name="status_insight_trace_step_failed">Analysetrinnet mislyktes</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Henter post kontekst…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Post sammenheng lastet</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Inndata i postkonteksten ble avvist</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Kan ikke laste innlegg kontekst</string>
+    <string name="status_insight_trace_tool_search_status_completed">Søk fullført</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Søkeinndata ble avvist</string>
+    <string name="status_insight_trace_tool_search_status_failed">Søket mislyktes</string>
+    <string name="status_insight_trace_agent_completed">Ferdigstiller analyse…</string>
+    <string name="status_insight_trace_agent_failed">Analyse mislyktes</string>
+    <string name="status_insight_trace_agent_closing">Avslutter analyse…</string>
+    <string name="ask_ai">Spør AI</string>
+    <string name="agent_chat_title">AI chat</string>
+    <string name="agent_history_title">Kollektiv Agent</string>
+    <string name="agent_history_empty">Ingen agent samtalelogg enda.</string>
+    <string name="agent_chat_send">Sende</string>
+    <string name="agent_chat_thinking">Tenker…</string>
     <string name="draft_box_title">Utkast</string>
     <string name="draft_box_empty">Ingen utkast ennå</string>
     <string name="draft_box_edit">Rediger</string>
     <string name="draft_box_retry">Prøv på nytt</string>
-    <string name="draft_box_send">Send</string>
+    <string name="draft_box_send">Sende</string>
     <string name="settings_draft_box_description">Se, rediger og send lagrede utkast på nytt</string>
-
     <string name="settings_title">Innstillinger</string>
-
     <string name="settings_accounts_title">Kontoer</string>
     <string name="settings_accounts_subtitle">Administrer påloggede kontoer</string>
     <string name="settings_appearance_title">Utseende</string>
     <string name="settings_appearance_subtitle">Tilpass hvordan Flare ser ut</string>
     <string name="settings_appearance_theme_group_title">Tema</string>
     <string name="settings_appearance_theme_group_subtitle">Farger, skriftstørrelse og avatarform</string>
-    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_title">Oppsett</string>
     <string name="settings_appearance_layout_group_subtitle">Tidslinjeoppsett, navigasjon og handlinger</string>
     <string name="settings_appearance_display_group_title">Skjerm</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemerker, lenker og nettleser</string>
-    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Synlighet, avspilling og sensitivt innhold</string>
     <string name="settings_storage_title">Lagring</string>
     <string name="settings_storage_subtitle">Administrer hurtigbuffer, logger og sikkerhetskopier</string>
@@ -73,9 +107,7 @@
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Bli med i vår Telegram-gruppe</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Bli med i vår Discord-server</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Bli med i vår Line-gruppe</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjelp oss med å oversette Flare</string>
@@ -125,6 +157,8 @@
     <string name="settings_ai_config_tap_to_edit">Trykk for å redigere</string>
     <string name="settings_ai_config_entable_translation">Aktiver AI-oversettelse</string>
     <string name="settings_ai_config_translation_description">Bruk AI i stedet for Google Translate. Oversettelser kan ta lengre tid.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">Aktiver AI-oppsummeringer</string>
     <string name="settings_ai_config_tldr_description">Oppsummer lange innlegg med AI. Tilgjengelig for innlegg lenger enn 500 tegn.</string>
     <string name="settings_ai_config_enable_pre_translation">Aktiver automatisk oversettelse</string>
@@ -134,12 +168,12 @@
     <string name="settings_ai_config_translate_provider">Oversettelsesleverandør</string>
     <string name="settings_ai_config_translate_provider_description">Velg hvilken tjeneste som skal oversette innhold</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
-    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Nett)</string>
+    <string name="settings_ai_config_translate_provider_deepl">Dypt</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API-nøkkel</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro-endepunkt</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Bruk api.deepl.com i stedet for det gratis api-free.deepl.com-endepunktet.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Oversett</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API-nøkkel</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate Basis-URL</string>
@@ -161,19 +195,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Legg til rele</string>
     <string name="settings_nostr_relays_placeholder">Skriv inn rele-URL</string>
     <string name="settings_nostr_relays_empty">Ingen releer lagt til</string>
-
     <string name="status_loadmore_error_retry">Prøv på nytt</string>
     <string name="login_expired">Innloggingsøkten har utløpt</string>
     <string name="login_expired_message">Trykk for å logge inn på nytt</string>
     <string name="login_expired_relogin">Logg inn på nytt</string>
-
     <string name="service_select_welcome_title">Velkommen til Flare</string>
     <string name="service_select_welcome_message">Flare er en klient for sosiale medier for Android.\nVelg en tjeneste for å koble til og komme i gang.</string>
-
     <string name="mastodon_login_verify_message">Verifiserer legitimasjon…</string>
-
     <string name="status_title">Innlegg</string>
-
     <string name="misskey_visibility_public">Offentlig</string>
     <string name="misskey_visibility_home">Hjem</string>
     <string name="misskey_visibility_followers">Følgere</string>
@@ -182,51 +211,39 @@
     <string name="misskey_visibility_home_description">Kun brukere på denne instansen kan se dette innlegget</string>
     <string name="misskey_visibility_followers_description">Kun følgere kan se dette innlegget</string>
     <string name="misskey_visibility_specified_description">Kun nevnte brukere kan se dette innlegget</string>
-
     <string name="bluesky_login_username_hint">Brukernavn</string>
     <string name="bluesky_login_password_hint">Passord</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-kode</string>
     <string name="bluesky_login_oauth_button">Logg inn med OAuth</string>
     <string name="bluesky_login_use_password_button">Bruk passord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortsatt være ustabil. Hvis du opplever problemer, bruk passordinnlogging i stedet.</string>
-
     <string name="report_title">Rapporter</string>
     <string name="report_description">Hva er galt med dette innlegget?</string>
-
-    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_spam_title">Søppelpost</string>
     <string name="report_reason_violation_title">Ulovlig eller hastende</string>
     <string name="report_reason_misleading_title">Misvisende</string>
     <string name="report_reason_sexual_title">Uønsket seksuelt innhold</string>
     <string name="report_reason_rude_title">Antisosial oppførsel</string>
     <string name="report_reason_other_title">Annet</string>
-
     <string name="report_reason_spam_description">For mange omtaler eller svar</string>
     <string name="report_reason_violation_description">Klare brudd på loven eller vilkårene for bruk</string>
     <string name="report_reason_misleading_description">Dette innlegget er misvisende</string>
     <string name="report_reason_sexual_description">Nakenhet eller pornografi som ikke er merket som dette</string>
     <string name="report_reason_rude_description">Trakassering, trolling eller intoleranse</string>
     <string name="report_reason_other_description">Et problem som ikke er inkludert i disse valgene</string>
-
     <string name="delete_status_title">Slett</string>
     <string name="delete_status_message">Slett dette innlegget?</string>
-
     <string name="mastodon_report_title">Rapporter</string>
     <string name="mastodon_report_description">Er du sikker på at du vil rapportere dette?</string>
-
     <string name="more">Mer</string>
-
     <string name="discover_search_placeholder">Søk</string>
     <string name="discover_users">Foreslåtte brukere</string>
     <string name="discover_status">Trendende innlegg</string>
     <string name="discover_hashtags">Trendende emneknagger</string>
-
     <string name="search_users">Brukere</string>
     <string name="search_status">Innlegg</string>
-
     <string name="quick_menu_add_account">Legg til konto</string>
-
     <string name="settings_appearance_generic">Generelt</string>
-
     <string name="settings_appearance_show_actions">Vis handlinger</string>
     <string name="settings_appearance_show_actions_description">Vis handlingsknapper under hvert innlegg</string>
     <string name="settings_appearance_post_action_style">Stil for handlinger</string>
@@ -241,6 +258,8 @@
     <string name="settings_appearance_show_numbers_description">Vis antall (liker, delinger osv.) under hvert innlegg</string>
     <string name="settings_appearance_show_cw_img">Vis sensitivt innhold</string>
     <string name="settings_appearance_show_cw_img_description">Vis alltid sensitive media i innlegg</string>
+    <string name="settings_appearance_expand_content_warning">Vis innhold bak innholdsvarsler</string>
+    <string name="settings_appearance_expand_content_warning_description">Alltid avsløre innleggsinnhold skjult av innholdsadvarsler</string>
     <string name="settings_appearance_expand_media">Bevar bildeformat for media</string>
     <string name="settings_appearance_expand_media_description">Vis media i sitt originale format i tidslinjer</string>
     <string name="settings_appearance_video_autoplay">Auto-avspilling av video</string>
@@ -261,7 +280,7 @@
     <string name="settings_appearance_theme_description">Velg app-tema</string>
     <string name="settings_appearance_theme_light">Lyst</string>
     <string name="settings_appearance_theme_dark">Mørkt</string>
-    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_theme_auto">Automatisk</string>
     <string name="settings_appearance_dynamic_theme">Dynamisk tema</string>
     <string name="settings_appearance_dynamic_theme_description">Tilpass fargene i appen til bakgrunnsbildet ditt</string>
     <string name="settings_appearance_show_link_previews">Vis forhåndsvisning av lenker</string>
@@ -295,27 +314,20 @@
     <string name="settings_appearance_full_width_post_description">La innlegg bruke hele den tilgjengelige bredden</string>
     <string name="settings_appearance_absolute_timestamp">Absolutt tidsstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Vis eksakte tidsstempler på innlegg</string>
-
     <string name="settings_appearance_show_platform_logo">Vis kildeplattform-ikoner</string>
     <string name="settings_appearance_show_platform_logo_description">Vis hvilken plattform hvert innlegg kom fra</string>
-
     <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
     <string name="settings_storage_clear_image_cache_description">Fjern %1$s MB med lagrede bilder</string>
-
     <string name="settings_storage_clear_database">Tøm databasen</string>
     <string name="settings_storage_clear_database_description">Fjern %1$s lagrede brukere og %2$s lagrede innlegg</string>
     <string name="settings_storage_app_log">Applogger</string>
     <string name="settings_storage_app_log_description">Se, lagre eller tøm applogger</string>
-
     <string name="service_select_instance_input_placeholder">Instans-URL</string>
     <string name="service_select_next_button">Neste</string>
     <string name="service_select_empty_message">Fant ingen instanser</string>
-
     <string name="media_viewer_title">Mediavisning</string>
-
     <string name="settings_accounts_remove">Fjern</string>
     <string name="settings_accounts_remove_confirm">Er du sikker på at du vil fjerne kontoen %1$s fra denne enheten?</string>
-
     <string name="media_menu_save">Lagre bilde</string>
     <string name="media_menu_share_image">Del bilde</string>
     <string name="media_menu_copy_link">Kopier lenke</string>
@@ -326,7 +338,6 @@
     <string name="media_save_fail">Kunne ikke lagre</string>
     <string name="media_alt_text">Alt-tekst</string>
     <string name="media_is_downloading">Media laster fortsatt ned. Prøv igjen om et øyeblikk.</string>
-
     <string name="settings_side_panel_empty">Som standard følger sidepanelet gjeldende kontos plattform.</string>
     <string name="tab_settings_add">Legg til</string>
     <string name="tab_settings_drag">Dra</string>
@@ -334,10 +345,8 @@
     <string name="tab_settings_remove">Fjern</string>
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
-    <string name="tab_settings_feed">Feeds</string>
-
+    <string name="tab_settings_feed">Strøm</string>
     <string name="local_filter_add">Legg til filter</string>
-
     <string name="local_filter_edit_title">Rediger filter</string>
     <string name="local_filter_add_title">Legg til filter</string>
     <string name="local_filter_keyword">Nøkkelord</string>
@@ -347,27 +356,20 @@
     <string name="local_filter_for_search">Bruk på søk</string>
     <string name="local_filter_regex">Bruk regulære uttrykk</string>
     <string name="local_filter_delete">Slett filter</string>
-
     <string name="delete">Slett</string>
-
     <string name="mastodon_tab_local_title">Lokal</string>
     <string name="mastodon_tab_public_title">Offentlig</string>
-
     <string name="home_tab_featured_title">Utvalgt</string>
     <string name="home_tab_bookmarks_title">Bokmerker</string>
     <string name="home_tab_favorite_title">Favoritter</string>
     <string name="home_tab_list_title">Lister</string>
-    <string name="home_tab_feeds_title">Feeds</string>
-
+    <string name="home_tab_feeds_title">Strøm</string>
     <string name="tab_settings_primary">Primær fane</string>
     <string name="tab_settings_secondary">Sekundær fane</string>
-
     <string name="status_detail_comment">Kommentar</string>
     <string name="status_detail_repost">Reposter</string>
-
     <string name="account_item_error_title">Feil</string>
     <string name="account_item_error_message">Kunne ikke laste konto</string>
-
     <string name="edit_tab_title">Rediger fane</string>
     <string name="edit_tab_name">Navn</string>
     <string name="edit_tab_name_placeholder">Fanenavn</string>
@@ -375,7 +377,6 @@
     <string name="edit_tab_with_avatar">Med avatar</string>
     <string name="edit_tab_enabled">Vis i blandede tidslinjer</string>
     <string name="edit_tab_enabled_description">Inkluder denne tidslinjen når den brukes inne i en blandet tidslinje eller gruppe.</string>
-
     <string name="list_add">Legg til liste</string>
     <string name="list_edit">Rediger liste</string>
     <string name="list_delete">Slett liste</string>
@@ -397,44 +398,42 @@
     <string name="edit_list_member_remove">Fjern</string>
     <string name="list_create_description">Listebeskrivelse</string>
     <string name="list_create_description_hint">Listebeskrivelse</string>
-
     <string name="edit_account_list_title">Rediger kontoliste</string>
-
     <string name="feeds_my_feeds_title">Mine feeds</string>
     <string name="feeds_discover_feeds_title">Oppdag feeds</string>
     <string name="feeds_discover_feeds_created_by">Opprettet av %1$s</string>
     <string name="feeds_unsubscribe">Avslutt abonnement</string>
     <string name="feeds_subscribe">Abonner</string>
-
     <string name="profile_tab_timeline">Innlegg</string>
     <string name="profile_tab_timeline_with_reply">Innlegg og svar</string>
     <string name="profile_tab_likes">Liker</string>
-    <string name="profile_tab_media">Media</string>
-
+    <string name="profile_tab_media">Medier</string>
+    <string name="illustrations_title">Illustrasjoner</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Ukentlig rangering</string>
+    <string name="pixiv_ranking_month_title">Månedlig rangering</string>
+    <string name="pixiv_ranking_day_male_title">Mannlig rangering</string>
+    <string name="pixiv_ranking_day_female_title">Kvinnelig rangering</string>
+    <string name="pixiv_ranking_week_original_title">Opprinnelig plassering</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie rangering</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">Faneinnstillinger</string>
-
-
     <string name="dm_list_title">Direktemeldinger</string>
     <string name="dm_list_empty">Ingen direktemeldinger</string>
     <string name="dm_list_error">Kunne ikke laste direktemeldinger</string>
-    <string name="send">Send</string>
+    <string name="send">Sende</string>
     <string name="dm_send_placeholder">Send en melding</string>
     <string name="dm_deleted">Slettet</string>
     <string name="dm_conversation">Direktemeldingssamtale</string>
     <string name="dm_sending">Sender</string>
     <string name="dm_leave">Forlat samtale</string>
     <string name="dm_to_profile">Vis profil</string>
-
-
     <string name="notification_login_expired">Innlogging utløpt for %1$s</string>
-
     <string name="following_title">Følger</string>
     <string name="fans_title">Følgere</string>
-
     <string name="local_history_search_placeholder">Søk i lagrede innlegg og profiler</string>
     <string name="local_history_search_status_title">Innlegg</string>
     <string name="local_history_search_user_title">Bruker</string>
-
     <string name="rss_sources_title">Abonnementer</string>
     <string name="add_rss_source">Legg til abonnement</string>
     <string name="edit_rss_source">Rediger abonnement</string>
@@ -442,9 +441,8 @@
     <string name="opml_import">Importer fra OPML</string>
     <string name="opml_export">Eksporter til OPML</string>
     <string name="export_completed">Eksport fullført</string>
-
     <string name="rss_sources_title_label">Tittel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">Nettadresse</string>
     <string name="rss_title">Abonnementer</string>
     <string name="empty_rss_sources">Ingen abonnementer</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub-vert</string>
@@ -461,7 +459,6 @@
     <string name="mastodon_local_timeline">Lokal tidslinje</string>
     <string name="subscription_url_hint">Lim inn en RSS-feed-URL eller en Mastodon-instans-URL</string>
     <string name="rss_sources_display_mode">Visningsmodus</string>
-
     <string name="rss_detail_open_in_browser">Åpne i nettleser</string>
     <string name="rss_detail_share">Del lenke</string>
     <string name="rss_detail_tldr">Oppsummer</string>
@@ -470,18 +467,15 @@
     <string name="rss_detail_tldr_loading">Oppsummerer…</string>
     <string name="rss_detail_translate">Oversett</string>
     <string name="rss_detail_translate_error">Kunne ikke oversette</string>
-
     <string name="emoji_picker_recent">Nylige</string>
     <string name="emoji_picker_search">Søk</string>
-
     <string name="podcast_host">Vert</string>
-    <string name="podcast_title">Podcast</string>
+    <string name="podcast_title">Podcasten</string>
     <string name="podcast_speaker">Taler</string>
     <string name="podcast_listen">Begynn å lytte</string>
     <string name="podcast_leave">Forlat</string>
     <string name="podcast_ended">Podcast avsluttet</string>
     <string name="podcast_living">Direkte nå</string>
-
     <string name="home_tab_antennas_title">Antenner</string>
     <string name="home_tab_channels_title">Kanaler</string>
     <string name="misskey_channel_tab_following">Følger</string>
@@ -498,24 +492,19 @@
     <string name="liked_title">Likt</string>
     <string name="all_rss_feeds_title">Alle abonnementer</string>
     <string name="posts_title">Innlegg</string>
-
     <string name="deeplink_account_selection_title">Velg konto</string>
     <string name="deeplink_account_selection_message">Velg en konto for å åpne denne lenken</string>
     <string name="deeplink_account_selection_browser">Åpne i nettleser</string>
-
     <string name="block_user_title">Blokker bruker</string>
     <string name="block_user_description">Er du sikker på at du vil blokkere denne brukeren?</string>
     <string name="unblock_user_title">Opphev blokkering</string>
     <string name="unblock_user_description">Er du sikker på at du vil oppheve blokkeringen av denne brukeren?</string>
-
     <string name="mute_user_title">Demp bruker</string>
     <string name="mute_user_description">Er du sikker på at du vil dempe denne brukeren?</string>
     <string name="unmute_user_title">Opphev demping</string>
     <string name="unmute_user_description">Er du sikker på at du vil oppheve dempingen av denne brukeren?</string>
-
     <string name="report_user_title">Rapporter bruker</string>
     <string name="report_user_description">Er du sikker på at du vil rapportere denne brukeren?</string>
-
     <string name="settings_storage_export_data">Eksporter data</string>
     <string name="settings_storage_export_data_description">Eksporter alle data, inkludert kontoer og påloggingsinformasjon. Hold filen sikker.</string>
     <string name="settings_storage_import_data">Importer data</string>
@@ -526,7 +515,6 @@
     <string name="import_error">Import feilet</string>
     <string name="import_confirmation_title">Bekreft import</string>
     <string name="import_confirmation_message">Dette vil importere data fra den valgte filen. Eksisterende poster med samme ID vil bli erstattet. Fortsette?</string>
-
     <string name="tab_settings_add_group">Legg til gruppe</string>
     <string name="tab_settings_add_tab">Legg til fane</string>
     <string name="tab_settings_edit_group">Rediger gruppe</string>

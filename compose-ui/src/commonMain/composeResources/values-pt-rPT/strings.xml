@@ -1,14 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Eliminar</string>
     <string name="done">Concluído</string>
     <string name="cancel">Cancelar</string>
-    <string name="ok">OK</string>
+    <string name="ok">Certo</string>
     <string name="profile_header_following_count">%1$s Seguindo</string>
     <string name="profile_header_fans_count">%1$s Seguidores</string>
     <string name="profile_header_toots_count">%1$s Publicações</string>
     <string name="profile_misskey_header_status_count">%1$s Publicações</string>
     <string name="profile_header_button_follow">Seguir</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Solicitar seguidor</string>
     <string name="profile_header_button_following">Seguindo</string>
     <string name="profile_header_button_requested">Solicitado</string>
     <string name="profile_header_button_blocked">Bloqueado</string>
@@ -169,7 +170,7 @@
     <string name="misskey_achievement_notes80000_description">Publique 80 000 notas</string>
     <string name="misskey_achievement_notes90000_title">Universo de notas</string>
     <string name="misskey_achievement_notes90000_description">Publique 90 000 notas</string>
-    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_title">TODOS OS SEUS NOTAS É ABAIXO NOS</string>
     <string name="misskey_achievement_notes100000_description">Publique 100 000 notas</string>
     <string name="misskey_achievement_notes100000_flavor">Com certeza tem muito a dizer.</string>
     <string name="misskey_achievement_login3_title">Iniciante I</string>
@@ -187,9 +188,9 @@
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Inicie sessão por um total de 100 dias</string>
     <string name="misskey_achievement_login100_flavor">Misskist Violento</string>
-    <string name="misskey_achievement_login200_title">Regular I</string>
+    <string name="misskey_achievement_login200_title">Normal I</string>
     <string name="misskey_achievement_login200_description">Inicie sessão por um total de 200 dias</string>
-    <string name="misskey_achievement_login300_title">Regular II</string>
+    <string name="misskey_achievement_login300_title">Normal II</string>
     <string name="misskey_achievement_login300_description">Inicie sessão por um total de 300 dias</string>
     <string name="misskey_achievement_login400_title">Regular III</string>
     <string name="misskey_achievement_login400_description">Inicie sessão por um total de 400 dias</string>
@@ -234,7 +235,7 @@
     <string name="misskey_achievement_followers10_description">Ganhe 10 seguidores</string>
     <string name="misskey_achievement_followers50_title">Em multidões</string>
     <string name="misskey_achievement_followers50_description">Ganhe 50 seguidores</string>
-    <string name="misskey_achievement_followers100_title">Popular</string>
+    <string name="misskey_achievement_followers100_title">Populares</string>
     <string name="misskey_achievement_followers100_description">Ganhe 100 seguidores</string>
     <string name="misskey_achievement_followers300_title">Por favor, formem uma única fila</string>
     <string name="misskey_achievement_followers300_description">Ganhe 300 seguidores</string>
@@ -269,7 +270,7 @@
     <string name="misskey_achievement_htl20npm_description">Faça com que a velocidade da sua linha do tempo inicial exceda 20 npm (notas por minuto)</string>
     <string name="misskey_achievement_view_instance_chart_title">Analista</string>
     <string name="misskey_achievement_view_instance_chart_description">Veja os gráficos da sua instância</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Olá, mundo!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Saída \"hello world\" no Scratchpad</string>
     <string name="misskey_achievement_open3windows_title">Multi-Janela</string>
     <string name="misskey_achievement_open3windows_description">Tenha pelo menos 3 janelas abertas ao mesmo tempo</string>
@@ -297,7 +298,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Um jogo em que clica em bolachas</string>
     <string name="misskey_achievement_cookie_clicked_description">Clicou na bolacha</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Espere, está no site correto?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Mergulhador de Cérebro</string>
     <string name="misskey_achievement_brain_diver_description">Publique o link para o Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Estouro de teste</string>
@@ -335,7 +336,7 @@
     <string name="tab_settings_remove">Remover</string>
     <string name="tab_settings_default">Predefinido</string>
     <string name="tab_settings_list">Lista</string>
-    <string name="tab_settings_feed">Feeds</string>
+    <string name="tab_settings_feed">Conteúdos</string>
     <string name="list_add">Adicionar lista</string>
     <string name="list_edit">Editar lista</string>
     <string name="list_delete">Eliminar lista</string>
@@ -344,7 +345,7 @@
     <string name="edit_rss_source">Editar subscrição</string>
     <string name="delete_rss_source">Eliminar subscrição</string>
     <string name="rss_sources_title_label">Título</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL de RSS</string>
     <string name="rss_title">Subscrições</string>
     <string name="empty_rss_sources">Sem subscrições</string>
     <string name="mastodon_trending_statuses">Publicações em destaque</string>
@@ -388,21 +389,33 @@
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Descobrir</string>
     <string name="settings_title">Definições</string>
-    <string name="mastodon_tab_local_title">Local</string>
+    <string name="mastodon_tab_local_title">Localização</string>
     <string name="mastodon_tab_public_title">Público</string>
     <string name="home_tab_featured_title">Destaque</string>
     <string name="home_tab_bookmarks_title">Marcadores</string>
     <string name="home_tab_favorite_title">Favoritos</string>
+    <string name="home_tab_following_title">Seguindo</string>
     <string name="home_tab_list_title">Listas</string>
-    <string name="home_tab_feeds_title">Feeds</string>
+    <string name="home_tab_feeds_title">Conteúdos</string>
     <string name="dm_list_title">Mensagens Diretas</string>
-    <string name="social_title">Social</string>
+    <string name="social_title">Sócio</string>
     <string name="antenna_title">Antenas</string>
     <string name="mixed_timeline_title">Mista</string>
     <string name="liked_title">Gostos</string>
     <string name="all_rss_feeds_title">Todas as subscrições</string>
     <string name="posts_title">Publicações</string>
+    <string name="posts_with_replies_title">Publicações &amp; Respostas</string>
+    <string name="media_title">Multimédia</string>
     <string name="settings_appearance_absolute_timestamp">Carimbo de data/hora absoluto</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar horários exatos nas publicações</string>
     <string name="channel_title">Canal</string>
+    <string name="pixiv_ranking_week_title">Classificação Semanal</string>
+    <string name="pixiv_ranking_month_title">Classificação Mensal</string>
+    <string name="pixiv_ranking_day_male_title">Classificação Masculina</string>
+    <string name="pixiv_ranking_day_female_title">Classificação Feminina</string>
+    <string name="pixiv_ranking_week_original_title">Classificação original</string>
+    <string name="pixiv_ranking_week_rookie_title">Classificação Inicial</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Ilustrações</string>
+    <string name="manga_title">Manga</string>
 </resources>

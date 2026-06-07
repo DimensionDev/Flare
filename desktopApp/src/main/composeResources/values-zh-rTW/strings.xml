@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
     <string name="delete">刪除</string>
@@ -81,6 +81,7 @@
     <string name="status_share_image">分享截圖</string>
     <string name="status_share_via_fxembed">透過 FxEmbed 分享</string>
     <string name="status_share_via_fixvx">透過 Fixvx 分享</string>
+    <string name="agent_chat_send">發送</string>
     <string name="list_add">加入列表</string>
     <string name="list_edit">編輯列表</string>
     <string name="list_delete">刪除列表</string>
@@ -160,7 +161,6 @@
     <string name="settings_app_logging_save">儲存日誌</string>
     <string name="settings_app_logging_clear">清除日誌</string>
     <string name="settings_app_logging_enable_network_logging">記錄網路請求</string>
-    <string name="settings_ai_config_title">AI</string>
     <string name="settings_services_title">服務</string>
     <string name="settings_ai_config_description">設定 AI 供應商和摘要功能</string>
     <string name="settings_ai_config_server">伺服器 URL</string>
@@ -198,15 +198,12 @@
     <string name="settings_ai_config_tldr_description">使用 AI 摘要長貼文。適用於超過 500 個字元的貼文。</string>
     <string name="settings_ai_config_translate_provider">翻譯服務商</string>
     <string name="settings_ai_config_translate_provider_description">選擇用於翻譯內容的服務</string>
-    <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google 翻譯 (網頁版)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API 密鑰</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro 端點</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">使用 api.deepl.com 而不是免費的 api-free.deepl.com。</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud 翻譯</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API 密鑰</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate 基礎 URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 密鑰</string>
     <string name="settings_translation_title">翻譯</string>
@@ -280,7 +277,6 @@
     <string name="settings_about_source_code">原始碼</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我們的 Telegram 群組</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">加入我們的 Discord 伺服器</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">協助我們翻譯 Flare</string>
@@ -321,7 +317,7 @@
     <string name="edit_rss_source">編輯訂閱</string>
     <string name="delete_rss_source">刪除訂閱</string>
     <string name="rss_sources_title_label">標題</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">訂閱</string>
     <string name="empty_rss_sources">暫無訂閱</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub 主機</string>

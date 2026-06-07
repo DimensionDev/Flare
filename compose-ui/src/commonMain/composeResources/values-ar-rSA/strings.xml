@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">حذف</string>
     <string name="done">تم</string>
     <string name="cancel">إلغاء</string>
@@ -9,7 +9,7 @@
     <string name="profile_header_toots_count">%1$s منشورات</string>
     <string name="profile_misskey_header_status_count">%1$s منشورات</string>
     <string name="profile_header_button_follow">متابعة</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">طلب المتابعة</string>
     <string name="profile_header_button_following">يتابع</string>
     <string name="profile_header_button_requested">تم الطلب</string>
     <string name="profile_header_button_blocked">محظور</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">تعديل اشتراك</string>
     <string name="delete_rss_source">حذف اشتراك</string>
     <string name="rss_sources_title_label">العنوان</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">رابط RSS</string>
     <string name="rss_title">الاشتراكات</string>
     <string name="empty_rss_sources">لا توجد اشتراكات</string>
     <string name="mastodon_trending_statuses">الحالات المتداولة</string>
@@ -394,6 +394,7 @@
     <string name="home_tab_featured_title">مميز</string>
     <string name="home_tab_bookmarks_title">الإشارات المرجعية</string>
     <string name="home_tab_favorite_title">المفضلات</string>
+    <string name="home_tab_following_title">يتابع</string>
     <string name="home_tab_list_title">القوائم</string>
     <string name="home_tab_feeds_title">الخلاصات</string>
     <string name="dm_list_title">الرسائل المباشرة</string>
@@ -403,7 +404,18 @@
     <string name="liked_title">المعجب بها</string>
     <string name="all_rss_feeds_title">كل الاشتراكات</string>
     <string name="posts_title">المنشورات</string>
+    <string name="posts_with_replies_title">الردود &amp; الردود</string>
+    <string name="media_title">الوسائط</string>
     <string name="settings_appearance_absolute_timestamp">طابع زمني مطلق</string>
     <string name="settings_appearance_absolute_timestamp_description">عرض طوابع زمنية دقيقة على المنشورات</string>
     <string name="channel_title">قناة</string>
+    <string name="pixiv_ranking_week_title">الترتيب الأسبوعي</string>
+    <string name="pixiv_ranking_month_title">الترتيب الشهري</string>
+    <string name="pixiv_ranking_day_male_title">ترتيب الذكور</string>
+    <string name="pixiv_ranking_day_female_title">تصنيف الأنثى</string>
+    <string name="pixiv_ranking_week_original_title">الترتيب الأصلي</string>
+    <string name="pixiv_ranking_week_rookie_title">تصنيف الروكيه</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">التوضيحات</string>
+    <string name="manga_title">Manga</string>
 </resources>

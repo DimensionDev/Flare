@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">מחיקה</string>
     <string name="done">בוצע</string>
     <string name="cancel">ביטול</string>
@@ -9,7 +9,6 @@
     <string name="profile_header_toots_count">%1$s פוסטים</string>
     <string name="profile_misskey_header_status_count">%1$s פוסטים</string>
     <string name="profile_header_button_follow">מעקב</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">במעקב</string>
     <string name="profile_header_button_requested">נשלחה בקשה</string>
     <string name="profile_header_button_blocked">חסום</string>
@@ -85,7 +84,7 @@
     <string name="permission_denied_message">התחבר שוב כדי לגשת לדף זה</string>
     <string name="misskey_compose_local_only">מקומי בלבד</string>
     <string name="misskey_compose_local_only_description">רק משתמשים בשרת זה יכולים לראות את הפוסט הזה</string>
-    <string name="misskey_item_action_renote">Renote</string>
+    <string name="misskey_item_action_renote">שיתוף מחדש</string>
     <string name="misskey_item_action_quote">ציטוט</string>
     <string name="bluesky_notification_unknown_message">סוג התראה לא ידוע %1$s</string>
     <string name="bluesky_notification_unknown_message2">אנא דווח על בעיה זו למפתח.</string>
@@ -181,11 +180,11 @@
     <string name="misskey_achievement_login7_flavor">מרגיש שכבר קלטת את העניין?</string>
     <string name="misskey_achievement_login15_title">מתחיל III</string>
     <string name="misskey_achievement_login15_description">התחבר במשך 15 ימים בסך הכל</string>
-    <string name="misskey_achievement_login30_title">Misskist I</string>
+    <string name="misskey_achievement_login30_title">מיומנות I</string>
     <string name="misskey_achievement_login30_description">התחבר במשך 30 ימים בסך הכל</string>
-    <string name="misskey_achievement_login60_title">Misskist II</string>
+    <string name="misskey_achievement_login60_title">מיומנות II</string>
     <string name="misskey_achievement_login60_description">התחבר במשך 60 ימים בסך הכל</string>
-    <string name="misskey_achievement_login100_title">Misskist III</string>
+    <string name="misskey_achievement_login100_title">מיומנות III</string>
     <string name="misskey_achievement_login100_description">התחבר במשך 100 ימים בסך הכל</string>
     <string name="misskey_achievement_login100_flavor">Misskist אלים</string>
     <string name="misskey_achievement_login200_title">קבוע I</string>
@@ -270,7 +269,7 @@
     <string name="misskey_achievement_htl20npm_description">דאג שמהירות ציר הזמן הראשי שלך תעלה על 20 npm (הערות לדקה)</string>
     <string name="misskey_achievement_view_instance_chart_title">אנליסט</string>
     <string name="misskey_achievement_view_instance_chart_description">צפה בגרפים של השרת שלך</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">שלום, עולם!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">הדפס \"hello world\" ב-Scratchpad</string>
     <string name="misskey_achievement_open3windows_title">ריבוי חלונות</string>
     <string name="misskey_achievement_open3windows_description">פתח לפחות 3 חלונות בו-זמנית</string>
@@ -298,9 +297,9 @@
     <string name="misskey_achievement_cookie_clicked_title">משחק שבו לוחצים על עוגיות</string>
     <string name="misskey_achievement_cookie_clicked_description">לחצת על העוגייה</string>
     <string name="misskey_achievement_cookie_clicked_flavor">רגע, אתה באתר הנכון?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">שוחה במוח</string>
     <string name="misskey_achievement_brain_diver_description">פרסם את הקישור ל-Brain Diver</string>
-    <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
+    <string name="misskey_achievement_brain_diver_flavor">מיסקי-מיסקי לא-תומא</string>
     <string name="misskey_achievement_smash_test_notification_button_title">בדיקת הצפה</string>
     <string name="misskey_achievement_smash_test_notification_button_description">הפעל את התראת הבדיקה שוב ושוב בזמן קצר מאוד</string>
     <string name="misskey_achievement_tutorial_completed_title">תעודת קורס בסיסי של Misskey</string>
@@ -345,7 +344,7 @@
     <string name="edit_rss_source">ערוך מינוי</string>
     <string name="delete_rss_source">מחק מינוי</string>
     <string name="rss_sources_title_label">כותרת</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">כתובת RSS</string>
     <string name="rss_title">מינויים</string>
     <string name="empty_rss_sources">אין מינויים</string>
     <string name="mastodon_trending_statuses">סטטוסים מגמתיים</string>
@@ -394,6 +393,7 @@
     <string name="home_tab_featured_title">מומלצים</string>
     <string name="home_tab_bookmarks_title">סימניות</string>
     <string name="home_tab_favorite_title">מועדפים</string>
+    <string name="home_tab_following_title">במעקב</string>
     <string name="home_tab_list_title">רשימות</string>
     <string name="home_tab_feeds_title">פידים</string>
     <string name="dm_list_title">הודעות ישירות</string>
@@ -403,6 +403,7 @@
     <string name="liked_title">אהבתי</string>
     <string name="all_rss_feeds_title">כל המינויים</string>
     <string name="posts_title">פוסטים</string>
+    <string name="media_title">מדיה</string>
     <string name="settings_appearance_absolute_timestamp">חותמת זמן מוחלטת</string>
     <string name="settings_appearance_absolute_timestamp_description">הצג חותמות זמן מדויקות בפוסטים</string>
     <string name="channel_title">ערוץ</string>

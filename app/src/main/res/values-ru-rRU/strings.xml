@@ -1,26 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Войти</string>
     <string name="navigate_back">Назад</string>
-
     <string name="home_tab_home_title">Главная</string>
     <string name="home_tab_notifications_title">Уведомления</string>
     <string name="home_tab_me_title">Я</string>
     <string name="home_tab_discover_title">Обзор</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d новый пост</item>
         <item quantity="few">%1$d новых поста</item>
         <item quantity="many">%1$d новых постов</item>
         <item quantity="other">%1$d новых постов</item>
     </plurals>
-
     <string name="notification_tab_all_title">Все</string>
     <string name="notification_tab_mentions_title">Упоминания</string>
     <string name="notification_tab_comments_title">Комментарии</string>
     <string name="notification_tab_likes_title">Лайки</string>
-
     <string name="compose_title">Написать</string>
     <string name="compose_reply_title">Ответить</string>
     <string name="compose_quote_title">Цитировать</string>
@@ -38,7 +33,7 @@
     <string name="compose_poll_expiration_1_day">1 день</string>
     <string name="compose_poll_expiration_3_days">3 дня</string>
     <string name="compose_poll_expiration_7_days">7 дней</string>
-    <string name="compose_content_warning_hint">Предупреждение о контенте</string>
+    <string name="compose_content_warning_hint">Предупреждение о содержании</string>
     <string name="compose_media_sensitive">Пометить медиа как чувствительное</string>
     <string name="compose_notification_title">Отправка поста</string>
     <string name="compose_notification_progress">Отправка поста</string>
@@ -48,15 +43,55 @@
     <string name="compose_close_confirm_message">У вас есть несохраненные изменения. Сохранить как черновик перед закрытием?</string>
     <string name="compose_save_draft">Сохранить</string>
     <string name="compose_close_discard">Удалить</string>
+    <string name="status_insight_title">Пост пронзание</string>
+    <string name="status_insight_input_placeholder">Спросите последующую справку…</string>
+    <string name="status_insight_send">Отправить</string>
+    <string name="status_insight_analyzing">Анализ этого сообщения…</string>
+    <string name="status_insight_error">Не удалось проанализировать это сообщение.</string>
+    <string name="status_insight_trace_loading_post_context">Загрузка контекста поста…</string>
+    <string name="status_insight_trace_post_context_loaded">Пост контекст загружен</string>
+    <string name="status_insight_trace_preparing_images">Подготовка изображений…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Изображения не поддерживаются; повторите попытку с текстом…</string>
+    <string name="status_insight_trace_agent_started">Запуск анализа…</string>
+    <string name="status_insight_trace_strategy_started">Планирование анализа…</string>
+    <string name="status_insight_trace_strategy_completed">План анализа завершен</string>
+    <string name="status_insight_trace_subgraph_started">Вход на этап анализа…</string>
+    <string name="status_insight_trace_subgraph_completed">Этап анализа завершен</string>
+    <string name="status_insight_trace_subgraph_failed">Сбой этапа анализа</string>
+    <string name="status_insight_trace_asking_model">Запрос %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Чтение ответа на модель…</string>
+    <string name="status_insight_trace_streaming_started">Трансляция из %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Получение ответа…</string>
+    <string name="status_insight_trace_streaming_completed">Поток ответа завершен</string>
+    <string name="status_insight_trace_streaming_failed">Сбой потока ответа</string>
+    <string name="status_insight_trace_running_step">Выполнение этапа анализа…</string>
+    <string name="status_insight_trace_step_completed">Этап анализа завершен</string>
+    <string name="status_insight_trace_step_failed">Не удалось выполнить шаг анализа</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Загрузка контекста поста…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Пост контекст загружен</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Пост ввод контекста был отклонён</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Не удалось загрузить контекст сообщения</string>
+    <string name="status_insight_trace_tool_search_status_started">Поиск…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Поиск завершен</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Поисковый запрос был отклонён</string>
+    <string name="status_insight_trace_tool_search_status_failed">Поиск не удался</string>
+    <string name="status_insight_trace_agent_completed">Завершение анализа…</string>
+    <string name="status_insight_trace_agent_failed">Не удалось выполнить анализ</string>
+    <string name="status_insight_trace_agent_closing">Закрытие анализа…</string>
+    <string name="ask_ai">Спросить ИИ</string>
+    <string name="agent_chat_title">AI Чат</string>
+    <string name="agent_history_title">Агент сигнала</string>
+    <string name="agent_history_empty">Пока нет истории чата агента.</string>
+    <string name="agent_chat_input_placeholder">Спросите что-нибудь…</string>
+    <string name="agent_chat_send">Отправить</string>
+    <string name="agent_chat_thinking">Думаю…</string>
     <string name="draft_box_title">Черновики</string>
     <string name="draft_box_empty">Черновиков пока нет</string>
     <string name="draft_box_edit">Изменить</string>
     <string name="draft_box_retry">Повторить</string>
     <string name="draft_box_send">Отправить</string>
     <string name="settings_draft_box_description">Просмотр, редактирование и повторная отправка сохраненных черновиков</string>
-
     <string name="settings_title">Настройки</string>
-
     <string name="settings_accounts_title">Аккаунты</string>
     <string name="settings_accounts_subtitle">Управление вошедшими аккаунтами</string>
     <string name="settings_appearance_title">Внешний вид</string>
@@ -75,11 +110,9 @@
     <string name="settings_about_subtitle">Узнать больше о Flare</string>
     <string name="settings_about_description">Клиент для децентрализованных соцсетей с открытым исходным кодом и функциями ИИ.</string>
     <string name="settings_about_source_code">Исходный код</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Телеграмма</string>
     <string name="settings_about_telegram_description">Вступить в нашу группу в Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Присоединиться к нашему серверу Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Вступить в нашу группу в Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помочь с переводом Flare</string>
@@ -129,6 +162,8 @@
     <string name="settings_ai_config_tap_to_edit">Нажмите для редактирования</string>
     <string name="settings_ai_config_entable_translation">Включить ИИ-перевод</string>
     <string name="settings_ai_config_translation_description">Использовать ИИ вместо Google Переводчика. Перевод может занять больше времени.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">Включить ИИ-краткое содержание</string>
     <string name="settings_ai_config_tldr_description">Создание краткого содержания длинных постов с помощью ИИ. Доступно для постов длиннее 500 символов.</string>
     <string name="settings_ai_config_enable_pre_translation">Включить автоперевод</string>
@@ -139,13 +174,13 @@
     <string name="settings_ai_config_translate_provider_description">Выберите сервис для перевода контента</string>
     <string name="settings_ai_config_translate_provider_ai">ИИ</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Переводчик (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl">Глубокий</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API Ключ</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro эндпоинт</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Использовать api.deepl.com вместо бесплатного api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Перевод через Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API Ключ</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">Либретранслировать</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">Базовый URL LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">API Ключ LibreTranslate</string>
     <string name="settings_translation_title">Перевод</string>
@@ -165,19 +200,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Добавить реле</string>
     <string name="settings_nostr_relays_placeholder">Введите URL реле</string>
     <string name="settings_nostr_relays_empty">Реле не добавлены</string>
-
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="login_expired">Сессия истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
-
     <string name="service_select_welcome_title">Добро пожаловать во Flare</string>
     <string name="service_select_welcome_message">Flare — клиент для социальных сетей для Android.\nВыберите сервис для подключения, чтобы начать.</string>
-
     <string name="mastodon_login_verify_message">Проверка учетных данных…</string>
-
     <string name="status_title">Пост</string>
-
     <string name="misskey_visibility_public">Публичный</string>
     <string name="misskey_visibility_home">Главная</string>
     <string name="misskey_visibility_followers">Подписчики</string>
@@ -186,51 +216,39 @@
     <string name="misskey_visibility_home_description">Только пользователи этого инстанса могут видеть этот пост</string>
     <string name="misskey_visibility_followers_description">Только ваши подписчики могут видеть этот пост</string>
     <string name="misskey_visibility_specified_description">Только упомянутые пользователи могут видеть этот пост</string>
-
     <string name="bluesky_login_username_hint">Имя пользователя</string>
     <string name="bluesky_login_password_hint">Пароль</string>
     <string name="bluesky_login_auth_factor_token_hint">Токен 2FA</string>
     <string name="bluesky_login_oauth_button">Войти через OAuth</string>
     <string name="bluesky_login_use_password_button">Использовать пароль</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth может работать нестабильно. Если возникнут проблемы, используйте вход по паролю.</string>
-
     <string name="report_title">Жалоба</string>
     <string name="report_description">Что не так с этим постом?</string>
-
     <string name="report_reason_spam_title">Спам</string>
     <string name="report_reason_violation_title">Незаконно или срочно</string>
     <string name="report_reason_misleading_title">Вводит в заблуждение</string>
     <string name="report_reason_sexual_title">Нежелательный сексуальный контент</string>
     <string name="report_reason_rude_title">Антисоциальное поведение</string>
     <string name="report_reason_other_title">Другое</string>
-
     <string name="report_reason_spam_description">Чрезмерные упоминания или ответы</string>
     <string name="report_reason_violation_description">Явные нарушения закона или условий обслуживания</string>
     <string name="report_reason_misleading_description">Этот пост вводит в заблуждение</string>
     <string name="report_reason_sexual_description">Нагота или порнография без соответствующей пометки</string>
     <string name="report_reason_rude_description">Преследование, троллинг или нетерпимость</string>
     <string name="report_reason_other_description">Проблема, не входящая в эти варианты</string>
-
     <string name="delete_status_title">Удалить</string>
     <string name="delete_status_message">Удалить этот пост?</string>
-
     <string name="mastodon_report_title">Жалоба</string>
     <string name="mastodon_report_description">Вы уверены, что хотите пожаловаться на это?</string>
-
     <string name="more">Еще</string>
-
     <string name="discover_search_placeholder">Поиск</string>
     <string name="discover_users">Рекомендуемые пользователи</string>
     <string name="discover_status">Популярные посты</string>
     <string name="discover_hashtags">Популярные хэштеги</string>
-
     <string name="search_users">Пользователи</string>
     <string name="search_status">Посты</string>
-
     <string name="quick_menu_add_account">Добавить аккаунт</string>
-
     <string name="settings_appearance_generic">Общие</string>
-
     <string name="settings_appearance_show_actions">Показывать действия</string>
     <string name="settings_appearance_show_actions_description">Показывать кнопки действий под каждым постом</string>
     <string name="settings_appearance_post_action_style">Стиль действий поста</string>
@@ -245,6 +263,8 @@
     <string name="settings_appearance_show_numbers_description">Показывать счетчики под каждым постом</string>
     <string name="settings_appearance_show_cw_img">Показывать чувствительный контент</string>
     <string name="settings_appearance_show_cw_img_description">Всегда открывать чувствительные медиа в постах</string>
+    <string name="settings_appearance_expand_content_warning">Показывать содержимое за предупреждениями о контенте</string>
+    <string name="settings_appearance_expand_content_warning_description">Всегда показывать контент сообщений, скрытый предупреждениями</string>
     <string name="settings_appearance_expand_media">Сохранять соотношение сторон медиа</string>
     <string name="settings_appearance_expand_media_description">Показывать медиа с оригинальным соотношением сторон в лентах</string>
     <string name="settings_appearance_video_autoplay">Автозапуск видео</string>
@@ -299,27 +319,20 @@
     <string name="settings_appearance_full_width_post_description">Позволить постам занимать всю доступную ширину</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютное время</string>
     <string name="settings_appearance_absolute_timestamp_description">Показывать точное время публикации постов</string>
-
     <string name="settings_appearance_show_platform_logo">Иконки платформ</string>
     <string name="settings_appearance_show_platform_logo_description">Показывать, с какой платформы пришел каждый пост</string>
-
     <string name="settings_storage_clear_image_cache">Очистить кеш изображений</string>
     <string name="settings_storage_clear_image_cache_description">Удалить %1$s МБ закешированных изображений</string>
-
     <string name="settings_storage_clear_database">Очистить базу данных</string>
     <string name="settings_storage_clear_database_description">Удалить %1$s закешированных пользователей и %2$s закешированных постов</string>
     <string name="settings_storage_app_log">Логи приложения</string>
     <string name="settings_storage_app_log_description">Просмотр, сохранение или очистка логов приложения</string>
-
     <string name="service_select_instance_input_placeholder">URL инстанса</string>
     <string name="service_select_next_button">Далее</string>
     <string name="service_select_empty_message">Инстансы не найдены</string>
-
     <string name="media_viewer_title">Просмотр медиа</string>
-
     <string name="settings_accounts_remove">Удалить</string>
     <string name="settings_accounts_remove_confirm">Вы уверены, что хотите удалить аккаунт %1$s с этого устройства?</string>
-
     <string name="media_menu_save">Сохранить изображение</string>
     <string name="media_menu_share_image">Поделиться изображением</string>
     <string name="media_menu_copy_link">Копировать ссылку</string>
@@ -330,7 +343,6 @@
     <string name="media_save_fail">Не удалось сохранить</string>
     <string name="media_alt_text">Альт-текст</string>
     <string name="media_is_downloading">Медиа все еще загружается. Попробуйте еще раз через мгновение.</string>
-
     <string name="settings_side_panel_empty">По умолчанию боковая панель соответствует платформе текущего аккаунта.</string>
     <string name="tab_settings_add">Добавить</string>
     <string name="tab_settings_drag">Перетащить</string>
@@ -339,9 +351,7 @@
     <string name="tab_settings_default">По умолчанию</string>
     <string name="tab_settings_list">Списки</string>
     <string name="tab_settings_feed">Ленты</string>
-
     <string name="local_filter_add">Добавить фильтр</string>
-
     <string name="local_filter_edit_title">Редактирование фильтра</string>
     <string name="local_filter_add_title">Добавление фильтра</string>
     <string name="local_filter_keyword">Ключевое слово</string>
@@ -351,27 +361,20 @@
     <string name="local_filter_for_search">Применять к поиску</string>
     <string name="local_filter_regex">Использовать регулярные выражения</string>
     <string name="local_filter_delete">Удалить фильтр</string>
-
     <string name="delete">Удалить</string>
-
     <string name="mastodon_tab_local_title">Локальная</string>
     <string name="mastodon_tab_public_title">Публичная</string>
-
     <string name="home_tab_featured_title">Рекомендации</string>
     <string name="home_tab_bookmarks_title">Закладки</string>
     <string name="home_tab_favorite_title">Избранное</string>
     <string name="home_tab_list_title">Списки</string>
     <string name="home_tab_feeds_title">Ленты</string>
-
     <string name="tab_settings_primary">Основная вкладка</string>
     <string name="tab_settings_secondary">Дополнительная вкладка</string>
-
     <string name="status_detail_comment">Комментировать</string>
     <string name="status_detail_repost">Репост</string>
-
     <string name="account_item_error_title">Ошибка</string>
     <string name="account_item_error_message">Не удалось загрузить аккаунт</string>
-
     <string name="edit_tab_title">Изменить вкладку</string>
     <string name="edit_tab_name">Имя</string>
     <string name="edit_tab_name_placeholder">Имя вкладки</string>
@@ -379,7 +382,6 @@
     <string name="edit_tab_with_avatar">С аватаром</string>
     <string name="edit_tab_enabled">Показывать в смешанных лентах</string>
     <string name="edit_tab_enabled_description">Включать эту ленту, когда она используется внутри смешанной ленты или группы.</string>
-
     <string name="list_add">Добавить список</string>
     <string name="list_edit">Изменить список</string>
     <string name="list_delete">Удалить список</string>
@@ -401,23 +403,26 @@
     <string name="edit_list_member_remove">Удалить</string>
     <string name="list_create_description">Описание списка</string>
     <string name="list_create_description_hint">Описание списка</string>
-
     <string name="edit_account_list_title">Изменить список аккаунтов</string>
-
     <string name="feeds_my_feeds_title">Мои ленты</string>
     <string name="feeds_discover_feeds_title">Найти ленты</string>
     <string name="feeds_discover_feeds_created_by">Создано %1$s</string>
     <string name="feeds_unsubscribe">Отписаться</string>
     <string name="feeds_subscribe">Подписаться</string>
-
     <string name="profile_tab_timeline">Посты</string>
     <string name="profile_tab_timeline_with_reply">Посты и ответы</string>
     <string name="profile_tab_likes">Лайки</string>
     <string name="profile_tab_media">Медиа</string>
-
+    <string name="illustrations_title">Иллюстрации</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Рейтинг за неделю</string>
+    <string name="pixiv_ranking_month_title">Рейтинг за месяц</string>
+    <string name="pixiv_ranking_day_male_title">Рейтинг мужчин</string>
+    <string name="pixiv_ranking_day_female_title">Женский рейтинг</string>
+    <string name="pixiv_ranking_week_original_title">Оригинальный Рейтинг</string>
+    <string name="pixiv_ranking_week_rookie_title">Рейтинг Новобранцев</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">Настройки вкладок</string>
-
-
     <string name="dm_list_title">Личные сообщения</string>
     <string name="dm_list_empty">Нет личных сообщений</string>
     <string name="dm_list_error">Не удалось загрузить личные сообщения</string>
@@ -428,17 +433,12 @@
     <string name="dm_sending">Отправка</string>
     <string name="dm_leave">Покинуть диалог</string>
     <string name="dm_to_profile">Показать профиль</string>
-
-
     <string name="notification_login_expired">Сессия истекла для %1$s</string>
-
     <string name="following_title">Подписки</string>
     <string name="fans_title">Подписчики</string>
-
     <string name="local_history_search_placeholder">Поиск по закешированным постам и профилям</string>
     <string name="local_history_search_status_title">Посты</string>
-    <string name="local_history_search_user_title">Пользователь</string>
-
+    <string name="local_history_search_user_title">Пользователи</string>
     <string name="rss_sources_title">Подписки</string>
     <string name="add_rss_source">Добавить подписку</string>
     <string name="edit_rss_source">Изменить подписку</string>
@@ -446,9 +446,8 @@
     <string name="opml_import">Импорт из OPML</string>
     <string name="opml_export">Экспорт в OPML</string>
     <string name="export_completed">Экспорт завершен</string>
-
     <string name="rss_sources_title_label">Название</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Подписки</string>
     <string name="empty_rss_sources">Нет подписок</string>
     <string name="rss_sources_rss_hub_host_label">Хост RSSHub</string>
@@ -456,7 +455,7 @@
     <string name="rss_sources_discovered_rss_sources">Найденные ленты</string>
     <string name="rss_sources_pinned_in_tabs">Закрепить на главных вкладках</string>
     <string name="rss_sources_open_in_browser">Открыть в браузере</string>
-    <string name="rss_sources_open_in_app">Открыть в приложении</string>
+    <string name="rss_sources_open_in_app">Открывать в приложении</string>
     <string name="rss_sources_full_content">Полный контент</string>
     <string name="rss_sources_description_only">Только описание</string>
     <string name="mastodon_available_timelines">Доступные ленты</string>
@@ -465,7 +464,6 @@
     <string name="mastodon_local_timeline">Локальная лента</string>
     <string name="subscription_url_hint">Вставьте URL RSS-ленты или URL инстанса Mastodon</string>
     <string name="rss_sources_display_mode">Режим отображения</string>
-
     <string name="rss_detail_open_in_browser">Открыть в браузере</string>
     <string name="rss_detail_share">Поделиться ссылкой</string>
     <string name="rss_detail_tldr">Краткое содержание</string>
@@ -474,18 +472,15 @@
     <string name="rss_detail_tldr_loading">Создание краткого содержания…</string>
     <string name="rss_detail_translate">Перевести</string>
     <string name="rss_detail_translate_error">Не удалось перевести</string>
-
     <string name="emoji_picker_recent">Недавние</string>
     <string name="emoji_picker_search">Поиск</string>
-
     <string name="podcast_host">Ведущий</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Спикер</string>
-    <string name="podcast_listen">Начать слушать</string>
+    <string name="podcast_listen">Слушать</string>
     <string name="podcast_leave">Покинуть</string>
     <string name="podcast_ended">Подкаст завершен</string>
     <string name="podcast_living">В эфире</string>
-
     <string name="home_tab_antennas_title">Антенны</string>
     <string name="home_tab_channels_title">Каналы</string>
     <string name="misskey_channel_tab_following">Подписки</string>
@@ -502,24 +497,19 @@
     <string name="liked_title">Понравилось</string>
     <string name="all_rss_feeds_title">Все подписки</string>
     <string name="posts_title">Посты</string>
-
     <string name="deeplink_account_selection_title">Выбор аккаунта</string>
     <string name="deeplink_account_selection_message">Выберите аккаунт, чтобы открыть эту ссылку</string>
     <string name="deeplink_account_selection_browser">Открыть в браузере</string>
-
     <string name="block_user_title">Заблокировать пользователя</string>
     <string name="block_user_description">Вы уверены, что хотите заблокировать этого пользователя?</string>
     <string name="unblock_user_title">Разблокировать пользователя</string>
     <string name="unblock_user_description">Вы уверены, что хотите разблокировать этого пользователя?</string>
-
     <string name="mute_user_title">Скрыть пользователя</string>
     <string name="mute_user_description">Вы уверены, что хотите скрыть этого пользователя?</string>
     <string name="unmute_user_title">Показать пользователя</string>
     <string name="unmute_user_description">Вы уверены, что хотите перестать скрывать этого пользователя?</string>
-
     <string name="report_user_title">Пожаловаться на пользователя</string>
     <string name="report_user_description">Вы уверены, что хотите пожаловаться на этого пользователя?</string>
-
     <string name="settings_storage_export_data">Экспорт данных</string>
     <string name="settings_storage_export_data_description">Экспорт всех данных, включая аккаунты и учетные данные. Храните файл в безопасности.</string>
     <string name="settings_storage_import_data">Импорт данных</string>
@@ -530,7 +520,6 @@
     <string name="import_error">Ошибка импорта</string>
     <string name="import_confirmation_title">Подтверждение импорта</string>
     <string name="import_confirmation_message">Это действие импортирует данные из выбранного файла. Существующие записи с совпадающими ID будут заменены. Продолжить?</string>
-
     <string name="tab_settings_add_group">Добавить группу</string>
     <string name="tab_settings_add_tab">Добавить вкладку</string>
     <string name="tab_settings_edit_group">Изменить группу</string>

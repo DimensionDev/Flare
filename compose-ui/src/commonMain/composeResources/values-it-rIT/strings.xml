@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Elimina</string>
     <string name="done">Fatto</string>
     <string name="cancel">Annulla</string>
@@ -9,7 +9,7 @@
     <string name="profile_header_toots_count">%1$s Post</string>
     <string name="profile_misskey_header_status_count">%1$s Post</string>
     <string name="profile_header_button_follow">Segui</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Richiedi seguito</string>
     <string name="profile_header_button_following">Segui già</string>
     <string name="profile_header_button_requested">Richiesto</string>
     <string name="profile_header_button_blocked">Bloccato</string>
@@ -42,7 +42,7 @@
     <string name="misskey_notification_item_replied_to_you">ti ha risposto</string>
     <string name="misskey_notification_item_reposted_your_status">ha ripubblicato un post</string>
     <string name="misskey_notification_item_quoted_your_status">ha citato il tuo post</string>
-    <string name="misskey_notification_item_reacted_to_your_status">ha reagito al tuo post</string>
+    <string name="misskey_notification_item_reacted_to_your_status">ha reagito alla tua Nota</string>
     <string name="misskey_notification_item_poll_ended">Un sondaggio a cui hai partecipato è terminato</string>
     <string name="misskey_notification_item_follow_request_accepted">ha accettato la tua richiesta di seguirti</string>
     <string name="misskey_notification_item_scheduled_note_posted">nota pianificata pubblicata</string>
@@ -85,7 +85,7 @@
     <string name="permission_denied_message">Accedi di nuovo per accedere a questa pagina</string>
     <string name="misskey_compose_local_only">Solo locale</string>
     <string name="misskey_compose_local_only_description">Solo gli utenti su questa istanza possono vedere questo post</string>
-    <string name="misskey_item_action_renote">Renote</string>
+    <string name="misskey_item_action_renote">Rinota</string>
     <string name="misskey_item_action_quote">Cita</string>
     <string name="bluesky_notification_unknown_message">Tipo di notifica sconosciuto %1$s</string>
     <string name="bluesky_notification_unknown_message2">Segnala questo problema allo sviluppatore.</string>
@@ -143,7 +143,7 @@
     <string name="misskey_achievement_notes1_description">Pubblica la tua prima nota</string>
     <string name="misskey_achievement_notes1_flavor">Buon divertimento con Misskey!</string>
     <string name="misskey_achievement_notes10_title">Alcune note</string>
-    <string name="misskey_achievement_notes10_description">Pubblica 10 note</string>
+    <string name="misskey_achievement_notes10_description">Hai inserito 10 Note</string>
     <string name="misskey_achievement_notes100_title">Un sacco di note</string>
     <string name="misskey_achievement_notes100_description">Pubblica 100 note</string>
     <string name="misskey_achievement_notes500_title">Sommerso dalle note</string>
@@ -181,11 +181,11 @@
     <string name="misskey_achievement_login7_flavor">Senti di averci preso la mano?</string>
     <string name="misskey_achievement_login15_title">Principiante III</string>
     <string name="misskey_achievement_login15_description">Accedi per un totale di 15 giorni</string>
-    <string name="misskey_achievement_login30_title">Misskist I</string>
+    <string name="misskey_achievement_login30_title">Missalcolista I</string>
     <string name="misskey_achievement_login30_description">Accedi per un totale di 30 giorni</string>
-    <string name="misskey_achievement_login60_title">Misskist II</string>
+    <string name="misskey_achievement_login60_title">Missalcolista II</string>
     <string name="misskey_achievement_login60_description">Accedi per un totale di 60 giorni</string>
-    <string name="misskey_achievement_login100_title">Misskist III</string>
+    <string name="misskey_achievement_login100_title">Missalcolista III</string>
     <string name="misskey_achievement_login100_description">Accedi per un totale di 100 giorni</string>
     <string name="misskey_achievement_login100_flavor">Misskist violento</string>
     <string name="misskey_achievement_login200_title">Regolare I</string>
@@ -263,7 +263,7 @@
     <string name="misskey_achievement_posted_at_late_night_flavor">È ora di andare a nanna.</string>
     <string name="misskey_achievement_posted_at_0min0sec_title">Orologio parlante</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Pubblica una nota alle 00:00</string>
-    <string name="misskey_achievement_posted_at_0min0sec_flavor">Click Click Click Claaang</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">tic, tac, tic, tac! Gong!</string>
     <string name="misskey_achievement_self_quote_title">Autoreferenza</string>
     <string name="misskey_achievement_self_quote_description">Cita una tua nota</string>
     <string name="misskey_achievement_htl20npm_title">Timeline fluida</string>
@@ -300,7 +300,7 @@
     <string name="misskey_achievement_cookie_clicked_flavor">Aspetta, sei sul sito giusto?</string>
     <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
     <string name="misskey_achievement_brain_diver_description">Pubblica il link a Brain Diver</string>
-    <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
+    <string name="misskey_achievement_brain_diver_flavor">Sulle note di Brain Diver</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Test a raffica</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Attiva ripetutamente il test delle notifiche in un tempo brevissimo</string>
     <string name="misskey_achievement_tutorial_completed_title">Diploma del corso elementare di Misskey</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">Modifica iscrizione</string>
     <string name="delete_rss_source">Elimina iscrizione</string>
     <string name="rss_sources_title_label">Titolo</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Iscrizioni</string>
     <string name="empty_rss_sources">Nessuna iscrizione</string>
     <string name="mastodon_trending_statuses">Stati di tendenza</string>
@@ -394,6 +394,7 @@
     <string name="home_tab_featured_title">In evidenza</string>
     <string name="home_tab_bookmarks_title">Segnalibri</string>
     <string name="home_tab_favorite_title">Preferiti</string>
+    <string name="home_tab_following_title">Seguiti</string>
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Feed</string>
     <string name="dm_list_title">Messaggi diretti</string>
@@ -403,7 +404,18 @@
     <string name="liked_title">Mi piace</string>
     <string name="all_rss_feeds_title">Tutte le iscrizioni</string>
     <string name="posts_title">Post</string>
+    <string name="posts_with_replies_title">Posts &amp; Risposte</string>
+    <string name="media_title">Media</string>
     <string name="settings_appearance_absolute_timestamp">Timestamp assoluto</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra timestamp esatti sui post</string>
     <string name="channel_title">Canale</string>
+    <string name="pixiv_ranking_week_title">Classifica Settimanale</string>
+    <string name="pixiv_ranking_month_title">Classifica Mensile</string>
+    <string name="pixiv_ranking_day_male_title">Classifica Maschile</string>
+    <string name="pixiv_ranking_day_female_title">Classifica Femmina</string>
+    <string name="pixiv_ranking_week_original_title">Classifica Originale</string>
+    <string name="pixiv_ranking_week_rookie_title">Classifica Rookie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Illustrazioni</string>
+    <string name="manga_title">Manga</string>
 </resources>

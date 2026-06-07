@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Eliminar</string>
     <string name="done">Hecho</string>
     <string name="cancel">Cancelar</string>
@@ -9,7 +9,7 @@
     <string name="profile_header_toots_count">%1$s Publicaciones</string>
     <string name="profile_misskey_header_status_count">%1$s Publicaciones</string>
     <string name="profile_header_button_follow">Seguir</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Solicitud seguir</string>
     <string name="profile_header_button_following">Siguiendo</string>
     <string name="profile_header_button_requested">Solicitado</string>
     <string name="profile_header_button_blocked">Bloqueado</string>
@@ -134,7 +134,7 @@
     <string name="translation_show_original">Mostrar original</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="date_format_full">dd MMMM yy HH:mm</string>
     <string name="vvo_notification_like">Le ha gustado tu publicación</string>
     <string name="user_follow_edit_list">Añadir/Eliminar de la lista</string>
     <string name="list_empty">No hay listas</string>
@@ -241,7 +241,7 @@
     <string name="misskey_achievement_followers300_description">Consigue 300 seguidores</string>
     <string name="misskey_achievement_followers500_title">Torre de radio</string>
     <string name="misskey_achievement_followers500_description">Consigue 500 seguidores</string>
-    <string name="misskey_achievement_followers1000_title">Influencer</string>
+    <string name="misskey_achievement_followers1000_title">Influenciador</string>
     <string name="misskey_achievement_followers1000_description">Consigue 1.000 seguidores</string>
     <string name="misskey_achievement_collect_achievements30_title">Coleccionista de logros</string>
     <string name="misskey_achievement_collect_achievements30_description">Gana 30 logros</string>
@@ -298,7 +298,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Un juego en el que haces clic en galletas</string>
     <string name="misskey_achievement_cookie_clicked_description">Hiciste clic en la galleta</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Espera, ¿estás en el sitio web correcto?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Diver cerebral</string>
     <string name="misskey_achievement_brain_diver_description">Publica el enlace a Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Desbordamiento de prueba</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">Editar suscripción</string>
     <string name="delete_rss_source">Eliminar suscripción</string>
     <string name="rss_sources_title_label">Título</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL de RSS</string>
     <string name="rss_title">Suscripciones</string>
     <string name="empty_rss_sources">No hay suscripciones</string>
     <string name="mastodon_trending_statuses">Estados populares</string>
@@ -394,6 +394,7 @@
     <string name="home_tab_featured_title">Destacados</string>
     <string name="home_tab_bookmarks_title">Marcadores</string>
     <string name="home_tab_favorite_title">Favoritos</string>
+    <string name="home_tab_following_title">Siguiendo</string>
     <string name="home_tab_list_title">Listas</string>
     <string name="home_tab_feeds_title">Canales</string>
     <string name="dm_list_title">Mensajes directos</string>
@@ -403,7 +404,18 @@
     <string name="liked_title">Me gusta</string>
     <string name="all_rss_feeds_title">Todas las suscripciones</string>
     <string name="posts_title">Publicaciones</string>
+    <string name="posts_with_replies_title">Mensajes &amp; Respuestas</string>
+    <string name="media_title">Multimedia</string>
     <string name="settings_appearance_absolute_timestamp">Marca de tiempo absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar marcas de tiempo exactas en las publicaciones</string>
     <string name="channel_title">Canal</string>
+    <string name="pixiv_ranking_week_title">Clasificación semanal</string>
+    <string name="pixiv_ranking_month_title">Clasificación mensual</string>
+    <string name="pixiv_ranking_day_male_title">Clasificación masculina</string>
+    <string name="pixiv_ranking_day_female_title">Clasificación femenina</string>
+    <string name="pixiv_ranking_week_original_title">Clasificación original</string>
+    <string name="pixiv_ranking_week_rookie_title">Ranking de Rokie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Illustraciones</string>
+    <string name="manga_title">Manga</string>
 </resources>

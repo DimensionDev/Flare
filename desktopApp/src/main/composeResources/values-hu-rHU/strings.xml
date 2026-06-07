@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="ok">OK</string>
+    <string name="ok">Rendben</string>
     <string name="cancel">Mégse</string>
     <string name="delete">Törlés</string>
     <string name="refresh">Frissítés</string>
-
     <string name="home_compose">Írás</string>
     <string name="home_login">Bejelentkezés</string>
     <string name="home_settings">Beállítások</string>
-
     <string name="home_tab_home_title">Kezdőlap</string>
     <string name="home_tab_notifications_title">Értesítések</string>
     <string name="home_tab_me_title">Én</string>
@@ -26,47 +24,38 @@
         <item quantity="one">%1$d új bejegyzés</item>
         <item quantity="other">%1$d új bejegyzés</item>
     </plurals>
-
     <string name="navigate_back">Vissza</string>
     <string name="service_select_instance_input_placeholder">Példány URL</string>
     <string name="service_select_next_button">Tovább</string>
     <string name="service_select_empty_message">Nem található példány</string>
-
     <string name="service_select_welcome_title">Üdvözöl a Flare</string>
     <string name="service_select_welcome_message">A Flare egy közösségi média kliens a következőhöz: %1$s.\nVálassz egy szolgáltatást a csatlakozáshoz és a kezdéshez.</string>
     <string name="mastodon_login_verify_message">Hitelesítő adatok ellenőrzése…</string>
-
     <string name="profile_tab_timeline">Bejegyzések</string>
     <string name="profile_tab_timeline_with_reply">Bejegyzések és válaszok</string>
     <string name="profile_tab_likes">Kedvelések</string>
     <string name="profile_tab_media">Média</string>
-
     <string name="report_title">Jelentés</string>
     <string name="report_description">Mi a baj ezzel a bejegyzéssel?</string>
-
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Illegális vagy sürgős</string>
     <string name="report_reason_misleading_title">Félrevezető</string>
     <string name="report_reason_sexual_title">Nem kívánt szexuális tartalom</string>
     <string name="report_reason_rude_title">Antiszociális viselkedés</string>
     <string name="report_reason_other_title">Egyéb</string>
-
     <string name="report_reason_spam_description">Túlzott említések vagy válaszok</string>
     <string name="report_reason_violation_description">A törvény vagy a szolgáltatási feltételek egyértelmű megsértése</string>
     <string name="report_reason_misleading_description">Ez a bejegyzés félrevezető</string>
     <string name="report_reason_sexual_description">Meztelenség vagy pornográfia, amely nincs ekként megjelölve</string>
     <string name="report_reason_rude_description">Zaklatás, trollkodás vagy intolerancia</string>
     <string name="report_reason_other_description">Olyan probléma, amely nem szerepel ezekben a lehetőségekben</string>
-
     <string name="delete_status_title">Törlés</string>
     <string name="delete_status_message">Törlöd ezt a bejegyzést?</string>
     <string name="compose_close_confirm_title">Mented a piszkozatot?</string>
     <string name="compose_close_confirm_message">Nem mentett módosításaid vannak. Elmented piszkozatként a bezárás előtt?</string>
     <string name="compose_close_discard">Elvetés</string>
-
     <string name="mastodon_report_title">Jelentés</string>
     <string name="mastodon_report_description">Biztosan jelenteni szeretnéd ezt?</string>
-
     <string name="bookmark_remove">Könyvjelző eltávolítása</string>
     <string name="bookmark_add">Könyvjelző hozzáadása</string>
     <string name="like">Kedvelés</string>
@@ -84,7 +73,6 @@
     <string name="status_detail_repost">Újraküldés</string>
     <string name="emoji_picker_recent">Legutóbbi</string>
     <string name="emoji_picker_search">Keresés</string>
-
     <string name="media_show_thumbnail_list">Bélyegkép-lista megjelenítése</string>
     <string name="media_hide_thumbnail_list">Bélyegkép-lista elrejtése</string>
     <string name="media_save">Mentés</string>
@@ -94,7 +82,7 @@
     <string name="status_share_image">Képernyőkép megosztása</string>
     <string name="status_share_via_fxembed">Megosztás FxEmbed segítségével</string>
     <string name="status_share_via_fixvx">Megosztás Fixvx segítségével</string>
-
+    <string name="agent_chat_send">Küldés</string>
     <string name="list_add">Lista hozzáadása</string>
     <string name="list_edit">Lista szerkesztése</string>
     <string name="list_delete">Lista törlése</string>
@@ -118,28 +106,23 @@
     <string name="edit_list_member_remove">Eltávolítás</string>
     <string name="list_create_description">Lista leírása</string>
     <string name="list_create_description_hint">Lista leírása</string>
-
     <string name="feeds_my_feeds_title">Saját csatornáim</string>
     <string name="feeds_discover_feeds_title">Csatornák felfedezése</string>
     <string name="feeds_discover_feeds_created_by">Létrehozta: %1$s</string>
     <string name="feeds_unsubscribe">Leiratkozás</string>
     <string name="feeds_subscribe">Feliratkozás</string>
-
     <string name="social_title">Közösségi</string>
-
     <string name="antenna_title">Antennák</string>
     <string name="mixed_timeline_title">Vegyes</string>
     <string name="liked_title">Kedvelt</string>
     <string name="all_rss_feeds_title">Minden feliratkozás</string>
     <string name="posts_title">Bejegyzések</string>
-
     <string name="bluesky_login_username">Felhasználónév</string>
     <string name="bluesky_login_password">Jelszó</string>
-    <string name="bluesky_login_2fa">2FA token</string>
+    <string name="bluesky_login_2fa">2FA kód</string>
     <string name="bluesky_login_oauth_button">Bejelentkezés OAuth-szal</string>
     <string name="bluesky_login_use_password_button">Jelszó használata</string>
     <string name="bluesky_login_oauth_hint">A Bluesky OAuth még instabil lehet. Ha problémákba ütközöl, használd a jelszavas bejelentkezést.</string>
-
     <string name="login_expired">A bejelentkezési munkamenet lejárt</string>
     <string name="login_expired_message">Kattints az újbóli bejelentkezéshez</string>
     <string name="login_expired_relogin">Újbóli bejelentkezés</string>
@@ -148,7 +131,6 @@
     <string name="add_account">Fiók hozzáadása</string>
     <string name="remove_account">Fiók eltávolítása</string>
     <string name="settings_accounts_remove_confirm">Biztosan el szeretnéd távolítani a(z) %1$s fiókot erről az eszközről?</string>
-
     <string name="settings_accounts_title">Fiókok</string>
     <string name="settings_appearance_title">Megjelenés</string>
     <string name="settings_status_appearance_title">Bejegyzés megjelenése</string>
@@ -206,7 +188,7 @@
     <string name="settings_ai_config_reasoning_effort_low">Alacsony</string>
     <string name="settings_ai_config_reasoning_effort_medium">Közepes</string>
     <string name="settings_ai_config_reasoning_effort_high">Magas</string>
-    <string name="settings_ai_config_extra_body">Extra Body</string>
+    <string name="settings_ai_config_extra_body">Extra Body (JSON)</string>
     <string name="settings_ai_config_translate_prompt">Fordítási prompt</string>
     <string name="settings_ai_config_tldr_prompt">Összegzési prompt</string>
     <string name="settings_ai_config_value_empty_placeholder">Nincs beállítva</string>
@@ -220,16 +202,13 @@
     <string name="settings_ai_config_translate_provider_description">Válaszd ki, melyik szolgáltatás fordítsa le a tartalmat</string>
     <string name="settings_ai_config_translate_provider_ai">MI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Fordító (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API kulcs</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro végpont</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Az api.deepl.com használata az ingyenes api-free.deepl.com végpont helyett.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Fordító</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API kulcs</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate alap URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API kulcs</string>
-
     <string name="settings_translation_title">Fordítás</string>
     <string name="settings_translation_description">Válaszd ki a fordítási szolgáltatásokat és az automatikus fordítás viselkedését</string>
     <string name="settings_translation_auto_excluded_languages">Az automatikus fordításból kihagyandó nyelvek</string>
@@ -238,7 +217,6 @@
     <string name="settings_translation_ai_test_action">Fordítás tesztelése</string>
     <string name="settings_translation_ai_test_original">Minta szöveg</string>
     <string name="settings_translation_ai_test_result">Lefordított szöveg</string>
-
     <string name="settings_appearance_generic">Általános</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Írás doboz megjelenítése a kezdő idővonalon</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Az írás doboz megjelenítése a Kezdőlap idővonal tetején</string>
@@ -297,24 +275,18 @@
     <string name="settings_appearance_post_action_style_stretch">Kifeszített</string>
     <string name="settings_appearance_absolute_timestamp">Abszolút időbélyeg</string>
     <string name="settings_appearance_absolute_timestamp_description">Pontos időbélyegek megjelenítése a bejegyzéseken</string>
-
     <string name="settings_appearance_show_platform_logo">Forrásplatform ikonok megjelenítése</string>
     <string name="settings_appearance_show_platform_logo_description">Annak megjelenítése, hogy melyik platformról származik az adott bejegyzés</string>
-
     <string name="settings_about_source_code">Forráskód</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Csatlakozz Telegram csoportunkhoz</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Csatlakozz Discord szerverünkhöz</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Segíts lefordítani a Flare-t</string>
     <string name="settings_privacy_policy">Adatvédelmi irányelvek</string>
-
     <string name="users">Felhasználók</string>
     <string name="hashtags">Hashtagek</string>
     <string name="statues">Bejegyzések</string>
-
-
     <string name="compose_title">Írás</string>
     <string name="compose_hint">Mi történik?</string>
     <string name="compose_poll_option_hint">%1$s. lehetőség</string>
@@ -335,7 +307,6 @@
     <string name="compose_notification_progress">Bejegyzés küldése</string>
     <string name="compose_notification_success">Bejegyzés elküldve</string>
     <string name="compose_notification_error">Nem sikerült a bejegyzés elküldése</string>
-
     <string name="misskey_visibility_public">Nyilvános</string>
     <string name="misskey_visibility_home">Kezdőlap</string>
     <string name="misskey_visibility_followers">Követők</string>
@@ -344,15 +315,12 @@
     <string name="misskey_visibility_home_description">Csak a példány felhasználói láthatják ezt a bejegyzést</string>
     <string name="misskey_visibility_followers_description">Csak a követők láthatják ezt a bejegyzést</string>
     <string name="misskey_visibility_specified_description">Csak a megemlített felhasználók láthatják ezt a bejegyzést</string>
-
-
     <string name="rss_sources_title">Feliratkozások</string>
     <string name="add_rss_source">Feliratkozás hozzáadása</string>
     <string name="edit_rss_source">Feliratkozás szerkesztése</string>
     <string name="delete_rss_source">Feliratkozás törlése</string>
-
     <string name="rss_sources_title_label">Cím</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Feliratkozások</string>
     <string name="empty_rss_sources">Nincsenek feliratkozások</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub gazdagép</string>
@@ -373,7 +341,6 @@
     <string name="mastodon_federated_timeline">Föderált idővonal</string>
     <string name="mastodon_local_timeline">Helyi idővonal</string>
     <string name="subscription_url_hint">Illessz be egy RSS csatorna vagy egy Mastodon példány URL-t</string>
-
     <string name="tab_settings_add">Hozzáadás</string>
     <string name="tab_settings_drag">Húzás</string>
     <string name="tab_settings_edit">Szerkesztés</string>
@@ -381,9 +348,7 @@
     <string name="tab_settings_default">Alapértelmezett</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Csatornák</string>
-
     <string name="notification_login_expired">A bejelentkezés lejárt a következőhöz: %1$s</string>
-
     <string name="dm_list_empty">Nincsenek közvetlen üzenetek</string>
     <string name="dm_list_error">Nem sikerült a közvetlen üzenetek betöltése</string>
     <string name="send">Küldés</string>
@@ -416,7 +381,6 @@
     <string name="tab_settings_filter_text_only">Csak szöveg</string>
     <string name="tab_settings_filter_image">Képek</string>
     <string name="tab_settings_filter_video">Videók</string>
-
     <string name="edit_tab_title">Fül szerkesztése</string>
     <string name="edit_tab_name">Név</string>
     <string name="edit_tab_name_placeholder">Fül neve</string>
@@ -424,16 +388,12 @@
     <string name="edit_tab_with_avatar">Profilképpel</string>
     <string name="edit_tab_enabled">Megjelenítés a vegyes idővonalakon</string>
     <string name="edit_tab_enabled_description">Az idővonal belefoglalása, ha vegyes idővonalon vagy csoporton belül használják.</string>
-
     <string name="edit">Szerkesztés</string>
-
     <string name="local_history_search_placeholder">Keresés a tárolt bejegyzések és profilok között</string>
     <string name="local_history_search_status_title">Bejegyzések</string>
     <string name="local_history_search_user_title">Felhasználó</string>
-
     <string name="settings_storage_clear_image_cache">Kép gyorsítótár törlése</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB gyorsítótárazott kép eltávolítása</string>
-
     <string name="settings_storage_clear_database">Adatbázis gyorsítótár törlése</string>
     <string name="settings_storage_clear_database_description">%1$s tárolt felhasználó és %2$s tárolt bejegyzés eltávolítása</string>
     <string name="settings_storage_app_log">Alkalmazásnaplók</string>
@@ -450,50 +410,39 @@
     <string name="draft_box_retry">Újra</string>
     <string name="draft_box_edit">Szerkesztés</string>
     <string name="draft_box_send">Küldés</string>
-
     <string name="copied_to_clipboard">Vágólapra másolva</string>
-
     <string name="opml_import">Importálás OPML-ből</string>
     <string name="opml_export">Exportálás OPML-be</string>
     <string name="save_completed">Exportálás kész</string>
-
     <string name="deeplink_account_selection_title">Fiók kiválasztása</string>
     <string name="deeplink_account_selection_message">Válassz egy fiókot a link megnyitásához</string>
     <string name="deeplink_account_selection_browser">Megnyitás böngészőben</string>
-
     <string name="block_user_title">Felhasználó tiltása</string>
     <string name="block_user_description">Biztosan le szeretnéd tiltani ezt a felhasználót?</string>
     <string name="unblock_user_title">Tiltás feloldása</string>
     <string name="unblock_user_description">Biztosan fel szeretnéd oldani a felhasználó tiltását?</string>
-
     <string name="mute_user_title">Felhasználó némítása</string>
     <string name="mute_user_description">Biztosan némítani szeretnéd ezt a felhasználót?</string>
     <string name="unmute_user_title">Némítás feloldása</string>
     <string name="unmute_user_description">Biztosan fel szeretnéd oldani a felhasználó némítását?</string>
-
     <string name="report_user_title">Felhasználó jelentése</string>
     <string name="report_user_description">Biztosan jelenteni szeretnéd ezt a felhasználót?</string>
-
     <string name="settings_storage_export_data">Adatok exportálása</string>
     <string name="settings_storage_export_data_description">Minden adat exportálása, beleértve a fiókokat és hitelesítő adatokat is. Tartsd biztonságban a fájlt.</string>
     <string name="settings_storage_import_data">Adatok importálása</string>
     <string name="settings_storage_import_data_description">Adatok importálása biztonsági másolatból. Az azonos azonosítóval rendelkező meglévő rekordok felülíródnak.</string>
     <string name="action_export">Exportálás</string>
     <string name="action_import">Importálás</string>
-
     <string name="save_error">Az exportálás nem sikerült</string>
     <string name="import_completed">Importálás kész</string>
     <string name="import_error">Az importálás nem sikerült</string>
     <string name="import_confirmation_title">Importálás megerősítése</string>
     <string name="import_confirmation_message">Ez adatokat fog importálni a kiválasztott fájlból. Az azonos azonosítóval rendelkező meglévő rekordok felülíródnak. Folytatod?</string>
-
     <string name="channel_title">Csatorna</string>
-
     <string name="misskey_channel_tab_following">Követés</string>
     <string name="misskey_channel_tab_favorites">Kedvencek</string>
     <string name="misskey_channel_tab_owned">Saját</string>
     <string name="misskey_channel_tab_featured">Kiemelt</string>
-
     <string name="media_save_success">Mentve a Letöltések közé</string>
     <string name="media_save_fail">A mentés nem sikerült</string>
 </resources>

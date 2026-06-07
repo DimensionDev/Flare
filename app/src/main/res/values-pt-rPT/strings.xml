@@ -1,24 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Iniciar sessão</string>
     <string name="navigate_back">Retroceder</string>
-
     <string name="home_tab_home_title">Início</string>
     <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Descobrir</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d nova publicação</item>
         <item quantity="other">%1$d novas publicações</item>
     </plurals>
-
     <string name="notification_tab_all_title">Tudo</string>
     <string name="notification_tab_mentions_title">Menções</string>
     <string name="notification_tab_comments_title">Comentários</string>
     <string name="notification_tab_likes_title">Gostos</string>
-
     <string name="compose_title">Escrever</string>
     <string name="compose_reply_title">Responder</string>
     <string name="compose_quote_title">Citar</string>
@@ -46,22 +41,66 @@
     <string name="compose_close_confirm_message">Tem alterações não guardadas. Guardar como rascunho antes de fechar?</string>
     <string name="compose_save_draft">Guardar</string>
     <string name="compose_close_discard">Descartar</string>
+    <string name="status_insight_title">Postar informações</string>
+    <string name="status_insight_input_placeholder">Pergunte um acompanhamento…</string>
+    <string name="status_insight_send">Enviar</string>
+    <string name="status_insight_analyzing">Analisando este post…</string>
+    <string name="status_insight_error">Não é possível analisar esta publicação.</string>
+    <string name="status_insight_trace_loading_post_context">Carregando o pós-contexto…</string>
+    <string name="status_insight_trace_post_context_loaded">Publicação de contexto carregada</string>
+    <string name="status_insight_trace_preparing_images">Preparando imagens…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Imagens não são suportadas; tentando novamente com o texto…</string>
+    <string name="status_insight_trace_agent_started">Iniciando análise…</string>
+    <string name="status_insight_trace_strategy_started">Planejando análise…</string>
+    <string name="status_insight_trace_strategy_completed">Plano de análise concluído</string>
+    <string name="status_insight_trace_subgraph_started">Entrando etapa de análise…</string>
+    <string name="status_insight_trace_subgraph_completed">Estágio de análise concluído</string>
+    <string name="status_insight_trace_subgraph_failed">Falha no estágio de análise</string>
+    <string name="status_insight_trace_asking_model">Perguntando %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Lendo resposta do modelo…</string>
+    <string name="status_insight_trace_streaming_started">Transmissão de %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Recebendo resposta…</string>
+    <string name="status_insight_trace_streaming_completed">Transmissão de resposta concluída</string>
+    <string name="status_insight_trace_streaming_failed">Falha ao responder</string>
+    <string name="status_insight_trace_running_step">Executando etapa de análise…</string>
+    <string name="status_insight_trace_step_completed">Etapa de análise concluída</string>
+    <string name="status_insight_trace_step_failed">Falha na etapa de análise</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Carregando o pós-contexto…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Publicação de contexto carregada</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Postar entrada do contexto foi rejeitada</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Não foi possível carregar o contexto do post</string>
+    <string name="status_insight_trace_tool_search_status_started">Procurando…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Pesquisa concluída</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">A pesquisa de entrada foi rejeitada</string>
+    <string name="status_insight_trace_tool_search_status_failed">Falha na pesquisa</string>
+    <string name="status_insight_trace_agent_completed">Finalizando análise…</string>
+    <string name="status_insight_trace_agent_failed">Análise falhou</string>
+    <string name="status_insight_trace_agent_closing">Fechando análise…</string>
+    <string name="ask_ai">Perguntar IA</string>
+    <string name="agent_chat_title">Chat IA</string>
+    <string name="agent_history_title">Agente Sinalizador</string>
+    <string name="agent_history_empty">Nenhum histórico de bate-papo dos agentes ainda.</string>
+    <string name="agent_chat_input_placeholder">Pergunte qualquer coisa…</string>
+    <string name="agent_chat_send">Enviar</string>
+    <string name="agent_chat_thinking">Pensando…</string>
     <string name="draft_box_title">Rascunhos</string>
     <string name="draft_box_empty">Ainda não existem rascunhos</string>
     <string name="draft_box_edit">Editar</string>
     <string name="draft_box_retry">Tentar novamente</string>
     <string name="draft_box_send">Enviar</string>
     <string name="settings_draft_box_description">Ver, editar e reenviar rascunhos guardados</string>
-
     <string name="settings_title">Definições</string>
-
     <string name="settings_accounts_title">Contas</string>
     <string name="settings_accounts_subtitle">Gerir contas com sessão iniciada</string>
     <string name="settings_appearance_title">Aparência</string>
     <string name="settings_appearance_subtitle">Personalize o visual e a sensação do Flare</string>
     <string name="settings_appearance_theme_group_title">Tema</string>
     <string name="settings_appearance_theme_group_subtitle">Cores, tamanho da fonte e formato do avatar</string>
-    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_title">Disposição</string>
     <string name="settings_appearance_layout_group_subtitle">Layout da linha do tempo, navegação e ações de publicação</string>
     <string name="settings_appearance_display_group_title">Ecrã</string>
     <string name="settings_appearance_display_group_subtitle">Carimbos temporais, selos de origem, hiperligações e comportamento do navegador</string>
@@ -75,9 +114,7 @@
     <string name="settings_about_source_code">Código fonte</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Junte-se ao nosso grupo no Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Junte-se ao nosso servidor no Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Junte-se ao nosso grupo no Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajude-nos a traduzir o Flare</string>
@@ -127,6 +164,8 @@
     <string name="settings_ai_config_tap_to_edit">Toque para editar</string>
     <string name="settings_ai_config_entable_translation">Ativar tradução por IA</string>
     <string name="settings_ai_config_translation_description">Utilize IA em vez do Google Tradutor. As traduções podem demorar mais tempo.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">Ativar resumos por IA</string>
     <string name="settings_ai_config_tldr_description">Resumir publicações longas com IA. Disponível para publicações com mais de 500 caracteres.</string>
     <string name="settings_ai_config_enable_pre_translation">Ativar tradução automática</string>
@@ -141,9 +180,9 @@
     <string name="settings_ai_config_translate_provider_deepl_api_key">Chave de API do DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Endpoint DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Utilize api.deepl.com em vez do endpoint gratuito api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translation</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Chave de API do Google Cloud</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTradutor</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL base do LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Chave de API do LibreTranslate</string>
     <string name="settings_translation_title">Tradução</string>
@@ -163,19 +202,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Adicionar relay</string>
     <string name="settings_nostr_relays_placeholder">Introduza o URL do relay</string>
     <string name="settings_nostr_relays_empty">Nenhum relay adicionado</string>
-
     <string name="status_loadmore_error_retry">Tentar novamente</string>
     <string name="login_expired">Sessão expirada</string>
     <string name="login_expired_message">Toque para iniciar sessão novamente</string>
     <string name="login_expired_relogin">Iniciar sessão novamente</string>
-
     <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
     <string name="service_select_welcome_message">O Flare é um cliente de redes sociais para Android.\nEscolha um serviço para se ligar e começar.</string>
-
     <string name="mastodon_login_verify_message">A verificar as suas credenciais…</string>
-
     <string name="status_title">Publicação</string>
-
     <string name="misskey_visibility_public">Público</string>
     <string name="misskey_visibility_home">Início</string>
     <string name="misskey_visibility_followers">Seguidores</string>
@@ -184,51 +218,39 @@
     <string name="misskey_visibility_home_description">Apenas utilizadores nesta instância podem ver esta publicação</string>
     <string name="misskey_visibility_followers_description">Apenas os seguidores podem ver esta publicação</string>
     <string name="misskey_visibility_specified_description">Apenas utilizadores mencionados podem ver esta publicação</string>
-
     <string name="bluesky_login_username_hint">Nome de utilizador</string>
     <string name="bluesky_login_password_hint">Palavra-passe</string>
     <string name="bluesky_login_auth_factor_token_hint">Código 2FA</string>
     <string name="bluesky_login_oauth_button">Iniciar sessão com OAuth</string>
     <string name="bluesky_login_use_password_button">Utilizar palavra-passe</string>
     <string name="bluesky_login_oauth_hint">O OAuth do Bluesky ainda pode estar instável. Se encontrar problemas, utilize o início de sessão por palavra-passe.</string>
-
     <string name="report_title">Denunciar</string>
     <string name="report_description">O que há de errado com esta publicação?</string>
-
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Ilegal ou urgente</string>
     <string name="report_reason_misleading_title">Enganador</string>
     <string name="report_reason_sexual_title">Conteúdo sexual indesejado</string>
     <string name="report_reason_rude_title">Comportamento antissocial</string>
     <string name="report_reason_other_title">Outro</string>
-
     <string name="report_reason_spam_description">Menções ou respostas excessivas</string>
     <string name="report_reason_violation_description">Violações claras da lei ou dos termos de serviço</string>
     <string name="report_reason_misleading_description">Esta publicação é enganadora</string>
     <string name="report_reason_sexual_description">Nudez ou pornografia não rotulada como tal</string>
     <string name="report_reason_rude_description">Assédio, trolling ou intolerância</string>
     <string name="report_reason_other_description">Um problema não incluído nestas opções</string>
-
     <string name="delete_status_title">Eliminar</string>
     <string name="delete_status_message">Eliminar esta publicação?</string>
-
     <string name="mastodon_report_title">Denunciar</string>
     <string name="mastodon_report_description">Tem a certeza de que deseja denunciar isto?</string>
-
     <string name="more">Mais</string>
-
     <string name="discover_search_placeholder">Pesquisar</string>
     <string name="discover_users">Utilizadores sugeridos</string>
     <string name="discover_status">Publicações populares</string>
     <string name="discover_hashtags">Hashtags populares</string>
-
     <string name="search_users">Utilizadores</string>
     <string name="search_status">Publicações</string>
-
     <string name="quick_menu_add_account">Adicionar conta</string>
-
     <string name="settings_appearance_generic">Genérico</string>
-
     <string name="settings_appearance_show_actions">Mostrar ações</string>
     <string name="settings_appearance_show_actions_description">Mostrar botões de ação por baixo de cada publicação</string>
     <string name="settings_appearance_post_action_style">Estilo de ação da publicação</string>
@@ -243,6 +265,8 @@
     <string name="settings_appearance_show_numbers_description">Mostrar contagens por baixo de cada publicação</string>
     <string name="settings_appearance_show_cw_img">Mostrar conteúdo sensível</string>
     <string name="settings_appearance_show_cw_img_description">Revelar sempre multimédia sensível nas publicações</string>
+    <string name="settings_appearance_expand_content_warning">Mostrar conteúdo atrás de avisos de conteúdo</string>
+    <string name="settings_appearance_expand_content_warning_description">Sempre revelar o conteúdo da postagem oculta pelos avisos de conteúdo</string>
     <string name="settings_appearance_expand_media">Preservar proporção da multimédia</string>
     <string name="settings_appearance_expand_media_description">Mostrar multimédia na sua proporção original nas linhas do tempo</string>
     <string name="settings_appearance_video_autoplay">Reprodução automática de vídeo</string>
@@ -297,27 +321,20 @@
     <string name="settings_appearance_full_width_post_description">Deixar que as publicações ocupem toda a largura disponível</string>
     <string name="settings_appearance_absolute_timestamp">Carimbo temporal absoluto</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar carimbos temporais exatos nas publicações</string>
-
     <string name="settings_appearance_show_platform_logo">Mostrar ícones da plataforma de origem</string>
     <string name="settings_appearance_show_platform_logo_description">Mostrar de que plataforma veio cada publicação</string>
-
     <string name="settings_storage_clear_image_cache">Limpar cache de imagens</string>
     <string name="settings_storage_clear_image_cache_description">Remover %1$s MB de imagens em cache</string>
-
     <string name="settings_storage_clear_database">Limpar base de dados em cache</string>
     <string name="settings_storage_clear_database_description">Remover %1$s utilizadores em cache e %2$s publicações em cache</string>
     <string name="settings_storage_app_log">Registos da aplicação</string>
     <string name="settings_storage_app_log_description">Ver, guardar ou limpar registos da aplicação</string>
-
     <string name="service_select_instance_input_placeholder">URL da instância</string>
     <string name="service_select_next_button">Seguinte</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
-
     <string name="media_viewer_title">Visualizador de multimédia</string>
-
     <string name="settings_accounts_remove">Remover</string>
     <string name="settings_accounts_remove_confirm">Tem a certeza de que deseja remover a conta %1$s deste dispositivo?</string>
-
     <string name="media_menu_save">Guardar imagem</string>
     <string name="media_menu_share_image">Partilhar imagem</string>
     <string name="media_menu_copy_link">Copiar hiperligação</string>
@@ -328,7 +345,6 @@
     <string name="media_save_fail">Falha ao guardar</string>
     <string name="media_alt_text">Texto alternativo</string>
     <string name="media_is_downloading">A multimédia ainda está a ser transferida. Tente novamente daqui a pouco.</string>
-
     <string name="settings_side_panel_empty">Por predefinição, o painel lateral segue a plataforma da conta atual.</string>
     <string name="tab_settings_add">Adicionar</string>
     <string name="tab_settings_drag">Arrastar</string>
@@ -336,10 +352,8 @@
     <string name="tab_settings_remove">Remover</string>
     <string name="tab_settings_default">Predefinição</string>
     <string name="tab_settings_list">Lista</string>
-    <string name="tab_settings_feed">Feeds</string>
-
+    <string name="tab_settings_feed">Conteúdos</string>
     <string name="local_filter_add">Adicionar filtro</string>
-
     <string name="local_filter_edit_title">Editar Filtro</string>
     <string name="local_filter_add_title">Adicionar Filtro</string>
     <string name="local_filter_keyword">Palavra-chave</string>
@@ -349,27 +363,20 @@
     <string name="local_filter_for_search">Aplicar à pesquisa</string>
     <string name="local_filter_regex">Utilizar expressões regulares</string>
     <string name="local_filter_delete">Eliminar Filtro</string>
-
     <string name="delete">Eliminar</string>
-
-    <string name="mastodon_tab_local_title">Local</string>
+    <string name="mastodon_tab_local_title">Localização</string>
     <string name="mastodon_tab_public_title">Público</string>
-
     <string name="home_tab_featured_title">Destaque</string>
     <string name="home_tab_bookmarks_title">Marcadores</string>
     <string name="home_tab_favorite_title">Favoritos</string>
     <string name="home_tab_list_title">Listas</string>
-    <string name="home_tab_feeds_title">Feeds</string>
-
+    <string name="home_tab_feeds_title">Conteúdos</string>
     <string name="tab_settings_primary">Separador primário</string>
     <string name="tab_settings_secondary">Separador secundário</string>
-
     <string name="status_detail_comment">Comentar</string>
     <string name="status_detail_repost">Republicar</string>
-
     <string name="account_item_error_title">Erro</string>
     <string name="account_item_error_message">Falha ao carregar conta</string>
-
     <string name="edit_tab_title">Editar separador</string>
     <string name="edit_tab_name">Nome</string>
     <string name="edit_tab_name_placeholder">Nome do separador</string>
@@ -377,7 +384,6 @@
     <string name="edit_tab_with_avatar">Com avatar</string>
     <string name="edit_tab_enabled">Mostrar em linhas do tempo mistas</string>
     <string name="edit_tab_enabled_description">Incluir esta linha do tempo quando utilizada dentro de uma linha do tempo mista ou grupo.</string>
-
     <string name="list_add">Adicionar lista</string>
     <string name="list_edit">Editar lista</string>
     <string name="list_delete">Eliminar lista</string>
@@ -399,23 +405,26 @@
     <string name="edit_list_member_remove">Remover</string>
     <string name="list_create_description">Descrição da lista</string>
     <string name="list_create_description_hint">Descrição da lista</string>
-
     <string name="edit_account_list_title">Editar lista de contas</string>
-
     <string name="feeds_my_feeds_title">Os meus feeds</string>
     <string name="feeds_discover_feeds_title">Descobrir feeds</string>
     <string name="feeds_discover_feeds_created_by">Criado por %1$s</string>
     <string name="feeds_unsubscribe">Anular subscrição</string>
     <string name="feeds_subscribe">Subscrever</string>
-
     <string name="profile_tab_timeline">Publicações</string>
     <string name="profile_tab_timeline_with_reply">Publicações e respostas</string>
     <string name="profile_tab_likes">Gostos</string>
     <string name="profile_tab_media">Multimédia</string>
-
+    <string name="illustrations_title">Ilustrações</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Classificação Semanal</string>
+    <string name="pixiv_ranking_month_title">Classificação Mensal</string>
+    <string name="pixiv_ranking_day_male_title">Classificação Masculina</string>
+    <string name="pixiv_ranking_day_female_title">Classificação Feminina</string>
+    <string name="pixiv_ranking_week_original_title">Classificação original</string>
+    <string name="pixiv_ranking_week_rookie_title">Classificação Inicial</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">Definições de separador</string>
-
-
     <string name="dm_list_title">Mensagens diretas</string>
     <string name="dm_list_empty">Nenhuma mensagem direta</string>
     <string name="dm_list_error">Falha ao carregar mensagens diretas</string>
@@ -426,17 +435,12 @@
     <string name="dm_sending">A enviar</string>
     <string name="dm_leave">Sair da conversa</string>
     <string name="dm_to_profile">Mostrar perfil</string>
-
-
     <string name="notification_login_expired">Sessão expirada para %1$s</string>
-
     <string name="following_title">Seguindo</string>
     <string name="fans_title">Seguidores</string>
-
     <string name="local_history_search_placeholder">Pesquisar publicações e perfis em cache</string>
     <string name="local_history_search_status_title">Publicações</string>
     <string name="local_history_search_user_title">Utilizador</string>
-
     <string name="rss_sources_title">Subscrições</string>
     <string name="add_rss_source">Adicionar Subscrição</string>
     <string name="edit_rss_source">Editar Subscrição</string>
@@ -444,9 +448,8 @@
     <string name="opml_import">Importar de OPML</string>
     <string name="opml_export">Exportar para OPML</string>
     <string name="export_completed">Exportação concluída</string>
-
     <string name="rss_sources_title_label">Título</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL de RSS</string>
     <string name="rss_title">Subscrições</string>
     <string name="empty_rss_sources">Nenhuma subscrição</string>
     <string name="rss_sources_rss_hub_host_label">Servidor RSSHub</string>
@@ -463,7 +466,6 @@
     <string name="mastodon_local_timeline">Linha do tempo local</string>
     <string name="subscription_url_hint">Cole um URL de feed RSS ou um URL de instância Mastodon</string>
     <string name="rss_sources_display_mode">Modo de visualização</string>
-
     <string name="rss_detail_open_in_browser">Abrir no navegador</string>
     <string name="rss_detail_share">Partilhar hiperligação</string>
     <string name="rss_detail_tldr">Resumir</string>
@@ -472,10 +474,8 @@
     <string name="rss_detail_tldr_loading">A resumir…</string>
     <string name="rss_detail_translate">Traduzir</string>
     <string name="rss_detail_translate_error">Falha ao traduzir</string>
-
     <string name="emoji_picker_recent">Recentes</string>
     <string name="emoji_picker_search">Pesquisar</string>
-
     <string name="podcast_host">Anfitrião</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Orador</string>
@@ -483,7 +483,6 @@
     <string name="podcast_leave">Sair</string>
     <string name="podcast_ended">Podcast terminado</string>
     <string name="podcast_living">Em direto</string>
-
     <string name="home_tab_antennas_title">Antenas</string>
     <string name="home_tab_channels_title">Canais</string>
     <string name="misskey_channel_tab_following">Seguindo</string>
@@ -494,30 +493,25 @@
     <string name="home_tab_mixed_timeline_title">Misto</string>
     <string name="tab_settings_mixed_timeline">Ativar separador de linha do tempo mista</string>
     <string name="tab_settings_mixed_timeline_desc">Combinar publicações de todos os separadores num único separador inicial.</string>
-    <string name="home_tab_social_timeline_title">Social</string>
-    <string name="social_title">Social</string>
+    <string name="home_tab_social_timeline_title">Sócio</string>
+    <string name="social_title">Sócio</string>
     <string name="antenna_title">Antenas</string>
     <string name="liked_title">Gostos</string>
     <string name="all_rss_feeds_title">Todas as subscrições</string>
     <string name="posts_title">Publicações</string>
-
     <string name="deeplink_account_selection_title">Selecionar conta</string>
     <string name="deeplink_account_selection_message">Selecione uma conta para abrir esta hiperligação</string>
     <string name="deeplink_account_selection_browser">Abrir no navegador</string>
-
     <string name="block_user_title">Bloquear utilizador</string>
     <string name="block_user_description">Tem a certeza de que deseja bloquear este utilizador?</string>
     <string name="unblock_user_title">Desbloquear utilizador</string>
     <string name="unblock_user_description">Tem a certeza de que deseja desbloquear este utilizador?</string>
-
     <string name="mute_user_title">Silenciar utilizador</string>
     <string name="mute_user_description">Tem a certeza de que deseja silenciar este utilizador?</string>
     <string name="unmute_user_title">Reativar som do utilizador</string>
     <string name="unmute_user_description">Tem a certeza de que deseja reativar o som deste utilizador?</string>
-
     <string name="report_user_title">Denunciar utilizador</string>
     <string name="report_user_description">Tem a certeza de que deseja denunciar este utilizador?</string>
-
     <string name="settings_storage_export_data">Exportar dados</string>
     <string name="settings_storage_export_data_description">Exportar todos os dados, incluindo contas e credenciais. Mantenha o ficheiro seguro.</string>
     <string name="settings_storage_import_data">Importar dados</string>
@@ -528,7 +522,6 @@
     <string name="import_error">Falha na importação</string>
     <string name="import_confirmation_title">Confirmar importação</string>
     <string name="import_confirmation_message">Isto irá importar dados do ficheiro selecionado. Os registos existentes com IDs correspondentes serão substituídos. Continuar?</string>
-
     <string name="tab_settings_add_group">Adicionar grupo</string>
     <string name="tab_settings_add_tab">Adicionar separador</string>
     <string name="tab_settings_edit_group">Editar grupo</string>

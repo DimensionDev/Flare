@@ -1,24 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">登录</string>
     <string name="navigate_back">返回</string>
-
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
     <string name="home_tab_discover_title">发现</string>
-
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%1$d 条新动态</item>
         <item quantity="other">%1$d 条新动态</item>
     </plurals>
-
     <string name="notification_tab_all_title">全部</string>
     <string name="notification_tab_mentions_title">提及</string>
     <string name="notification_tab_comments_title">评论</string>
     <string name="notification_tab_likes_title">喜欢</string>
-
     <string name="compose_title">撰写</string>
     <string name="compose_reply_title">回复</string>
     <string name="compose_quote_title">引用</string>
@@ -46,8 +40,41 @@
     <string name="compose_close_confirm_message">您有未保存的更改。在关闭前将其保存为草稿吗？</string>
     <string name="compose_save_draft">保存</string>
     <string name="compose_close_discard">舍弃</string>
+    <string name="status_insight_title">帖子视图</string>
+    <string name="status_insight_send">发送</string>
+    <string name="status_insight_error">无法分析此帖子。</string>
+    <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>
+    <string name="status_insight_trace_images_unsupported_fallback">图像不被支持；重试文本…</string>
+    <string name="status_insight_trace_agent_started">开始分析…</string>
+    <string name="status_insight_trace_strategy_started">规划分析…</string>
+    <string name="status_insight_trace_strategy_completed">分析计划已完成</string>
+    <string name="status_insight_trace_subgraph_started">进入分析阶段…</string>
+    <string name="status_insight_trace_subgraph_completed">分析阶段已完成</string>
+    <string name="status_insight_trace_subgraph_failed">分析阶段失败</string>
+    <string name="status_insight_trace_model_response_received">正在读取模型响应…</string>
+    <string name="status_insight_trace_streaming_completed">响应流完成</string>
+    <string name="status_insight_trace_streaming_failed">响应流失败</string>
+    <string name="status_insight_trace_running_step">运行分析步骤…</string>
+    <string name="status_insight_trace_step_completed">分析步骤已完成</string>
+    <string name="status_insight_trace_step_failed">分析步骤失败</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">帖子上下文已加载</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">帖子上下文输入被拒绝</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">加载帖子上下文失败</string>
+    <string name="status_insight_trace_tool_search_status_started">正在搜索…</string>
+    <string name="status_insight_trace_tool_search_status_completed">搜索完成</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">搜索输入被拒绝</string>
+    <string name="status_insight_trace_tool_search_status_failed">搜索失败</string>
+    <string name="status_insight_trace_agent_completed">正在完成分析…</string>
+    <string name="status_insight_trace_agent_failed">分析失败</string>
+    <string name="status_insight_trace_agent_closing">结束分析…</string>
     <string name="ask_ai">问问AI</string>
     <string name="agent_chat_title">AI 聊天</string>
+    <string name="agent_history_title">闪光代理</string>
+    <string name="agent_history_empty">暂无代理聊天历史记录。</string>
     <string name="agent_chat_input_placeholder">想问什么都可以…</string>
     <string name="agent_chat_send">发送</string>
     <string name="agent_chat_thinking">正在思考…</string>
@@ -57,9 +84,7 @@
     <string name="draft_box_retry">重试</string>
     <string name="draft_box_send">发送</string>
     <string name="settings_draft_box_description">查看、编辑并重新发送已保存的草稿</string>
-
     <string name="settings_title">设置</string>
-
     <string name="settings_accounts_title">账户</string>
     <string name="settings_accounts_subtitle">管理已登录的账户</string>
     <string name="settings_appearance_title">外观</string>
@@ -80,9 +105,7 @@
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我们的 Telegram 群组</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">加入我们的 Discord 服务器</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">加入我们的 Line 群组</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">帮助我们翻译 Flare</string>
@@ -132,6 +155,8 @@
     <string name="settings_ai_config_tap_to_edit">点击编辑</string>
     <string name="settings_ai_config_entable_translation">启用 AI 翻译</string>
     <string name="settings_ai_config_translation_description">使用 AI 代替谷歌翻译。翻译可能需要较长时间。</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">启用 AI 摘要</string>
     <string name="settings_ai_config_tldr_description">使用 AI 总结长动态。适用于超过 500 字符的动态。</string>
     <string name="settings_ai_config_enable_pre_translation">启用自动翻译</string>
@@ -142,7 +167,7 @@
     <string name="settings_ai_config_translate_provider_description">选择翻译内容的服务器</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">谷歌翻译 (网页版)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl">深度</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API 密钥</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro 端点</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">使用 api.deepl.com 而非免费的 api-free.deepl.com 端点。</string>
@@ -168,19 +193,14 @@
     <string name="settings_nostr_relays_add_dialog_title">添加中继器</string>
     <string name="settings_nostr_relays_placeholder">输入中继器 URL</string>
     <string name="settings_nostr_relays_empty">未添加中继器</string>
-
     <string name="status_loadmore_error_retry">重试</string>
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击重新登录</string>
     <string name="login_expired_relogin">重新登录</string>
-
     <string name="service_select_welcome_title">欢迎使用 Flare</string>
     <string name="service_select_welcome_message">Flare 是一款适用于 Android 的社交媒体客户端。\n选择一个服务进行连接并开始使用。</string>
-
     <string name="mastodon_login_verify_message">正在验证您的凭据…</string>
-
     <string name="status_title">动态</string>
-
     <string name="misskey_visibility_public">公开</string>
     <string name="misskey_visibility_home">主页</string>
     <string name="misskey_visibility_followers">关注者</string>
@@ -189,51 +209,39 @@
     <string name="misskey_visibility_home_description">仅此实例上的用户可以看到此动态</string>
     <string name="misskey_visibility_followers_description">仅关注者可以看到此动态</string>
     <string name="misskey_visibility_specified_description">仅提及的用户可以看到此动态</string>
-
     <string name="bluesky_login_username_hint">用户名</string>
     <string name="bluesky_login_password_hint">密码</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA 验证码</string>
     <string name="bluesky_login_oauth_button">使用 OAuth 登录</string>
     <string name="bluesky_login_use_password_button">使用密码</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth 可能仍不稳定。如果您遇到问题，请使用密码登录。</string>
-
     <string name="report_title">举报</string>
     <string name="report_description">此动态有什么问题？</string>
-
     <string name="report_reason_spam_title">垃圾信息</string>
     <string name="report_reason_violation_title">违法或紧急情况</string>
     <string name="report_reason_misleading_title">误导性内容</string>
     <string name="report_reason_sexual_title">违规色情内容</string>
     <string name="report_reason_rude_title">反社会行为</string>
     <string name="report_reason_other_title">其他</string>
-
     <string name="report_reason_spam_description">过度的提及或回复</string>
     <string name="report_reason_violation_description">明显违反法律或服务条款的内容</string>
     <string name="report_reason_misleading_description">此动态具有误导性</string>
     <string name="report_reason_sexual_description">未标记的裸露或色情内容</string>
     <string name="report_reason_rude_description">骚扰、恶意挑衅或不宽容行为</string>
     <string name="report_reason_other_description">上述选项未涵盖的问题</string>
-
     <string name="delete_status_title">删除</string>
     <string name="delete_status_message">删除此动态吗？</string>
-
     <string name="mastodon_report_title">举报</string>
     <string name="mastodon_report_description">您确定要举报此项吗？</string>
-
     <string name="more">更多</string>
-
     <string name="discover_search_placeholder">搜索</string>
     <string name="discover_users">推荐用户</string>
     <string name="discover_status">热门动态</string>
     <string name="discover_hashtags">热门话题</string>
-
     <string name="search_users">用户</string>
     <string name="search_status">动态</string>
-
     <string name="quick_menu_add_account">添加账户</string>
-
     <string name="settings_appearance_generic">通用</string>
-
     <string name="settings_appearance_show_actions">显示操作按钮</string>
     <string name="settings_appearance_show_actions_description">在每条动态下方显示操作按钮</string>
     <string name="settings_appearance_post_action_style">动态操作样式</string>
@@ -248,6 +256,8 @@
     <string name="settings_appearance_show_numbers_description">在每条动态下方显示计数</string>
     <string name="settings_appearance_show_cw_img">显示敏感内容</string>
     <string name="settings_appearance_show_cw_img_description">始终显示动态中的敏感媒体</string>
+    <string name="settings_appearance_expand_content_warning">显示内容警告背后的内容</string>
+    <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保留媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中以原始宽高比显示媒体</string>
     <string name="settings_appearance_video_autoplay">视频自动播放</string>
@@ -290,8 +300,8 @@
     <string name="settings_appearance_bottombar_behavior">底栏行为</string>
     <string name="settings_appearance_bottombar_behavior_description">选择底部导航栏的行为</string>
     <string name="settings_appearance_bottombar_behavior_fixed">固定</string>
-    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">滚动时隐藏</string>
-    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">滚动时最小化</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">隐藏</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">收起</string>
     <string name="settings_appearance_show_bottom_bar_labels">显示底栏文字</string>
     <string name="settings_appearance_show_bottom_bar_labels_description">在底部导航和侧边栏显示文字标签</string>
     <string name="settings_appearance_deck_mode">分栏模式 (Deck)</string>
@@ -302,27 +312,20 @@
     <string name="settings_appearance_full_width_post_description">让动态占据全部可用宽度</string>
     <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
     <string name="settings_appearance_absolute_timestamp_description">在动态上显示精确的时间戳</string>
-
     <string name="settings_appearance_show_platform_logo">显示来源平台图标</string>
     <string name="settings_appearance_show_platform_logo_description">显示每条动态来自哪个平台</string>
-
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">移除 %1$s MB 缓存图片</string>
-
     <string name="settings_storage_clear_database">清除缓存数据库</string>
     <string name="settings_storage_clear_database_description">移除 %1$s 个缓存用户和 %2$s 条缓存动态</string>
     <string name="settings_storage_app_log">应用日志</string>
     <string name="settings_storage_app_log_description">查看、保存或清除应用日志</string>
-
     <string name="service_select_instance_input_placeholder">实例 URL</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">未找到实例</string>
-
     <string name="media_viewer_title">媒体查看器</string>
-
     <string name="settings_accounts_remove">移除</string>
     <string name="settings_accounts_remove_confirm">您确定要从此设备移除账户 %1$s 吗？</string>
-
     <string name="media_menu_save">保存图片</string>
     <string name="media_menu_share_image">分享图片</string>
     <string name="media_menu_copy_link">复制链接</string>
@@ -333,7 +336,6 @@
     <string name="media_save_fail">保存失败</string>
     <string name="media_alt_text">替代文本</string>
     <string name="media_is_downloading">媒体仍在下载中。请稍后再试。</string>
-
     <string name="settings_side_panel_empty">默认情况下，侧边栏遵循当前账户的平台。</string>
     <string name="tab_settings_add">添加</string>
     <string name="tab_settings_drag">拖动</string>
@@ -342,9 +344,7 @@
     <string name="tab_settings_default">默认</string>
     <string name="tab_settings_list">列表</string>
     <string name="tab_settings_feed">馈送 (Feeds)</string>
-
     <string name="local_filter_add">添加过滤器</string>
-
     <string name="local_filter_edit_title">编辑过滤器</string>
     <string name="local_filter_add_title">添加过滤器</string>
     <string name="local_filter_keyword">关键词</string>
@@ -354,27 +354,20 @@
     <string name="local_filter_for_search">应用到搜索</string>
     <string name="local_filter_regex">使用正则表达式</string>
     <string name="local_filter_delete">删除过滤器</string>
-
     <string name="delete">删除</string>
-
     <string name="mastodon_tab_local_title">本地</string>
     <string name="mastodon_tab_public_title">公共</string>
-
     <string name="home_tab_featured_title">精选</string>
     <string name="home_tab_bookmarks_title">书签</string>
     <string name="home_tab_favorite_title">收藏</string>
     <string name="home_tab_list_title">列表</string>
     <string name="home_tab_feeds_title">馈送</string>
-
     <string name="tab_settings_primary">主选项卡</string>
     <string name="tab_settings_secondary">次选项卡</string>
-
     <string name="status_detail_comment">评论</string>
     <string name="status_detail_repost">转发</string>
-
     <string name="account_item_error_title">错误</string>
     <string name="account_item_error_message">加载账户失败</string>
-
     <string name="edit_tab_title">编辑选项卡</string>
     <string name="edit_tab_name">名称</string>
     <string name="edit_tab_name_placeholder">选项卡名称</string>
@@ -382,7 +375,6 @@
     <string name="edit_tab_with_avatar">显示头像</string>
     <string name="edit_tab_enabled">在混合时间轴中显示</string>
     <string name="edit_tab_enabled_description">当此时间轴被包含在混合时间轴或分组中时显示。</string>
-
     <string name="list_add">添加列表</string>
     <string name="list_edit">编辑列表</string>
     <string name="list_delete">删除列表</string>
@@ -404,23 +396,26 @@
     <string name="edit_list_member_remove">移除</string>
     <string name="list_create_description">列表描述</string>
     <string name="list_create_description_hint">列表描述</string>
-
     <string name="edit_account_list_title">编辑账户列表</string>
-
     <string name="feeds_my_feeds_title">我的馈送</string>
     <string name="feeds_discover_feeds_title">发现馈送</string>
     <string name="feeds_discover_feeds_created_by">由 %1$s 创建</string>
     <string name="feeds_unsubscribe">取消订阅</string>
     <string name="feeds_subscribe">订阅</string>
-
     <string name="profile_tab_timeline">动态</string>
     <string name="profile_tab_timeline_with_reply">动态与回复</string>
     <string name="profile_tab_likes">喜欢</string>
     <string name="profile_tab_media">媒体</string>
-
+    <string name="illustrations_title">说明</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">每周排名</string>
+    <string name="pixiv_ranking_month_title">每月排名</string>
+    <string name="pixiv_ranking_day_male_title">男性排名</string>
+    <string name="pixiv_ranking_day_female_title">女性排名</string>
+    <string name="pixiv_ranking_week_original_title">原始排名</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">选项卡设置</string>
-
-
     <string name="dm_list_title">私信</string>
     <string name="dm_list_empty">暂无私信</string>
     <string name="dm_list_error">加载私信失败</string>
@@ -431,17 +426,12 @@
     <string name="dm_sending">正在发送</string>
     <string name="dm_leave">退出对话</string>
     <string name="dm_to_profile">显示个人资料</string>
-
-
     <string name="notification_login_expired">%1$s 的登录已过期</string>
-
     <string name="following_title">正在关注</string>
     <string name="fans_title">关注者</string>
-
     <string name="local_history_search_placeholder">搜索缓存的动态和个人资料</string>
     <string name="local_history_search_status_title">动态</string>
     <string name="local_history_search_user_title">用户</string>
-
     <string name="rss_sources_title">订阅</string>
     <string name="add_rss_source">添加订阅</string>
     <string name="edit_rss_source">编辑订阅</string>
@@ -449,9 +439,8 @@
     <string name="opml_import">从 OPML 导入</string>
     <string name="opml_export">导出为 OPML</string>
     <string name="export_completed">导出已完成</string>
-
     <string name="rss_sources_title_label">标题</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">订阅</string>
     <string name="empty_rss_sources">暂无订阅</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub 域名</string>
@@ -468,7 +457,6 @@
     <string name="mastodon_local_timeline">本站时间轴</string>
     <string name="subscription_url_hint">粘贴 RSS 馈送 URL 或 Mastodon 实例 URL</string>
     <string name="rss_sources_display_mode">显示模式</string>
-
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_share">分享链接</string>
     <string name="rss_detail_tldr">总结</string>
@@ -477,10 +465,8 @@
     <string name="rss_detail_tldr_loading">正在总结…</string>
     <string name="rss_detail_translate">翻译</string>
     <string name="rss_detail_translate_error">翻译失败</string>
-
     <string name="emoji_picker_recent">最近</string>
     <string name="emoji_picker_search">搜索</string>
-
     <string name="podcast_host">主持人</string>
     <string name="podcast_title">播客</string>
     <string name="podcast_speaker">发言者</string>
@@ -488,7 +474,6 @@
     <string name="podcast_leave">退出</string>
     <string name="podcast_ended">播客已结束</string>
     <string name="podcast_living">正在直播</string>
-
     <string name="home_tab_antennas_title">天线 (Antennas)</string>
     <string name="home_tab_channels_title">频道</string>
     <string name="misskey_channel_tab_following">正在关注</string>
@@ -505,24 +490,19 @@
     <string name="liked_title">已赞</string>
     <string name="all_rss_feeds_title">所有订阅</string>
     <string name="posts_title">帖子</string>
-
     <string name="deeplink_account_selection_title">选择账户</string>
     <string name="deeplink_account_selection_message">选择一个账户来打开此链接</string>
     <string name="deeplink_account_selection_browser">在浏览器中打开</string>
-
     <string name="block_user_title">屏蔽用户</string>
     <string name="block_user_description">您确定要屏蔽此用户吗？</string>
     <string name="unblock_user_title">取消屏蔽用户</string>
     <string name="unblock_user_description">您确定要取消屏蔽此用户吗？</string>
-
     <string name="mute_user_title">隐藏用户 (Mute)</string>
     <string name="mute_user_description">您确定要隐藏此用户吗？</string>
     <string name="unmute_user_title">取消隐藏用户</string>
     <string name="unmute_user_description">您确定要取消隐藏此用户吗？</string>
-
     <string name="report_user_title">举报用户</string>
     <string name="report_user_description">您确定要举报此用户吗？</string>
-
     <string name="settings_storage_export_data">导出数据</string>
     <string name="settings_storage_export_data_description">导出所有数据，包括账户和凭据。请妥善保管此文件。</string>
     <string name="settings_storage_import_data">导入数据</string>
@@ -533,7 +513,6 @@
     <string name="import_error">导入失败</string>
     <string name="import_confirmation_title">确认导入</string>
     <string name="import_confirmation_message">这将从所选文件导入数据。具有匹配 ID 的现有记录将被替换。要继续吗？</string>
-
     <string name="tab_settings_add_group">添加分组</string>
     <string name="tab_settings_add_tab">添加选项卡</string>
     <string name="tab_settings_edit_group">编辑分组</string>

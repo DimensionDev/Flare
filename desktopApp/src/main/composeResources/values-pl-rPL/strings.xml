@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">OK</string>
     <string name="cancel">Anuluj</string>
     <string name="delete">Usuń</string>
@@ -37,6 +37,15 @@
     <string name="profile_tab_timeline_with_reply">Wpisy i odpowiedzi</string>
     <string name="profile_tab_likes">Polubienia</string>
     <string name="profile_tab_media">Multimedia</string>
+    <string name="illustrations_title">Ilustracje</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Ranking tygodniowy</string>
+    <string name="pixiv_ranking_month_title">Ranking Miesięczny</string>
+    <string name="pixiv_ranking_day_male_title">Ranking mężczyzn</string>
+    <string name="pixiv_ranking_day_female_title">Ranking Kobiet</string>
+    <string name="pixiv_ranking_week_original_title">Oryginalny Ranking</string>
+    <string name="pixiv_ranking_week_rookie_title">Ranking Rookie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Zgłoś</string>
     <string name="report_description">Co jest nie tak z tym wpisem?</string>
     <string name="report_reason_spam_title">Spam</string>
@@ -84,6 +93,47 @@
     <string name="status_share_image">Udostępnij zrzut ekranu</string>
     <string name="status_share_via_fxembed">Udostępnij przez FxEmbed</string>
     <string name="status_share_via_fixvx">Udostępnij przez Fixvx</string>
+    <string name="status_insight_title">Wgląd postów</string>
+    <string name="agent_chat_title">Czat SI</string>
+    <string name="agent_chat_input_placeholder">Pytaj cokolwiek…</string>
+    <string name="agent_chat_send">Wyślij</string>
+    <string name="agent_chat_thinking">Myślenie…</string>
+    <string name="status_insight_analyzing">Analizowanie tego posta…</string>
+    <string name="status_insight_error">Nie można przeanalizować tego posta.</string>
+    <string name="status_insight_trace_loading_post_context">Wczytywanie kontekstu postu…</string>
+    <string name="status_insight_trace_post_context_loaded">Kontekst postu załadowany</string>
+    <string name="status_insight_trace_preparing_images">Przygotowywanie obrazów…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Obrazy nie są obsługiwane; ponowiono próbę z tekstem…</string>
+    <string name="status_insight_trace_agent_started">Rozpoczęcie analizy…</string>
+    <string name="status_insight_trace_strategy_started">Analiza planowania…</string>
+    <string name="status_insight_trace_strategy_completed">Plan analizy zakończony</string>
+    <string name="status_insight_trace_subgraph_started">Wejście do etapu analizy…</string>
+    <string name="status_insight_trace_subgraph_completed">Etap analizy zakończony</string>
+    <string name="status_insight_trace_subgraph_failed">Etap analizy nie powiódł się</string>
+    <string name="status_insight_trace_model_response_received">Czytanie odpowiedzi modelu…</string>
+    <string name="status_insight_trace_streaming_started">Strumieniowanie z %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Otrzymywanie odpowiedzi…</string>
+    <string name="status_insight_trace_streaming_completed">Strumień odpowiedzi zakończony</string>
+    <string name="status_insight_trace_streaming_failed">Strumień odpowiedzi nie powiodło się</string>
+    <string name="status_insight_trace_running_step">Uruchamianie analizy kroku…</string>
+    <string name="status_insight_trace_step_completed">Krok analizy zakończony</string>
+    <string name="status_insight_trace_step_failed">Krok analizy nie powiódł się</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Wczytywanie kontekstu postu…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Kontekst postu załadowany</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Wprowadzanie kontekstu postu zostało odrzucone</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Nie udało się załadować kontekstu posta</string>
+    <string name="status_insight_trace_tool_search_status_started">Wyszukiwanie…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Wyszukiwanie zakończone</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Pole wyszukiwania zostało odrzucone</string>
+    <string name="status_insight_trace_tool_search_status_failed">Wyszukiwanie nie powiodło się</string>
+    <string name="status_insight_trace_agent_completed">Zakończenie analizy…</string>
+    <string name="status_insight_trace_agent_failed">Analiza nie powiodła się</string>
+    <string name="status_insight_trace_agent_closing">Zamknięcie analizy…</string>
+    <string name="ask_ai">Zapytaj SI</string>
     <string name="list_add">Dodaj listę</string>
     <string name="list_edit">Edytuj listę</string>
     <string name="list_delete">Usuń listę</string>
@@ -159,6 +209,9 @@
     <string name="settings_guest_setting_description">Wybierz serwer, z którym połączy się tryb gościa</string>
     <string name="settings_local_history_title">Historia lokalna</string>
     <string name="settings_local_history_description">Przeszukuj wpisy i profile zapisane na tym urządzeniu</string>
+    <string name="settings_agent_history_title">Agent Flara</string>
+    <string name="settings_agent_history_description">Zobacz historię czatu Flare Agent</string>
+    <string name="agent_history_empty">Brak historii czatu agenta.</string>
     <string name="settings_app_logging_title">Logi aplikacji</string>
     <string name="settings_app_logging_save">Zapisz logi</string>
     <string name="settings_app_logging_clear">Wyczyść logi</string>
@@ -176,7 +229,7 @@
     <string name="settings_ai_config_type_openai">API zgodne z AI</string>
     <string name="settings_ai_config_api_key">Klucz API</string>
     <string name="settings_ai_config_api_key_hint">Wprowadź klucz API</string>
-    <string name="settings_ai_config_model">Model</string>
+    <string name="settings_ai_config_model">Wzór</string>
     <string name="settings_ai_config_model_description">Wybierz model z tego punktu końcowego</string>
     <string name="settings_ai_config_model_select">Wybierz model</string>
     <string name="settings_ai_config_model_loading">Ładowanie modeli…</string>
@@ -195,6 +248,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Nie ustawiono</string>
     <string name="settings_ai_config_entable_translation">Włącz tłumaczenie AI</string>
     <string name="settings_ai_config_translation_description">Używaj AI zamiast Google Translate. Tłumaczenia mogą trwać dłużej.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Włącz automatyczne tłumaczenie</string>
     <string name="settings_ai_config_pre_translation_description">Tłumacz nowo załadowane treści osi czasu i profili w tle i zapisuj wyniki. Może to zużywać dużą liczbę tokenów.</string>
     <string name="settings_ai_config_enable_tldr">Włącz podsumowania AI</string>
@@ -202,14 +257,14 @@
     <string name="settings_ai_config_translate_provider">Dostawca tłumaczeń</string>
     <string name="settings_ai_config_translate_provider_description">Wybierz usługę tłumaczącą treści</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
-    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
+    <string name="settings_ai_config_translate_provider_google_web">Tłumacz Google (Web)</string>
     <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">Klucz API DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Punkt końcowy DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Używaj api.deepl.com zamiast darmowego punktu końcowego api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Tłumaczenie Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Klucz API Google Cloud</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">Tłumacz Libre\'a</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">Bazowy URL LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Klucz API LibreTranslate</string>
     <string name="settings_translation_title">Tłumaczenie</string>
@@ -235,6 +290,8 @@
     <string name="settings_appearance_show_numbers_description">Pokazuj liczniki pod każdym wpisem</string>
     <string name="settings_appearance_show_cw_img">Pokaż treści wrażliwe</string>
     <string name="settings_appearance_show_cw_img_description">Zawsze pokazuj wrażliwe multimedia we wpisach</string>
+    <string name="settings_appearance_expand_content_warning">Pokaż zawartość za ostrzeżeniami o treści</string>
+    <string name="settings_appearance_expand_content_warning_description">Zawsze ujawniaj zawartość postów ukrytą przez ostrzeżenia o treściach</string>
     <string name="settings_appearance_expand_media">Zachowaj proporcje multimediów</string>
     <string name="settings_appearance_expand_media_description">Pokazuj multimedia w ich oryginalnych proporcjach na osiach czasu</string>
     <string name="settings_appearance_video_autoplay">Automatyczne odtwarzanie wideo</string>
@@ -283,7 +340,6 @@
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Dołącz do naszej grupy na Telegramie</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Dołącz do naszego serwera Discord</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomóż nam tłumaczyć Flare</string>
@@ -324,7 +380,7 @@
     <string name="edit_rss_source">Edytuj subskrypcję</string>
     <string name="delete_rss_source">Usuń subskrypcję</string>
     <string name="rss_sources_title_label">Tytuł</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Subskrypcje</string>
     <string name="empty_rss_sources">Brak subskrypcji</string>
     <string name="rss_sources_rss_hub_host_label">Host RSSHub</string>

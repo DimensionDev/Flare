@@ -1,14 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Удалить</string>
     <string name="done">Готово</string>
     <string name="cancel">Отмена</string>
-    <string name="ok">OK</string>
+    <string name="ok">ОК</string>
     <string name="profile_header_following_count">%1$s Подписки</string>
     <string name="profile_header_fans_count">%1$s Подписчики</string>
     <string name="profile_header_toots_count">%1$s Посты</string>
     <string name="profile_misskey_header_status_count">%1$s Посты</string>
     <string name="profile_header_button_follow">Подписаться</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Запросить подписку</string>
     <string name="profile_header_button_following">Вы подписаны</string>
     <string name="profile_header_button_requested">Запрос отправлен</string>
     <string name="profile_header_button_blocked">Заблокирован</string>
@@ -25,7 +26,7 @@
     <string name="mastodon_item_show_more">Показать больше</string>
     <string name="mastodon_item_show_less">Скрыть</string>
     <string name="mastodon_item_pinned">закрепил пост</string>
-    <string name="post_show_full_text">Показать весь текст</string>
+    <string name="post_show_full_text">Показать полностью</string>
     <string name="bluesky_notification_item_followed_you">подписался на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">лайкнул ваш пост</string>
     <string name="bluesky_notification_item_reblogged_your_status">сделал репост поста</string>
@@ -133,7 +134,7 @@
     <string name="translation_show_original">Показать оригинал</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="date_format_full">dd MMM yy H:mm</string>
     <string name="vvo_notification_like">Лайкнул ваш пост</string>
     <string name="user_follow_edit_list">Добавить/удалить из списка</string>
     <string name="list_empty">Списков нет</string>
@@ -169,7 +170,7 @@
     <string name="misskey_achievement_notes80000_description">Опубликуйте 80 000 заметок</string>
     <string name="misskey_achievement_notes90000_title">Вселенная заметок</string>
     <string name="misskey_achievement_notes90000_description">Опубликуйте 90 000 заметок</string>
-    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_title">ВСЕ ВАШИ ЗАМЕТКИ ПРИНАДЛЕЖАТ НАМ</string>
     <string name="misskey_achievement_notes100000_description">Опубликуйте 100 000 заметок</string>
     <string name="misskey_achievement_notes100000_flavor">Вам определенно есть что сказать.</string>
     <string name="misskey_achievement_login3_title">Новичок I</string>
@@ -269,7 +270,7 @@
     <string name="misskey_achievement_htl20npm_description">Добейтесь скорости вашей домашней ленты более 20 npm (заметок в минуту)</string>
     <string name="misskey_achievement_view_instance_chart_title">Аналитик</string>
     <string name="misskey_achievement_view_instance_chart_description">Просмотрите графики вашего инстанса</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Привет, мир!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Выведите \"hello world\" в Scratchpad</string>
     <string name="misskey_achievement_open3windows_title">Многооконность</string>
     <string name="misskey_achievement_open3windows_description">Откройте не менее 3 окон одновременно</string>
@@ -344,7 +345,7 @@
     <string name="edit_rss_source">Изменить подписку</string>
     <string name="delete_rss_source">Удалить подписку</string>
     <string name="rss_sources_title_label">Заголовок</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Подписки</string>
     <string name="empty_rss_sources">Подписок нет</string>
     <string name="mastodon_trending_statuses">Популярное</string>
@@ -393,6 +394,7 @@
     <string name="home_tab_featured_title">Популярное</string>
     <string name="home_tab_bookmarks_title">Закладки</string>
     <string name="home_tab_favorite_title">Избранное</string>
+    <string name="home_tab_following_title">Подписки</string>
     <string name="home_tab_list_title">Списки</string>
     <string name="home_tab_feeds_title">Ленты</string>
     <string name="dm_list_title">Личные сообщения</string>
@@ -402,7 +404,18 @@
     <string name="liked_title">Понравилось</string>
     <string name="all_rss_feeds_title">Все подписки</string>
     <string name="posts_title">Посты</string>
+    <string name="posts_with_replies_title">Сообщения &amp; Ответы</string>
+    <string name="media_title">Медиа</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютное время</string>
     <string name="settings_appearance_absolute_timestamp_description">Показывать точное время публикации</string>
     <string name="channel_title">Канал</string>
+    <string name="pixiv_ranking_week_title">Рейтинг за неделю</string>
+    <string name="pixiv_ranking_month_title">Рейтинг за месяц</string>
+    <string name="pixiv_ranking_day_male_title">Рейтинг мужчин</string>
+    <string name="pixiv_ranking_day_female_title">Женский рейтинг</string>
+    <string name="pixiv_ranking_week_original_title">Оригинальный Рейтинг</string>
+    <string name="pixiv_ranking_week_rookie_title">Рейтинг Новобранцев</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Иллюстрации</string>
+    <string name="manga_title">Manga</string>
 </resources>

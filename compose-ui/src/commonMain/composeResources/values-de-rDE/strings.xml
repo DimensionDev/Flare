@@ -1,15 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Löschen</string>
     <string name="done">Fertig</string>
     <string name="cancel">Abbrechen</string>
-    <string name="ok">OK</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s Ich folge</string>
     <string name="profile_header_fans_count">%1$s Follower</string>
     <string name="profile_header_toots_count">%1$s Beiträge</string>
     <string name="profile_misskey_header_status_count">%1$s Beiträge</string>
     <string name="profile_header_button_follow">Folgen</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Anfragefolgen</string>
     <string name="profile_header_button_following">Ich folge</string>
     <string name="profile_header_button_requested">Angefragt</string>
     <string name="profile_header_button_blocked">Blockiert</string>
@@ -170,7 +170,7 @@
     <string name="misskey_achievement_notes80000_description">Poste 80.000 Notizen</string>
     <string name="misskey_achievement_notes90000_title">Notizen-Universum</string>
     <string name="misskey_achievement_notes90000_description">Poste 90.000 Notizen</string>
-    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_title">ALL DEINE NOTIZEN GEHÖREN UNS</string>
     <string name="misskey_achievement_notes100000_description">Poste 100.000 Notizen</string>
     <string name="misskey_achievement_notes100000_flavor">Du hast wirklich viel zu sagen.</string>
     <string name="misskey_achievement_login3_title">Anfänger I</string>
@@ -272,7 +272,7 @@
     <string name="misskey_achievement_view_instance_chart_description">Betrachte die Statistiken deiner Instanz</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hallo Welt!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Gib \"hello world\" im Scratchpad aus</string>
-    <string name="misskey_achievement_open3windows_title">Multi-Window</string>
+    <string name="misskey_achievement_open3windows_title">Mehrfenstermodus</string>
     <string name="misskey_achievement_open3windows_description">Habe mindestens 3 Fenster gleichzeitig offen</string>
     <string name="misskey_achievement_drive_folder_circular_reference_title">Zirkelbezug</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Versuche, einen rekursiv verschachtelten Ordner in Drive zu erstellen</string>
@@ -298,7 +298,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Ein Spiel, bei dem man Kekse anklickt</string>
     <string name="misskey_achievement_cookie_clicked_description">Den Keks angeklickt</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Warte, bist du auf der richtigen Website?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Gehirntaucher</string>
     <string name="misskey_achievement_brain_diver_description">Poste den Link zu Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Test-Überlauf</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">Abonnement bearbeiten</string>
     <string name="delete_rss_source">Abonnement löschen</string>
     <string name="rss_sources_title_label">Titel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS-URL</string>
     <string name="rss_title">Abonnements</string>
     <string name="empty_rss_sources">Keine Abonnements</string>
     <string name="mastodon_trending_statuses">Trendende Beiträge</string>
@@ -384,7 +384,7 @@
     <string name="service_select_compatibility_warning">Dieser Server nutzt %1$s, Flare wird im Kompatibilitätsmodus ausgeführt. Einige Funktionen funktionieren möglicherweise nicht korrekt.</string>
     <string name="login_agreement">Durch die Anmeldung stimmst du den %1$s zu.</string>
     <string name="eula_privacy_policy">EULA und Datenschutzrichtlinie</string>
-    <string name="home_tab_home_title">Home</string>
+    <string name="home_tab_home_title">Start</string>
     <string name="home_tab_notifications_title">Benachrichtigungen</string>
     <string name="home_tab_me_title">Ich</string>
     <string name="home_tab_discover_title">Entdecken</string>
@@ -394,6 +394,7 @@
     <string name="home_tab_featured_title">Empfohlen</string>
     <string name="home_tab_bookmarks_title">Lesezeichen</string>
     <string name="home_tab_favorite_title">Favoriten</string>
+    <string name="home_tab_following_title">Abbonements</string>
     <string name="home_tab_list_title">Listen</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direktnachrichten</string>
@@ -403,7 +404,18 @@
     <string name="liked_title">Gefällt mir</string>
     <string name="all_rss_feeds_title">Alle Abonnements</string>
     <string name="posts_title">Beiträge</string>
+    <string name="posts_with_replies_title">Beiträge &amp; Antworten</string>
+    <string name="media_title">Medien</string>
     <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Exakte Zeitstempel bei Beiträgen anzeigen</string>
     <string name="channel_title">Kanal</string>
+    <string name="pixiv_ranking_week_title">Wöchentliche Rangliste</string>
+    <string name="pixiv_ranking_month_title">Monatliche Rangliste</string>
+    <string name="pixiv_ranking_day_male_title">Männliche Rangliste</string>
+    <string name="pixiv_ranking_day_female_title">Weibliche Rangliste</string>
+    <string name="pixiv_ranking_week_original_title">Ursprüngliche Rangliste</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Illustrationen</string>
+    <string name="manga_title">Manga</string>
 </resources>

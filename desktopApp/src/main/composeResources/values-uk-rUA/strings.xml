@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">ОК</string>
     <string name="cancel">Скасувати</string>
     <string name="delete">Видалити</string>
@@ -37,6 +37,15 @@
     <string name="profile_tab_timeline_with_reply">Дописи та відповіді</string>
     <string name="profile_tab_likes">Вподобайки</string>
     <string name="profile_tab_media">Медіа</string>
+    <string name="illustrations_title">Ілюстрації</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Щотижневий рейтинг</string>
+    <string name="pixiv_ranking_month_title">Щомісячний рейтинг</string>
+    <string name="pixiv_ranking_day_male_title">Чоловічий рейтинг</string>
+    <string name="pixiv_ranking_day_female_title">Рейтинг жінки</string>
+    <string name="pixiv_ranking_week_original_title">Оригінальний рейтинг</string>
+    <string name="pixiv_ranking_week_rookie_title">Рейтинг Нових Очків</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Поскаржитися</string>
     <string name="report_description">Що не так з цим дописом?</string>
     <string name="report_reason_spam_title">Спам</string>
@@ -84,6 +93,38 @@
     <string name="status_share_image">Поділитися скріншотом</string>
     <string name="status_share_via_fxembed">Поділитися через FxEmbed</string>
     <string name="status_share_via_fixvx">Поділитися через Fixvx</string>
+    <string name="status_insight_title">Поштова фінансова статистика</string>
+    <string name="agent_chat_title">Чат</string>
+    <string name="agent_chat_input_placeholder">Запитайте що-небудь…</string>
+    <string name="agent_chat_send">Надіслати</string>
+    <string name="agent_chat_thinking">Взаємохідна…</string>
+    <string name="status_insight_error">Неможливо аналізувати це повідомлення.</string>
+    <string name="status_insight_trace_post_context_loaded">Пост завантажений контекст</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Зображення не підтримуються; повторна спроба з текстом…</string>
+    <string name="status_insight_trace_agent_started">Початок аналізу…</string>
+    <string name="status_insight_trace_strategy_completed">План аналізу завершено</string>
+    <string name="status_insight_trace_subgraph_started">Етап аналізу…</string>
+    <string name="status_insight_trace_subgraph_completed">Стадія аналізу завершена</string>
+    <string name="status_insight_trace_subgraph_failed">Помилка аналізу стадії</string>
+    <string name="status_insight_trace_model_response_received">Читання відповіді моделі…</string>
+    <string name="status_insight_trace_streaming_started">Трансляція з %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Отримання відповіді…</string>
+    <string name="status_insight_trace_streaming_completed">Потік відповіді завершено</string>
+    <string name="status_insight_trace_streaming_failed">Помилка модуля відповіді</string>
+    <string name="status_insight_trace_running_step">Виконання кроку аналізу…</string>
+    <string name="status_insight_trace_step_completed">Крок аналізу завершено</string>
+    <string name="status_insight_trace_step_failed">Помилка аналізу</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Пост завантажений контекст</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Вхідне повідомлення про контекст повідомлення відхилено</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Не вдалося завантажити контекст повідомлення</string>
+    <string name="status_insight_trace_tool_search_status_started">Пошук…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Пошук завершено</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Поле пошуку відхилено</string>
+    <string name="status_insight_trace_tool_search_status_failed">Не вдалося виконати пошук</string>
+    <string name="status_insight_trace_agent_completed">Завершення аналізу…</string>
+    <string name="status_insight_trace_agent_failed">Помилка аналізу</string>
+    <string name="status_insight_trace_agent_closing">Закриття аналізу…</string>
+    <string name="ask_ai">Запитати ШІ</string>
     <string name="list_add">Додати список</string>
     <string name="list_edit">Редагувати список</string>
     <string name="list_delete">Видалити список</string>
@@ -159,6 +200,9 @@
     <string name="settings_guest_setting_description">Виберіть сервер, до якого підключається гостьовий режим</string>
     <string name="settings_local_history_title">Локальна історія</string>
     <string name="settings_local_history_description">Пошук дописів та профілів, кешованих на цьому пристрої</string>
+    <string name="settings_agent_history_title">Flare Agent</string>
+    <string name="settings_agent_history_description">Переглянути локальну історію чату Flare Agent</string>
+    <string name="agent_history_empty">Ще немає історії чатів.</string>
     <string name="settings_app_logging_title">Журнали додатка</string>
     <string name="settings_app_logging_save">Зберегти журнали</string>
     <string name="settings_app_logging_clear">Очистити журнали</string>
@@ -195,6 +239,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Не встановлено</string>
     <string name="settings_ai_config_entable_translation">Увімкнути переклад ШІ</string>
     <string name="settings_ai_config_translation_description">Використовувати ШІ замість Google Перекладача. Переклад може тривати довше.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Увімкнути автопереклад</string>
     <string name="settings_ai_config_pre_translation_description">Перекладати новий вміст стрічки та профілів у фоновому режимі та кешувати результати. Це може використовувати велику кількість токенів.</string>
     <string name="settings_ai_config_enable_tldr">Увімкнути ШІ-підсумки</string>
@@ -203,11 +249,11 @@
     <string name="settings_ai_config_translate_provider_description">Виберіть сервіс для перекладу вмісту</string>
     <string name="settings_ai_config_translate_provider_ai">ШІ</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Перекладач (Веб)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl">Глибокий</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">Ключ API DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Ендпоінт DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Використовувати api.deepl.com замість безкоштовного api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Перекладач Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Ключ API Google Cloud</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">Базовий URL LibreTranslate</string>
@@ -235,6 +281,8 @@
     <string name="settings_appearance_show_numbers_description">Показувати лічильники під кожним дописом</string>
     <string name="settings_appearance_show_cw_img">Показувати чутливий вміст</string>
     <string name="settings_appearance_show_cw_img_description">Завжди показувати чутливі медіа в дописах</string>
+    <string name="settings_appearance_expand_content_warning">Показувати попереджень про вміст</string>
+    <string name="settings_appearance_expand_content_warning_description">Завжди показувати зміст повідомлення, приховану за попередженнями про контент</string>
     <string name="settings_appearance_expand_media">Зберігати співвідношення сторін медіа</string>
     <string name="settings_appearance_expand_media_description">Показувати медіа в оригінальному співвідношенні сторін у стрічках</string>
     <string name="settings_appearance_video_autoplay">Автовідтворення відео</string>
@@ -281,11 +329,10 @@
     <string name="settings_appearance_show_platform_logo">Показувати іконки джерел</string>
     <string name="settings_appearance_show_platform_logo_description">Показувати, з якої платформи надійшов кожен допис</string>
     <string name="settings_about_source_code">Вихідний код</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Телеграма</string>
     <string name="settings_about_telegram_description">Приєднуйтесь до нашої групи в Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Приєднуйтесь до нашого сервера в Discord</string>
-    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization">Кравдін</string>
     <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
     <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="users">Користувачі</string>
@@ -324,7 +371,7 @@
     <string name="edit_rss_source">Редагувати підписку</string>
     <string name="delete_rss_source">Видалити підписку</string>
     <string name="rss_sources_title_label">Заголовок</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Підписки</string>
     <string name="empty_rss_sources">Немає підписок</string>
     <string name="rss_sources_rss_hub_host_label">Хост RSSHub</string>

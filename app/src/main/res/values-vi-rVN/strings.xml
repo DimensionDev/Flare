@@ -1,23 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Đăng nhập</string>
     <string name="navigate_back">Quay lại</string>
-
     <string name="home_tab_home_title">Trang chủ</string>
     <string name="home_tab_notifications_title">Thông báo</string>
     <string name="home_tab_me_title">Tôi</string>
     <string name="home_tab_discover_title">Khám phá</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="other">%1$d bài đăng mới</item>
     </plurals>
-
     <string name="notification_tab_all_title">Tất cả</string>
     <string name="notification_tab_mentions_title">Lượt nhắc</string>
     <string name="notification_tab_comments_title">Bình luận</string>
     <string name="notification_tab_likes_title">Lượt thích</string>
-
     <string name="compose_title">Soạn bài</string>
     <string name="compose_reply_title">Trả lời</string>
     <string name="compose_quote_title">Trích dẫn</string>
@@ -45,15 +40,15 @@
     <string name="compose_close_confirm_message">Bạn có những thay đổi chưa được lưu. Lưu bài này làm bản nháp trước khi đóng?</string>
     <string name="compose_save_draft">Lưu</string>
     <string name="compose_close_discard">Hủy bỏ</string>
+    <string name="status_insight_send">Gửi</string>
+    <string name="agent_chat_send">Gửi</string>
     <string name="draft_box_title">Bản nháp</string>
     <string name="draft_box_empty">Chưa có bản nháp nào</string>
     <string name="draft_box_edit">Sửa</string>
     <string name="draft_box_retry">Thử lại</string>
     <string name="draft_box_send">Gửi</string>
     <string name="settings_draft_box_description">Xem, sửa và gửi lại các bản nháp đã lưu</string>
-
     <string name="settings_title">Cài đặt</string>
-
     <string name="settings_accounts_title">Tài khoản</string>
     <string name="settings_accounts_subtitle">Quản lý các tài khoản đã đăng nhập</string>
     <string name="settings_appearance_title">Giao diện</string>
@@ -74,9 +69,7 @@
     <string name="settings_about_source_code">Mã nguồn</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Tham gia nhóm Telegram của chúng tôi</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Tham gia máy chủ Discord của chúng tôi</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Tham gia nhóm Line của chúng tôi</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Giúp chúng tôi dịch Flare</string>
@@ -134,15 +127,12 @@
     <string name="settings_ai_config_tldr_prompt">Câu lệnh tóm tắt</string>
     <string name="settings_ai_config_translate_provider">Nhà cung cấp dịch thuật</string>
     <string name="settings_ai_config_translate_provider_description">Chọn dịch vụ dịch nội dung</string>
-    <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Dịch (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">Khóa API DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Điểm cuối DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Sử dụng api.deepl.com thay vì điểm cuối api-free.deepl.com miễn phí.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translation</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Khóa API Google Cloud</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL cơ sở LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Khóa API LibreTranslate</string>
     <string name="settings_translation_title">Dịch thuật</string>
@@ -162,19 +152,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Thêm relay</string>
     <string name="settings_nostr_relays_placeholder">Nhập URL relay</string>
     <string name="settings_nostr_relays_empty">Chưa thêm relay nào</string>
-
     <string name="status_loadmore_error_retry">Thử lại</string>
     <string name="login_expired">Phiên đăng nhập đã hết hạn</string>
     <string name="login_expired_message">Chạm để đăng nhập lại</string>
     <string name="login_expired_relogin">Đăng nhập lại</string>
-
     <string name="service_select_welcome_title">Chào mừng đến với Flare</string>
     <string name="service_select_welcome_message">Flare là một ứng dụng mạng xã hội dành cho Android.\nHãy chọn một dịch vụ để kết nối và bắt đầu.</string>
-
     <string name="mastodon_login_verify_message">Đang xác thực thông tin của bạn…</string>
-
     <string name="status_title">Bài đăng</string>
-
     <string name="misskey_visibility_public">Công khai</string>
     <string name="misskey_visibility_home">Trang chủ</string>
     <string name="misskey_visibility_followers">Người theo dõi</string>
@@ -183,51 +168,39 @@
     <string name="misskey_visibility_home_description">Chỉ người dùng trên máy chủ này mới có thể thấy bài đăng này</string>
     <string name="misskey_visibility_followers_description">Chỉ người theo dõi mới có thể thấy bài đăng này</string>
     <string name="misskey_visibility_specified_description">Chỉ những người dùng được nhắc đến mới có thể thấy bài đăng này</string>
-
     <string name="bluesky_login_username_hint">Tên người dùng</string>
     <string name="bluesky_login_password_hint">Mật khẩu</string>
     <string name="bluesky_login_auth_factor_token_hint">Mã 2FA</string>
     <string name="bluesky_login_oauth_button">Đăng nhập bằng OAuth</string>
     <string name="bluesky_login_use_password_button">Sử dụng mật khẩu</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth có thể vẫn chưa ổn định. Nếu bạn gặp vấn đề, hãy sử dụng đăng nhập bằng mật khẩu.</string>
-
     <string name="report_title">Báo cáo</string>
     <string name="report_description">Có vấn đề gì với bài đăng này?</string>
-
     <string name="report_reason_spam_title">Rác (Spam)</string>
     <string name="report_reason_violation_title">Bất hợp pháp hoặc khẩn cấp</string>
     <string name="report_reason_misleading_title">Gây hiểu lầm</string>
     <string name="report_reason_sexual_title">Nội dung tình dục không mong muốn</string>
     <string name="report_reason_rude_title">Hành vi thiếu văn hóa</string>
     <string name="report_reason_other_title">Khác</string>
-
     <string name="report_reason_spam_description">Nhắc đến hoặc trả lời quá mức</string>
     <string name="report_reason_violation_description">Vi phạm rõ ràng luật pháp hoặc điều khoản dịch vụ</string>
     <string name="report_reason_misleading_description">Bài đăng này gây hiểu lầm</string>
     <string name="report_reason_sexual_description">Ảnh khỏa thân hoặc nội dung khiêu dâm không được dán nhãn</string>
     <string name="report_reason_rude_description">Quấy rối, công kích hoặc không khoan dung</string>
     <string name="report_reason_other_description">Một vấn đề không nằm trong các lựa chọn trên</string>
-
     <string name="delete_status_title">Xóa</string>
     <string name="delete_status_message">Xóa bài đăng này?</string>
-
     <string name="mastodon_report_title">Báo cáo</string>
     <string name="mastodon_report_description">Bạn có chắc chắn muốn báo cáo nội dung này không?</string>
-
     <string name="more">Thêm</string>
-
     <string name="discover_search_placeholder">Tìm kiếm</string>
     <string name="discover_users">Người dùng gợi ý</string>
     <string name="discover_status">Bài đăng thịnh hành</string>
     <string name="discover_hashtags">Hashtag thịnh hành</string>
-
     <string name="search_users">Người dùng</string>
     <string name="search_status">Bài đăng</string>
-
     <string name="quick_menu_add_account">Thêm tài khoản</string>
-
     <string name="settings_appearance_generic">Chung</string>
-
     <string name="settings_appearance_show_actions">Hiển thị hành động</string>
     <string name="settings_appearance_show_actions_description">Hiển thị các nút hành động bên dưới mỗi bài đăng</string>
     <string name="settings_appearance_post_action_style">Kiểu hành động bài đăng</string>
@@ -296,27 +269,20 @@
     <string name="settings_appearance_full_width_post_description">Cho phép bài đăng trải rộng toàn bộ chiều rộng khả dụng</string>
     <string name="settings_appearance_absolute_timestamp">Dấu thời gian tuyệt đối</string>
     <string name="settings_appearance_absolute_timestamp_description">Hiển thị thời gian chính xác trên các bài đăng</string>
-
     <string name="settings_appearance_show_platform_logo">Hiển thị biểu tượng nền tảng nguồn</string>
     <string name="settings_appearance_show_platform_logo_description">Hiển thị bài đăng đến từ nền tảng nào</string>
-
     <string name="settings_storage_clear_image_cache">Xóa bộ nhớ tạm ảnh</string>
     <string name="settings_storage_clear_image_cache_description">Gỡ bỏ %1$s MB ảnh trong bộ nhớ tạm</string>
-
     <string name="settings_storage_clear_database">Xóa bộ nhớ tạm cơ sở dữ liệu</string>
     <string name="settings_storage_clear_database_description">Gỡ bỏ %1$s người dùng và %2$s bài đăng trong bộ nhớ tạm</string>
     <string name="settings_storage_app_log">Nhật ký ứng dụng</string>
     <string name="settings_storage_app_log_description">Xem, lưu hoặc xóa nhật ký ứng dụng</string>
-
     <string name="service_select_instance_input_placeholder">URL máy chủ</string>
     <string name="service_select_next_button">Tiếp theo</string>
     <string name="service_select_empty_message">Không tìm thấy máy chủ nào</string>
-
     <string name="media_viewer_title">Trình xem phương tiện</string>
-
     <string name="settings_accounts_remove">Gỡ bỏ</string>
     <string name="settings_accounts_remove_confirm">Bạn có chắc chắn muốn gỡ tài khoản %1$s khỏi thiết bị này không?</string>
-
     <string name="media_menu_save">Lưu ảnh</string>
     <string name="media_menu_share_image">Chia sẻ ảnh</string>
     <string name="media_menu_copy_link">Sao chép liên kết</string>
@@ -327,7 +293,6 @@
     <string name="media_save_fail">Lưu thất bại</string>
     <string name="media_alt_text">Văn bản thay thế</string>
     <string name="media_is_downloading">Phương tiện vẫn đang được tải xuống. Hãy thử lại sau giây lát.</string>
-
     <string name="settings_side_panel_empty">Theo mặc định, bảng điều khiển bên sẽ tuân theo nền tảng của tài khoản hiện tại.</string>
     <string name="tab_settings_add">Thêm</string>
     <string name="tab_settings_drag">Kéo</string>
@@ -336,9 +301,7 @@
     <string name="tab_settings_default">Mặc định</string>
     <string name="tab_settings_list">Danh sách</string>
     <string name="tab_settings_feed">Nguồn tin</string>
-
     <string name="local_filter_add">Thêm bộ lọc</string>
-
     <string name="local_filter_edit_title">Sửa bộ lọc</string>
     <string name="local_filter_add_title">Thêm bộ lọc</string>
     <string name="local_filter_keyword">Từ khóa</string>
@@ -348,27 +311,20 @@
     <string name="local_filter_for_search">Áp dụng cho tìm kiếm</string>
     <string name="local_filter_regex">Sử dụng biểu thức chính quy (Regex)</string>
     <string name="local_filter_delete">Xóa bộ lọc</string>
-
     <string name="delete">Xóa</string>
-
     <string name="mastodon_tab_local_title">Nội bộ</string>
     <string name="mastodon_tab_public_title">Công khai</string>
-
     <string name="home_tab_featured_title">Nổi bật</string>
     <string name="home_tab_bookmarks_title">Dấu trang</string>
     <string name="home_tab_favorite_title">Yêu thích</string>
     <string name="home_tab_list_title">Danh sách</string>
     <string name="home_tab_feeds_title">Nguồn tin</string>
-
     <string name="tab_settings_primary">Tab chính</string>
     <string name="tab_settings_secondary">Tab phụ</string>
-
     <string name="status_detail_comment">Bình luận</string>
     <string name="status_detail_repost">Đăng lại</string>
-
     <string name="account_item_error_title">Lỗi</string>
     <string name="account_item_error_message">Tải tài khoản thất bại</string>
-
     <string name="edit_tab_title">Sửa tab</string>
     <string name="edit_tab_name">Tên</string>
     <string name="edit_tab_name_placeholder">Tên tab</string>
@@ -376,7 +332,6 @@
     <string name="edit_tab_with_avatar">Kèm ảnh đại diện</string>
     <string name="edit_tab_enabled">Hiển thị trong dòng thời gian hỗn hợp</string>
     <string name="edit_tab_enabled_description">Bao gồm dòng thời gian này khi nó được dùng bên trong một dòng thời gian hỗn hợp hoặc nhóm.</string>
-
     <string name="list_add">Thêm danh sách</string>
     <string name="list_edit">Sửa danh sách</string>
     <string name="list_delete">Xóa danh sách</string>
@@ -398,23 +353,17 @@
     <string name="edit_list_member_remove">Gỡ bỏ</string>
     <string name="list_create_description">Mô tả danh sách</string>
     <string name="list_create_description_hint">Mô tả danh sách</string>
-
     <string name="edit_account_list_title">Sửa danh sách tài khoản</string>
-
     <string name="feeds_my_feeds_title">Nguồn tin của tôi</string>
     <string name="feeds_discover_feeds_title">Khám phá nguồn tin</string>
     <string name="feeds_discover_feeds_created_by">Tạo bởi %1$s</string>
     <string name="feeds_unsubscribe">Hủy đăng ký</string>
     <string name="feeds_subscribe">Đăng ký</string>
-
     <string name="profile_tab_timeline">Bài đăng</string>
     <string name="profile_tab_timeline_with_reply">Bài đăng và trả lời</string>
     <string name="profile_tab_likes">Lượt thích</string>
     <string name="profile_tab_media">Phương tiện</string>
-
     <string name="tab_settings_title">Cài đặt tab</string>
-
-
     <string name="dm_list_title">Tin nhắn trực tiếp</string>
     <string name="dm_list_empty">Không có tin nhắn trực tiếp nào</string>
     <string name="dm_list_error">Tải tin nhắn trực tiếp thất bại</string>
@@ -425,17 +374,12 @@
     <string name="dm_sending">Đang gửi</string>
     <string name="dm_leave">Rời khỏi cuộc trò chuyện</string>
     <string name="dm_to_profile">Xem hồ sơ</string>
-
-
     <string name="notification_login_expired">Phiên đăng nhập đã hết hạn cho %1$s</string>
-
     <string name="following_title">Đang theo dõi</string>
     <string name="fans_title">Người theo dõi</string>
-
     <string name="local_history_search_placeholder">Tìm bài đăng và hồ sơ đã lưu tạm</string>
     <string name="local_history_search_status_title">Bài đăng</string>
     <string name="local_history_search_user_title">Người dùng</string>
-
     <string name="rss_sources_title">Đăng ký</string>
     <string name="add_rss_source">Thêm đăng ký</string>
     <string name="edit_rss_source">Sửa đăng ký</string>
@@ -443,12 +387,10 @@
     <string name="opml_import">Nhập từ OPML</string>
     <string name="opml_export">Xuất ra OPML</string>
     <string name="export_completed">Xuất hoàn tất</string>
-
     <string name="rss_sources_title_label">Tiêu đề</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Đăng ký</string>
     <string name="empty_rss_sources">Chưa có nội dung đăng ký nào</string>
-    <string name="rss_sources_rss_hub_host_label">RSSHub Host</string>
     <string name="rss_sources_rss_hub_host_hint">Đặt RSSHub host để dùng RSSHub, hoặc chọn máy chủ RSSHub công cộng</string>
     <string name="rss_sources_discovered_rss_sources">Các nguồn tin tìm thấy</string>
     <string name="rss_sources_pinned_in_tabs">Ghim vào các tab Trang chủ</string>
@@ -462,7 +404,6 @@
     <string name="mastodon_local_timeline">Dòng thời gian nội bộ</string>
     <string name="subscription_url_hint">Dán URL nguồn tin RSS hoặc URL máy chủ Mastodon</string>
     <string name="rss_sources_display_mode">Chế độ hiển thị</string>
-
     <string name="rss_detail_open_in_browser">Mở bằng trình duyệt</string>
     <string name="rss_detail_share">Chia sẻ liên kết</string>
     <string name="rss_detail_tldr">Tóm tắt</string>
@@ -471,10 +412,8 @@
     <string name="rss_detail_tldr_loading">Đang tóm tắt…</string>
     <string name="rss_detail_translate">Dịch</string>
     <string name="rss_detail_translate_error">Dịch thất bại</string>
-
     <string name="emoji_picker_recent">Gần đây</string>
     <string name="emoji_picker_search">Tìm kiếm</string>
-
     <string name="podcast_host">Người dẫn</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Người nói</string>
@@ -482,7 +421,6 @@
     <string name="podcast_leave">Rời đi</string>
     <string name="podcast_ended">Podcast đã kết thúc</string>
     <string name="podcast_living">Đang trực tiếp</string>
-
     <string name="home_tab_antennas_title">Antenna</string>
     <string name="home_tab_channels_title">Kênh</string>
     <string name="misskey_channel_tab_following">Đang theo dõi</string>
@@ -499,24 +437,19 @@
     <string name="liked_title">Đã thích</string>
     <string name="all_rss_feeds_title">Tất cả đăng ký</string>
     <string name="posts_title">Bài đăng</string>
-
     <string name="deeplink_account_selection_title">Chọn tài khoản</string>
     <string name="deeplink_account_selection_message">Chọn một tài khoản để mở liên kết này</string>
     <string name="deeplink_account_selection_browser">Mở bằng trình duyệt</string>
-
     <string name="block_user_title">Chặn người dùng</string>
     <string name="block_user_description">Bạn có chắc chắn muốn chặn người dùng này không?</string>
     <string name="unblock_user_title">Bỏ chặn người dùng</string>
     <string name="unblock_user_description">Bạn có chắc chắn muốn bỏ chặn người dùng này không?</string>
-
     <string name="mute_user_title">Ẩn người dùng</string>
     <string name="mute_user_description">Bạn có chắc chắn muốn ẩn người dùng này không?</string>
     <string name="unmute_user_title">Bỏ ẩn người dùng</string>
     <string name="unmute_user_description">Bạn có chắc chắn muốn bỏ ẩn người dùng này không?</string>
-
     <string name="report_user_title">Báo cáo người dùng</string>
     <string name="report_user_description">Bạn có chắc chắn muốn báo cáo người dùng này không?</string>
-
     <string name="settings_storage_export_data">Xuất dữ liệu</string>
     <string name="settings_storage_export_data_description">Xuất toàn bộ dữ liệu, bao gồm các tài khoản và thông tin xác thực. Hãy bảo mật tệp này.</string>
     <string name="settings_storage_import_data">Nhập dữ liệu</string>
@@ -527,7 +460,6 @@
     <string name="import_error">Nhập thất bại</string>
     <string name="import_confirmation_title">Xác nhận nhập</string>
     <string name="import_confirmation_message">Hành động này sẽ nhập dữ liệu từ tệp đã chọn. Các bản ghi hiện có với ID trùng khớp sẽ bị thay thế. Tiếp tục?</string>
-
     <string name="tab_settings_add_group">Thêm nhóm</string>
     <string name="tab_settings_add_tab">Thêm tab</string>
     <string name="tab_settings_edit_group">Sửa nhóm</string>

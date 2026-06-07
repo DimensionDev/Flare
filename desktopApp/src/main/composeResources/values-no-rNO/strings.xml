@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="ok">OK</string>
+    <string name="ok">Ok</string>
     <string name="cancel">Avbryt</string>
     <string name="delete">Slett</string>
     <string name="refresh">Oppdater</string>
@@ -34,10 +34,19 @@
     <string name="profile_tab_timeline">Innlegg</string>
     <string name="profile_tab_timeline_with_reply">Innlegg og svar</string>
     <string name="profile_tab_likes">Liker</string>
-    <string name="profile_tab_media">Media</string>
+    <string name="profile_tab_media">Medier</string>
+    <string name="illustrations_title">Illustrasjoner</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Ukentlig rangering</string>
+    <string name="pixiv_ranking_month_title">Månedlig rangering</string>
+    <string name="pixiv_ranking_day_male_title">Mannlig rangering</string>
+    <string name="pixiv_ranking_day_female_title">Kvinnelig rangering</string>
+    <string name="pixiv_ranking_week_original_title">Opprinnelig plassering</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie rangering</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Rapporter</string>
     <string name="report_description">Hva er galt med dette innlegget?</string>
-    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_spam_title">Søppelpost</string>
     <string name="report_reason_violation_title">Ulovlig eller akutt</string>
     <string name="report_reason_misleading_title">Misvisende</string>
     <string name="report_reason_sexual_title">Uønsket seksuelt innhold</string>
@@ -82,6 +91,41 @@
     <string name="status_share_image">Del skjermbilde</string>
     <string name="status_share_via_fxembed">Del via FxEmbed</string>
     <string name="status_share_via_fixvx">Del via Fixvx</string>
+    <string name="status_insight_title">Post innsikt</string>
+    <string name="agent_chat_title">AI chat</string>
+    <string name="agent_chat_send">Sende</string>
+    <string name="agent_chat_thinking">Tenker…</string>
+    <string name="status_insight_analyzing">Analyserer dette innlegget…</string>
+    <string name="status_insight_error">Kunne ikke analysere innlegget.</string>
+    <string name="status_insight_trace_loading_post_context">Henter post kontekst…</string>
+    <string name="status_insight_trace_post_context_loaded">Post sammenheng lastet</string>
+    <string name="status_insight_trace_preparing_images">Forbereder bilder…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Bilder støttes ikke; Prøv på nytt med tekst…</string>
+    <string name="status_insight_trace_agent_started">Starter analyse…</string>
+    <string name="status_insight_trace_strategy_started">Planlegging av analyse…</string>
+    <string name="status_insight_trace_strategy_completed">Analyssplan fullført</string>
+    <string name="status_insight_trace_subgraph_started">Legger til analysestase…</string>
+    <string name="status_insight_trace_subgraph_completed">Analyseringsstadium er fullført</string>
+    <string name="status_insight_trace_subgraph_failed">Analyseringsfasen mislyktes</string>
+    <string name="status_insight_trace_model_response_received">Leser modelrespons…</string>
+    <string name="status_insight_trace_streaming_started">Strømmer fra %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Mottar svar…</string>
+    <string name="status_insight_trace_streaming_completed">Respons strøm fullført</string>
+    <string name="status_insight_trace_streaming_failed">Responsstrøm mislyktes</string>
+    <string name="status_insight_trace_running_step">Kjører analyse-trinn…</string>
+    <string name="status_insight_trace_step_completed">Analysetrinn fullført</string>
+    <string name="status_insight_trace_step_failed">Analysetrinnet mislyktes</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Henter post kontekst…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Post sammenheng lastet</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Inndata i postkonteksten ble avvist</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Kan ikke laste innlegg kontekst</string>
+    <string name="status_insight_trace_tool_search_status_completed">Søk fullført</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Søkeinndata ble avvist</string>
+    <string name="status_insight_trace_tool_search_status_failed">Søket mislyktes</string>
+    <string name="status_insight_trace_agent_completed">Ferdigstiller analyse…</string>
+    <string name="status_insight_trace_agent_failed">Analyse mislyktes</string>
+    <string name="status_insight_trace_agent_closing">Avslutter analyse…</string>
+    <string name="ask_ai">Spør AI</string>
     <string name="list_add">Legg til liste</string>
     <string name="list_edit">Rediger liste</string>
     <string name="list_delete">Slett liste</string>
@@ -137,11 +181,11 @@
     <string name="settings_appearance_subtitle">Tilpass utseendet og følelsen til Flare</string>
     <string name="settings_appearance_theme_group_title">Tema</string>
     <string name="settings_appearance_theme_group_subtitle">Farger, skriftstørrelse og avatarform</string>
-    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_title">Oppsett</string>
     <string name="settings_appearance_layout_group_subtitle">Tidslinje-layout, navigasjon og handlinger for innlegg</string>
     <string name="settings_appearance_display_group_title">Skjerm</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemerker, lenker og nettleseroppførsel</string>
-    <string name="settings_appearance_media_group_title">Media</string>
+    <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Mediesynlighet, avspilling og sensitivt innhold</string>
     <string name="settings_storage_title">Lagring</string>
     <string name="settings_draft_box_title">Kladder</string>
@@ -157,6 +201,9 @@
     <string name="settings_guest_setting_description">Velg hvilken server gjestemodus skal koble til</string>
     <string name="settings_local_history_title">Lokal historikk</string>
     <string name="settings_local_history_description">Søk i innlegg og profiler bufret på denne enheten</string>
+    <string name="settings_agent_history_title">Kollektiv Agent</string>
+    <string name="settings_agent_history_description">Vis lokal flat Agent samtalelogg</string>
+    <string name="agent_history_empty">Ingen agent samtalelogg enda.</string>
     <string name="settings_app_logging_title">App-logger</string>
     <string name="settings_app_logging_save">Lagre logger</string>
     <string name="settings_app_logging_clear">Slett logger</string>
@@ -193,6 +240,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Ikke satt</string>
     <string name="settings_ai_config_entable_translation">Aktiver AI-oversettelse</string>
     <string name="settings_ai_config_translation_description">Bruk AI i stedet for Google Translate. Oversettelser kan ta lengre tid.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Aktiver automatisk oversettelse</string>
     <string name="settings_ai_config_pre_translation_description">Oversett nylig lastet tidslinje- og profilinnhold i bakgrunnen og bufre resultatene. Dette kan bruke mange tokens.</string>
     <string name="settings_ai_config_enable_tldr">Aktiver AI-oppsummeringer</string>
@@ -200,12 +249,12 @@
     <string name="settings_ai_config_translate_provider">Oversettelsesleverandør</string>
     <string name="settings_ai_config_translate_provider_description">Velg hvilken tjeneste som skal oversette innhold</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
-    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Nett)</string>
+    <string name="settings_ai_config_translate_provider_deepl">Dypt</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API-nøkkel</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro-endepunkt</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Bruk api.deepl.com i stedet for det gratis api-free.deepl.com-endepunktet.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Oversett</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API-nøkkel</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate basis-URL</string>
@@ -233,6 +282,8 @@
     <string name="settings_appearance_show_numbers_description">Vis antall under hvert innlegg</string>
     <string name="settings_appearance_show_cw_img">Vis sensitivt innhold</string>
     <string name="settings_appearance_show_cw_img_description">Vis alltid sensitivt medieinnhold i innlegg</string>
+    <string name="settings_appearance_expand_content_warning">Vis innhold bak innholdsvarsler</string>
+    <string name="settings_appearance_expand_content_warning_description">Alltid avsløre innleggsinnhold skjult av innholdsadvarsler</string>
     <string name="settings_appearance_expand_media">Bevar bildeformat for media</string>
     <string name="settings_appearance_expand_media_description">Vis media i sitt originale bildeformat i tidslinjer</string>
     <string name="settings_appearance_video_autoplay">Autoavspilling av video</string>
@@ -253,7 +304,7 @@
     <string name="settings_appearance_theme_description">Velg app-tema</string>
     <string name="settings_appearance_theme_light">Lyst</string>
     <string name="settings_appearance_theme_dark">Mørkt</string>
-    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_theme_auto">Automatisk</string>
     <string name="settings_appearance_dynamic_theme">Dynamisk tema</string>
     <string name="settings_appearance_dynamic_theme_description">Match app-fargene til bakgrunnsbildet ditt</string>
     <string name="settings_appearance_show_link_previews">Vis forhåndsvisning av lenker</string>
@@ -281,7 +332,6 @@
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Bli med i vår Telegram-gruppe</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Bli med i vår Discord-server</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjelp oss med å oversette Flare</string>
@@ -322,7 +372,7 @@
     <string name="edit_rss_source">Rediger abonnement</string>
     <string name="delete_rss_source">Slett abonnement</string>
     <string name="rss_sources_title_label">Tittel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">Nettadresse</string>
     <string name="rss_title">Abonnementer</string>
     <string name="empty_rss_sources">Ingen abonnementer</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub-vert</string>
@@ -353,7 +403,7 @@
     <string name="notification_login_expired">Innlogging utløpt for %1$s</string>
     <string name="dm_list_empty">Ingen direktemeldinger</string>
     <string name="dm_list_error">Kunne ikke laste inn direktemeldinger</string>
-    <string name="send">Send</string>
+    <string name="send">Sende</string>
     <string name="dm_send_placeholder">Send en melding</string>
     <string name="dm_deleted">Slettet</string>
     <string name="dm_conversation">Direktemeldingssamtale</string>
@@ -411,7 +461,7 @@
     <string name="draft_box_empty">Ingen kladder ennå</string>
     <string name="draft_box_retry">Prøv på nytt</string>
     <string name="draft_box_edit">Rediger</string>
-    <string name="draft_box_send">Send</string>
+    <string name="draft_box_send">Sende</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
     <string name="opml_import">Importer fra OPML</string>
     <string name="opml_export">Eksporter til OPML</string>

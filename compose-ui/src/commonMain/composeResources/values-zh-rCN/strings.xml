@@ -1,22 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">删除</string>
     <string name="done">完成</string>
     <string name="cancel">取消</string>
     <string name="ok">确定</string>
-
     <string name="profile_header_following_count">%1$s 正在关注</string>
     <string name="profile_header_fans_count">%1$s 关注者</string>
     <string name="profile_header_toots_count">%1$s 帖子</string>
     <string name="profile_misskey_header_status_count">%1$s 帖子</string>
-
     <string name="profile_header_button_follow">关注</string>
     <string name="profile_header_button_request_follow">请求关注</string>
     <string name="profile_header_button_following">正在关注</string>
     <string name="profile_header_button_requested">已请求</string>
     <string name="profile_header_button_blocked">已屏蔽</string>
     <string name="profile_header_button_is_fans">关注了你</string>
-
     <string name="mastodon_notification_item_followed_you">关注了你</string>
     <string name="mastodon_notification_item_favourited_your_status">收藏了你的帖子</string>
     <string name="mastodon_notification_item_reblogged_your_status">转发了帖子</string>
@@ -29,9 +26,7 @@
     <string name="mastodon_item_show_more">显示更多</string>
     <string name="mastodon_item_show_less">显示更少</string>
     <string name="mastodon_item_pinned">置顶了帖子</string>
-
     <string name="post_show_full_text">显示全文</string>
-
     <string name="bluesky_notification_item_followed_you">关注了你</string>
     <string name="bluesky_notification_item_favourited_your_status">赞了你的帖子</string>
     <string name="bluesky_notification_item_reblogged_your_status">转发了帖子</string>
@@ -43,7 +38,6 @@
     <string name="bluesky_notification_item_starterpack_joined">通过 Starter Pack 加入</string>
     <string name="bluesky_notification_item_unKnown">未知</string>
     <string name="bluesky_notification_item_pin">置顶了帖子</string>
-
     <string name="misskey_notification_item_mentioned_you">提到了你</string>
     <string name="misskey_notification_item_replied_to_you">回复了你</string>
     <string name="misskey_notification_item_reposted_your_status">转发了帖子</string>
@@ -65,10 +59,8 @@
     <string name="misskey_notification_item_requested_follow">请求关注你</string>
     <string name="misskey_notification_unknwon">未知通知：%1$s</string>
     <string name="misskey_item_reblogged_status">转发了帖子</string>
-
     <string name="xqt_item_reblogged_status">转发了帖子</string>
     <string name="xqt_item_mention_status">提到了你</string>
-
     <string name="mastodon_visibility_public">公开</string>
     <string name="mastodon_visibility_unlisted">未列出</string>
     <string name="mastodon_visibility_private">私密</string>
@@ -77,10 +69,8 @@
     <string name="mastodon_visibility_unlisted_description">任何人都可以看到此帖，但不会出现在公共时间轴上</string>
     <string name="mastodon_visibility_private_description">只有关注者可以看到此帖</string>
     <string name="mastodon_visibility_direct_description">只有被提到的人可以看到此帖</string>
-
     <string name="settings_notifications_title">通知</string>
     <string name="settings_notifications_subtitle">自定义 Flare 如何通知你</string>
-
     <string name="status_loadmore_end">没有更多帖子了</string>
     <string name="status_loadmore_error">加载更多帖子时出错</string>
     <string name="status_loadmore_error_retry">重试</string>
@@ -91,31 +81,24 @@
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击以重新登录</string>
     <string name="login_expired_relogin">重新登录</string>
-
     <string name="permission_denied_title">权限被拒绝</string>
     <string name="permission_denied_message">请重新登录以访问此页面</string>
-
     <string name="misskey_compose_local_only">仅限本地</string>
     <string name="misskey_compose_local_only_description">只有此实例上的用户可以看到此帖</string>
-
     <string name="misskey_item_action_renote">转发 (Renote)</string>
     <string name="misskey_item_action_quote">引用</string>
-
     <string name="bluesky_notification_unknown_message">未知通知类型 %1$s</string>
     <string name="bluesky_notification_unknown_message2">请将此问题报告给开发者。</string>
-
     <string name="blusky_item_action_repost">转发</string>
     <string name="blusky_item_action_quote">引用</string>
     <string name="blusky_item_action_report">举报</string>
     <string name="blusky_item_action_delete">删除</string>
-
     <string name="mastodon_item_unbookmark">取消书签</string>
     <string name="mastodon_item_bookmark">书签</string>
     <string name="mastodon_item_delete">删除</string>
     <string name="mastodon_item_report">举报</string>
     <string name="misskey_item_action_delete">删除</string>
     <string name="misskey_item_action_report">举报</string>
-
     <string name="bookmark_remove">移除书签</string>
     <string name="bookmark_add">添加书签</string>
     <string name="like">赞</string>
@@ -133,7 +116,6 @@
     <string name="share">分享</string>
     <string name="fx_share">通过 FxEmbed 分享</string>
     <string name="comment">评论</string>
-
     <string name="user_report">举报</string>
     <string name="user_block">屏蔽</string>
     <string name="user_unblock">取消屏蔽</string>
@@ -150,281 +132,194 @@
     <string name="translation_badge_failed">翻译失败</string>
     <string name="translation_retry">重试翻译</string>
     <string name="translation_show_original">显示原文</string>
-
     <string name="date_format_year_month_day">yy年MM月dd日</string>
     <string name="date_format_month_day">MM月dd日</string>
     <string name="date_format_full">yy年MM月dd日 HH:mm</string>
-
     <string name="vvo_notification_like">赞了你的帖子</string>
-
     <string name="user_follow_edit_list">添加/移除自列表</string>
     <string name="list_empty">没有列表</string>
     <string name="list_error">加载列表失败</string>
-
     <string name="misskey_achievement_notes1_title">刚刚设置好我的 msky</string>
     <string name="misskey_achievement_notes1_description">发布你的第一条便笺</string>
     <string name="misskey_achievement_notes1_flavor">在 Misskey 玩得开心！</string>
-
     <string name="misskey_achievement_notes10_title">一些便笺</string>
     <string name="misskey_achievement_notes10_description">发布 10 条便笺</string>
-
     <string name="misskey_achievement_notes100_title">很多便笺</string>
     <string name="misskey_achievement_notes100_description">发布 100 条便笺</string>
-
     <string name="misskey_achievement_notes500_title">被便笺覆盖</string>
     <string name="misskey_achievement_notes500_description">发布 500 条便笺</string>
-
     <string name="misskey_achievement_notes1000_title">便笺山</string>
     <string name="misskey_achievement_notes1000_description">发布 1,000 条便笺</string>
-
     <string name="misskey_achievement_notes5000_title">溢出的便笺</string>
     <string name="misskey_achievement_notes5000_description">发布 5,000 条便笺</string>
-
     <string name="misskey_achievement_notes10000_title">超级便笺</string>
     <string name="misskey_achievement_notes10000_description">发布 10,000 条便笺</string>
-
     <string name="misskey_achievement_notes20000_title">需要... 更多... 便笺...</string>
     <string name="misskey_achievement_notes20000_description">发布 20,000 条便笺</string>
-
     <string name="misskey_achievement_notes30000_title">全是便笺！</string>
     <string name="misskey_achievement_notes30000_description">发布 30,000 条便笺</string>
-
     <string name="misskey_achievement_notes40000_title">便笺工厂</string>
     <string name="misskey_achievement_notes40000_description">发布 40,000 条便笺</string>
-
     <string name="misskey_achievement_notes50000_title">便笺行星</string>
     <string name="misskey_achievement_notes50000_description">发布 50,000 条便笺</string>
-
     <string name="misskey_achievement_notes60000_title">便笺类星体</string>
     <string name="misskey_achievement_notes60000_description">发布 60,000 条便笺</string>
-
     <string name="misskey_achievement_notes70000_title">便笺黑洞</string>
     <string name="misskey_achievement_notes70000_description">发布 70,000 条便笺</string>
-
     <string name="misskey_achievement_notes80000_title">便笺星系</string>
     <string name="misskey_achievement_notes80000_description">发布 80,000 条便笺</string>
-
     <string name="misskey_achievement_notes90000_title">便笺宇宙</string>
     <string name="misskey_achievement_notes90000_description">发布 90,000 条便笺</string>
-
     <string name="misskey_achievement_notes100000_title">你所有的便笺都属于我们</string>
     <string name="misskey_achievement_notes100000_description">发布 100,000 条便笺</string>
     <string name="misskey_achievement_notes100000_flavor">你肯定有很多话要说。</string>
-
     <string name="misskey_achievement_login3_title">新手 I</string>
     <string name="misskey_achievement_login3_description">累计登录 3 天</string>
     <string name="misskey_achievement_login3_flavor">从今天起，就叫我 Misskist</string>
-
     <string name="misskey_achievement_login7_title">新手 II</string>
     <string name="misskey_achievement_login7_description">累计登录 7 天</string>
     <string name="misskey_achievement_login7_flavor">觉得已经掌握窍门了吗？</string>
-
     <string name="misskey_achievement_login15_title">新手 III</string>
     <string name="misskey_achievement_login15_description">累计登录 15 天</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">累计登录 30 天</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">累计登录 60 天</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">累计登录 100 天</string>
     <string name="misskey_achievement_login100_flavor">暴力的 Misskist</string>
-
     <string name="misskey_achievement_login200_title">常客 I</string>
     <string name="misskey_achievement_login200_description">累计登录 200 天</string>
-
     <string name="misskey_achievement_login300_title">常客 II</string>
     <string name="misskey_achievement_login300_description">累计登录 300 天</string>
-
     <string name="misskey_achievement_login400_title">常客 III</string>
     <string name="misskey_achievement_login400_description">累计登录 400 天</string>
-
     <string name="misskey_achievement_login500_title">专家 I</string>
     <string name="misskey_achievement_login500_description">累计登录 500 天</string>
     <string name="misskey_achievement_login500_flavor">我的朋友们，常有人说我喜欢便笺</string>
-
     <string name="misskey_achievement_login600_title">专家 II</string>
     <string name="misskey_achievement_login600_description">累计登录 600 天</string>
-
     <string name="misskey_achievement_login700_title">专家 III</string>
     <string name="misskey_achievement_login700_description">累计登录 700 天</string>
-
     <string name="misskey_achievement_login800_title">便笺大师 I</string>
     <string name="misskey_achievement_login800_description">累计登录 800 天</string>
-
     <string name="misskey_achievement_login900_title">便笺大师 II</string>
     <string name="misskey_achievement_login900_description">累计登录 900 天</string>
-
     <string name="misskey_achievement_login1000_title">便笺大师 III</string>
     <string name="misskey_achievement_login1000_description">累计登录 1,000 天</string>
     <string name="misskey_achievement_login1000_flavor">感谢使用 Misskey！</string>
-
     <string name="misskey_achievement_note_clipped1_title">必须... 剪藏...</string>
     <string name="misskey_achievement_note_clipped1_description">剪藏你的第一条便笺</string>
-
     <string name="misskey_achievement_note_favorited1_title">观星者</string>
     <string name="misskey_achievement_note_favorited1_description">收藏你的第一条便笺</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">寻找星星</string>
     <string name="misskey_achievement_my_note_favorited1_description">让别人收藏你的便笺</string>
-
     <string name="misskey_achievement_profile_filled_title">准备充分</string>
     <string name="misskey_achievement_profile_filled_description">设置你的个人资料</string>
-
     <string name="misskey_achievement_marked_as_cat_title">我是一只猫</string>
     <string name="misskey_achievement_marked_as_cat_description">将你的账号标记为猫</string>
     <string name="misskey_achievement_marked_as_cat_flavor">我以后会给你起个名字。</string>
-
     <string name="misskey_achievement_following1_title">关注你的第一个用户</string>
     <string name="misskey_achievement_following1_description">关注一个用户</string>
-
     <string name="misskey_achievement_following10_title">跟上... 跟上...</string>
     <string name="misskey_achievement_following10_description">关注 10 个用户</string>
-
     <string name="misskey_achievement_following50_title">很多朋友</string>
     <string name="misskey_achievement_following50_description">关注 50 个账号</string>
-
     <string name="misskey_achievement_following100_title">100 个朋友</string>
     <string name="misskey_achievement_following100_description">关注 100 个账号</string>
-
     <string name="misskey_achievement_following300_title">朋友超载</string>
     <string name="misskey_achievement_following300_description">关注 300 个账号</string>
-
     <string name="misskey_achievement_followers1_title">第一个关注者</string>
     <string name="misskey_achievement_followers1_description">获得 1 个关注者</string>
-
     <string name="misskey_achievement_followers10_title">关注我！</string>
     <string name="misskey_achievement_followers10_description">获得 10 个关注者</string>
-
     <string name="misskey_achievement_followers50_title">成群结队</string>
     <string name="misskey_achievement_followers50_description">获得 50 个关注者</string>
-
     <string name="misskey_achievement_followers100_title">受欢迎</string>
     <string name="misskey_achievement_followers100_description">获得 100 个关注者</string>
-
     <string name="misskey_achievement_followers300_title">请排成一队</string>
     <string name="misskey_achievement_followers300_description">获得 300 个关注者</string>
-
     <string name="misskey_achievement_followers500_title">广播塔</string>
     <string name="misskey_achievement_followers500_description">获得 500 个关注者</string>
-
     <string name="misskey_achievement_followers1000_title">网红</string>
     <string name="misskey_achievement_followers1000_description">获得 1,000 个关注者</string>
-
     <string name="misskey_achievement_collect_achievements30_title">成就收藏家</string>
     <string name="misskey_achievement_collect_achievements30_description">获得 30 个成就</string>
-
     <string name="misskey_achievement_view_achievements3min_title">喜欢成就</string>
     <string name="misskey_achievement_view_achievements3min_description">查看成就列表至少 3 分钟</string>
-
     <string name="misskey_achievement_i_love_misskey_title">我爱 Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">发布 \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Misskey 开发团队非常感谢你的支持！</string>
-
     <string name="misskey_achievement_found_treasure_title">寻宝</string>
     <string name="misskey_achievement_found_treasure_description">你找到了隐藏的宝藏</string>
-
     <string name="misskey_achievement_client30min_title">短暂休息</string>
     <string name="misskey_achievement_client30min_description">保持 Misskey 开启至少 30 分钟</string>
-
     <string name="misskey_achievement_client60min_title">Misskey 中没有 \"Miss\"</string>
     <string name="misskey_achievement_client60min_description">保持 Misskey 开启至少 60 分钟</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">没关系</string>
     <string name="misskey_achievement_note_deleted_within1min_description">在发布后一分钟内删除便笺</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">夜猫子</string>
     <string name="misskey_achievement_posted_at_late_night_description">在深夜发布便笺</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">该睡觉了。</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">报时钟</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">在 00:00 发布便笺</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">滴答 滴答 滴答 咚</string>
-
     <string name="misskey_achievement_self_quote_title">自引</string>
     <string name="misskey_achievement_self_quote_description">引用你自己的便笺</string>
-
     <string name="misskey_achievement_htl20npm_title">流动的时间轴</string>
     <string name="misskey_achievement_htl20npm_description">主页时间轴的速度超过每分钟 20 条 (npm)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">分析师</string>
     <string name="misskey_achievement_view_instance_chart_description">查看你的实例图表</string>
-
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">你好，世界！</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">在 Scratchpad 中输出 \"hello world\"</string>
-
     <string name="misskey_achievement_open3windows_title">多窗口</string>
     <string name="misskey_achievement_open3windows_description">同时开启至少 3 个窗口</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">循环引用</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">尝试在网盘中创建递归嵌套的文件夹</string>
-
     <string name="misskey_achievement_react_without_read_title">你真的读了吗？</string>
     <string name="misskey_achievement_react_without_read_description">便笺发布后 3 秒内对长度超过 100 字的便笺做出回应</string>
-
     <string name="misskey_achievement_clicked_click_here_title">点击这里</string>
     <string name="misskey_achievement_clicked_click_here_description">你点击了这里</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">纯属运气</string>
     <string name="misskey_achievement_just_plain_lucky_description">每 10 秒有 0.005% 的概率获得</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">神格化</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">将你的名字设为 \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">一周年</string>
     <string name="misskey_achievement_passed_since_account_created1_description">账号创建已满一年</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">两周年</string>
     <string name="misskey_achievement_passed_since_account_created2_description">账号创建已满两年</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">三周年</string>
     <string name="misskey_achievement_passed_since_account_created3_description">账号创建已满三年</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">生日快乐</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">在生日当天登录</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">新年快乐！</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">在元旦当天登录</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">祝在此实例开启美好的一年</string>
-
     <string name="misskey_achievement_cookie_clicked_title">一个点击饼干的游戏</string>
     <string name="misskey_achievement_cookie_clicked_description">点击了饼干</string>
     <string name="misskey_achievement_cookie_clicked_flavor">等等，你进对网站了吗？</string>
-
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">大脑Diver</string>
     <string name="misskey_achievement_brain_diver_description">发布 Brain Diver 的链接</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">测试溢出</string>
     <string name="misskey_achievement_smash_test_notification_button_description">在极短时间内多次触发通知测试</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Misskey 初级课程毕业证书</string>
     <string name="misskey_achievement_tutorial_completed_description">教程已完成</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">泡泡游戏中的最大物体</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">双重🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">泡泡游戏中同时出现两个最大物体</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">你可以像这样 🤯 🤯 装满一点便当盒。</string>
-
     <string name="vote">投票</string>
     <string name="poll_expired">投票已结束</string>
     <string name="poll_voted">已投票</string>
     <string name="poll_expired_at">结束于 %1$s</string>
     <string name="user_send_message">发送私信</string>
-
     <string name="profile_search_user_using_account">通过 %3$s 在 %2$s 中查找 %1$s</string>
     <string name="profile_search_user_using_account_compat">在 %1$s 中查找</string>
-
     <string name="feeds_discover_feeds_created_by">由 %1$s 创建</string>
-
     <string name="notification_item_accept_follow_request">接受</string>
     <string name="notification_item_reject_follow_request">拒绝</string>
-
-
     <string name="dm_list_empty">没有私信</string>
     <string name="dm_list_error">加载私信失败</string>
     <string name="send">发送</string>
@@ -434,7 +329,6 @@
     <string name="dm_sending">发送中</string>
     <string name="dm_leave">离开对话</string>
     <string name="dm_to_profile">查看资料</string>
-
     <string name="settings_side_panel_empty">默认情况下，侧边栏遵循当前账号的平台。</string>
     <string name="tab_settings_add">添加</string>
     <string name="tab_settings_drag">拖动</string>
@@ -443,24 +337,20 @@
     <string name="tab_settings_default">默认</string>
     <string name="tab_settings_list">列表</string>
     <string name="tab_settings_feed">源</string>
-
     <string name="list_add">添加列表</string>
     <string name="list_edit">编辑列表</string>
     <string name="list_delete">删除列表</string>
-
     <string name="rss_sources_title">订阅</string>
     <string name="add_rss_source">添加订阅</string>
     <string name="edit_rss_source">编辑订阅</string>
     <string name="delete_rss_source">删除订阅</string>
-
     <string name="rss_sources_title_label">标题</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">订阅</string>
     <string name="empty_rss_sources">没有订阅</string>
     <string name="mastodon_trending_statuses">热门趋势</string>
     <string name="mastodon_federated_timeline">跨站时间轴</string>
     <string name="mastodon_local_timeline">本站时间轴</string>
-
     <string name="service_select_welcome_title">欢迎来到 Flare</string>
     <string name="service_select_welcome_message">输入服务器以开始。</string>
     <string name="service_select_welcome_hint">Flare 支持 Mastodon, Misskey, Bluesky, Nostr 和 X。</string>
@@ -494,7 +384,6 @@
     <string name="service_select_compatibility_warning">此服务器使用 %1$s，Flare 将在兼容模式下运行。某些功能可能无法正常工作。</string>
     <string name="login_agreement">登录即表示你同意 %1$s。</string>
     <string name="eula_privacy_policy">最终用户许可协议 (EULA) 和隐私政策</string>
-
     <string name="home_tab_home_title">主页</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
@@ -505,6 +394,7 @@
     <string name="home_tab_featured_title">精选</string>
     <string name="home_tab_bookmarks_title">书签</string>
     <string name="home_tab_favorite_title">收藏</string>
+    <string name="home_tab_following_title">正在关注</string>
     <string name="home_tab_list_title">列表</string>
     <string name="home_tab_feeds_title">源</string>
     <string name="dm_list_title">私信</string>
@@ -514,7 +404,18 @@
     <string name="liked_title">已赞</string>
     <string name="all_rss_feeds_title">所有订阅</string>
     <string name="posts_title">帖子</string>
+    <string name="posts_with_replies_title">帖子 &amp; 回复</string>
+    <string name="media_title">媒体</string>
     <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
     <string name="settings_appearance_absolute_timestamp_description">在帖子上显示确切的时间戳</string>
     <string name="channel_title">频道</string>
+    <string name="pixiv_ranking_week_title">每周排名</string>
+    <string name="pixiv_ranking_month_title">每月排名</string>
+    <string name="pixiv_ranking_day_male_title">男性排名</string>
+    <string name="pixiv_ranking_day_female_title">女性排名</string>
+    <string name="pixiv_ranking_week_original_title">原始排名</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">说明</string>
+    <string name="manga_title">Manga</string>
 </resources>

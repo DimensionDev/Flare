@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">موافق</string>
     <string name="cancel">إلغاء</string>
     <string name="delete">حذف</string>
     <string name="refresh">تحديث</string>
-
     <string name="home_compose">إنشاء</string>
     <string name="home_login">تسجيل الدخول</string>
     <string name="home_settings">الإعدادات</string>
-
     <string name="home_tab_home_title">الرئيسية</string>
     <string name="home_tab_notifications_title">التنبيهات</string>
     <string name="home_tab_me_title">أنا</string>
@@ -30,47 +28,47 @@
         <item quantity="many">%1$d منشورًا جديدًا</item>
         <item quantity="other">%1$d منشور جديد</item>
     </plurals>
-
     <string name="navigate_back">رجوع</string>
     <string name="service_select_instance_input_placeholder">رابط الخادم (URL)</string>
     <string name="service_select_next_button">التالي</string>
     <string name="service_select_empty_message">لم يتم العثور على خوادم</string>
-
     <string name="service_select_welcome_title">مرحبًا بك في Flare</string>
     <string name="service_select_welcome_message">Flare هو عميل تواصل اجتماعي لـ %1$s.\nاختر خدمة للاتصال والبدء.</string>
     <string name="mastodon_login_verify_message">جاري التحقق من بيانات الاعتماد…</string>
-
     <string name="profile_tab_timeline">المنشورات</string>
     <string name="profile_tab_timeline_with_reply">المنشورات والردود</string>
     <string name="profile_tab_likes">الإعجابات</string>
     <string name="profile_tab_media">الوسائط</string>
-
+    <string name="illustrations_title">التوضيحات</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">الترتيب الأسبوعي</string>
+    <string name="pixiv_ranking_month_title">الترتيب الشهري</string>
+    <string name="pixiv_ranking_day_male_title">ترتيب الذكور</string>
+    <string name="pixiv_ranking_day_female_title">تصنيف الأنثى</string>
+    <string name="pixiv_ranking_week_original_title">الترتيب الأصلي</string>
+    <string name="pixiv_ranking_week_rookie_title">تصنيف الروكيه</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">إبلاغ</string>
     <string name="report_description">ما المشكلة في هذا المنشور؟</string>
-
     <string name="report_reason_spam_title">بريد مزعج (Spam)</string>
     <string name="report_reason_violation_title">غير قانوني أو عاجل</string>
     <string name="report_reason_misleading_title">مضلل</string>
     <string name="report_reason_sexual_title">محتوى جنسي غير مرغوب فيه</string>
     <string name="report_reason_rude_title">سلوك غير اجتماعي</string>
     <string name="report_reason_other_title">أخرى</string>
-
     <string name="report_reason_spam_description">إشارات أو ردود مفرطة</string>
     <string name="report_reason_violation_description">انتهاكات واضحة للقانون أو شروط الخدمة</string>
     <string name="report_reason_misleading_description">هذا المنشور مضلل</string>
     <string name="report_reason_sexual_description">عري أو مواد إباحية غير مصنفة كذلك</string>
     <string name="report_reason_rude_description">مضايقة، أو تنمر، أو عدم تسامح</string>
     <string name="report_reason_other_description">مشكلة غير مدرجة في هذه الخيارات</string>
-
     <string name="delete_status_title">حذف</string>
     <string name="delete_status_message">حذف هذا المنشور؟</string>
     <string name="compose_close_confirm_title">حفظ المسودة؟</string>
     <string name="compose_close_confirm_message">لديك تغييرات غير محفوظة. هل تريد حفظها كمسودة قبل الإغلاق؟</string>
     <string name="compose_close_discard">تجاهل</string>
-
     <string name="mastodon_report_title">إبلاغ</string>
     <string name="mastodon_report_description">هل أنت متأكد أنك تريد الإبلاغ عن هذا؟</string>
-
     <string name="bookmark_remove">إزالة الإشارة المرجعية</string>
     <string name="bookmark_add">إضافة إشارة مرجعية</string>
     <string name="like">إعجاب</string>
@@ -88,7 +86,6 @@
     <string name="status_detail_repost">إعادة نشر</string>
     <string name="emoji_picker_recent">الأخيرة</string>
     <string name="emoji_picker_search">بحث</string>
-
     <string name="media_show_thumbnail_list">إظهار قائمة الصور المصغرة</string>
     <string name="media_hide_thumbnail_list">إخفاء قائمة الصور المصغرة</string>
     <string name="media_save">حفظ</string>
@@ -98,7 +95,48 @@
     <string name="status_share_image">مشاركة لقطة شاشة</string>
     <string name="status_share_via_fxembed">مشاركة عبر FxEmbed</string>
     <string name="status_share_via_fixvx">مشاركة عبر Fixvx</string>
-
+    <string name="status_insight_title">نشر التبصر</string>
+    <string name="agent_chat_title">دردشة AI</string>
+    <string name="agent_chat_input_placeholder">اسأل عن أي شيء…</string>
+    <string name="agent_chat_send">إرسال</string>
+    <string name="agent_chat_thinking">التفكير…</string>
+    <string name="status_insight_analyzing">تحليل هذا المنشور…</string>
+    <string name="status_insight_error">غير قادر على تحليل هذه المشاركة.</string>
+    <string name="status_insight_trace_loading_post_context">تحميل سياق المشاركة…</string>
+    <string name="status_insight_trace_post_context_loaded">تم تحميل سياق المشاركة</string>
+    <string name="status_insight_trace_preparing_images">جارٍ إعداد الصور…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">الصور غير معتمدة؛ إعادة المحاولة مع النص…</string>
+    <string name="status_insight_trace_agent_started">بدء التحليل…</string>
+    <string name="status_insight_trace_strategy_started">تحليل التخطيط…</string>
+    <string name="status_insight_trace_strategy_completed">اكتملت خطة التحليل</string>
+    <string name="status_insight_trace_subgraph_started">إدخال مرحلة التحليل…</string>
+    <string name="status_insight_trace_subgraph_completed">اكتملت مرحلة التحليل</string>
+    <string name="status_insight_trace_subgraph_failed">فشلت مرحلة التحليل</string>
+    <string name="status_insight_trace_asking_model">طلب %1$s…</string>
+    <string name="status_insight_trace_model_response_received">قراءة استجابة النموذج…</string>
+    <string name="status_insight_trace_streaming_started">تبث من %1$s…</string>
+    <string name="status_insight_trace_streaming_response">تلقي الرد…</string>
+    <string name="status_insight_trace_streaming_completed">اكتمل تدفق الاستجابة</string>
+    <string name="status_insight_trace_streaming_failed">فشل تدفق الاستجابة</string>
+    <string name="status_insight_trace_running_step">تشغيل خطوة التحليل…</string>
+    <string name="status_insight_trace_step_completed">اكتملت خطوة التحليل</string>
+    <string name="status_insight_trace_step_failed">فشلت خطوة التحليل</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">تحميل سياق المشاركة…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">تم تحميل سياق المشاركة</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">تم رفض إدخال سياق المشاركة</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">فشل تحميل سياق المشاركة</string>
+    <string name="status_insight_trace_tool_search_status_started">البحث…</string>
+    <string name="status_insight_trace_tool_search_status_completed">اكتمل البحث</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">تم رفض إدخال البحث</string>
+    <string name="status_insight_trace_tool_search_status_failed">فشل البحث</string>
+    <string name="status_insight_trace_agent_completed">إنهاء التحليل…</string>
+    <string name="status_insight_trace_agent_failed">فشل التحليل</string>
+    <string name="status_insight_trace_agent_closing">إغلاق التحليل…</string>
+    <string name="ask_ai">اسأل AI</string>
     <string name="list_add">إضافة قائمة</string>
     <string name="list_edit">تعديل القائمة</string>
     <string name="list_delete">حذف القائمة</string>
@@ -122,28 +160,23 @@
     <string name="edit_list_member_remove">إزالة</string>
     <string name="list_create_description">وصف القائمة</string>
     <string name="list_create_description_hint">وصف القائمة</string>
-
     <string name="feeds_my_feeds_title">خلاصاتي</string>
     <string name="feeds_discover_feeds_title">استكشاف الخلاصات</string>
     <string name="feeds_discover_feeds_created_by">بواسطة %1$s</string>
     <string name="feeds_unsubscribe">إلغاء الاشتراك</string>
     <string name="feeds_subscribe">اشتراك</string>
-
     <string name="social_title">اجتماعي</string>
-
     <string name="antenna_title">الهوائيات (Antennas)</string>
     <string name="mixed_timeline_title">مختلط</string>
     <string name="liked_title">المعجب بها</string>
     <string name="all_rss_feeds_title">كل الاشتراكات</string>
     <string name="posts_title">المنشورات</string>
-
     <string name="bluesky_login_username">اسم المستخدم</string>
     <string name="bluesky_login_password">كلمة المرور</string>
     <string name="bluesky_login_2fa">رمز المصادقة الثنائية (2FA)</string>
     <string name="bluesky_login_oauth_button">تسجيل الدخول عبر OAuth</string>
     <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
     <string name="bluesky_login_oauth_hint">قد لا تزال خدمة Bluesky OAuth غير مستقرة. إذا واجهت مشاكل، استخدم تسجيل الدخول بكلمة المرور بدلاً من ذلك.</string>
-
     <string name="login_expired">انتهت جلسة تسجيل الدخول</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
     <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
@@ -152,7 +185,6 @@
     <string name="add_account">إضافة حساب</string>
     <string name="remove_account">إزالة الحساب</string>
     <string name="settings_accounts_remove_confirm">هل أنت متأكد أنك تريد إزالة الحساب %1$s من هذا الجهاز؟</string>
-
     <string name="settings_accounts_title">الحسابات</string>
     <string name="settings_appearance_title">المظهر</string>
     <string name="settings_status_appearance_title">مظهر المنشور</string>
@@ -180,6 +212,9 @@
     <string name="settings_guest_setting_description">اختر الخادم الذي يتصل به وضع الضيف</string>
     <string name="settings_local_history_title">السجل المحلي</string>
     <string name="settings_local_history_description">البحث في المنشورات والملفات الشخصية المخزنة مؤقتًا على هذا الجهاز</string>
+    <string name="settings_agent_history_title">الوكيل المتلاعب</string>
+    <string name="settings_agent_history_description">عرض محفوظات المحادثة المحلية للوكيل المتحرك</string>
+    <string name="agent_history_empty">لا يوجد وكيل سجل الدردشة حتى الآن.</string>
     <string name="settings_app_logging_title">سجلات التطبيق</string>
     <string name="settings_app_logging_save">حفظ السجلات</string>
     <string name="settings_app_logging_clear">مسح السجلات</string>
@@ -216,6 +251,8 @@
     <string name="settings_ai_config_value_empty_placeholder">غير محدد</string>
     <string name="settings_ai_config_entable_translation">تفعيل ترجمة الذكاء الاصطناعي</string>
     <string name="settings_ai_config_translation_description">استخدم الذكاء الاصطناعي بدلاً من ترجمة جوجل. قد تستغرق الترجمة وقتًا أطول.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">تفعيل الترجمة التلقائية</string>
     <string name="settings_ai_config_pre_translation_description">ترجمة محتوى الجدول الزمني والملف الشخصي المحمل حديثًا في الخلفية وتخزين النتائج مؤقتًا. قد يستهلك هذا عددًا كبيرًا من الرموز (tokens).</string>
     <string name="settings_ai_config_enable_tldr">تفعيل ملخصات الذكاء الاصطناعي</string>
@@ -224,16 +261,15 @@
     <string name="settings_ai_config_translate_provider_description">اختر الخدمة التي تترجم المحتوى</string>
     <string name="settings_ai_config_translate_provider_ai">ذكاء اصطناعي</string>
     <string name="settings_ai_config_translate_provider_google_web">ترجمة جوجل (ويب)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl">عمق</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">مفتاح واجهة برمجة تطبيقات DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">نقطة نهاية DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">استخدم api.deepl.com بدلاً من api-free.deepl.com المجاني.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">ترجمة جوجل السحابية</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">مفتاح واجهة برمجة تطبيقات جوجل السحابية</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">ترجمة ليبرتور</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">رابط LibreTranslate الأساسي</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">مفتاح واجهة برمجة تطبيقات LibreTranslate</string>
-
     <string name="settings_translation_title">الترجمة</string>
     <string name="settings_translation_description">اختر خدمات الترجمة وسلوك الترجمة التلقائية</string>
     <string name="settings_translation_auto_excluded_languages">اللغات المستثناة من الترجمة التلقائية</string>
@@ -242,7 +278,6 @@
     <string name="settings_translation_ai_test_action">اختبار الترجمة</string>
     <string name="settings_translation_ai_test_original">النص العينة</string>
     <string name="settings_translation_ai_test_result">النص المترجم</string>
-
     <string name="settings_appearance_generic">عام</string>
     <string name="settings_appearance_show_compose_in_home_timeline">إظهار مربع الإنشاء في الجدول الزمني الرئيسي</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">إظهار مربع الإنشاء في الجزء العلوي من الجدول الزمني الرئيسي</string>
@@ -258,6 +293,8 @@
     <string name="settings_appearance_show_numbers_description">إظهار العدادات أسفل كل منشور</string>
     <string name="settings_appearance_show_cw_img">إظهار المحتوى الحساس</string>
     <string name="settings_appearance_show_cw_img_description">كشف الوسائط الحساسة دائمًا في المنشورات</string>
+    <string name="settings_appearance_expand_content_warning">إظهار المحتوى خلف تحذيرات المحتوى</string>
+    <string name="settings_appearance_expand_content_warning_description">يكشف دائما محتوى المنشور مخفي بواسطة تحذيرات المحتوى</string>
     <string name="settings_appearance_expand_media">الحفاظ على نسبة أبعاد الوسائط</string>
     <string name="settings_appearance_expand_media_description">إظهار الوسائط بنسبة أبعادها الأصلية في الجداول الزمنية</string>
     <string name="settings_appearance_video_autoplay">تشغيل الفيديو تلقائيًا</string>
@@ -301,24 +338,18 @@
     <string name="settings_appearance_post_action_style_stretch">تمدد</string>
     <string name="settings_appearance_absolute_timestamp">طابع زمني مطلق</string>
     <string name="settings_appearance_absolute_timestamp_description">إظهار أوقات محددة على المنشورات</string>
-
     <string name="settings_appearance_show_platform_logo">إظهار أيقونات المنصة المصدر</string>
     <string name="settings_appearance_show_platform_logo_description">إظهار المنصة التي جاء منها كل منشور</string>
-
     <string name="settings_about_source_code">كود المصدر</string>
     <string name="settings_about_telegram">تيليجرام</string>
     <string name="settings_about_telegram_description">انضم إلى مجموعتنا على تيليجرام</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">انضم إلى خادمنا على ديسكورد</string>
-    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization">كرودن</string>
     <string name="settings_about_localization_description">ساعدنا في ترجمة Flare</string>
     <string name="settings_privacy_policy">سياسة الخصوصية</string>
-
     <string name="users">المستخدمين</string>
     <string name="hashtags">الوسوم</string>
     <string name="statues">المنشورات</string>
-
-
     <string name="compose_title">إنشاء</string>
     <string name="compose_hint">ماذا يدور في ذهنك؟</string>
     <string name="compose_poll_option_hint">الخيار %1$s</string>
@@ -339,7 +370,6 @@
     <string name="compose_notification_progress">جاري إرسال المنشور</string>
     <string name="compose_notification_success">تم إرسال المنشور</string>
     <string name="compose_notification_error">فشل إرسال المنشور</string>
-
     <string name="misskey_visibility_public">عام</string>
     <string name="misskey_visibility_home">الرئيسية</string>
     <string name="misskey_visibility_followers">المتابعون</string>
@@ -348,13 +378,10 @@
     <string name="misskey_visibility_home_description">يمكن للمستخدمين على هذا الخادم فقط رؤية هذا المنشور</string>
     <string name="misskey_visibility_followers_description">يمكن للمتابعين فقط رؤية هذا المنشور</string>
     <string name="misskey_visibility_specified_description">يمكن للمستخدمين المذكورين فقط رؤية هذا المنشور</string>
-
-
     <string name="rss_sources_title">الاشتراكات</string>
     <string name="add_rss_source">إضافة اشتراك</string>
     <string name="edit_rss_source">تعديل الاشتراك</string>
     <string name="delete_rss_source">حذف الاشتراك</string>
-
     <string name="rss_sources_title_label">العنوان</string>
     <string name="rss_sources_url_label">الرابط (URL)</string>
     <string name="rss_title">الاشتراكات</string>
@@ -377,7 +404,6 @@
     <string name="mastodon_federated_timeline">الجدول الزمني الموحد</string>
     <string name="mastodon_local_timeline">الجدول الزمني المحلي</string>
     <string name="subscription_url_hint">الصق رابط خلاصة RSS أو رابط خادم Mastodon</string>
-
     <string name="tab_settings_add">إضافة</string>
     <string name="tab_settings_drag">سحب</string>
     <string name="tab_settings_edit">تعديل</string>
@@ -385,9 +411,7 @@
     <string name="tab_settings_default">الافتراضي</string>
     <string name="tab_settings_list">قائمة</string>
     <string name="tab_settings_feed">خلاصات</string>
-
     <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول لـ %1$s</string>
-
     <string name="dm_list_empty">لا توجد رسائل مباشرة</string>
     <string name="dm_list_error">فشل تحميل الرسائل مباشرة</string>
     <string name="send">إرسال</string>
@@ -420,7 +444,6 @@
     <string name="tab_settings_filter_text_only">نص فقط</string>
     <string name="tab_settings_filter_image">صور</string>
     <string name="tab_settings_filter_video">فيديوهات</string>
-
     <string name="edit_tab_title">تعديل التبويب</string>
     <string name="edit_tab_name">الاسم</string>
     <string name="edit_tab_name_placeholder">اسم التبويب</string>
@@ -428,16 +451,12 @@
     <string name="edit_tab_with_avatar">مع الصورة الشخصية</string>
     <string name="edit_tab_enabled">إظهار في الجداول الزمنية المختلطة</string>
     <string name="edit_tab_enabled_description">تضمين هذا الجدول الزمني عند استخدامه داخل جدول زمني مختلط أو مجموعة.</string>
-
     <string name="edit">تعديل</string>
-
     <string name="local_history_search_placeholder">البحث في المنشورات والملفات الشخصية المخزنة مؤقتًا</string>
     <string name="local_history_search_status_title">المنشورات</string>
     <string name="local_history_search_user_title">المستخدم</string>
-
     <string name="settings_storage_clear_image_cache">مسح ذاكرة تخزين الصور المؤقتة</string>
     <string name="settings_storage_clear_image_cache_description">إزالة %1$s ميجابايت من الصور المخزنة مؤقتًا</string>
-
     <string name="settings_storage_clear_database">مسح قاعدة البيانات المخزنة مؤقتًا</string>
     <string name="settings_storage_clear_database_description">إزالة %1$s مستخدم و %2$s منشور مخزن مؤقتًا</string>
     <string name="settings_storage_app_log">سجلات التطبيق</string>
@@ -454,50 +473,39 @@
     <string name="draft_box_retry">إعادة محاولة</string>
     <string name="draft_box_edit">تعديل</string>
     <string name="draft_box_send">إرسال</string>
-
     <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
-
     <string name="opml_import">استيراد من OPML</string>
     <string name="opml_export">تصدير إلى OPML</string>
     <string name="save_completed">اكتمل التصدير</string>
-
     <string name="deeplink_account_selection_title">اختر حسابًا</string>
     <string name="deeplink_account_selection_message">اختر حسابًا لفتح هذا الرابط</string>
     <string name="deeplink_account_selection_browser">فتح في المتصفح</string>
-
     <string name="block_user_title">حظر المستخدم</string>
     <string name="block_user_description">هل أنت متأكد أنك تريد حظر هذا المستخدم؟</string>
     <string name="unblock_user_title">إلغاء حظر المستخدم</string>
     <string name="unblock_user_description">هل أنت متأكد أنك تريد إلغاء حظر هذا المستخدم؟</string>
-
     <string name="mute_user_title">كتم المستخدم</string>
     <string name="mute_user_description">هل أنت متأكد أنك تريد كتم هذا المستخدم؟</string>
     <string name="unmute_user_title">إلغاء كتم المستخدم</string>
     <string name="unmute_user_description">هل أنت متأكد أنك تريد إلغاء كتم هذا المستخدم؟</string>
-
     <string name="report_user_title">الإبلاغ عن المستخدم</string>
     <string name="report_user_description">هل أنت متأكد أنك تريد الإبلاغ عن هذا المستخدم؟</string>
-
     <string name="settings_storage_export_data">تصدير البيانات</string>
     <string name="settings_storage_export_data_description">تصدير جميع البيانات، بما في ذلك الحسابات وبيانات الاعتماد. حافظ على أمان الملف.</string>
     <string name="settings_storage_import_data">استيراد البيانات</string>
     <string name="settings_storage_import_data_description">استيراد البيانات من ملف نسخة احتياطية. سيتم استبدال السجلات الموجودة ذات المعرفات المطابقة.</string>
     <string name="action_export">تصدير</string>
     <string name="action_import">استيراد</string>
-
     <string name="save_error">فشل التصدير</string>
     <string name="import_completed">اكتمل الاستيراد</string>
     <string name="import_error">فشل الاستيراد</string>
     <string name="import_confirmation_title">تأكيد الاستيراد</string>
     <string name="import_confirmation_message">سيؤدي هذا إلى استيراد البيانات من الملف المحدد. سيتم استبدال السجلات الموجودة ذات المعرفات المطابقة. هل تريد الاستمرار؟</string>
-
     <string name="channel_title">القناة</string>
-
     <string name="misskey_channel_tab_following">متابعون</string>
     <string name="misskey_channel_tab_favorites">المفضلات</string>
     <string name="misskey_channel_tab_owned">مملوكة</string>
     <string name="misskey_channel_tab_featured">المميزة</string>
-
     <string name="media_save_success">تم الحفظ في التنزيلات</string>
     <string name="media_save_fail">فشل الحفظ</string>
 </resources>

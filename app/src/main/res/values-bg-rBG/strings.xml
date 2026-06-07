@@ -1,24 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Вход</string>
     <string name="navigate_back">Назад</string>
-
     <string name="home_tab_home_title">Начало</string>
     <string name="home_tab_notifications_title">Известия</string>
     <string name="home_tab_me_title">Аз</string>
     <string name="home_tab_discover_title">Откриване</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d нова публикация</item>
         <item quantity="other">%1$d нови публикации</item>
     </plurals>
-
     <string name="notification_tab_all_title">Всички</string>
     <string name="notification_tab_mentions_title">Споменавания</string>
     <string name="notification_tab_comments_title">Коментари</string>
     <string name="notification_tab_likes_title">Харесвания</string>
-
     <string name="compose_title">Създаване</string>
     <string name="compose_reply_title">Отговор</string>
     <string name="compose_quote_title">Цитат</string>
@@ -46,15 +41,15 @@
     <string name="compose_close_confirm_message">Имате незапазени промени. Искате ли да ги запазите като чернова преди затваряне?</string>
     <string name="compose_save_draft">Запазване</string>
     <string name="compose_close_discard">Отхвърляне</string>
+    <string name="status_insight_send">Изпращане</string>
+    <string name="agent_chat_send">Изпращане</string>
     <string name="draft_box_title">Чернови</string>
     <string name="draft_box_empty">Все още няма чернови</string>
     <string name="draft_box_edit">Редактиране</string>
     <string name="draft_box_retry">Повторен опит</string>
     <string name="draft_box_send">Изпращане</string>
     <string name="settings_draft_box_description">Преглед, редактиране и повторно изпращане на запазени чернови</string>
-
     <string name="settings_title">Настройки</string>
-
     <string name="settings_accounts_title">Профили</string>
     <string name="settings_accounts_subtitle">Управление на вписаните профили</string>
     <string name="settings_appearance_title">Външен вид</string>
@@ -73,11 +68,9 @@
     <string name="settings_about_subtitle">Научете повече за Flare</string>
     <string name="settings_about_description">Клиент с отворен код, задвижван от AI, за децентрализирани социални платформи.</string>
     <string name="settings_about_source_code">Изходен код</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Телеграм</string>
     <string name="settings_about_telegram_description">Присъединете се към нашата Telegram група</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Присъединете се към нашия Discord сървър</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Присъединете се към нашата Line група</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помогнете ни да преведем Flare</string>
@@ -137,13 +130,11 @@
     <string name="settings_ai_config_translate_provider_description">Изберете коя услуга да превежда съдържанието</string>
     <string name="settings_ai_config_translate_provider_ai">ИИ</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Преводач (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API ключ</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro крайна точка</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Използване на api.deepl.com вместо безплатната api-free.deepl.com крайна точка.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Преводач</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API ключ</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate базов URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API ключ</string>
     <string name="settings_translation_title">Превод</string>
@@ -163,19 +154,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Добавяне на реле</string>
     <string name="settings_nostr_relays_placeholder">Въведете URL на релето</string>
     <string name="settings_nostr_relays_empty">Няма добавени релета</string>
-
     <string name="status_loadmore_error_retry">Повторен опит</string>
     <string name="login_expired">Сесията за вход изтече</string>
     <string name="login_expired_message">Докоснете за повторно вписване</string>
     <string name="login_expired_relogin">Повторно вписване</string>
-
     <string name="service_select_welcome_title">Добре дошли във Flare</string>
     <string name="service_select_welcome_message">Flare е клиент за социални медии за Android.\nИзберете услуга, за да се свържете и започнете.</string>
-
     <string name="mastodon_login_verify_message">Удостоверяване на вашите данни…</string>
-
     <string name="status_title">Публикация</string>
-
     <string name="misskey_visibility_public">Публично</string>
     <string name="misskey_visibility_home">Начало</string>
     <string name="misskey_visibility_followers">Последователи</string>
@@ -184,51 +170,39 @@
     <string name="misskey_visibility_home_description">Само потребители от този инстанс могат да виждат тази публикация</string>
     <string name="misskey_visibility_followers_description">Само последователите могат да виждат тази публикация</string>
     <string name="misskey_visibility_specified_description">Само споменатите потребители могат да виждат тази публикация</string>
-
     <string name="bluesky_login_username_hint">Потребителско име</string>
     <string name="bluesky_login_password_hint">Парола</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA код</string>
     <string name="bluesky_login_oauth_button">Вход с OAuth</string>
     <string name="bluesky_login_use_password_button">Използване на парола</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth все още може да е нестабилен. Ако срещнете проблеми, използвайте вход с парола.</string>
-
     <string name="report_title">Докладване</string>
     <string name="report_description">Какво не е наред с тази публикация?</string>
-
     <string name="report_reason_spam_title">Спам</string>
     <string name="report_reason_violation_title">Незаконно или спешно</string>
     <string name="report_reason_misleading_title">Подвеждащо</string>
     <string name="report_reason_sexual_title">Нежелано сексуално съдържание</string>
     <string name="report_reason_rude_title">Антисоциално поведение</string>
     <string name="report_reason_other_title">Друго</string>
-
     <string name="report_reason_spam_description">Прекомерни споменавания или отговори</string>
     <string name="report_reason_violation_description">Явни нарушения на закона или условията за ползване</string>
     <string name="report_reason_misleading_description">Тази публикация е подвеждаща</string>
     <string name="report_reason_sexual_description">Голота или порнография, която не е означена като такава</string>
     <string name="report_reason_rude_description">Тормоз, тролене или нетолерантност</string>
     <string name="report_reason_other_description">Проблем, който не е включен в тези опции</string>
-
     <string name="delete_status_title">Изтриване</string>
     <string name="delete_status_message">Изтриване на публикацията?</string>
-
     <string name="mastodon_report_title">Докладване</string>
     <string name="mastodon_report_description">Сигурни ли сте, че искате да докладвате това?</string>
-
     <string name="more">Още</string>
-
     <string name="discover_search_placeholder">Търсене</string>
     <string name="discover_users">Предложени потребители</string>
     <string name="discover_status">Трендинг публикации</string>
     <string name="discover_hashtags">Трендинг хаштагове</string>
-
     <string name="search_users">Потребители</string>
     <string name="search_status">Публикации</string>
-
     <string name="quick_menu_add_account">Добавяне на профил</string>
-
     <string name="settings_appearance_generic">Общи</string>
-
     <string name="settings_appearance_show_actions">Показване на действия</string>
     <string name="settings_appearance_show_actions_description">Показване на бутони за действия под всяка публикация</string>
     <string name="settings_appearance_post_action_style">Стил на действията за публикация</string>
@@ -297,27 +271,20 @@
     <string name="settings_appearance_full_width_post_description">Позволяване на публикациите да заемат цялата налична ширина</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютно времево клеймо</string>
     <string name="settings_appearance_absolute_timestamp_description">Показване на точно време на публикациите</string>
-
     <string name="settings_appearance_show_platform_logo">Показване на икони на платформата-източник</string>
     <string name="settings_appearance_show_platform_logo_description">Показване от коя платформа идва всяка публикация</string>
-
     <string name="settings_storage_clear_image_cache">Изчистване на кеша с изображения</string>
     <string name="settings_storage_clear_image_cache_description">Премахване на %1$s MB кеширани изображения</string>
-
     <string name="settings_storage_clear_database">Изчистване на кешираната база данни</string>
     <string name="settings_storage_clear_database_description">Премахване на %1$s кеширани потребители и %2$s кеширани публикации</string>
     <string name="settings_storage_app_log">Лог файлове на приложението</string>
     <string name="settings_storage_app_log_description">Преглед, запазване или изчистване на лог файловете</string>
-
     <string name="service_select_instance_input_placeholder">URL на инстанса</string>
     <string name="service_select_next_button">Напред</string>
     <string name="service_select_empty_message">Не са открити инстанси</string>
-
     <string name="media_viewer_title">Преглед на медия</string>
-
     <string name="settings_accounts_remove">Премахване</string>
     <string name="settings_accounts_remove_confirm">Сигурни ли сте, че искате да премахнете профила %1$s от това устройство?</string>
-
     <string name="media_menu_save">Запазване на изображението</string>
     <string name="media_menu_share_image">Споделяне на изображението</string>
     <string name="media_menu_copy_link">Копиране на връзката</string>
@@ -328,7 +295,6 @@
     <string name="media_save_fail">Неуспешно запазване</string>
     <string name="media_alt_text">Алтернативен текст</string>
     <string name="media_is_downloading">Медията все още се изтегля. Опитайте отново след малко.</string>
-
     <string name="settings_side_panel_empty">По подразбиране страничният панел следва платформата на текущия профил.</string>
     <string name="tab_settings_add">Добавяне</string>
     <string name="tab_settings_drag">Плъзгане</string>
@@ -337,9 +303,7 @@
     <string name="tab_settings_default">По подразбиране</string>
     <string name="tab_settings_list">Списък</string>
     <string name="tab_settings_feed">Фийдове</string>
-
     <string name="local_filter_add">Добавяне на филтър</string>
-
     <string name="local_filter_edit_title">Редактиране на филтър</string>
     <string name="local_filter_add_title">Добавяне на филтър</string>
     <string name="local_filter_keyword">Ключова дума</string>
@@ -349,27 +313,20 @@
     <string name="local_filter_for_search">Прилагане към търсенето</string>
     <string name="local_filter_regex">Използване на регулярни изрази</string>
     <string name="local_filter_delete">Изтриване на филтъра</string>
-
     <string name="delete">Изтриване</string>
-
     <string name="mastodon_tab_local_title">Локално</string>
     <string name="mastodon_tab_public_title">Публично</string>
-
     <string name="home_tab_featured_title">Представени</string>
     <string name="home_tab_bookmarks_title">Отметки</string>
     <string name="home_tab_favorite_title">Любими</string>
     <string name="home_tab_list_title">Списъци</string>
     <string name="home_tab_feeds_title">Фийдове</string>
-
     <string name="tab_settings_primary">Основен раздел</string>
     <string name="tab_settings_secondary">Вторичен раздел</string>
-
     <string name="status_detail_comment">Коментар</string>
     <string name="status_detail_repost">Повторно споделяне</string>
-
     <string name="account_item_error_title">Грешка</string>
     <string name="account_item_error_message">Неуспешно зареждане на профила</string>
-
     <string name="edit_tab_title">Редактиране на раздел</string>
     <string name="edit_tab_name">Име</string>
     <string name="edit_tab_name_placeholder">Име на раздела</string>
@@ -377,7 +334,6 @@
     <string name="edit_tab_with_avatar">С аватар</string>
     <string name="edit_tab_enabled">Показване в смесени времеви линии</string>
     <string name="edit_tab_enabled_description">Включване на тази времева линия, когато се използва вътре в смесена времева линия или група.</string>
-
     <string name="list_add">Добавяне на списък</string>
     <string name="list_edit">Редактиране на списък</string>
     <string name="list_delete">Изтриване на списък</string>
@@ -399,23 +355,17 @@
     <string name="edit_list_member_remove">Премахване</string>
     <string name="list_create_description">Описание на списъка</string>
     <string name="list_create_description_hint">Описание на списъка</string>
-
     <string name="edit_account_list_title">Редактиране на списъка с профили</string>
-
     <string name="feeds_my_feeds_title">Моите фийдове</string>
     <string name="feeds_discover_feeds_title">Откриване на фийдове</string>
     <string name="feeds_discover_feeds_created_by">Създаден от %1$s</string>
     <string name="feeds_unsubscribe">Отказ от абонамент</string>
     <string name="feeds_subscribe">Абониране</string>
-
     <string name="profile_tab_timeline">Публикации</string>
     <string name="profile_tab_timeline_with_reply">Публикации и отговори</string>
     <string name="profile_tab_likes">Харесвания</string>
     <string name="profile_tab_media">Медия</string>
-
     <string name="tab_settings_title">Настройки на разделите</string>
-
-
     <string name="dm_list_title">Директни съобщения</string>
     <string name="dm_list_empty">Няма директни съобщения</string>
     <string name="dm_list_error">Неуспешно зареждане на директни съобщения</string>
@@ -426,17 +376,12 @@
     <string name="dm_sending">Изпращане</string>
     <string name="dm_leave">Напускане на разговора</string>
     <string name="dm_to_profile">Показване на профила</string>
-
-
     <string name="notification_login_expired">Входът изтече за %1$s</string>
-
     <string name="following_title">Следвани</string>
     <string name="fans_title">Последователи</string>
-
     <string name="local_history_search_placeholder">Търсене на кеширани публикации и профили</string>
     <string name="local_history_search_status_title">Публикации</string>
     <string name="local_history_search_user_title">Потребител</string>
-
     <string name="rss_sources_title">Абонаменти</string>
     <string name="add_rss_source">Добавяне на абонамент</string>
     <string name="edit_rss_source">Редактиране на абонамент</string>
@@ -444,12 +389,11 @@
     <string name="opml_import">Импортиране от OPML</string>
     <string name="opml_export">Експортиране в OPML</string>
     <string name="export_completed">Експортирането завърши</string>
-
     <string name="rss_sources_title_label">Заглавие</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Абонаменти</string>
     <string name="empty_rss_sources">Няма абонаменти</string>
-    <string name="rss_sources_rss_hub_host_label">RSSHub хост</string>
+    <string name="rss_sources_rss_hub_host_label">Хост на RSSHub</string>
     <string name="rss_sources_rss_hub_host_hint">Задайте RSSHub хост, за да използвате RSSHub, или изберете публичния RSSHub сървър</string>
     <string name="rss_sources_discovered_rss_sources">Открити фийдове</string>
     <string name="rss_sources_pinned_in_tabs">Закачане в разделите на Начало</string>
@@ -463,7 +407,6 @@
     <string name="mastodon_local_timeline">Локална времева линия</string>
     <string name="subscription_url_hint">Поставете URL адрес на RSS фийд или на Mastodon инстанс</string>
     <string name="rss_sources_display_mode">Режим на показване</string>
-
     <string name="rss_detail_open_in_browser">Отваряне в браузър</string>
     <string name="rss_detail_share">Споделяне на връзката</string>
     <string name="rss_detail_tldr">Обобщаване</string>
@@ -472,10 +415,8 @@
     <string name="rss_detail_tldr_loading">Обобщаване…</string>
     <string name="rss_detail_translate">Превод</string>
     <string name="rss_detail_translate_error">Неуспешен превод</string>
-
     <string name="emoji_picker_recent">Скорошни</string>
     <string name="emoji_picker_search">Търсене</string>
-
     <string name="podcast_host">Хост</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Говорител</string>
@@ -483,7 +424,6 @@
     <string name="podcast_leave">Напускане</string>
     <string name="podcast_ended">Подкастът приключи</string>
     <string name="podcast_living">На живо в момента</string>
-
     <string name="home_tab_antennas_title">Антени</string>
     <string name="home_tab_channels_title">Канали</string>
     <string name="misskey_channel_tab_following">Следвани</string>
@@ -500,24 +440,19 @@
     <string name="liked_title">Харесано</string>
     <string name="all_rss_feeds_title">Всички абонаменти</string>
     <string name="posts_title">Публикации</string>
-
     <string name="deeplink_account_selection_title">Избор на профил</string>
     <string name="deeplink_account_selection_message">Изберете профил, за да отворите тази връзка</string>
     <string name="deeplink_account_selection_browser">Отваряне в браузър</string>
-
     <string name="block_user_title">Блокиране на потребител</string>
     <string name="block_user_description">Сигурни ли сте, че искате да блокирате този потребител?</string>
     <string name="unblock_user_title">Деблокиране на потребител</string>
     <string name="unblock_user_description">Сигурни ли сте, че искате да деблокирате този потребител?</string>
-
     <string name="mute_user_title">Заглушаване на потребител</string>
     <string name="mute_user_description">Сигурни ли сте, че искате да заглушите този потребител?</string>
     <string name="unmute_user_title">Включване на звука за потребителя</string>
     <string name="unmute_user_description">Сигурни ли сте, че искате да включите звука (unmute) за този потребител?</string>
-
     <string name="report_user_title">Докладване на потребител</string>
     <string name="report_user_description">Сигурни ли сте, че искате да докладвате този потребител?</string>
-
     <string name="settings_storage_export_data">Експортиране на данни</string>
     <string name="settings_storage_export_data_description">Експортиране на всички данни, включително профили и учетни данни. Пазете файла на сигурно място.</string>
     <string name="settings_storage_import_data">Импортиране на данни</string>
@@ -528,7 +463,6 @@
     <string name="import_error">Импортирането не бе успешно</string>
     <string name="import_confirmation_title">Потвърждение на импортирането</string>
     <string name="import_confirmation_message">Това ще импортира данни от избрания файл. Съществуващите записи със съвпадащи идентификатори ще бъдат заменени. Продължаване?</string>
-
     <string name="tab_settings_add_group">Добавяне на група</string>
     <string name="tab_settings_add_tab">Добавяне на раздел</string>
     <string name="tab_settings_edit_group">Редактиране на група</string>

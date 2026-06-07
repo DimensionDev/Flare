@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current">
-        <![CDATA[
-            <span>Phiên bản %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Phiên bản %1$s:</span>
             <ul>
                 <li>Cải thiện hiệu năng và sửa lỗi.</li>
             </ul>
-        ]]>
-    </string>
+        ]]></string>
 </resources>

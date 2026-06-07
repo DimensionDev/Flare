@@ -1,24 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Logga in</string>
     <string name="navigate_back">Gå tillbaka</string>
-
     <string name="home_tab_home_title">Hem</string>
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Jag</string>
     <string name="home_tab_discover_title">Upptäck</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d nytt inlägg</item>
         <item quantity="other">%1$d nya inlägg</item>
     </plurals>
-
     <string name="notification_tab_all_title">Alla</string>
     <string name="notification_tab_mentions_title">Omnämnanden</string>
     <string name="notification_tab_comments_title">Kommentarer</string>
     <string name="notification_tab_likes_title">Gilla-markeringar</string>
-
     <string name="compose_title">Skriv</string>
     <string name="compose_reply_title">Svara</string>
     <string name="compose_quote_title">Citera</string>
@@ -46,15 +41,59 @@
     <string name="compose_close_confirm_message">Du har osparade ändringar. Spara detta som ett utkast innan du stänger?</string>
     <string name="compose_save_draft">Spara</string>
     <string name="compose_close_discard">Släng</string>
+    <string name="status_insight_title">Inlägg insikt</string>
+    <string name="status_insight_input_placeholder">Fråga en uppföljning…</string>
+    <string name="status_insight_send">Skicka</string>
+    <string name="status_insight_analyzing">Analyserar detta inlägg…</string>
+    <string name="status_insight_error">Det går inte att analysera detta inlägg.</string>
+    <string name="status_insight_trace_loading_post_context">Laddar inlägg sammanhang…</string>
+    <string name="status_insight_trace_post_context_loaded">Inläggskontext laddad</string>
+    <string name="status_insight_trace_preparing_images">Förbereder bilder…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Bilderna stöds inte; försöker igen med text…</string>
+    <string name="status_insight_trace_agent_started">Startar analys…</string>
+    <string name="status_insight_trace_strategy_started">Planeringsanalys…</string>
+    <string name="status_insight_trace_strategy_completed">Analysplan slutförd</string>
+    <string name="status_insight_trace_subgraph_started">Mata in analysstadium…</string>
+    <string name="status_insight_trace_subgraph_completed">Analysstadiet avslutat</string>
+    <string name="status_insight_trace_subgraph_failed">Analysstadiet misslyckades</string>
+    <string name="status_insight_trace_asking_model">Fråga %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Läser modellsvar…</string>
+    <string name="status_insight_trace_streaming_started">Streaming från %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Tar emot svar…</string>
+    <string name="status_insight_trace_streaming_completed">Svarsströmmen slutförd</string>
+    <string name="status_insight_trace_streaming_failed">Svara strömmen misslyckades</string>
+    <string name="status_insight_trace_running_step">Löpande analyssteg…</string>
+    <string name="status_insight_trace_step_completed">Analyssteg avslutat</string>
+    <string name="status_insight_trace_step_failed">Analyssteg misslyckades</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Laddar inlägg sammanhang…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Inläggskontext laddad</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Inmatning av inläggets innehåll avvisades</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Det gick inte att läsa in inläggskontext</string>
+    <string name="status_insight_trace_tool_search_status_started">Söker…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Sökning slutförd</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Sökinmatningen avvisades</string>
+    <string name="status_insight_trace_tool_search_status_failed">Sökning misslyckades</string>
+    <string name="status_insight_trace_agent_completed">Slutför analys…</string>
+    <string name="status_insight_trace_agent_failed">Analys misslyckades</string>
+    <string name="status_insight_trace_agent_closing">Slutför analys…</string>
+    <string name="ask_ai">Fråga AI</string>
+    <string name="agent_chat_title">AI Chatt</string>
+    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_empty">Ingen agent chatthistorik än.</string>
+    <string name="agent_chat_input_placeholder">Fråga vad som helst…</string>
+    <string name="agent_chat_send">Skicka</string>
+    <string name="agent_chat_thinking">Tänker…</string>
     <string name="draft_box_title">Utkast</string>
     <string name="draft_box_empty">Inga utkast ännu</string>
     <string name="draft_box_edit">Redigera</string>
     <string name="draft_box_retry">Försök igen</string>
     <string name="draft_box_send">Skicka</string>
     <string name="settings_draft_box_description">Visa, redigera och skicka sparade utkast igen</string>
-
     <string name="settings_title">Inställningar</string>
-
     <string name="settings_accounts_title">Konton</string>
     <string name="settings_accounts_subtitle">Hantera inloggade konton</string>
     <string name="settings_appearance_title">Utseende</string>
@@ -75,9 +114,7 @@
     <string name="settings_about_source_code">Källkod</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Gå med i vår Telegram-grupp</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Gå med i vår Discord-server</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Gå med i vår Line-grupp</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjälp oss översätta Flare</string>
@@ -121,12 +158,14 @@
     <string name="settings_ai_config_reasoning_effort_description">Välj hur mycket extra resonemang modellen använder. Standard följer leverantörens inställning.</string>
     <string name="settings_ai_config_reasoning_effort_default">Standard</string>
     <string name="settings_ai_config_reasoning_effort_low">Låg</string>
-    <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
+    <string name="settings_ai_config_reasoning_effort_medium">Medel</string>
     <string name="settings_ai_config_reasoning_effort_high">Hög</string>
     <string name="settings_ai_config_extra_body">Extra Body</string>
     <string name="settings_ai_config_tap_to_edit">Tryck för att redigera</string>
     <string name="settings_ai_config_entable_translation">Aktivera AI-översättning</string>
     <string name="settings_ai_config_translation_description">Använd AI istället för Google Översätt. Översättningar kan ta längre tid.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">Aktivera AI-sammanfattningar</string>
     <string name="settings_ai_config_tldr_description">Sammanfatta långa inlägg med AI. Tillgängligt för inlägg längre än 500 tecken.</string>
     <string name="settings_ai_config_enable_pre_translation">Aktivera automatisk översättning</string>
@@ -143,7 +182,7 @@
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Använd api.deepl.com istället för den kostnadsfria api-free.deepl.com-slutpunkten.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translation</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API-nyckel</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreÖversätt</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate bas-URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-nyckel</string>
     <string name="settings_translation_title">Översättning</string>
@@ -163,19 +202,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Lägg till relä</string>
     <string name="settings_nostr_relays_placeholder">Ange relä-URL</string>
     <string name="settings_nostr_relays_empty">Inga reläer tillagda</string>
-
     <string name="status_loadmore_error_retry">Försök igen</string>
     <string name="login_expired">Inloggningssessionen har löpt ut</string>
     <string name="login_expired_message">Tryck för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
-
     <string name="service_select_welcome_title">Välkommen till Flare</string>
     <string name="service_select_welcome_message">Flare är en sociala medier-klient för Android.\nVälj en tjänst att ansluta till för att komma igång.</string>
-
     <string name="mastodon_login_verify_message">Verifierar dina uppgifter…</string>
-
     <string name="status_title">Inlägg</string>
-
     <string name="misskey_visibility_public">Offentlig</string>
     <string name="misskey_visibility_home">Hem</string>
     <string name="misskey_visibility_followers">Följare</string>
@@ -184,51 +218,39 @@
     <string name="misskey_visibility_home_description">Endast användare på denna instans kan se detta inlägg</string>
     <string name="misskey_visibility_followers_description">Endast följare kan se detta inlägg</string>
     <string name="misskey_visibility_specified_description">Endast omnämnda användare kan se detta inlägg</string>
-
     <string name="bluesky_login_username_hint">Användarnamn</string>
     <string name="bluesky_login_password_hint">Lösenord</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-kod</string>
     <string name="bluesky_login_oauth_button">Logga in med OAuth</string>
     <string name="bluesky_login_use_password_button">Använd lösenord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortfarande vara instabilt. Om du stöter på problem, använd lösenordsinloggning istället.</string>
-
     <string name="report_title">Rapportera</string>
     <string name="report_description">Vad är fel med detta inlägg?</string>
-
     <string name="report_reason_spam_title">Skräppost</string>
     <string name="report_reason_violation_title">Olagligt eller brådskande</string>
     <string name="report_reason_misleading_title">Vilseledande</string>
     <string name="report_reason_sexual_title">Oönskat sexuellt innehåll</string>
     <string name="report_reason_rude_title">Antisocialt beteende</string>
     <string name="report_reason_other_title">Annat</string>
-
     <string name="report_reason_spam_description">Överdrivna omnämnanden eller svar</string>
     <string name="report_reason_violation_description">Tydliga brott mot lagen eller användarvillkoren</string>
     <string name="report_reason_misleading_description">Detta inlägg är vilseledande</string>
     <string name="report_reason_sexual_description">Nakenhet eller pornografi som inte är märkt som sådan</string>
     <string name="report_reason_rude_description">Trakasserier, trolling eller intolerans</string>
     <string name="report_reason_other_description">Ett problem som inte ingår i dessa alternativ</string>
-
     <string name="delete_status_title">Ta bort</string>
     <string name="delete_status_message">Ta bort detta inlägg?</string>
-
     <string name="mastodon_report_title">Rapportera</string>
     <string name="mastodon_report_description">Är du säker på att du vill rapportera detta?</string>
-
     <string name="more">Mer</string>
-
     <string name="discover_search_placeholder">Sök</string>
     <string name="discover_users">Föreslagna användare</string>
     <string name="discover_status">Trendande inlägg</string>
     <string name="discover_hashtags">Trendande hashtaggar</string>
-
     <string name="search_users">Användare</string>
     <string name="search_status">Inlägg</string>
-
     <string name="quick_menu_add_account">Lägg till konto</string>
-
     <string name="settings_appearance_generic">Allmänt</string>
-
     <string name="settings_appearance_show_actions">Visa åtgärder</string>
     <string name="settings_appearance_show_actions_description">Visa åtgärdsknappar under varje inlägg</string>
     <string name="settings_appearance_post_action_style">Stil för inläggsåtgärder</string>
@@ -243,6 +265,8 @@
     <string name="settings_appearance_show_numbers_description">Visa antal under varje inlägg</string>
     <string name="settings_appearance_show_cw_img">Visa känsligt innehåll</string>
     <string name="settings_appearance_show_cw_img_description">Visa alltid känslig media i inlägg</string>
+    <string name="settings_appearance_expand_content_warning">Visa innehåll bakom innehållsvarningar</string>
+    <string name="settings_appearance_expand_content_warning_description">Avslöja alltid inläggets innehåll dolt av innehållsvarningar</string>
     <string name="settings_appearance_expand_media">Bevara medians bildförhållande</string>
     <string name="settings_appearance_expand_media_description">Visa media med dess ursprungliga bildförhållande i tidslinjer</string>
     <string name="settings_appearance_video_autoplay">Automatisk videouppspelning</string>
@@ -263,7 +287,7 @@
     <string name="settings_appearance_theme_description">Välj app-tema</string>
     <string name="settings_appearance_theme_light">Ljus</string>
     <string name="settings_appearance_theme_dark">Mörk</string>
-    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_theme_auto">Automatiskt</string>
     <string name="settings_appearance_dynamic_theme">Dynamiskt tema</string>
     <string name="settings_appearance_dynamic_theme_description">Matcha appens färger till din bakgrundsbild</string>
     <string name="settings_appearance_show_link_previews">Visa länkförhandsvisningar</string>
@@ -297,27 +321,20 @@
     <string name="settings_appearance_full_width_post_description">Låt inlägg spänna över hela den tillgängliga bredden</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
     <string name="settings_appearance_absolute_timestamp_description">Visa exakta tidsstämplar på inlägg</string>
-
     <string name="settings_appearance_show_platform_logo">Visa ikoner för källplattform</string>
     <string name="settings_appearance_show_platform_logo_description">Visa vilken plattform varje inlägg kom ifrån</string>
-
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">Ta bort %1$s MB cachade bilder</string>
-
     <string name="settings_storage_clear_database">Rensa cachad databas</string>
     <string name="settings_storage_clear_database_description">Ta bort %1$s cachade användare och %2$s cachade inlägg</string>
     <string name="settings_storage_app_log">Apploggar</string>
     <string name="settings_storage_app_log_description">Visa, spara eller rensa apploggar</string>
-
     <string name="service_select_instance_input_placeholder">Instans-URL</string>
     <string name="service_select_next_button">Nästa</string>
     <string name="service_select_empty_message">Inga instanser hittades</string>
-
     <string name="media_viewer_title">Mediavisare</string>
-
     <string name="settings_accounts_remove">Ta bort</string>
     <string name="settings_accounts_remove_confirm">Är du säker på att du vill ta bort kontot %1$s från denna enhet?</string>
-
     <string name="media_menu_save">Spara bild</string>
     <string name="media_menu_share_image">Dela bild</string>
     <string name="media_menu_copy_link">Kopiera länk</string>
@@ -328,7 +345,6 @@
     <string name="media_save_fail">Misslyckades med att spara</string>
     <string name="media_alt_text">Alt-text</string>
     <string name="media_is_downloading">Media laddas fortfarande ner. Försök igen om en stund.</string>
-
     <string name="settings_side_panel_empty">Som standard följer sidopanelen det nuvarande kontots plattform.</string>
     <string name="tab_settings_add">Lägg till</string>
     <string name="tab_settings_drag">Dra</string>
@@ -337,9 +353,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Flöden</string>
-
     <string name="local_filter_add">Lägg till filter</string>
-
     <string name="local_filter_edit_title">Redigera filter</string>
     <string name="local_filter_add_title">Lägg till filter</string>
     <string name="local_filter_keyword">Nyckelord</string>
@@ -349,27 +363,20 @@
     <string name="local_filter_for_search">Tillämpa på sökning</string>
     <string name="local_filter_regex">Använd reguljära uttryck</string>
     <string name="local_filter_delete">Ta bort filter</string>
-
     <string name="delete">Ta bort</string>
-
     <string name="mastodon_tab_local_title">Lokalt</string>
     <string name="mastodon_tab_public_title">Offentligt</string>
-
     <string name="home_tab_featured_title">Utvalt</string>
     <string name="home_tab_bookmarks_title">Bokmärken</string>
     <string name="home_tab_favorite_title">Favoriter</string>
     <string name="home_tab_list_title">Listor</string>
     <string name="home_tab_feeds_title">Flöden</string>
-
     <string name="tab_settings_primary">Primär flik</string>
     <string name="tab_settings_secondary">Sekundär flik</string>
-
     <string name="status_detail_comment">Kommentera</string>
     <string name="status_detail_repost">Reposta</string>
-
     <string name="account_item_error_title">Fel</string>
     <string name="account_item_error_message">Misslyckades med att ladda konto</string>
-
     <string name="edit_tab_title">Redigera flik</string>
     <string name="edit_tab_name">Namn</string>
     <string name="edit_tab_name_placeholder">Fliknamn</string>
@@ -377,7 +384,6 @@
     <string name="edit_tab_with_avatar">Med avatar</string>
     <string name="edit_tab_enabled">Visa i blandade tidslinjer</string>
     <string name="edit_tab_enabled_description">Inkludera denna tidslinje när den används inuti en blandad tidslinje eller grupp.</string>
-
     <string name="list_add">Lägg till lista</string>
     <string name="list_edit">Redigera lista</string>
     <string name="list_delete">Ta bort lista</string>
@@ -399,23 +405,26 @@
     <string name="edit_list_member_remove">Ta bort</string>
     <string name="list_create_description">Listbeskrivning</string>
     <string name="list_create_description_hint">Listbeskrivning</string>
-
     <string name="edit_account_list_title">Redigera kontolista</string>
-
     <string name="feeds_my_feeds_title">Mina flöden</string>
     <string name="feeds_discover_feeds_title">Upptäck flöden</string>
     <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
     <string name="feeds_unsubscribe">Avsluta prenumeration</string>
     <string name="feeds_subscribe">Prenumerera</string>
-
     <string name="profile_tab_timeline">Inlägg</string>
     <string name="profile_tab_timeline_with_reply">Inlägg och svar</string>
     <string name="profile_tab_likes">Gilla-markeringar</string>
     <string name="profile_tab_media">Media</string>
-
+    <string name="illustrations_title">Illustrationer</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Veckovis Ranking</string>
+    <string name="pixiv_ranking_month_title">Månatlig Rankning</string>
+    <string name="pixiv_ranking_day_male_title">Manlig Ranking</string>
+    <string name="pixiv_ranking_day_female_title">Kvinnlig Rankning</string>
+    <string name="pixiv_ranking_week_original_title">Ursprunglig Rankning</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">Flikinställningar</string>
-
-
     <string name="dm_list_title">Direktmeddelanden</string>
     <string name="dm_list_empty">Inga direktmeddelanden</string>
     <string name="dm_list_error">Misslyckades med att ladda direktmeddelanden</string>
@@ -426,17 +435,12 @@
     <string name="dm_sending">Skickar</string>
     <string name="dm_leave">Lämna konversationen</string>
     <string name="dm_to_profile">Visa profil</string>
-
-
     <string name="notification_login_expired">Inloggningen har löpt ut för %1$s</string>
-
     <string name="following_title">Följer</string>
     <string name="fans_title">Följare</string>
-
     <string name="local_history_search_placeholder">Sök cachade inlägg och profiler</string>
     <string name="local_history_search_status_title">Inlägg</string>
     <string name="local_history_search_user_title">Användare</string>
-
     <string name="rss_sources_title">Prenumerationer</string>
     <string name="add_rss_source">Lägg till prenumeration</string>
     <string name="edit_rss_source">Redigera prenumeration</string>
@@ -444,9 +448,8 @@
     <string name="opml_import">Importera från OPML</string>
     <string name="opml_export">Exportera till OPML</string>
     <string name="export_completed">Export slutförd</string>
-
     <string name="rss_sources_title_label">Titel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS-URL</string>
     <string name="rss_title">Prenumerationer</string>
     <string name="empty_rss_sources">Inga prenumerationer</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub-värd</string>
@@ -463,7 +466,6 @@
     <string name="mastodon_local_timeline">Lokal tidslinje</string>
     <string name="subscription_url_hint">Klistra in en RSS-flödes-URL eller en Mastodon-instans-URL</string>
     <string name="rss_sources_display_mode">Visningsläge</string>
-
     <string name="rss_detail_open_in_browser">Öppna i webbläsare</string>
     <string name="rss_detail_share">Dela länk</string>
     <string name="rss_detail_tldr">Sammanfatta</string>
@@ -472,10 +474,8 @@
     <string name="rss_detail_tldr_loading">Sammanfattar…</string>
     <string name="rss_detail_translate">Översätt</string>
     <string name="rss_detail_translate_error">Misslyckades med att översätta</string>
-
     <string name="emoji_picker_recent">Senaste</string>
     <string name="emoji_picker_search">Sök</string>
-
     <string name="podcast_host">Värd</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Talare</string>
@@ -483,7 +483,6 @@
     <string name="podcast_leave">Lämna</string>
     <string name="podcast_ended">Podcast avslutad</string>
     <string name="podcast_living">Live nu</string>
-
     <string name="home_tab_antennas_title">Antenner</string>
     <string name="home_tab_channels_title">Kanaler</string>
     <string name="misskey_channel_tab_following">Följer</string>
@@ -500,24 +499,19 @@
     <string name="liked_title">Gillat</string>
     <string name="all_rss_feeds_title">Alla prenumerationer</string>
     <string name="posts_title">Inlägg</string>
-
     <string name="deeplink_account_selection_title">Välj konto</string>
     <string name="deeplink_account_selection_message">Välj ett konto för att öppna denna länk</string>
     <string name="deeplink_account_selection_browser">Öppna i webbläsare</string>
-
     <string name="block_user_title">Blockera användare</string>
     <string name="block_user_description">Är du säker på att du vill blockera denna användare?</string>
     <string name="unblock_user_title">Avblockera användare</string>
     <string name="unblock_user_description">Är du säker på att du vill avblockera denna användare?</string>
-
     <string name="mute_user_title">Tysta användare</string>
     <string name="mute_user_description">Är du säker på att du vill tysta denna användare?</string>
     <string name="unmute_user_title">Sluta tysta användare</string>
     <string name="unmute_user_description">Är du säker på att du vill sluta tysta denna användare?</string>
-
     <string name="report_user_title">Rapportera användare</string>
     <string name="report_user_description">Är du säker på att du vill rapportera denna användare?</string>
-
     <string name="settings_storage_export_data">Exportera data</string>
     <string name="settings_storage_export_data_description">Exportera all data, inklusive konton och inloggningsuppgifter. Förvara filen säkert.</string>
     <string name="settings_storage_import_data">Importera data</string>
@@ -528,7 +522,6 @@
     <string name="import_error">Import misslyckades</string>
     <string name="import_confirmation_title">Bekräfta import</string>
     <string name="import_confirmation_message">Detta kommer att importera data från den valda filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
-
     <string name="tab_settings_add_group">Lägg till grupp</string>
     <string name="tab_settings_add_tab">Lägg till flik</string>
     <string name="tab_settings_edit_group">Redigera grupp</string>

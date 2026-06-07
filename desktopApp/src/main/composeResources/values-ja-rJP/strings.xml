@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
     <string name="delete">削除</string>
     <string name="refresh">更新</string>
-
     <string name="home_compose">投稿する</string>
     <string name="home_login">ログイン</string>
     <string name="home_settings">設定</string>
-
     <string name="home_tab_home_title">ホーム</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">自分</string>
@@ -23,50 +21,49 @@
     <string name="home_tab_feeds_title">フィード</string>
     <string name="dm_list_title">ダイレクトメッセージ</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%1$d 件の新しい投稿</item>
         <item quantity="other">%1$d 件の新しい投稿</item>
     </plurals>
-
     <string name="navigate_back">戻る</string>
     <string name="service_select_instance_input_placeholder">インスタンスのURL</string>
     <string name="service_select_next_button">次へ</string>
     <string name="service_select_empty_message">インスタンスが見つかりませんでした</string>
-
     <string name="service_select_welcome_title">Flareへようこそ</string>
     <string name="service_select_welcome_message">Flareは %1$s 用のソーシャルメディアクライアントです。\nサービスを選択して接続し、始めましょう。</string>
     <string name="mastodon_login_verify_message">認証情報を確認中…</string>
-
     <string name="profile_tab_timeline">投稿</string>
     <string name="profile_tab_timeline_with_reply">投稿と返信</string>
     <string name="profile_tab_likes">いいね</string>
     <string name="profile_tab_media">メディア</string>
-
+    <string name="illustrations_title">Illustrations</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">今週のランキング</string>
+    <string name="pixiv_ranking_month_title">毎月のランキング</string>
+    <string name="pixiv_ranking_day_male_title">男性ランキング</string>
+    <string name="pixiv_ranking_day_female_title">女性ランキング</string>
+    <string name="pixiv_ranking_week_original_title">元のランキング</string>
+    <string name="pixiv_ranking_week_rookie_title">ルーキーランキング</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">通報</string>
     <string name="report_description">この投稿のどこに問題がありますか？</string>
-
     <string name="report_reason_spam_title">スパム</string>
     <string name="report_reason_violation_title">違法または緊急</string>
     <string name="report_reason_misleading_title">誤解を招く内容</string>
     <string name="report_reason_sexual_title">望まない性的コンテンツ</string>
     <string name="report_reason_rude_title">迷惑行為</string>
     <string name="report_reason_other_title">その他</string>
-
     <string name="report_reason_spam_description">過度なメンションや返信</string>
     <string name="report_reason_violation_description">法律や利用規約への明らかな違反</string>
     <string name="report_reason_misleading_description">この投稿は誤解を招きます</string>
     <string name="report_reason_sexual_description">適切にラベル付けされていない裸体やポルノ</string>
     <string name="report_reason_rude_description">嫌がらせ、荒らし、不寛容な態度</string>
     <string name="report_reason_other_description">これらの選択肢に含まれない問題</string>
-
     <string name="delete_status_title">削除</string>
     <string name="delete_status_message">この投稿を削除しますか？</string>
     <string name="compose_close_confirm_title">下書きを保存しますか？</string>
     <string name="compose_close_confirm_message">未保存の変更があります。閉じる前に下書きとして保存しますか？</string>
     <string name="compose_close_discard">破棄</string>
-
     <string name="mastodon_report_title">通報</string>
     <string name="mastodon_report_description">本当にこれを通報しますか？</string>
-
     <string name="bookmark_remove">ブックマークを解除</string>
     <string name="bookmark_add">ブックマークに保存</string>
     <string name="like">いいね</string>
@@ -84,8 +81,7 @@
     <string name="status_detail_repost">リポスト</string>
     <string name="emoji_picker_recent">履歴</string>
     <string name="emoji_picker_search">検索</string>
-
-    <string name="media_show_thumbnail_list">サムネイルリストを表示</string>
+    <string name="media_show_thumbnail_list">サムネイル一覧を表示</string>
     <string name="media_hide_thumbnail_list">サムネイルリストを隠す</string>
     <string name="media_save">保存</string>
     <string name="media_fullscreen">全画面表示</string>
@@ -94,7 +90,30 @@
     <string name="status_share_image">スクリーンショットを共有</string>
     <string name="status_share_via_fxembed">FxEmbedで共有</string>
     <string name="status_share_via_fixvx">Fixvxで共有</string>
-
+    <string name="status_insight_title">洞察力を投稿</string>
+    <string name="agent_chat_title">AIチャット</string>
+    <string name="agent_chat_send">送信</string>
+    <string name="status_insight_error">この投稿を分析できません。</string>
+    <string name="status_insight_trace_post_context_loaded">投稿内容を読み込みました</string>
+    <string name="status_insight_trace_strategy_completed">分析プランが完了しました</string>
+    <string name="status_insight_trace_subgraph_completed">解析が完了しました</string>
+    <string name="status_insight_trace_subgraph_failed">解析ステージに失敗しました</string>
+    <string name="status_insight_trace_streaming_completed">応答ストリームが完了しました</string>
+    <string name="status_insight_trace_streaming_failed">応答ストリームに失敗しました</string>
+    <string name="status_insight_trace_step_completed">解析ステップが完了しました</string>
+    <string name="status_insight_trace_step_failed">解析のステップに失敗しました</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">投稿内容を読み込みました</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">投稿のコンテキスト入力が拒否されました</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">投稿の読み込みに失敗しました</string>
+    <string name="status_insight_trace_tool_search_status_completed">検索が完了しました</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">検索入力が拒否されました</string>
+    <string name="status_insight_trace_tool_search_status_failed">検索に失敗しました</string>
+    <string name="status_insight_trace_agent_failed">分析失敗</string>
+    <string name="ask_ai">AIに聞く</string>
     <string name="list_add">リストを追加</string>
     <string name="list_edit">リストを編集</string>
     <string name="list_delete">リストを削除</string>
@@ -118,28 +137,23 @@
     <string name="edit_list_member_remove">削除</string>
     <string name="list_create_description">リストの説明</string>
     <string name="list_create_description_hint">リストの説明</string>
-
     <string name="feeds_my_feeds_title">マイフィード</string>
     <string name="feeds_discover_feeds_title">フィードを見つける</string>
     <string name="feeds_discover_feeds_created_by">作成者: %1$s</string>
     <string name="feeds_unsubscribe">購読解除</string>
     <string name="feeds_subscribe">購読する</string>
-
     <string name="social_title">ソーシャル</string>
-
     <string name="antenna_title">アンテナ</string>
     <string name="mixed_timeline_title">ミックス</string>
     <string name="liked_title">いいねした投稿</string>
     <string name="all_rss_feeds_title">すべての購読</string>
     <string name="posts_title">投稿</string>
-
     <string name="bluesky_login_username">ユーザー名</string>
     <string name="bluesky_login_password">パスワード</string>
     <string name="bluesky_login_2fa">2FAトークン</string>
     <string name="bluesky_login_oauth_button">OAuthでログイン</string>
     <string name="bluesky_login_use_password_button">パスワードを使用</string>
     <string name="bluesky_login_oauth_hint">BlueskyのOAuthはまだ不安定な場合があります。問題が発生した場合は、パスワードログインを使用してください。</string>
-
     <string name="login_expired">ログインセッションが期限切れです</string>
     <string name="login_expired_message">クリックして再度ログインしてください</string>
     <string name="login_expired_relogin">再ログイン</string>
@@ -148,7 +162,6 @@
     <string name="add_account">アカウントを追加</string>
     <string name="remove_account">アカウントを削除</string>
     <string name="settings_accounts_remove_confirm">このデバイスからアカウント「%1$s」を削除してもよろしいですか？</string>
-
     <string name="settings_accounts_title">アカウント</string>
     <string name="settings_appearance_title">外観</string>
     <string name="settings_status_appearance_title">投稿の表示設定</string>
@@ -176,6 +189,9 @@
     <string name="settings_guest_setting_description">ゲストモードで接続するサーバーを選択</string>
     <string name="settings_local_history_title">ローカル履歴</string>
     <string name="settings_local_history_description">デバイスに保存された投稿やプロファイルを検索</string>
+    <string name="settings_agent_history_title">フレアエージェント</string>
+    <string name="settings_agent_history_description">ローカルの Flare Agent チャット履歴を表示</string>
+    <string name="agent_history_empty">エージェントのチャット履歴はまだありません。</string>
     <string name="settings_app_logging_title">アプリログ</string>
     <string name="settings_app_logging_save">ログを保存</string>
     <string name="settings_app_logging_clear">ログを消去</string>
@@ -206,12 +222,14 @@
     <string name="settings_ai_config_reasoning_effort_low">低</string>
     <string name="settings_ai_config_reasoning_effort_medium">中</string>
     <string name="settings_ai_config_reasoning_effort_high">高</string>
-    <string name="settings_ai_config_extra_body">Extra Body</string>
+    <string name="settings_ai_config_extra_body">追加のボディ (Extra Body)</string>
     <string name="settings_ai_config_translate_prompt">翻訳プロンプト</string>
     <string name="settings_ai_config_tldr_prompt">要約プロンプト</string>
     <string name="settings_ai_config_value_empty_placeholder">未設定</string>
     <string name="settings_ai_config_entable_translation">AI翻訳を有効にする</string>
     <string name="settings_ai_config_translation_description">Google翻訳の代わりにAIを使用します。翻訳に時間がかかる場合があります。</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">自動翻訳を有効にする</string>
     <string name="settings_ai_config_pre_translation_description">新しく読み込まれたタイムラインやプロフィールの内容をバックグラウンドで翻訳し、結果をキャッシュします。大量のトークンを消費する可能性があります。</string>
     <string name="settings_ai_config_enable_tldr">AI要約を有効にする</string>
@@ -229,7 +247,6 @@
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate ベースURL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate APIキー</string>
-
     <string name="settings_translation_title">翻訳</string>
     <string name="settings_translation_description">翻訳サービスと自動翻訳の動作を選択</string>
     <string name="settings_translation_auto_excluded_languages">自動翻訳を除外する言語</string>
@@ -238,7 +255,6 @@
     <string name="settings_translation_ai_test_action">翻訳をテスト</string>
     <string name="settings_translation_ai_test_original">サンプルテキスト</string>
     <string name="settings_translation_ai_test_result">翻訳結果</string>
-
     <string name="settings_appearance_generic">全般</string>
     <string name="settings_appearance_show_compose_in_home_timeline">ホームタイムラインに投稿欄を表示</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">ホームタイムラインの上部に投稿ボックスを表示します</string>
@@ -254,6 +270,8 @@
     <string name="settings_appearance_show_numbers_description">各投稿の下にカウントを表示します</string>
     <string name="settings_appearance_show_cw_img">閲覧注意コンテンツを表示</string>
     <string name="settings_appearance_show_cw_img_description">投稿内の閲覧注意メディアを常に表示します</string>
+    <string name="settings_appearance_expand_content_warning">コンテンツ警告の背後にコンテンツを表示する</string>
+    <string name="settings_appearance_expand_content_warning_description">コンテンツの警告で非表示になった投稿コンテンツを常に表示する</string>
     <string name="settings_appearance_expand_media">メディアのアスペクト比を維持</string>
     <string name="settings_appearance_expand_media_description">タイムラインでメディアを元のアスペクト比で表示します</string>
     <string name="settings_appearance_video_autoplay">動画の自動再生</string>
@@ -297,24 +315,18 @@
     <string name="settings_appearance_post_action_style_stretch">引き伸ばし</string>
     <string name="settings_appearance_absolute_timestamp">絶対時間表示</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に正確な時刻を表示します</string>
-
     <string name="settings_appearance_show_platform_logo">プラットフォームアイコンを表示</string>
     <string name="settings_appearance_show_platform_logo_description">各投稿の送信元プラットフォームを表示します</string>
-
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegramグループに参加</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Discordサーバーに参加</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Flareの翻訳を手伝う</string>
     <string name="settings_privacy_policy">プライバシーポリシー</string>
-
     <string name="users">ユーザー</string>
     <string name="hashtags">ハッシュタグ</string>
     <string name="statues">投稿</string>
-
-
     <string name="compose_title">投稿する</string>
     <string name="compose_hint">今なにしてる？</string>
     <string name="compose_poll_option_hint">選択肢 %1$s</string>
@@ -335,7 +347,6 @@
     <string name="compose_notification_progress">投稿を送信中</string>
     <string name="compose_notification_success">投稿を送信しました</string>
     <string name="compose_notification_error">投稿の送信に失敗しました</string>
-
     <string name="misskey_visibility_public">パブリック</string>
     <string name="misskey_visibility_home">ホーム</string>
     <string name="misskey_visibility_followers">フォロワー</string>
@@ -344,15 +355,12 @@
     <string name="misskey_visibility_home_description">このインスタンスのユーザーのみがこの投稿を見ることができます</string>
     <string name="misskey_visibility_followers_description">フォロワーのみがこの投稿を見ることができます</string>
     <string name="misskey_visibility_specified_description">メンションされたユーザーのみがこの投稿を見ることができます</string>
-
-
     <string name="rss_sources_title">購読</string>
     <string name="add_rss_source">購読を追加</string>
     <string name="edit_rss_source">購読を編集</string>
     <string name="delete_rss_source">購読を削除</string>
-
     <string name="rss_sources_title_label">タイトル</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">購読</string>
     <string name="empty_rss_sources">購読がありません</string>
     <string name="rss_sources_rss_hub_host_label">RSSHubホスト</string>
@@ -373,7 +381,6 @@
     <string name="mastodon_federated_timeline">連合タイムライン</string>
     <string name="mastodon_local_timeline">ローカルタイムライン</string>
     <string name="subscription_url_hint">RSSフィードのURLまたはMastodonインスタンスのURLを貼り付け</string>
-
     <string name="tab_settings_add">追加</string>
     <string name="tab_settings_drag">ドラッグ</string>
     <string name="tab_settings_edit">編集</string>
@@ -381,9 +388,7 @@
     <string name="tab_settings_default">デフォルト</string>
     <string name="tab_settings_list">リスト</string>
     <string name="tab_settings_feed">フィード</string>
-
     <string name="notification_login_expired">%1$s のログイン期限が切れました</string>
-
     <string name="dm_list_empty">ダイレクトメッセージがありません</string>
     <string name="dm_list_error">ダイレクトメッセージの読み込みに失敗しました</string>
     <string name="send">送信</string>
@@ -416,7 +421,6 @@
     <string name="tab_settings_filter_text_only">テキストのみ</string>
     <string name="tab_settings_filter_image">画像</string>
     <string name="tab_settings_filter_video">動画</string>
-
     <string name="edit_tab_title">タブを編集</string>
     <string name="edit_tab_name">名前</string>
     <string name="edit_tab_name_placeholder">タブ名</string>
@@ -424,16 +428,12 @@
     <string name="edit_tab_with_avatar">アバターを表示</string>
     <string name="edit_tab_enabled">ミックスタイムラインに表示</string>
     <string name="edit_tab_enabled_description">このタイムラインをミックスタイムラインやグループ内で使用する場合に含めます。</string>
-
     <string name="edit">編集</string>
-
     <string name="local_history_search_placeholder">保存された投稿やプロファイルを検索</string>
     <string name="local_history_search_status_title">投稿</string>
     <string name="local_history_search_user_title">ユーザー</string>
-
     <string name="settings_storage_clear_image_cache">画像キャッシュを消去</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MBのキャッシュ画像を削除します</string>
-
     <string name="settings_storage_clear_database">キャッシュデータベースを消去</string>
     <string name="settings_storage_clear_database_description">%1$s 人のユーザーと %2$s 件の投稿のキャッシュを削除します</string>
     <string name="settings_storage_app_log">アプリログ</string>
@@ -450,50 +450,39 @@
     <string name="draft_box_retry">再試行</string>
     <string name="draft_box_edit">編集</string>
     <string name="draft_box_send">送信</string>
-
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
-
     <string name="opml_import">OPMLからインポート</string>
     <string name="opml_export">OPMLへエクスポート</string>
     <string name="save_completed">エクスポート完了</string>
-
     <string name="deeplink_account_selection_title">アカウントを選択</string>
     <string name="deeplink_account_selection_message">このリンクを開くアカウントを選択してください</string>
     <string name="deeplink_account_selection_browser">ブラウザで開く</string>
-
     <string name="block_user_title">ユーザーをブロック</string>
     <string name="block_user_description">本当にこのユーザーをブロックしますか？</string>
     <string name="unblock_user_title">ブロックを解除</string>
     <string name="unblock_user_description">本当にこのユーザーのブロックを解除しますか？</string>
-
     <string name="mute_user_title">ユーザーをミュート</string>
     <string name="mute_user_description">本当にこのユーザーをミュートしますか？</string>
     <string name="unmute_user_title">ミュートを解除</string>
     <string name="unmute_user_description">本当にこのユーザーのミュートを解除しますか？</string>
-
     <string name="report_user_title">ユーザーを通報</string>
     <string name="report_user_description">本当にこのユーザーを通報しますか？</string>
-
     <string name="settings_storage_export_data">データをエクスポート</string>
     <string name="settings_storage_export_data_description">アカウントや認証情報を含むすべてのデータをエクスポートします。ファイルは安全に保管してください。</string>
     <string name="settings_storage_import_data">データをインポート</string>
     <string name="settings_storage_import_data_description">バックアップファイルからデータをインポートします。同じIDを持つ既存の記録は上書きされます。</string>
     <string name="action_export">エクスポート</string>
     <string name="action_import">インポート</string>
-
     <string name="save_error">エクスポートに失敗しました</string>
     <string name="import_completed">インポート完了</string>
     <string name="import_error">インポートに失敗しました</string>
     <string name="import_confirmation_title">インポートの確認</string>
     <string name="import_confirmation_message">選択したファイルからデータをインポートします。同じIDを持つ既存の記録は上書きされます。続行しますか？</string>
-
     <string name="channel_title">チャンネル</string>
-
     <string name="misskey_channel_tab_following">フォロー中</string>
     <string name="misskey_channel_tab_favorites">お気に入り</string>
     <string name="misskey_channel_tab_owned">所有</string>
     <string name="misskey_channel_tab_featured">トレンド</string>
-
     <string name="media_save_success">ダウンロードに保存しました</string>
     <string name="media_save_fail">保存に失敗しました</string>
 </resources>

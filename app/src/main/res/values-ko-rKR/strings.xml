@@ -1,21 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="login_button">로그인</string>
     <string name="navigate_back">뒤로 가기</string>
-
     <string name="home_tab_home_title">홈</string>
     <string name="home_tab_notifications_title">알림</string>
     <string name="home_tab_me_title">나</string>
     <string name="home_tab_discover_title">검색</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="other">%1$d개의 새 게시물</item>
     </plurals>
-
     <string name="notification_tab_all_title">전체</string>
     <string name="notification_tab_mentions_title">멘션</string>
     <string name="notification_tab_comments_title">댓글</string>
     <string name="notification_tab_likes_title">좋아요</string>
-
     <string name="compose_title">작성</string>
     <string name="compose_reply_title">답장</string>
     <string name="compose_quote_title">인용</string>
@@ -43,15 +40,15 @@
     <string name="compose_close_confirm_message">저장되지 않은 변경 사항이 있습니다. 닫기 전에 초안으로 저장할까요?</string>
     <string name="compose_save_draft">저장</string>
     <string name="compose_close_discard">삭제</string>
+    <string name="status_insight_send">전송</string>
+    <string name="agent_chat_send">전송</string>
     <string name="draft_box_title">초안함</string>
     <string name="draft_box_empty">초안이 없습니다</string>
     <string name="draft_box_edit">편집</string>
     <string name="draft_box_retry">재시도</string>
     <string name="draft_box_send">전송</string>
     <string name="settings_draft_box_description">저장된 초안 보기, 편집 및 재전송</string>
-
     <string name="settings_title">설정</string>
-
     <string name="settings_accounts_title">계정</string>
     <string name="settings_accounts_subtitle">로그인된 계정 관리</string>
     <string name="settings_appearance_title">모양</string>
@@ -70,11 +67,9 @@
     <string name="settings_about_subtitle">Flare에 대해 자세히 알아보기</string>
     <string name="settings_about_description">탈중앙화 소셜 플랫폼을 위한 오픈 소스 AI 기반 클라이언트입니다.</string>
     <string name="settings_about_source_code">소스 코드</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">텔레그램</string>
     <string name="settings_about_telegram_description">저희 Telegram 그룹에 참여하세요</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">저희 Discord 서버에 참여하세요</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">저희 Line 그룹에 참여하세요</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Flare 번역을 도와주세요</string>
@@ -91,7 +86,6 @@
     <string name="settings_app_logging_save">로그 저장</string>
     <string name="settings_app_logging_clear">로그 삭제</string>
     <string name="settings_app_logging_enable_network_logging">네트워크 요청 로그 기록</string>
-    <string name="settings_ai_config_title">AI</string>
     <string name="settings_ai_config_description">AI 제공업체 및 요약 설정</string>
     <string name="settings_ai_config_server">서버 URL</string>
     <string name="settings_ai_config_server_hint">기본 URL 입력</string>
@@ -132,15 +126,12 @@
     <string name="settings_ai_config_tldr_prompt">요약 프롬프트</string>
     <string name="settings_ai_config_translate_provider">번역 제공업체</string>
     <string name="settings_ai_config_translate_provider_description">콘텐츠를 번역할 서비스 선택</string>
-    <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google 번역 (웹)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API 키</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro 엔드포인트</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">무료 api-free.deepl.com 대신 api.deepl.com을 사용합니다.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud 번역</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API 키</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate 기본 URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 키</string>
     <string name="settings_translation_title">번역</string>
@@ -160,19 +151,14 @@
     <string name="settings_nostr_relays_add_dialog_title">릴레이 추가</string>
     <string name="settings_nostr_relays_placeholder">릴레이 URL 입력</string>
     <string name="settings_nostr_relays_empty">추가된 릴레이가 없습니다</string>
-
     <string name="status_loadmore_error_retry">재시도</string>
     <string name="login_expired">로그인 세션 만료</string>
     <string name="login_expired_message">다시 로그인하려면 탭하세요</string>
     <string name="login_expired_relogin">다시 로그인</string>
-
     <string name="service_select_welcome_title">Flare에 오신 것을 환영합니다</string>
     <string name="service_select_welcome_message">Flare는 Android용 소셜 미디어 클라이언트입니다.\n연결할 서비스를 선택하여 시작하세요.</string>
-
     <string name="mastodon_login_verify_message">자격 증명 확인 중…</string>
-
     <string name="status_title">게시물</string>
-
     <string name="misskey_visibility_public">공개</string>
     <string name="misskey_visibility_home">홈</string>
     <string name="misskey_visibility_followers">팔로워</string>
@@ -181,51 +167,39 @@
     <string name="misskey_visibility_home_description">이 인스턴스의 사용자만 이 게시물을 볼 수 있습니다</string>
     <string name="misskey_visibility_followers_description">팔로워만 이 게시물을 볼 수 있습니다</string>
     <string name="misskey_visibility_specified_description">언급된 사용자만 이 게시물을 볼 수 있습니다</string>
-
     <string name="bluesky_login_username_hint">사용자 이름</string>
     <string name="bluesky_login_password_hint">비밀번호</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA 토큰</string>
     <string name="bluesky_login_oauth_button">OAuth로 로그인</string>
     <string name="bluesky_login_use_password_button">비밀번호 사용</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth는 아직 불안정할 수 있습니다. 문제가 발생하면 비밀번호 로그인을 대신 사용하세요.</string>
-
     <string name="report_title">신고</string>
     <string name="report_description">이 게시물의 문제가 무엇인가요?</string>
-
     <string name="report_reason_spam_title">스팸</string>
     <string name="report_reason_violation_title">불법 또는 긴급</string>
     <string name="report_reason_misleading_title">허위 정보</string>
     <string name="report_reason_sexual_title">원치 않는 성적 콘텐츠</string>
     <string name="report_reason_rude_title">반사회적 행동</string>
     <string name="report_reason_other_title">기타</string>
-
     <string name="report_reason_spam_description">과도한 언급 또는 답장</string>
     <string name="report_reason_violation_description">법률 또는 서비스 약관의 명백한 위반</string>
     <string name="report_reason_misleading_description">이 게시물은 허위 정보를 포함하고 있습니다</string>
     <string name="report_reason_sexual_description">표시되지 않은 누드 또는 음란물</string>
     <string name="report_reason_rude_description">괴롭힘, 트롤링 또는 불관용</string>
     <string name="report_reason_other_description">이 옵션들에 포함되지 않은 문제</string>
-
     <string name="delete_status_title">삭제</string>
     <string name="delete_status_message">이 게시물을 삭제할까요?</string>
-
     <string name="mastodon_report_title">신고</string>
     <string name="mastodon_report_description">정말로 신고하시겠습니까?</string>
-
     <string name="more">더 보기</string>
-
     <string name="discover_search_placeholder">검색</string>
     <string name="discover_users">추천 사용자</string>
     <string name="discover_status">트렌드 게시물</string>
     <string name="discover_hashtags">트렌드 해시태그</string>
-
     <string name="search_users">사용자</string>
     <string name="search_status">게시물</string>
-
     <string name="quick_menu_add_account">계정 추가</string>
-
     <string name="settings_appearance_generic">일반</string>
-
     <string name="settings_appearance_show_actions">동작 표시</string>
     <string name="settings_appearance_show_actions_description">각 게시물 아래에 동작 버튼 표시</string>
     <string name="settings_appearance_post_action_style">게시물 동작 스타일</string>
@@ -294,27 +268,20 @@
     <string name="settings_appearance_full_width_post_description">게시물이 사용 가능한 전체 너비를 차지하도록 허용</string>
     <string name="settings_appearance_absolute_timestamp">절대 타임스탬프</string>
     <string name="settings_appearance_absolute_timestamp_description">게시물에 정확한 타임스탬프 표시</string>
-
     <string name="settings_appearance_show_platform_logo">소스 플랫폼 아이콘 표시</string>
     <string name="settings_appearance_show_platform_logo_description">각 게시물의 출처 플랫폼 표시</string>
-
     <string name="settings_storage_clear_image_cache">이미지 캐시 삭제</string>
     <string name="settings_storage_clear_image_cache_description">캐시된 이미지 %1$s MB 삭제</string>
-
     <string name="settings_storage_clear_database">캐시된 데이터베이스 삭제</string>
     <string name="settings_storage_clear_database_description">캐시된 사용자 %1$s명 및 게시물 %2$s개 삭제</string>
     <string name="settings_storage_app_log">앱 로그</string>
     <string name="settings_storage_app_log_description">앱 로그 보기, 저장 또는 삭제</string>
-
     <string name="service_select_instance_input_placeholder">인스턴스 URL</string>
     <string name="service_select_next_button">다음</string>
     <string name="service_select_empty_message">인스턴스를 찾을 수 없음</string>
-
     <string name="media_viewer_title">미디어 뷰어</string>
-
     <string name="settings_accounts_remove">제거</string>
     <string name="settings_accounts_remove_confirm">이 기기에서 %1$s 계정을 제거하시겠습니까?</string>
-
     <string name="media_menu_save">이미지 저장</string>
     <string name="media_menu_share_image">이미지 공유</string>
     <string name="media_menu_copy_link">링크 복사</string>
@@ -325,7 +292,6 @@
     <string name="media_save_fail">저장 실패</string>
     <string name="media_alt_text">대체 텍스트</string>
     <string name="media_is_downloading">미디어를 다운로드 중입니다. 잠시 후 다시 시도하세요.</string>
-
     <string name="settings_side_panel_empty">기본적으로 사이드 패널은 현재 계정의 플랫폼을 따릅니다.</string>
     <string name="tab_settings_add">추가</string>
     <string name="tab_settings_drag">드래그</string>
@@ -334,9 +300,7 @@
     <string name="tab_settings_default">기본값</string>
     <string name="tab_settings_list">목록</string>
     <string name="tab_settings_feed">피드</string>
-
     <string name="local_filter_add">필터 추가</string>
-
     <string name="local_filter_edit_title">필터 편집</string>
     <string name="local_filter_add_title">필터 추가</string>
     <string name="local_filter_keyword">키워드</string>
@@ -346,27 +310,20 @@
     <string name="local_filter_for_search">검색에 적용</string>
     <string name="local_filter_regex">정규 표현식 사용</string>
     <string name="local_filter_delete">필터 삭제</string>
-
     <string name="delete">삭제</string>
-
     <string name="mastodon_tab_local_title">로컬</string>
     <string name="mastodon_tab_public_title">연합</string>
-
     <string name="home_tab_featured_title">추천</string>
     <string name="home_tab_bookmarks_title">북마크</string>
     <string name="home_tab_favorite_title">즐겨찾기</string>
     <string name="home_tab_list_title">목록</string>
     <string name="home_tab_feeds_title">피드</string>
-
     <string name="tab_settings_primary">기본 탭</string>
     <string name="tab_settings_secondary">보조 탭</string>
-
     <string name="status_detail_comment">댓글</string>
     <string name="status_detail_repost">리포스트</string>
-
     <string name="account_item_error_title">오류</string>
     <string name="account_item_error_message">계정 로드 실패</string>
-
     <string name="edit_tab_title">탭 편집</string>
     <string name="edit_tab_name">이름</string>
     <string name="edit_tab_name_placeholder">탭 이름</string>
@@ -374,7 +331,6 @@
     <string name="edit_tab_with_avatar">아바타 포함</string>
     <string name="edit_tab_enabled">혼합 타임라인에 표시</string>
     <string name="edit_tab_enabled_description">혼합 타임라인 또는 그룹 내에서 사용될 때 이 타임라인을 포함합니다.</string>
-
     <string name="list_add">목록 추가</string>
     <string name="list_edit">목록 편집</string>
     <string name="list_delete">목록 삭제</string>
@@ -396,23 +352,17 @@
     <string name="edit_list_member_remove">제거</string>
     <string name="list_create_description">목록 설명</string>
     <string name="list_create_description_hint">목록 설명</string>
-
     <string name="edit_account_list_title">계정 목록 편집</string>
-
     <string name="feeds_my_feeds_title">내 피드</string>
     <string name="feeds_discover_feeds_title">피드 찾기</string>
     <string name="feeds_discover_feeds_created_by">%1$s님이 만듦</string>
     <string name="feeds_unsubscribe">구독 취소</string>
     <string name="feeds_subscribe">구독</string>
-
     <string name="profile_tab_timeline">게시물</string>
     <string name="profile_tab_timeline_with_reply">게시물 및 답장</string>
     <string name="profile_tab_likes">좋아요</string>
     <string name="profile_tab_media">미디어</string>
-
     <string name="tab_settings_title">탭 설정</string>
-
-
     <string name="dm_list_title">다이렉트 메시지</string>
     <string name="dm_list_empty">다이렉트 메시지 없음</string>
     <string name="dm_list_error">다이렉트 메시지 로드 실패</string>
@@ -423,17 +373,12 @@
     <string name="dm_sending">전송 중</string>
     <string name="dm_leave">대화 나가기</string>
     <string name="dm_to_profile">프로필 보기</string>
-
-
     <string name="notification_login_expired">%1$s의 로그인이 만료되었습니다</string>
-
     <string name="following_title">팔로잉</string>
     <string name="fans_title">팔로워</string>
-
     <string name="local_history_search_placeholder">캐시된 게시물 및 프로필 검색</string>
     <string name="local_history_search_status_title">게시물</string>
     <string name="local_history_search_user_title">사용자</string>
-
     <string name="rss_sources_title">구독</string>
     <string name="add_rss_source">구독 추가</string>
     <string name="edit_rss_source">구독 편집</string>
@@ -441,9 +386,8 @@
     <string name="opml_import">OPML에서 가져오기</string>
     <string name="opml_export">OPML로 내보내기</string>
     <string name="export_completed">내보내기 완료</string>
-
     <string name="rss_sources_title_label">제목</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">구독</string>
     <string name="empty_rss_sources">구독 없음</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub 호스트</string>
@@ -460,7 +404,6 @@
     <string name="mastodon_local_timeline">로컬 타임라인</string>
     <string name="subscription_url_hint">RSS 피드 URL 또는 Mastodon 인스턴스 URL 붙여넣기</string>
     <string name="rss_sources_display_mode">표시 모드</string>
-
     <string name="rss_detail_open_in_browser">브라우저에서 열기</string>
     <string name="rss_detail_share">링크 공유</string>
     <string name="rss_detail_tldr">요약</string>
@@ -469,10 +412,8 @@
     <string name="rss_detail_tldr_loading">요약 중…</string>
     <string name="rss_detail_translate">번역</string>
     <string name="rss_detail_translate_error">번역 실패</string>
-
     <string name="emoji_picker_recent">최근</string>
     <string name="emoji_picker_search">검색</string>
-
     <string name="podcast_host">호스트</string>
     <string name="podcast_title">팟캐스트</string>
     <string name="podcast_speaker">발표자</string>
@@ -480,7 +421,6 @@
     <string name="podcast_leave">나가기</string>
     <string name="podcast_ended">팟캐스트 종료됨</string>
     <string name="podcast_living">현재 라이브</string>
-
     <string name="home_tab_antennas_title">안테나</string>
     <string name="home_tab_channels_title">채널</string>
     <string name="misskey_channel_tab_following">팔로잉</string>
@@ -497,24 +437,19 @@
     <string name="liked_title">좋아요 표시함</string>
     <string name="all_rss_feeds_title">모든 구독</string>
     <string name="posts_title">게시물</string>
-
     <string name="deeplink_account_selection_title">계정 선택</string>
     <string name="deeplink_account_selection_message">이 링크를 열 계정을 선택하세요</string>
     <string name="deeplink_account_selection_browser">브라우저에서 열기</string>
-
     <string name="block_user_title">사용자 차단</string>
     <string name="block_user_description">정말로 이 사용자를 차단하시겠습니까?</string>
     <string name="unblock_user_title">사용자 차단 해제</string>
     <string name="unblock_user_description">정말로 이 사용자의 차단을 해제하시겠습니까?</string>
-
     <string name="mute_user_title">사용자 뮤트</string>
     <string name="mute_user_description">정말로 이 사용자를 뮤트하시겠습니까?</string>
     <string name="unmute_user_title">사용자 뮤트 해제</string>
     <string name="unmute_user_description">정말로 이 사용자의 뮤트를 해제하시겠습니까?</string>
-
     <string name="report_user_title">사용자 신고</string>
     <string name="report_user_description">정말로 이 사용자를 신고하시겠습니까?</string>
-
     <string name="settings_storage_export_data">데이터 내보내기</string>
     <string name="settings_storage_export_data_description">계정 및 자격 증명을 포함한 모든 데이터를 내보냅니다. 파일을 안전하게 보관하세요.</string>
     <string name="settings_storage_import_data">데이터 가져오기</string>
@@ -525,7 +460,6 @@
     <string name="import_error">가져오기 실패</string>
     <string name="import_confirmation_title">가져오기 확인</string>
     <string name="import_confirmation_message">선택한 파일에서 데이터를 가져옵니다. 일치하는 ID를 가진 기존 레코드는 교체됩니다. 계속하시겠습니까?</string>
-
     <string name="tab_settings_add_group">그룹 추가</string>
     <string name="tab_settings_add_tab">탭 추가</string>
     <string name="tab_settings_edit_group">그룹 편집</string>

@@ -1,22 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Видалити</string>
     <string name="done">Готово</string>
     <string name="cancel">Скасувати</string>
     <string name="ok">ОК</string>
-
     <string name="profile_header_following_count">%1$s Підписки</string>
     <string name="profile_header_fans_count">%1$s Підписники</string>
     <string name="profile_header_toots_count">%1$s Дописи</string>
     <string name="profile_misskey_header_status_count">%1$s Дописи</string>
-
     <string name="profile_header_button_follow">Підписатися</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Запит на підписку</string>
     <string name="profile_header_button_following">Ви підписані</string>
     <string name="profile_header_button_requested">Запит надіслано</string>
     <string name="profile_header_button_blocked">Заблоковано</string>
     <string name="profile_header_button_is_fans">Підписаний на вас</string>
-
     <string name="mastodon_notification_item_followed_you">підписався(-лася) на вас</string>
     <string name="mastodon_notification_item_favourited_your_status">додав(-ла) ваш допис до обраного</string>
     <string name="mastodon_notification_item_reblogged_your_status">поширив(-ла) допис</string>
@@ -29,9 +26,7 @@
     <string name="mastodon_item_show_more">Показати більше</string>
     <string name="mastodon_item_show_less">Показати менше</string>
     <string name="mastodon_item_pinned">закріпив(-ла) допис</string>
-
     <string name="post_show_full_text">Показати весь текст</string>
-
     <string name="bluesky_notification_item_followed_you">підписався(-лася) на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">вподобав(-ла) ваш допис</string>
     <string name="bluesky_notification_item_reblogged_your_status">поширив(-ла) допис</string>
@@ -43,7 +38,6 @@
     <string name="bluesky_notification_item_starterpack_joined">приєднався(-лася) через стартовий набір</string>
     <string name="bluesky_notification_item_unKnown">Невідомо</string>
     <string name="bluesky_notification_item_pin">закріпив(-ла) допис</string>
-
     <string name="misskey_notification_item_mentioned_you">згадав(-ла) вас</string>
     <string name="misskey_notification_item_replied_to_you">відповів(-ла) вам</string>
     <string name="misskey_notification_item_reposted_your_status">поширив(-ла) допис</string>
@@ -65,10 +59,8 @@
     <string name="misskey_notification_item_requested_follow">надіслав(-ла) запит на підписку</string>
     <string name="misskey_notification_unknwon">Невідоме сповіщення: %1$s</string>
     <string name="misskey_item_reblogged_status">поширив(-ла)</string>
-
     <string name="xqt_item_reblogged_status">поширив(-ла)</string>
     <string name="xqt_item_mention_status">згадав(-ла) вас</string>
-
     <string name="mastodon_visibility_public">Публічно</string>
     <string name="mastodon_visibility_unlisted">Не для списків</string>
     <string name="mastodon_visibility_private">Приватно</string>
@@ -77,10 +69,8 @@
     <string name="mastodon_visibility_unlisted_description">Будь-хто може бачити цей допис, але він не з\'явиться в публічних стрічках</string>
     <string name="mastodon_visibility_private_description">Тільки підписники можуть бачити цей допис</string>
     <string name="mastodon_visibility_direct_description">Тільки згадані користувачі можуть бачити цей допис</string>
-
     <string name="settings_notifications_title">Сповіщення</string>
     <string name="settings_notifications_subtitle">Налаштуйте, як Flare сповіщає вас</string>
-
     <string name="status_loadmore_end">Більше немає дописів</string>
     <string name="status_loadmore_error">Помилка завантаження дописів</string>
     <string name="status_loadmore_error_retry">Повторити</string>
@@ -91,31 +81,24 @@
     <string name="login_expired">Сесія входу закінчилася</string>
     <string name="login_expired_message">Торкніться, щоб увійти знову</string>
     <string name="login_expired_relogin">Увійти знову</string>
-
     <string name="permission_denied_title">Доступ заборонено</string>
     <string name="permission_denied_message">Увійдіть знову, щоб отримати доступ до цієї сторінки</string>
-
     <string name="misskey_compose_local_only">Тільки локально</string>
     <string name="misskey_compose_local_only_description">Тільки користувачі цього сервера можуть бачити цей допис</string>
-
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Цитата</string>
-
     <string name="bluesky_notification_unknown_message">Невідомий тип сповіщення %1$s</string>
     <string name="bluesky_notification_unknown_message2">Будь ласка, повідомте про цю проблему розробнику.</string>
-
     <string name="blusky_item_action_repost">Поширити</string>
     <string name="blusky_item_action_quote">Цитата</string>
     <string name="blusky_item_action_report">Скаржитися</string>
     <string name="blusky_item_action_delete">Видалити</string>
-
     <string name="mastodon_item_unbookmark">Видалити з закладок</string>
     <string name="mastodon_item_bookmark">У закладки</string>
     <string name="mastodon_item_delete">Видалити</string>
     <string name="mastodon_item_report">Скаржитися</string>
     <string name="misskey_item_action_delete">Видалити</string>
     <string name="misskey_item_action_report">Скаржитися</string>
-
     <string name="bookmark_remove">Видалити з закладок</string>
     <string name="bookmark_add">У закладки</string>
     <string name="like">Подобається</string>
@@ -133,7 +116,6 @@
     <string name="share">Поділитися</string>
     <string name="fx_share">Поділитися через FxEmbed</string>
     <string name="comment">Коментувати</string>
-
     <string name="user_report">Скаржитися</string>
     <string name="user_block">Заблокувати</string>
     <string name="user_unblock">Розблокувати</string>
@@ -150,281 +132,194 @@
     <string name="translation_badge_failed">Помилка перекладу</string>
     <string name="translation_retry">Повторити переклад</string>
     <string name="translation_show_original">Показати оригінал</string>
-
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM yy HH:mm</string>
-
+    <string name="date_format_full">дд MMM H:mm</string>
     <string name="vvo_notification_like">Вподобав(-ла) ваш допис</string>
-
     <string name="user_follow_edit_list">Додати/видалити зі списку</string>
     <string name="list_empty">Немає списків</string>
     <string name="list_error">Не вдалося завантажити списки</string>
-
     <string name="misskey_achievement_notes1_title">просто налаштовую свій msky</string>
     <string name="misskey_achievement_notes1_description">Опублікуйте свій перший допис</string>
     <string name="misskey_achievement_notes1_flavor">Бажаємо гарно провести час у Misskey!</string>
-
     <string name="misskey_achievement_notes10_title">Кілька дописів</string>
     <string name="misskey_achievement_notes10_description">Опублікуйте 10 дописів</string>
-
     <string name="misskey_achievement_notes100_title">Багато дописів</string>
     <string name="misskey_achievement_notes100_description">Опублікуйте 100 дописів</string>
-
     <string name="misskey_achievement_notes500_title">Завалений дописами</string>
     <string name="misskey_achievement_notes500_description">Опублікуйте 500 дописів</string>
-
     <string name="misskey_achievement_notes1000_title">Гора дописів</string>
     <string name="misskey_achievement_notes1000_description">Опублікуйте 1 000 дописів</string>
-
     <string name="misskey_achievement_notes5000_title">Дописи ллються через край</string>
     <string name="misskey_achievement_notes5000_description">Опублікуйте 5 000 дописів</string>
-
     <string name="misskey_achievement_notes10000_title">Супердопис</string>
     <string name="misskey_achievement_notes10000_description">Опублікуйте 10 000 дописів</string>
-
     <string name="misskey_achievement_notes20000_title">Треба... більше... дописів...</string>
     <string name="misskey_achievement_notes20000_description">Опублікуйте 20 000 дописів</string>
-
     <string name="misskey_achievement_notes30000_title">Дописи, дописи, дописи!</string>
     <string name="misskey_achievement_notes30000_description">Опублікуйте 30 000 дописів</string>
-
     <string name="misskey_achievement_notes40000_title">Фабрика дописів</string>
     <string name="misskey_achievement_notes40000_description">Опублікуйте 40 000 дописів</string>
-
     <string name="misskey_achievement_notes50000_title">Планета дописів</string>
     <string name="misskey_achievement_notes50000_description">Опублікуйте 50 000 дописів</string>
-
     <string name="misskey_achievement_notes60000_title">Квазар дописів</string>
     <string name="misskey_achievement_notes60000_description">Опублікуйте 60 000 дописів</string>
-
     <string name="misskey_achievement_notes70000_title">Чорна діра дописів</string>
     <string name="misskey_achievement_notes70000_description">Опублікуйте 70 000 дописів</string>
-
     <string name="misskey_achievement_notes80000_title">Галактика дописів</string>
     <string name="misskey_achievement_notes80000_description">Опублікуйте 80 000 дописів</string>
-
     <string name="misskey_achievement_notes90000_title">Всесвіт дописів</string>
     <string name="misskey_achievement_notes90000_description">Опублікуйте 90 000 дописів</string>
-
     <string name="misskey_achievement_notes100000_title">УСІ ВАШІ ДОПИСИ НАЛЕЖАТЬ НАМ</string>
     <string name="misskey_achievement_notes100000_description">Опублікуйте 100 000 дописів</string>
     <string name="misskey_achievement_notes100000_flavor">Вам точно є про що сказати.</string>
-
     <string name="misskey_achievement_login3_title">Початківець I</string>
     <string name="misskey_achievement_login3_description">Увійдіть протягом 3 днів загалом</string>
     <string name="misskey_achievement_login3_flavor">Відсьогодні називайте мене Misskist</string>
-
     <string name="misskey_achievement_login7_title">Початківець II</string>
     <string name="misskey_achievement_login7_description">Увійдіть протягом 7 днів загалом</string>
     <string name="misskey_achievement_login7_flavor">Вже відчуваєте, що освоїлися?</string>
-
     <string name="misskey_achievement_login15_title">Початківець III</string>
     <string name="misskey_achievement_login15_description">Увійдіть протягом 15 днів загалом</string>
-
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Увійдіть протягом 30 днів загалом</string>
-
     <string name="misskey_achievement_login60_title">Misskist II</string>
     <string name="misskey_achievement_login60_description">Увійдіть протягом 60 днів загалом</string>
-
     <string name="misskey_achievement_login100_title">Misskist III</string>
     <string name="misskey_achievement_login100_description">Увійдіть протягом 100 днів загалом</string>
     <string name="misskey_achievement_login100_flavor">Запеклий Misskist</string>
-
     <string name="misskey_achievement_login200_title">Постійний відвідувач I</string>
     <string name="misskey_achievement_login200_description">Увійдіть протягом 200 днів загалом</string>
-
     <string name="misskey_achievement_login300_title">Постійний відвідувач II</string>
     <string name="misskey_achievement_login300_description">Увійдіть протягом 300 днів загалом</string>
-
     <string name="misskey_achievement_login400_title">Постійний відвідувач III</string>
     <string name="misskey_achievement_login400_description">Увійдіть протягом 400 днів загалом</string>
-
     <string name="misskey_achievement_login500_title">Експерт I</string>
     <string name="misskey_achievement_login500_description">Увійдіть протягом 500 днів загалом</string>
     <string name="misskey_achievement_login500_flavor">Друзі мої, часто кажуть, що я люблю дописи</string>
-
     <string name="misskey_achievement_login600_title">Експерт II</string>
     <string name="misskey_achievement_login600_description">Увійдіть протягом 600 днів загалом</string>
-
     <string name="misskey_achievement_login700_title">Експерт III</string>
     <string name="misskey_achievement_login700_description">Увійдіть протягом 700 днів загалом</string>
-
     <string name="misskey_achievement_login800_title">Майстер дописів I</string>
     <string name="misskey_achievement_login800_description">Увійдіть протягом 800 днів загалом</string>
-
     <string name="misskey_achievement_login900_title">Майстер дописів II</string>
     <string name="misskey_achievement_login900_description">Увійдіть протягом 900 днів загалом</string>
-
     <string name="misskey_achievement_login1000_title">Майстер дописів III</string>
     <string name="misskey_achievement_login1000_description">Увійдіть протягом 1 000 днів загалом</string>
     <string name="misskey_achievement_login1000_flavor">Дякуємо, що користуєтеся Misskey!</string>
-
     <string name="misskey_achievement_note_clipped1_title">Мушу... відібрати...</string>
     <string name="misskey_achievement_note_clipped1_description">Відберіть свій перший допис</string>
-
     <string name="misskey_achievement_note_favorited1_title">Звіздар</string>
     <string name="misskey_achievement_note_favorited1_description">Додайте свій перший допис до обраного</string>
-
     <string name="misskey_achievement_my_note_favorited1_title">У пошуках зірок</string>
     <string name="misskey_achievement_my_note_favorited1_description">Нехай хтось інший додасть один з ваших дописів до обраного</string>
-
     <string name="misskey_achievement_profile_filled_title">Добре підготовлений</string>
     <string name="misskey_achievement_profile_filled_description">Налаштуйте свій профіль</string>
-
     <string name="misskey_achievement_marked_as_cat_title">Я кіт</string>
     <string name="misskey_achievement_marked_as_cat_description">Позначте свій акаунт як кота</string>
     <string name="misskey_achievement_marked_as_cat_flavor">Я дам тобі ім\'я пізніше.</string>
-
     <string name="misskey_achievement_following1_title">Перша підписка</string>
     <string name="misskey_achievement_following1_description">Підпишіться на користувача</string>
-
     <string name="misskey_achievement_following10_title">Не відставай... не відставай...</string>
     <string name="misskey_achievement_following10_description">Підпишіться на 10 користувачів</string>
-
     <string name="misskey_achievement_following50_title">Багато друзів</string>
     <string name="misskey_achievement_following50_description">Підпишіться на 50 акаунтів</string>
-
     <string name="misskey_achievement_following100_title">100 друзів</string>
     <string name="misskey_achievement_following100_description">Підпишіться на 100 акаунтів</string>
-
     <string name="misskey_achievement_following300_title">Перебір з друзями</string>
     <string name="misskey_achievement_following300_description">Підпишіться на 300 акаунтів</string>
-
     <string name="misskey_achievement_followers1_title">Перший підписник</string>
     <string name="misskey_achievement_followers1_description">Отримайте 1 підписника</string>
-
     <string name="misskey_achievement_followers10_title">Слідуй за мною!</string>
     <string name="misskey_achievement_followers10_description">Отримайте 10 підписників</string>
-
     <string name="misskey_achievement_followers50_title">Цілі натовпи</string>
     <string name="misskey_achievement_followers50_description">Отримайте 50 підписників</string>
-
     <string name="misskey_achievement_followers100_title">Популярний</string>
     <string name="misskey_achievement_followers100_description">Отримайте 100 підписників</string>
-
     <string name="misskey_achievement_followers300_title">Будь ласка, станьте в одну чергу</string>
     <string name="misskey_achievement_followers300_description">Отримайте 300 підписників</string>
-
     <string name="misskey_achievement_followers500_title">Радіовежа</string>
     <string name="misskey_achievement_followers500_description">Отримайте 500 підписників</string>
-
     <string name="misskey_achievement_followers1000_title">Інфлюенсер</string>
     <string name="misskey_achievement_followers1000_description">Отримайте 1 000 підписників</string>
-
     <string name="misskey_achievement_collect_achievements30_title">Колекціонер досягнень</string>
     <string name="misskey_achievement_collect_achievements30_description">Здобудьте 30 досягнень</string>
-
     <string name="misskey_achievement_view_achievements3min_title">Любить досягнення</string>
     <string name="misskey_achievement_view_achievements3min_description">Дивіться на свій список досягнень принаймні 3 хвилини</string>
-
     <string name="misskey_achievement_i_love_misskey_title">Я люблю Misskey</string>
     <string name="misskey_achievement_i_love_misskey_description">Опублікуйте \"I ❤ #Misskey\"</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Команда розробників Misskey дуже вдячна вам за підтримку!</string>
-
     <string name="misskey_achievement_found_treasure_title">Пошук скарбів</string>
     <string name="misskey_achievement_found_treasure_description">Ви знайшли прихований скарб</string>
-
     <string name="misskey_achievement_client30min_title">Коротка перерва</string>
     <string name="misskey_achievement_client30min_description">Тримайте Misskey відкритим принаймні 30 хвилин</string>
-
     <string name="misskey_achievement_client60min_title">Жодних промахів у Misskey</string>
     <string name="misskey_achievement_client60min_description">Тримайте Misskey відкритим принаймні 60 хвилин</string>
-
     <string name="misskey_achievement_note_deleted_within1min_title">Неважливо</string>
     <string name="misskey_achievement_note_deleted_within1min_description">Видаліть допис протягом хвилини після його публікації</string>
-
     <string name="misskey_achievement_posted_at_late_night_title">Нічна сова</string>
     <string name="misskey_achievement_posted_at_late_night_description">Опублікуйте допис пізно вночі</string>
     <string name="misskey_achievement_posted_at_late_night_flavor">Пора вже лягати спати.</string>
-
     <string name="misskey_achievement_posted_at_0min0sec_title">Годинник, що розмовляє</string>
     <string name="misskey_achievement_posted_at_0min0sec_description">Опублікуйте допис о 00:00</string>
     <string name="misskey_achievement_posted_at_0min0sec_flavor">Тік-так, тік-так, бам!</string>
-
     <string name="misskey_achievement_self_quote_title">Самоцитування</string>
     <string name="misskey_achievement_self_quote_description">Процитуйте власний допис</string>
-
     <string name="misskey_achievement_htl20npm_title">Стрічка, що пливе</string>
     <string name="misskey_achievement_htl20npm_description">Нехай швидкість вашої домашньої стрічки перевищить 20 н/хв (нотаток на хвилину)</string>
-
     <string name="misskey_achievement_view_instance_chart_title">Аналітик</string>
     <string name="misskey_achievement_view_instance_chart_description">Перегляньте графіки вашого сервера</string>
-
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Привіт, світе!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Виведіть \"hello world\" у Scratchpad</string>
-
     <string name="misskey_achievement_open3windows_title">Багатовіконність</string>
     <string name="misskey_achievement_open3windows_description">Тримайте принаймні 3 вікна відкритими одночасно</string>
-
     <string name="misskey_achievement_drive_folder_circular_reference_title">Циклічне посилання</string>
     <string name="misskey_achievement_drive_folder_circular_reference_description">Спроба створити рекурсивно вкладену папку на Диску</string>
-
     <string name="misskey_achievement_react_without_read_title">Ви справді це прочитали?</string>
     <string name="misskey_achievement_react_without_read_description">Відреагуйте на допис довжиною понад 100 символів протягом 3 секунд після його публікації</string>
-
     <string name="misskey_achievement_clicked_click_here_title">Натисніть сюди</string>
     <string name="misskey_achievement_clicked_click_here_description">Ви натиснули сюди</string>
-
     <string name="misskey_achievement_just_plain_lucky_title">Просто пощастило</string>
     <string name="misskey_achievement_just_plain_lucky_description">Має шанс бути отриманим з імовірністю 0,005% кожні 10 секунд</string>
-
     <string name="misskey_achievement_set_name_to_syuilo_title">Комплекс бога</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Встановіть своє ім\'я як \"syuilo\"</string>
-
     <string name="misskey_achievement_passed_since_account_created1_title">Перша річниця</string>
     <string name="misskey_achievement_passed_since_account_created1_description">Минув один рік з моменту створення вашого акаунта</string>
-
     <string name="misskey_achievement_passed_since_account_created2_title">Друга річниця</string>
     <string name="misskey_achievement_passed_since_account_created2_description">Минуло два роки з моменту створення вашого акаунта</string>
-
     <string name="misskey_achievement_passed_since_account_created3_title">Третя річниця</string>
     <string name="misskey_achievement_passed_since_account_created3_description">Минуло три роки з моменту створення вашого акаунта</string>
-
     <string name="misskey_achievement_logged_in_on_birthday_title">З днем народження</string>
     <string name="misskey_achievement_logged_in_on_birthday_description">Увійдіть у свій день народження</string>
-
     <string name="misskey_achievement_logged_in_on_new_years_day_title">З Новим роком!</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_description">Увійшов у перший день року</string>
     <string name="misskey_achievement_logged_in_on_new_years_day_flavor">За ще один чудовий рік на цьому сервері</string>
-
     <string name="misskey_achievement_cookie_clicked_title">Гра, в якій ви клікаєте на печиво</string>
     <string name="misskey_achievement_cookie_clicked_description">Натиснули на печиво</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Зачекайте, ви на тому сайті?</string>
-
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Дайвер мозку</string>
     <string name="misskey_achievement_brain_diver_description">Опублікуйте посилання на Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
-
     <string name="misskey_achievement_smash_test_notification_button_title">Переповнення тестами</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Запускайте тест сповіщень багаторазово протягом надзвичайно короткого часу</string>
-
     <string name="misskey_achievement_tutorial_completed_title">Диплом початкового курсу Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Навчання завершено</string>
-
     <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Найбільший об\'єкт у грі з бульбашками</string>
-
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Подвійний🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два найбільші об\'єкти у грі з бульбашками одночасно</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Ви можете трохи наповнити ланч-бокс ось так 🤯 🤯.</string>
-
     <string name="vote">Голосувати</string>
     <string name="poll_expired">Опитування завершено</string>
     <string name="poll_voted">Проголосовано</string>
     <string name="poll_expired_at">Завершилося %1$s</string>
     <string name="user_send_message">Надіслати пряме повідомлення</string>
-
     <string name="profile_search_user_using_account">Знайти %1$s у %2$s через %3$s</string>
     <string name="profile_search_user_using_account_compat">Знайти у %1$s</string>
-
     <string name="feeds_discover_feeds_created_by">Створено %1$s</string>
-
     <string name="notification_item_accept_follow_request">Прийняти</string>
     <string name="notification_item_reject_follow_request">Відхилити</string>
-
-
     <string name="dm_list_empty">Немає прямих повідомлень</string>
     <string name="dm_list_error">Не вдалося завантажити прямі повідомлення</string>
     <string name="send">Надіслати</string>
@@ -434,7 +329,6 @@
     <string name="dm_sending">Надсилання</string>
     <string name="dm_leave">Залишити розмову</string>
     <string name="dm_to_profile">Показати профіль</string>
-
     <string name="settings_side_panel_empty">За замовчуванням бічна панель відповідає платформі поточного акаунта.</string>
     <string name="tab_settings_add">Додати</string>
     <string name="tab_settings_drag">Перетягнути</string>
@@ -443,24 +337,20 @@
     <string name="tab_settings_default">Типово</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Стрічки</string>
-
     <string name="list_add">Додати список</string>
     <string name="list_edit">Редагувати список</string>
     <string name="list_delete">Видалити список</string>
-
     <string name="rss_sources_title">Підписки</string>
     <string name="add_rss_source">Додати підписку</string>
     <string name="edit_rss_source">Редагувати підписку</string>
     <string name="delete_rss_source">Видалити підписку</string>
-
     <string name="rss_sources_title_label">Заголовок</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Підписки</string>
     <string name="empty_rss_sources">Немає підписок</string>
     <string name="mastodon_trending_statuses">Популярні статуси</string>
     <string name="mastodon_federated_timeline">Глобальна стрічка</string>
     <string name="mastodon_local_timeline">Локальна стрічка</string>
-
     <string name="service_select_welcome_title">Ласкаво просимо до Flare</string>
     <string name="service_select_welcome_message">Введіть сервер, щоб розпочати.</string>
     <string name="service_select_welcome_hint">Flare підтримує Mastodon, Misskey, Bluesky, Nostr та X.</string>
@@ -494,7 +384,6 @@
     <string name="service_select_compatibility_warning">Цей сервер використовує %1$s, Flare працюватиме в режимі сумісності. Деякі функції можуть працювати некоректно.</string>
     <string name="login_agreement">Входячи, ви погоджуєтеся з %1$s.</string>
     <string name="eula_privacy_policy">EULA та Політикою конфіденційності</string>
-
     <string name="home_tab_home_title">Головна</string>
     <string name="home_tab_notifications_title">Сповіщення</string>
     <string name="home_tab_me_title">Я</string>
@@ -505,6 +394,7 @@
     <string name="home_tab_featured_title">Популярне</string>
     <string name="home_tab_bookmarks_title">Закладки</string>
     <string name="home_tab_favorite_title">Вибране</string>
+    <string name="home_tab_following_title">Підписки</string>
     <string name="home_tab_list_title">Списки</string>
     <string name="home_tab_feeds_title">Стрічки</string>
     <string name="dm_list_title">Прямі повідомлення</string>
@@ -514,7 +404,18 @@
     <string name="liked_title">Сподобалося</string>
     <string name="all_rss_feeds_title">Усі підписки</string>
     <string name="posts_title">Дописи</string>
+    <string name="posts_with_replies_title">Повідомлень &amp; Відповідей</string>
+    <string name="media_title">Медіа</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютна мітка часу</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати точний час на дописах</string>
     <string name="channel_title">Канал</string>
+    <string name="pixiv_ranking_week_title">Щотижневий рейтинг</string>
+    <string name="pixiv_ranking_month_title">Щомісячний рейтинг</string>
+    <string name="pixiv_ranking_day_male_title">Чоловічий рейтинг</string>
+    <string name="pixiv_ranking_day_female_title">Рейтинг жінки</string>
+    <string name="pixiv_ranking_week_original_title">Оригінальний рейтинг</string>
+    <string name="pixiv_ranking_week_rookie_title">Рейтинг Нових Очків</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Ілюстрації</string>
+    <string name="manga_title">Manga</string>
 </resources>

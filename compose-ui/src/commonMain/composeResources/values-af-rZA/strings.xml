@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Verwyder</string>
     <string name="done">Klaar</string>
     <string name="cancel">Kanselleer</string>
@@ -9,14 +9,13 @@
     <string name="profile_header_toots_count">%1$s Plasings</string>
     <string name="profile_misskey_header_status_count">%1$s Plasings</string>
     <string name="profile_header_button_follow">Volg</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Volg tans</string>
     <string name="profile_header_button_requested">Aangevra</string>
     <string name="profile_header_button_blocked">Geblokkeer</string>
     <string name="profile_header_button_is_fans">Volg jou</string>
     <string name="mastodon_notification_item_followed_you">het jou begin volg</string>
     <string name="mastodon_notification_item_favourited_your_status">het jou plasing as gunsteling gemerk</string>
-    <string name="mastodon_notification_item_reblogged_your_status">het 'n plasing herplaas</string>
+    <string name="mastodon_notification_item_reblogged_your_status">het \'n plasing herplaas</string>
     <string name="mastodon_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
     <string name="mastodon_notification_item_mentioned_you">het jou genoem</string>
     <string name="mastodon_notification_item_requested_follow">het versoek om jou te volg</string>
@@ -29,7 +28,7 @@
     <string name="post_show_full_text">Wys volledige teks</string>
     <string name="bluesky_notification_item_followed_you">het jou begin volg</string>
     <string name="bluesky_notification_item_favourited_your_status">hou van jou plasing</string>
-    <string name="bluesky_notification_item_reblogged_your_status">het 'n plasing herplaas</string>
+    <string name="bluesky_notification_item_reblogged_your_status">het \'n plasing herplaas</string>
     <string name="bluesky_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
     <string name="bluesky_notification_item_mentioned_you">het jou genoem</string>
     <string name="bluesky_item_reblogged_status">herplaas</string>
@@ -40,7 +39,7 @@
     <string name="bluesky_notification_item_pin">het \'n plasing vasgespeld</string>
     <string name="misskey_notification_item_mentioned_you">het jou genoem</string>
     <string name="misskey_notification_item_replied_to_you">het op jou geantwoord</string>
-    <string name="misskey_notification_item_reposted_your_status">het 'n plasing herplaas</string>
+    <string name="misskey_notification_item_reposted_your_status">het \'n plasing herplaas</string>
     <string name="misskey_notification_item_quoted_your_status">het jou plasing aangehaal</string>
     <string name="misskey_notification_item_reacted_to_your_status">het op jou plasing gereageer</string>
     <string name="misskey_notification_item_poll_ended">\'n Meningspeiling waaraan jy deelgeneem het, het geëindig</string>
@@ -173,13 +172,13 @@
     <string name="misskey_achievement_notes100000_title">AL JOU NOTAS BEHOORT AAN ONS</string>
     <string name="misskey_achievement_notes100000_description">Plaas 100,000 notas</string>
     <string name="misskey_achievement_notes100000_flavor">Jy het beslis baie om te sê.</string>
-    <string name="misskey_achievement_login3_title">Beginner I</string>
+    <string name="misskey_achievement_login3_title">Beginners I</string>
     <string name="misskey_achievement_login3_description">Meld aan vir \'n totaal van 3 dae</string>
     <string name="misskey_achievement_login3_flavor">Vanaf vandag, noem my maar net Misskist</string>
-    <string name="misskey_achievement_login7_title">Beginner II</string>
+    <string name="misskey_achievement_login7_title">Beginners II</string>
     <string name="misskey_achievement_login7_description">Meld aan vir \'n totaal van 7 dae</string>
     <string name="misskey_achievement_login7_flavor">Voel dit al of jy die ding onder die knie het?</string>
-    <string name="misskey_achievement_login15_title">Beginner III</string>
+    <string name="misskey_achievement_login15_title">Beginners III</string>
     <string name="misskey_achievement_login15_description">Meld aan vir \'n totaal van 15 dae</string>
     <string name="misskey_achievement_login30_title">Misskist I</string>
     <string name="misskey_achievement_login30_description">Meld aan vir \'n totaal van 30 dae</string>
@@ -298,7 +297,7 @@
     <string name="misskey_achievement_cookie_clicked_title">\'n Speletjie waarin jy op koekies klik</string>
     <string name="misskey_achievement_cookie_clicked_description">Het op die koekie geklik</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Wag, is jy op die regte webwerf?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Brein Diver</string>
     <string name="misskey_achievement_brain_diver_description">Plaas die skakel na Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Toets-oorvloei</string>
@@ -345,7 +344,7 @@
     <string name="edit_rss_source">Redigeer subskripsie</string>
     <string name="delete_rss_source">Verwyder subskripsie</string>
     <string name="rss_sources_title_label">Titel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS-URL</string>
     <string name="rss_title">Subskripsies</string>
     <string name="empty_rss_sources">Geen subskripsies nie</string>
     <string name="mastodon_trending_statuses">Gewilde statusse</string>
@@ -394,15 +393,16 @@
     <string name="home_tab_featured_title">Uitgelig</string>
     <string name="home_tab_bookmarks_title">Boekmerke</string>
     <string name="home_tab_favorite_title">Gunstelinge</string>
+    <string name="home_tab_following_title">Volg tans</string>
     <string name="home_tab_list_title">Lyste</string>
     <string name="home_tab_feeds_title">Strome</string>
     <string name="dm_list_title">Direkte Boodskappe</string>
     <string name="social_title">Sosiaal</string>
-    <string name="antenna_title">Antennas</string>
     <string name="mixed_timeline_title">Gemeng</string>
     <string name="liked_title">Hou van</string>
     <string name="all_rss_feeds_title">Alle Subskripsies</string>
     <string name="posts_title">Plasings</string>
+    <string name="media_title">Media</string>
     <string name="settings_appearance_absolute_timestamp">Absoluut tydstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Wys presiese tydstempels op plasings</string>
     <string name="channel_title">Kanaal</string>

@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">OK</string>
     <string name="cancel">Zrušit</string>
     <string name="delete">Smazat</string>
     <string name="refresh">Obnovit</string>
-
     <string name="home_compose">Napsat</string>
     <string name="home_login">Přihlásit se</string>
     <string name="home_settings">Nastavení</string>
-
     <string name="home_tab_home_title">Domů</string>
     <string name="home_tab_notifications_title">Oznámení</string>
     <string name="home_tab_me_title">Já</string>
@@ -28,47 +26,47 @@
         <item quantity="many">%1$d nových příspěvků</item>
         <item quantity="other">%1$d nových příspěvků</item>
     </plurals>
-
     <string name="navigate_back">Zpět</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>
     <string name="service_select_empty_message">Nebyly nalezeny žádné instance</string>
-
     <string name="service_select_welcome_title">Vítejte ve Flare</string>
     <string name="service_select_welcome_message">Flare je klient sociálních sítí pro %1$s.\nVyberte službu pro připojení a začněte.</string>
     <string name="mastodon_login_verify_message">Ověřování přihlašovacích údajů…</string>
-
     <string name="profile_tab_timeline">Příspěvky</string>
     <string name="profile_tab_timeline_with_reply">Příspěvky a odpovědi</string>
     <string name="profile_tab_likes">To se mi líbí</string>
     <string name="profile_tab_media">Média</string>
-
+    <string name="illustrations_title">Ilustrace</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Týdenní hodnocení</string>
+    <string name="pixiv_ranking_month_title">Měsíční hodnocení</string>
+    <string name="pixiv_ranking_day_male_title">Žebříček mužů</string>
+    <string name="pixiv_ranking_day_female_title">Ženské hodnocení</string>
+    <string name="pixiv_ranking_week_original_title">Původní hodnocení</string>
+    <string name="pixiv_ranking_week_rookie_title">Hodnocení Rookie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Nahlásit</string>
     <string name="report_description">Co je s tímto příspěvkem v nepořádku?</string>
-
-    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_spam_title">Nevyžádaná pošta</string>
     <string name="report_reason_violation_title">Nezákonné nebo naléhavé</string>
     <string name="report_reason_misleading_title">Zavádějící</string>
     <string name="report_reason_sexual_title">Nežádoucí sexuální obsah</string>
     <string name="report_reason_rude_title">Antisociální chování</string>
     <string name="report_reason_other_title">Jiné</string>
-
     <string name="report_reason_spam_description">Nadměrné množství zmínek nebo odpovědí</string>
     <string name="report_reason_violation_description">Jasné porušení zákona nebo podmínek služby</string>
     <string name="report_reason_misleading_description">Tento příspěvek je zavádějící</string>
     <string name="report_reason_sexual_description">Nahota nebo pornografie, která není takto označena</string>
     <string name="report_reason_rude_description">Obtěžování, trolling nebo nesnášenlivost</string>
     <string name="report_reason_other_description">Problém, který není uveden v těchto možnostech</string>
-
     <string name="delete_status_title">Smazat</string>
     <string name="delete_status_message">Smazat tento příspěvek?</string>
     <string name="compose_close_confirm_title">Uložit koncept?</string>
     <string name="compose_close_confirm_message">Máte neuložené změny. Chcete je před zavřením uložit jako koncept?</string>
     <string name="compose_close_discard">Zahodit</string>
-
     <string name="mastodon_report_title">Nahlásit</string>
     <string name="mastodon_report_description">Opravdu chcete toto nahlásit?</string>
-
     <string name="bookmark_remove">Odebrat záložku</string>
     <string name="bookmark_add">Přidat záložku</string>
     <string name="like">To se mi líbí</string>
@@ -86,7 +84,6 @@
     <string name="status_detail_repost">Sdílet</string>
     <string name="emoji_picker_recent">Nedávné</string>
     <string name="emoji_picker_search">Hledat</string>
-
     <string name="media_show_thumbnail_list">Zobrazit seznam náhledů</string>
     <string name="media_hide_thumbnail_list">Skrýt seznam náhledů</string>
     <string name="media_save">Uložit</string>
@@ -96,7 +93,48 @@
     <string name="status_share_image">Sdílet snímek obrazovky</string>
     <string name="status_share_via_fxembed">Sdílet přes FxEmbed</string>
     <string name="status_share_via_fixvx">Sdílet přes Fixvx</string>
-
+    <string name="status_insight_title">Poslat přehled</string>
+    <string name="agent_chat_title">AI chat</string>
+    <string name="agent_chat_input_placeholder">Zeptejte se něčeho…</string>
+    <string name="agent_chat_send">Odeslat</string>
+    <string name="agent_chat_thinking">Uvažuji…</string>
+    <string name="status_insight_analyzing">Analyzuji tento příspěvek…</string>
+    <string name="status_insight_error">Nelze analyzovat tento příspěvek.</string>
+    <string name="status_insight_trace_loading_post_context">Načítání kontextu příspěvku…</string>
+    <string name="status_insight_trace_post_context_loaded">Napsat kontext načten</string>
+    <string name="status_insight_trace_preparing_images">Příprava obrázků…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Obrázky nejsou podporovány; opakujte pokusy s textem…</string>
+    <string name="status_insight_trace_agent_started">Zahájení analýzy…</string>
+    <string name="status_insight_trace_strategy_started">Plánování analýzy…</string>
+    <string name="status_insight_trace_strategy_completed">Plán analýzy byl dokončen</string>
+    <string name="status_insight_trace_subgraph_started">Zahájení fáze analýzy…</string>
+    <string name="status_insight_trace_subgraph_completed">Fáze analýzy dokončena</string>
+    <string name="status_insight_trace_subgraph_failed">Fáze analýzy selhala</string>
+    <string name="status_insight_trace_asking_model">Požadavek %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Čtení odezvy modelu…</string>
+    <string name="status_insight_trace_streaming_started">Streamování z %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Přijímání odpovědi…</string>
+    <string name="status_insight_trace_streaming_completed">Odesílání odpovědi dokončeno</string>
+    <string name="status_insight_trace_streaming_failed">Odezva stream selhala</string>
+    <string name="status_insight_trace_running_step">Spuštěný krok…</string>
+    <string name="status_insight_trace_step_completed">Krok analýzy byl dokončen</string>
+    <string name="status_insight_trace_step_failed">Krok analýzy selhal</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Načítání kontextu příspěvku…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Napsat kontext načten</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Kontextový vstup byl odmítnut</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Nepodařilo se načíst kontext příspěvku</string>
+    <string name="status_insight_trace_tool_search_status_started">Vyhledávání…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Hledání dokončeno</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Hledaný vstup byl odmítnut</string>
+    <string name="status_insight_trace_tool_search_status_failed">Hledání se nezdařilo</string>
+    <string name="status_insight_trace_agent_completed">Dokončování analýzy…</string>
+    <string name="status_insight_trace_agent_failed">Analýza selhala</string>
+    <string name="status_insight_trace_agent_closing">Uzavírací analýza…</string>
+    <string name="ask_ai">Zeptat se na AI</string>
     <string name="list_add">Přidat seznam</string>
     <string name="list_edit">Upravit seznam</string>
     <string name="list_delete">Smazat seznam</string>
@@ -120,28 +158,23 @@
     <string name="edit_list_member_remove">Odebrat</string>
     <string name="list_create_description">Popis seznamu</string>
     <string name="list_create_description_hint">Popis seznamu</string>
-
     <string name="feeds_my_feeds_title">Moje kanály</string>
     <string name="feeds_discover_feeds_title">Objevovat kanály</string>
     <string name="feeds_discover_feeds_created_by">Vytvořil %1$s</string>
     <string name="feeds_unsubscribe">Zrušit odběr</string>
     <string name="feeds_subscribe">Odebírat</string>
-
     <string name="social_title">Sociální sítě</string>
-
     <string name="antenna_title">Antény</string>
     <string name="mixed_timeline_title">Smíšené</string>
     <string name="liked_title">To se mi líbí</string>
     <string name="all_rss_feeds_title">Všechny odběry</string>
     <string name="posts_title">Příspěvky</string>
-
     <string name="bluesky_login_username">Uživatelské jméno</string>
     <string name="bluesky_login_password">Heslo</string>
     <string name="bluesky_login_2fa">Token 2FA</string>
     <string name="bluesky_login_oauth_button">Přihlásit se pomocí OAuth</string>
     <string name="bluesky_login_use_password_button">Použít heslo</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth může být stále nestabilní. Pokud narazíte na problémy, použijte raději přihlášení heslem.</string>
-
     <string name="login_expired">Relace přihlášení vypršela</string>
     <string name="login_expired_message">Klikněte pro opětovné přihlášení</string>
     <string name="login_expired_relogin">Znovu se přihlásit</string>
@@ -150,7 +183,6 @@
     <string name="add_account">Přidat účet</string>
     <string name="remove_account">Odebrat účet</string>
     <string name="settings_accounts_remove_confirm">Opravdu chcete odebrat účet %1$s z tohoto zařízení?</string>
-
     <string name="settings_accounts_title">Účty</string>
     <string name="settings_appearance_title">Vzhled</string>
     <string name="settings_status_appearance_title">Vzhled příspěvků</string>
@@ -178,6 +210,9 @@
     <string name="settings_guest_setting_description">Vyberte server, ke kterému se režim pro hosty připojuje</string>
     <string name="settings_local_history_title">Místní historie</string>
     <string name="settings_local_history_description">Vyhledávat v příspěvcích a profilech uložených v mezipaměti na tomto zařízení</string>
+    <string name="settings_agent_history_title">Flare Agent</string>
+    <string name="settings_agent_history_description">Zobrazit místní historii chatu Flare Agent</string>
+    <string name="agent_history_empty">Historie konverzace agenta.</string>
     <string name="settings_app_logging_title">Protokoly aplikace</string>
     <string name="settings_app_logging_save">Uložit protokoly</string>
     <string name="settings_app_logging_clear">Vymazat protokoly</string>
@@ -195,7 +230,7 @@
     <string name="settings_ai_config_type_openai">API kompatibilní s AI</string>
     <string name="settings_ai_config_api_key">API klíč</string>
     <string name="settings_ai_config_api_key_hint">Zadejte API klíč</string>
-    <string name="settings_ai_config_model">Model</string>
+    <string name="settings_ai_config_model">Vzor</string>
     <string name="settings_ai_config_model_description">Vyberte model z tohoto koncového bodu</string>
     <string name="settings_ai_config_model_select">Vybrat model</string>
     <string name="settings_ai_config_model_loading">Načítání modelů…</string>
@@ -214,6 +249,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Nenastaveno</string>
     <string name="settings_ai_config_entable_translation">Povolit překlad pomocí AI</string>
     <string name="settings_ai_config_translation_description">Používat AI namísto Google Translate. Překlady mohou trvat déle.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Povolit automatický překlad</string>
     <string name="settings_ai_config_pre_translation_description">Překládat nově načtený obsah časové osy a profilu na pozadí a ukládat výsledky do mezipaměti. To může spotřebovat velké množství tokenů.</string>
     <string name="settings_ai_config_enable_tldr">Povolit AI shrnutí</string>
@@ -221,17 +258,16 @@
     <string name="settings_ai_config_translate_provider">Poskytovatel překladu</string>
     <string name="settings_ai_config_translate_provider_description">Vyberte službu, která překládá obsah</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
-    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_google_web">Překlad Google (Web)</string>
+    <string name="settings_ai_config_translate_provider_deepl">Hluboké</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API klíč</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Koncový bod DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Použít api.deepl.com namísto bezplatného koncového bodu api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Překlad Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API klíč</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">Základní URL LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">API klíč LibreTranslate</string>
-
     <string name="settings_translation_title">Překlad</string>
     <string name="settings_translation_description">Zvolte služby překladu a chování automatického překladu</string>
     <string name="settings_translation_auto_excluded_languages">Jazyky, které se mají při automatickém překladu přeskočit</string>
@@ -240,7 +276,6 @@
     <string name="settings_translation_ai_test_action">Otestovat překlad</string>
     <string name="settings_translation_ai_test_original">Ukázkový text</string>
     <string name="settings_translation_ai_test_result">Přeložený text</string>
-
     <string name="settings_appearance_generic">Obecné</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Zobrazit pole pro psaní na hlavní časové ose</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Zobrazit pole pro psaní v horní části hlavní časové osy</string>
@@ -256,6 +291,8 @@
     <string name="settings_appearance_show_numbers_description">Zobrazit počty pod každým příspěvkem</string>
     <string name="settings_appearance_show_cw_img">Zobrazit citlivý obsah</string>
     <string name="settings_appearance_show_cw_img_description">Vždy odkrývat citlivá média v příspěvcích</string>
+    <string name="settings_appearance_expand_content_warning">Zobrazit obsah za obsahem varování</string>
+    <string name="settings_appearance_expand_content_warning_description">Vždy zobrazovat obsah příspěvku skrytý varováním obsahu</string>
     <string name="settings_appearance_expand_media">Zachovat poměr stran médií</string>
     <string name="settings_appearance_expand_media_description">Zobrazit média v jejich původním poměru stran v časových osách</string>
     <string name="settings_appearance_video_autoplay">Automatické přehrávání videa</string>
@@ -299,24 +336,18 @@
     <string name="settings_appearance_post_action_style_stretch">Roztažené</string>
     <string name="settings_appearance_absolute_timestamp">Absolutní časové razítko</string>
     <string name="settings_appearance_absolute_timestamp_description">Zobrazovat u příspěvků přesné časy</string>
-
     <string name="settings_appearance_show_platform_logo">Zobrazit ikony zdrojové platformy</string>
     <string name="settings_appearance_show_platform_logo_description">Zobrazit, ze které platformy každý příspěvek pochází</string>
-
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Připojte se k naší skupině na Telegramu</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Připojte se k našemu serveru na Discordu</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomozte nám s překladem Flare</string>
     <string name="settings_privacy_policy">Zásady ochrany osobních údajů</string>
-
     <string name="users">Uživatelé</string>
     <string name="hashtags">Hashtagy</string>
     <string name="statues">Příspěvky</string>
-
-
     <string name="compose_title">Napsat</string>
     <string name="compose_hint">Co se děje?</string>
     <string name="compose_poll_option_hint">Možnost %1$s</string>
@@ -337,7 +368,6 @@
     <string name="compose_notification_progress">Odesílání příspěvku</string>
     <string name="compose_notification_success">Příspěvek odeslán</string>
     <string name="compose_notification_error">Nepodařilo se odeslat příspěvek</string>
-
     <string name="misskey_visibility_public">Veřejné</string>
     <string name="misskey_visibility_home">Domů</string>
     <string name="misskey_visibility_followers">Sledující</string>
@@ -346,15 +376,12 @@
     <string name="misskey_visibility_home_description">Pouze uživatelé na této instanci mohou tento příspěvek vidět</string>
     <string name="misskey_visibility_followers_description">Pouze sledující mohou tento příspěvek vidět</string>
     <string name="misskey_visibility_specified_description">Pouze zmínění uživatelé mohou tento příspěvek vidět</string>
-
-
     <string name="rss_sources_title">Odběry</string>
     <string name="add_rss_source">Přidat odběr</string>
     <string name="edit_rss_source">Upravit odběr</string>
     <string name="delete_rss_source">Smazat odběr</string>
-
     <string name="rss_sources_title_label">Název</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Odběry</string>
     <string name="empty_rss_sources">Žádné odběry</string>
     <string name="rss_sources_rss_hub_host_label">Hostitel RSSHub</string>
@@ -375,7 +402,6 @@
     <string name="mastodon_federated_timeline">Federovaná časová osa</string>
     <string name="mastodon_local_timeline">Místní časová osa</string>
     <string name="subscription_url_hint">Vložte URL RSS kanálu nebo URL instance Mastodonu</string>
-
     <string name="tab_settings_add">Přidat</string>
     <string name="tab_settings_drag">Přetáhnout</string>
     <string name="tab_settings_edit">Upravit</string>
@@ -383,9 +409,7 @@
     <string name="tab_settings_default">Výchozí</string>
     <string name="tab_settings_list">Seznam</string>
     <string name="tab_settings_feed">Kanály</string>
-
     <string name="notification_login_expired">Přihlášení vypršelo pro uživatele %1$s</string>
-
     <string name="dm_list_empty">Žádné soukromé zprávy</string>
     <string name="dm_list_error">Nepodařilo se načíst soukromé zprávy</string>
     <string name="send">Odeslat</string>
@@ -418,7 +442,6 @@
     <string name="tab_settings_filter_text_only">Pouze text</string>
     <string name="tab_settings_filter_image">Obrázky</string>
     <string name="tab_settings_filter_video">Videa</string>
-
     <string name="edit_tab_title">Upravit kartu</string>
     <string name="edit_tab_name">Název</string>
     <string name="edit_tab_name_placeholder">Název karty</string>
@@ -426,16 +449,12 @@
     <string name="edit_tab_with_avatar">S avatarem</string>
     <string name="edit_tab_enabled">Zobrazovat ve smíšených časových osách</string>
     <string name="edit_tab_enabled_description">Zahrnout tuto časovou osu, pokud je použita v rámci smíšené časové osy nebo skupiny.</string>
-
     <string name="edit">Upravit</string>
-
     <string name="local_history_search_placeholder">Hledat v příspěvcích a profilech v mezipaměti</string>
     <string name="local_history_search_status_title">Příspěvky</string>
     <string name="local_history_search_user_title">Uživatel</string>
-
     <string name="settings_storage_clear_image_cache">Vymazat mezipaměť obrázků</string>
     <string name="settings_storage_clear_image_cache_description">Odebrat %1$s MB obrázků z mezipaměti</string>
-
     <string name="settings_storage_clear_database">Vymazat databázi v mezipaměti</string>
     <string name="settings_storage_clear_database_description">Odebrat %1$s uživatelů a %2$s příspěvků z mezipaměti</string>
     <string name="settings_storage_app_log">Protokoly aplikace</string>
@@ -452,50 +471,39 @@
     <string name="draft_box_retry">Zkusit znovu</string>
     <string name="draft_box_edit">Upravit</string>
     <string name="draft_box_send">Odeslat</string>
-
     <string name="copied_to_clipboard">Zkopírováno do schránky</string>
-
     <string name="opml_import">Importovat z OPML</string>
     <string name="opml_export">Exportovat do OPML</string>
     <string name="save_completed">Export dokončen</string>
-
     <string name="deeplink_account_selection_title">Vybrat účet</string>
     <string name="deeplink_account_selection_message">Vyberte účet pro otevření tohoto odkazu</string>
     <string name="deeplink_account_selection_browser">Otevřít v prohlížeči</string>
-
     <string name="block_user_title">Zablokovat uživatele</string>
     <string name="block_user_description">Opravdu chcete zablokovat tohoto uživatele?</string>
     <string name="unblock_user_title">Odblokovat uživatele</string>
     <string name="unblock_user_description">Opravdu chcete odblokovat tohoto uživatele?</string>
-
     <string name="mute_user_title">Skrýt uživatele</string>
     <string name="mute_user_description">Opravdu chcete skrýt tohoto uživatele?</string>
     <string name="unmute_user_title">Znovu zobrazit uživatele</string>
     <string name="unmute_user_description">Opravdu chcete znovu zobrazit tohoto uživatele?</string>
-
     <string name="report_user_title">Nahlásit uživatele</string>
     <string name="report_user_description">Opravdu chcete nahlásit tohoto uživatele?</string>
-
     <string name="settings_storage_export_data">Exportovat data</string>
     <string name="settings_storage_export_data_description">Exportovat všechna data včetně účtů a přihlašovacích údajů. Soubor uchovávejte v bezpečí.</string>
     <string name="settings_storage_import_data">Importovat data</string>
     <string name="settings_storage_import_data_description">Importovat data ze záložního souboru. Stávající záznamy se shodujícími se ID budou nahrazeny.</string>
     <string name="action_export">Exportovat</string>
     <string name="action_import">Importovat</string>
-
     <string name="save_error">Export selhal</string>
     <string name="import_completed">Import dokončen</string>
     <string name="import_error">Import selhal</string>
     <string name="import_confirmation_title">Potvrdit import</string>
     <string name="import_confirmation_message">Tímto se naimportují data z vybraného souboru. Stávající záznamy se shodujícími se ID budou nahrazeny. Pokračovat?</string>
-
     <string name="channel_title">Kanál</string>
-
     <string name="misskey_channel_tab_following">Sledované</string>
     <string name="misskey_channel_tab_favorites">Oblíbené</string>
     <string name="misskey_channel_tab_owned">Vlastněné</string>
     <string name="misskey_channel_tab_featured">Doporučené</string>
-
     <string name="media_save_success">Uloženo do složky Stažené soubory</string>
     <string name="media_save_fail">Uložení selhalo</string>
 </resources>

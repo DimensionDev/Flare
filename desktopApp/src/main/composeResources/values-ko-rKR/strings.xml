@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">확인</string>
     <string name="cancel">취소</string>
     <string name="delete">삭제</string>
@@ -82,6 +81,7 @@
     <string name="status_share_image">스크린샷 공유</string>
     <string name="status_share_via_fxembed">FxEmbed로 공유</string>
     <string name="status_share_via_fixvx">Fixvx로 공유</string>
+    <string name="agent_chat_send">전송</string>
     <string name="list_add">목록 추가</string>
     <string name="list_edit">목록 편집</string>
     <string name="list_delete">목록 삭제</string>
@@ -199,15 +199,12 @@
     <string name="settings_ai_config_tldr_description">500자 이상의 긴 게시물에 대해 AI 요약 기능 활성화</string>
     <string name="settings_ai_config_translate_provider">번역 제공업체</string>
     <string name="settings_ai_config_translate_provider_description">콘텐츠를 번역할 서비스 선택</string>
-    <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google 번역 (웹)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API 키</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro 엔드포인트</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">무료 api-free.deepl.com 대신 api.deepl.com을 사용합니다.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud 번역</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API 키</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate 기본 URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API 키</string>
     <string name="settings_translation_title">번역</string>
@@ -281,7 +278,6 @@
     <string name="settings_about_source_code">소스 코드</string>
     <string name="settings_about_telegram">텔레그램</string>
     <string name="settings_about_telegram_description">우리의 텔레그램 그룹에 참여하세요</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">저희 Discord 서버에 참여하세요</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Flare 번역에 도움을 주세요</string>
@@ -322,7 +318,7 @@
     <string name="edit_rss_source">구독 편집</string>
     <string name="delete_rss_source">구독 삭제</string>
     <string name="rss_sources_title_label">제목</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">구독</string>
     <string name="empty_rss_sources">구독 없음</string>
     <string name="rss_sources_rss_hub_host_label">RssHub 호스트</string>

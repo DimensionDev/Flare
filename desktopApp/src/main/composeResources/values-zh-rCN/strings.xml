@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
     <string name="delete">删除</string>
@@ -34,6 +34,15 @@
     <string name="profile_tab_timeline_with_reply">动态与回复</string>
     <string name="profile_tab_likes">喜欢</string>
     <string name="profile_tab_media">媒体</string>
+    <string name="illustrations_title">说明</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">每周排名</string>
+    <string name="pixiv_ranking_month_title">每月排名</string>
+    <string name="pixiv_ranking_day_male_title">男性排名</string>
+    <string name="pixiv_ranking_day_female_title">女性排名</string>
+    <string name="pixiv_ranking_week_original_title">原始排名</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">举报</string>
     <string name="report_description">此内容有什么问题？</string>
     <string name="report_reason_spam_title">垃圾内容</string>
@@ -81,6 +90,40 @@
     <string name="status_share_image">分享截图</string>
     <string name="status_share_via_fxembed">通过 FxEmbed 分享</string>
     <string name="status_share_via_fixvx">通过 Fixvx 分享</string>
+    <string name="status_insight_title">帖子视图</string>
+    <string name="agent_chat_title">AI 聊天</string>
+    <string name="agent_chat_input_placeholder">询问任何…</string>
+    <string name="agent_chat_send">发送</string>
+    <string name="status_insight_error">无法分析此帖子。</string>
+    <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>
+    <string name="status_insight_trace_images_unsupported_fallback">图像不被支持；重试文本…</string>
+    <string name="status_insight_trace_agent_started">开始分析…</string>
+    <string name="status_insight_trace_strategy_started">规划分析…</string>
+    <string name="status_insight_trace_strategy_completed">分析计划已完成</string>
+    <string name="status_insight_trace_subgraph_started">进入分析阶段…</string>
+    <string name="status_insight_trace_subgraph_completed">分析阶段已完成</string>
+    <string name="status_insight_trace_subgraph_failed">分析阶段失败</string>
+    <string name="status_insight_trace_model_response_received">正在读取模型响应…</string>
+    <string name="status_insight_trace_streaming_completed">响应流完成</string>
+    <string name="status_insight_trace_streaming_failed">响应流失败</string>
+    <string name="status_insight_trace_running_step">运行分析步骤…</string>
+    <string name="status_insight_trace_step_completed">分析步骤已完成</string>
+    <string name="status_insight_trace_step_failed">分析步骤失败</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">帖子上下文已加载</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">帖子上下文输入被拒绝</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">加载帖子上下文失败</string>
+    <string name="status_insight_trace_tool_search_status_started">正在搜索…</string>
+    <string name="status_insight_trace_tool_search_status_completed">搜索完成</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">搜索输入被拒绝</string>
+    <string name="status_insight_trace_tool_search_status_failed">搜索失败</string>
+    <string name="status_insight_trace_agent_completed">正在完成分析…</string>
+    <string name="status_insight_trace_agent_failed">分析失败</string>
+    <string name="status_insight_trace_agent_closing">结束分析…</string>
+    <string name="ask_ai">询问AI</string>
     <string name="list_add">添加列表</string>
     <string name="list_edit">编辑列表</string>
     <string name="list_delete">删除列表</string>
@@ -156,6 +199,9 @@
     <string name="settings_guest_setting_description">选择访客模式连接的服务器</string>
     <string name="settings_local_history_title">本地历史</string>
     <string name="settings_local_history_description">搜索此设备上缓存的动态和个人资料</string>
+    <string name="settings_agent_history_title">闪光代理</string>
+    <string name="settings_agent_history_description">查看本地闪光代理聊天记录</string>
+    <string name="agent_history_empty">暂无代理聊天历史记录。</string>
     <string name="settings_app_logging_title">应用日志</string>
     <string name="settings_app_logging_save">保存日志</string>
     <string name="settings_app_logging_clear">清除日志</string>
@@ -192,6 +238,8 @@
     <string name="settings_ai_config_value_empty_placeholder">未设置</string>
     <string name="settings_ai_config_entable_translation">启用 AI 翻译</string>
     <string name="settings_ai_config_translation_description">使用 AI 代替谷歌翻译。翻译可能需要更长时间。</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">启用自动翻译</string>
     <string name="settings_ai_config_pre_translation_description">在后台翻译新加载的时间轴和资料内容并缓存结果。这可能会消耗大量 Token。</string>
     <string name="settings_ai_config_enable_tldr">启用 AI 总结</string>
@@ -200,7 +248,7 @@
     <string name="settings_ai_config_translate_provider_description">选择用于翻译内容的服务</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">谷歌翻译 (网页版)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl">深度</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API 密钥</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro 端点</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">使用 api.deepl.com 而不是免费的 api-free.deepl.com。</string>
@@ -232,6 +280,8 @@
     <string name="settings_appearance_show_numbers_description">在每条内容下方显示互动计数</string>
     <string name="settings_appearance_show_cw_img">显示敏感内容</string>
     <string name="settings_appearance_show_cw_img_description">始终直接显示敏感媒体内容</string>
+    <string name="settings_appearance_expand_content_warning">显示内容警告背后的内容</string>
+    <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保持媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中按原比例显示媒体</string>
     <string name="settings_appearance_video_autoplay">视频自动播放</string>
@@ -280,7 +330,6 @@
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我们的 Telegram 群组</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">加入我们的 Discord 服务器</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">协助我们翻译 Flare</string>
@@ -321,7 +370,7 @@
     <string name="edit_rss_source">编辑订阅</string>
     <string name="delete_rss_source">删除订阅</string>
     <string name="rss_sources_title_label">标题</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">订阅</string>
     <string name="empty_rss_sources">暂无订阅</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub 域名</string>

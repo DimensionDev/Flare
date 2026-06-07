@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">ОК</string>
     <string name="cancel">Отмена</string>
     <string name="delete">Удалить</string>
@@ -38,6 +37,15 @@
     <string name="profile_tab_timeline_with_reply">Записи и ответы</string>
     <string name="profile_tab_likes">Лайки</string>
     <string name="profile_tab_media">Медиа</string>
+    <string name="illustrations_title">Иллюстрации</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Рейтинг за неделю</string>
+    <string name="pixiv_ranking_month_title">Рейтинг за месяц</string>
+    <string name="pixiv_ranking_day_male_title">Рейтинг мужчин</string>
+    <string name="pixiv_ranking_day_female_title">Женский рейтинг</string>
+    <string name="pixiv_ranking_week_original_title">Оригинальный Рейтинг</string>
+    <string name="pixiv_ranking_week_rookie_title">Рейтинг Новобранцев</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Пожаловаться</string>
     <string name="report_description">В чем проблема с этим сообщением?</string>
     <string name="report_reason_spam_title">Спам</string>
@@ -85,6 +93,44 @@
     <string name="status_share_image">Поделиться скриншотом</string>
     <string name="status_share_via_fxembed">Поделиться через FxEmbed</string>
     <string name="status_share_via_fixvx">Поделиться через Fixvx</string>
+    <string name="status_insight_title">Пост пронзание</string>
+    <string name="agent_chat_title">AI Чат</string>
+    <string name="agent_chat_input_placeholder">Спросите что-нибудь…</string>
+    <string name="agent_chat_send">Отправить</string>
+    <string name="agent_chat_thinking">Думаю…</string>
+    <string name="status_insight_analyzing">Анализ этого сообщения…</string>
+    <string name="status_insight_error">Не удалось проанализировать это сообщение.</string>
+    <string name="status_insight_trace_loading_post_context">Загрузка контекста поста…</string>
+    <string name="status_insight_trace_post_context_loaded">Пост контекст загружен</string>
+    <string name="status_insight_trace_preparing_images">Подготовка изображений…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Изображения не поддерживаются; повторите попытку с текстом…</string>
+    <string name="status_insight_trace_agent_started">Запуск анализа…</string>
+    <string name="status_insight_trace_strategy_started">Планирование анализа…</string>
+    <string name="status_insight_trace_strategy_completed">План анализа завершен</string>
+    <string name="status_insight_trace_subgraph_started">Вход на этап анализа…</string>
+    <string name="status_insight_trace_subgraph_completed">Этап анализа завершен</string>
+    <string name="status_insight_trace_subgraph_failed">Сбой этапа анализа</string>
+    <string name="status_insight_trace_asking_model">Запрос %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Чтение ответа на модель…</string>
+    <string name="status_insight_trace_streaming_started">Трансляция из %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Получение ответа…</string>
+    <string name="status_insight_trace_streaming_completed">Поток ответа завершен</string>
+    <string name="status_insight_trace_streaming_failed">Сбой потока ответа</string>
+    <string name="status_insight_trace_running_step">Выполнение этапа анализа…</string>
+    <string name="status_insight_trace_step_completed">Этап анализа завершен</string>
+    <string name="status_insight_trace_step_failed">Не удалось выполнить шаг анализа</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Загрузка контекста поста…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Пост контекст загружен</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Пост ввод контекста был отклонён</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Не удалось загрузить контекст сообщения</string>
+    <string name="status_insight_trace_tool_search_status_started">Поиск…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Поиск завершен</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Поисковый запрос был отклонён</string>
+    <string name="status_insight_trace_tool_search_status_failed">Поиск не удался</string>
+    <string name="status_insight_trace_agent_completed">Завершение анализа…</string>
+    <string name="status_insight_trace_agent_failed">Не удалось выполнить анализ</string>
+    <string name="status_insight_trace_agent_closing">Закрытие анализа…</string>
+    <string name="ask_ai">Спросить ИИ</string>
     <string name="list_add">Добавить список</string>
     <string name="list_edit">Изменить список</string>
     <string name="list_delete">Удалить список</string>
@@ -160,6 +206,9 @@
     <string name="settings_guest_setting_description">Установить хост для гостевого режима</string>
     <string name="settings_local_history_title">Локальная история</string>
     <string name="settings_local_history_description">Просмотр или поиск в истории посещений</string>
+    <string name="settings_agent_history_title">Агент сигнала</string>
+    <string name="settings_agent_history_description">Просмотр истории локального мигания Агента</string>
+    <string name="agent_history_empty">Пока нет истории чата агента.</string>
     <string name="settings_app_logging_title">Журнал приложений</string>
     <string name="settings_app_logging_save">Сохранить журнал</string>
     <string name="settings_app_logging_clear">Очистить журнал</string>
@@ -190,12 +239,14 @@
     <string name="settings_ai_config_reasoning_effort_low">Низкий</string>
     <string name="settings_ai_config_reasoning_effort_medium">Средний</string>
     <string name="settings_ai_config_reasoning_effort_high">Высокий</string>
-    <string name="settings_ai_config_extra_body">Extra Body</string>
+    <string name="settings_ai_config_extra_body">Extra Body (JSON)</string>
     <string name="settings_ai_config_translate_prompt">Запрос на перевод</string>
     <string name="settings_ai_config_tldr_prompt">Краткая подсказка</string>
     <string name="settings_ai_config_value_empty_placeholder">Нажмите, чтобы изменить</string>
     <string name="settings_ai_config_entable_translation">Включить перевод ИИ</string>
     <string name="settings_ai_config_translation_description">Замена перевода Google с помощью ИИ перевода, может занять больше времени</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Включить автоперевод</string>
     <string name="settings_ai_config_pre_translation_description">Автоматически переводить и кэшировать вновь загруженную ленту времени и содержимое профиля в фоновом режиме. Это может потреблять большое количество токенов.</string>
     <string name="settings_ai_config_enable_tldr">Включить пересказ с помощью ИИ</string>
@@ -221,7 +272,7 @@
     <string name="settings_translation_ai_test_action">Тестовый перевод</string>
     <string name="settings_translation_ai_test_original">Образец текста</string>
     <string name="settings_translation_ai_test_result">Переведенный текст</string>
-    <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_generic">Общие</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Показать поле компоновки в домашней шкале времени</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Показать поле создания в верхней части домашней ленты времени</string>
     <string name="settings_appearance_show_bottom_bar_labels">Показать нижнюю панель текста</string>
@@ -236,6 +287,8 @@
     <string name="settings_appearance_show_numbers_description">Показывать номера в нижней части записи</string>
     <string name="settings_appearance_show_cw_img">Показать чувствительный контент</string>
     <string name="settings_appearance_show_cw_img_description">Всегда показывать конфиденциальный контент в сообщении</string>
+    <string name="settings_appearance_expand_content_warning">Показывать содержимое за предупреждениями о контенте</string>
+    <string name="settings_appearance_expand_content_warning_description">Всегда показывать контент сообщений, скрытый предупреждениями</string>
     <string name="settings_appearance_expand_media">Развернуть медиафайлы в полный размер</string>
     <string name="settings_appearance_expand_media_description">Сохранять соотношение сторон медиафайлов в ленте</string>
     <string name="settings_appearance_video_autoplay">Автовоспроизведение видео</string>
@@ -284,7 +337,6 @@
     <string name="settings_about_source_code">Исходный код</string>
     <string name="settings_about_telegram">Телеграмма</string>
     <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Присоединяйтесь к нашему серверу Discord</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>

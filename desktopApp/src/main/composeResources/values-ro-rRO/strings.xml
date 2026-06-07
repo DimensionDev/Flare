@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="ok">OK</string>
+    <string name="ok">Ok</string>
     <string name="cancel">Anulează</string>
     <string name="delete">Șterge</string>
     <string name="refresh">Reîmprospătează</string>
@@ -13,7 +13,7 @@
     <string name="home_tab_discover_title">Descoperă</string>
     <string name="settings_title">Setări</string>
     <string name="mastodon_tab_local_title">Local</string>
-    <string name="mastodon_tab_public_title">Public</string>
+    <string name="mastodon_tab_public_title">Publice</string>
     <string name="home_tab_featured_title">Recomandate</string>
     <string name="home_tab_bookmarks_title">Marcaje</string>
     <string name="home_tab_favorite_title">Favorite</string>
@@ -36,6 +36,15 @@
     <string name="profile_tab_timeline_with_reply">Postări și răspunsuri</string>
     <string name="profile_tab_likes">Aprecieri</string>
     <string name="profile_tab_media">Media</string>
+    <string name="illustrations_title">Ilustraţii</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Clasament săptămânal</string>
+    <string name="pixiv_ranking_month_title">Clasament lunar</string>
+    <string name="pixiv_ranking_day_male_title">Clasament masculin</string>
+    <string name="pixiv_ranking_day_female_title">Clasament femei</string>
+    <string name="pixiv_ranking_week_original_title">Clasament original</string>
+    <string name="pixiv_ranking_week_rookie_title">Clasament Rookie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Raportează</string>
     <string name="report_description">Ce este în neregulă cu această postare?</string>
     <string name="report_reason_spam_title">Spam</string>
@@ -83,6 +92,48 @@
     <string name="status_share_image">Distribuie captura de ecran</string>
     <string name="status_share_via_fxembed">Distribuie prin FxEmbed</string>
     <string name="status_share_via_fixvx">Distribuie prin Fixvx</string>
+    <string name="status_insight_title">Postaţi vederea</string>
+    <string name="agent_chat_title">Chat AI</string>
+    <string name="agent_chat_input_placeholder">Întreabă orice…</string>
+    <string name="agent_chat_send">Trimite</string>
+    <string name="agent_chat_thinking">Gândire…</string>
+    <string name="status_insight_analyzing">Se analizează această postare…</string>
+    <string name="status_insight_error">Nu se poate analiza acest post.</string>
+    <string name="status_insight_trace_loading_post_context">Se încarcă contextul postării…</string>
+    <string name="status_insight_trace_post_context_loaded">Contextul postării încărcat</string>
+    <string name="status_insight_trace_preparing_images">Se pregătesc imaginile…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Imaginile nu sunt acceptate; reîncearcă cu textul…</string>
+    <string name="status_insight_trace_agent_started">Începe analiza…</string>
+    <string name="status_insight_trace_strategy_started">Analiza planificării…</string>
+    <string name="status_insight_trace_strategy_completed">Plan de analiză finalizat</string>
+    <string name="status_insight_trace_subgraph_started">Intrare în etapa…</string>
+    <string name="status_insight_trace_subgraph_completed">Etapa de analiză finalizată</string>
+    <string name="status_insight_trace_subgraph_failed">Analiza a eșuat</string>
+    <string name="status_insight_trace_asking_model">Se cere %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Citire răspuns model…</string>
+    <string name="status_insight_trace_streaming_started">Streaming de la %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Primire răspuns…</string>
+    <string name="status_insight_trace_streaming_completed">Flux de răspuns completat</string>
+    <string name="status_insight_trace_streaming_failed">Flux răspuns eșuat</string>
+    <string name="status_insight_trace_running_step">Rulare analiză pas…</string>
+    <string name="status_insight_trace_step_completed">Etapa de analiză finalizată</string>
+    <string name="status_insight_trace_step_failed">Etapa analizei a eșuat</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Se încarcă contextul postării…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Contextul postării încărcat</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Intrarea în context a fost respinsă</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Încărcarea contextului postării a eșuat</string>
+    <string name="status_insight_trace_tool_search_status_started">Se caută…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Căutare finalizată</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Căutarea a fost respinsă</string>
+    <string name="status_insight_trace_tool_search_status_failed">Căutare eșuată</string>
+    <string name="status_insight_trace_agent_completed">Finalizare analiză…</string>
+    <string name="status_insight_trace_agent_failed">Analiza a eșuat</string>
+    <string name="status_insight_trace_agent_closing">Închidere analiza…</string>
+    <string name="ask_ai">Întreabă AI</string>
     <string name="list_add">Adaugă listă</string>
     <string name="list_edit">Editează lista</string>
     <string name="list_delete">Șterge lista</string>
@@ -111,7 +162,7 @@
     <string name="feeds_discover_feeds_created_by">Creat de %1$s</string>
     <string name="feeds_unsubscribe">Dezabonare</string>
     <string name="feeds_subscribe">Abonare</string>
-    <string name="social_title">Social</string>
+    <string name="social_title">Sociale</string>
     <string name="antenna_title">Antene</string>
     <string name="mixed_timeline_title">Mixt</string>
     <string name="liked_title">Apreciate</string>
@@ -158,6 +209,9 @@
     <string name="settings_guest_setting_description">Alege serverul la care se conectează modul invitat</string>
     <string name="settings_local_history_title">Istoric local</string>
     <string name="settings_local_history_description">Caută postări și profiluri stocate în cache pe acest dispozitiv</string>
+    <string name="settings_agent_history_title">Agent Fierbinte</string>
+    <string name="settings_agent_history_description">Vezi istoricul chat-ului cu Agent Flare local</string>
+    <string name="agent_history_empty">Nici un agent de chat istoric.</string>
     <string name="settings_app_logging_title">Loguri aplicație</string>
     <string name="settings_app_logging_save">Salvează logurile</string>
     <string name="settings_app_logging_clear">Șterge logurile</string>
@@ -194,6 +248,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Nesetat</string>
     <string name="settings_ai_config_entable_translation">Activează traducerea prin IA</string>
     <string name="settings_ai_config_translation_description">Folosește IA în loc de Google Translate. Traducerile pot dura mai mult.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Activează traducerea automată</string>
     <string name="settings_ai_config_pre_translation_description">Tradu conținutul nou încărcat din cronologie și profil în fundal și stochează rezultatele. Acest lucru poate consuma un număr mare de token-uri.</string>
     <string name="settings_ai_config_enable_tldr">Activează rezumatele prin IA</string>
@@ -206,7 +262,7 @@
     <string name="settings_ai_config_translate_provider_deepl_api_key">Cheie API DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Punct final DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Folosește api.deepl.com în loc de punctul final gratuit api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Traducere Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Cheie API Google Cloud</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL de bază LibreTranslate</string>
@@ -234,6 +290,8 @@
     <string name="settings_appearance_show_numbers_description">Arată contoarele sub fiecare postare</string>
     <string name="settings_appearance_show_cw_img">Arată conținutul sensibil</string>
     <string name="settings_appearance_show_cw_img_description">Dezvăluie întotdeauna fișierele media sensibile în postări</string>
+    <string name="settings_appearance_expand_content_warning">Arată conținut în spatele avertismentelor de conținut</string>
+    <string name="settings_appearance_expand_content_warning_description">Descoperă întotdeauna conținutul postărilor ascuns de avertismentele conținutului</string>
     <string name="settings_appearance_expand_media">Păstrează raportul de aspect media</string>
     <string name="settings_appearance_expand_media_description">Arată media la raportul de aspect original în cronologii</string>
     <string name="settings_appearance_video_autoplay">Redare automată video</string>
@@ -280,9 +338,8 @@
     <string name="settings_appearance_show_platform_logo">Arată pictogramele platformei sursă</string>
     <string name="settings_appearance_show_platform_logo_description">Arată de pe ce platformă provine fiecare postare</string>
     <string name="settings_about_source_code">Cod sursă</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Telegramă</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Alătură-te serverului nostru de Discord</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>
@@ -310,7 +367,7 @@
     <string name="compose_notification_progress">Se trimite postarea</string>
     <string name="compose_notification_success">Postare trimisă</string>
     <string name="compose_notification_error">Eșec la trimiterea postării</string>
-    <string name="misskey_visibility_public">Public</string>
+    <string name="misskey_visibility_public">Publice</string>
     <string name="misskey_visibility_home">Acasă</string>
     <string name="misskey_visibility_followers">Urmăritori</string>
     <string name="misskey_visibility_specified">Specificați</string>
@@ -323,7 +380,7 @@
     <string name="edit_rss_source">Editează abonamentul</string>
     <string name="delete_rss_source">Șterge abonamentul</string>
     <string name="rss_sources_title_label">Titlu</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Abonamente</string>
     <string name="empty_rss_sources">Niciun abonament</string>
     <string name="rss_sources_rss_hub_host_label">Gazdă RSSHub</string>

@@ -1,15 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Supprimer</string>
     <string name="done">Terminé</string>
     <string name="cancel">Annuler</string>
-    <string name="ok">OK</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s abonnements</string>
     <string name="profile_header_fans_count">%1$s abonnés</string>
     <string name="profile_header_toots_count">%1$s publications</string>
     <string name="profile_misskey_header_status_count">%1$s publications</string>
     <string name="profile_header_button_follow">Suivre</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Demander un suivi</string>
     <string name="profile_header_button_following">Abonné</string>
     <string name="profile_header_button_requested">En attente</string>
     <string name="profile_header_button_blocked">Bloqué</string>
@@ -61,10 +61,10 @@
     <string name="misskey_item_reblogged_status">a repartagé</string>
     <string name="xqt_item_reblogged_status">a repartagé</string>
     <string name="xqt_item_mention_status">vous a mentionné</string>
-    <string name="mastodon_visibility_public">Public</string>
+    <string name="mastodon_visibility_public">Publique</string>
     <string name="mastodon_visibility_unlisted">Non listé</string>
     <string name="mastodon_visibility_private">Privé</string>
-    <string name="mastodon_visibility_direct">Direct</string>
+    <string name="mastodon_visibility_direct">Directement</string>
     <string name="mastodon_visibility_public_description">Tout le monde peut voir et booster cette publication</string>
     <string name="mastodon_visibility_unlisted_description">Tout le monde peut voir cette publication, mais elle n\'apparaîtra pas dans le fil public</string>
     <string name="mastodon_visibility_private_description">Seuls vos abonnés peuvent voir cette publication</string>
@@ -134,7 +134,7 @@
     <string name="translation_show_original">Afficher l\'original</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
-    <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="date_format_full">jj MMM Yy HH:mm</string>
     <string name="vvo_notification_like">A aimé votre publication</string>
     <string name="user_follow_edit_list">Ajouter/Retirer de la liste</string>
     <string name="list_empty">Aucune liste</string>
@@ -170,7 +170,7 @@
     <string name="misskey_achievement_notes80000_description">Publiez 80 000 notes</string>
     <string name="misskey_achievement_notes90000_title">Univers de notes</string>
     <string name="misskey_achievement_notes90000_description">Publiez 90 000 notes</string>
-    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_title">TOUTES VOS REMARQUES SONT CI-DESSUS</string>
     <string name="misskey_achievement_notes100000_description">Publiez 100 000 notes</string>
     <string name="misskey_achievement_notes100000_flavor">Vous avez sûrement beaucoup de choses à dire.</string>
     <string name="misskey_achievement_login3_title">Débutant I</string>
@@ -270,7 +270,7 @@
     <string name="misskey_achievement_htl20npm_description">La vitesse de votre fil d\'actualité dépasse 20 npm (notes par minute)</string>
     <string name="misskey_achievement_view_instance_chart_title">Analyste</string>
     <string name="misskey_achievement_view_instance_chart_description">Consultez les graphiques de votre instance</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Bonjour, monde !</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Affichez \"hello world\" dans le Scratchpad</string>
     <string name="misskey_achievement_open3windows_title">Multi-fenêtres</string>
     <string name="misskey_achievement_open3windows_description">Ayez au moins 3 fenêtres ouvertes en même temps</string>
@@ -298,7 +298,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Un jeu dans lequel vous cliquez sur des cookies</string>
     <string name="misskey_achievement_cookie_clicked_description">A cliqué sur le cookie</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Attendez, êtes-vous sur le bon site ?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Plongeur du cerveau</string>
     <string name="misskey_achievement_brain_diver_description">Publiez le lien vers Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Débordement de test</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">Modifier l\'abonnement</string>
     <string name="delete_rss_source">Supprimer l\'abonnement</string>
     <string name="rss_sources_title_label">Titre</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Abonnements</string>
     <string name="empty_rss_sources">Aucun abonnement</string>
     <string name="mastodon_trending_statuses">Publications populaires</string>
@@ -389,21 +389,32 @@
     <string name="home_tab_me_title">Moi</string>
     <string name="home_tab_discover_title">Découvrir</string>
     <string name="settings_title">Paramètres</string>
-    <string name="mastodon_tab_local_title">Local</string>
-    <string name="mastodon_tab_public_title">Public</string>
+    <string name="mastodon_tab_local_title">Locale</string>
+    <string name="mastodon_tab_public_title">Publique</string>
     <string name="home_tab_featured_title">Mis en avant</string>
     <string name="home_tab_bookmarks_title">Signets</string>
     <string name="home_tab_favorite_title">Favoris</string>
+    <string name="home_tab_following_title">Abonnements</string>
     <string name="home_tab_list_title">Listes</string>
     <string name="home_tab_feeds_title">Flux</string>
     <string name="dm_list_title">Messages directs</string>
-    <string name="social_title">Social</string>
+    <string name="social_title">Réseaux sociaux</string>
     <string name="antenna_title">Antennes</string>
     <string name="mixed_timeline_title">Mixte</string>
     <string name="liked_title">Aimé</string>
     <string name="all_rss_feeds_title">Tous les abonnements</string>
     <string name="posts_title">Publications</string>
+    <string name="media_title">Médias</string>
     <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
     <string name="settings_appearance_absolute_timestamp_description">Afficher l\'heure exacte sur les publications</string>
     <string name="channel_title">Canal</string>
+    <string name="pixiv_ranking_week_title">Classement hebdomadaire</string>
+    <string name="pixiv_ranking_month_title">Classement Mensuel</string>
+    <string name="pixiv_ranking_day_male_title">Classement des hommes</string>
+    <string name="pixiv_ranking_day_female_title">Classement féminin</string>
+    <string name="pixiv_ranking_week_original_title">Classement original</string>
+    <string name="pixiv_ranking_week_rookie_title">Classement des Rookies</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Illustrations</string>
+    <string name="manga_title">Manga</string>
 </resources>

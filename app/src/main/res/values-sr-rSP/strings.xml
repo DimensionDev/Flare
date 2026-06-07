@@ -1,25 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Пријава</string>
     <string name="navigate_back">Назад</string>
-
     <string name="home_tab_home_title">Почетна</string>
     <string name="home_tab_notifications_title">Обавештења</string>
     <string name="home_tab_me_title">Ја</string>
     <string name="home_tab_discover_title">Откријте</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d нова објава</item>
         <item quantity="few">%1$d нове објаве</item>
         <item quantity="other">%1$d нових објава</item>
     </plurals>
-
     <string name="notification_tab_all_title">Све</string>
     <string name="notification_tab_mentions_title">Помињања</string>
     <string name="notification_tab_comments_title">Коментари</string>
     <string name="notification_tab_likes_title">Свиђања</string>
-
     <string name="compose_title">Састави</string>
     <string name="compose_reply_title">Одговори</string>
     <string name="compose_quote_title">Цитирај</string>
@@ -47,15 +42,15 @@
     <string name="compose_close_confirm_message">Имате несачуване измене. Да ли желите да их сачувате као нацрт пре затварања?</string>
     <string name="compose_save_draft">Сачувај</string>
     <string name="compose_close_discard">Одбаци</string>
+    <string name="status_insight_send">Пошаљи</string>
+    <string name="agent_chat_send">Пошаљи</string>
     <string name="draft_box_title">Нацрти</string>
     <string name="draft_box_empty">Још нема нацрта</string>
     <string name="draft_box_edit">Измени</string>
     <string name="draft_box_retry">Понови</string>
     <string name="draft_box_send">Пошаљи</string>
     <string name="settings_draft_box_description">Прегледајте, измените и поново пошаљите сачуване нацрте</string>
-
     <string name="settings_title">Подешавања</string>
-
     <string name="settings_accounts_title">Налози</string>
     <string name="settings_accounts_subtitle">Управљајте пријављеним налозима</string>
     <string name="settings_appearance_title">Изглед</string>
@@ -74,11 +69,9 @@
     <string name="settings_about_subtitle">Сазнајте више о Flare-у</string>
     <string name="settings_about_description">Klijent otvorenog koda za decentralizovane društvene platforme, pokretan veštačkom inteligencijom.</string>
     <string name="settings_about_source_code">Izvorni kod</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Телеграм</string>
     <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Pridružite se našoj Line grupi</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomozite nam u prevođenju Flare-a</string>
@@ -138,13 +131,11 @@
     <string name="settings_ai_config_translate_provider_description">Одаберите коју услугу користите за превод садржаја</string>
     <string name="settings_ai_config_translate_provider_ai">ВИ</string>
     <string name="settings_ai_config_translate_provider_google_web">Google преводилац (веб)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API кључ</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro крајња тачка</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Користите api.deepl.com уместо бесплатне api-free.deepl.com крајње тачке.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud превод</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API кључ</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate основни URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API кључ</string>
     <string name="settings_translation_title">Превод</string>
@@ -164,19 +155,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Додај релеј</string>
     <string name="settings_nostr_relays_placeholder">Унесите URL релеја</string>
     <string name="settings_nostr_relays_empty">Није додат ниједан релеј</string>
-
     <string name="status_loadmore_error_retry">Понови</string>
     <string name="login_expired">Сесија пријаве је истекла</string>
     <string name="login_expired_message">Додирните да се поново пријавите</string>
     <string name="login_expired_relogin">Пријави се поново</string>
-
     <string name="service_select_welcome_title">Добро дошли у Flare</string>
     <string name="service_select_welcome_message">Flare је клијент друштвених медија за Android.\nОдаберите услугу за повезивање да бисте започели.</string>
-
     <string name="mastodon_login_verify_message">Провера ваших акредитива…</string>
-
     <string name="status_title">Објава</string>
-
     <string name="misskey_visibility_public">Јавно</string>
     <string name="misskey_visibility_home">Почетна</string>
     <string name="misskey_visibility_followers">Пратиоци</string>
@@ -185,51 +171,39 @@
     <string name="misskey_visibility_home_description">Само корисници на овој инстанци могу видети ову објаву</string>
     <string name="misskey_visibility_followers_description">Само пратиоци могу видети ову објаву</string>
     <string name="misskey_visibility_specified_description">Само поменути корисници могу видети ову објаву</string>
-
     <string name="bluesky_login_username_hint">Корисничко име</string>
     <string name="bluesky_login_password_hint">Лозинка</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA токен</string>
     <string name="bluesky_login_oauth_button">Пријавите се помоћу OAuth-а</string>
     <string name="bluesky_login_use_password_button">Користи лозинку</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth можда још увек није стабилан. Ако наиђете на проблеме, користите пријаву лозинком.</string>
-
     <string name="report_title">Пријави</string>
     <string name="report_description">Шта није у реду са овом објавом?</string>
-
     <string name="report_reason_spam_title">Спам</string>
     <string name="report_reason_violation_title">Незаконито или хитно</string>
     <string name="report_reason_misleading_title">Обмањујуће</string>
     <string name="report_reason_sexual_title">Нежељени сексуални садржај</string>
     <string name="report_reason_rude_title">Антисоцијално понашање</string>
     <string name="report_reason_other_title">Остало</string>
-
     <string name="report_reason_spam_description">Прекомерна помињања или одговори</string>
     <string name="report_reason_violation_description">Јасна кршења закона или услова коришћења</string>
     <string name="report_reason_misleading_description">Ова објава обмањује</string>
     <string name="report_reason_sexual_description">Голотиња или порнографија која није тако означена</string>
     <string name="report_reason_rude_description">Узнемиравање, троловање или нетолеранција</string>
     <string name="report_reason_other_description">Проблем који није укључен у ове опције</string>
-
     <string name="delete_status_title">Обриши</string>
     <string name="delete_status_message">Обрисати ову објаву?</string>
-
     <string name="mastodon_report_title">Пријави</string>
     <string name="mastodon_report_description">Да ли сте сигурни да желите ово да пријавите?</string>
-
     <string name="more">Више</string>
-
     <string name="discover_search_placeholder">Претрага</string>
     <string name="discover_users">Предложени корисници</string>
     <string name="discover_status">Објаве у тренду</string>
     <string name="discover_hashtags">Хештагови у тренду</string>
-
     <string name="search_users">Корисници</string>
     <string name="search_status">Објаве</string>
-
     <string name="quick_menu_add_account">Додај налог</string>
-
     <string name="settings_appearance_generic">Опште</string>
-
     <string name="settings_appearance_show_actions">Прикажи акције</string>
     <string name="settings_appearance_show_actions_description">Прикажи дугмад за акције испод сваке објаве</string>
     <string name="settings_appearance_post_action_style">Стил акције објаве</string>
@@ -298,27 +272,20 @@
     <string name="settings_appearance_full_width_post_description">Дозволите објавама да заузму целу доступну ширину</string>
     <string name="settings_appearance_absolute_timestamp">Апсолутна временска ознака</string>
     <string name="settings_appearance_absolute_timestamp_description">Прикажи тачне временске ознаке на објавама</string>
-
     <string name="settings_appearance_show_platform_logo">Прикажи иконе изворних платформи</string>
     <string name="settings_appearance_show_platform_logo_description">Прикажи са које платформе је свака објава дошла</string>
-
     <string name="settings_storage_clear_image_cache">Обриши кеш слика</string>
     <string name="settings_storage_clear_image_cache_description">Уклоните %1$s MB кешираних слика</string>
-
     <string name="settings_storage_clear_database">Обриши кеширану базу података</string>
     <string name="settings_storage_clear_database_description">Уклоните %1$s кешираних корисника и %2$s кешираних објава</string>
     <string name="settings_storage_app_log">Дневници апликације</string>
     <string name="settings_storage_app_log_description">Прегледајте, сачувајте или обришите дневнике апликације</string>
-
     <string name="service_select_instance_input_placeholder">URL инстанце</string>
     <string name="service_select_next_button">Следеће</string>
     <string name="service_select_empty_message">Ниједна инстанца није пронађена</string>
-
     <string name="media_viewer_title">Прегледач медија</string>
-
     <string name="settings_accounts_remove">Уклони</string>
     <string name="settings_accounts_remove_confirm">Да ли сте сигурни да желите да уклоните налог %1$s са овог уређаја?</string>
-
     <string name="media_menu_save">Сачувај слику</string>
     <string name="media_menu_share_image">Подели слику</string>
     <string name="media_menu_copy_link">Копирај линк</string>
@@ -329,7 +296,6 @@
     <string name="media_save_fail">Чување није успело</string>
     <string name="media_alt_text">Алт текст</string>
     <string name="media_is_downloading">Медиј се још увек преузима. Покушајте поново за тренутак.</string>
-
     <string name="settings_side_panel_empty">Подразумевано, бочна плоча прати платформу тренутног налога.</string>
     <string name="tab_settings_add">Додај</string>
     <string name="tab_settings_drag">Превуци</string>
@@ -338,9 +304,7 @@
     <string name="tab_settings_default">Подразумевано</string>
     <string name="tab_settings_list">Листа</string>
     <string name="tab_settings_feed">Извори</string>
-
     <string name="local_filter_add">Додај филтер</string>
-
     <string name="local_filter_edit_title">Измени филтер</string>
     <string name="local_filter_add_title">Додај филтер</string>
     <string name="local_filter_keyword">Кључна реч</string>
@@ -350,27 +314,20 @@
     <string name="local_filter_for_search">Примени на претрагу</string>
     <string name="local_filter_regex">Користи регуларне изразе</string>
     <string name="local_filter_delete">Обриши филтер</string>
-
     <string name="delete">Обриши</string>
-
     <string name="mastodon_tab_local_title">Локално</string>
     <string name="mastodon_tab_public_title">Јавно</string>
-
     <string name="home_tab_featured_title">Истакнуто</string>
     <string name="home_tab_bookmarks_title">Обележивачи</string>
     <string name="home_tab_favorite_title">Омиљено</string>
     <string name="home_tab_list_title">Листе</string>
     <string name="home_tab_feeds_title">Извори</string>
-
     <string name="tab_settings_primary">Примарна картица</string>
     <string name="tab_settings_secondary">Секундарна картица</string>
-
     <string name="status_detail_comment">Коментариши</string>
     <string name="status_detail_repost">Поново објави</string>
-
     <string name="account_item_error_title">Грешка</string>
     <string name="account_item_error_message">Учитавање налога није успело</string>
-
     <string name="edit_tab_title">Измени картицу</string>
     <string name="edit_tab_name">Име</string>
     <string name="edit_tab_name_placeholder">Име картице</string>
@@ -378,7 +335,6 @@
     <string name="edit_tab_with_avatar">Са аватаром</string>
     <string name="edit_tab_enabled">Прикажи у мешовитим временским линијама</string>
     <string name="edit_tab_enabled_description">Укључи ову временску линију када се користи унутар мешовите временске линије или групе.</string>
-
     <string name="list_add">Додај листу</string>
     <string name="list_edit">Измени листу</string>
     <string name="list_delete">Обриши листу</string>
@@ -400,23 +356,17 @@
     <string name="edit_list_member_remove">Уклони</string>
     <string name="list_create_description">Опис листе</string>
     <string name="list_create_description_hint">Опис листе</string>
-
     <string name="edit_account_list_title">Измени листу налога</string>
-
     <string name="feeds_my_feeds_title">Моји извори</string>
     <string name="feeds_discover_feeds_title">Откријте изворе</string>
     <string name="feeds_discover_feeds_created_by">Креирао %1$s</string>
     <string name="feeds_unsubscribe">Откажи претплату</string>
     <string name="feeds_subscribe">Претплати се</string>
-
     <string name="profile_tab_timeline">Објаве</string>
     <string name="profile_tab_timeline_with_reply">Објаве и одговори</string>
     <string name="profile_tab_likes">Свиђања</string>
     <string name="profile_tab_media">Медији</string>
-
     <string name="tab_settings_title">Подешавања картица</string>
-
-
     <string name="dm_list_title">Директне поруке</string>
     <string name="dm_list_empty">Нема директних порука</string>
     <string name="dm_list_error">Учитавање директних порука није успело</string>
@@ -427,17 +377,12 @@
     <string name="dm_sending">Слање</string>
     <string name="dm_leave">Напусти конверзацију</string>
     <string name="dm_to_profile">Прикажи профил</string>
-
-
     <string name="notification_login_expired">Пријава је истекла за %1$s</string>
-
     <string name="following_title">Прати</string>
     <string name="fans_title">Пратиоци</string>
-
     <string name="local_history_search_placeholder">Претражите кеширане објаве и профиле</string>
     <string name="local_history_search_status_title">Објаве</string>
     <string name="local_history_search_user_title">Корисник</string>
-
     <string name="rss_sources_title">Претплате</string>
     <string name="add_rss_source">Додај претплату</string>
     <string name="edit_rss_source">Измени претплату</string>
@@ -445,9 +390,8 @@
     <string name="opml_import">Увези из OPML-а</string>
     <string name="opml_export">Извези у OPML</string>
     <string name="export_completed">Извоз је завршен</string>
-
     <string name="rss_sources_title_label">Наслов</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">РСС УРЛ</string>
     <string name="rss_title">Претплате</string>
     <string name="empty_rss_sources">Нема претплата</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub хост</string>
@@ -464,7 +408,6 @@
     <string name="mastodon_local_timeline">Локална временска линија</string>
     <string name="subscription_url_hint">Налепите URL RSS извора или URL Mastodon инстанце</string>
     <string name="rss_sources_display_mode">Режим приказа</string>
-
     <string name="rss_detail_open_in_browser">Отвори у прегледачу</string>
     <string name="rss_detail_share">Подели линк</string>
     <string name="rss_detail_tldr">Сумирај</string>
@@ -473,10 +416,8 @@
     <string name="rss_detail_tldr_loading">Сумирање…</string>
     <string name="rss_detail_translate">Преведи</string>
     <string name="rss_detail_translate_error">Превођење није успело</string>
-
     <string name="emoji_picker_recent">Недавно</string>
     <string name="emoji_picker_search">Претрага</string>
-
     <string name="podcast_host">Хост</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Говорник</string>
@@ -484,7 +425,6 @@
     <string name="podcast_leave">Напусти</string>
     <string name="podcast_ended">Подкаст је завршен</string>
     <string name="podcast_living">Уживо сада</string>
-
     <string name="home_tab_antennas_title">Антене</string>
     <string name="home_tab_channels_title">Канали</string>
     <string name="misskey_channel_tab_following">Прати</string>
@@ -501,24 +441,19 @@
     <string name="liked_title">Sviđa mi se</string>
     <string name="all_rss_feeds_title">Sve pretplate</string>
     <string name="posts_title">Objave</string>
-
     <string name="deeplink_account_selection_title">Одаберите налог</string>
     <string name="deeplink_account_selection_message">Одаберите налог за отварање овог линка</string>
     <string name="deeplink_account_selection_browser">Отвори у прегледачу</string>
-
     <string name="block_user_title">Блокирај корисника</string>
     <string name="block_user_description">Да ли сте сигурни да желите да блокирате овог корисника?</string>
     <string name="unblock_user_title">Одблокирај корисника</string>
     <string name="unblock_user_description">Да ли сте сигурни да желите да одблокирате овог корисника?</string>
-
     <string name="mute_user_title">Утишај корисника</string>
     <string name="mute_user_description">Да ли сте сигурни да желите да утишате овог корисника?</string>
     <string name="unmute_user_title">Поништи утишавање корисника</string>
     <string name="unmute_user_description">Да ли сте сигурни да желите да поништите утишавање овог корисника?</string>
-
     <string name="report_user_title">Пријави корисника</string>
     <string name="report_user_description">Да ли сте сигурни да желите да пријавите овог корисника?</string>
-
     <string name="settings_storage_export_data">Извези податке</string>
     <string name="settings_storage_export_data_description">Извезите све податке, укључујући налоге и акредитиве. Чувајте датотеку безбедном.</string>
     <string name="settings_storage_import_data">Увези податке</string>
@@ -529,7 +464,6 @@
     <string name="import_error">Увоз није успео</string>
     <string name="import_confirmation_title">Потврдите увоз</string>
     <string name="import_confirmation_message">Ово ће увести податке из изабране датотеке. Постојећи записи са подударним ID-овима ће бити замењени. Наставити?</string>
-
     <string name="tab_settings_add_group">Додај групу</string>
     <string name="tab_settings_add_tab">Додај картицу</string>
     <string name="tab_settings_edit_group">Измени групу</string>

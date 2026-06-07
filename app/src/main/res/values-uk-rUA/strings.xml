@@ -1,26 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Увійти</string>
     <string name="navigate_back">Назад</string>
-
     <string name="home_tab_home_title">Головна</string>
     <string name="home_tab_notifications_title">Сповіщення</string>
     <string name="home_tab_me_title">Я</string>
     <string name="home_tab_discover_title">Цікаве</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d новий допис</item>
         <item quantity="few">%1$d нові дописи</item>
         <item quantity="many">%1$d нових дописів</item>
         <item quantity="other">%1$d нових дописів</item>
     </plurals>
-
     <string name="notification_tab_all_title">Усі</string>
     <string name="notification_tab_mentions_title">Згадки</string>
     <string name="notification_tab_comments_title">Коментарі</string>
     <string name="notification_tab_likes_title">Вподобайки</string>
-
     <string name="compose_title">Створити</string>
     <string name="compose_reply_title">Відповісти</string>
     <string name="compose_quote_title">Цитувати</string>
@@ -48,15 +43,49 @@
     <string name="compose_close_confirm_message">У вас є незбережені зміни. Зберегти як чернетку перед закриттям?</string>
     <string name="compose_save_draft">Зберегти</string>
     <string name="compose_close_discard">Відхилити</string>
+    <string name="status_insight_title">Поштова фінансова статистика</string>
+    <string name="status_insight_input_placeholder">Запитайте відповідь…</string>
+    <string name="status_insight_send">Надіслати</string>
+    <string name="status_insight_error">Неможливо аналізувати це повідомлення.</string>
+    <string name="status_insight_trace_post_context_loaded">Пост завантажений контекст</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Зображення не підтримуються; повторна спроба з текстом…</string>
+    <string name="status_insight_trace_agent_started">Початок аналізу…</string>
+    <string name="status_insight_trace_strategy_completed">План аналізу завершено</string>
+    <string name="status_insight_trace_subgraph_started">Етап аналізу…</string>
+    <string name="status_insight_trace_subgraph_completed">Стадія аналізу завершена</string>
+    <string name="status_insight_trace_subgraph_failed">Помилка аналізу стадії</string>
+    <string name="status_insight_trace_model_response_received">Читання відповіді моделі…</string>
+    <string name="status_insight_trace_streaming_started">Трансляція з %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Отримання відповіді…</string>
+    <string name="status_insight_trace_streaming_completed">Потік відповіді завершено</string>
+    <string name="status_insight_trace_streaming_failed">Помилка модуля відповіді</string>
+    <string name="status_insight_trace_running_step">Виконання кроку аналізу…</string>
+    <string name="status_insight_trace_step_completed">Крок аналізу завершено</string>
+    <string name="status_insight_trace_step_failed">Помилка аналізу</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Пост завантажений контекст</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Вхідне повідомлення про контекст повідомлення відхилено</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Не вдалося завантажити контекст повідомлення</string>
+    <string name="status_insight_trace_tool_search_status_started">Пошук…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Пошук завершено</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Поле пошуку відхилено</string>
+    <string name="status_insight_trace_tool_search_status_failed">Не вдалося виконати пошук</string>
+    <string name="status_insight_trace_agent_completed">Завершення аналізу…</string>
+    <string name="status_insight_trace_agent_failed">Помилка аналізу</string>
+    <string name="status_insight_trace_agent_closing">Закриття аналізу…</string>
+    <string name="ask_ai">Запитати ШІ</string>
+    <string name="agent_chat_title">Чат</string>
+    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_empty">Ще немає історії чатів.</string>
+    <string name="agent_chat_input_placeholder">Запитайте що-небудь…</string>
+    <string name="agent_chat_send">Надіслати</string>
+    <string name="agent_chat_thinking">Взаємохідна…</string>
     <string name="draft_box_title">Чернетки</string>
     <string name="draft_box_empty">Чернеток ще немає</string>
     <string name="draft_box_edit">Редагувати</string>
     <string name="draft_box_retry">Повторити</string>
     <string name="draft_box_send">Надіслати</string>
     <string name="settings_draft_box_description">Перегляд, редагування та повторне надсилання чернеток</string>
-
     <string name="settings_title">Налаштування</string>
-
     <string name="settings_accounts_title">Облікові записи</string>
     <string name="settings_accounts_subtitle">Керування обліковими записами</string>
     <string name="settings_appearance_title">Зовнішній вигляд</string>
@@ -75,13 +104,11 @@
     <string name="settings_about_subtitle">Дізнайтеся більше про Flare</string>
     <string name="settings_about_description">Клієнт з відкритим вихідним кодом на базі ШІ для децентралізованих соціальних платформ.</string>
     <string name="settings_about_source_code">Вихідний код</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Телеграма</string>
     <string name="settings_about_telegram_description">Приєднуйтесь до нашої групи в Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Приєднуйтесь до нашого сервера в Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Приєднуйтесь до нашої групи в Line</string>
-    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization">Кравдін</string>
     <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
     <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="settings_side_panel">Налаштування бічної панелі</string>
@@ -129,6 +156,8 @@
     <string name="settings_ai_config_tap_to_edit">Торкніться, щоб редагувати</string>
     <string name="settings_ai_config_entable_translation">Увімкнути переклад через ШІ</string>
     <string name="settings_ai_config_translation_description">Використовувати ШІ замість Google Translate. Переклад може тривати довше.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">Увімкнути ШІ-підсумки</string>
     <string name="settings_ai_config_tldr_description">Підсумовуйте довгі дописи за допомогою ШІ. Доступно для дописів довше 500 символів.</string>
     <string name="settings_ai_config_enable_pre_translation">Увімкнути автопереклад</string>
@@ -138,12 +167,12 @@
     <string name="settings_ai_config_translate_provider">Провайдер перекладу</string>
     <string name="settings_ai_config_translate_provider_description">Виберіть сервіс для перекладу вмісту</string>
     <string name="settings_ai_config_translate_provider_ai">ШІ (AI)</string>
-    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_google_web">Google Перекладач (Веб)</string>
+    <string name="settings_ai_config_translate_provider_deepl">Глибокий</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">Ключ API DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Кінцева точка DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Використовувати api.deepl.com замість безкоштовного api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Перекладач Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Ключ API Google Cloud</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">Базовий URL LibreTranslate</string>
@@ -165,19 +194,14 @@
     <string name="settings_nostr_relays_add_dialog_title">Додати реле</string>
     <string name="settings_nostr_relays_placeholder">Введіть URL реле</string>
     <string name="settings_nostr_relays_empty">Реле не додано</string>
-
     <string name="status_loadmore_error_retry">Повторити</string>
     <string name="login_expired">Сеанс входу вичерпано</string>
     <string name="login_expired_message">Торкніться, щоб увійти знову</string>
     <string name="login_expired_relogin">Увійти знову</string>
-
     <string name="service_select_welcome_title">Ласкаво просимо до Flare</string>
     <string name="service_select_welcome_message">Flare — це клієнт соціальних мереж для Android.\nВиберіть сервіс, щоб підключитися та почати.</string>
-
     <string name="mastodon_login_verify_message">Перевірка облікових даних…</string>
-
     <string name="status_title">Допис</string>
-
     <string name="misskey_visibility_public">Публічний</string>
     <string name="misskey_visibility_home">Домашній</string>
     <string name="misskey_visibility_followers">Для підписників</string>
@@ -186,51 +210,39 @@
     <string name="misskey_visibility_home_description">Тільки користувачі цього сервера можуть бачити цей допис</string>
     <string name="misskey_visibility_followers_description">Тільки підписники можуть бачити цей допис</string>
     <string name="misskey_visibility_specified_description">Тільки згадані користувачі можуть бачити цей допис</string>
-
     <string name="bluesky_login_username_hint">Ім\'я користувача</string>
     <string name="bluesky_login_password_hint">Пароль</string>
     <string name="bluesky_login_auth_factor_token_hint">Код 2FA</string>
     <string name="bluesky_login_oauth_button">Увійти через OAuth</string>
     <string name="bluesky_login_use_password_button">Використати пароль</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth може бути нестабільним. Якщо виникнуть проблеми, використовуйте вхід за паролем.</string>
-
     <string name="report_title">Скарги</string>
     <string name="report_description">Що не так із цим дописом?</string>
-
     <string name="report_reason_spam_title">Спам</string>
     <string name="report_reason_violation_title">Незаконний або терміновий вміст</string>
     <string name="report_reason_misleading_title">Вводить в оману</string>
     <string name="report_reason_sexual_title">Небажаний сексуальний вміст</string>
     <string name="report_reason_rude_title">Антисоціальна поведінка</string>
     <string name="report_reason_other_title">Інше</string>
-
     <string name="report_reason_spam_description">Надмірна кількість згадок або відповідей</string>
     <string name="report_reason_violation_description">Явні порушення закону або умов використання</string>
     <string name="report_reason_misleading_description">Цей допис вводить в оману</string>
     <string name="report_reason_sexual_description">Оголеність або порнографія без відповідної мітки</string>
     <string name="report_reason_rude_description">Цькування, тролінг або нетерпимість</string>
     <string name="report_reason_other_description">Проблема, якої немає в переліку</string>
-
     <string name="delete_status_title">Видалити</string>
     <string name="delete_status_message">Видалити цей допис?</string>
-
     <string name="mastodon_report_title">Скарга</string>
     <string name="mastodon_report_description">Ви впевнені, що хочете поскаржитися на це?</string>
-
     <string name="more">Більше</string>
-
     <string name="discover_search_placeholder">Пошук</string>
     <string name="discover_users">Рекомендовані користувачі</string>
     <string name="discover_status">Популярні дописи</string>
     <string name="discover_hashtags">Популярні хештеги</string>
-
     <string name="search_users">Користувачі</string>
     <string name="search_status">Дописи</string>
-
     <string name="quick_menu_add_account">Додати обліковий запис</string>
-
     <string name="settings_appearance_generic">Загальні</string>
-
     <string name="settings_appearance_show_actions">Показувати дії</string>
     <string name="settings_appearance_show_actions_description">Показувати кнопки дій під кожним дописом</string>
     <string name="settings_appearance_post_action_style">Стиль кнопок дій</string>
@@ -245,6 +257,8 @@
     <string name="settings_appearance_show_numbers_description">Показувати кількість дій під кожним дописом</string>
     <string name="settings_appearance_show_cw_img">Показувати делікатний вміст</string>
     <string name="settings_appearance_show_cw_img_description">Завжди показувати делікатні медіа в дописах</string>
+    <string name="settings_appearance_expand_content_warning">Показувати попереджень про вміст</string>
+    <string name="settings_appearance_expand_content_warning_description">Завжди показувати зміст повідомлення, приховану за попередженнями про контент</string>
     <string name="settings_appearance_expand_media">Зберігати співвідношення сторін</string>
     <string name="settings_appearance_expand_media_description">Показувати медіа з оригінальним співвідношенням сторін у стрічці</string>
     <string name="settings_appearance_video_autoplay">Автоматичне відтворення відео</string>
@@ -299,27 +313,20 @@
     <string name="settings_appearance_full_width_post_description">Дозволити дописам займати всю доступну ширину</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютний час</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати точний час створення дописів</string>
-
     <string name="settings_appearance_show_platform_logo">Піктограми платформ</string>
     <string name="settings_appearance_show_platform_logo_description">Показувати, з якої платформи надійшов допис</string>
-
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">Видалити %1$s МБ кешованих зображень</string>
-
     <string name="settings_storage_clear_database">Очистити кеш бази даних</string>
     <string name="settings_storage_clear_database_description">Видалити %1$s кешованих користувачів і %2$s кешованих дописів</string>
     <string name="settings_storage_app_log">Логи додатка</string>
     <string name="settings_storage_app_log_description">Перегляд, збереження або очищення логів</string>
-
     <string name="service_select_instance_input_placeholder">URL сервера (інстансу)</string>
     <string name="service_select_next_button">Далі</string>
     <string name="service_select_empty_message">Серверів не знайдено</string>
-
     <string name="media_viewer_title">Перегляд медіа</string>
-
     <string name="settings_accounts_remove">Видалити</string>
     <string name="settings_accounts_remove_confirm">Ви впевнені, що хочете видалити обліковий запис %1$s із цього пристрою?</string>
-
     <string name="media_menu_save">Зберегти зображення</string>
     <string name="media_menu_share_image">Поділитися зображенням</string>
     <string name="media_menu_copy_link">Копіювати посилання</string>
@@ -330,7 +337,6 @@
     <string name="media_save_fail">Не вдалося зберегти</string>
     <string name="media_alt_text">Альтернативний текст</string>
     <string name="media_is_downloading">Медіа ще завантажується. Повторіть спробу за мить.</string>
-
     <string name="settings_side_panel_empty">За замовчуванням бічна панель відповідає платформі поточного облікового запису.</string>
     <string name="tab_settings_add">Додати</string>
     <string name="tab_settings_drag">Перетягнути</string>
@@ -339,9 +345,7 @@
     <string name="tab_settings_default">За замовчуванням</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Стрічки</string>
-
     <string name="local_filter_add">Додати фільтр</string>
-
     <string name="local_filter_edit_title">Редагувати фільтр</string>
     <string name="local_filter_add_title">Додати фільтр</string>
     <string name="local_filter_keyword">Ключове слово</string>
@@ -351,27 +355,20 @@
     <string name="local_filter_for_search">Застосувати до пошуку</string>
     <string name="local_filter_regex">Використовувати регулярні вирази</string>
     <string name="local_filter_delete">Видалити фільтр</string>
-
     <string name="delete">Видалити</string>
-
     <string name="mastodon_tab_local_title">Локальна</string>
     <string name="mastodon_tab_public_title">Публічна</string>
-
     <string name="home_tab_featured_title">Рекомендоване</string>
     <string name="home_tab_bookmarks_title">Закладки</string>
     <string name="home_tab_favorite_title">Вибране</string>
     <string name="home_tab_list_title">Списки</string>
     <string name="home_tab_feeds_title">Стрічки</string>
-
     <string name="tab_settings_primary">Основна вкладка</string>
     <string name="tab_settings_secondary">Друрядна вкладка</string>
-
     <string name="status_detail_comment">Коментувати</string>
     <string name="status_detail_repost">Поширити</string>
-
     <string name="account_item_error_title">Помилка</string>
     <string name="account_item_error_message">Не вдалося завантажити обліковий запис</string>
-
     <string name="edit_tab_title">Редагувати вкладку</string>
     <string name="edit_tab_name">Назва</string>
     <string name="edit_tab_name_placeholder">Назва вкладки</string>
@@ -379,7 +376,6 @@
     <string name="edit_tab_with_avatar">З аватаром</string>
     <string name="edit_tab_enabled">Показувати у змішаних стрічках</string>
     <string name="edit_tab_enabled_description">Включати цю стрічку, коли вона використовується всередині змішаної стрічки або групи.</string>
-
     <string name="list_add">Додати список</string>
     <string name="list_edit">Редагувати список</string>
     <string name="list_delete">Видалити список</string>
@@ -401,23 +397,26 @@
     <string name="edit_list_member_remove">Видалити</string>
     <string name="list_create_description">Опис списку</string>
     <string name="list_create_description_hint">Опис списку</string>
-
     <string name="edit_account_list_title">Редагувати список акаунтів</string>
-
     <string name="feeds_my_feeds_title">Мої стрічки</string>
     <string name="feeds_discover_feeds_title">Знайти стрічки</string>
     <string name="feeds_discover_feeds_created_by">Створено %1$s</string>
     <string name="feeds_unsubscribe">Відписатися</string>
     <string name="feeds_subscribe">Підписатися</string>
-
     <string name="profile_tab_timeline">Дописи</string>
     <string name="profile_tab_timeline_with_reply">Дописи та відповіді</string>
     <string name="profile_tab_likes">Вподобайки</string>
     <string name="profile_tab_media">Медіа</string>
-
+    <string name="illustrations_title">Ілюстрації</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Щотижневий рейтинг</string>
+    <string name="pixiv_ranking_month_title">Щомісячний рейтинг</string>
+    <string name="pixiv_ranking_day_male_title">Чоловічий рейтинг</string>
+    <string name="pixiv_ranking_day_female_title">Рейтинг жінки</string>
+    <string name="pixiv_ranking_week_original_title">Оригінальний рейтинг</string>
+    <string name="pixiv_ranking_week_rookie_title">Рейтинг Нових Очків</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">Налаштування вкладок</string>
-
-
     <string name="dm_list_title">Прямі повідомлення</string>
     <string name="dm_list_empty">Немає прямих повідомлень</string>
     <string name="dm_list_error">Не вдалося завантажити повідомлення</string>
@@ -428,17 +427,12 @@
     <string name="dm_sending">Надсилання</string>
     <string name="dm_leave">Залишити розмову</string>
     <string name="dm_to_profile">Показати профіль</string>
-
-
     <string name="notification_login_expired">Термін входу вичерпано для %1$s</string>
-
     <string name="following_title">Підписки</string>
     <string name="fans_title">Підписники</string>
-
     <string name="local_history_search_placeholder">Пошук у кешованих дописах та профілях</string>
     <string name="local_history_search_status_title">Дописи</string>
     <string name="local_history_search_user_title">Користувач</string>
-
     <string name="rss_sources_title">Підписки</string>
     <string name="add_rss_source">Додати підписку</string>
     <string name="edit_rss_source">Редагувати підписку</string>
@@ -446,9 +440,8 @@
     <string name="opml_import">Імпортувати з OPML</string>
     <string name="opml_export">Експортувати в OPML</string>
     <string name="export_completed">Експорт завершено</string>
-
     <string name="rss_sources_title_label">Назва</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Підписки</string>
     <string name="empty_rss_sources">Немає підписок</string>
     <string name="rss_sources_rss_hub_host_label">Хост RSSHub</string>
@@ -465,7 +458,6 @@
     <string name="mastodon_local_timeline">Локальна стрічка</string>
     <string name="subscription_url_hint">Вставте URL-адресу RSS-стрічки або Mastodon-сервера</string>
     <string name="rss_sources_display_mode">Режим відображення</string>
-
     <string name="rss_detail_open_in_browser">Відкрити в браузері</string>
     <string name="rss_detail_share">Поділитися посиланням</string>
     <string name="rss_detail_tldr">Підсумувати</string>
@@ -474,10 +466,8 @@
     <string name="rss_detail_tldr_loading">Підсумовування…</string>
     <string name="rss_detail_translate">Перекласти</string>
     <string name="rss_detail_translate_error">Не вдалося перекласти</string>
-
     <string name="emoji_picker_recent">Останні</string>
     <string name="emoji_picker_search">Пошук</string>
-
     <string name="podcast_host">Ведучий</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Спікер</string>
@@ -485,7 +475,6 @@
     <string name="podcast_leave">Вийти</string>
     <string name="podcast_ended">Подкаст завершився</string>
     <string name="podcast_living">Зараз у прямому ефірі</string>
-
     <string name="home_tab_antennas_title">Антени</string>
     <string name="home_tab_channels_title">Канали</string>
     <string name="misskey_channel_tab_following">Підписки</string>
@@ -502,24 +491,19 @@
     <string name="liked_title">Сподобалося</string>
     <string name="all_rss_feeds_title">Усі підписки</string>
     <string name="posts_title">Дописи</string>
-
     <string name="deeplink_account_selection_title">Виберіть обліковий запис</string>
     <string name="deeplink_account_selection_message">Виберіть обліковий запис, щоб відкрити посилання</string>
     <string name="deeplink_account_selection_browser">Відкрити в браузері</string>
-
     <string name="block_user_title">Заблокувати користувача</string>
     <string name="block_user_description">Ви впевнені, що хочете заблокувати цього користувача?</string>
     <string name="unblock_user_title">Розблокувати користувача</string>
     <string name="unblock_user_description">Ви впевнені, що хочете розблокувати цього користувача?</string>
-
     <string name="mute_user_title">Приглушити користувача</string>
     <string name="mute_user_description">Ви впевнені, що хочете приглушити цього користувача?</string>
     <string name="unmute_user_title">Скасувати приглушення</string>
     <string name="unmute_user_description">Ви впевнені, що хочете скасувати приглушення для цього користувача?</string>
-
     <string name="report_user_title">Поскаржитися на користувача</string>
     <string name="report_user_description">Ви впевнені, що хочете поскаржитися на цього користувача?</string>
-
     <string name="settings_storage_export_data">Експортувати дані</string>
     <string name="settings_storage_export_data_description">Експортувати всі дані, включаючи акаунти та паролі. Зберігайте цей файл у безпеці.</string>
     <string name="settings_storage_import_data">Імпортувати дані</string>
@@ -530,7 +514,6 @@
     <string name="import_error">Імпорт не вдався</string>
     <string name="import_confirmation_title">Підтвердження імпорту</string>
     <string name="import_confirmation_message">Це завантажить дані з вибраного файлу. Існуючі записи з однаковими ID будуть замінені. Продовжити?</string>
-
     <string name="tab_settings_add_group">Додати групу</string>
     <string name="tab_settings_add_tab">Додати вкладку</string>
     <string name="tab_settings_edit_group">Редагувати групу</string>

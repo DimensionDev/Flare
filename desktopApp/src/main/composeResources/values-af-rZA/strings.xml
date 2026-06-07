@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">OK</string>
     <string name="cancel">Kanselleer</string>
     <string name="delete">Vee uit</string>
     <string name="refresh">Verfris</string>
-
     <string name="home_compose">Skryf</string>
     <string name="home_login">Meld aan</string>
     <string name="home_settings">Instellings</string>
-
     <string name="home_tab_home_title">Tuis</string>
     <string name="home_tab_notifications_title">Kennisgewings</string>
     <string name="home_tab_me_title">Ek</string>
@@ -26,47 +24,38 @@
         <item quantity="one">%1$d Nuwe Plasing</item>
         <item quantity="other">%1$d Nuwe Plasings</item>
     </plurals>
-
     <string name="navigate_back">Terug</string>
     <string name="service_select_instance_input_placeholder">Instansie-URL</string>
     <string name="service_select_next_button">Volgende</string>
     <string name="service_select_empty_message">Geen instansies gevind nie</string>
-
     <string name="service_select_welcome_title">Welkom by Flare</string>
     <string name="service_select_welcome_message">Flare is \'n sosiale media-kliënt vir %1$s.\nKies \'n diens om te koppel en te begin.</string>
     <string name="mastodon_login_verify_message">Verifieer tans jou geloofsbriewe…</string>
-
     <string name="profile_tab_timeline">Plasings</string>
     <string name="profile_tab_timeline_with_reply">Plasings en antwoorde</string>
     <string name="profile_tab_likes">Hou-van-plasings</string>
     <string name="profile_tab_media">Media</string>
-
     <string name="report_title">Rapporteer</string>
     <string name="report_description">Wat is fout met hierdie plasing?</string>
-
-    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_spam_title">Spambekendstelling</string>
     <string name="report_reason_violation_title">Onwettig of dringend</string>
     <string name="report_reason_misleading_title">Misleidend</string>
     <string name="report_reason_sexual_title">Onverlangde Seksuele Inhoud</string>
     <string name="report_reason_rude_title">Antisosiale Gedrag</string>
     <string name="report_reason_other_title">Ander</string>
-
     <string name="report_reason_spam_description">Oormatige meldings of antwoorde</string>
     <string name="report_reason_violation_description">Duidelike oortredings van die wet of diensbepalings</string>
     <string name="report_reason_misleading_description">Hierdie plasing is misleidend</string>
     <string name="report_reason_sexual_description">Naaktheid of pornografie wat nie as sodanig gemerk is nie</string>
     <string name="report_reason_rude_description">Teistering, trolle of onverdraagsaamheid</string>
     <string name="report_reason_other_description">\'n Kwessie wat nie in hierdie opsies ingesluit is nie</string>
-
     <string name="delete_status_title">Vee uit</string>
     <string name="delete_status_message">Vee hierdie plasing uit?</string>
     <string name="compose_close_confirm_title">Stoor konsep?</string>
     <string name="compose_close_confirm_message">Jy het ongestoorde veranderinge. Stoor dit as \'n konsep voordat jy toemaak?</string>
     <string name="compose_close_discard">Gooi weg</string>
-
     <string name="mastodon_report_title">Rapporteer</string>
     <string name="mastodon_report_description">Is jy seker jy wil dit rapporteer?</string>
-
     <string name="bookmark_remove">Verwyder boekmerk</string>
     <string name="bookmark_add">Voeg boekmerk by</string>
     <string name="like">Hou van</string>
@@ -84,7 +73,6 @@
     <string name="status_detail_repost">Herplasing</string>
     <string name="emoji_picker_recent">Onlangs</string>
     <string name="emoji_picker_search">Soek</string>
-
     <string name="media_show_thumbnail_list">Wys duimnael-lys</string>
     <string name="media_hide_thumbnail_list">Versteek duimnael-lys</string>
     <string name="media_save">Stoor</string>
@@ -94,7 +82,7 @@
     <string name="status_share_image">Deel skermskoot</string>
     <string name="status_share_via_fxembed">Deel via FxEmbed</string>
     <string name="status_share_via_fixvx">Deel via Fixvx</string>
-
+    <string name="agent_chat_send">Stuur</string>
     <string name="list_add">Voeg lys by</string>
     <string name="list_edit">Wysig lys</string>
     <string name="list_delete">Vee lys uit</string>
@@ -118,28 +106,22 @@
     <string name="edit_list_member_remove">Verwyder</string>
     <string name="list_create_description">Lysbeskrywing</string>
     <string name="list_create_description_hint">Lysbeskrywing</string>
-
     <string name="feeds_my_feeds_title">My voere</string>
     <string name="feeds_discover_feeds_title">Ontdek voere</string>
     <string name="feeds_discover_feeds_created_by">Geskep deur %1$s</string>
     <string name="feeds_unsubscribe">Teken uit</string>
     <string name="feeds_subscribe">Teken in</string>
-
     <string name="social_title">Sosiaal</string>
-
-    <string name="antenna_title">Antennas</string>
     <string name="mixed_timeline_title">Gemeng</string>
     <string name="liked_title">Hou van</string>
     <string name="all_rss_feeds_title">Alle Subskripsies</string>
     <string name="posts_title">Plasings</string>
-
     <string name="bluesky_login_username">Gebruikersnaam</string>
     <string name="bluesky_login_password">Wagwoord</string>
     <string name="bluesky_login_2fa">2FA-teken</string>
     <string name="bluesky_login_oauth_button">Meld aan met OAuth</string>
     <string name="bluesky_login_use_password_button">Gebruik wagwoord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth mag dalk nog onstabiel wees. As jy probleme ondervind, gebruik wagwoord-aanmelding.</string>
-
     <string name="login_expired">Aanmeldsessie het verval</string>
     <string name="login_expired_message">Klik om weer aan te meld</string>
     <string name="login_expired_relogin">Meld weer aan</string>
@@ -148,7 +130,6 @@
     <string name="add_account">Voeg rekening by</string>
     <string name="remove_account">Verwyder rekening</string>
     <string name="settings_accounts_remove_confirm">Is jy seker jy wil rekening %1$s van hierdie toestel verwyder?</string>
-
     <string name="settings_accounts_title">Rekeninge</string>
     <string name="settings_appearance_title">Voorkoms</string>
     <string name="settings_status_appearance_title">Plasingvoorkoms</string>
@@ -193,7 +174,6 @@
     <string name="settings_ai_config_type_openai">KI-versoenbare API</string>
     <string name="settings_ai_config_api_key">API-sleutel</string>
     <string name="settings_ai_config_api_key_hint">Voer API-sleutel in</string>
-    <string name="settings_ai_config_model">Model</string>
     <string name="settings_ai_config_model_description">Kies \'n model van hierdie eindpunt</string>
     <string name="settings_ai_config_model_select">Kies model</string>
     <string name="settings_ai_config_model_loading">Laai modelle tans…</string>
@@ -204,7 +184,6 @@
     <string name="settings_ai_config_reasoning_effort_description">Kies hoeveel ekstra redenering die model gebruik. Verstek volg die verskaffer se instelling.</string>
     <string name="settings_ai_config_reasoning_effort_default">Verstek</string>
     <string name="settings_ai_config_reasoning_effort_low">Laag</string>
-    <string name="settings_ai_config_reasoning_effort_medium">Medium</string>
     <string name="settings_ai_config_reasoning_effort_high">Hoog</string>
     <string name="settings_ai_config_extra_body">Ekstra Liggaam</string>
     <string name="settings_ai_config_translate_prompt">Vertaalpor</string>
@@ -219,17 +198,12 @@
     <string name="settings_ai_config_translate_provider">Vertaalverskaffer</string>
     <string name="settings_ai_config_translate_provider_description">Kies watter diens inhoud vertaal</string>
     <string name="settings_ai_config_translate_provider_ai">KI</string>
-    <string name="settings_ai_config_translate_provider_google_web">Google Translate (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API-sleutel</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro-eindpunt</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Gebruik api.deepl.com in plaas van die gratis api-free.deepl.com-eindpunt.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API-sleutel</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate Basis-URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-sleutel</string>
-
     <string name="settings_translation_title">Vertaling</string>
     <string name="settings_translation_description">Kies vertaaldienste en outo-vertaalgedrag</string>
     <string name="settings_translation_auto_excluded_languages">Tale om oor te slaan vir outo-vertaal</string>
@@ -238,7 +212,6 @@
     <string name="settings_translation_ai_test_action">Toets vertaling</string>
     <string name="settings_translation_ai_test_original">Monsterteks</string>
     <string name="settings_translation_ai_test_result">Vertaalde teks</string>
-
     <string name="settings_appearance_generic">Algemeen</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Wys skryfblokkie in tuistydlyn</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Wys die skryfblokkie bo-aan die Tuistydlyn</string>
@@ -297,24 +270,17 @@
     <string name="settings_appearance_post_action_style_stretch">Strek</string>
     <string name="settings_appearance_absolute_timestamp">Absolute tydstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Wys presiese tydstempels op plasings</string>
-
     <string name="settings_appearance_show_platform_logo">Wys bronplatform-ikone</string>
     <string name="settings_appearance_show_platform_logo_description">Wys van watter platform elke plasing gekom het</string>
-
     <string name="settings_about_source_code">Bronkode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Sluit by ons Telegram-groep aan</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Sluit by ons Discord-bediener aan</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Help ons om Flare te vertaal</string>
     <string name="settings_privacy_policy">Privaatheidsbeleid</string>
-
     <string name="users">Gebruikers</string>
-    <string name="hashtags">Hashtags</string>
     <string name="statues">Plasings</string>
-
-
     <string name="compose_title">Skryf</string>
     <string name="compose_hint">Wat gebeur?</string>
     <string name="compose_poll_option_hint">Opsie %1$s</string>
@@ -335,7 +301,6 @@
     <string name="compose_notification_progress">Stuur plasing tans</string>
     <string name="compose_notification_success">Plasing gestuur</string>
     <string name="compose_notification_error">Kon nie plasing stuur nie</string>
-
     <string name="misskey_visibility_public">Publiek</string>
     <string name="misskey_visibility_home">Tuis</string>
     <string name="misskey_visibility_followers">Volgelinge</string>
@@ -344,15 +309,12 @@
     <string name="misskey_visibility_home_description">Slegs gebruikers op hierdie instansie kan hierdie plasing sien</string>
     <string name="misskey_visibility_followers_description">Slegs volgelinge kan hierdie plasing sien</string>
     <string name="misskey_visibility_specified_description">Slegs gemelde gebruikers kan hierdie plasing sien</string>
-
-
     <string name="rss_sources_title">Subskripsies</string>
     <string name="add_rss_source">Voeg subskripsie by</string>
     <string name="edit_rss_source">Wysig subskripsie</string>
     <string name="delete_rss_source">Vee subskripsie uit</string>
-
     <string name="rss_sources_title_label">Titel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS-URL</string>
     <string name="rss_title">Subskripsies</string>
     <string name="empty_rss_sources">Geen subskripsies nie</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub-gasheer</string>
@@ -373,7 +335,6 @@
     <string name="mastodon_federated_timeline">Gefedereerde tydlyn</string>
     <string name="mastodon_local_timeline">Plaaslike tydlyn</string>
     <string name="subscription_url_hint">Plak \'n RSS-voervoer-URL of \'n Mastodon-instansie-URL</string>
-
     <string name="tab_settings_add">Voeg by</string>
     <string name="tab_settings_drag">Sleep</string>
     <string name="tab_settings_edit">Wysig</string>
@@ -381,9 +342,7 @@
     <string name="tab_settings_default">Verstek</string>
     <string name="tab_settings_list">Lys</string>
     <string name="tab_settings_feed">Voere</string>
-
     <string name="notification_login_expired">Aanmelding het verval vir %1$s</string>
-
     <string name="dm_list_empty">Geen direkte boodskappe nie</string>
     <string name="dm_list_error">Kon nie direkte boodskappe laai nie</string>
     <string name="send">Stuur</string>
@@ -416,7 +375,6 @@
     <string name="tab_settings_filter_text_only">Slegs teks</string>
     <string name="tab_settings_filter_image">Beelde</string>
     <string name="tab_settings_filter_video">Video\'s</string>
-
     <string name="edit_tab_title">Wysig oortjie</string>
     <string name="edit_tab_name">Naam</string>
     <string name="edit_tab_name_placeholder">Oortjie-naam</string>
@@ -424,16 +382,12 @@
     <string name="edit_tab_with_avatar">Met profiel</string>
     <string name="edit_tab_enabled">Wys in gemengde tydlyne</string>
     <string name="edit_tab_enabled_description">Sluit hierdie tydlyn in wanneer dit binne \'n gemengde tydlyn of groep gebruik word.</string>
-
     <string name="edit">Wysig</string>
-
     <string name="local_history_search_placeholder">Soek gekasde plasings en profiele</string>
     <string name="local_history_search_status_title">Plasings</string>
     <string name="local_history_search_user_title">Gebruiker</string>
-
     <string name="settings_storage_clear_image_cache">Vee beeldkas uit</string>
     <string name="settings_storage_clear_image_cache_description">Verwyder %1$s MB se gekasde beelde</string>
-
     <string name="settings_storage_clear_database">Vee gekasde databasis uit</string>
     <string name="settings_storage_clear_database_description">Verwyder %1$s gekasde gebruikers en %2$s gekasde plasings</string>
     <string name="settings_storage_app_log">Toepassing-logs</string>
@@ -450,50 +404,39 @@
     <string name="draft_box_retry">Probeer weer</string>
     <string name="draft_box_edit">Wysig</string>
     <string name="draft_box_send">Stuur</string>
-
     <string name="copied_to_clipboard">Gekopieer na knipbord</string>
-
     <string name="opml_import">Voer in vanaf OPML</string>
     <string name="opml_export">Voer uit na OPML</string>
     <string name="save_completed">Uitvoer voltooi</string>
-
     <string name="deeplink_account_selection_title">Kies rekening</string>
     <string name="deeplink_account_selection_message">Kies \'n rekening om hierdie skakel oop te maak</string>
     <string name="deeplink_account_selection_browser">Maak oop in blaaier</string>
-
     <string name="block_user_title">Blokkeer gebruiker</string>
     <string name="block_user_description">Is jy seker jy wil hierdie gebruiker blokkeer?</string>
     <string name="unblock_user_title">Deblokkeer gebruiker</string>
     <string name="unblock_user_description">Is jy seker jy wil hierdie gebruiker deblokkeer?</string>
-
     <string name="mute_user_title">Demp gebruiker</string>
     <string name="mute_user_description">Is jy seker jy wil hierdie gebruiker demp?</string>
     <string name="unmute_user_title">Ondemp gebruiker</string>
     <string name="unmute_user_description">Is jy seker jy wil hierdie gebruiker ondemp?</string>
-
     <string name="report_user_title">Rapporteer gebruiker</string>
     <string name="report_user_description">Is jy seker jy wil hierdie gebruiker rapporteer?</string>
-
     <string name="settings_storage_export_data">Voer data uit</string>
     <string name="settings_storage_export_data_description">Voer alle data uit, insluitend rekeninge en geloofsbriewe. Hou die lêer veilig.</string>
     <string name="settings_storage_import_data">Voer data in</string>
     <string name="settings_storage_import_data_description">Voer data in vanaf \'n rugsteunlêer. Bestaande rekords met ooreenstemmende ID\'s sal vervang word.</string>
     <string name="action_export">Voer uit</string>
     <string name="action_import">Voer in</string>
-
     <string name="save_error">Uitvoer het misluk</string>
     <string name="import_completed">Invoer voltooi</string>
     <string name="import_error">Invoer het misluk</string>
     <string name="import_confirmation_title">Bevestig invoer</string>
     <string name="import_confirmation_message">Dit sal data vanaf die gekose lêer invoer. Bestaande rekords met ooreenstemmende ID\'s sal vervang word. Gaan voort?</string>
-
     <string name="channel_title">Kanaal</string>
-
     <string name="misskey_channel_tab_following">Gevolgde</string>
     <string name="misskey_channel_tab_favorites">Gunstelinge</string>
     <string name="misskey_channel_tab_owned">Besit</string>
     <string name="misskey_channel_tab_featured">Uitgesoek</string>
-
     <string name="media_save_success">Gestoor in Downloads</string>
     <string name="media_save_fail">Kon nie stoor nie</string>
 </resources>

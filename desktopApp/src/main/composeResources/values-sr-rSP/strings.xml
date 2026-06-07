@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="ok">U redu</string>
     <string name="cancel">Otkaži</string>
     <string name="delete">Obriši</string>
@@ -38,7 +38,7 @@
     <string name="profile_tab_media">Mediji</string>
     <string name="report_title">Prijavi</string>
     <string name="report_description">Šta nije u redu sa ovom objavom?</string>
-    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_spam_title">Спам</string>
     <string name="report_reason_violation_title">Ilegalno ili hitno</string>
     <string name="report_reason_misleading_title">Obmanjujuće</string>
     <string name="report_reason_sexual_title">Neželjeni seksualni sadržaj</string>
@@ -83,6 +83,7 @@
     <string name="status_share_image">Podeli snimak ekrana</string>
     <string name="status_share_via_fxembed">Podeli preko FxEmbed</string>
     <string name="status_share_via_fixvx">Podeli preko Fixvx</string>
+    <string name="agent_chat_send">Пошаљи</string>
     <string name="list_add">Dodaj listu</string>
     <string name="list_edit">Izmeni listu</string>
     <string name="list_delete">Obriši listu</string>
@@ -119,7 +120,7 @@
     <string name="posts_title">Objave</string>
     <string name="bluesky_login_username">Korisničko ime</string>
     <string name="bluesky_login_password">Lozinka</string>
-    <string name="bluesky_login_2fa">2FA token</string>
+    <string name="bluesky_login_2fa">2FA токен</string>
     <string name="bluesky_login_oauth_button">Prijavi se preko OAuth-a</string>
     <string name="bluesky_login_use_password_button">Koristi lozinku</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth može biti nestabilan. Ako imate problema, koristite prijavu lozinkom.</string>
@@ -162,7 +163,6 @@
     <string name="settings_app_logging_save">Sačuvaj dnevnike</string>
     <string name="settings_app_logging_clear">Obriši dnevnike</string>
     <string name="settings_app_logging_enable_network_logging">Beleži mrežne zahteve</string>
-    <string name="settings_ai_config_title">AI</string>
     <string name="settings_services_title">Servisi</string>
     <string name="settings_ai_config_description">Podesite AI provajdere i sumiranje</string>
     <string name="settings_ai_config_server">URL servera</string>
@@ -175,7 +175,6 @@
     <string name="settings_ai_config_type_openai">API компатибилан са ВИ</string>
     <string name="settings_ai_config_api_key">API ključ</string>
     <string name="settings_ai_config_api_key_hint">Unesite API ključ</string>
-    <string name="settings_ai_config_model">Model</string>
     <string name="settings_ai_config_model_description">Izaberite model sa ove krajnje tačke</string>
     <string name="settings_ai_config_model_select">Izaberi model</string>
     <string name="settings_ai_config_model_loading">Učitavanje modela…</string>
@@ -200,15 +199,12 @@
     <string name="settings_ai_config_tldr_description">Sumirajte dugačke objave pomoću AI. Dostupno za objave duže od 500 karaktera.</string>
     <string name="settings_ai_config_translate_provider">Provajder prevoda</string>
     <string name="settings_ai_config_translate_provider_description">Izaberite koji servis prevodi sadržaj</string>
-    <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_google_web">Google prevodilac (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API ključ</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro krajnja tačka</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Koristite api.deepl.com umesto besplatne api-free.deepl.com krajnje tačke.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud prevod</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API ključ</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate bazni URL</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API ključ</string>
     <string name="settings_translation_title">Prevod</string>
@@ -280,9 +276,8 @@
     <string name="settings_appearance_show_platform_logo">Prikaži ikonice izvornih platformi</string>
     <string name="settings_appearance_show_platform_logo_description">Prikaži sa koje platforme svaka objava dolazi</string>
     <string name="settings_about_source_code">Izvorni kod</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Телеграм</string>
     <string name="settings_about_telegram_description">Pridružite se našoj Telegram grupi</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Pridružite se našem Discord serveru</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomozite nam da prevedemo Flare</string>
@@ -323,7 +318,7 @@
     <string name="edit_rss_source">Izmeni pretplatu</string>
     <string name="delete_rss_source">Obriši pretplatu</string>
     <string name="rss_sources_title_label">Naslov</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">РСС УРЛ</string>
     <string name="rss_title">Pretplate</string>
     <string name="empty_rss_sources">Nema pretplata</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub host</string>

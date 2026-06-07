@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">삭제</string>
     <string name="done">완료</string>
     <string name="cancel">취소</string>
@@ -9,7 +9,6 @@
     <string name="profile_header_toots_count">%1$s 게시물</string>
     <string name="profile_misskey_header_status_count">%1$s 게시물</string>
     <string name="profile_header_button_follow">팔로우</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">팔로잉</string>
     <string name="profile_header_button_requested">요청됨</string>
     <string name="profile_header_button_blocked">차단됨</string>
@@ -181,11 +180,11 @@
     <string name="misskey_achievement_login7_flavor">이제 좀 익숙해지셨나요?</string>
     <string name="misskey_achievement_login15_title">초보자 III</string>
     <string name="misskey_achievement_login15_description">총 15일간 로그인하세요</string>
-    <string name="misskey_achievement_login30_title">Misskist I</string>
+    <string name="misskey_achievement_login30_title">미스키스트 I</string>
     <string name="misskey_achievement_login30_description">총 30일간 로그인하세요</string>
-    <string name="misskey_achievement_login60_title">Misskist II</string>
+    <string name="misskey_achievement_login60_title">미스키스트 II</string>
     <string name="misskey_achievement_login60_description">총 60일간 로그인하세요</string>
-    <string name="misskey_achievement_login100_title">Misskist III</string>
+    <string name="misskey_achievement_login100_title">미스키스트 III</string>
     <string name="misskey_achievement_login100_description">총 100일간 로그인하세요</string>
     <string name="misskey_achievement_login100_flavor">격렬한 Misskist</string>
     <string name="misskey_achievement_login200_title">단골 I</string>
@@ -247,7 +246,7 @@
     <string name="misskey_achievement_collect_achievements30_description">업적 30개를 달성하세요</string>
     <string name="misskey_achievement_view_achievements3min_title">업적 감상</string>
     <string name="misskey_achievement_view_achievements3min_description">업적 목록을 최소 3분간 살펴보세요</string>
-    <string name="misskey_achievement_i_love_misskey_title">I Love Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_title">나는 미스키를 사랑해요</string>
     <string name="misskey_achievement_i_love_misskey_description">\"I ❤ #Misskey\"라고 게시하세요</string>
     <string name="misskey_achievement_i_love_misskey_flavor">Misskey 개발팀은 여러분의 응원에 진심으로 감사드립니다!</string>
     <string name="misskey_achievement_found_treasure_title">보물 찾기</string>
@@ -270,7 +269,7 @@
     <string name="misskey_achievement_htl20npm_description">홈 타임라인의 속도가 분당 20개(npm)를 초과하게 하세요</string>
     <string name="misskey_achievement_view_instance_chart_title">분석가</string>
     <string name="misskey_achievement_view_instance_chart_description">인스턴스의 차트를 확인하세요</string>
-    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">안녕하세요, 세계!</string>
     <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Scratchpad에 \"hello world\"를 출력하세요</string>
     <string name="misskey_achievement_open3windows_title">멀티 윈도우</string>
     <string name="misskey_achievement_open3windows_description">최소 3개의 창을 동시에 여세요</string>
@@ -298,9 +297,9 @@
     <string name="misskey_achievement_cookie_clicked_title">쿠키를 클릭하는 게임</string>
     <string name="misskey_achievement_cookie_clicked_description">쿠키를 클릭했습니다</string>
     <string name="misskey_achievement_cookie_clicked_flavor">잠깐만요, 올바른 웹사이트에 접속하신 거 맞나요?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">브레인 다이버</string>
     <string name="misskey_achievement_brain_diver_description">Brain Diver 링크를 게시하세요</string>
-    <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
+    <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey 라투마</string>
     <string name="misskey_achievement_smash_test_notification_button_title">테스트 연타</string>
     <string name="misskey_achievement_smash_test_notification_button_description">매우 짧은 시간 내에 알림 테스트를 반복적으로 실행하세요</string>
     <string name="misskey_achievement_tutorial_completed_title">Misskey 초급 과정 수료증</string>
@@ -345,7 +344,7 @@
     <string name="edit_rss_source">구독 편집</string>
     <string name="delete_rss_source">구독 삭제</string>
     <string name="rss_sources_title_label">제목</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">구독</string>
     <string name="empty_rss_sources">구독 중인 항목이 없습니다</string>
     <string name="mastodon_trending_statuses">인기 게시물</string>
@@ -394,6 +393,7 @@
     <string name="home_tab_featured_title">추천</string>
     <string name="home_tab_bookmarks_title">북마크</string>
     <string name="home_tab_favorite_title">즐겨찾기</string>
+    <string name="home_tab_following_title">팔로잉</string>
     <string name="home_tab_list_title">리스트</string>
     <string name="home_tab_feeds_title">피드</string>
     <string name="dm_list_title">다이렉트 메시지</string>
@@ -403,6 +403,7 @@
     <string name="liked_title">좋아요 표시함</string>
     <string name="all_rss_feeds_title">모든 구독</string>
     <string name="posts_title">게시물</string>
+    <string name="media_title">미디어</string>
     <string name="settings_appearance_absolute_timestamp">절대 타임스탬프</string>
     <string name="settings_appearance_absolute_timestamp_description">게시물에 정확한 타임스탬프 표시</string>
     <string name="channel_title">채널</string>

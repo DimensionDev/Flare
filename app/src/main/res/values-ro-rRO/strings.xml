@@ -1,25 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Flare</string>
-
     <string name="login_button">Autentificare</string>
     <string name="navigate_back">Înapoi</string>
-
     <string name="home_tab_home_title">Acasă</string>
     <string name="home_tab_notifications_title">Notificări</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Descoperă</string>
-
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d postare nouă</item>
         <item quantity="few">%1$d postări noi</item>
         <item quantity="other">%1$d de postări noi</item>
     </plurals>
-
     <string name="notification_tab_all_title">Toate</string>
     <string name="notification_tab_mentions_title">Mențiuni</string>
     <string name="notification_tab_comments_title">Comentarii</string>
     <string name="notification_tab_likes_title">Aprecieri</string>
-
     <string name="compose_title">Compune</string>
     <string name="compose_reply_title">Răspunde</string>
     <string name="compose_quote_title">Citat</string>
@@ -47,15 +42,59 @@
     <string name="compose_close_confirm_message">Ai modificări nesalvate. Salvezi ca ciornă înainte de a închide?</string>
     <string name="compose_save_draft">Salvează</string>
     <string name="compose_close_discard">Renunță</string>
+    <string name="status_insight_title">Postaţi vederea</string>
+    <string name="status_insight_input_placeholder">Întreabă un follow-up…</string>
+    <string name="status_insight_send">Trimite</string>
+    <string name="status_insight_analyzing">Se analizează această postare…</string>
+    <string name="status_insight_error">Nu se poate analiza acest post.</string>
+    <string name="status_insight_trace_loading_post_context">Se încarcă contextul postării…</string>
+    <string name="status_insight_trace_post_context_loaded">Contextul postării încărcat</string>
+    <string name="status_insight_trace_preparing_images">Se pregătesc imaginile…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Imaginile nu sunt acceptate; reîncearcă cu textul…</string>
+    <string name="status_insight_trace_agent_started">Începe analiza…</string>
+    <string name="status_insight_trace_strategy_started">Analiza planificării…</string>
+    <string name="status_insight_trace_strategy_completed">Plan de analiză finalizat</string>
+    <string name="status_insight_trace_subgraph_started">Intrare în etapa…</string>
+    <string name="status_insight_trace_subgraph_completed">Etapa de analiză finalizată</string>
+    <string name="status_insight_trace_subgraph_failed">Analiza a eșuat</string>
+    <string name="status_insight_trace_asking_model">Se cere %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Citire răspuns model…</string>
+    <string name="status_insight_trace_streaming_started">Streaming de la %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Primire răspuns…</string>
+    <string name="status_insight_trace_streaming_completed">Flux de răspuns completat</string>
+    <string name="status_insight_trace_streaming_failed">Flux răspuns eșuat</string>
+    <string name="status_insight_trace_running_step">Rulare analiză pas…</string>
+    <string name="status_insight_trace_step_completed">Etapa de analiză finalizată</string>
+    <string name="status_insight_trace_step_failed">Etapa analizei a eșuat</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Se încarcă contextul postării…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Contextul postării încărcat</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Intrarea în context a fost respinsă</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Încărcarea contextului postării a eșuat</string>
+    <string name="status_insight_trace_tool_search_status_started">Se caută…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Căutare finalizată</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Căutarea a fost respinsă</string>
+    <string name="status_insight_trace_tool_search_status_failed">Căutare eșuată</string>
+    <string name="status_insight_trace_agent_completed">Finalizare analiză…</string>
+    <string name="status_insight_trace_agent_failed">Analiza a eșuat</string>
+    <string name="status_insight_trace_agent_closing">Închidere analiza…</string>
+    <string name="ask_ai">Întreabă AI</string>
+    <string name="agent_chat_title">Chat AI</string>
+    <string name="agent_history_title">Agent Fierbinte</string>
+    <string name="agent_history_empty">Nici un agent de chat istoric.</string>
+    <string name="agent_chat_input_placeholder">Întreabă orice…</string>
+    <string name="agent_chat_send">Trimite</string>
+    <string name="agent_chat_thinking">Gândire…</string>
     <string name="draft_box_title">Ciorne</string>
     <string name="draft_box_empty">Nicio ciornă momentan</string>
     <string name="draft_box_edit">Editează</string>
     <string name="draft_box_retry">Reîncearcă</string>
     <string name="draft_box_send">Trimite</string>
     <string name="settings_draft_box_description">Vezi, editează și retrimite ciornele salvate</string>
-
     <string name="settings_title">Setări</string>
-
     <string name="settings_accounts_title">Conturi</string>
     <string name="settings_accounts_subtitle">Gestionează conturile conectate</string>
     <string name="settings_appearance_title">Aspect</string>
@@ -74,11 +113,9 @@
     <string name="settings_about_subtitle">Află mai multe despre Flare</string>
     <string name="settings_about_description">Un client open-source, bazat pe AI, pentru platforme sociale descentralizate.</string>
     <string name="settings_about_source_code">Cod sursă</string>
-    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram">Telegramă</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Alătură-te serverului nostru de Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Alătură-te grupului nostru de Line</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>
@@ -128,6 +165,8 @@
     <string name="settings_ai_config_tap_to_edit">Atinge pentru a edita</string>
     <string name="settings_ai_config_entable_translation">Activează traducerea IA</string>
     <string name="settings_ai_config_translation_description">Folosește IA în loc de Google Translate. Traducerile pot dura mai mult.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_tldr">Activează rezumatele IA</string>
     <string name="settings_ai_config_tldr_description">Rezumatul postărilor lungi cu IA. Disponibil pentru postări mai lungi de 500 de caractere.</string>
     <string name="settings_ai_config_enable_pre_translation">Activează traducerea automată</string>
@@ -142,7 +181,7 @@
     <string name="settings_ai_config_translate_provider_deepl_api_key">Cheie API DeepL</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">Endpoint DeepL Pro</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Folosește api.deepl.com în loc de endpoint-ul gratuit api-free.deepl.com.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Traducere Google Cloud</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Cheie API Google Cloud</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL de bază LibreTranslate</string>
@@ -164,20 +203,15 @@
     <string name="settings_nostr_relays_add_dialog_title">Adaugă releu</string>
     <string name="settings_nostr_relays_placeholder">Introdu URL releu</string>
     <string name="settings_nostr_relays_empty">Niciun releu adăugat</string>
-
     <string name="status_loadmore_error_retry">Reîncearcă</string>
     <string name="login_expired">Sesiunea a expirat</string>
     <string name="login_expired_message">Atinge pentru a te autentifica din nou</string>
     <string name="login_expired_relogin">Autentifică-te din nou</string>
-
     <string name="service_select_welcome_title">Bun venit la Flare</string>
     <string name="service_select_welcome_message">Flare este un client de social media pentru Android.\nAlege un serviciu pentru a te conecta și a începe.</string>
-
     <string name="mastodon_login_verify_message">Se verifică datele de autentificare…</string>
-
     <string name="status_title">Postare</string>
-
-    <string name="misskey_visibility_public">Public</string>
+    <string name="misskey_visibility_public">Publice</string>
     <string name="misskey_visibility_home">Acasă</string>
     <string name="misskey_visibility_followers">Urmăritori</string>
     <string name="misskey_visibility_specified">Specificat</string>
@@ -185,51 +219,39 @@
     <string name="misskey_visibility_home_description">Doar utilizatorii de pe această instanță pot vedea postarea</string>
     <string name="misskey_visibility_followers_description">Doar urmăritorii pot vedea această postare</string>
     <string name="misskey_visibility_specified_description">Doar utilizatorii menționați pot vedea această postare</string>
-
     <string name="bluesky_login_username_hint">Utilizator</string>
     <string name="bluesky_login_password_hint">Parolă</string>
     <string name="bluesky_login_auth_factor_token_hint">Cod 2FA</string>
     <string name="bluesky_login_oauth_button">Autentificare cu OAuth</string>
     <string name="bluesky_login_use_password_button">Folosește parola</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth poate fi încă instabil. Dacă ai probleme, folosește autentificarea cu parolă.</string>
-
     <string name="report_title">Raportează</string>
     <string name="report_description">Ce este greșit la această postare?</string>
-
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Ilegal sau urgent</string>
     <string name="report_reason_misleading_title">Induce în eroare</string>
     <string name="report_reason_sexual_title">Conținut sexual nedorit</string>
     <string name="report_reason_rude_title">Comportament anti-social</string>
     <string name="report_reason_other_title">Altele</string>
-
     <string name="report_reason_spam_description">Mențiuni sau răspunsuri excesive</string>
     <string name="report_reason_violation_description">Încălcări clare ale legii sau ale termenilor de utilizare</string>
     <string name="report_reason_misleading_description">Această postare induce în eroare</string>
     <string name="report_reason_sexual_description">Nuditate sau pornografie neetichetată ca atare</string>
     <string name="report_reason_rude_description">Hărțuire, trolling sau intoleranță</string>
     <string name="report_reason_other_description">O problemă care nu este inclusă în aceste opțiuni</string>
-
     <string name="delete_status_title">Șterge</string>
     <string name="delete_status_message">Ștergi această postare?</string>
-
     <string name="mastodon_report_title">Raportează</string>
     <string name="mastodon_report_description">Sigur vrei să raportezi asta?</string>
-
     <string name="more">Mai mult</string>
-
     <string name="discover_search_placeholder">Caută</string>
     <string name="discover_users">Utilizatori sugerați</string>
     <string name="discover_status">Postări populare</string>
     <string name="discover_hashtags">Hashtag-uri populare</string>
-
     <string name="search_users">Utilizatori</string>
     <string name="search_status">Postări</string>
-
     <string name="quick_menu_add_account">Adaugă cont</string>
-
     <string name="settings_appearance_generic">Generic</string>
-
     <string name="settings_appearance_show_actions">Arată acțiunile</string>
     <string name="settings_appearance_show_actions_description">Arată butoanele de acțiune sub fiecare postare</string>
     <string name="settings_appearance_post_action_style">Stil acțiune postare</string>
@@ -244,6 +266,8 @@
     <string name="settings_appearance_show_numbers_description">Arată contorizările sub fiecare postare</string>
     <string name="settings_appearance_show_cw_img">Arată conținutul sensibil</string>
     <string name="settings_appearance_show_cw_img_description">Dezvăluie întotdeauna media sensibilă în postări</string>
+    <string name="settings_appearance_expand_content_warning">Arată conținut în spatele avertismentelor de conținut</string>
+    <string name="settings_appearance_expand_content_warning_description">Descoperă întotdeauna conținutul postărilor ascuns de avertismentele conținutului</string>
     <string name="settings_appearance_expand_media">Păstrează raportul de aspect media</string>
     <string name="settings_appearance_expand_media_description">Arată media la raportul de aspect original în cronologii</string>
     <string name="settings_appearance_video_autoplay">Redare automată video</string>
@@ -298,27 +322,20 @@
     <string name="settings_appearance_full_width_post_description">Permite postărilor să ocupe toată lățimea disponibilă</string>
     <string name="settings_appearance_absolute_timestamp">Timestamp absolut</string>
     <string name="settings_appearance_absolute_timestamp_description">Arată timestamp-uri exacte pe postări</string>
-
     <string name="settings_appearance_show_platform_logo">Arată pictogramele platformei sursă</string>
     <string name="settings_appearance_show_platform_logo_description">Arată de pe ce platformă provine fiecare postare</string>
-
     <string name="settings_storage_clear_image_cache">Șterge cache imagini</string>
     <string name="settings_storage_clear_image_cache_description">Elimină %1$s MB de imagini stocate în cache</string>
-
     <string name="settings_storage_clear_database">Șterge baza de date cache</string>
     <string name="settings_storage_clear_database_description">Elimină %1$s utilizatori și %2$s postări stocate în cache</string>
     <string name="settings_storage_app_log">Log-uri aplicație</string>
     <string name="settings_storage_app_log_description">Vezi, salvează sau șterge log-urile aplicației</string>
-
     <string name="service_select_instance_input_placeholder">URL instanță</string>
     <string name="service_select_next_button">Înainte</string>
     <string name="service_select_empty_message">Nicio instanță găsită</string>
-
     <string name="media_viewer_title">Vizualizator media</string>
-
     <string name="settings_accounts_remove">Elimină</string>
     <string name="settings_accounts_remove_confirm">Sigur vrei să elimini contul %1$s de pe acest dispozitiv?</string>
-
     <string name="media_menu_save">Salvează imaginea</string>
     <string name="media_menu_share_image">Distribuie imaginea</string>
     <string name="media_menu_copy_link">Copiază link-ul</string>
@@ -329,7 +346,6 @@
     <string name="media_save_fail">Eroare la salvare</string>
     <string name="media_alt_text">Text alternativ</string>
     <string name="media_is_downloading">Media se descarcă încă. Reîncearcă imediat.</string>
-
     <string name="settings_side_panel_empty">Implicit, panoul lateral urmează platforma contului curent.</string>
     <string name="tab_settings_add">Adaugă</string>
     <string name="tab_settings_drag">Trage</string>
@@ -338,9 +354,7 @@
     <string name="tab_settings_default">Implicit</string>
     <string name="tab_settings_list">Listă</string>
     <string name="tab_settings_feed">Fluxuri</string>
-
     <string name="local_filter_add">Adaugă filtru</string>
-
     <string name="local_filter_edit_title">Editează filtrul</string>
     <string name="local_filter_add_title">Adaugă filtru</string>
     <string name="local_filter_keyword">Cuvânt cheie</string>
@@ -350,27 +364,20 @@
     <string name="local_filter_for_search">Aplică la căutare</string>
     <string name="local_filter_regex">Folosește expresii regulate</string>
     <string name="local_filter_delete">Șterge filtrul</string>
-
     <string name="delete">Șterge</string>
-
     <string name="mastodon_tab_local_title">Local</string>
-    <string name="mastodon_tab_public_title">Public</string>
-
+    <string name="mastodon_tab_public_title">Publice</string>
     <string name="home_tab_featured_title">Recomandate</string>
     <string name="home_tab_bookmarks_title">Semne de carte</string>
     <string name="home_tab_favorite_title">Favorite</string>
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Fluxuri</string>
-
     <string name="tab_settings_primary">Tab primar</string>
     <string name="tab_settings_secondary">Tab secundar</string>
-
     <string name="status_detail_comment">Comentariu</string>
     <string name="status_detail_repost">Repostează</string>
-
     <string name="account_item_error_title">Eroare</string>
     <string name="account_item_error_message">Eroare la încărcarea contului</string>
-
     <string name="edit_tab_title">Editează tab-ul</string>
     <string name="edit_tab_name">Nume</string>
     <string name="edit_tab_name_placeholder">Nume tab</string>
@@ -378,7 +385,6 @@
     <string name="edit_tab_with_avatar">Cu avatar</string>
     <string name="edit_tab_enabled">Arată în cronologii mixte</string>
     <string name="edit_tab_enabled_description">Include această cronologie când este folosită în interiorul unei cronologii mixte sau grup.</string>
-
     <string name="list_add">Adaugă listă</string>
     <string name="list_edit">Editează lista</string>
     <string name="list_delete">Șterge lista</string>
@@ -400,23 +406,26 @@
     <string name="edit_list_member_remove">Elimină</string>
     <string name="list_create_description">Descriere listă</string>
     <string name="list_create_description_hint">Descriere listă</string>
-
     <string name="edit_account_list_title">Editează lista de conturi</string>
-
     <string name="feeds_my_feeds_title">Fluxurile mele</string>
     <string name="feeds_discover_feeds_title">Descoperă fluxuri</string>
     <string name="feeds_discover_feeds_created_by">Creat de %1$s</string>
     <string name="feeds_unsubscribe">Dezabonează-te</string>
     <string name="feeds_subscribe">Abonează-te</string>
-
     <string name="profile_tab_timeline">Postări</string>
     <string name="profile_tab_timeline_with_reply">Postări și răspunsuri</string>
     <string name="profile_tab_likes">Aprecieri</string>
     <string name="profile_tab_media">Media</string>
-
+    <string name="illustrations_title">Ilustraţii</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Clasament săptămânal</string>
+    <string name="pixiv_ranking_month_title">Clasament lunar</string>
+    <string name="pixiv_ranking_day_male_title">Clasament masculin</string>
+    <string name="pixiv_ranking_day_female_title">Clasament femei</string>
+    <string name="pixiv_ranking_week_original_title">Clasament original</string>
+    <string name="pixiv_ranking_week_rookie_title">Clasament Rookie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="tab_settings_title">Setări tab-uri</string>
-
-
     <string name="dm_list_title">Mesaje directe</string>
     <string name="dm_list_empty">Niciun mesaj direct</string>
     <string name="dm_list_error">Eroare la încărcarea mesajelor directe</string>
@@ -427,17 +436,12 @@
     <string name="dm_sending">Se trimite</string>
     <string name="dm_leave">Părăsește conversația</string>
     <string name="dm_to_profile">Arată profilul</string>
-
-
     <string name="notification_login_expired">Autentificare expirată pentru %1$s</string>
-
     <string name="following_title">Urmărește</string>
     <string name="fans_title">Urmăritori</string>
-
     <string name="local_history_search_placeholder">Caută postări și profiluri în cache</string>
     <string name="local_history_search_status_title">Postări</string>
     <string name="local_history_search_user_title">Utilizator</string>
-
     <string name="rss_sources_title">Abonamente</string>
     <string name="add_rss_source">Adaugă abonament</string>
     <string name="edit_rss_source">Editează abonament</string>
@@ -445,9 +449,8 @@
     <string name="opml_import">Importă din OPML</string>
     <string name="opml_export">Exportă în OPML</string>
     <string name="export_completed">Export finalizat</string>
-
     <string name="rss_sources_title_label">Titlu</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Abonamente</string>
     <string name="empty_rss_sources">Niciun abonament</string>
     <string name="rss_sources_rss_hub_host_label">Host RSSHub</string>
@@ -464,7 +467,6 @@
     <string name="mastodon_local_timeline">Cronologie locală</string>
     <string name="subscription_url_hint">Lipește un URL flux RSS sau un URL instanță Mastodon</string>
     <string name="rss_sources_display_mode">Mod afișare</string>
-
     <string name="rss_detail_open_in_browser">Deschide în browser</string>
     <string name="rss_detail_share">Distribuie link</string>
     <string name="rss_detail_tldr">Rezumat</string>
@@ -473,10 +475,8 @@
     <string name="rss_detail_tldr_loading">Se sumează…</string>
     <string name="rss_detail_translate">Tradu</string>
     <string name="rss_detail_translate_error">Eroare la traducere</string>
-
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Caută</string>
-
     <string name="podcast_host">Gazdă</string>
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Vorbitor</string>
@@ -484,7 +484,6 @@
     <string name="podcast_leave">Părăsește</string>
     <string name="podcast_ended">Podcast încheiat</string>
     <string name="podcast_living">Live acum</string>
-
     <string name="home_tab_antennas_title">Antene</string>
     <string name="home_tab_channels_title">Canale</string>
     <string name="misskey_channel_tab_following">Urmărește</string>
@@ -495,30 +494,25 @@
     <string name="home_tab_mixed_timeline_title">Mixt</string>
     <string name="tab_settings_mixed_timeline">Activează tab-ul cronologie mixtă</string>
     <string name="tab_settings_mixed_timeline_desc">Combină postările din toate tab-urile într-un singur tab Acasă.</string>
-    <string name="home_tab_social_timeline_title">Social</string>
-    <string name="social_title">Social</string>
+    <string name="home_tab_social_timeline_title">Sociale</string>
+    <string name="social_title">Sociale</string>
     <string name="antenna_title">Antene</string>
     <string name="liked_title">Apreciate</string>
     <string name="all_rss_feeds_title">Toate abonamentele</string>
     <string name="posts_title">Postări</string>
-
     <string name="deeplink_account_selection_title">Selectează contul</string>
     <string name="deeplink_account_selection_message">Selectează un cont pentru a deschide acest link</string>
     <string name="deeplink_account_selection_browser">Deschide în browser</string>
-
     <string name="block_user_title">Blochează utilizatorul</string>
     <string name="block_user_description">Sigur vrei să blochezi acest utilizator?</string>
     <string name="unblock_user_title">Deblochează utilizatorul</string>
     <string name="unblock_user_description">Sigur vrei să deblochezi acest utilizator?</string>
-
     <string name="mute_user_title">Silențiază utilizatorul</string>
     <string name="mute_user_description">Sigur vrei să pui pe mut acest utilizator?</string>
     <string name="unmute_user_title">Reactivează sunetul utilizatorului</string>
     <string name="unmute_user_description">Sigur vrei să reactivezi sunetul acestui utilizator?</string>
-
     <string name="report_user_title">Raportează utilizatorul</string>
     <string name="report_user_description">Sigur vrei să raportezi acest utilizator?</string>
-
     <string name="settings_storage_export_data">Exportă datele</string>
     <string name="settings_storage_export_data_description">Exportă toate datele, inclusiv conturile și credențialele. Păstrează fișierul în siguranță.</string>
     <string name="settings_storage_import_data">Importă datele</string>
@@ -529,7 +523,6 @@
     <string name="import_error">Import eșuat</string>
     <string name="import_confirmation_title">Confirmă importul</string>
     <string name="import_confirmation_message">Aceasta va importa datele din fișierul selectat. Înregistrările existente cu ID-uri identice vor fi înlocuite. Continui?</string>
-
     <string name="tab_settings_add_group">Adaugă grup</string>
     <string name="tab_settings_add_tab">Adaugă tab</string>
     <string name="tab_settings_edit_group">Editează grupul</string>

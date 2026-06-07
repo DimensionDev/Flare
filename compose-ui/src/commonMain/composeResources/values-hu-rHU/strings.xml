@@ -1,15 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Törlés</string>
     <string name="done">Kész</string>
     <string name="cancel">Mégse</string>
-    <string name="ok">OK</string>
+    <string name="ok">Rendben</string>
     <string name="profile_header_following_count">%1$s Követés</string>
     <string name="profile_header_fans_count">%1$s Követő</string>
     <string name="profile_header_toots_count">%1$s Bejegyzés</string>
     <string name="profile_misskey_header_status_count">%1$s Bejegyzés</string>
     <string name="profile_header_button_follow">Követés</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
     <string name="profile_header_button_following">Követve</string>
     <string name="profile_header_button_requested">Kérve</string>
     <string name="profile_header_button_blocked">Tiltva</string>
@@ -298,7 +297,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Egy játék, amiben sütikre kattintasz</string>
     <string name="misskey_achievement_cookie_clicked_description">Rákattintottál a sütire</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Várj, biztosan a jó weboldalon jársz?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Agy Diver</string>
     <string name="misskey_achievement_brain_diver_description">Tedd közzé a Brain Diver linkjét</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Teszt túltengés</string>
@@ -345,7 +344,7 @@
     <string name="edit_rss_source">Feliratkozás szerkesztése</string>
     <string name="delete_rss_source">Feliratkozás törlése</string>
     <string name="rss_sources_title_label">Cím</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">Feliratkozások</string>
     <string name="empty_rss_sources">Nincsenek feliratkozások</string>
     <string name="mastodon_trending_statuses">Népszerű állapotok</string>
@@ -357,7 +356,7 @@
     <string name="service_select_welcome_list_hint">Vagy válassz ezek közül a szerverek közül</string>
     <string name="bluesky_login_username_hint">Felhasználónév</string>
     <string name="bluesky_login_password_hint">Jelszó</string>
-    <string name="bluesky_login_auth_factor_token_hint">2FA token</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA kód</string>
     <string name="bluesky_login_oauth_button">Bejelentkezés OAuth-szal</string>
     <string name="bluesky_login_use_password_button">Jelszó használata</string>
     <string name="bluesky_login_oauth_hint">A Bluesky OAuth még instabil lehet. Ha problémákba ütközöl, használd a jelszavas bejelentkezést.</string>
@@ -372,7 +371,6 @@
     <string name="nostr_login_qr_button">Csatlakozás QR-kóddal</string>
     <string name="nostr_login_qr_hint">Szkenneld be Amberrel, Albyval vagy más Nostr Connect aláíróval.</string>
     <string name="nostr_login_qr_waiting">Várakozás az aláíró jóváhagyására…</string>
-    <string name="nostr_login_qr_link_label">Nostr Connect link</string>
     <string name="cancel_button">Mégse</string>
     <string name="nostr_login_generate_button">Létrehozás és bejelentkezés</string>
     <string name="nostr_login_npub_hint">npub vagy hex pubkey (opcionális, ha az nsec be van állítva)</string>
@@ -394,6 +392,7 @@
     <string name="home_tab_featured_title">Kiemelt</string>
     <string name="home_tab_bookmarks_title">Könyvjelzők</string>
     <string name="home_tab_favorite_title">Kedvencek</string>
+    <string name="home_tab_following_title">Követés</string>
     <string name="home_tab_list_title">Listák</string>
     <string name="home_tab_feeds_title">Hírfolyamok</string>
     <string name="dm_list_title">Közvetlen üzenetek</string>
@@ -403,6 +402,7 @@
     <string name="liked_title">Kedvelt</string>
     <string name="all_rss_feeds_title">Minden feliratkozás</string>
     <string name="posts_title">Bejegyzések</string>
+    <string name="media_title">Média</string>
     <string name="settings_appearance_absolute_timestamp">Abszolút időbélyeg</string>
     <string name="settings_appearance_absolute_timestamp_description">Pontos időbélyeg megjelenítése a bejegyzéseken</string>
     <string name="channel_title">Csatorna</string>

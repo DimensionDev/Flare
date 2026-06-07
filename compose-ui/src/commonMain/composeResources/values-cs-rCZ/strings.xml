@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Odstranit</string>
     <string name="done">Hotovo</string>
     <string name="cancel">Zrušit</string>
@@ -9,7 +9,7 @@
     <string name="profile_header_toots_count">%1$s Příspěvky</string>
     <string name="profile_misskey_header_status_count">%1$s Příspěvky</string>
     <string name="profile_header_button_follow">Sledovat</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Požádat o následování</string>
     <string name="profile_header_button_following">Sleduji</string>
     <string name="profile_header_button_requested">Požádáno</string>
     <string name="profile_header_button_blocked">Blokován</string>
@@ -194,7 +194,7 @@
     <string name="misskey_achievement_login300_description">Přihlaste se celkem ve 300 dnech</string>
     <string name="misskey_achievement_login400_title">Pravidelný návštěvník III</string>
     <string name="misskey_achievement_login400_description">Přihlaste se celkem ve 400 dnech</string>
-    <string name="misskey_achievement_login500_title">Expert I</string>
+    <string name="misskey_achievement_login500_title">Odborník I</string>
     <string name="misskey_achievement_login500_description">Přihlaste se celkem v 500 dnech</string>
     <string name="misskey_achievement_login500_flavor">Moji přátelé, často se říkalo, že mám rád poznámky</string>
     <string name="misskey_achievement_login600_title">Expert II</string>
@@ -298,7 +298,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Hra, ve které klikáte na sušenky</string>
     <string name="misskey_achievement_cookie_clicked_description">Klikli jste na sušenku</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Počkejte, jste na správné webové stránce?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Potápěč mozku</string>
     <string name="misskey_achievement_brain_diver_description">Zveřejněte odkaz na Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Testovací přetečení</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">Upravit odběr</string>
     <string name="delete_rss_source">Smazat odběr</string>
     <string name="rss_sources_title_label">Název</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL RSS</string>
     <string name="rss_title">Odběry</string>
     <string name="empty_rss_sources">Žádné odběry</string>
     <string name="mastodon_trending_statuses">Trendující statusy</string>
@@ -357,7 +357,7 @@
     <string name="service_select_welcome_list_hint">Nebo si vyberte z těchto serverů</string>
     <string name="bluesky_login_username_hint">Uživatelské jméno</string>
     <string name="bluesky_login_password_hint">Heslo</string>
-    <string name="bluesky_login_auth_factor_token_hint">2FA token</string>
+    <string name="bluesky_login_auth_factor_token_hint">2FA kód</string>
     <string name="bluesky_login_oauth_button">Přihlásit se přes OAuth</string>
     <string name="bluesky_login_use_password_button">Použít heslo</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth může být stále nestabilní. Pokud narazíte na problémy, použijte místo toho přihlášení heslem.</string>
@@ -394,6 +394,7 @@
     <string name="home_tab_featured_title">Doporučené</string>
     <string name="home_tab_bookmarks_title">Záložky</string>
     <string name="home_tab_favorite_title">Oblíbené</string>
+    <string name="home_tab_following_title">Sledovaní</string>
     <string name="home_tab_list_title">Seznamy</string>
     <string name="home_tab_feeds_title">Zdroje</string>
     <string name="dm_list_title">Přímé zprávy</string>
@@ -403,7 +404,18 @@
     <string name="liked_title">To se mi líbí</string>
     <string name="all_rss_feeds_title">Všechny odběry</string>
     <string name="posts_title">Příspěvky</string>
+    <string name="posts_with_replies_title">Příspěvky &amp; Odpovědi</string>
+    <string name="media_title">Média</string>
     <string name="settings_appearance_absolute_timestamp">Absolutní časové razítko</string>
     <string name="settings_appearance_absolute_timestamp_description">Zobrazovat u příspěvků přesný čas</string>
     <string name="channel_title">Kanál</string>
+    <string name="pixiv_ranking_week_title">Týdenní hodnocení</string>
+    <string name="pixiv_ranking_month_title">Měsíční hodnocení</string>
+    <string name="pixiv_ranking_day_male_title">Žebříček mužů</string>
+    <string name="pixiv_ranking_day_female_title">Ženské hodnocení</string>
+    <string name="pixiv_ranking_week_original_title">Původní hodnocení</string>
+    <string name="pixiv_ranking_week_rookie_title">Hodnocení Rookie</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Ilustrace</string>
+    <string name="manga_title">Manga</string>
 </resources>

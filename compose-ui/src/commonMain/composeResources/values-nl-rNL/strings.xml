@@ -1,14 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Verwijderen</string>
     <string name="done">Gereed</string>
     <string name="cancel">Annuleren</string>
-    <string name="ok">OK</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s Volgend</string>
     <string name="profile_header_fans_count">%1$s Volgers</string>
     <string name="profile_header_toots_count">%1$s Berichten</string>
     <string name="profile_misskey_header_status_count">%1$s Berichten</string>
     <string name="profile_header_button_follow">Volgen</string>
-    <string name="profile_header_button_request_follow">Request follow</string>
+    <string name="profile_header_button_request_follow">Aanvraag volgen</string>
     <string name="profile_header_button_following">Volgend</string>
     <string name="profile_header_button_requested">Verzocht</string>
     <string name="profile_header_button_blocked">Geblokkeerd</string>
@@ -63,7 +64,7 @@
     <string name="mastodon_visibility_public">Openbaar</string>
     <string name="mastodon_visibility_unlisted">Niet vermeld</string>
     <string name="mastodon_visibility_private">Privé</string>
-    <string name="mastodon_visibility_direct">Direct</string>
+    <string name="mastodon_visibility_direct">Directe</string>
     <string name="mastodon_visibility_public_description">Iedereen kan dit bericht zien en boosten</string>
     <string name="mastodon_visibility_unlisted_description">Iedereen kan dit bericht zien, maar het verschijnt niet op de openbare tijdlijn</string>
     <string name="mastodon_visibility_private_description">Alleen volgers kunnen dit bericht zien</string>
@@ -169,7 +170,7 @@
     <string name="misskey_achievement_notes80000_description">Plaats 80.000 notities</string>
     <string name="misskey_achievement_notes90000_title">Notitie-universum</string>
     <string name="misskey_achievement_notes90000_description">Plaats 90.000 notities</string>
-    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_title">ALLES UW MET BELONG OM TE ONS</string>
     <string name="misskey_achievement_notes100000_description">Plaats 100.000 notities</string>
     <string name="misskey_achievement_notes100000_flavor">Je hebt vast veel te vertellen.</string>
     <string name="misskey_achievement_login3_title">Beginner I</string>
@@ -240,7 +241,7 @@
     <string name="misskey_achievement_followers300_description">Krijg 300 volgers</string>
     <string name="misskey_achievement_followers500_title">Radio-toren</string>
     <string name="misskey_achievement_followers500_description">Krijg 500 volgers</string>
-    <string name="misskey_achievement_followers1000_title">Influencer</string>
+    <string name="misskey_achievement_followers1000_title">Bevochtiger</string>
     <string name="misskey_achievement_followers1000_description">Krijg 1.000 volgers</string>
     <string name="misskey_achievement_collect_achievements30_title">Prestatieverzamelaar</string>
     <string name="misskey_achievement_collect_achievements30_description">Verdien 30 prestaties</string>
@@ -297,7 +298,7 @@
     <string name="misskey_achievement_cookie_clicked_title">Een spel waarin je op koekjes klikt</string>
     <string name="misskey_achievement_cookie_clicked_description">Op het koekje geklikt</string>
     <string name="misskey_achievement_cookie_clicked_flavor">Wacht, zit je wel op de juiste website?</string>
-    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_title">Hersenen Duiver</string>
     <string name="misskey_achievement_brain_diver_description">Plaats de link naar Brain Diver</string>
     <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Test-overloop</string>
@@ -344,7 +345,7 @@
     <string name="edit_rss_source">Abonnement bewerken</string>
     <string name="delete_rss_source">Abonnement verwijderen</string>
     <string name="rss_sources_title_label">Titel</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS-URL</string>
     <string name="rss_title">Abonnementen</string>
     <string name="empty_rss_sources">Geen abonnementen</string>
     <string name="mastodon_trending_statuses">Trending berichten</string>
@@ -383,7 +384,7 @@
     <string name="service_select_compatibility_warning">Deze server gebruikt %1$s, Flare zal in compatibiliteitsmodus draaien. Sommige functies werken mogelijk niet correct.</string>
     <string name="login_agreement">Door in te loggen, ga je akkoord met de %1$s.</string>
     <string name="eula_privacy_policy">EULA en Privacybeleid</string>
-    <string name="home_tab_home_title">Home</string>
+    <string name="home_tab_home_title">Startpagina</string>
     <string name="home_tab_notifications_title">Notificaties</string>
     <string name="home_tab_me_title">Ik</string>
     <string name="home_tab_discover_title">Ontdekken</string>
@@ -393,6 +394,7 @@
     <string name="home_tab_featured_title">Aanbevolen</string>
     <string name="home_tab_bookmarks_title">Bladwijzers</string>
     <string name="home_tab_favorite_title">Favorieten</string>
+    <string name="home_tab_following_title">Volgend</string>
     <string name="home_tab_list_title">Lijsten</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Directe berichten</string>
@@ -402,7 +404,18 @@
     <string name="liked_title">Leuk gevonden</string>
     <string name="all_rss_feeds_title">Alle abonnementen</string>
     <string name="posts_title">Berichten</string>
+    <string name="posts_with_replies_title">Berichten &amp; Antwoorden</string>
+    <string name="media_title">Medium</string>
     <string name="settings_appearance_absolute_timestamp">Absolute tijdsaanduiding</string>
     <string name="settings_appearance_absolute_timestamp_description">Toon exacte tijdstippen op berichten</string>
     <string name="channel_title">Kanaal</string>
+    <string name="pixiv_ranking_week_title">Wekelijkse Ranglijst</string>
+    <string name="pixiv_ranking_month_title">Maandelijkse Ranglijst</string>
+    <string name="pixiv_ranking_day_male_title">Mannelijk Rang</string>
+    <string name="pixiv_ranking_day_female_title">Vrouwelijke Rang</string>
+    <string name="pixiv_ranking_week_original_title">Originele Rang</string>
+    <string name="pixiv_ranking_week_rookie_title">Beginner Rang</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Illustraties</string>
+    <string name="manga_title">Manga</string>
 </resources>

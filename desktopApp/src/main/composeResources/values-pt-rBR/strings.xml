@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="ok">OK</string>
+    <string name="ok">Certo</string>
     <string name="cancel">Cancelar</string>
     <string name="delete">Excluir</string>
     <string name="refresh">Atualizar</string>
@@ -18,7 +18,7 @@
     <string name="home_tab_bookmarks_title">Salvos</string>
     <string name="home_tab_favorite_title">Favoritos</string>
     <string name="home_tab_list_title">Listas</string>
-    <string name="home_tab_feeds_title">Feeds</string>
+    <string name="home_tab_feeds_title">Conteúdos</string>
     <string name="dm_list_title">Mensagens Diretas</string>
     <plurals name="home_timeline_new_toots">
         <item quantity="one">%1$d novo post</item>
@@ -31,10 +31,19 @@
     <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
     <string name="service_select_welcome_message">Flare é um cliente de mídia social para %1$s.\nEscolha um serviço para se conectar e começar.</string>
     <string name="mastodon_login_verify_message">Verificando suas credenciais…</string>
-    <string name="profile_tab_timeline">Posts</string>
+    <string name="profile_tab_timeline">Postagens</string>
     <string name="profile_tab_timeline_with_reply">Posts e respostas</string>
     <string name="profile_tab_likes">Curtidas</string>
     <string name="profile_tab_media">Mídia</string>
+    <string name="illustrations_title">Ilustrações</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Classificação Semanal</string>
+    <string name="pixiv_ranking_month_title">Classificação Mensal</string>
+    <string name="pixiv_ranking_day_male_title">Classificação Masculina</string>
+    <string name="pixiv_ranking_day_female_title">Classificação Feminina</string>
+    <string name="pixiv_ranking_week_original_title">Classificação original</string>
+    <string name="pixiv_ranking_week_rookie_title">Classificação Inicial</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Denunciar</string>
     <string name="report_description">O que há de errado com este post?</string>
     <string name="report_reason_spam_title">Spam</string>
@@ -82,6 +91,48 @@
     <string name="status_share_image">Compartilhar captura de tela</string>
     <string name="status_share_via_fxembed">Compartilhar via FxEmbed</string>
     <string name="status_share_via_fixvx">Compartilhar via Fixvx</string>
+    <string name="status_insight_title">Postar informações</string>
+    <string name="agent_chat_title">Chat IA</string>
+    <string name="agent_chat_input_placeholder">Pergunte qualquer coisa…</string>
+    <string name="agent_chat_send">Enviar</string>
+    <string name="agent_chat_thinking">Pensando…</string>
+    <string name="status_insight_analyzing">Analisando este post…</string>
+    <string name="status_insight_error">Não é possível analisar esta publicação.</string>
+    <string name="status_insight_trace_loading_post_context">Carregando o pós-contexto…</string>
+    <string name="status_insight_trace_post_context_loaded">Publicação de contexto carregada</string>
+    <string name="status_insight_trace_preparing_images">Preparando imagens…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Imagens não são suportadas; tentando novamente com o texto…</string>
+    <string name="status_insight_trace_agent_started">Iniciando análise…</string>
+    <string name="status_insight_trace_strategy_started">Planejando análise…</string>
+    <string name="status_insight_trace_strategy_completed">Plano de análise concluído</string>
+    <string name="status_insight_trace_subgraph_started">Entrando etapa de análise…</string>
+    <string name="status_insight_trace_subgraph_completed">Estágio de análise concluído</string>
+    <string name="status_insight_trace_subgraph_failed">Falha no estágio de análise</string>
+    <string name="status_insight_trace_asking_model">Perguntando %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Lendo resposta do modelo…</string>
+    <string name="status_insight_trace_streaming_started">Transmissão de %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Recebendo resposta…</string>
+    <string name="status_insight_trace_streaming_completed">Transmissão de resposta concluída</string>
+    <string name="status_insight_trace_streaming_failed">Falha ao responder</string>
+    <string name="status_insight_trace_running_step">Executando etapa de análise…</string>
+    <string name="status_insight_trace_step_completed">Etapa de análise concluída</string>
+    <string name="status_insight_trace_step_failed">Falha na etapa de análise</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Carregando o pós-contexto…</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Publicação de contexto carregada</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Postar entrada do contexto foi rejeitada</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Não foi possível carregar o contexto do post</string>
+    <string name="status_insight_trace_tool_search_status_started">Procurando…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Pesquisa concluída</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">A pesquisa de entrada foi rejeitada</string>
+    <string name="status_insight_trace_tool_search_status_failed">Falha na pesquisa</string>
+    <string name="status_insight_trace_agent_completed">Finalizando análise…</string>
+    <string name="status_insight_trace_agent_failed">Análise falhou</string>
+    <string name="status_insight_trace_agent_closing">Fechando análise…</string>
+    <string name="ask_ai">Perguntar IA</string>
     <string name="list_add">Adicionar lista</string>
     <string name="list_edit">Editar lista</string>
     <string name="list_delete">Excluir lista</string>
@@ -110,7 +161,7 @@
     <string name="feeds_discover_feeds_created_by">Criado por %1$s</string>
     <string name="feeds_unsubscribe">Cancelar assinatura</string>
     <string name="feeds_subscribe">Assinar</string>
-    <string name="social_title">Social</string>
+    <string name="social_title">Sócio</string>
     <string name="antenna_title">Antenas</string>
     <string name="mixed_timeline_title">Mista</string>
     <string name="liked_title">Curtido</string>
@@ -137,7 +188,7 @@
     <string name="settings_appearance_subtitle">Personalizar o visual do Flare</string>
     <string name="settings_appearance_theme_group_title">Tema</string>
     <string name="settings_appearance_theme_group_subtitle">Cores, tamanho da fonte e formato do avatar</string>
-    <string name="settings_appearance_layout_group_title">Layout</string>
+    <string name="settings_appearance_layout_group_title">Disposição</string>
     <string name="settings_appearance_layout_group_subtitle">Layout da linha do tempo, navegação e ações de post</string>
     <string name="settings_appearance_display_group_title">Exibição</string>
     <string name="settings_appearance_display_group_subtitle">Data/hora, selos de origem, links e comportamento do navegador</string>
@@ -157,6 +208,9 @@
     <string name="settings_guest_setting_description">Escolha qual servidor o modo convidado se conecta</string>
     <string name="settings_local_history_title">Histórico Local</string>
     <string name="settings_local_history_description">Buscar posts e perfis em cache neste dispositivo</string>
+    <string name="settings_agent_history_title">Agente Sinalizador</string>
+    <string name="settings_agent_history_description">Ver o histórico local do Flare Agent</string>
+    <string name="agent_history_empty">Nenhum histórico de bate-papo dos agentes ainda.</string>
     <string name="settings_app_logging_title">Logs do app</string>
     <string name="settings_app_logging_save">Salvar logs</string>
     <string name="settings_app_logging_clear">Limpar logs</string>
@@ -193,6 +247,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Não definido</string>
     <string name="settings_ai_config_entable_translation">Ativar tradução por IA</string>
     <string name="settings_ai_config_translation_description">Usar IA em vez do Google Tradutor. As traduções podem levar mais tempo.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Ativar tradução automática</string>
     <string name="settings_ai_config_pre_translation_description">Traduzir conteúdo novo de linhas do tempo e perfis em segundo plano e salvar os resultados. Isso pode consumir muitos tokens.</string>
     <string name="settings_ai_config_enable_tldr">Ativar resumos por IA</string>
@@ -207,7 +263,7 @@
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Usar api.deepl.com em vez do endpoint gratuito api-free.deepl.com.</string>
     <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translation</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Chave de API do Google Cloud</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTradutor</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">URL Base do LibreTranslate</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">Chave de API do LibreTranslate</string>
     <string name="settings_translation_title">Tradução</string>
@@ -233,6 +289,8 @@
     <string name="settings_appearance_show_numbers_description">Mostrar contadores abaixo de cada post</string>
     <string name="settings_appearance_show_cw_img">Mostrar conteúdo sensível</string>
     <string name="settings_appearance_show_cw_img_description">Sempre revelar mídia sensível nos posts</string>
+    <string name="settings_appearance_expand_content_warning">Mostrar conteúdo atrás de avisos de conteúdo</string>
+    <string name="settings_appearance_expand_content_warning_description">Sempre revelar o conteúdo da postagem oculta pelos avisos de conteúdo</string>
     <string name="settings_appearance_expand_media">Preservar proporção da mídia</string>
     <string name="settings_appearance_expand_media_description">Mostrar mídia em sua proporção original nas linhas do tempo</string>
     <string name="settings_appearance_video_autoplay">Reprodução automática de vídeo</string>
@@ -281,14 +339,13 @@
     <string name="settings_about_source_code">Código-fonte</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Junte-se ao nosso grupo no Telegram</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Junte-se ao nosso servidor no Discord</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajude-nos a traduzir o Flare</string>
     <string name="settings_privacy_policy">Política de Privacidade</string>
     <string name="users">Usuários</string>
-    <string name="hashtags">Hashtags</string>
-    <string name="statues">Posts</string>
+    <string name="hashtags">Palavras-chave</string>
+    <string name="statues">Postagens</string>
     <string name="compose_title">Escrever</string>
     <string name="compose_hint">O que está acontecendo?</string>
     <string name="compose_poll_option_hint">Opção %1$s</string>
@@ -310,7 +367,7 @@
     <string name="compose_notification_success">Post enviado</string>
     <string name="compose_notification_error">Falha ao enviar post</string>
     <string name="misskey_visibility_public">Público</string>
-    <string name="misskey_visibility_home">Home</string>
+    <string name="misskey_visibility_home">Início</string>
     <string name="misskey_visibility_followers">Seguidores</string>
     <string name="misskey_visibility_specified">Especificado</string>
     <string name="misskey_visibility_public_description">Qualquer pessoa pode ver e impulsionar este post</string>
@@ -322,7 +379,7 @@
     <string name="edit_rss_source">Editar Assinatura</string>
     <string name="delete_rss_source">Excluir Assinatura</string>
     <string name="rss_sources_title_label">Título</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">URL de RSS</string>
     <string name="rss_title">Assinaturas</string>
     <string name="empty_rss_sources">Nenhuma assinatura</string>
     <string name="rss_sources_rss_hub_host_label">Host do RSSHub</string>
@@ -349,7 +406,7 @@
     <string name="tab_settings_remove">Remover</string>
     <string name="tab_settings_default">Padrão</string>
     <string name="tab_settings_list">Lista</string>
-    <string name="tab_settings_feed">Feeds</string>
+    <string name="tab_settings_feed">Conteúdos</string>
     <string name="notification_login_expired">Sessão expirada para %1$s</string>
     <string name="dm_list_empty">Nenhuma mensagem direta</string>
     <string name="dm_list_error">Falha ao carregar mensagens diretas</string>
@@ -392,7 +449,7 @@
     <string name="edit_tab_enabled_description">Incluir esta linha do tempo quando ela for usada dentro de uma linha do tempo mista ou grupo.</string>
     <string name="edit">Editar</string>
     <string name="local_history_search_placeholder">Buscar posts e perfis em cache</string>
-    <string name="local_history_search_status_title">Posts</string>
+    <string name="local_history_search_status_title">Postagens</string>
     <string name="local_history_search_user_title">Usuário</string>
     <string name="settings_storage_clear_image_cache">Limpar cache de imagens</string>
     <string name="settings_storage_clear_image_cache_description">Remover %1$s MB de imagens em cache</string>

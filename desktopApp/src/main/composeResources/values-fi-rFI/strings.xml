@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="ok">OK</string>
+    <string name="ok">Ok</string>
     <string name="cancel">Peruuta</string>
     <string name="delete">Poista</string>
     <string name="refresh">Päivitä</string>
-
     <string name="home_compose">Luo postaus</string>
     <string name="home_login">Kirjaudu sisään</string>
     <string name="home_settings">Asetukset</string>
-
     <string name="home_tab_home_title">Koti</string>
     <string name="home_tab_notifications_title">Ilmoitukset</string>
     <string name="home_tab_me_title">Minä</string>
@@ -26,47 +24,47 @@
         <item quantity="one">%1$d uusi postaus</item>
         <item quantity="other">%1$d uutta postausta</item>
     </plurals>
-
     <string name="navigate_back">Takaisin</string>
     <string name="service_select_instance_input_placeholder">Palvelimen osoite</string>
     <string name="service_select_next_button">Seuraava</string>
     <string name="service_select_empty_message">Palvelimia ei löytynyt</string>
-
     <string name="service_select_welcome_title">Tervetuloa Flareen</string>
     <string name="service_select_welcome_message">Flare on sosiaalisen median asiakasohjelma %1$s-palvelulle.\nValitse palvelu kirjautuaksesi ja aloittaaksesi.</string>
     <string name="mastodon_login_verify_message">Varmistetaan kirjautumistietoja…</string>
-
     <string name="profile_tab_timeline">Postaukset</string>
     <string name="profile_tab_timeline_with_reply">Postaukset ja vastaukset</string>
     <string name="profile_tab_likes">Tykkäykset</string>
     <string name="profile_tab_media">Media</string>
-
+    <string name="illustrations_title">Kuvitukset</string>
+    <string name="manga_title">Manga</string>
+    <string name="pixiv_ranking_week_title">Viikoittainen Sijoitus</string>
+    <string name="pixiv_ranking_month_title">Kuukausittainen Sijoitus</string>
+    <string name="pixiv_ranking_day_male_title">Miehen Sijoitus</string>
+    <string name="pixiv_ranking_day_female_title">Naisen Sijoitus</string>
+    <string name="pixiv_ranking_week_original_title">Alkuperäinen Sijoitus</string>
+    <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="report_title">Raportoi</string>
     <string name="report_description">Mikä tässä postauksessa on vikana?</string>
-
     <string name="report_reason_spam_title">Roskaposti</string>
     <string name="report_reason_violation_title">Laiton tai kiireellinen</string>
     <string name="report_reason_misleading_title">Harhaanjohtava</string>
     <string name="report_reason_sexual_title">Ei-toivottu seksuaalinen sisältö</string>
     <string name="report_reason_rude_title">Epäsosiaalinen käytös</string>
     <string name="report_reason_other_title">Muu</string>
-
     <string name="report_reason_spam_description">Liikaa mainintoja tai vastauksia</string>
     <string name="report_reason_violation_description">Selkeät lain tai palveluehtojen rikkomukset</string>
     <string name="report_reason_misleading_description">Tämä postaus on harhaanjohtava</string>
     <string name="report_reason_sexual_description">Alastomuutta tai pornografiaa, jota ei ole merkitty sellaiseksi</string>
     <string name="report_reason_rude_description">Häirintä, trollaaminen tai suvaitsemattomuus</string>
     <string name="report_reason_other_description">Ongelma, jota ei löydy näistä vaihtoehdoista</string>
-
     <string name="delete_status_title">Poista</string>
     <string name="delete_status_message">Poistetaanko tämä postaus?</string>
     <string name="compose_close_confirm_title">Tallennetaanko luonnos?</string>
     <string name="compose_close_confirm_message">Sinulla on tallentamattomia muutoksia. Tallennetaanko tämä luonnokseksi ennen sulkemista?</string>
     <string name="compose_close_discard">Hylkää</string>
-
     <string name="mastodon_report_title">Raportoi</string>
     <string name="mastodon_report_description">Haluatko varmasti raportoida tämän?</string>
-
     <string name="bookmark_remove">Poista kirjanmerkki</string>
     <string name="bookmark_add">Lisää kirjanmerkki</string>
     <string name="like">Tykkää</string>
@@ -84,7 +82,6 @@
     <string name="status_detail_repost">Uudelleenpostaus</string>
     <string name="emoji_picker_recent">Viimeisimmät</string>
     <string name="emoji_picker_search">Hae</string>
-
     <string name="media_show_thumbnail_list">Näytä pikkukuvat</string>
     <string name="media_hide_thumbnail_list">Piilota pikkukuvat</string>
     <string name="media_save">Tallenna</string>
@@ -94,7 +91,41 @@
     <string name="status_share_image">Jaa kuvakaappaus</string>
     <string name="status_share_via_fxembed">Jaa FxEmbedin kautta</string>
     <string name="status_share_via_fixvx">Jaa Fixvx:n kautta</string>
-
+    <string name="status_insight_title">Viestin käsitys</string>
+    <string name="agent_chat_title">Ai Keskustelu</string>
+    <string name="agent_chat_send">Lähetä</string>
+    <string name="status_insight_error">Tätä viestiä ei voi analysoida.</string>
+    <string name="status_insight_trace_post_context_loaded">Viestin konteksti ladattu</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Kuvia ei tueta. Yritä uudelleen tekstillä…</string>
+    <string name="status_insight_trace_agent_started">Aloitetaan analyysiä…</string>
+    <string name="status_insight_trace_strategy_started">Suunnitteluanalyysi…</string>
+    <string name="status_insight_trace_strategy_completed">Analyysisuunnitelma valmis</string>
+    <string name="status_insight_trace_subgraph_started">Analyysivaihe…</string>
+    <string name="status_insight_trace_subgraph_completed">Analyysivaihe valmis</string>
+    <string name="status_insight_trace_subgraph_failed">Analyysivaihe epäonnistui</string>
+    <string name="status_insight_trace_asking_model">Kysytään %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Luetaan mallivastetta…</string>
+    <string name="status_insight_trace_streaming_started">Suoratoistetaan %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Vastaanotetaan vastausta…</string>
+    <string name="status_insight_trace_streaming_completed">Vastausvirta valmis</string>
+    <string name="status_insight_trace_streaming_failed">Vastausvirta epäonnistui</string>
+    <string name="status_insight_trace_running_step">Käynnissä analyysivaihe…</string>
+    <string name="status_insight_trace_step_completed">Analyysivaihe valmis</string>
+    <string name="status_insight_trace_step_failed">Analyysivaihe epäonnistui</string>
+    <string name="status_insight_trace_tool_call_started">%1$s</string>
+    <string name="status_insight_trace_tool_call_completed">%1$s</string>
+    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
+    <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_completed">Viestin konteksti ladattu</string>
+    <string name="status_insight_trace_tool_load_status_context_validation_failed">Viestin kontekstin syöte hylättiin</string>
+    <string name="status_insight_trace_tool_load_status_context_failed">Viestin kontekstin lataaminen epäonnistui</string>
+    <string name="status_insight_trace_tool_search_status_started">Etsitään…</string>
+    <string name="status_insight_trace_tool_search_status_completed">Haku suoritettu</string>
+    <string name="status_insight_trace_tool_search_status_validation_failed">Hakusyöte hylättiin</string>
+    <string name="status_insight_trace_tool_search_status_failed">Haku epäonnistui</string>
+    <string name="status_insight_trace_agent_failed">Analyysi epäonnistui</string>
+    <string name="status_insight_trace_agent_closing">Loppuanalyysi…</string>
+    <string name="ask_ai">Kysy AI</string>
     <string name="list_add">Lisää lista</string>
     <string name="list_edit">Muokkaa listaa</string>
     <string name="list_delete">Poista lista</string>
@@ -118,28 +149,23 @@
     <string name="edit_list_member_remove">Poista</string>
     <string name="list_create_description">Listan kuvaus</string>
     <string name="list_create_description_hint">Listan kuvaus</string>
-
     <string name="feeds_my_feeds_title">Omat syötteet</string>
     <string name="feeds_discover_feeds_title">Löydä syötteitä</string>
     <string name="feeds_discover_feeds_created_by">Tekijä: %1$s</string>
     <string name="feeds_unsubscribe">Peruuta tilaus</string>
     <string name="feeds_subscribe">Tilaa</string>
-
     <string name="social_title">Sosiaalinen</string>
-
     <string name="antenna_title">Antennit</string>
     <string name="mixed_timeline_title">Sekoitettu</string>
     <string name="liked_title">Tykätyt</string>
     <string name="all_rss_feeds_title">Kaikki tilaukset</string>
     <string name="posts_title">Julkaisut</string>
-
     <string name="bluesky_login_username">Käyttäjätunnus</string>
     <string name="bluesky_login_password">Salasana</string>
     <string name="bluesky_login_2fa">2FA-koodi</string>
     <string name="bluesky_login_oauth_button">Kirjaudu OAuthilla</string>
     <string name="bluesky_login_use_password_button">Käytä salasanaa</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth voi olla vielä epävakaa. Jos ilmenee ongelmia, käytä salasanakirjautumista.</string>
-
     <string name="login_expired">Kirjautumisistunto vanhentunut</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
@@ -148,7 +174,6 @@
     <string name="add_account">Lisää tili</string>
     <string name="remove_account">Poista tili</string>
     <string name="settings_accounts_remove_confirm">Haluatko varmasti poistaa tilin %1$s tästä laitteesta?</string>
-
     <string name="settings_accounts_title">Tilit</string>
     <string name="settings_appearance_title">Ulkoasu</string>
     <string name="settings_status_appearance_title">Postauksen ulkoasu</string>
@@ -176,6 +201,9 @@
     <string name="settings_guest_setting_description">Valitse, mihin palvelimeen vierastila yhdistää</string>
     <string name="settings_local_history_title">Paikallinen historia</string>
     <string name="settings_local_history_description">Hae laitteeseen välimuistiin tallennettuja postauksia ja profiileja</string>
+    <string name="settings_agent_history_title">Flare Agent</string>
+    <string name="settings_agent_history_description">Näytä paikallinen Flare Agent chat historia</string>
+    <string name="agent_history_empty">Ei agenttikeskusteluhistoriaa vielä.</string>
     <string name="settings_app_logging_title">Sovelluksen lokit</string>
     <string name="settings_app_logging_save">Tallenna lokit</string>
     <string name="settings_app_logging_clear">Tyhjennä lokit</string>
@@ -206,12 +234,14 @@
     <string name="settings_ai_config_reasoning_effort_low">Matala</string>
     <string name="settings_ai_config_reasoning_effort_medium">Keskitaso</string>
     <string name="settings_ai_config_reasoning_effort_high">Korkea</string>
-    <string name="settings_ai_config_extra_body">Extra Body</string>
+    <string name="settings_ai_config_extra_body">Ylimääräinen runko (Extra Body)</string>
     <string name="settings_ai_config_translate_prompt">Käännöskehote</string>
     <string name="settings_ai_config_tldr_prompt">Tiivistelmäkehote</string>
     <string name="settings_ai_config_value_empty_placeholder">Ei asetettu</string>
     <string name="settings_ai_config_entable_translation">Ota tekoälykäännös käyttöön</string>
     <string name="settings_ai_config_translation_description">Käytä tekoälyä Google Kääntäjän sijaan. Käännökset saattavat kestää kauemmin.</string>
+    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
+    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">Ota automaattinen kääntäminen käyttöön</string>
     <string name="settings_ai_config_pre_translation_description">Käännä uusi aikajanan ja profiilin sisältö taustalla ja tallenna tulokset välimuistiin. Tämä voi kuluttaa suuren määrän tokeneita.</string>
     <string name="settings_ai_config_enable_tldr">Ota tekoälytiivistelmät käyttöön</string>
@@ -220,16 +250,15 @@
     <string name="settings_ai_config_translate_provider_description">Valitse, mikä palvelu kääntää sisällön</string>
     <string name="settings_ai_config_translate_provider_ai">Tekoäly (AI)</string>
     <string name="settings_ai_config_translate_provider_google_web">Google Kääntäjä (Web)</string>
-    <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
+    <string name="settings_ai_config_translate_provider_deepl">Syvä</string>
     <string name="settings_ai_config_translate_provider_deepl_api_key">DeepL API-avain</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro">DeepL Pro -palvelupiste</string>
     <string name="settings_ai_config_translate_provider_deepl_use_pro_description">Käytä api.deepl.com-osoitetta ilmaisen api-free.deepl.com-osoitteen sijaan.</string>
-    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Translate</string>
+    <string name="settings_ai_config_translate_provider_google_cloud">Google Cloud Käännä</string>
     <string name="settings_ai_config_translate_provider_google_cloud_api_key">Google Cloud API-avain</string>
-    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
+    <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslaatti</string>
     <string name="settings_ai_config_translate_provider_libretranslate_base_url">LibreTranslate perusosoite</string>
     <string name="settings_ai_config_translate_provider_libretranslate_api_key">LibreTranslate API-avain</string>
-
     <string name="settings_translation_title">Kääntäminen</string>
     <string name="settings_translation_description">Valitse käännöspalvelut ja automaattisen kääntämisen toiminta</string>
     <string name="settings_translation_auto_excluded_languages">Kielet, joita ei käännetä automaattisesti</string>
@@ -238,7 +267,6 @@
     <string name="settings_translation_ai_test_action">Testaa käännöstä</string>
     <string name="settings_translation_ai_test_original">Esimerkkiteksti</string>
     <string name="settings_translation_ai_test_result">Käännetty teksti</string>
-
     <string name="settings_appearance_generic">Yleiset</string>
     <string name="settings_appearance_show_compose_in_home_timeline">Näytä tekstikenttä kotiaikajanalla</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Näytä postauksen luontikenttä kotiaikajanan yläreunassa</string>
@@ -254,6 +282,8 @@
     <string name="settings_appearance_show_numbers_description">Näytä määrät kunkin postauksen alla</string>
     <string name="settings_appearance_show_cw_img">Näytä arkaluonteinen sisältö</string>
     <string name="settings_appearance_show_cw_img_description">Näytä aina arkaluonteinen media postauksissa</string>
+    <string name="settings_appearance_expand_content_warning">Näytä sisältö sisältövaroitusten takana</string>
+    <string name="settings_appearance_expand_content_warning_description">Näytä sisältövaroitusten piilotettu sisältö aina</string>
     <string name="settings_appearance_expand_media">Säilytä median kuvasuhde</string>
     <string name="settings_appearance_expand_media_description">Näytä media alkuperäisessä kuvasuhteessa aikajanoilla</string>
     <string name="settings_appearance_video_autoplay">Videoiden automaattinen toisto</string>
@@ -297,24 +327,18 @@
     <string name="settings_appearance_post_action_style_stretch">Venytytty</string>
     <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
     <string name="settings_appearance_absolute_timestamp_description">Näytä tarkat aikaleimat postauksissa</string>
-
     <string name="settings_appearance_show_platform_logo">Näytä lähdepalvelimen kuvakkeet</string>
     <string name="settings_appearance_show_platform_logo_description">Näytä, mistä palvelusta kukin postaus on peräisin</string>
-
     <string name="settings_about_source_code">Lähdekoodi</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Liity Telegram-ryhmäämme</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_discord_description">Liity Discord-palvelimellemme</string>
-    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization">Crowdiini</string>
     <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
     <string name="settings_privacy_policy">Tietosuojaseloste</string>
-
     <string name="users">Käyttäjät</string>
     <string name="hashtags">Aihetunnisteet</string>
     <string name="statues">Postaukset</string>
-
-
     <string name="compose_title">Luo postaus</string>
     <string name="compose_hint">Mitä mielessä?</string>
     <string name="compose_poll_option_hint">Vaihtoehto %1$s</string>
@@ -335,7 +359,6 @@
     <string name="compose_notification_progress">Lähetetään postausta</string>
     <string name="compose_notification_success">Postaus lähetetty</string>
     <string name="compose_notification_error">Postauksen lähettäminen epäonnistui</string>
-
     <string name="misskey_visibility_public">Julkinen</string>
     <string name="misskey_visibility_home">Koti</string>
     <string name="misskey_visibility_followers">Seuraajat</string>
@@ -344,13 +367,10 @@
     <string name="misskey_visibility_home_description">Vain tämän palvelimen käyttäjät voivat nähdä tämän postauksen</string>
     <string name="misskey_visibility_followers_description">Vain seuraajat voivat nähdä tämän postauksen</string>
     <string name="misskey_visibility_specified_description">Vain mainitut käyttäjät voivat nähdä tämän postauksen</string>
-
-
     <string name="rss_sources_title">Tilaukset</string>
     <string name="add_rss_source">Lisää tilaus</string>
     <string name="edit_rss_source">Muokkaa tilausta</string>
     <string name="delete_rss_source">Poista tilaus</string>
-
     <string name="rss_sources_title_label">Otsikko</string>
     <string name="rss_sources_url_label">URL-osoite</string>
     <string name="rss_title">Tilaukset</string>
@@ -373,7 +393,6 @@
     <string name="mastodon_federated_timeline">Federoidun verkon aikajana</string>
     <string name="mastodon_local_timeline">Paikallinen aikajana</string>
     <string name="subscription_url_hint">Liitä RSS-syötteen tai Mastodon-palvelimen osoite</string>
-
     <string name="tab_settings_add">Lisää</string>
     <string name="tab_settings_drag">Vedä</string>
     <string name="tab_settings_edit">Muokkaa</string>
@@ -381,9 +400,7 @@
     <string name="tab_settings_default">Oletus</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Syötteet</string>
-
     <string name="notification_login_expired">Kirjautuminen vanhentunut tilille %1$s</string>
-
     <string name="dm_list_empty">Ei yksityisviestejä</string>
     <string name="dm_list_error">Yksityisviestien lataaminen epäonnistui</string>
     <string name="send">Lähetä</string>
@@ -416,7 +433,6 @@
     <string name="tab_settings_filter_text_only">Vain teksti</string>
     <string name="tab_settings_filter_image">Kuvat</string>
     <string name="tab_settings_filter_video">Videot</string>
-
     <string name="edit_tab_title">Muokkaa välilehteä</string>
     <string name="edit_tab_name">Nimi</string>
     <string name="edit_tab_name_placeholder">Välilehden nimi</string>
@@ -424,16 +440,12 @@
     <string name="edit_tab_with_avatar">Profiilikuvalla</string>
     <string name="edit_tab_enabled">Näytä sekoitetuilla aikajanoilla</string>
     <string name="edit_tab_enabled_description">Sisällytä tämä aikajana, kun sitä käytetään sekoitetulla aikajanalla tai ryhmässä.</string>
-
     <string name="edit">Muokkaa</string>
-
     <string name="local_history_search_placeholder">Etsi välimuistista postauksia ja profiileja</string>
     <string name="local_history_search_status_title">Postaukset</string>
     <string name="local_history_search_user_title">Käyttäjä</string>
-
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvavälimuisti</string>
     <string name="settings_storage_clear_image_cache_description">Poista %1$s Mt välimuistiin tallennettuja kuvia</string>
-
     <string name="settings_storage_clear_database">Tyhjennä tietokantavälimuisti</string>
     <string name="settings_storage_clear_database_description">Poista %1$s käyttäjää ja %2$s postausta välimuistista</string>
     <string name="settings_storage_app_log">Sovelluksen lokit</string>
@@ -450,50 +462,39 @@
     <string name="draft_box_retry">Yritä uudelleen</string>
     <string name="draft_box_edit">Muokkaa</string>
     <string name="draft_box_send">Lähetä</string>
-
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
-
     <string name="opml_import">Tuo OPML-tiedostosta</string>
     <string name="opml_export">Vie OPML-tiedostoon</string>
     <string name="save_completed">Vienti valmis</string>
-
     <string name="deeplink_account_selection_title">Valitse tili</string>
     <string name="deeplink_account_selection_message">Valitse tili, jolla linkki avataan</string>
     <string name="deeplink_account_selection_browser">Avaa selaimessa</string>
-
     <string name="block_user_title">Estä käyttäjä</string>
     <string name="block_user_description">Haluatko varmasti estää tämän käyttäjän?</string>
     <string name="unblock_user_title">Poista esto</string>
     <string name="unblock_user_description">Haluatko varmasti poistaa eston tältä käyttäjältä?</string>
-
     <string name="mute_user_title">Mykistä käyttäjä</string>
     <string name="mute_user_description">Haluatko varmasti mykistää tämän käyttäjän?</string>
     <string name="unmute_user_title">Poista mykistys</string>
     <string name="unmute_user_description">Haluatko varmasti poistaa mykistyksen tältä käyttäjältä?</string>
-
     <string name="report_user_title">Raportoi käyttäjä</string>
     <string name="report_user_description">Haluatko varmasti raportoida tämän käyttäjän?</string>
-
     <string name="settings_storage_export_data">Vie tiedot</string>
     <string name="settings_storage_export_data_description">Vie kaikki tiedot, mukaan lukien tilit ja kirjautumistiedot. Pidä tiedosto turvassa.</string>
     <string name="settings_storage_import_data">Tuo tiedot</string>
     <string name="settings_storage_import_data_description">Tuo tiedot varmuuskopiotiedostosta. Aiemmat tietueet, joilla on sama tunniste, korvataan.</string>
     <string name="action_export">Vie</string>
     <string name="action_import">Tuo</string>
-
     <string name="save_error">Vienti epäonnistui</string>
     <string name="import_completed">Tuonti valmis</string>
     <string name="import_error">Tuonti epäonnistui</string>
     <string name="import_confirmation_title">Vahvista tuonti</string>
     <string name="import_confirmation_message">Tämä tuo tiedot valitusta tiedostosta. Aiemmat tietueet, joilla on sama tunniste, korvataan. Jatketaanko?</string>
-
     <string name="channel_title">Kanava</string>
-
     <string name="misskey_channel_tab_following">Seurataan</string>
     <string name="misskey_channel_tab_favorites">Suosikit</string>
     <string name="misskey_channel_tab_owned">Omat</string>
     <string name="misskey_channel_tab_featured">Suositellut</string>
-
     <string name="media_save_success">Tallennettu ladattuihin tiedostoihin</string>
     <string name="media_save_fail">Tallentaminen epäonnistui</string>
 </resources>

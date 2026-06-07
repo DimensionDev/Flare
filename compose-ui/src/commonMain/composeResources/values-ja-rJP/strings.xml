@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">削除</string>
     <string name="done">完了</string>
     <string name="cancel">キャンセル</string>
@@ -181,11 +181,11 @@
     <string name="misskey_achievement_login7_flavor">そろそろ慣れてきましたか？</string>
     <string name="misskey_achievement_login15_title">初級 III</string>
     <string name="misskey_achievement_login15_description">合計15日間ログインする</string>
-    <string name="misskey_achievement_login30_title">Misskist I</string>
+    <string name="misskey_achievement_login30_title">ミスキストI</string>
     <string name="misskey_achievement_login30_description">合計30日間ログインする</string>
-    <string name="misskey_achievement_login60_title">Misskist II</string>
+    <string name="misskey_achievement_login60_title">ミスキストII</string>
     <string name="misskey_achievement_login60_description">合計60日間ログインする</string>
-    <string name="misskey_achievement_login100_title">Misskist III</string>
+    <string name="misskey_achievement_login100_title">ミスキストIII</string>
     <string name="misskey_achievement_login100_description">合計100日間ログインする</string>
     <string name="misskey_achievement_login100_flavor">バイオレント・ミスキスト</string>
     <string name="misskey_achievement_login200_title">常連 I</string>
@@ -345,7 +345,7 @@
     <string name="edit_rss_source">購読を編集</string>
     <string name="delete_rss_source">購読を削除</string>
     <string name="rss_sources_title_label">タイトル</string>
-    <string name="rss_sources_url_label">URL</string>
+    <string name="rss_sources_url_label">RSS URL</string>
     <string name="rss_title">購読</string>
     <string name="empty_rss_sources">購読はありません</string>
     <string name="mastodon_trending_statuses">トレンド</string>
@@ -394,6 +394,7 @@
     <string name="home_tab_featured_title">おすすめ</string>
     <string name="home_tab_bookmarks_title">ブックマーク</string>
     <string name="home_tab_favorite_title">お気に入り</string>
+    <string name="home_tab_following_title">フォロー中</string>
     <string name="home_tab_list_title">リスト</string>
     <string name="home_tab_feeds_title">フィード</string>
     <string name="dm_list_title">メッセージ</string>
@@ -403,7 +404,17 @@
     <string name="liked_title">いいねした投稿</string>
     <string name="all_rss_feeds_title">すべての購読</string>
     <string name="posts_title">投稿</string>
+    <string name="media_title">メディア</string>
     <string name="settings_appearance_absolute_timestamp">絶対時刻表示</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に正確な日時を表示します</string>
     <string name="channel_title">チャンネル</string>
+    <string name="pixiv_ranking_week_title">今週のランキング</string>
+    <string name="pixiv_ranking_month_title">毎月のランキング</string>
+    <string name="pixiv_ranking_day_male_title">男性ランキング</string>
+    <string name="pixiv_ranking_day_female_title">女性ランキング</string>
+    <string name="pixiv_ranking_week_original_title">元のランキング</string>
+    <string name="pixiv_ranking_week_rookie_title">ルーキーランキング</string>
+    <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="illustrations_title">Illustrations</string>
+    <string name="manga_title">Manga</string>
 </resources>

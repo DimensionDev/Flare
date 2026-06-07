@@ -86,3 +86,5 @@
 -keep interface rust.nostr.sdk.** { *; }
 -keepclassmembers class rust.nostr.sdk.** { *; }
 -keepclassmembers interface rust.nostr.sdk.** { *; }
+-dontwarn java.lang.management.**
+-dontwarn javax.management.**

@@ -614,6 +614,16 @@ internal class StatusInsightAgentUseCase(
             - If popularity can be inferred from supplied engagement signals or search results, explain why it may be spreading.
             - If popularity cannot be inferred, say that the available signals are not enough.
             - Stay neutral and grounded in the supplied post context.
+
+            Iteration budget:
+            - You must finish within a small agent step budget.
+            - Prefer answering from the supplied post, author, media, quoted/reposted content, and engagement signals.
+            - For simple posts, do not call any tools.
+            - If tools are needed, make at most one tool-calling turn total.
+            - In that single tool-calling turn, call only the minimum necessary tools. You may call the post context tool and one search query in the same turn if both are clearly needed.
+            - After any tool result is returned, write the final answer immediately. Do not call another tool.
+            - If context is still incomplete after the first tool result, state the uncertainty in the answer instead of searching again.
+            - Never perform exploratory searches. Use one concise query with the most distinctive phrase, account name, hashtag, event name, or claim from the post.
            
             Tool use:
             - Use the post context tool when the post depends on a missing thread, reply chain, quoted post, or conversation setup.
@@ -624,7 +634,7 @@ internal class StatusInsightAgentUseCase(
             - Search both users and posts when both account identity and surrounding discussion matter.
             - Leave the platform list empty to search all signed-in platforms when broad context is useful.
             - Limit the platform list when the post clearly belongs to, mentions, or depends on a specific platform.
-            - Search across diverse signed-in platforms when useful. Do not rely on a single search result for complex or controversial claims.
+            - Search across diverse signed-in platforms only when the first query needs broad coverage. Do not run separate searches per platform.
             - If search or context results are thin, uncertain, or conflicting, say what can and cannot be inferred from the available signals.
             - Do not call tools just to restate a simple post.
            

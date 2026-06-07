@@ -77,7 +77,8 @@ internal fun DeckTimelineScreen(
     }
     tabState.tabItem.onSuccess { tabItem ->
         val timelineState = rememberTimelineItemPresenterWithLazyListState(tabItem)
-        val isTopBarExpanded = remember(tabItem.id) { androidx.compose.runtime.mutableStateOf(true) }
+        val isTopBarExpanded =
+            remember(tabItem.id) { androidx.compose.runtime.mutableStateOf(true) }
         val timelineAppearance = LocalTimelineAppearance.current
         CompositionLocalProvider(
             LocalTimelineAppearance provides
@@ -124,8 +125,13 @@ internal fun DeckTimelineScreen(
                             modifier =
                                 Modifier
                                     .matchParentSize()
-                                    .background(FluentTheme.colors.background.mica.base)
-                                    .blur(32.dp),
+                                    .background(
+                                        if (!FluentTheme.colors.darkMode) {
+                                            FluentTheme.colors.background.layer.default
+                                        } else {
+                                            FluentTheme.colors.background.mica.base
+                                        },
+                                    ).blur(32.dp),
                         )
                         Row(
                             modifier =

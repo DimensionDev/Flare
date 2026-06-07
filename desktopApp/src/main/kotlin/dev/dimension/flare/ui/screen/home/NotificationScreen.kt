@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -76,6 +78,7 @@ internal fun NotificationScreen() {
                             SelectorBar(
                                 modifier =
                                     Modifier
+                                        .horizontalScroll(rememberScrollState())
                                         .let {
                                             if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain) {
                                                 it.padding(horizontal = screenHorizontalPadding)
@@ -146,7 +149,7 @@ internal fun NotificationScreen() {
                                                     maxLines = 1,
                                                     modifier = Modifier.padding(start = 8.dp),
                                                 )
-                                                AnimatedVisibility(badge > 0) {
+                                                if (badge > 0) {
                                                     Badge(
                                                         status = BadgeStatus.Informational,
                                                         content = {

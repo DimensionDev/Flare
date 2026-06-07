@@ -24,7 +24,8 @@ internal class LoadStatusContextTool(
         name = "load_status_context",
         description =
             "Load the current post's conversation context, including surrounding replies or thread posts. " +
-                "Use this only when the post depends on missing conversation context.",
+                "Use this only when the post depends on missing conversation context. " +
+                "After this tool returns, answer from the available context instead of calling more tools.",
     ) {
     @Serializable
     internal data class Args(
@@ -55,7 +56,7 @@ internal class SearchStatusTool(
         description =
             "Search public or account-visible posts or users across the user's signed-in social platforms. " +
                 "Use this only when external posts or user profiles may explain a phrase, meme, event, account, " +
-                "or why a post is spreading.",
+                "or why a post is spreading. Use one concise query, then answer from the returned results.",
     ) {
     @Serializable
     internal data class Args(

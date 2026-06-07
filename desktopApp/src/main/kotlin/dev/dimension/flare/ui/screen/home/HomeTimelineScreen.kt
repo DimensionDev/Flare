@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalUriHandler
@@ -280,14 +281,18 @@ internal fun HomeTimelineScreen(
                                 Box(
                                     modifier =
                                         Modifier
+                                            .alpha(0.66f)
                                             .matchParentSize()
+                                            .blur(16.dp)
                                             .background(
-                                                if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain) {
-                                                    FluentTheme.colors.background.card.secondary
+                                                if (LocalTimelineAppearance.current.timelineDisplayMode == TimelineDisplayMode.Plain &&
+                                                    !FluentTheme.colors.darkMode
+                                                ) {
+                                                    FluentTheme.colors.background.layer.default
                                                 } else {
                                                     FluentTheme.colors.background.mica.base
                                                 },
-                                            ).blur(32.dp),
+                                            ),
                                 )
                                 Row(
                                     modifier =

@@ -66,11 +66,11 @@ fun FlareApp(content: @Composable () -> Unit) {
             remember(globalAppearance, timelineAppearance, appSettings.translateConfig, appSettings.aiConfig) {
                 timelineAppearance.copy(
                     aiConfig =
-                            TimelineAppearance.AiConfig(
-                                translation = true,
-                                tldr = appSettings.aiConfig.tldr,
-                                agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
-                            ),
+                        TimelineAppearance.AiConfig(
+                            translation = true,
+                            tldr = appSettings.aiConfig.tldr,
+                            agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
+                        ),
                 )
             },
         content = content,

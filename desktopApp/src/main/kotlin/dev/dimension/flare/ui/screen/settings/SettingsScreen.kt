@@ -88,9 +88,9 @@ import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
 import dev.dimension.flare.settings_accounts_remove_confirm
 import dev.dimension.flare.settings_accounts_title
+import dev.dimension.flare.settings_ai_config_agent_description
 import dev.dimension.flare.settings_ai_config_api_key
 import dev.dimension.flare.settings_ai_config_api_key_hint
-import dev.dimension.flare.settings_ai_config_agent_description
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_agent
 import dev.dimension.flare.settings_ai_config_enable_pre_translation

@@ -244,6 +244,7 @@ import dev.dimension.flare.ui.presenter.ImportDataPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AiAgentEnabledPresenter
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
 import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
 import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
@@ -1150,7 +1151,7 @@ internal fun SettingsScreen(
                 )
             }
             AnimatedVisibility(
-                state.aiConfigState.aiAgent,
+                state.aiAgentEnabledState.enabled,
             ) {
                 CardExpanderItem(
                     onClick = toAgentHistory,
@@ -2253,12 +2254,14 @@ private fun presenter(
     val appearanceState = appearancePresenter()
     val storageState = storagePresenter(onExportFilePicker, onImportFilePicker)
     val aiConfigState = aiConfigPresenter()
+    val aiAgentEnabledState = remember { AiAgentEnabledPresenter() }.invoke()
     var aboutExpanded by remember { mutableStateOf(false) }
 
     object {
         val accountState = accountState
         val appearanceState = appearanceState
         val aiConfigState = aiConfigState
+        val aiAgentEnabledState = aiAgentEnabledState
         val storageState = storageState
         val aboutExpanded = aboutExpanded
 

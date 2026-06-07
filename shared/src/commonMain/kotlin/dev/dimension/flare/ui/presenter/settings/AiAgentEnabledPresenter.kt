@@ -22,7 +22,7 @@ public class AiAgentEnabledPresenter :
     override fun body(): State {
         val appSettings by appDataStore.appSettingsStore.data.collectAsState(AppSettings(version = ""))
         return StateImpl(
-            enabled = appSettings.aiConfig.agent,
+            enabled = appSettings.aiConfig.isAiAgentEnabled(),
         )
     }
 
@@ -30,3 +30,6 @@ public class AiAgentEnabledPresenter :
         override val enabled: Boolean,
     ) : State
 }
+
+internal fun AppSettings.AiConfig.isAiAgentEnabled(): Boolean =
+    agent && (type as? AppSettings.AiConfig.Type.OpenAI)?.model?.isNotBlank() == true

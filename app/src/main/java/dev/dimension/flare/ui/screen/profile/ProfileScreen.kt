@@ -81,6 +81,7 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -414,8 +415,8 @@ internal fun ProfileScreen(
                                                             }
                                                         },
                                                     ) {
-                                                        Text(
-                                                            profileTab.title,
+                                                        dev.dimension.flare.ui.component.Text(
+                                                            text = profileTab.name.asText(),
                                                             modifier =
                                                                 Modifier
                                                                     .padding(8.dp),
@@ -663,8 +664,6 @@ private fun profilePresenter(
 
 private sealed interface ProfileTabItem {
     val name: UiStrings
-    val title: String
-        get() = name.name
 
     data class Timeline(
         override val name: UiStrings,

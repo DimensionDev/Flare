@@ -303,18 +303,20 @@ private final class AgentChatMessagesController: UIViewController, UICollectionV
             return
         }
 
+        let wasNearBottom = isNearBottom
         let convertedEndFrame = view.convert(endFrame, from: nil)
         keyboardBottomInset = max(0, view.bounds.maxY - convertedEndFrame.minY)
         updateCollectionInsets()
-        if isNearBottom {
+        if wasNearBottom {
             scrollToBottom(animated: false)
         }
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
+        let wasNearBottom = isNearBottom
         keyboardBottomInset = 0
         updateCollectionInsets()
-        if isNearBottom {
+        if wasNearBottom {
             scrollToBottom(animated: false)
         }
     }

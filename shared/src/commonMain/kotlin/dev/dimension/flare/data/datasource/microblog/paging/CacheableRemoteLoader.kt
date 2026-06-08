@@ -6,6 +6,8 @@ public interface CacheableRemoteLoader<T : Any> : RemoteLoader<T> {
     public val pagingKey: String
     public val supportPrepend: Boolean
         get() = false
+    public val collapseReplyChains: Boolean
+        get() = true
 }
 
 @HiddenFromObjC

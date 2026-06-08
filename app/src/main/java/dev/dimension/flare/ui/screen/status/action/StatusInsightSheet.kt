@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.status.action
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -40,8 +41,11 @@ import dev.dimension.flare.ui.component.agent.AgentChatError
 import dev.dimension.flare.ui.component.agent.AgentChatInput
 import dev.dimension.flare.ui.component.agent.AgentChatMessageBubble
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
@@ -51,6 +55,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun StatusInsightSheet(
     accountType: AccountType,
     statusKey: MicroBlogKey,
+    navigate: (Route) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by producePresenter("status_insight_${accountType}_$statusKey") {
@@ -105,14 +110,30 @@ internal fun StatusInsightSheet(
         ) {
             state.post?.let { post ->
                 item {
-                    StatusInsightPostPreview(post = post)
+                    StatusInsightPostPreview(
+                        post = post,
+                        onClick = {
+                            navigate(Route.Status.Detail(statusKey = post.statusKey, accountType = post.accountType))
+                        },
+                    )
                 }
             }
 
             items(state.messages) { message ->
                 AgentChatMessageBubble(
                     text = message.text,
+                    parts = message.parts,
+                    inputRequest = message.inputRequest,
+                    inputRequestSelected = message.inputRequestSelected,
+                    inputRequestSelectedOptionId = message.inputRequestSelectedOptionId,
                     isUser = message is StatusInsightPresenter.Message.User,
+                    onInputRequestOptionSelected = state::selectInputRequestOption,
+                    onPostClick = { post ->
+                        navigate(Route.Status.Detail(statusKey = post.statusKey, accountType = post.accountType))
+                    },
+                    onUserClick = { user ->
+                        user.toRoute()?.let(navigate)
+                    },
                 )
             }
 
@@ -134,8 +155,8 @@ internal fun StatusInsightSheet(
         }
         AgentChatInput(
             state = textState,
-            enabled = !state.isRunning,
             canSend = state.canSend,
+            inputRequest = state.inputRequest,
             placeholder = stringResource(id = R.string.status_insight_input_placeholder),
             sendContentDescription = stringResource(id = R.string.status_insight_send),
             onSend = state::sendMessage,
@@ -151,9 +172,21 @@ internal fun StatusInsightSheet(
 }
 
 @Composable
-internal fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
+internal fun StatusInsightPostPreview(
+    post: UiTimelineV2.Post,
+    onClick: (() -> Unit)? = null,
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .let { base ->
+                    if (onClick != null) {
+                        base.clickable(onClick = onClick)
+                    } else {
+                        base
+                    }
+                },
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         CompositionLocalProvider(
@@ -179,6 +212,12 @@ internal fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
         }
     }
 }
+
+private fun UiProfile.toRoute(): Route? =
+    when (val event = clickEvent) {
+        is ClickEvent.Deeplink -> Route.parse(event.url)
+        ClickEvent.Noop -> null
+    }
 
 @Composable
 private fun AgentTrace.label(): String =

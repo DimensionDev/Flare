@@ -13,8 +13,10 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -51,12 +53,23 @@ internal class AgentChatHistoryProvider(
             }
 
     fun observeMessages(conversationId: String): Flow<List<AgentChatHistoryMessage>> =
-        database
-            .conversationDao()
-            .observeMessages(conversationId)
-            .map { messages ->
-                messages.mapNotNull { it.toHistoryMessage() }
+        combine(
+            database.conversationDao().observeMessages(conversationId),
+            database.conversationDao().observeAttachments(
+                conversationId = conversationId,
+                owner = AgentConversationAttachmentOwner.Assistant.name,
+            ),
+        ) { messages, attachments ->
+            val inputRequestsByCreatedAt =
+                attachments
+                    .mapNotNull { it.toStoredInputRequestWithCreatedAt() }
+                    .associate { it.first to it.second }
+            messages.mapNotNull { message ->
+                message.toHistoryMessage(
+                    inputRequestState = inputRequestsByCreatedAt[message.createdAt],
+                )
             }
+        }
 
     fun observeAttachments(
         conversationId: String,
@@ -69,6 +82,19 @@ internal class AgentChatHistoryProvider(
                 conversationId = conversationId,
                 owner = owner.name,
                 groupKey = groupKey,
+            ).map { attachments ->
+                attachments.mapNotNull { it.toAttachment() }
+            }
+
+    fun observeAttachments(
+        conversationId: String,
+        owner: AgentConversationAttachmentOwner,
+    ): Flow<List<AgentConversationAttachment>> =
+        database
+            .conversationDao()
+            .observeAttachments(
+                conversationId = conversationId,
+                owner = owner.name,
             ).map { attachments ->
                 attachments.mapNotNull { it.toAttachment() }
             }
@@ -118,6 +144,87 @@ internal class AgentChatHistoryProvider(
         groupKey = STATUS_INSIGHT_SOURCE_GROUP_KEY,
         attachments = posts.map { AgentConversationAttachment.Post(it) },
     )
+
+    suspend fun storeAssistantAttachments(
+        conversationId: String,
+        attachments: List<AgentConversationAttachment>,
+    ) {
+        if (attachments.isEmpty()) {
+            return
+        }
+        storeAttachments(
+            conversationId = conversationId,
+            owner = AgentConversationAttachmentOwner.Assistant,
+            groupKey = "assistant-${Clock.System.now().toEpochMilliseconds()}",
+            attachments = attachments,
+        )
+    }
+
+    suspend fun storeAssistantInputRequest(
+        conversationId: String,
+        inputRequest: AgentInputRequest,
+    ) {
+        val message =
+            database.conversationDao().getLatestMessageByRole(
+                conversationId = conversationId,
+                role = Message.Role.Assistant.name,
+            ) ?: return
+        database.connect {
+            database.conversationDao().insertAttachments(
+                listOf(
+                    AgentConversationAttachment
+                        .InputRequest(
+                            state =
+                                AgentInputRequestState(
+                                    request = inputRequest,
+                                    selected = false,
+                                ),
+                        ).toDbAttachment(
+                            conversationId = conversationId,
+                            owner = AgentConversationAttachmentOwner.Assistant,
+                            groupKey = inputRequestGroupKey(message.createdAt),
+                            position = 0,
+                            createdAt = message.createdAt,
+                        ),
+                ),
+            )
+        }
+    }
+
+    suspend fun markInputRequestSelected(
+        conversationId: String,
+        requestId: String,
+        optionId: String,
+    ) {
+        val attachments =
+            database.conversationDao().getAttachments(
+                conversationId = conversationId,
+                owner = AgentConversationAttachmentOwner.Assistant.name,
+            )
+        val updated =
+            attachments.mapNotNull { attachment ->
+                val state = attachment.toStoredInputRequest() ?: return@mapNotNull null
+                if (state.request.requestId != requestId || state.selected) {
+                    return@mapNotNull null
+                }
+                attachment.copy(
+                    contentJson =
+                        json.encodeToString(
+                            StoredInputRequest(
+                                request = state.request,
+                                selected = true,
+                                selectedOptionId = optionId,
+                            ),
+                        ),
+                )
+            }
+        if (updated.isEmpty()) {
+            return
+        }
+        database.connect {
+            database.conversationDao().insertAttachments(updated)
+        }
+    }
 
     suspend fun clear(conversationId: String) {
         database.connect {
@@ -230,8 +337,8 @@ internal class AgentChatHistoryProvider(
         )
     }
 
-    private fun DbAgentMessage.toHistoryMessage(): AgentChatHistoryMessage? {
-        if (text.isBlank()) {
+    private fun DbAgentMessage.toHistoryMessage(inputRequestState: AgentInputRequestState?): AgentChatHistoryMessage? {
+        if (text.isBlank() && inputRequestState == null) {
             return null
         }
         return AgentChatHistoryMessage(
@@ -244,6 +351,9 @@ internal class AgentChatHistoryProvider(
                 },
             text = text,
             createdAt = createdAt,
+            inputRequest = inputRequestState?.request,
+            inputRequestSelected = inputRequestState?.selected ?: false,
+            inputRequestSelectedOptionId = inputRequestState?.selectedOptionId,
         )
     }
 
@@ -278,6 +388,25 @@ internal class AgentChatHistoryProvider(
                     createdAt = createdAt,
                 )
             }
+
+            is AgentConversationAttachment.InputRequest -> {
+                DbAgentConversationAttachment(
+                    conversationId = conversationId,
+                    owner = owner.name,
+                    groupKey = groupKey,
+                    position = position,
+                    type = AgentConversationAttachmentType.InputRequest.name,
+                    contentJson =
+                        json.encodeToString(
+                            StoredInputRequest(
+                                request = state.request,
+                                selected = state.selected,
+                                selectedOptionId = state.selectedOptionId,
+                            ),
+                        ),
+                    createdAt = createdAt,
+                )
+            }
         }
 
     private fun DbAgentConversationAttachment.toAttachment(): AgentConversationAttachment? =
@@ -295,10 +424,38 @@ internal class AgentChatHistoryProvider(
                     )
                 }
 
+                AgentConversationAttachmentType.InputRequest.name -> {
+                    val stored = json.decodeFromString<StoredInputRequest>(contentJson)
+                    AgentConversationAttachment.InputRequest(
+                        state =
+                            AgentInputRequestState(
+                                request = stored.request,
+                                selected = stored.selected,
+                                selectedOptionId = stored.selectedOptionId,
+                            ),
+                    )
+                }
+
                 else -> {
                     null
                 }
             }
+        }.getOrNull()
+
+    private fun DbAgentConversationAttachment.toStoredInputRequestWithCreatedAt(): Pair<Long, AgentInputRequestState>? =
+        toStoredInputRequest()?.let { createdAt to it }
+
+    private fun DbAgentConversationAttachment.toStoredInputRequest(): AgentInputRequestState? =
+        runCatching {
+            if (type != AgentConversationAttachmentType.InputRequest.name) {
+                return@runCatching null
+            }
+            val stored = json.decodeFromString<StoredInputRequest>(contentJson)
+            AgentInputRequestState(
+                request = stored.request,
+                selected = stored.selected,
+                selectedOptionId = stored.selectedOptionId,
+            )
         }.getOrNull()
 
     private fun Message.displayText(): String =
@@ -306,6 +463,13 @@ internal class AgentChatHistoryProvider(
             .trim()
             .substringAfter("User message:\n")
             .trim()
+            .let { text ->
+                if (this is Message.Assistant) {
+                    text.cleanAgentVisibleText()
+                } else {
+                    text
+                }
+            }
 
     private fun String.fallbackTitle(): String =
         lineSequence()
@@ -318,6 +482,9 @@ internal class AgentChatHistoryProvider(
     private companion object {
         const val MAX_FALLBACK_TITLE_CHARS = 80
         const val STATUS_INSIGHT_SOURCE_GROUP_KEY = "status-insight-source"
+
+        fun inputRequestGroupKey(createdAt: Long): String = "input-request-$createdAt"
+
         val json =
             Json {
                 ignoreUnknownKeys = true
@@ -334,6 +501,7 @@ internal enum class AgentConversationAttachmentOwner {
 private enum class AgentConversationAttachmentType {
     Post,
     User,
+    InputRequest,
 }
 
 internal sealed interface AgentConversationAttachment {
@@ -344,7 +512,24 @@ internal sealed interface AgentConversationAttachment {
     data class User(
         val user: UiProfile,
     ) : AgentConversationAttachment
+
+    data class InputRequest(
+        val state: AgentInputRequestState,
+    ) : AgentConversationAttachment
 }
+
+@Serializable
+private data class StoredInputRequest(
+    val request: AgentInputRequest,
+    val selected: Boolean = false,
+    val selectedOptionId: String? = null,
+)
+
+internal data class AgentInputRequestState(
+    val request: AgentInputRequest,
+    val selected: Boolean = false,
+    val selectedOptionId: String? = null,
+)
 
 internal data class AgentChatHistoryRecord(
     val conversationId: String,
@@ -356,6 +541,9 @@ internal data class AgentChatHistoryMessage(
     val role: Role,
     val text: String,
     val createdAt: Long,
+    val inputRequest: AgentInputRequest? = null,
+    val inputRequestSelected: Boolean = false,
+    val inputRequestSelectedOptionId: String? = null,
 ) {
     enum class Role {
         System,

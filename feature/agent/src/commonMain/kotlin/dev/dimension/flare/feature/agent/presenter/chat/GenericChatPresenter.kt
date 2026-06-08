@@ -10,8 +10,14 @@ import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.agent.chat.GenericChatAgentUseCase
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
+import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
+import dev.dimension.flare.feature.agent.common.AgentConversationAttachmentOwner
+import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentTrace
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.parseAgentMessageParts
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
+import dev.dimension.flare.feature.agent.presenter.toAgentTextParts
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -39,12 +45,16 @@ public class GenericChatPresenter(
         public val isRunning: Boolean
         public val statusInsightPosts: ImmutableList<UiTimelineV2.Post>
         public val currentTrace: AgentTrace?
+        public val traceHistory: ImmutableList<AgentTrace>
+        public val inputRequest: AgentInputRequest?
         public val error: Throwable?
         public val canSend: Boolean
 
         public fun setInput(value: String)
 
         public fun sendMessage()
+
+        public fun selectInputRequestOption(option: AgentInputRequest.Option)
     }
 
     @Composable
@@ -54,6 +64,9 @@ public class GenericChatPresenter(
         }.collectAsState(emptyList())
         val statusInsightPosts by remember(conversationId) {
             historyProvider.observeStatusInsightPosts(conversationId)
+        }.collectAsState(emptyList())
+        val assistantAttachments by remember(conversationId) {
+            historyProvider.observeAttachments(conversationId, AgentConversationAttachmentOwner.Assistant)
         }.collectAsState(emptyList())
         val conversationRecord by remember(conversationId) {
             historyProvider.observeRecord(conversationId)
@@ -79,15 +92,44 @@ public class GenericChatPresenter(
                     )
                 },
                 userMessage = Message::User,
-                assistantMessage = Message::Assistant,
+                assistantMessage = { text, attachments, inputRequest ->
+                    Message.Assistant(
+                        text = text,
+                        parts = parseAgentMessageParts(text, attachments),
+                        inputRequest = inputRequest,
+                    )
+                },
                 isAssistantMessage = { it is Message.Assistant },
+                messageInputRequest = Message::inputRequest,
+                messageInputRequestSelected = Message::inputRequestSelected,
+                markMessageInputRequestSelected = { message, requestId, optionId ->
+                    when (message) {
+                        is Message.Assistant -> {
+                            if (message.inputRequest?.requestId == requestId) {
+                                message.copy(
+                                    inputRequestSelected = true,
+                                    inputRequestSelectedOptionId = optionId,
+                                )
+                            } else {
+                                message
+                            }
+                        }
+
+                        is Message.User -> {
+                            message
+                        }
+                    }
+                },
                 messageText = Message::text,
+                onInputRequestSelected = { requestId, optionId ->
+                    historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
+                },
                 missingContextError = {
                     IllegalStateException("Generic chat context is unavailable")
                 },
                 autoRunOnContext = false,
                 initialUserInput = initialMessage,
-                initialMessages = restoredMessages.mapNotNull { it.toPresenterMessage(statusInsightPosts) },
+                initialMessages = restoredMessages.mapNotNull { it.toPresenterMessage(statusInsightPosts, assistantAttachments) },
             )
 
         return StateImpl(
@@ -98,25 +140,40 @@ public class GenericChatPresenter(
             isRunning = controller.isRunning,
             statusInsightPosts = statusInsightPosts.toImmutableList(),
             currentTrace = controller.currentTrace,
+            traceHistory = controller.traceHistory,
+            inputRequest = controller.inputRequest,
             error = controller.error,
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
+            onSelectInputRequestOption = controller::selectInputRequestOption,
         )
     }
 
     @Immutable
     public sealed interface Message {
         public val text: String
+        public val parts: ImmutableList<AgentMessagePart>
+        public val inputRequest: AgentInputRequest?
+            get() = null
+        public val inputRequestSelected: Boolean
+            get() = false
+        public val inputRequestSelectedOptionId: String?
+            get() = null
 
         @Immutable
         public data class User(
             override val text: String,
+            override val parts: ImmutableList<AgentMessagePart> = text.toAgentTextParts(),
         ) : Message
 
         @Immutable
         public data class Assistant(
             override val text: String,
+            override val parts: ImmutableList<AgentMessagePart>,
+            override val inputRequest: AgentInputRequest? = null,
+            override val inputRequestSelected: Boolean = false,
+            override val inputRequestSelectedOptionId: String? = null,
         ) : Message
     }
 
@@ -129,10 +186,13 @@ public class GenericChatPresenter(
         override val isRunning: Boolean,
         override val statusInsightPosts: ImmutableList<UiTimelineV2.Post>,
         override val currentTrace: AgentTrace?,
+        override val traceHistory: ImmutableList<AgentTrace>,
+        override val inputRequest: AgentInputRequest?,
         override val error: Throwable?,
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
+        private val onSelectInputRequestOption: (AgentInputRequest.Option) -> Unit,
     ) : State {
         override fun setInput(value: String) {
             onSetInput.invoke(value)
@@ -141,13 +201,20 @@ public class GenericChatPresenter(
         override fun sendMessage() {
             onSendMessage.invoke()
         }
+
+        override fun selectInputRequestOption(option: AgentInputRequest.Option) {
+            onSelectInputRequestOption.invoke(option)
+        }
     }
 
     private data class GenericChatContext(
         val searchDataSources: List<AccountMicroblogDataSource>,
     )
 
-    private fun AgentChatHistoryMessage.toPresenterMessage(statusInsightPosts: List<UiTimelineV2.Post>): Message? =
+    private fun AgentChatHistoryMessage.toPresenterMessage(
+        statusInsightPosts: List<UiTimelineV2.Post>,
+        assistantAttachments: List<AgentConversationAttachment>,
+    ): Message? =
         when (role) {
             AgentChatHistoryMessage.Role.User -> {
                 val displayText = text.statusInsightDisplayText(statusInsightPosts) ?: return null
@@ -155,7 +222,15 @@ public class GenericChatPresenter(
             }
 
             AgentChatHistoryMessage.Role.Assistant -> {
-                Message.Assistant(text)
+                val attachments =
+                    statusInsightPosts.map { AgentConversationAttachment.Post(it) } + assistantAttachments
+                Message.Assistant(
+                    text = text,
+                    parts = parseAgentMessageParts(text, attachments),
+                    inputRequest = inputRequest,
+                    inputRequestSelected = inputRequestSelected,
+                    inputRequestSelectedOptionId = inputRequestSelectedOptionId,
+                )
             }
 
             AgentChatHistoryMessage.Role.System -> {

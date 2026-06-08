@@ -607,9 +607,9 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     @Test
     fun refreshCollapsesLinearReplyChainIntoLatestPost() =
         runTest {
-            val accountKey = MicroBlogKey("mastodon.example", "timeline")
+            val accountKey = MicroBlogKey("timeline", "mastodon.example")
             val accountType = AccountType.Specific(accountKey)
-            val user = profile(MicroBlogKey("mastodon.example", "user"), "User")
+            val user = profile(MicroBlogKey("user", "mastodon.example"), "User")
             val postA =
                 createPost(
                     accountType = accountType,
@@ -695,6 +695,157 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(postC.statusKey, post.statusKey)
             assertEquals("${mediator.pagingKey}_${page.data.single().status.data.id}", post.itemKey)
             assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshCollapsePreservesExistingParentOrderWhenDirectParentIsAlsoVisible() =
+        runTest {
+            val accountKey = MicroBlogKey("mastodon.example", "timeline")
+            val accountType = AccountType.Specific(accountKey)
+            val user = profile(MicroBlogKey("mastodon.example", "user"), "User")
+            val parents =
+                (0 until 5).map { index ->
+                    createPost(
+                        accountType = accountType,
+                        user = user,
+                        statusKey = MicroBlogKey("parent-$index", "mastodon.example"),
+                        text = "Parent $index",
+                    )
+                }
+            val leaf =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("leaf", "mastodon.example"),
+                    text = "Leaf",
+                    parents = parents,
+                )
+            val loader =
+                FakeLoader("reply_chain_parent_order") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(parents.last(), leaf),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+            val result = mediator.timeline(pageSize = 20, request = PagingRequest.Refresh)
+            val post = assertIs<UiTimelineV2.Post>(result.data.single())
+
+            assertEquals(leaf.statusKey, post.statusKey)
+            assertEquals(
+                listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
+                post.parents.map { it.statusKey.id },
+            )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshCanPreserveLinearReplyChainAsVisiblePosts() =
+        runTest {
+            val accountKey = MicroBlogKey("mastodon.example", "timeline")
+            val accountType = AccountType.Specific(accountKey)
+            val user = profile(MicroBlogKey("mastodon.example", "user"), "User")
+            val postA =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "a"),
+                    text = "A",
+                )
+            val postB =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "b"),
+                    text = "B",
+                    parents = listOf(postA),
+                )
+            val postC =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "c"),
+                    text = "C",
+                    parents = listOf(postB),
+                )
+            val loader =
+                FakeLoader(
+                    pagingKey = "status_detail_reply_chain",
+                    collapseReplyChains = false,
+                ) { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(postA, postB, postC),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("No append expected")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+
+            val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val pagingSource = db.pagingTimelineDao().getPagingSource(mediator.pagingKey)
+            val page =
+                pagingSource.load(
+                    PagingSource.LoadParams.Refresh(
+                        key = null,
+                        loadSize = 20,
+                        placeholdersEnabled = false,
+                    ),
+                )
+            assertTrue(page is PagingSource.LoadResult.Page)
+
+            val posts =
+                page.data.map {
+                    assertIs<UiTimelineV2.Post>(
+                        TimelinePagingMapper.toUi(
+                            item = it,
+                            pagingKey = mediator.pagingKey,
+                            translationDisplayOptions =
+                                TranslationDisplayOptions(
+                                    translationEnabled = false,
+                                    autoDisplayEnabled = false,
+                                    providerCacheKey = "",
+                                ),
+                        ),
+                    )
+                }
+            assertEquals(listOf(postA.statusKey, postB.statusKey, postC.statusKey), posts.map { it.statusKey })
         }
 
     @Test
@@ -1747,6 +1898,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
     private class FakeLoader(
         override val pagingKey: String,
         override val supportPrepend: Boolean = false,
+        override val collapseReplyChains: Boolean = true,
         private val onLoad: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,
     ) : CacheableRemoteLoader<UiTimelineV2> {
         val requests = mutableListOf<PagingRequest>()

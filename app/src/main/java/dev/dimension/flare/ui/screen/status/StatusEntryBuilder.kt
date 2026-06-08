@@ -126,6 +126,7 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
         StatusInsightSheet(
             accountType = args.accountType,
             statusKey = args.statusKey,
+            navigate = navigate,
         )
     }
 

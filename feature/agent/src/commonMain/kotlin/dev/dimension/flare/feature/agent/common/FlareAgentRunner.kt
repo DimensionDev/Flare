@@ -6,6 +6,7 @@ import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
 import ai.koog.agents.core.dsl.extension.nodeExecuteTools
 import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResults
+import ai.koog.agents.core.dsl.extension.nodeLLMSendToolResultsWithoutTools
 import ai.koog.agents.core.dsl.extension.onTextMessage
 import ai.koog.agents.core.dsl.extension.onToolCalls
 import ai.koog.agents.core.tools.ToolRegistry
@@ -32,7 +33,7 @@ internal class FlareAgentRunner(
         request: FlareAgentRequest,
         conversationId: String,
         onTrace: suspend (AgentTrace) -> Unit,
-    ): String {
+    ): AgentRunResult {
         val runtime =
             runtimeProvider.createRuntime()
                 ?: throw FlareAgentUnavailableException(runtimeProvider.availability())
@@ -40,7 +41,11 @@ internal class FlareAgentRunner(
         val resolvedRequest = request.withToolSet(toolSet)
         val agent = runtime.createAgent(resolvedRequest, onTrace)
         return try {
-            agent.run(request.prompt, conversationId)
+            AgentRunResult(
+                text = agent.run(request.prompt, conversationId),
+                attachments = toolSet.attachmentStore.snapshot(),
+                inputRequest = toolSet.inputRequestStore.snapshot(),
+            )
         } finally {
             agent.close()
         }
@@ -70,13 +75,20 @@ internal class FlareAgentRunner(
                         }
                     }
                     val nodeExecuteTools by nodeExecuteTools(request.executeToolsNodeName)
-                    val nodeSendToolResults by nodeLLMSendToolResults(request.sendToolResultsNodeName)
+                    val nodeSendToolResults by
+                        if (request.finishAfterToolResults) {
+                            nodeLLMSendToolResultsWithoutTools(request.sendToolResultsNodeName)
+                        } else {
+                            nodeLLMSendToolResults(request.sendToolResultsNodeName)
+                        }
 
                     edge(nodeStart forwardTo nodeAnalyze)
                     edge(nodeAnalyze forwardTo nodeExecuteTools onToolCalls { true })
                     edge(nodeAnalyze forwardTo nodeFinish onTextMessage { true })
                     edge(nodeExecuteTools forwardTo nodeSendToolResults)
-                    edge(nodeSendToolResults forwardTo nodeExecuteTools onToolCalls { true })
+                    if (!request.finishAfterToolResults) {
+                        edge(nodeSendToolResults forwardTo nodeExecuteTools onToolCalls { true })
+                    }
                     edge(nodeSendToolResults forwardTo nodeFinish onTextMessage { true })
                 },
             ).install(
@@ -158,6 +170,12 @@ internal class FlareAgentRunner(
             ).build()
 }
 
+internal data class AgentRunResult(
+    val text: String,
+    val attachments: List<AgentConversationAttachment>,
+    val inputRequest: AgentInputRequest?,
+)
+
 internal data class FlareAgentRequest(
     val prompt: Prompt,
     val systemPrompt: String,
@@ -169,11 +187,15 @@ internal data class FlareAgentRequest(
     val toolContext: AgentToolContext = AgentToolContext.Empty,
     val temperature: Double = 0.2,
     val maxIterations: Int = 16,
+    val finishAfterToolResults: Boolean = false,
     val chatMemoryWindowSize: Int = 20,
     private val toolSet: AgentToolSet = AgentToolSet.Empty,
 ) {
     val toolRegistry: ToolRegistry = toolSet.toolRegistry
-    val systemPromptWithToolGuidance: String = systemPrompt.withToolGuidance(toolSet.systemPromptGuidance)
+    val systemPromptWithToolGuidance: String =
+        systemPrompt
+            .withAgentMarkdownGuidance()
+            .withToolGuidance(toolSet.systemPromptGuidance)
 
     fun withToolSet(toolSet: AgentToolSet): FlareAgentRequest = copy(toolSet = toolSet)
 
@@ -198,3 +220,16 @@ private fun String.withToolGuidance(guidance: String): String =
     } else {
         trimEnd() + "\n\n" + guidance
     }
+
+private fun String.withAgentMarkdownGuidance(): String =
+    trimEnd() +
+        "\n\n" +
+        """
+        Response formatting:
+        - Return Markdown supported by compose-richtext.
+        - Prefer paragraphs, headings, bullet lists, numbered lists, block quotes, inline code, and links when they improve readability.
+        - Do not use markdown tables because they are not needed in the chat bubble layout; use compact lists instead.
+        - Do not wrap the entire answer in a fenced code block unless the user explicitly asks for code.
+        - If you include a Flare attachment marker such as [[post:...]] or [[user:...]], keep it exactly unchanged and place it on its own line.
+        - Return only the final user-visible answer.
+        """.trimIndent()

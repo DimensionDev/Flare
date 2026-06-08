@@ -35,8 +35,40 @@ internal interface AgentConversationDao {
         groupKey: String,
     ): Flow<List<DbAgentConversationAttachment>>
 
+    @Query(
+        """
+        SELECT * FROM agent_conversation_attachments
+        WHERE conversationId = :conversationId
+            AND owner = :owner
+        ORDER BY createdAt ASC, groupKey ASC, position ASC
+        """,
+    )
+    fun observeAttachments(
+        conversationId: String,
+        owner: String,
+    ): Flow<List<DbAgentConversationAttachment>>
+
     @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position ASC")
     suspend fun getMessages(conversationId: String): List<DbAgentMessage>
+
+    @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId AND role = :role ORDER BY position DESC LIMIT 1")
+    suspend fun getLatestMessageByRole(
+        conversationId: String,
+        role: String,
+    ): DbAgentMessage?
+
+    @Query(
+        """
+        SELECT * FROM agent_conversation_attachments
+        WHERE conversationId = :conversationId
+            AND owner = :owner
+        ORDER BY createdAt ASC, groupKey ASC, position ASC
+        """,
+    )
+    suspend fun getAttachments(
+        conversationId: String,
+        owner: String,
+    ): List<DbAgentConversationAttachment>
 
     @Query("SELECT * FROM agent_conversations WHERE conversationId = :conversationId")
     suspend fun getConversation(conversationId: String): DbAgentConversation?

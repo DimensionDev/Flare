@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -88,8 +89,11 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentColor
@@ -105,6 +109,7 @@ internal fun StatusInsightDialog(
     accountType: AccountType,
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
+    navigate: (Route) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by producePresenter("status_insight_${accountType}_$statusKey") {
@@ -155,17 +160,34 @@ internal fun StatusInsightDialog(
                 canSend = state.canSend,
                 error = state.error,
                 runningTrace = state.currentTrace?.label() ?: stringResource(Res.string.status_insight_analyzing),
+                inputRequest = state.inputRequest,
                 inputPlaceholder = stringResource(Res.string.agent_chat_input_placeholder),
                 sendContentDescription = stringResource(Res.string.agent_chat_send),
                 messageText = StatusInsightPresenter.Message::text,
+                messageParts = StatusInsightPresenter.Message::parts,
+                messageInputRequest = StatusInsightPresenter.Message::inputRequest,
+                messageInputRequestSelected = StatusInsightPresenter.Message::inputRequestSelected,
+                messageInputRequestSelectedOptionId = StatusInsightPresenter.Message::inputRequestSelectedOptionId,
                 isUserMessage = { it is StatusInsightPresenter.Message.User },
                 onInputChange = state::setInput,
                 onSend = state::sendMessage,
+                onInputRequestOptionSelected = state::selectInputRequestOption,
+                onPostClick = { post ->
+                    navigate(Route.StatusDetail(accountType = post.accountType, statusKey = post.statusKey))
+                },
+                onUserClick = { user ->
+                    user.toRoute()?.let(navigate)
+                },
                 leadingContentItemCount = if (state.post != null) 1 else 0,
                 leadingContent = {
                     state.post?.let { post ->
                         item {
-                            StatusInsightPostPreview(post = post)
+                            StatusInsightPostPreview(
+                                post = post,
+                                onClick = {
+                                    navigate(Route.StatusDetail(accountType = post.accountType, statusKey = post.statusKey))
+                                },
+                            )
                         }
                     }
                 },
@@ -185,12 +207,21 @@ internal fun StatusInsightDialog(
 }
 
 @Composable
-internal fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
+internal fun StatusInsightPostPreview(
+    post: UiTimelineV2.Post,
+    onClick: (() -> Unit)? = null,
+) {
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .border(
+                .let { base ->
+                    if (onClick != null) {
+                        base.clickable(onClick = onClick)
+                    } else {
+                        base
+                    }
+                }.border(
                     border = BorderStroke(1.dp, FluentTheme.colors.stroke.card.default),
                     shape = RoundedCornerShape(8.dp),
                 ),
@@ -218,6 +249,12 @@ internal fun StatusInsightPostPreview(post: UiTimelineV2.Post) {
         }
     }
 }
+
+private fun UiProfile.toRoute(): Route? =
+    when (val event = clickEvent) {
+        is ClickEvent.Deeplink -> Route.parse(event.url)
+        ClickEvent.Noop -> null
+    }
 
 @Composable
 private fun AgentTrace.label(): String =

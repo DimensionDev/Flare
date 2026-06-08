@@ -18,7 +18,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
-internal fun UserCompat(
+public fun UserCompat(
     user: UiProfile,
     modifier: Modifier = Modifier,
     onUserClick: (MicroBlogKey) -> Unit = {},

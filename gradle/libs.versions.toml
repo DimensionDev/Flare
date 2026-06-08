@@ -103,6 +103,7 @@ prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "pret
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 richtext-ui = { module = "com.halilibo.compose-richtext:richtext-ui", version.ref = "richtextUiMaterial3" }
 richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "richtextUiMaterial3" }
+richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "richtextUiMaterial3" }
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-util = { group = "androidx.compose.ui", name = "ui-util" }

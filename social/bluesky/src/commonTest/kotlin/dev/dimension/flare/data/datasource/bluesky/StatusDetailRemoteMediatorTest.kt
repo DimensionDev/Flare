@@ -23,6 +23,7 @@ import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.time.Instant
 
@@ -67,6 +68,57 @@ class StatusDetailRemoteMediatorTest {
                 "Visible thread posts should not be repeated in ${post.statusKey.id} parents",
             )
         }
+    }
+
+    @Test
+    fun renderThread_keepsAncestorsAboveAnchorVisible() {
+        val parent = createPostView("parent", "parent post")
+        val anchor = createPostView("anchor", "anchor post")
+        val reply = createPostView("reply", "reply post")
+
+        val rendered =
+            listOf(
+                createThreadItem(parent, depth = -1),
+                createThreadItem(anchor, depth = 0),
+                createThreadItem(reply, depth = 1),
+            ).renderThread(accountKey)
+                .filterIsInstance<UiTimelineV2.Post>()
+
+        assertEquals(
+            listOf(parent.uri.atUri, anchor.uri.atUri, reply.uri.atUri),
+            rendered.map { it.statusKey.id },
+        )
+        val visibleKeys = rendered.map { it.statusKey }.toSet()
+        rendered.forEach { post ->
+            assertFalse(
+                post.parents.any { it.statusKey in visibleKeys },
+                "Visible thread posts should not be repeated in ${post.statusKey.id} parents",
+            )
+        }
+    }
+
+    @Test
+    fun renderThread_chainsDescendantsBelowAnchor() {
+        val anchor = createPostView("anchor", "anchor post")
+        val firstReply = createPostView("reply-1", "first reply")
+        val secondReply = createPostView("reply-2", "second reply")
+
+        val rendered =
+            listOf(
+                createThreadItem(anchor, depth = 0),
+                createThreadItem(firstReply, depth = 1),
+                createThreadItem(secondReply, depth = 2),
+            ).renderThread(accountKey)
+                .filterIsInstance<UiTimelineV2.Post>()
+
+        assertEquals(
+            listOf(anchor.uri.atUri, secondReply.uri.atUri),
+            rendered.map { it.statusKey.id },
+        )
+        assertEquals(
+            listOf(firstReply.uri.atUri),
+            rendered.last().parents.map { it.statusKey.id },
+        )
     }
 
     private fun createThreadItem(

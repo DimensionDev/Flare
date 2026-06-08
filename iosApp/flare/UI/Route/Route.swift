@@ -99,7 +99,7 @@ enum Route: Hashable, Identifiable {
         case .agentHistory:
             AgentChatHistoryScreen()
         case .agentChat(let conversationId, let initialMessage):
-            AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage)
+            AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage, onNavigate: onNavigate)
         case .translationConfig:
             TranslationConfigScreen()
         case .tabSettings:
@@ -121,7 +121,7 @@ enum Route: Hashable, Identifiable {
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
         case .statusInsight(let accountType, let statusKey):
-            StatusInsightSheet(accountType: accountType, statusKey: statusKey)
+            StatusInsightSheet(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
         case .userFans(let account, let userKey):
             UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
         case .userFollowing(let account, let userKey):

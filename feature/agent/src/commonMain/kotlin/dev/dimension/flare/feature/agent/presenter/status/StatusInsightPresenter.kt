@@ -6,8 +6,12 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentTrace
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.parseAgentMessageParts
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
+import dev.dimension.flare.feature.agent.presenter.toAgentTextParts
 import dev.dimension.flare.feature.agent.status.StatusInsightAgentUseCase
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -35,12 +39,16 @@ public class StatusInsightPresenter(
         public val isRunning: Boolean
         public val post: UiTimelineV2.Post?
         public val currentTrace: AgentTrace?
+        public val traceHistory: ImmutableList<AgentTrace>
+        public val inputRequest: AgentInputRequest?
         public val error: Throwable?
         public val canSend: Boolean
 
         public fun setInput(value: String)
 
         public fun sendMessage()
+
+        public fun selectInputRequestOption(option: AgentInputRequest.Option)
     }
 
     @Composable
@@ -78,8 +86,34 @@ public class StatusInsightPresenter(
                     )
                 },
                 userMessage = Message::User,
-                assistantMessage = Message::Assistant,
+                assistantMessage = { text, attachments, inputRequest ->
+                    Message.Assistant(
+                        text = text,
+                        parts = parseAgentMessageParts(text, attachments),
+                        inputRequest = inputRequest,
+                    )
+                },
                 isAssistantMessage = { it is Message.Assistant },
+                messageInputRequest = Message::inputRequest,
+                messageInputRequestSelected = Message::inputRequestSelected,
+                markMessageInputRequestSelected = { message, requestId, optionId ->
+                    when (message) {
+                        is Message.Assistant -> {
+                            if (message.inputRequest?.requestId == requestId) {
+                                message.copy(
+                                    inputRequestSelected = true,
+                                    inputRequestSelectedOptionId = optionId,
+                                )
+                            } else {
+                                message
+                            }
+                        }
+
+                        is Message.User -> {
+                            message
+                        }
+                    }
+                },
                 messageText = Message::text,
                 missingContextError = {
                     IllegalStateException("Current account does not support post data source")
@@ -92,26 +126,41 @@ public class StatusInsightPresenter(
             isRunning = controller.isRunning,
             post = controller.content,
             currentTrace = controller.currentTrace,
+            traceHistory = controller.traceHistory,
+            inputRequest = controller.inputRequest,
             error = controller.error,
             insight = controller.insight,
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
+            onSelectInputRequestOption = controller::selectInputRequestOption,
         )
     }
 
     @Immutable
     public sealed interface Message {
         public val text: String
+        public val parts: ImmutableList<AgentMessagePart>
+        public val inputRequest: AgentInputRequest?
+            get() = null
+        public val inputRequestSelected: Boolean
+            get() = false
+        public val inputRequestSelectedOptionId: String?
+            get() = null
 
         @Immutable
         public data class User(
             override val text: String,
+            override val parts: ImmutableList<AgentMessagePart> = text.toAgentTextParts(),
         ) : Message
 
         @Immutable
         public data class Assistant(
             override val text: String,
+            override val parts: ImmutableList<AgentMessagePart>,
+            override val inputRequest: AgentInputRequest? = null,
+            override val inputRequestSelected: Boolean = false,
+            override val inputRequestSelectedOptionId: String? = null,
         ) : Message
     }
 
@@ -122,11 +171,14 @@ public class StatusInsightPresenter(
         override val isRunning: Boolean,
         override val post: UiTimelineV2.Post?,
         override val currentTrace: AgentTrace?,
+        override val traceHistory: ImmutableList<AgentTrace>,
+        override val inputRequest: AgentInputRequest?,
         override val error: Throwable?,
         override val insight: UiState<String>,
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
+        private val onSelectInputRequestOption: (AgentInputRequest.Option) -> Unit,
     ) : State {
         override fun setInput(value: String) {
             onSetInput.invoke(value)
@@ -134,6 +186,10 @@ public class StatusInsightPresenter(
 
         override fun sendMessage() {
             onSendMessage.invoke()
+        }
+
+        override fun selectInputRequestOption(option: AgentInputRequest.Option) {
+            onSelectInputRequestOption.invoke(option)
         }
     }
 

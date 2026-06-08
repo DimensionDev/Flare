@@ -63,6 +63,7 @@ internal object TimelinePagingMapper {
                                                 data = it,
                                                 referenceType = ReferenceType.Quote,
                                                 rootStatusId = rootStatus.data.id,
+                                                referenceOrder = 0,
                                             ),
                                         ) + collectPostReferences(it, rootStatus.data.id)
                                     }.orEmpty()
@@ -95,16 +96,18 @@ internal object TimelinePagingMapper {
                 translationDisplayOptions = translationDisplayOptions,
             )
         val references =
-            item.references.mapNotNull { reference ->
-                reference.status?.let {
-                    reference.reference.referenceType to
-                        dbStatusWithUserToUiTimeline(
-                            data = it,
-                            pagingKey = pagingKey,
-                            translationDisplayOptions = translationDisplayOptions,
-                        )
+            item.references
+                .sortedBy { it.reference.referenceOrder }
+                .mapNotNull { reference ->
+                    reference.status?.let {
+                        reference.reference.referenceType to
+                            dbStatusWithUserToUiTimeline(
+                                data = it,
+                                pagingKey = pagingKey,
+                                translationDisplayOptions = translationDisplayOptions,
+                            )
+                    }
                 }
-            }
         return when (root) {
             is UiTimelineV2.Feed -> {
                 root
@@ -254,12 +257,14 @@ internal object TimelinePagingMapper {
         data: UiTimelineV2,
         referenceType: ReferenceType,
         rootStatusId: String,
+        referenceOrder: Int,
     ) = DbStatusReferenceWithStatus(
         reference =
             DbStatusReference(
                 referenceType = referenceType,
                 statusId = rootStatusId,
                 referenceStatusId = DbStatus.createId(data.accountType as DbAccountType, data.statusKey),
+                referenceOrder = referenceOrder,
                 _id = Uuid.random().toString(),
             ),
         status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true),
@@ -270,6 +275,7 @@ internal object TimelinePagingMapper {
         rootStatusId: String,
     ): List<DbStatusReferenceWithStatus> {
         val visited = mutableSetOf<MicroBlogKey>()
+        var referenceOrder = 0
 
         fun visit(post: UiTimelineV2.Post): List<DbStatusReferenceWithStatus> =
             post.directReferencePosts().flatMap { (referenceType, referencedPost) ->
@@ -278,6 +284,7 @@ internal object TimelinePagingMapper {
                         data = referencedPost,
                         referenceType = referenceType,
                         rootStatusId = rootStatusId,
+                        referenceOrder = referenceOrder++,
                     ),
                 ) +
                     if (visited.add(referencedPost.statusKey)) {
@@ -329,29 +336,29 @@ internal object TimelinePagingMapper {
         }
 
     private fun UiTimelineV2.Post.directReferences() =
-        (
-            references +
-                quote.map {
-                    UiTimelineV2.Post.Reference(
-                        statusKey = it.statusKey,
-                        type = ReferenceType.Quote,
-                    )
-                } +
-                parents.map {
-                    UiTimelineV2.Post.Reference(
-                        statusKey = it.statusKey,
-                        type = ReferenceType.Reply,
-                    )
-                } +
-                listOfNotNull(
-                    internalRepost?.let {
-                        UiTimelineV2.Post.Reference(
-                            statusKey = it.statusKey,
-                            type = ReferenceType.Retweet,
-                        )
-                    },
+        buildList {
+            quote.mapTo(this) {
+                UiTimelineV2.Post.Reference(
+                    statusKey = it.statusKey,
+                    type = ReferenceType.Quote,
                 )
-        ).distinctBy { it.type to it.statusKey }
+            }
+            parents.mapTo(this) {
+                UiTimelineV2.Post.Reference(
+                    statusKey = it.statusKey,
+                    type = ReferenceType.Reply,
+                )
+            }
+            internalRepost?.let {
+                add(
+                    UiTimelineV2.Post.Reference(
+                        statusKey = it.statusKey,
+                        type = ReferenceType.Retweet,
+                    ),
+                )
+            }
+            addAll(references)
+        }.distinctBy { it.type to it.statusKey }
             .toImmutableList()
 
     private fun dbStatusWithUserToUiTimeline(

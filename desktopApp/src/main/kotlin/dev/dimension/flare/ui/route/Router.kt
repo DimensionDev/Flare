@@ -344,6 +344,7 @@ internal fun Router(
                         accountType = args.accountType,
                         statusKey = args.statusKey,
                         onBack = onBack,
+                        navigate = navigate,
                     )
                 }
 
@@ -966,6 +967,7 @@ internal fun Router(
                         conversationId = args.conversationId,
                         initialMessage = args.initialMessage,
                         onBack = onBack,
+                        navigate = navigate,
                     )
                 }
 

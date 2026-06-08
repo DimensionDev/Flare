@@ -5,6 +5,7 @@ struct StatusInsightSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
     @StateObject private var presenter: KotlinPresenter<StatusInsightPresenterState>
+    let onNavigate: (Route) -> Void
 
     var body: some View {
         AgentChatView(
@@ -14,18 +15,37 @@ struct StatusInsightSheet: View {
             canSend: presenter.state.canSend,
             error: presenter.state.error,
             runningTrace: presenter.state.currentTrace?.localizedLabel ?? String(localized: "status_insight_analyzing"),
+            inputRequest: presenter.state.inputRequest,
             inputPlaceholder: String(localized: "agent_chat_input_placeholder"),
             messageText: { $0.text },
+            messageParts: { Array($0.parts) },
+            messageInputRequest: { $0.inputRequest },
+            messageInputRequestSelected: { $0.inputRequestSelected },
+            messageInputRequestSelectedOptionId: { $0.inputRequestSelectedOptionId },
             isUserMessage: { message in
                 String(describing: type(of: message)).contains("User")
             },
             onInputChange: presenter.state.setInput,
             onSend: presenter.state.sendMessage,
+            onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
+            onPostClick: { post in
+                onNavigate(.statusDetail(post.accountType, post.statusKey))
+            },
+            onUserClick: { user in
+                if let route = agentRoute(for: user) {
+                    onNavigate(route)
+                }
+            },
             leadingContent: {
                 AnyView(
                     Group {
                         if let post = presenter.state.post {
-                            StatusInsightPostPreview(post: post)
+                            StatusInsightPostPreview(
+                                post: post,
+                                onClick: {
+                                    onNavigate(.statusDetail(post.accountType, post.statusKey))
+                                }
+                            )
                         }
                     }
                 )
@@ -54,8 +74,10 @@ struct StatusInsightSheet: View {
 extension StatusInsightSheet {
     init(
         accountType: AccountType,
-        statusKey: MicroBlogKey
+        statusKey: MicroBlogKey,
+        onNavigate: @escaping (Route) -> Void = { _ in }
     ) {
+        self.onNavigate = onNavigate
         self._presenter = .init(
             wrappedValue: .init(
                 presenter: StatusInsightPresenter(
@@ -70,6 +92,12 @@ extension StatusInsightSheet {
 struct StatusInsightPostPreview: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     let post: UiTimelineV2.Post
+    let onClick: (() -> Void)?
+
+    init(post: UiTimelineV2.Post, onClick: (() -> Void)? = nil) {
+        self.post = post
+        self.onClick = onClick
+    }
 
     var body: some View {
         StatusView(
@@ -88,7 +116,20 @@ struct StatusInsightPostPreview: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color(.separator), lineWidth: 1)
         )
+        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .if(onClick != nil) { view in
+            view.onTapGesture {
+                onClick?()
+            }
+        }
     }
+}
+
+private func agentRoute(for user: UiProfile) -> Route? {
+    guard let event = user.clickEvent as? ClickEventDeeplink else {
+        return nil
+    }
+    return Route.fromDeepLink(url: event.url)
 }
 
 struct StatusInsightCurrentTrace: View {

@@ -10,14 +10,23 @@ struct AgentChatView<Message>: View {
     let canSend: Bool
     let error: KotlinThrowable?
     let runningTrace: String
+    let inputRequest: AgentInputRequest?
     let inputPlaceholder: String
     let messageText: (Message) -> String
+    let messageParts: (Message) -> [AgentMessagePart]
+    let messageInputRequest: (Message) -> AgentInputRequest?
+    let messageInputRequestSelected: (Message) -> Bool
+    let messageInputRequestSelectedOptionId: (Message) -> String?
     let isUserMessage: (Message) -> Bool
     let onInputChange: (String) -> Void
     let onSend: () -> Void
+    let onInputRequestOptionSelected: (AgentInputRequest.Option) -> Void
+    let onPostClick: (UiTimelineV2.Post) -> Void
+    let onUserClick: (UiProfile) -> Void
     private let leadingContent: () -> AnyView
 
     @State private var draft: String = ""
+    @State private var inputBarHeight: CGFloat = 0
 
     init(
         messages: [Message],
@@ -26,11 +35,19 @@ struct AgentChatView<Message>: View {
         canSend: Bool,
         error: KotlinThrowable?,
         runningTrace: String,
+        inputRequest: AgentInputRequest? = nil,
         inputPlaceholder: String,
         messageText: @escaping (Message) -> String,
+        messageParts: @escaping (Message) -> [AgentMessagePart],
+        messageInputRequest: @escaping (Message) -> AgentInputRequest? = { _ in nil },
+        messageInputRequestSelected: @escaping (Message) -> Bool = { _ in false },
+        messageInputRequestSelectedOptionId: @escaping (Message) -> String? = { _ in nil },
         isUserMessage: @escaping (Message) -> Bool,
         onInputChange: @escaping (String) -> Void,
         onSend: @escaping () -> Void,
+        onInputRequestOptionSelected: @escaping (AgentInputRequest.Option) -> Void = { _ in },
+        onPostClick: @escaping (UiTimelineV2.Post) -> Void = { _ in },
+        onUserClick: @escaping (UiProfile) -> Void = { _ in },
         leadingContent: @escaping () -> AnyView = { AnyView(EmptyView()) }
     ) {
         self.messages = messages
@@ -39,57 +56,78 @@ struct AgentChatView<Message>: View {
         self.canSend = canSend
         self.error = error
         self.runningTrace = runningTrace
+        self.inputRequest = inputRequest
         self.inputPlaceholder = inputPlaceholder
         self.messageText = messageText
+        self.messageParts = messageParts
+        self.messageInputRequest = messageInputRequest
+        self.messageInputRequestSelected = messageInputRequestSelected
+        self.messageInputRequestSelectedOptionId = messageInputRequestSelectedOptionId
         self.isUserMessage = isUserMessage
         self.onInputChange = onInputChange
         self.onSend = onSend
+        self.onInputRequestOptionSelected = onInputRequestOptionSelected
+        self.onPostClick = onPostClick
+        self.onUserClick = onUserClick
         self.leadingContent = leadingContent
     }
 
     var body: some View {
-        AgentChatMessagesView(rows: rows)
-            .background(Color(.systemGroupedBackground))
-            .ignoresSafeArea()
-            .safeAreaInset(edge: .bottom) {
-                HStack(alignment: .center, spacing: 10) {
-                    TextField(inputPlaceholder, text: $draft, axis: .vertical)
-                        .lineLimit(1...4)
-                        .disabled(isRunning)
-                        .submitLabel(.send)
-                        .onSubmit {
-                            if canSend {
-                                submit()
-                            }
-                        }
-                        .padding()
-                        .backport
-                        .glassEffect(.regularInteractive, in: .capsule, fallbackBackground: .regularMaterial)
+        ZStack {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
 
-                    Button {
+            AgentChatMessagesView(rows: rows, bottomAccessoryInset: inputBarHeight)
+                .ignoresSafeArea(.container, edges: .vertical)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            HStack(alignment: .center, spacing: 10) {
+                TextField(inputRequest?.freeTextPlaceholder ?? inputPlaceholder, text: $draft, axis: .vertical)
+                    .lineLimit(1...4)
+                    .submitLabel(.send)
+                    .onSubmit {
                         submit()
-                    } label: {
-                        Image(systemName: "paperplane.fill")
-                            .font(.title2)
-                            .frame(width: 48, height: 48)
                     }
+                    .padding()
                     .backport
-                    .glassProminentButtonStyle()
-                    .disabled(!canSend)
+                    .glassEffect(.regularInteractive, in: .capsule, fallbackBackground: .regularMaterial)
+
+                Button {
+                    submit()
+                } label: {
+                    Image(systemName: "paperplane.fill")
+                        .font(.title2)
+                        .frame(width: 48, height: 48)
                 }
-                .padding([.horizontal, .bottom])
+                .backport
+                .glassProminentButtonStyle()
+                .disabled(!canSend)
             }
-            .onAppear {
-                draft = input
-            }
-            .onChange(of: input) { _, value in
-                if draft != value {
-                    draft = value
+            .frame(maxWidth: .infinity)
+            .padding([.horizontal, .bottom])
+            .background {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: AgentChatInputBarHeightPreferenceKey.self,
+                        value: proxy.size.height
+                    )
                 }
             }
-            .onChange(of: draft) { _, value in
-                onInputChange(value)
+        }
+        .onPreferenceChange(AgentChatInputBarHeightPreferenceKey.self) { height in
+            inputBarHeight = height
+        }
+        .onAppear {
+            draft = input
+        }
+        .onChange(of: input) { _, value in
+            if draft != value {
+                draft = value
             }
+        }
+        .onChange(of: draft) { _, value in
+            onInputChange(value)
+        }
     }
 
     private var rows: [AgentChatRow] {
@@ -102,7 +140,14 @@ struct AgentChatView<Message>: View {
                 .message(
                     id: "message-\(index)",
                     text: messageText(message),
-                    isUser: isUserMessage(message)
+                    parts: messageParts(message),
+                    inputRequest: messageInputRequest(message),
+                    inputRequestSelected: messageInputRequestSelected(message),
+                    inputRequestSelectedOptionId: messageInputRequestSelectedOptionId(message),
+                    isUser: isUserMessage(message),
+                    onInputRequestOptionSelected: onInputRequestOptionSelected,
+                    onPostClick: onPostClick,
+                    onUserClick: onUserClick
                 )
             }
         )
@@ -119,21 +164,202 @@ struct AgentChatView<Message>: View {
     }
 
     private func submit() {
+        guard canSend else {
+            return
+        }
         onSend()
         draft = ""
     }
 }
 
+private struct AgentChatInputBarHeightPreferenceKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+private struct AgentInputRequestOptionsView: View {
+    let request: AgentInputRequest
+    let enabled: Bool
+    let selectedOptionId: String?
+    let onOptionSelected: (AgentInputRequest.Option) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            let options = visibleOptions
+            let postOptions = options.filter { $0.postPreview != nil }
+            let userOptions = options.filter { $0.userPreview != nil }
+            let actionOptions = options.filter { $0.postPreview == nil && $0.userPreview == nil }
+
+            if let previewPost = request.postPreview,
+               !actionOptions.isEmpty {
+                AgentComposeConfirmationRequestView(
+                    request: request,
+                    previewPost: previewPost,
+                    actionOptions: actionOptions,
+                    enabled: enabled,
+                    onOptionSelected: onOptionSelected
+                )
+            } else {
+                Text(request.prompt)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                ForEach(postOptions, id: \.id) { option in
+                    if let post = option.postPreview {
+                        Button {
+                            if enabled {
+                                onOptionSelected(option)
+                            }
+                        } label: {
+                            StatusInsightPostPreview(
+                                post: post,
+                                onClick: {
+                                    onOptionSelected(option)
+                                }
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!enabled)
+                    }
+                }
+
+                ForEach(userOptions, id: \.id) { option in
+                    if let user = option.userPreview {
+                        Button {
+                            if enabled {
+                                onOptionSelected(option)
+                            }
+                        } label: {
+                            UserCompatView(
+                                data: user,
+                                trailing: { EmptyView() },
+                                onClicked: {
+                                    onOptionSelected(option)
+                                }
+                            )
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color(.separator).opacity(0.55), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!enabled)
+                    }
+                }
+
+                if !actionOptions.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(actionOptions, id: \.id) { option in
+                            Button {
+                                if enabled {
+                                    onOptionSelected(option)
+                                }
+                            } label: {
+                                HStack {
+                                    Text(option.label)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                            .frame(maxWidth: .infinity)
+                            .disabled(!enabled)
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var visibleOptions: [AgentInputRequest.Option] {
+        let options = Array(request.options)
+        guard let selectedOptionId else {
+            return options
+        }
+        return options.filter { $0.id == selectedOptionId }
+    }
+}
+
+private struct AgentComposeConfirmationRequestView: View {
+    let request: AgentInputRequest
+    let previewPost: UiTimelineV2.Post
+    let actionOptions: [AgentInputRequest.Option]
+    let enabled: Bool
+    let onOptionSelected: (AgentInputRequest.Option) -> Void
+
+    private var title: String {
+        request.prompt
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .first
+            .map(String.init) ?? "确认发送这条内容吗？"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title.isEmpty ? "确认发送这条内容吗？" : title)
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            StatusInsightPostPreview(
+                post: previewPost,
+                onClick: {}
+            )
+
+            HStack(spacing: 8) {
+                ForEach(actionOptions, id: \.id) { option in
+                    if option.id == "confirm" {
+                        Button {
+                            if enabled {
+                                onOptionSelected(option)
+                            }
+                        } label: {
+                            Text(option.label)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(maxWidth: .infinity)
+                        .disabled(!enabled)
+                    } else {
+                        Button(role: option.id == "cancel" ? .cancel : nil) {
+                            if enabled {
+                                onOptionSelected(option)
+                            }
+                        } label: {
+                            Text(option.label)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
+                        .disabled(!enabled)
+                    }
+                }
+            }
+        }
+    }
+}
+
 private struct AgentChatMessagesView: UIViewControllerRepresentable {
     let rows: [AgentChatRow]
+    let bottomAccessoryInset: CGFloat
 
     func makeUIViewController(context: Context) -> AgentChatMessagesController {
         let controller = AgentChatMessagesController()
+        controller.bottomAccessoryInset = bottomAccessoryInset
         controller.update(rows: rows)
         return controller
     }
 
     func updateUIViewController(_ controller: AgentChatMessagesController, context: Context) {
+        controller.bottomAccessoryInset = bottomAccessoryInset
         controller.update(rows: rows)
     }
 }
@@ -151,11 +377,32 @@ private struct AgentChatRow {
         )
     }
 
-    static func message(id: String, text: String, isUser: Bool) -> AgentChatRow {
+    static func message(
+        id: String,
+        text: String,
+        parts: [AgentMessagePart],
+        inputRequest: AgentInputRequest?,
+        inputRequestSelected: Bool,
+        inputRequestSelectedOptionId: String?,
+        isUser: Bool,
+        onInputRequestOptionSelected: @escaping (AgentInputRequest.Option) -> Void,
+        onPostClick: @escaping (UiTimelineV2.Post) -> Void,
+        onUserClick: @escaping (UiProfile) -> Void
+    ) -> AgentChatRow {
         AgentChatRow(
             id: id,
-            renderHash: text.hashValue ^ isUser.hashValue,
-            content: .message(text: text, isUser: isUser)
+            renderHash: text.hashValue ^ parts.renderHash ^ isUser.hashValue ^ (inputRequest?.requestId.hashValue ?? 0) ^ inputRequestSelected.hashValue ^ (inputRequestSelectedOptionId?.hashValue ?? 0),
+            content: .message(
+                text: text,
+                parts: parts,
+                inputRequest: inputRequest,
+                inputRequestSelected: inputRequestSelected,
+                inputRequestSelectedOptionId: inputRequestSelectedOptionId,
+                isUser: isUser,
+                onInputRequestOptionSelected: onInputRequestOptionSelected,
+                onPostClick: onPostClick,
+                onUserClick: onUserClick
+            )
         )
     }
 
@@ -178,7 +425,17 @@ private struct AgentChatRow {
 
 private enum AgentChatRowContent {
     case leading(AnyView)
-    case message(text: String, isUser: Bool)
+    case message(
+        text: String,
+        parts: [AgentMessagePart],
+        inputRequest: AgentInputRequest?,
+        inputRequestSelected: Bool,
+        inputRequestSelectedOptionId: String?,
+        isUser: Bool,
+        onInputRequestOptionSelected: (AgentInputRequest.Option) -> Void,
+        onPostClick: (UiTimelineV2.Post) -> Void,
+        onUserClick: (UiProfile) -> Void
+    )
     case running(String)
     case error(String)
 }
@@ -188,10 +445,6 @@ private final class AgentChatMessagesController: UIViewController, UICollectionV
     private enum Section {
         static let main = 0
     }
-    private enum Metrics {
-        static let bottomInputInset: CGFloat = 112
-    }
-
     private let chatLayout = CollectionViewChatLayout()
     private var collectionView: UICollectionView!
     private var dataSource: UICollectionViewDiffableDataSource<Int, String>!
@@ -199,24 +452,33 @@ private final class AgentChatMessagesController: UIViewController, UICollectionV
     private var rowIDs: [String] = []
     private var renderHashes: [String: Int] = [:]
     private var didApplyInitialRows = false
-    private var keyboardBottomInset: CGFloat = 0
+    private var shouldStickToBottom = true
+    var bottomAccessoryInset: CGFloat = 0 {
+        didSet {
+            guard abs(bottomAccessoryInset - oldValue) > 0.5 else { return }
+            guard isViewLoaded else { return }
+
+            let shouldScrollToBottom = shouldStickToBottom || isNearBottom
+            updateCollectionInsets()
+            if shouldScrollToBottom {
+                requestScrollToBottom(animated: false)
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
         setupDataSource()
-        setupKeyboardObservers()
         applySnapshot(animated: false)
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if !didApplyInitialRows, collectionView.numberOfItems(inSection: Section.main) > 0 {
             didApplyInitialRows = true
+            requestScrollToBottom(animated: false)
+        } else if shouldStickToBottom {
             scrollToBottom(animated: false)
         }
     }
@@ -283,47 +545,9 @@ private final class AgentChatMessagesController: UIViewController, UICollectionV
         }
     }
 
-    private func setupKeyboardObservers() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillChangeFrame(_:)),
-            name: UIResponder.keyboardWillChangeFrameNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide(_:)),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-    }
-
-    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
-        guard let endFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
-            return
-        }
-
-        let wasNearBottom = isNearBottom
-        let convertedEndFrame = view.convert(endFrame, from: nil)
-        keyboardBottomInset = max(0, view.bounds.maxY - convertedEndFrame.minY)
-        updateCollectionInsets()
-        if wasNearBottom {
-            scrollToBottom(animated: false)
-        }
-    }
-
-    @objc private func keyboardWillHide(_ notification: Notification) {
-        let wasNearBottom = isNearBottom
-        keyboardBottomInset = 0
-        updateCollectionInsets()
-        if wasNearBottom {
-            scrollToBottom(animated: false)
-        }
-    }
-
     private func updateCollectionInsets() {
         guard collectionView != nil else { return }
-        let bottomInset = Metrics.bottomInputInset + keyboardBottomInset
+        let bottomInset = bottomAccessoryInset
         var contentInset = collectionView.contentInset
         contentInset.bottom = bottomInset
         collectionView.contentInset = contentInset
@@ -336,15 +560,15 @@ private final class AgentChatMessagesController: UIViewController, UICollectionV
     private func applySnapshot(animated: Bool) {
         guard dataSource != nil else { return }
 
-        let wasNearBottom = isNearBottom
-        let positionSnapshot = wasNearBottom ? nil : chatLayout.getContentOffsetSnapshot(from: .top)
+        let shouldScrollToBottom = shouldStickToBottom || isNearBottom
+        let positionSnapshot = shouldScrollToBottom ? nil : chatLayout.getContentOffsetSnapshot(from: .top)
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         snapshot.appendSections([Section.main])
         snapshot.appendItems(rowIDs, toSection: Section.main)
         dataSource.apply(snapshot, animatingDifferences: animated) { [weak self] in
             guard let self else { return }
-            if wasNearBottom {
-                self.scrollToBottom(animated: false)
+            if shouldScrollToBottom {
+                self.requestScrollToBottom(animated: false)
             } else if let positionSnapshot {
                 self.chatLayout.restoreContentOffset(with: positionSnapshot)
             }
@@ -353,21 +577,50 @@ private final class AgentChatMessagesController: UIViewController, UICollectionV
 
     private var isNearBottom: Bool {
         guard collectionView.bounds.height > 0 else { return true }
-        let maxOffsetY = max(
+        return collectionView.contentOffset.y >= bottomContentOffsetY - 80
+    }
+
+    private var bottomContentOffsetY: CGFloat {
+        max(
             -collectionView.adjustedContentInset.top,
             collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
         )
-        return collectionView.contentOffset.y >= maxOffsetY - 80
+    }
+
+    private func requestScrollToBottom(animated: Bool) {
+        shouldStickToBottom = true
+        scrollToBottom(animated: animated)
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.shouldStickToBottom else { return }
+            self.scrollToBottom(animated: false)
+        }
     }
 
     private func scrollToBottom(animated: Bool) {
-        let itemCount = collectionView.numberOfItems(inSection: Section.main)
-        guard itemCount > 0 else { return }
-        collectionView.scrollToItem(
-            at: IndexPath(item: itemCount - 1, section: Section.main),
-            at: .bottom,
+        guard collectionView.bounds.height > 0 else { return }
+        collectionView.layoutIfNeeded()
+        collectionView.setContentOffset(
+            CGPoint(
+                x: collectionView.contentOffset.x,
+                y: bottomContentOffsetY
+            ),
             animated: animated
         )
+    }
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        guard scrollView === collectionView else { return }
+        shouldStickToBottom = false
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        guard scrollView === collectionView, !decelerate else { return }
+        shouldStickToBottom = isNearBottom
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard scrollView === collectionView else { return }
+        shouldStickToBottom = isNearBottom
     }
 
     private func reconfigureVisibleCells() {
@@ -448,8 +701,18 @@ private struct AgentChatRowView: View {
             case .leading(let content):
                 content
                     .padding(.horizontal)
-            case .message(let text, let isUser):
-                AgentChatMessageBubble(text: text, isUser: isUser)
+            case .message(let text, let parts, let inputRequest, let inputRequestSelected, let inputRequestSelectedOptionId, let isUser, let onInputRequestOptionSelected, let onPostClick, let onUserClick):
+                AgentChatMessageBubble(
+                    text: text,
+                    parts: parts,
+                    inputRequest: inputRequest,
+                    inputRequestSelected: inputRequestSelected,
+                    inputRequestSelectedOptionId: inputRequestSelectedOptionId,
+                    isUser: isUser,
+                    onInputRequestOptionSelected: onInputRequestOptionSelected,
+                    onPostClick: onPostClick,
+                    onUserClick: onUserClick
+                )
             case .running(let text):
                 StatusInsightCurrentTrace(trace: text)
                     .padding(.horizontal)
@@ -466,7 +729,14 @@ private struct AgentChatRowView: View {
 
 private struct AgentChatMessageBubble: View {
     let text: String
+    let parts: [AgentMessagePart]
+    let inputRequest: AgentInputRequest?
+    let inputRequestSelected: Bool
+    let inputRequestSelectedOptionId: String?
     let isUser: Bool
+    let onInputRequestOptionSelected: (AgentInputRequest.Option) -> Void
+    let onPostClick: (UiTimelineV2.Post) -> Void
+    let onUserClick: (UiProfile) -> Void
 
     var body: some View {
         HStack {
@@ -474,7 +744,7 @@ private struct AgentChatMessageBubble: View {
                 Spacer(minLength: 44)
             }
 
-            messageTextView
+            messageContent
                     .textSelection(.enabled)
                     .padding(12)
                     .foregroundStyle(isUser ? .white : .primary)
@@ -496,16 +766,87 @@ private struct AgentChatMessageBubble: View {
         .padding(.horizontal)
     }
 
-    private var messageTextView: Text {
+    @ViewBuilder
+    private var messageContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if parts.isEmpty {
+                fallbackMessageText
+            } else {
+                ForEach(Array(parts.enumerated()), id: \.offset) { _, part in
+                    switch part {
+                    case let textPart as AgentMessagePartText:
+                        markdownText(textPart.markdown)
+                    case let postPart as AgentMessagePartPostCard:
+                        StatusInsightPostPreview(
+                            post: postPart.post,
+                            onClick: {
+                                onPostClick(postPart.post)
+                            }
+                        )
+                    case let userPart as AgentMessagePartUserCard:
+                        AgentUserPreview(
+                            user: userPart.user,
+                            onClick: {
+                                onUserClick(userPart.user)
+                            }
+                        )
+                    default:
+                        EmptyView()
+                    }
+                }
+            }
+            if !isUser, let inputRequest {
+                AgentInputRequestOptionsView(
+                    request: inputRequest,
+                    enabled: !inputRequestSelected,
+                    selectedOptionId: inputRequestSelectedOptionId,
+                    onOptionSelected: onInputRequestOptionSelected
+                )
+            }
+        }
+    }
+
+    private var fallbackMessageText: Text {
+        markdownText(text)
+    }
+
+    private func markdownText(_ value: String) -> Text {
         if isUser {
-            Text(verbatim: text)
+            Text(verbatim: value)
         } else if let attributedText = try? AttributedString(
-            markdown: text,
+            markdown: value,
             options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         ) {
             Text(attributedText)
         } else {
-            Text(verbatim: text)
+            Text(verbatim: value)
+        }
+    }
+}
+
+private struct AgentUserPreview: View {
+    let user: UiProfile
+    let onClick: () -> Void
+
+    var body: some View {
+        UserCompatView(
+            data: user,
+            trailing: { EmptyView() },
+            onClicked: onClick
+        )
+        .padding(10)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.separator).opacity(0.55), lineWidth: 1)
+        )
+    }
+}
+
+private extension Array where Element == AgentMessagePart {
+    var renderHash: Int {
+        reduce(count.hashValue) { partial, part in
+            partial ^ String(describing: type(of: part)).hashValue
         }
     }
 }

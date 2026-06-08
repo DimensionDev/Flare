@@ -206,6 +206,57 @@ internal fun List<Status>.render(accountKey: MicroBlogKey): List<UiTimelineV2> =
         .resolveParents()
         .collapseStandaloneParents()
 
+internal fun renderStatusContext(
+    ancestors: List<Status>,
+    current: Status,
+    descendants: List<Status>,
+    accountKey: MicroBlogKey,
+): List<UiTimelineV2> {
+    val contextRootItems =
+        (ancestors + current)
+            .map { it.render(host = accountKey.host, accountKey = accountKey) }
+    val descendantPosts =
+        descendants
+            .mapNotNull {
+                it.render(host = accountKey.host, accountKey = accountKey) as? UiTimelineV2.Post
+            }
+    val chains = mutableListOf<MutableList<UiTimelineV2.Post>>()
+    val chainByStatusKey = mutableMapOf<MicroBlogKey, MutableList<UiTimelineV2.Post>>()
+
+    descendantPosts.forEach { post ->
+        val parentKey =
+            post.references
+                .firstOrNull { it.type == ReferenceType.Reply }
+                ?.statusKey
+        val parentChain = parentKey?.let { chainByStatusKey[it] }
+        val chain =
+            if (parentChain != null && parentChain.lastOrNull()?.statusKey == parentKey) {
+                parentChain
+            } else {
+                mutableListOf<UiTimelineV2.Post>().also {
+                    chains += it
+                }
+            }
+        val standalonePost = post.copy(parents = persistentListOf())
+        chain += standalonePost
+        chainByStatusKey[standalonePost.statusKey] = chain
+    }
+
+    val descendantChainItems =
+        chains.mapNotNull { chain ->
+            val post = chain.lastOrNull() ?: return@mapNotNull null
+            post.copy(
+                parents =
+                    chain
+                        .dropLast(1)
+                        .map { it.copy(parents = persistentListOf()) }
+                        .toImmutableList(),
+            )
+        }
+
+    return contextRootItems + descendantChainItems
+}
+
 internal fun Status.render(
     host: String,
     accountKey: MicroBlogKey?,
@@ -727,9 +778,14 @@ private fun List<UiTimelineV2>.resolveParents(): List<UiTimelineV2> {
         val parent =
             post.references
                 .firstOrNull { it.type == ReferenceType.Reply }
+                ?.takeUnless { it.statusKey in visiting }
                 ?.let { postsByKey[it.statusKey] }
                 ?: return persistentListOf()
-        return listOf(parent.copy(parents = resolveParents(parent, visiting))).toImmutableList()
+        return (
+            resolveParents(parent, visiting) +
+                parent.copy(parents = persistentListOf())
+        ).distinctBy { it.statusKey }
+            .toImmutableList()
     }
 
     return map { item ->

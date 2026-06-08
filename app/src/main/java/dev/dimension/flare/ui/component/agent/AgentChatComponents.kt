@@ -28,8 +28,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +45,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -59,6 +64,7 @@ import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -134,6 +140,20 @@ internal fun <Message : Any> AgentChatScaffold(
     leadingContentItemCount: Int = 0,
     leadingContent: LazyListScope.() -> Unit = {},
 ) {
+    val textState = rememberTextFieldState(input)
+    val currentOnInputChange by rememberUpdatedState(onInputChange)
+
+    LaunchedEffect(input) {
+        if (textState.text.toString() != input) {
+            textState.setTextAndPlaceCursorAtEnd(input)
+        }
+    }
+    LaunchedEffect(textState) {
+        snapshotFlow { textState.text.toString() }
+            .distinctUntilChanged()
+            .collect(currentOnInputChange)
+    }
+
     val bottomBarHeight =
         if (reserveBottomBarHeight) {
             LocalBottomBarHeight.current
@@ -156,12 +176,11 @@ internal fun <Message : Any> AgentChatScaffold(
                         thickness = FlareDividerDefaults.thickness,
                     )
                     AgentChatInput(
-                        value = input,
+                        state = textState,
                         enabled = !isRunning,
                         canSend = canSend,
                         placeholder = inputPlaceholder,
                         sendContentDescription = sendContentDescription,
-                        onValueChange = onInputChange,
                         onSend = onSend,
                         modifier =
                             Modifier
@@ -337,34 +356,28 @@ internal fun AgentChatMessageBubble(
 
 @Composable
 internal fun AgentChatInput(
-    value: String,
+    state: TextFieldState,
     enabled: Boolean,
     canSend: Boolean,
     placeholder: String,
     sendContentDescription: String,
-    onValueChange: (String) -> Unit,
     onSend: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
+        state = state,
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
-        minLines = 1,
-        maxLines = 4,
+        lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 4),
         placeholder = {
             Text(text = placeholder)
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-        keyboardActions =
-            KeyboardActions(
-                onSend = {
-                    if (canSend) {
-                        onSend()
-                    }
-                },
-            ),
+        onKeyboardAction = {
+            if (canSend) {
+                onSend()
+            }
+        },
         trailingIcon = {
             IconButton(
                 onClick = onSend,

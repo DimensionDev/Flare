@@ -4,6 +4,8 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
 import kotlinx.serialization.Serializable
 
+// icon should add after the last one, otherwise it will break the serialization compatibility.
+// If you want to remove an icon, please deprecate it and hide it from the tab/group icon picker instead of removing it directly.
 @Serializable
 @Immutable
 public enum class UiIcon {
@@ -21,7 +23,6 @@ public enum class UiIcon {
     Mastodon,
     Misskey,
     Bluesky,
-    Pixiv,
     List,
     Feeds,
     Messages,
@@ -61,6 +62,7 @@ public enum class UiIcon {
     X,
     Translate,
     UnFavourite,
+    Pixiv,
 }
 
 /**

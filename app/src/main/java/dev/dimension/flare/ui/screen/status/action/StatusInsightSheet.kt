@@ -1,17 +1,28 @@
 package dev.dimension.flare.ui.screen.status.action
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -23,16 +34,19 @@ import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.status.StatusInsightPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
-import dev.dimension.flare.ui.component.agent.AgentChatScaffold
+import dev.dimension.flare.ui.component.agent.AgentChatCurrentTrace
+import dev.dimension.flare.ui.component.agent.AgentChatError
+import dev.dimension.flare.ui.component.agent.AgentChatInput
+import dev.dimension.flare.ui.component.agent.AgentChatMessageBubble
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun StatusInsightSheet(
     accountType: AccountType,
@@ -48,40 +62,92 @@ internal fun StatusInsightSheet(
         }.invoke()
     }
 
-    val title = stringResource(id = R.string.status_insight_title)
+    val textState = rememberTextFieldState(state.input)
+    val currentOnInputChange by rememberUpdatedState(state::setInput)
 
-    AgentChatScaffold(
-        messages = state.messages,
-        input = state.input,
-        isRunning = state.isRunning,
-        canSend = state.canSend,
-        error = state.error,
-        runningTrace = state.currentTrace?.label() ?: stringResource(id = R.string.status_insight_analyzing),
-        inputPlaceholder = stringResource(id = R.string.status_insight_input_placeholder),
-        sendContentDescription = stringResource(id = R.string.status_insight_send),
-        messageText = StatusInsightPresenter.Message::text,
-        isUserMessage = { it is StatusInsightPresenter.Message.User },
-        onInputChange = state::setInput,
-        onSend = state::sendMessage,
-        modifier = modifier,
-        topBar = {
-            FlareTopAppBar(
-                title = {
-                    Text(text = title)
-                },
-                windowInsets = WindowInsets(0),
-            )
-        },
-        reserveBottomBarHeight = false,
-        leadingContentItemCount = if (state.post != null) 1 else 0,
-        leadingContent = {
+    LaunchedEffect(state.input) {
+        if (textState.text.toString() != state.input) {
+            textState.setTextAndPlaceCursorAtEnd(state.input)
+        }
+    }
+    LaunchedEffect(textState) {
+        snapshotFlow { textState.text.toString() }
+            .distinctUntilChanged()
+            .collect(currentOnInputChange)
+    }
+
+    val listState = rememberLazyListState()
+    val itemCount =
+        state.messages.size +
+            (if (state.post != null) 1 else 0) +
+            (if (state.isRunning) 1 else 0) +
+            (if (state.error != null) 1 else 0)
+
+    LaunchedEffect(itemCount) {
+        if (itemCount > 0) {
+            listState.animateScrollToItem(itemCount - 1)
+        }
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        LazyColumn(
+            modifier =
+                Modifier
+                    .weight(1f, fill = false)
+                    .fillMaxWidth()
+                    .imeNestedScroll()
+                    .padding(horizontal = screenHorizontalPadding),
+            state = listState,
+            contentPadding = PaddingValues(vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             state.post?.let { post ->
                 item {
                     StatusInsightPostPreview(post = post)
                 }
             }
-        },
-    )
+
+            items(state.messages) { message ->
+                AgentChatMessageBubble(
+                    text = message.text,
+                    isUser = message is StatusInsightPresenter.Message.User,
+                )
+            }
+
+            if (state.isRunning) {
+                item {
+                    AgentChatCurrentTrace(
+                        trace = state.currentTrace?.label() ?: stringResource(id = R.string.status_insight_analyzing),
+                    )
+                }
+            }
+
+            state.error?.let { throwable ->
+                item {
+                    AgentChatError(
+                        text = throwable.message ?: stringResource(id = R.string.status_insight_error),
+                    )
+                }
+            }
+        }
+        AgentChatInput(
+            state = textState,
+            enabled = !state.isRunning,
+            canSend = state.canSend,
+            placeholder = stringResource(id = R.string.status_insight_input_placeholder),
+            sendContentDescription = stringResource(id = R.string.status_insight_send),
+            onSend = state::sendMessage,
+            modifier =
+                Modifier
+                    .imePadding()
+                    .padding(
+                        horizontal = screenHorizontalPadding,
+                        vertical = 8.dp,
+                    ),
+        )
+    }
 }
 
 @Composable

@@ -2,6 +2,8 @@ package dev.dimension.flare.ui.model
 
 import kotlinx.serialization.Serializable
 
+// strings should add after the last one, otherwise it will break the serialization compatibility.
+// If you want to remove a strings, please deprecate it and hide it from the tab/group icon picker instead of removing it directly.
 @Serializable
 public enum class UiStrings {
     Home,
@@ -14,7 +16,6 @@ public enum class UiStrings {
     Featured,
     Bookmark,
     Favourite,
-    Following,
     List,
     Feeds,
     DirectMessage,
@@ -25,8 +26,6 @@ public enum class UiStrings {
     Liked,
     AllRssFeeds,
     Posts,
-    PostsWithReplies,
-    Media,
     Channel,
     Default,
     Login,
@@ -52,6 +51,9 @@ public enum class UiStrings {
     PixivRankingDayManga,
     Illustrations,
     Manga,
+    Following,
+    PostsWithReplies,
+    Media,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

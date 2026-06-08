@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.nucleus)
-    id("com.github.gmazzo.buildconfig") version "6.0.9"
+    id("com.github.gmazzo.buildconfig") version "6.0.10"
 }
 
 dependencies {

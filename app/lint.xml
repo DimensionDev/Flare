@@ -1,3 +1,5 @@
-<issue id="ComposeCompositionLocalUsage">
-    <option name="allowed-composition-locals" value="LocalAppearanceSettings" />
-</issue>
+<lint>
+    <issue id="ComposeCompositionLocalUsage">
+        <option name="allowed-composition-locals" value="LocalAppearanceSettings" />
+    </issue>
+</lint>

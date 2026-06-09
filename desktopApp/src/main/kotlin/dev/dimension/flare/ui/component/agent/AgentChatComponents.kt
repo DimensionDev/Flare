@@ -56,7 +56,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import compose.icons.fontawesomeicons.solid.Robot
-import dev.dimension.flare.*
 import dev.dimension.flare.Res
 import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.data.model.PostActionStyle

@@ -204,13 +204,17 @@ private fun UiTimelineV2.Post.toLocalCachePostToolText(): String =
         if (quote.isNotEmpty()) {
             appendLine("quotes:")
             quote.take(MAX_LOCAL_CACHE_RELATED_POSTS).forEachIndexed { index, post ->
-                appendLine("- #${index + 1} ${post.user?.handle?.raw.orEmpty()}: ${post.content.raw.take(MAX_LOCAL_CACHE_RELATED_TEXT_LENGTH)}")
+                appendLine(
+                    "- #${index + 1} ${post.user?.handle?.raw.orEmpty()}: ${post.content.raw.take(MAX_LOCAL_CACHE_RELATED_TEXT_LENGTH)}",
+                )
             }
         }
         if (parents.isNotEmpty()) {
             appendLine("parents:")
             parents.take(MAX_LOCAL_CACHE_RELATED_POSTS).forEachIndexed { index, post ->
-                appendLine("- #${index + 1} ${post.user?.handle?.raw.orEmpty()}: ${post.content.raw.take(MAX_LOCAL_CACHE_RELATED_TEXT_LENGTH)}")
+                appendLine(
+                    "- #${index + 1} ${post.user?.handle?.raw.orEmpty()}: ${post.content.raw.take(MAX_LOCAL_CACHE_RELATED_TEXT_LENGTH)}",
+                )
             }
         }
     }

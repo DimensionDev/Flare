@@ -52,9 +52,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-internal fun LocalCacheScreen(
-    toAskAi: (String?, LocalHistoryAgentTarget) -> Unit = { _, _ -> },
-) {
+internal fun LocalCacheScreen(toAskAi: (String?, LocalHistoryAgentTarget) -> Unit = { _, _ -> }) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         presenter()

@@ -214,9 +214,13 @@ internal class ProfileInsightAgentUseCase(
             }
             appendLine()
             appendLine("Initial tool guidance:")
-            appendLine("- For the first profile insight answer, call load_user_timeline for this user unless the snapshot alone is clearly sufficient.")
+            appendLine(
+                "- For the first profile insight answer, call load_user_timeline for this user unless the snapshot alone is clearly sufficient.",
+            )
             appendLine("- Use the user's id and host from userKey. Leave platforms empty unless a specific platform is required.")
-            appendLine("- After tool results are available, answer directly and include exact attachmentRef markers for the profile or the clearest supporting posts when useful.")
+            appendLine(
+                "- After tool results are available, answer directly and include exact attachmentRef markers for the profile or the clearest supporting posts when useful.",
+            )
         }
 
     private fun UiProfile.BottomContent?.toPromptLines(): List<String> =

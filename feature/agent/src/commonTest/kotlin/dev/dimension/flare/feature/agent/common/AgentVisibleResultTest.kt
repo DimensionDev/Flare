@@ -22,7 +22,16 @@ internal class AgentVisibleResultTest {
         val request =
             AgentInputRequest(
                 requestId = "subscription-save:MASTODON_TRENDS:mastodon.social",
-                localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage, "MASTODON_TRENDS", "Mastodon trends", "mastodon.social", "mastodon.social", "", ""),
+                localizedPrompt =
+                    AgentUiStrings.text(
+                        AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage,
+                        "MASTODON_TRENDS",
+                        "Mastodon trends",
+                        "mastodon.social",
+                        "mastodon.social",
+                        "",
+                        "",
+                    ),
                 options =
                     listOf(
                         AgentInputRequest.Option(

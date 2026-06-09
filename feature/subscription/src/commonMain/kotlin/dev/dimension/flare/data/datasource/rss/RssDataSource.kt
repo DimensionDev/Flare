@@ -9,14 +9,12 @@ import org.koin.core.component.KoinComponent
 
 internal object RssDataSource :
     KoinComponent {
-    fun fetchLoader(url: String) =
-        KoinSubscriptionDataSource.createTimelineLoader(SubscriptionType.RSS, url)
+    fun fetchLoader(url: String) = KoinSubscriptionDataSource.createTimelineLoader(SubscriptionType.RSS, url)
 
     fun fetchLoader(
         type: SubscriptionType,
         url: String,
-    ): CacheableRemoteLoader<UiTimelineV2> =
-        KoinSubscriptionDataSource.createTimelineLoader(type, url)
+    ): CacheableRemoteLoader<UiTimelineV2> = KoinSubscriptionDataSource.createTimelineLoader(type, url)
 
     fun fetchLoader(subscription: UiRssSource): CacheableRemoteLoader<UiTimelineV2> =
         fetchLoader(

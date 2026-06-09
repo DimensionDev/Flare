@@ -160,7 +160,9 @@ internal class SaveSubscriptionSourceTool(
     internal data class Args(
         @property:LLMDescription("Existing subscription source id to update. Leave 0 to create a new source.")
         val sourceId: Int = 0,
-        @property:LLMDescription("Subscription type, such as RSS, MASTODON_PUBLIC, MASTODON_LOCAL, or MASTODON_TRENDS. Leave blank to detect.")
+        @property:LLMDescription(
+            "Subscription type, such as RSS, MASTODON_PUBLIC, MASTODON_LOCAL, or MASTODON_TRENDS. Leave blank to detect.",
+        )
         val type: String = "",
         @property:LLMDescription("RSS URL or platform instance host to save.")
         val url: String = "",
@@ -170,7 +172,9 @@ internal class SaveSubscriptionSourceTool(
         val icon: String = "",
         @property:LLMDescription("RSS display mode: FULL_CONTENT, DESCRIPTION_ONLY, or OPEN_IN_BROWSER. Ignored for non-RSS types.")
         val displayMode: String = "",
-        @property:LLMDescription("Set false for the first save/update request to generate the app confirmation button. Set true only after the latest user message explicitly confirms the exact subscription source to save.")
+        @property:LLMDescription(
+            "Set false for the first save/update request to generate the app confirmation button. Set true only after the latest user message explicitly confirms the exact subscription source to save.",
+        )
         val confirmed: Boolean = false,
     )
 
@@ -249,7 +253,9 @@ internal class DeleteSubscriptionSourceTool(
         val type: String = "",
         @property:LLMDescription("RSS URL or platform instance host to delete when sourceId is blank.")
         val url: String = "",
-        @property:LLMDescription("Set false for the first delete request to generate the app confirmation button. Set true only after the latest user message explicitly confirms the exact subscription source to delete.")
+        @property:LLMDescription(
+            "Set false for the first delete request to generate the app confirmation button. Set true only after the latest user message explicitly confirms the exact subscription source to delete.",
+        )
         val confirmed: Boolean = false,
     )
 
@@ -260,7 +266,7 @@ internal class DeleteSubscriptionSourceTool(
                 ?: return session.subscriptionSourceSelectionMessage(
                     valuePrefix = AgentUiStrings.Subscription.DeleteSourcePrefix,
                     action = "delete",
-        )
+                )
         if (!args.confirmed) {
             val localizedPrompt = source.deleteConfirmationLocalizedText()
             session.inputRequestStore.set(
@@ -392,7 +398,9 @@ private data class SubscriptionTypeFilter(
     fun matches(type: SubscriptionType): Boolean = all || type in types
 }
 
-private suspend fun AgentToolSession.resolveSubscriptionTimelineTarget(args: LoadSubscriptionTimelineTool.Args): SubscriptionTimelineTarget? {
+private suspend fun AgentToolSession.resolveSubscriptionTimelineTarget(
+    args: LoadSubscriptionTimelineTool.Args,
+): SubscriptionTimelineTarget? {
     resolveSubscriptionSource(args.sourceId, args.type, args.url)?.let { source ->
         return source.toTimelineTarget()
     }
@@ -427,7 +435,7 @@ private suspend fun AgentToolSession.resolveSubscriptionTimelineTarget(args: Loa
             }.getOrNull()
         val targets =
             when (detected) {
-                is SubscriptionSourceDetection.RssFeed ->
+                is SubscriptionSourceDetection.RssFeed -> {
                     listOf(
                         SubscriptionTimelineTarget(
                             id = null,
@@ -436,11 +444,13 @@ private suspend fun AgentToolSession.resolveSubscriptionTimelineTarget(args: Loa
                             title = detected.title,
                         ),
                     )
+                }
 
-                is SubscriptionSourceDetection.RssSources ->
+                is SubscriptionSourceDetection.RssSources -> {
                     detected.sources.map { it.toTimelineTarget() }
+                }
 
-                is SubscriptionSourceDetection.SubscriptionInstance ->
+                is SubscriptionSourceDetection.SubscriptionInstance -> {
                     detected.availableTimelines.map { type ->
                         SubscriptionTimelineTarget(
                             id = null,
@@ -449,10 +459,13 @@ private suspend fun AgentToolSession.resolveSubscriptionTimelineTarget(args: Loa
                             title = "${detected.instanceName ?: detected.host} - ${type.displayName()}",
                         )
                     }
+                }
 
                 SubscriptionSourceDetection.RssHub,
                 null,
-                -> emptyList()
+                -> {
+                    emptyList()
+                }
             }
         return targets.singleOrNull()
     }
@@ -486,7 +499,9 @@ private suspend fun AgentToolSession.resolveSubscriptionSource(
         }.singleOrNull()
 }
 
-private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(args: SaveSubscriptionSourceTool.Args): List<SubscriptionSaveCandidate>? {
+private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(
+    args: SaveSubscriptionSourceTool.Args,
+): List<SubscriptionSaveCandidate>? {
     val dataSource = subscriptionDataSource ?: return emptyList()
     val inputUrl = args.url.trim()
     if (inputUrl.isBlank()) {
@@ -515,7 +530,7 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(args: Sav
                     args.title
                         .trim()
                         .ifBlank {
-                            detectedRss?.title ?: "${normalizedUrl} - ${requestedType.displayName()}"
+                            detectedRss?.title ?: "$normalizedUrl - ${requestedType.displayName()}"
                         },
                 icon = args.icon.trim().ifBlank { detectedRss?.icon },
                 displayMode = displayMode,
@@ -524,7 +539,7 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(args: Sav
     }
 
     return when (val detected = dataSource.detectSource(inputUrl)) {
-        is SubscriptionSourceDetection.RssFeed ->
+        is SubscriptionSourceDetection.RssFeed -> {
             listOf(
                 SubscriptionSaveCandidate(
                     type = SubscriptionType.RSS,
@@ -534,8 +549,9 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(args: Sav
                     displayMode = displayMode,
                 ),
             )
+        }
 
-        is SubscriptionSourceDetection.RssSources ->
+        is SubscriptionSourceDetection.RssSources -> {
             detected.sources.map { source ->
                 SubscriptionSaveCandidate(
                     type = SubscriptionType.RSS,
@@ -545,8 +561,9 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(args: Sav
                     displayMode = displayMode,
                 )
             }
+        }
 
-        is SubscriptionSourceDetection.SubscriptionInstance ->
+        is SubscriptionSourceDetection.SubscriptionInstance -> {
             detected.availableTimelines.map { type ->
                 SubscriptionSaveCandidate(
                     type = type,
@@ -556,8 +573,11 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(args: Sav
                     displayMode = RssDisplayMode.FULL_CONTENT,
                 )
             }
+        }
 
-        SubscriptionSourceDetection.RssHub -> emptyList()
+        SubscriptionSourceDetection.RssHub -> {
+            emptyList()
+        }
     }
 }
 
@@ -610,7 +630,7 @@ private suspend fun AgentToolSession.subscriptionSaveSelectionMessage(candidates
                         id = "subscription-save:${index + 1}",
                         localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, candidate.subscriptionLabel()),
                         value =
-                                buildString {
+                            buildString {
                                 appendLine(AgentUiStrings.Subscription.SaveSourcePrefix)
                                 appendSubscriptionSaveArgs(candidate)
                             },
@@ -625,10 +645,11 @@ private suspend fun AgentToolSession.subscriptionSaveSelectionMessage(candidates
 
 private fun SubscriptionSourceDetection.toToolText(): String =
     when (this) {
-        SubscriptionSourceDetection.RssHub ->
+        SubscriptionSourceDetection.RssHub -> {
             "Detected subscription source\nkind: RSSHub\nmessage: Provide the resolved RSSHub feed URL before saving."
+        }
 
-        is SubscriptionSourceDetection.RssFeed ->
+        is SubscriptionSourceDetection.RssFeed -> {
             buildString {
                 appendLine("Detected subscription source")
                 appendLine("kind: RSS feed")
@@ -637,14 +658,16 @@ private fun SubscriptionSourceDetection.toToolText(): String =
                 appendLine("title: $title")
                 appendLine("icon: ${icon.orEmpty()}")
             }.trim()
+        }
 
-        is SubscriptionSourceDetection.RssSources ->
+        is SubscriptionSourceDetection.RssSources -> {
             sources.toSubscriptionSourcesToolText(
                 title = "Detected RSS/Atom feeds",
                 emptyMessage = "No RSS/Atom feeds were detected.",
             )
+        }
 
-        is SubscriptionSourceDetection.SubscriptionInstance ->
+        is SubscriptionSourceDetection.SubscriptionInstance -> {
             buildString {
                 appendLine("Detected subscription source")
                 appendLine("kind: subscription instance")
@@ -656,6 +679,7 @@ private fun SubscriptionSourceDetection.toToolText(): String =
                     appendLine("- type=${type.name}, displayName=${type.displayName()}, url=$host")
                 }
             }.trim()
+        }
     }
 
 private fun List<UiRssSource>.toSubscriptionSourcesToolText(
@@ -860,17 +884,21 @@ private fun String.toSubscriptionTypeOrNull(): SubscriptionType? {
 
 private fun SubscriptionType.aliasKeys(): Set<String> =
     when (this) {
-        SubscriptionType.RSS ->
+        SubscriptionType.RSS -> {
             setOf("feed", "feeds", "atom", "rdf", "rssfeed", "rsssource", "rss订阅")
+        }
 
-        SubscriptionType.MASTODON_TRENDS ->
+        SubscriptionType.MASTODON_TRENDS -> {
             setOf("mastodontrends", "mastodontrend", "trends", "trend", "trending", "hot", "热门", "趋势")
+        }
 
-        SubscriptionType.MASTODON_PUBLIC ->
+        SubscriptionType.MASTODON_PUBLIC -> {
             setOf("mastodonpublic", "public", "federated", "federation", "global", "联邦", "公共")
+        }
 
-        SubscriptionType.MASTODON_LOCAL ->
+        SubscriptionType.MASTODON_LOCAL -> {
             setOf("mastodonlocal", "local", "instance", "本地", "实例")
+        }
     }.map { it.subscriptionKey() }.toSet()
 
 private fun String.subscriptionKey(): String =
@@ -925,7 +953,9 @@ private fun String.toSubscriptionHost(): String {
             else -> "https://$value"
         }
     return runCatching {
-        io.ktor.http.Url(webUrl).host
+        io.ktor.http
+            .Url(webUrl)
+            .host
     }.getOrElse {
         value
             .removePrefix("https://")

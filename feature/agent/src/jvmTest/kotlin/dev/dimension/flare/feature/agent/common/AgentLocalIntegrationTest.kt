@@ -38,10 +38,11 @@ internal class AgentLocalIntegrationTest {
     @Test
     fun localAiRequestsSubscriptionConfirmationForMastodonSocial() =
         runTest(timeout = kotlin.time.Duration.parse("90s")) {
-            val config = LocalAiConfig.load() ?: run {
-                println("Skipping local AI integration test: local.properties does not contain ai.url, ai.key, and ai.model.")
-                return@runTest
-            }
+            val config =
+                LocalAiConfig.load() ?: run {
+                    println("Skipping local AI integration test: local.properties does not contain ai.url, ai.key, and ai.model.")
+                    return@runTest
+                }
             val runtime =
                 AiConfigKoogBridge().createRuntime(
                     aiConfig = config.toAppAiConfig(),
@@ -104,7 +105,10 @@ internal class AgentLocalIntegrationTest {
 
             val inputRequest = assertNotNull(visibleResult.inputRequest, "Agent should create a confirmation input request.")
             assertTrue(visibleResult.text.isNotBlank(), "Confirmation responses must keep visible text.")
-            assertTrue(inputRequest.localizedPrompt.args.any { it.contains("mastodon.social") }, "Confirmation prompt should mention mastodon.social.")
+            assertTrue(
+                inputRequest.localizedPrompt.args.any { it.contains("mastodon.social") },
+                "Confirmation prompt should mention mastodon.social.",
+            )
             assertEquals(1, inputRequest.options.size, "Confirmation request should only include one button.")
             assertTrue(inputRequest.options.any { it.id == "confirm" }, "Confirmation request should include a confirm button.")
             assertTrue(subscriptionDataSource.detectCalled, "The agent should call detect_subscription_source.")
@@ -155,7 +159,8 @@ internal class AgentLocalIntegrationTest {
                 if (request.finishAfterToolResults) {
                     nodeLLMSendToolResultsWithoutTools(request.sendToolResultsNodeName)
                 } else {
-                    ai.koog.agents.core.dsl.extension.nodeLLMSendToolResults(request.sendToolResultsNodeName)
+                    ai.koog.agents.core.dsl.extension
+                        .nodeLLMSendToolResults(request.sendToolResultsNodeName)
                 }
 
             edge(nodeStart forwardTo nodeAnalyze)
@@ -310,9 +315,10 @@ internal class AgentLocalIntegrationTest {
 }
 
 private fun Properties.firstValue(vararg names: String): String =
-    names.firstNotNullOfOrNull { name ->
-        getProperty(name)?.trim()?.removeWrappingQuotes()?.takeIf { it.isNotBlank() }
-    }.orEmpty()
+    names
+        .firstNotNullOfOrNull { name ->
+            getProperty(name)?.trim()?.removeWrappingQuotes()?.takeIf { it.isNotBlank() }
+        }.orEmpty()
 
 private fun String.toHttpUrl(): String =
     when {

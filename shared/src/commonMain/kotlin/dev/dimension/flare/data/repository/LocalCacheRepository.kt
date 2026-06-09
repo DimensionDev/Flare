@@ -94,7 +94,9 @@ private fun String.toLikePattern(): String =
                     append(char)
                 }
 
-                else -> append(char)
+                else -> {
+                    append(char)
+                }
             }
         }
         append('%')

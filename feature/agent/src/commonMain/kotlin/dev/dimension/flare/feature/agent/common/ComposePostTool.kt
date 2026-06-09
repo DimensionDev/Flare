@@ -109,7 +109,7 @@ internal class ComposePostTool(
                 sensitive = args.sensitive,
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
-        )
+            )
         if (!args.confirmed) {
             val userPreview = target.loadUserPreview()
             val inputRequest =
@@ -323,7 +323,11 @@ internal class ComposePostTool(
                         .map { (platformType, targets) ->
                             AgentInputRequest.Option(
                                 id = "platform:${platformType.name}",
-                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, platformType.composePlatformLabel(targets.size)),
+                                localizedLabel =
+                                    AgentUiStrings.text(
+                                        AgentLocalizedTextKey.DynamicText,
+                                        platformType.composePlatformLabel(targets.size),
+                                    ),
                                 value =
                                     buildString {
                                         appendLine(AgentUiStrings.Compose.platformPrefix(action.uiVerb))
@@ -365,8 +369,17 @@ internal class ComposePostTool(
                     platformType.name,
                     data.visibility.name,
                     reference?.statusKey?.toString().orEmpty(),
-                    reference?.post?.user?.composeDisplayLabel().orEmpty(),
-                    reference?.post?.content?.raw?.take(160).orEmpty(),
+                    reference
+                        ?.post
+                        ?.user
+                        ?.composeDisplayLabel()
+                        .orEmpty(),
+                    reference
+                        ?.post
+                        ?.content
+                        ?.raw
+                        ?.take(160)
+                        .orEmpty(),
                     data.language.joinToString(),
                     data.sensitive.toString(),
                     data.spoilerText.orEmpty(),
@@ -453,8 +466,7 @@ internal class ComposePostTool(
 
     private fun AgentComposeTarget.composeAccountLabel(): String = "${platformType.name} / $accountKey"
 
-    private fun PlatformType.composePlatformLabel(accountCount: Int): String =
-        AgentUiStrings.Compose.platformLabel(this, accountCount)
+    private fun PlatformType.composePlatformLabel(accountCount: Int): String = AgentUiStrings.Compose.platformLabel(this, accountCount)
 
     private fun UiProfile.composeDisplayLabel(): String =
         listOf(

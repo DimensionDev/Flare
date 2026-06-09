@@ -1,5 +1,7 @@
 package dev.dimension.flare.feature.agent.common
 
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -10,9 +12,9 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -22,8 +24,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
 import dev.dimension.flare.data.datasource.subscription.SubscriptionSourceDetection
-import dev.dimension.flare.data.database.app.model.RssDisplayMode
-import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.LocalCacheRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
@@ -147,7 +147,12 @@ internal class AgentToolsTest {
             assertEquals(AgentLocalizedTextKey.ComposeConfirmationMessage, inputRequest.localizedPrompt.key)
             assertEquals(AgentLocalizedTextKey.ComposeSendConfirmationTitle.name, inputRequest.localizedPrompt.args.first())
             assertEquals(1, inputRequest.options.size)
-            assertEquals(AgentLocalizedTextKey.ConfirmSendPost, inputRequest.options.first { it.id == "confirm" }.localizedLabel.key)
+            assertEquals(
+                AgentLocalizedTextKey.ConfirmSendPost,
+                inputRequest.options
+                    .first { it.id == "confirm" }
+                    .localizedLabel.key,
+            )
             assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.raw)
         }
 
@@ -262,9 +267,16 @@ internal class AgentToolsTest {
             assertEquals(AgentLocalizedTextKey.SelectComposePlatform, inputRequest.localizedPrompt.key)
             assertEquals(3, inputRequest.options.size)
             assertTrue(inputRequest.options.all { it.localizedLabel.key == AgentLocalizedTextKey.DynamicText })
-            assertTrue(inputRequest.options.any { it.localizedLabel.args.firstOrNull() == "Twitter/X" && it.value.contains("platforms=xQt") })
+            assertTrue(
+                inputRequest.options.any { it.localizedLabel.args.firstOrNull() == "Twitter/X" && it.value.contains("platforms=xQt") },
+            )
             assertTrue(inputRequest.options.any { it.value.contains("platforms=VVo") })
-            assertTrue(inputRequest.options.any { it.localizedLabel.args.firstOrNull() == "Mastodon" && it.value.contains("hello from agent") })
+            assertTrue(
+                inputRequest.options.any {
+                    it.localizedLabel.args.firstOrNull() == "Mastodon" &&
+                        it.value.contains("hello from agent")
+                },
+            )
         }
 
     @Test
@@ -467,7 +479,13 @@ internal class AgentToolsTest {
             assertFalse(result.contains("Share"))
             val request = assertNotNull(inputRequestStore.snapshot())
             assertEquals(1, request.options.size)
-            assertEquals("Like", request.options.first().localizedLabel.args.firstOrNull())
+            assertEquals(
+                "Like",
+                request.options
+                    .first()
+                    .localizedLabel.args
+                    .firstOrNull(),
+            )
         }
 
     @Test
@@ -520,7 +538,12 @@ internal class AgentToolsTest {
             assertEquals(AgentLocalizedTextKey.PostActionConfirmationMessage, request.localizedPrompt.key)
             assertEquals("Like", request.localizedPrompt.args.first())
             assertEquals(1, request.options.size)
-            assertEquals(AgentLocalizedTextKey.ConfirmExecute, request.options.first().localizedLabel.key)
+            assertEquals(
+                AgentLocalizedTextKey.ConfirmExecute,
+                request.options
+                    .first()
+                    .localizedLabel.key,
+            )
         }
 
     @Test
@@ -675,7 +698,12 @@ internal class AgentToolsTest {
             assertEquals(AgentLocalizedTextKey.RelationConfirmationMessage, request.localizedPrompt.key)
             assertEquals("Mute", request.localizedPrompt.args.first())
             assertEquals(1, request.options.size)
-            assertEquals(AgentLocalizedTextKey.ConfirmExecute, request.options.first().localizedLabel.key)
+            assertEquals(
+                AgentLocalizedTextKey.ConfirmExecute,
+                request.options
+                    .first()
+                    .localizedLabel.key,
+            )
         }
 
     @Test
@@ -830,7 +858,12 @@ internal class AgentToolsTest {
             val request = assertNotNull(inputRequestStore.snapshot())
             assertEquals(AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage, request.localizedPrompt.key)
             assertEquals(1, request.options.size)
-            assertEquals(AgentLocalizedTextKey.ConfirmSaveSubscription, request.options.first().localizedLabel.key)
+            assertEquals(
+                AgentLocalizedTextKey.ConfirmSaveSubscription,
+                request.options
+                    .first()
+                    .localizedLabel.key,
+            )
         }
 
     @Test

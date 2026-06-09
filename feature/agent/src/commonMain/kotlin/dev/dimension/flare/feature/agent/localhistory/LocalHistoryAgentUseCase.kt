@@ -184,8 +184,12 @@ internal class LocalHistoryAgentUseCase(
             appendLine("target: ${target.promptLabel()}")
             appendLine("query: ${query ?: "(none; viewed history)"}")
             appendLine()
-            appendLine("If the latest question is still about local history/cache, use the local cache/history tools again when fresh evidence is needed.")
-            appendLine("If the latest question asks for live social search, subscriptions, account actions, or composing, use the available Flare tools normally.")
+            appendLine(
+                "If the latest question is still about local history/cache, use the local cache/history tools again when fresh evidence is needed.",
+            )
+            appendLine(
+                "If the latest question asks for live social search, subscriptions, account actions, or composing, use the available Flare tools normally.",
+            )
             appendLine()
             appendLine("User message:")
             append(userInput)

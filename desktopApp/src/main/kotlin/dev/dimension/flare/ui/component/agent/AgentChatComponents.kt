@@ -56,8 +56,8 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import compose.icons.fontawesomeicons.solid.Robot
-import dev.dimension.flare.Res
 import dev.dimension.flare.*
+import dev.dimension.flare.Res
 import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
@@ -658,61 +658,209 @@ private fun AgentConfirmationButtons(
 private fun AgentLocalizedText.resolveAgentLocalizedText(): String {
     fun arg(index: Int): String = args.getOrNull(index).orEmpty()
     return when (key) {
-        AgentLocalizedTextKey.DynamicText -> arg(0)
-        AgentLocalizedTextKey.Cancel -> stringResource(Res.string.agent_ui_cancel)
-        AgentLocalizedTextKey.ConfirmExecute -> stringResource(Res.string.agent_ui_confirm_execute)
-        AgentLocalizedTextKey.ConfirmSaveSubscription -> stringResource(Res.string.agent_ui_confirm_save_subscription)
-        AgentLocalizedTextKey.CancelSaveSubscription -> stringResource(Res.string.agent_ui_cancel_save_subscription)
-        AgentLocalizedTextKey.ConfirmDeleteSubscription -> stringResource(Res.string.agent_ui_confirm_delete_subscription)
-        AgentLocalizedTextKey.CancelDeleteSubscription -> stringResource(Res.string.agent_ui_cancel_delete_subscription)
-        AgentLocalizedTextKey.ConfirmSendPost -> stringResource(Res.string.agent_ui_confirm_send_post)
-        AgentLocalizedTextKey.CancelSendPost -> stringResource(Res.string.agent_ui_cancel_send_post)
-        AgentLocalizedTextKey.SelectLoadSubscriptionSource -> stringResource(Res.string.agent_ui_select_load_subscription_source)
-        AgentLocalizedTextKey.SelectDeleteSubscriptionSource -> stringResource(Res.string.agent_ui_select_delete_subscription_source)
-        AgentLocalizedTextKey.SelectSaveSubscriptionSource -> stringResource(Res.string.agent_ui_select_save_subscription_source)
-        AgentLocalizedTextKey.SubscriptionSourcePlaceholder -> stringResource(Res.string.agent_ui_subscription_source_placeholder)
-        AgentLocalizedTextKey.SubscriptionSaveSelectionPlaceholder -> stringResource(Res.string.agent_ui_subscription_save_selection_placeholder)
-        AgentLocalizedTextKey.SubscriptionSaveConfirmationPlaceholder -> stringResource(Res.string.agent_ui_subscription_save_confirmation_placeholder)
-        AgentLocalizedTextKey.SubscriptionDeleteConfirmationPlaceholder -> stringResource(Res.string.agent_ui_subscription_delete_confirmation_placeholder)
-        AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage ->
+        AgentLocalizedTextKey.DynamicText -> {
+            arg(0)
+        }
+
+        AgentLocalizedTextKey.Cancel -> {
+            stringResource(Res.string.agent_ui_cancel)
+        }
+
+        AgentLocalizedTextKey.ConfirmExecute -> {
+            stringResource(Res.string.agent_ui_confirm_execute)
+        }
+
+        AgentLocalizedTextKey.ConfirmSaveSubscription -> {
+            stringResource(Res.string.agent_ui_confirm_save_subscription)
+        }
+
+        AgentLocalizedTextKey.CancelSaveSubscription -> {
+            stringResource(Res.string.agent_ui_cancel_save_subscription)
+        }
+
+        AgentLocalizedTextKey.ConfirmDeleteSubscription -> {
+            stringResource(Res.string.agent_ui_confirm_delete_subscription)
+        }
+
+        AgentLocalizedTextKey.CancelDeleteSubscription -> {
+            stringResource(Res.string.agent_ui_cancel_delete_subscription)
+        }
+
+        AgentLocalizedTextKey.ConfirmSendPost -> {
+            stringResource(Res.string.agent_ui_confirm_send_post)
+        }
+
+        AgentLocalizedTextKey.CancelSendPost -> {
+            stringResource(Res.string.agent_ui_cancel_send_post)
+        }
+
+        AgentLocalizedTextKey.SelectLoadSubscriptionSource -> {
+            stringResource(Res.string.agent_ui_select_load_subscription_source)
+        }
+
+        AgentLocalizedTextKey.SelectDeleteSubscriptionSource -> {
+            stringResource(Res.string.agent_ui_select_delete_subscription_source)
+        }
+
+        AgentLocalizedTextKey.SelectSaveSubscriptionSource -> {
+            stringResource(Res.string.agent_ui_select_save_subscription_source)
+        }
+
+        AgentLocalizedTextKey.SubscriptionSourcePlaceholder -> {
+            stringResource(Res.string.agent_ui_subscription_source_placeholder)
+        }
+
+        AgentLocalizedTextKey.SubscriptionSaveSelectionPlaceholder -> {
+            stringResource(Res.string.agent_ui_subscription_save_selection_placeholder)
+        }
+
+        AgentLocalizedTextKey.SubscriptionSaveConfirmationPlaceholder -> {
+            stringResource(Res.string.agent_ui_subscription_save_confirmation_placeholder)
+        }
+
+        AgentLocalizedTextKey.SubscriptionDeleteConfirmationPlaceholder -> {
+            stringResource(Res.string.agent_ui_subscription_delete_confirmation_placeholder)
+        }
+
+        AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage -> {
             stringResource(Res.string.agent_ui_subscription_save_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4), arg(5))
-        AgentLocalizedTextKey.SubscriptionDeleteConfirmationMessage ->
+        }
+
+        AgentLocalizedTextKey.SubscriptionDeleteConfirmationMessage -> {
             stringResource(Res.string.agent_ui_subscription_delete_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4))
-        AgentLocalizedTextKey.SelectComposeTargetPost -> stringResource(Res.string.agent_ui_select_compose_target_post, arg(0))
-        AgentLocalizedTextKey.SelectComposeAccount -> stringResource(Res.string.agent_ui_select_compose_account, arg(0))
-        AgentLocalizedTextKey.SelectComposePlatform -> stringResource(Res.string.agent_ui_select_compose_platform, arg(0))
-        AgentLocalizedTextKey.ComposeTargetPostPlaceholder -> stringResource(Res.string.agent_ui_compose_target_post_placeholder)
-        AgentLocalizedTextKey.ComposeAccountPlaceholder -> stringResource(Res.string.agent_ui_compose_account_placeholder)
-        AgentLocalizedTextKey.ComposePlatformPlaceholder -> stringResource(Res.string.agent_ui_compose_platform_placeholder)
-        AgentLocalizedTextKey.ComposeConfirmationPlaceholder -> stringResource(Res.string.agent_ui_compose_confirmation_placeholder)
-        AgentLocalizedTextKey.ComposeSendConfirmationTitle -> stringResource(Res.string.agent_ui_compose_send_confirmation_title)
-        AgentLocalizedTextKey.ComposeReplyConfirmationTitle -> stringResource(Res.string.agent_ui_compose_reply_confirmation_title)
-        AgentLocalizedTextKey.ComposeQuoteConfirmationTitle -> stringResource(Res.string.agent_ui_compose_quote_confirmation_title)
-        AgentLocalizedTextKey.ComposeConfirmationMessage -> resolveComposeConfirmationText()
-        AgentLocalizedTextKey.SelectPostActionPost -> stringResource(Res.string.agent_ui_select_post_action_post)
-        AgentLocalizedTextKey.SelectPostAction -> stringResource(Res.string.agent_ui_select_post_action)
-        AgentLocalizedTextKey.PostActionTargetPostPlaceholder -> stringResource(Res.string.agent_ui_post_action_target_post_placeholder)
-        AgentLocalizedTextKey.PostActionPlaceholder -> stringResource(Res.string.agent_ui_post_action_placeholder)
-        AgentLocalizedTextKey.PostActionConfirmationPlaceholder -> stringResource(Res.string.agent_ui_post_action_confirmation_placeholder)
-        AgentLocalizedTextKey.PostActionConfirmationMessage ->
+        }
+
+        AgentLocalizedTextKey.SelectComposeTargetPost -> {
+            stringResource(Res.string.agent_ui_select_compose_target_post, arg(0))
+        }
+
+        AgentLocalizedTextKey.SelectComposeAccount -> {
+            stringResource(Res.string.agent_ui_select_compose_account, arg(0))
+        }
+
+        AgentLocalizedTextKey.SelectComposePlatform -> {
+            stringResource(Res.string.agent_ui_select_compose_platform, arg(0))
+        }
+
+        AgentLocalizedTextKey.ComposeTargetPostPlaceholder -> {
+            stringResource(Res.string.agent_ui_compose_target_post_placeholder)
+        }
+
+        AgentLocalizedTextKey.ComposeAccountPlaceholder -> {
+            stringResource(Res.string.agent_ui_compose_account_placeholder)
+        }
+
+        AgentLocalizedTextKey.ComposePlatformPlaceholder -> {
+            stringResource(Res.string.agent_ui_compose_platform_placeholder)
+        }
+
+        AgentLocalizedTextKey.ComposeConfirmationPlaceholder -> {
+            stringResource(Res.string.agent_ui_compose_confirmation_placeholder)
+        }
+
+        AgentLocalizedTextKey.ComposeSendConfirmationTitle -> {
+            stringResource(Res.string.agent_ui_compose_send_confirmation_title)
+        }
+
+        AgentLocalizedTextKey.ComposeReplyConfirmationTitle -> {
+            stringResource(Res.string.agent_ui_compose_reply_confirmation_title)
+        }
+
+        AgentLocalizedTextKey.ComposeQuoteConfirmationTitle -> {
+            stringResource(Res.string.agent_ui_compose_quote_confirmation_title)
+        }
+
+        AgentLocalizedTextKey.ComposeConfirmationMessage -> {
+            resolveComposeConfirmationText()
+        }
+
+        AgentLocalizedTextKey.SelectPostActionPost -> {
+            stringResource(Res.string.agent_ui_select_post_action_post)
+        }
+
+        AgentLocalizedTextKey.SelectPostAction -> {
+            stringResource(Res.string.agent_ui_select_post_action)
+        }
+
+        AgentLocalizedTextKey.PostActionTargetPostPlaceholder -> {
+            stringResource(Res.string.agent_ui_post_action_target_post_placeholder)
+        }
+
+        AgentLocalizedTextKey.PostActionPlaceholder -> {
+            stringResource(Res.string.agent_ui_post_action_placeholder)
+        }
+
+        AgentLocalizedTextKey.PostActionConfirmationPlaceholder -> {
+            stringResource(Res.string.agent_ui_post_action_confirmation_placeholder)
+        }
+
+        AgentLocalizedTextKey.PostActionConfirmationMessage -> {
             stringResource(Res.string.agent_ui_post_action_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4))
-        AgentLocalizedTextKey.SelectRelationStateUser -> stringResource(Res.string.agent_ui_select_relation_state_user)
-        AgentLocalizedTextKey.SelectRelationUser -> stringResource(Res.string.agent_ui_select_relation_user)
-        AgentLocalizedTextKey.SelectRelationAction -> stringResource(Res.string.agent_ui_select_relation_action)
-        AgentLocalizedTextKey.SelectRelationAccount -> stringResource(Res.string.agent_ui_select_relation_account)
-        AgentLocalizedTextKey.RelationUserPlaceholder -> stringResource(Res.string.agent_ui_relation_user_placeholder)
-        AgentLocalizedTextKey.RelationActionPlaceholder -> stringResource(Res.string.agent_ui_relation_action_placeholder)
-        AgentLocalizedTextKey.RelationAccountPlaceholder -> stringResource(Res.string.agent_ui_relation_account_placeholder)
-        AgentLocalizedTextKey.RelationConfirmationPlaceholder -> stringResource(Res.string.agent_ui_relation_confirmation_placeholder)
-        AgentLocalizedTextKey.RelationConfirmationMessage ->
+        }
+
+        AgentLocalizedTextKey.SelectRelationStateUser -> {
+            stringResource(Res.string.agent_ui_select_relation_state_user)
+        }
+
+        AgentLocalizedTextKey.SelectRelationUser -> {
+            stringResource(Res.string.agent_ui_select_relation_user)
+        }
+
+        AgentLocalizedTextKey.SelectRelationAction -> {
+            stringResource(Res.string.agent_ui_select_relation_action)
+        }
+
+        AgentLocalizedTextKey.SelectRelationAccount -> {
+            stringResource(Res.string.agent_ui_select_relation_account)
+        }
+
+        AgentLocalizedTextKey.RelationUserPlaceholder -> {
+            stringResource(Res.string.agent_ui_relation_user_placeholder)
+        }
+
+        AgentLocalizedTextKey.RelationActionPlaceholder -> {
+            stringResource(Res.string.agent_ui_relation_action_placeholder)
+        }
+
+        AgentLocalizedTextKey.RelationAccountPlaceholder -> {
+            stringResource(Res.string.agent_ui_relation_account_placeholder)
+        }
+
+        AgentLocalizedTextKey.RelationConfirmationPlaceholder -> {
+            stringResource(Res.string.agent_ui_relation_confirmation_placeholder)
+        }
+
+        AgentLocalizedTextKey.RelationConfirmationMessage -> {
             stringResource(Res.string.agent_ui_relation_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4), arg(5))
-        AgentLocalizedTextKey.SelectRecentPostsUser -> stringResource(Res.string.agent_ui_select_recent_posts_user)
-        AgentLocalizedTextKey.SelectMatchedUser -> stringResource(Res.string.agent_ui_select_matched_user)
-        AgentLocalizedTextKey.SelectProfileUser -> stringResource(Res.string.agent_ui_select_profile_user)
-        AgentLocalizedTextKey.SelectFollowingUser -> stringResource(Res.string.agent_ui_select_following_user)
-        AgentLocalizedTextKey.SelectFollowersUser -> stringResource(Res.string.agent_ui_select_followers_user)
-        AgentLocalizedTextKey.SelectProfileTabsUser -> stringResource(Res.string.agent_ui_select_profile_tabs_user)
-        AgentLocalizedTextKey.StatusInsightUserPlaceholder -> stringResource(Res.string.agent_ui_status_insight_user_placeholder)
+        }
+
+        AgentLocalizedTextKey.SelectRecentPostsUser -> {
+            stringResource(Res.string.agent_ui_select_recent_posts_user)
+        }
+
+        AgentLocalizedTextKey.SelectMatchedUser -> {
+            stringResource(Res.string.agent_ui_select_matched_user)
+        }
+
+        AgentLocalizedTextKey.SelectProfileUser -> {
+            stringResource(Res.string.agent_ui_select_profile_user)
+        }
+
+        AgentLocalizedTextKey.SelectFollowingUser -> {
+            stringResource(Res.string.agent_ui_select_following_user)
+        }
+
+        AgentLocalizedTextKey.SelectFollowersUser -> {
+            stringResource(Res.string.agent_ui_select_followers_user)
+        }
+
+        AgentLocalizedTextKey.SelectProfileTabsUser -> {
+            stringResource(Res.string.agent_ui_select_profile_tabs_user)
+        }
+
+        AgentLocalizedTextKey.StatusInsightUserPlaceholder -> {
+            stringResource(Res.string.agent_ui_status_insight_user_placeholder)
+        }
     }
 }
 
@@ -720,7 +868,10 @@ private fun AgentLocalizedText.resolveAgentLocalizedText(): String {
 private fun AgentLocalizedText.resolveComposeConfirmationText(): String {
     val title =
         AgentLocalizedText(
-            key = runCatching { AgentLocalizedTextKey.valueOf(args.getOrNull(0).orEmpty()) }.getOrDefault(AgentLocalizedTextKey.ComposeSendConfirmationTitle),
+            key =
+                runCatching {
+                    AgentLocalizedTextKey.valueOf(args.getOrNull(0).orEmpty())
+                }.getOrDefault(AgentLocalizedTextKey.ComposeSendConfirmationTitle),
         ).resolveAgentLocalizedText()
     val account = args.getOrNull(1).orEmpty()
     val platform = args.getOrNull(4).orEmpty()

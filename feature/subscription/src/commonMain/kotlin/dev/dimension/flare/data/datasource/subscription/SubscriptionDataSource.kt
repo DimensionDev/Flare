@@ -146,21 +146,23 @@ public object KoinSubscriptionDataSource :
         url: String,
     ): CacheableRemoteLoader<UiTimelineV2> =
         when (type) {
-            SubscriptionType.RSS ->
+            SubscriptionType.RSS -> {
                 RssTimelineRemoteMediator(
                     url = url,
                     fetchSource = {
                         subscriptionRepository.findByUrl(it).firstOrNull()
                     },
                 )
+            }
 
-            else ->
+            else -> {
                 platformRegistry
                     .requireSubscriptionTimelineSpec(type)
                     .createLoader(
                         host = url,
                         locale = Locale.language,
                     )
+            }
         }
 
     override suspend fun saveSource(input: SubscriptionSourceInput): UiRssSource = subscriptionRepository.upsert(input)
@@ -236,11 +238,12 @@ private fun String.toWebUrl(): String =
 
 private fun UiRssSource.timelineSourceId(): String =
     when (type) {
-        SubscriptionType.RSS ->
+        SubscriptionType.RSS -> {
             RssTimelineSpecs.rss
                 .itemId(RssTimelineData(url))
+        }
 
-        else ->
+        else -> {
             RssTimelineSpecs.subscription
                 .itemId(
                     SubscriptionTimelineData(
@@ -248,4 +251,5 @@ private fun UiRssSource.timelineSourceId(): String =
                         subscriptionType = type,
                     ),
                 )
+        }
     }

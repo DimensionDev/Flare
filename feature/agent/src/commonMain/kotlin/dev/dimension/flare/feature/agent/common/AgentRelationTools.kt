@@ -58,7 +58,9 @@ internal class LoadUserRelationTool(
                 runCatching {
                     RelationStateResult(
                         target = target,
-                        relation = target.dataSource.relationHandler.dataSource.relation(user.userKey),
+                        relation =
+                            target.dataSource.relationHandler.dataSource
+                                .relation(user.userKey),
                     )
                 }.getOrNull()
             }
@@ -148,7 +150,12 @@ internal class ListRelationActionsTool(
 
 internal class ExecuteRelationActionTool(
     private val session: AgentToolSession,
-    private val actionHandler: suspend (RelationDataSource, RelationAction, MicroBlogKey, Boolean) -> Unit = { dataSource, action, userKey, requestFollow ->
+    private val actionHandler: suspend (
+        RelationDataSource,
+        RelationAction,
+        MicroBlogKey,
+        Boolean,
+    ) -> Unit = { dataSource, action, userKey, requestFollow ->
         when (action) {
             RelationAction.Follow -> dataSource.relationHandler.follow(userKey = userKey, requestFollow = requestFollow).join()
             RelationAction.Unfollow -> dataSource.relationHandler.unfollow(userKey).join()
@@ -188,7 +195,9 @@ internal class ExecuteRelationActionTool(
         val requestFollow: Boolean = false,
         @property:LLMDescription("In a post insight session, set true to target the current post's author.")
         val useCurrentPostAuthor: Boolean = false,
-        @property:LLMDescription("Set true only after the latest user message explicitly confirms the exact target user, account, and action.")
+        @property:LLMDescription(
+            "Set true only after the latest user message explicitly confirms the exact target user, account, and action.",
+        )
         val confirmed: Boolean = false,
     )
 
@@ -221,8 +230,14 @@ internal class ExecuteRelationActionTool(
                     target.accountKey.toString(),
                     target.platformType.name,
                     user.userKey.toString(),
-                    user.profile?.name?.raw.orEmpty(),
-                    user.profile?.handle?.raw.orEmpty(),
+                    user.profile
+                        ?.name
+                        ?.raw
+                        .orEmpty(),
+                    user.profile
+                        ?.handle
+                        ?.raw
+                        .orEmpty(),
                 )
             session.inputRequestStore.set(
                 AgentInputRequest(
@@ -406,14 +421,29 @@ private suspend fun AgentToolSession.resolveRelationUser(args: RelationUserArgs)
 
 private suspend fun AgentToolSession.availableRelationUsers(): List<UiProfile> =
     buildList {
-        status?.currentPost?.agentDisplayPost()?.user?.let(::add)
+        status
+            ?.currentPost
+            ?.agentDisplayPost()
+            ?.user
+            ?.let(::add)
         attachmentStore
             .snapshot()
             .forEach { attachment ->
                 when (attachment) {
-                    is AgentConversationAttachment.Post -> attachment.post.agentDisplayPost().user?.let(::add)
-                    is AgentConversationAttachment.User -> add(attachment.user)
-                    is AgentConversationAttachment.InputRequest -> Unit
+                    is AgentConversationAttachment.Post -> {
+                        attachment.post
+                            .agentDisplayPost()
+                            .user
+                            ?.let(::add)
+                    }
+
+                    is AgentConversationAttachment.User -> {
+                        add(attachment.user)
+                    }
+
+                    is AgentConversationAttachment.InputRequest -> {
+                        Unit
+                    }
                 }
             }
     }.distinctBy { it.platformType to it.key }
@@ -501,7 +531,8 @@ private suspend fun AgentToolSession.relationActionCandidates(
         .flatMap { target ->
             val relation =
                 runCatching {
-                    target.dataSource.relationHandler.dataSource.relation(user.userKey)
+                    target.dataSource.relationHandler.dataSource
+                        .relation(user.userKey)
                 }.getOrNull()
             target.availableRelationActions(relation).map { action ->
                 RelationActionCandidate(
@@ -516,7 +547,7 @@ private fun AgentRelationTarget.availableRelationActions(relation: UiRelation?):
         .filter { it in dataSource.supportedRelationTypes }
         .flatMap { type ->
             when (type) {
-                RelationActionType.Follow ->
+                RelationActionType.Follow -> {
                     listOf(
                         if (relation?.following == true || relation?.hasPendingFollowRequestFromYou == true) {
                             RelationAction.Unfollow
@@ -524,8 +555,9 @@ private fun AgentRelationTarget.availableRelationActions(relation: UiRelation?):
                             RelationAction.Follow
                         },
                     )
+                }
 
-                RelationActionType.Block ->
+                RelationActionType.Block -> {
                     listOf(
                         if (relation?.blocking == true) {
                             RelationAction.Unblock
@@ -533,8 +565,9 @@ private fun AgentRelationTarget.availableRelationActions(relation: UiRelation?):
                             RelationAction.Block
                         },
                     )
+                }
 
-                RelationActionType.Mute ->
+                RelationActionType.Mute -> {
                     listOf(
                         if (relation?.muted == true) {
                             RelationAction.Unmute
@@ -542,6 +575,7 @@ private fun AgentRelationTarget.availableRelationActions(relation: UiRelation?):
                             RelationAction.Mute
                         },
                     )
+                }
             }
         }
 
@@ -598,7 +632,9 @@ private suspend fun AgentToolSession.setRelationActionSelectionRequest(
 ) {
     inputRequestStore.set(
         AgentInputRequest(
-            requestId = "relation-action:${user.userKey}:${candidates.joinToString { it.target.accountKey.toString() + ':' + it.action.id }}",
+            requestId = "relation-action:${user.userKey}:${candidates.joinToString {
+                it.target.accountKey.toString() + ':' + it.action.id
+            }}",
             localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectRelationAction),
             options =
                 candidates.take(RELATION_SELECTION_OPTION_LIMIT).map { candidate ->

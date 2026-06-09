@@ -10,15 +10,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import platform.AppKit.NSBitmapImageRep
+import platform.AppKit.NSCompositeCopy
 import platform.AppKit.NSGraphicsContext
 import platform.AppKit.NSImage
 import platform.AppKit.NSImageCompressionFactor
-import platform.AppKit.NSCompositeCopy
 import platform.AppKit.NSJPEGFileType
+import platform.AppKit.representationUsingType
 import platform.CoreGraphics.CGRectMake
 import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSData
-import platform.AppKit.representationUsingType
 import kotlin.math.min
 import kotlin.native.HiddenFromObjC
 

@@ -92,6 +92,7 @@
     <string name="agent_chat_input_placeholder">Ask anything…</string>
     <string name="agent_chat_send">Send</string>
     <string name="agent_chat_thinking">Thinking…</string>
+    <string name="agent_compose_confirmation_prompt">Send this post?</string>
     <string name="draft_box_title">Drafts</string>
     <string name="draft_box_empty">No drafts yet</string>
     <string name="draft_box_edit">Edit</string>
@@ -173,8 +174,8 @@
     <string name="settings_ai_config_tap_to_edit">Tap to edit</string>
     <string name="settings_ai_config_entable_translation">Enable AI translation</string>
     <string name="settings_ai_config_translation_description">Use AI instead of Google Translate. Translations may take longer.</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后，在已配置 OpenAI 兼容模型时，会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">Enable AI agent</string>
+    <string name="settings_ai_config_agent_description">Show AI agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
     <string name="settings_ai_config_enable_tldr">Enable AI summaries</string>
     <string name="settings_ai_config_tldr_description">Summarize long posts with AI. Available for posts longer than 500 characters.</string>
     <string name="settings_ai_config_enable_pre_translation">Enable auto-translate</string>

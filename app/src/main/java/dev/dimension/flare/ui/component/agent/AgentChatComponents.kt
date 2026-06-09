@@ -95,21 +95,21 @@ internal fun <Message : Any> AgentChatContent(
     canSend: Boolean,
     error: Throwable?,
     runningTrace: String,
-    inputRequest: AgentInputRequest? = null,
     inputPlaceholder: String,
     sendContentDescription: String,
     messageText: (Message) -> String,
     messageParts: (Message) -> List<AgentMessagePart>,
-    messageInputRequest: (Message) -> AgentInputRequest? = { null },
-    messageInputRequestSelected: (Message) -> Boolean = { false },
-    messageInputRequestSelectedOptionId: (Message) -> String? = { null },
     isUserMessage: (Message) -> Boolean,
     onInputChange: (String) -> Unit,
     onSend: () -> Unit,
+    modifier: Modifier = Modifier,
+    inputRequest: AgentInputRequest? = null,
+    messageInputRequest: (Message) -> AgentInputRequest? = { null },
+    messageInputRequestSelected: (Message) -> Boolean = { false },
+    messageInputRequestSelectedOptionId: (Message) -> String? = { null },
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit = {},
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
-    modifier: Modifier = Modifier,
     showHeader: Boolean = true,
     leadingContentItemCount: Int = 0,
     leadingContent: LazyListScope.() -> Unit = {},
@@ -163,21 +163,21 @@ internal fun <Message : Any> AgentChatScaffold(
     canSend: Boolean,
     error: Throwable?,
     runningTrace: String,
-    inputRequest: AgentInputRequest? = null,
     inputPlaceholder: String,
     sendContentDescription: String,
     messageText: (Message) -> String,
     messageParts: (Message) -> List<AgentMessagePart>,
-    messageInputRequest: (Message) -> AgentInputRequest? = { null },
-    messageInputRequestSelected: (Message) -> Boolean = { false },
-    messageInputRequestSelectedOptionId: (Message) -> String? = { null },
     isUserMessage: (Message) -> Boolean,
     onInputChange: (String) -> Unit,
     onSend: () -> Unit,
+    modifier: Modifier = Modifier,
+    inputRequest: AgentInputRequest? = null,
+    messageInputRequest: (Message) -> AgentInputRequest? = { null },
+    messageInputRequestSelected: (Message) -> Boolean = { false },
+    messageInputRequestSelectedOptionId: (Message) -> String? = { null },
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit = {},
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
-    modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
     reserveBottomBarHeight: Boolean = true,
     leadingContentItemCount: Int = 0,
@@ -312,9 +312,9 @@ internal fun <Message : Any> AgentChatMessageList(
     messageInputRequestSelectedOptionId: (Message) -> String?,
     isUserMessage: (Message) -> Boolean,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
+    modifier: Modifier = Modifier,
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
-    modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     leadingContentItemCount: Int = 0,
     leadingContent: LazyListScope.() -> Unit = {},
@@ -381,14 +381,14 @@ internal fun <Message : Any> AgentChatMessageList(
 internal fun AgentChatMessageBubble(
     text: String,
     parts: List<AgentMessagePart>,
+    isUser: Boolean,
+    modifier: Modifier = Modifier,
     inputRequest: AgentInputRequest? = null,
     inputRequestSelected: Boolean = false,
     inputRequestSelectedOptionId: String? = null,
-    isUser: Boolean,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit = {},
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -568,11 +568,11 @@ private fun AgentUserCard(
 internal fun AgentChatInput(
     state: TextFieldState,
     canSend: Boolean,
-    inputRequest: AgentInputRequest? = null,
     placeholder: String,
     sendContentDescription: String,
     onSend: () -> Unit,
     modifier: Modifier = Modifier,
+    inputRequest: AgentInputRequest? = null,
 ) {
     fun sendIfEnabled() {
         if (canSend) {
@@ -694,42 +694,47 @@ private fun AgentComposeConfirmationRequest(
     enabled: Boolean,
     onOptionSelected: (AgentInputRequest.Option) -> Unit,
 ) {
-    Text(
-        text =
-            request.prompt
-                .lineSequence()
-                .firstOrNull()
-                .orEmpty()
-                .ifBlank { "确认发送这条内容吗？" },
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-    )
-    request.postPreview?.let { post ->
-        AgentPostCard(
-            post = post,
-            onClick = null,
-        )
-    }
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        actionOptions.forEach { option ->
-            if (option.id == confirmOption?.id) {
-                Button(
-                    onClick = { onOptionSelected(option) },
-                    enabled = enabled,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(text = option.label)
-                }
-            } else {
-                OutlinedButton(
-                    onClick = { onOptionSelected(option) },
-                    enabled = enabled,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(text = option.label)
+        Text(
+            text =
+                request.prompt
+                    .lineSequence()
+                    .firstOrNull()
+                    .orEmpty()
+                    .ifBlank { stringResource(id = R.string.agent_compose_confirmation_prompt) },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        request.postPreview?.let { post ->
+            AgentPostCard(
+                post = post,
+                onClick = null,
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            actionOptions.forEach { option ->
+                if (option.id == confirmOption?.id) {
+                    Button(
+                        onClick = { onOptionSelected(option) },
+                        enabled = enabled,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(text = option.label)
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = { onOptionSelected(option) },
+                        enabled = enabled,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(text = option.label)
+                    }
                 }
             }
         }

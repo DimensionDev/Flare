@@ -53,6 +53,7 @@
     <string name="status_insight_analyzing">Analyzing this post…</string>
     <string name="profile_insight_analyzing">Analyzing this profile…</string>
     <string name="status_insight_error">Unable to analyze this post.</string>
+    <string name="profile_insight_error">Unable to analyze this profile.</string>
     <string name="status_insight_trace_loading_post_context">Loading post context…</string>
     <string name="status_insight_trace_post_context_loaded">Post context loaded</string>
     <string name="status_insight_trace_preparing_images">Preparing images…</string>

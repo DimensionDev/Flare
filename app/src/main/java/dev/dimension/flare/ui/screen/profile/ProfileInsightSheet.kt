@@ -16,7 +16,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.feature.agent.presenter.profile.ProfileInsightPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.agent.AgentChatScaffold
+import dev.dimension.flare.ui.component.agent.AgentChatSheetScaffold
 import dev.dimension.flare.ui.component.agent.label
 import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.ClickEvent
@@ -42,13 +42,14 @@ internal fun ProfileInsightSheet(
         }.invoke()
     }
 
-    AgentChatScaffold(
+    AgentChatSheetScaffold(
         messages = state.messages,
         input = state.input,
         isRunning = state.isRunning,
         canSend = state.canSend,
         error = state.error,
         runningTrace = state.currentTrace?.label() ?: stringResource(id = R.string.profile_insight_analyzing),
+        errorText = stringResource(id = R.string.profile_insight_error),
         inputRequest = state.inputRequest,
         inputPlaceholder = stringResource(id = R.string.agent_chat_input_placeholder),
         sendContentDescription = stringResource(id = R.string.agent_chat_send),
@@ -68,7 +69,6 @@ internal fun ProfileInsightSheet(
         onUserClick = { user ->
             user.toRoute()?.let(navigate)
         },
-        reserveBottomBarHeight = false,
         leadingContentItemCount = if (state.profile != null) 1 else 0,
         leadingContent = {
             state.profile?.let { profile ->

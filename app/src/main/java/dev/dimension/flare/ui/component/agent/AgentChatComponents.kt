@@ -784,7 +784,7 @@ private fun AgentConfirmationButtons(
 }
 
 @Composable
-private fun AgentLocalizedText.resolveAgentLocalizedText(): String {
+internal fun AgentLocalizedText.resolveAgentLocalizedText(): String {
     fun arg(index: Int): String = args.getOrNull(index).orEmpty()
     return when (key) {
         AgentLocalizedTextKey.DynamicText -> {

@@ -101559,6 +101559,7 @@
       }
     },
     "notification_save_image_error" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -101749,6 +101750,7 @@
       }
     },
     "notification_save_image_success" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

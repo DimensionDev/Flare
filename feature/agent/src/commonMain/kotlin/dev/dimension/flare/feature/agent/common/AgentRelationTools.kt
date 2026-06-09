@@ -588,7 +588,8 @@ private suspend fun AgentToolSession.relationUserSelectionMessage(
 ): String {
     val candidates = availableRelationUsers().takeIf { it.isNotEmpty() }
     if (candidates == null) {
-        return "Relation tool requires a target user. Use search_users/load_user_profile first, target the current post author, or provide targetUserId and targetUserHost."
+        return "Relation tool requires a target user. Use search_users/load_user_profile first, " +
+            "target the current post author, or provide targetUserId and targetUserHost."
     }
     inputRequestStore.set(
         AgentInputRequest(

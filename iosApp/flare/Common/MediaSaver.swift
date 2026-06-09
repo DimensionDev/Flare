@@ -1,5 +1,6 @@
 import Foundation
 import Kingfisher
+import Photos
 import UIKit
 import SwiftUI
 import Drops
@@ -19,17 +20,19 @@ class MediaSaver: NSObject {
         KingfisherManager.shared.downloader.downloadImage(with: url, options: kingfisherOptions(customHeaders: customHeaders), progressBlock: nil) { result in
             switch result {
             case .success(let v):
-                UIImageWriteToSavedPhotosAlbum(v.image, self, #selector(self.saveCompleted), nil)
+                self.saveOriginalDataToPhotos(v.originalData)
             case .failure:
-                DispatchQueue.main.async {
-                    Drops.show(
-                        .init(
-                            title: .init(localized: "notification_save_image_error"),
-                            icon: .faCircleExclamation
-                        )
-                    )
-                }
+                self.showSaveResult(success: false)
             }
+        }
+    }
+
+    nonisolated private func saveOriginalDataToPhotos(_ data: Data) {
+        PHPhotoLibrary.shared().performChanges {
+            let request = PHAssetCreationRequest.forAsset()
+            request.addResource(with: .photo, data: data, options: nil)
+        } completionHandler: { success, error in
+            self.showSaveResult(success: success && error == nil)
         }
     }
 
@@ -46,12 +49,12 @@ class MediaSaver: NSObject {
         })]
     }
     
-    @objc func saveCompleted(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    nonisolated private func showSaveResult(success: Bool) {
         DispatchQueue.main.async {
             Drops.show(
                 .init(
-                    title: .init(localized: "notification_save_image_success"),
-                    icon: .faCircleCheck
+                    title: .init(localized: success ? "notification_save_image_success" : "notification_save_image_error"),
+                    icon: success ? .faCircleCheck : .faCircleExclamation
                 )
             )
         }

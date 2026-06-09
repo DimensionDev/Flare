@@ -369,9 +369,9 @@ internal class AgentSubscriptionItemStore {
                 .asReversed()
                 .distinctBy { it.url }
                 .firstOrNull { feed ->
-                    normalizedRef.isNotBlank() && feed.agentRssArticleRef().normalizedSubscriptionRef() == normalizedRef ||
-                        normalizedRef.isNotBlank() && feed.agentRssArticleMarker().normalizedSubscriptionRef() == normalizedRef ||
-                        normalizedUrl.isNotBlank() && feed.url == normalizedUrl
+                    (normalizedRef.isNotBlank() && feed.agentRssArticleRef().normalizedSubscriptionRef() == normalizedRef) ||
+                        (normalizedRef.isNotBlank() && feed.agentRssArticleMarker().normalizedSubscriptionRef() == normalizedRef) ||
+                        (normalizedUrl.isNotBlank() && feed.url == normalizedUrl)
                 }
         }
 }

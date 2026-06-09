@@ -99,7 +99,7 @@ internal class PixivDataSource(
         persistentListOf(
             CommonTimelineSpecs.home.galleryTabItem(
                 data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.Material(UiIcon.Pixiv),
+                icon = IconType.FavIcon("https://pixiv.net/"),
                 title = UiText.Raw("pixiv"),
             ),
         )

@@ -82,7 +82,7 @@
     <string name="status_insight_trace_agent_closing">Fechando análise…</string>
     <string name="ask_ai">Perguntar IA</string>
     <string name="agent_chat_title">Chat IA</string>
-    <string name="agent_history_title">Agente Sinalizador</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Nenhum histórico de bate-papo dos agentes ainda.</string>
     <string name="agent_chat_input_placeholder">Pergunte qualquer coisa…</string>
     <string name="agent_chat_send">Enviar</string>

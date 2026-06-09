@@ -212,8 +212,8 @@
     <string name="settings_guest_setting_description">اختر الخادم الذي يتصل به وضع الضيف</string>
     <string name="settings_local_history_title">السجل المحلي</string>
     <string name="settings_local_history_description">البحث في المنشورات والملفات الشخصية المخزنة مؤقتًا على هذا الجهاز</string>
-    <string name="settings_agent_history_title">الوكيل المتلاعب</string>
-    <string name="settings_agent_history_description">عرض محفوظات المحادثة المحلية للوكيل المتحرك</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">عرض محفوظات المحادثة المحلية لـ Flare AI</string>
     <string name="agent_history_empty">لا يوجد وكيل سجل الدردشة حتى الآن.</string>
     <string name="settings_app_logging_title">سجلات التطبيق</string>
     <string name="settings_app_logging_save">حفظ السجلات</string>

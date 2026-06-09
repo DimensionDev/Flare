@@ -200,8 +200,8 @@
     <string name="settings_guest_setting_description">Kies met welke server de gastmodus verbinding maakt</string>
     <string name="settings_local_history_title">Lokale geschiedenis</string>
     <string name="settings_local_history_description">Zoeken in berichten en profielen die op dit apparaat zijn gecachet</string>
-    <string name="settings_agent_history_title">Verspreid agent</string>
-    <string name="settings_agent_history_description">Bekijk lokale Flare agent chat geschiedenis</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Bekijk lokale Flare AI chatgeschiedenis</string>
     <string name="agent_history_empty">Nog geen medewerker chatgeschiedenis.</string>
     <string name="settings_app_logging_title">App-logs</string>
     <string name="settings_app_logging_save">Logs opslaan</string>

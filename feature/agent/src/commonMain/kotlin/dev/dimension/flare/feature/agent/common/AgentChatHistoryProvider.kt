@@ -477,7 +477,7 @@ internal class AgentChatHistoryProvider(
             ?.trim()
             ?.take(MAX_FALLBACK_TITLE_CHARS)
             .orEmpty()
-            .ifBlank { "Flare Agent" }
+            .ifBlank { "Flare AI" }
 
     private companion object {
         const val MAX_FALLBACK_TITLE_CHARS = 80

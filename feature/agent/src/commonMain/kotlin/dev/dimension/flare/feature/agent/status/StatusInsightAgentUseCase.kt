@@ -20,7 +20,7 @@ import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
 import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
-import dev.dimension.flare.feature.agent.common.cleanAgentVisibleText
+import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
@@ -127,15 +127,19 @@ internal class StatusInsightAgentUseCase(
         val resultAttachments =
             (listOf(AgentConversationAttachment.Post(post)) + result.attachments)
                 .distinctBy { it.attachmentIdentity() }
+        val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
         chatHistoryProvider.storeAssistantAttachments(conversationId, resultAttachments)
-        result.inputRequest?.let { inputRequest ->
+        visibleResult.inputRequest?.let { inputRequest ->
             chatHistoryProvider.storeAssistantInputRequest(conversationId, inputRequest)
+        }
+        if (!visibleResult.hasVisibleContent(resultAttachments)) {
+            return
         }
         send(
             AgentConversationEvent.Result(
-                text = result.text.cleanAgentVisibleText(),
+                text = visibleResult.text,
                 attachments = resultAttachments,
-                inputRequest = result.inputRequest,
+                inputRequest = visibleResult.inputRequest,
             ),
         )
     }

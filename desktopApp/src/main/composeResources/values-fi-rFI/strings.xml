@@ -201,8 +201,8 @@
     <string name="settings_guest_setting_description">Valitse, mihin palvelimeen vierastila yhdistää</string>
     <string name="settings_local_history_title">Paikallinen historia</string>
     <string name="settings_local_history_description">Hae laitteeseen välimuistiin tallennettuja postauksia ja profiileja</string>
-    <string name="settings_agent_history_title">Flare Agent</string>
-    <string name="settings_agent_history_description">Näytä paikallinen Flare Agent chat historia</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Näytä paikallinen Flare AI chat historia</string>
     <string name="agent_history_empty">Ei agenttikeskusteluhistoriaa vielä.</string>
     <string name="settings_app_logging_title">Sovelluksen lokit</string>
     <string name="settings_app_logging_save">Tallenna lokit</string>

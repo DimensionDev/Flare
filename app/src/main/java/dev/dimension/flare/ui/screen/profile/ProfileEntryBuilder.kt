@@ -1,10 +1,13 @@
 package dev.dimension.flare.ui.screen.profile
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
+import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit
@@ -62,6 +65,14 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
                     Route.Profile.Fans(
                         userKey = it,
                         accountType = args.accountType,
+                    )
+                )
+            },
+            onProfileInsightClick = {
+                navigate(
+                    Route.Profile.Insight(
+                        accountType = args.accountType,
+                        userKey = it,
                     )
                 )
             },
@@ -123,6 +134,14 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
                     )
                 )
             },
+            onProfileInsightClick = {
+                navigate(
+                    Route.Profile.Insight(
+                        accountType = args.accountType,
+                        userKey = it,
+                    )
+                )
+            },
         )
     }
     
@@ -177,6 +196,14 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
                     )
                 )
             },
+            onProfileInsightClick = {
+                navigate(
+                    Route.Profile.Insight(
+                        accountType = args.accountType,
+                        userKey = it,
+                    )
+                )
+            },
         )
     }
     
@@ -209,6 +236,16 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
                     )
                 )
             }
+        )
+    }
+
+    entry<Route.Profile.Insight>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { args ->
+        ProfileInsightSheet(
+            accountType = args.accountType,
+            userKey = args.userKey,
+            navigate = navigate,
         )
     }
 

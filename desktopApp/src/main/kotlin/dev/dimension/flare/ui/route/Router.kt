@@ -66,6 +66,7 @@ import dev.dimension.flare.ui.screen.home.GroupConfigScreen
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.MuteUserDialog
 import dev.dimension.flare.ui.screen.home.NotificationScreen
+import dev.dimension.flare.ui.screen.home.ProfileInsightDialog
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRoute
 import dev.dimension.flare.ui.screen.home.ReportUserDialog
@@ -87,6 +88,7 @@ import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.settings.AgentChatScreen
 import dev.dimension.flare.ui.screen.settings.AgentHistoryScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
+import dev.dimension.flare.ui.screen.settings.LocalHistoryAgentScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
@@ -348,6 +350,17 @@ internal fun Router(
                     )
                 }
 
+                entry<Route.ProfileInsight>(
+                    metadata = dialog(),
+                ) { args ->
+                    ProfileInsightDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                        navigate = navigate,
+                    )
+                }
+
                 entry<Route.CreateRssSource>(
                     metadata = dialog(),
                 ) { args ->
@@ -573,6 +586,14 @@ internal fun Router(
                                 ),
                             )
                         },
+                        onProfileInsightClick = {
+                            navigate(
+                                Route.ProfileInsight(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -615,6 +636,14 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                ),
+                            )
+                        },
+                        onProfileInsightClick = {
+                            navigate(
+                                Route.ProfileInsight(
+                                    accountType = args.accountType,
+                                    userKey = it,
                                 ),
                             )
                         },
@@ -786,6 +815,14 @@ internal fun Router(
                                 ),
                             )
                         },
+                        onProfileInsightClick = {
+                            navigate(
+                                Route.ProfileInsight(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -944,7 +981,17 @@ internal fun Router(
                 }
 
                 entry<Route.LocalCache> {
-                    LocalCacheScreen()
+                    LocalCacheScreen(
+                        toAskAi = { query, target ->
+                            navigate(
+                                Route.LocalHistoryAgent(
+                                    conversationId = "local-history:${kotlin.time.Clock.System.now().toEpochMilliseconds()}",
+                                    query = query,
+                                    target = target,
+                                ),
+                            )
+                        },
+                    )
                 }
 
                 entry<Route.AgentHistory> {
@@ -966,6 +1013,16 @@ internal fun Router(
                     AgentChatScreen(
                         conversationId = args.conversationId,
                         initialMessage = args.initialMessage,
+                        onBack = onBack,
+                        navigate = navigate,
+                    )
+                }
+
+                entry<Route.LocalHistoryAgent> { args ->
+                    LocalHistoryAgentScreen(
+                        conversationId = args.conversationId,
+                        query = args.query,
+                        target = args.target,
                         onBack = onBack,
                         navigate = navigate,
                     )

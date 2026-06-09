@@ -82,7 +82,7 @@
     <string name="status_insight_trace_agent_closing">Afsluttende analyse…</string>
     <string name="ask_ai">Spørg AI</string>
     <string name="agent_chat_title">AI Chat</string>
-    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Ingen agent chat historik endnu.</string>
     <string name="agent_chat_input_placeholder">Spørg noget…</string>
     <string name="agent_chat_send">Send</string>

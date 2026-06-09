@@ -209,8 +209,8 @@
     <string name="settings_guest_setting_description">Wybierz serwer, z którym połączy się tryb gościa</string>
     <string name="settings_local_history_title">Historia lokalna</string>
     <string name="settings_local_history_description">Przeszukuj wpisy i profile zapisane na tym urządzeniu</string>
-    <string name="settings_agent_history_title">Agent Flara</string>
-    <string name="settings_agent_history_description">Zobacz historię czatu Flare Agent</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Zobacz historię czatu Flare AI</string>
     <string name="agent_history_empty">Brak historii czatu agenta.</string>
     <string name="settings_app_logging_title">Logi aplikacji</string>
     <string name="settings_app_logging_save">Zapisz logi</string>

@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentLocalizedText
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -77,7 +78,7 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
     conversationId: String,
     contextFlow: Flow<Context?>,
     runAgent: (Context, String?, String) -> Flow<AgentConversationEvent<Content, Trace>>,
-    userMessage: (String) -> Message,
+    userMessage: (String, AgentLocalizedText?) -> Message,
     assistantMessage: (String, List<AgentConversationAttachment>, AgentInputRequest?) -> Message,
     isAssistantMessage: (Message) -> Boolean,
     messageInputRequest: (Message) -> AgentInputRequest? = { null },
@@ -246,7 +247,7 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
             if (!initialUserInputConsumed && initialText != null) {
                 initialUserInputConsumed = true
                 updateMessages {
-                    it + userMessage(initialText)
+                    it + userMessage(initialText, null)
                 }
                 runCurrentAgent(userInput = initialText)
             } else if (autoRunOnContext) {
@@ -273,7 +274,7 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
                 input = ""
                 inputRequest = null
                 updateMessages {
-                    it + userMessage(text)
+                    it + userMessage(text, null)
                 }
                 runCurrentAgent(userInput = text)
             }
@@ -296,7 +297,7 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
                 input = ""
                 inputRequest = null
                 updateMessages {
-                    it + userMessage(option.label)
+                    it + userMessage(option.localizedLabel.toAgentProtocolText(), option.localizedLabel)
                 }
                 runCurrentAgent(userInput = text)
             }

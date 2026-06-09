@@ -203,8 +203,8 @@
     <string name="settings_guest_setting_description">Choisir le serveur auquel le mode invité se connecte</string>
     <string name="settings_local_history_title">Historique local</string>
     <string name="settings_local_history_description">Rechercher des messages et des profils mis en cache sur cet appareil</string>
-    <string name="settings_agent_history_title">Agent Fusée éclairante</string>
-    <string name="settings_agent_history_description">Afficher l\'historique de discussion de l\'agent de fusée éclairante locale</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Afficher l\'historique de discussion local de Flare AI</string>
     <string name="agent_history_empty">Aucun historique de chat d\'agent pour le moment.</string>
     <string name="settings_app_logging_title">Journaux de l\'application</string>
     <string name="settings_app_logging_save">Enregistrer les journaux</string>

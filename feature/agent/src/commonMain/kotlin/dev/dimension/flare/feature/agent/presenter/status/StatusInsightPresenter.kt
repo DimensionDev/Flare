@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentLocalizedText
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.parseAgentMessageParts
@@ -85,7 +86,9 @@ public class StatusInsightPresenter(
                         conversationId = currentConversationId,
                     )
                 },
-                userMessage = Message::User,
+                userMessage = { text, localizedText ->
+                    Message.User(text = text, localizedText = localizedText)
+                },
                 assistantMessage = { text, attachments, inputRequest ->
                     Message.Assistant(
                         text = text,
@@ -140,6 +143,8 @@ public class StatusInsightPresenter(
     @Immutable
     public sealed interface Message {
         public val text: String
+        public val localizedText: AgentLocalizedText?
+            get() = null
         public val parts: ImmutableList<AgentMessagePart>
         public val inputRequest: AgentInputRequest?
             get() = null
@@ -151,6 +156,7 @@ public class StatusInsightPresenter(
         @Immutable
         public data class User(
             override val text: String,
+            override val localizedText: AgentLocalizedText? = null,
             override val parts: ImmutableList<AgentMessagePart> = text.toAgentTextParts(),
         ) : Message
 

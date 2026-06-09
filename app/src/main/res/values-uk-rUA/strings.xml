@@ -74,7 +74,7 @@
     <string name="status_insight_trace_agent_closing">Закриття аналізу…</string>
     <string name="ask_ai">Запитати ШІ</string>
     <string name="agent_chat_title">Чат</string>
-    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Ще немає історії чатів.</string>
     <string name="agent_chat_input_placeholder">Запитайте що-небудь…</string>
     <string name="agent_chat_send">Надіслати</string>

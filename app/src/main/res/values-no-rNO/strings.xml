@@ -76,7 +76,7 @@
     <string name="status_insight_trace_agent_closing">Avslutter analyse…</string>
     <string name="ask_ai">Spør AI</string>
     <string name="agent_chat_title">AI chat</string>
-    <string name="agent_history_title">Kollektiv Agent</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Ingen agent samtalelogg enda.</string>
     <string name="agent_chat_send">Sende</string>
     <string name="agent_chat_thinking">Tenker…</string>

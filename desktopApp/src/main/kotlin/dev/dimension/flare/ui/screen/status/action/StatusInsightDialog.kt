@@ -164,6 +164,7 @@ internal fun StatusInsightDialog(
                 inputPlaceholder = stringResource(Res.string.agent_chat_input_placeholder),
                 sendContentDescription = stringResource(Res.string.agent_chat_send),
                 messageText = StatusInsightPresenter.Message::text,
+                messageLocalizedText = StatusInsightPresenter.Message::localizedText,
                 messageParts = StatusInsightPresenter.Message::parts,
                 messageInputRequest = StatusInsightPresenter.Message::inputRequest,
                 messageInputRequestSelected = StatusInsightPresenter.Message::inputRequestSelected,

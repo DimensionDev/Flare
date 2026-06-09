@@ -77,7 +77,7 @@
     <string name="status_insight_trace_agent_closing">Loppuanalyysi…</string>
     <string name="ask_ai">Kysy AI</string>
     <string name="agent_chat_title">Ai Keskustelu</string>
-    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Ei agenttikeskusteluhistoriaa vielä.</string>
     <string name="agent_chat_send">Lähetä</string>
     <string name="draft_box_title">Luonnokset</string>

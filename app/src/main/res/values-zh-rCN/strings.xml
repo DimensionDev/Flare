@@ -73,8 +73,8 @@
     <string name="status_insight_trace_agent_closing">结束分析…</string>
     <string name="ask_ai">问问AI</string>
     <string name="agent_chat_title">AI 聊天</string>
-    <string name="agent_history_title">闪光代理</string>
-    <string name="agent_history_empty">暂无代理聊天历史记录。</string>
+    <string name="agent_history_title">Flare AI</string>
+    <string name="agent_history_empty">暂无 AI 聊天历史记录。</string>
     <string name="agent_chat_input_placeholder">想问什么都可以…</string>
     <string name="agent_chat_send">发送</string>
     <string name="agent_chat_thinking">正在思考…</string>

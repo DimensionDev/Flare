@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBarDefaults
@@ -27,12 +29,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
+import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.BackArrow
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -46,7 +51,10 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
+internal fun LocalCacheSearchScreen(
+    onBack: () -> Unit,
+    onAskAiClick: (String?, LocalHistoryAgentTarget) -> Unit = { _, _ -> },
+) {
     val state by producePresenter {
         presenter()
     }
@@ -54,6 +62,7 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
     val lazyListState = rememberLazyStaggeredGridState()
     val uriHandler = LocalUriHandler.current
+    val showAskAi = LocalTimelineAppearance.current.aiConfig.agent
     FlareScaffold(
         topBar = {
             Box(
@@ -110,6 +119,38 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
                         )
                     },
                     content = {
+                        if (showAskAi) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .imePadding()
+                                        .padding(16.dp),
+                            ) {
+                                ExtendedFloatingActionButton(
+                                    onClick = {
+                                        state.setSearchBarExpanded(false)
+                                        keyboardController?.hide()
+                                        onAskAiClick(
+                                            text
+                                                .trim()
+                                                .takeIf { it.isNotEmpty() },
+                                            state.selectedSearchType.toLocalHistoryAgentTarget(),
+                                        )
+                                    },
+                                    icon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Robot,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = {
+                                        Text(text = stringResource(id = R.string.ask_ai))
+                                    },
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                )
+                            }
+                        }
                     },
                     expanded = state.searchBarExpanded,
                     onExpandedChange = state::setSearchBarExpanded,
@@ -216,3 +257,9 @@ private enum class SearchType(
     Status(R.string.local_history_search_status_title),
     User(R.string.local_history_search_user_title),
 }
+
+private fun SearchType.toLocalHistoryAgentTarget(): LocalHistoryAgentTarget =
+    when (this) {
+        SearchType.Status -> LocalHistoryAgentTarget.Posts
+        SearchType.User -> LocalHistoryAgentTarget.Users
+    }

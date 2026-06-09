@@ -109,20 +109,18 @@ internal class ComposePostTool(
                 sensitive = args.sensitive,
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
-            )
+        )
         if (!args.confirmed) {
             val userPreview = target.loadUserPreview()
-            val confirmationMessage = target.confirmationMessage(data, action, reference, userPreview)
-            session.inputRequestStore.set(
+            val inputRequest =
                 target.confirmationInputRequest(
                     data = data,
                     action = action,
                     reference = reference,
-                    confirmationMessage = confirmationMessage,
                     userPreview = userPreview,
-                ),
-            )
-            return confirmationMessage
+                )
+            session.inputRequestStore.set(inputRequest)
+            return inputRequest.localizedPrompt.toAgentProtocolText()
         }
 
         target.dataSource.compose(data = data) {
@@ -207,36 +205,36 @@ internal class ComposePostTool(
             return "${action.label} requires a target post. Open a post insight session, " +
                 "use search_posts/load_post_context first, or provide targetStatusId and targetStatusHost."
         }
-        val prompt = "请选择要${action.zhVerb}的帖子。"
+        val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectComposeTargetPost, action.uiVerb)
         session.inputRequestStore.set(
             AgentInputRequest(
                 requestId = "compose-target:${action.name}:${content.hashCode()}:${args.platforms.joinToString()}",
-                prompt = prompt,
+                localizedPrompt = localizedPrompt,
                 options =
                     postTargets.map { post ->
                         AgentInputRequest.Option(
                             id = "post:${post.agentAttachmentRef()}",
-                            label = post.composePostLabel(),
+                            localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, post.composePostLabel()),
                             value =
                                 buildString {
-                                    appendLine("${action.zhVerb}以下帖子：")
+                                    appendLine(AgentUiStrings.Compose.targetPostPrefix(action.uiVerb))
                                     appendLine("action=${action.name}")
                                     appendLine("targetStatusId=${post.statusKey.id}")
                                     appendLine("targetStatusHost=${post.statusKey.host}")
                                     appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                     appendLine()
                                     appendAccountArgs(args)
-                                    appendLine("内容：")
+                                    appendLine("${AgentUiStrings.Common.Content}：")
                                     append(content)
                                 },
                             postPreview = post,
                         )
                     },
                 allowFreeText = true,
-                freeTextPlaceholder = "也可以直接输入目标帖子链接、statusKey 或修改内容...",
+                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposeTargetPostPlaceholder),
             ),
         )
-        return prompt
+        return localizedPrompt.toAgentProtocolText()
     }
 
     private suspend fun accountSelectionMessage(
@@ -267,20 +265,24 @@ internal class ComposePostTool(
                 platformGroups = platformGroups,
             )
         }
-        val prompt = "请选择用于${action.zhVerb}这条内容的账号。"
+        val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectComposeAccount, action.uiVerb)
         session.inputRequestStore.set(
             AgentInputRequest(
                 requestId = "compose-account:${action.name}:${content.hashCode()}:${args.platforms.joinToString()}:${reference?.statusKey}",
-                prompt = prompt,
+                localizedPrompt = localizedPrompt,
                 options =
                     targets.map { target ->
                         val userPreview = target.loadUserPreview()
                         AgentInputRequest.Option(
                             id = "account:${target.accountKey}",
-                            label = userPreview?.composeDisplayLabel() ?: target.composeAccountLabel(),
+                            localizedLabel =
+                                AgentUiStrings.text(
+                                    AgentLocalizedTextKey.DynamicText,
+                                    userPreview?.composeDisplayLabel() ?: target.composeAccountLabel(),
+                                ),
                             value =
                                 buildString {
-                                    appendLine("使用以下账号${action.zhVerb}：")
+                                    appendLine(AgentUiStrings.Compose.accountPrefix(action.uiVerb))
                                     appendLine("action=${action.name}")
                                     appendLine("accountId=${target.accountKey.id}")
                                     appendLine("accountHost=${target.accountKey.host}")
@@ -290,17 +292,17 @@ internal class ComposePostTool(
                                         appendLine("targetStatusHost=${it.statusKey.host}")
                                     }
                                     appendLine()
-                                    appendLine("内容：")
+                                    appendLine("${AgentUiStrings.Common.Content}：")
                                     append(content)
                                 },
                             userPreview = userPreview,
                         )
                     },
                 allowFreeText = true,
-                freeTextPlaceholder = "也可以直接输入账号或修改内容...",
+                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposeAccountPlaceholder),
             ),
         )
-        return prompt
+        return localizedPrompt.toAgentProtocolText()
     }
 
     private suspend fun platformSelectionMessage(
@@ -310,21 +312,21 @@ internal class ComposePostTool(
         reference: ComposeReference?,
         platformGroups: Map<PlatformType, List<AgentComposeTarget>>,
     ): String {
-        val prompt = "请选择用于${action.zhVerb}这条内容的平台。"
+        val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectComposePlatform, action.uiVerb)
         session.inputRequestStore.set(
             AgentInputRequest(
                 requestId = "compose-platform:${action.name}:${content.hashCode()}:${reference?.statusKey}",
-                prompt = prompt,
+                localizedPrompt = localizedPrompt,
                 options =
                     platformGroups.entries
                         .sortedBy { it.key.name }
                         .map { (platformType, targets) ->
                             AgentInputRequest.Option(
                                 id = "platform:${platformType.name}",
-                                label = platformType.composePlatformLabel(targets.size),
+                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, platformType.composePlatformLabel(targets.size)),
                                 value =
                                     buildString {
-                                        appendLine("使用以下平台${action.zhVerb}：")
+                                        appendLine(AgentUiStrings.Compose.platformPrefix(action.uiVerb))
                                         appendLine("action=${action.name}")
                                         appendLine("platforms=${platformType.name}")
                                         reference?.let {
@@ -333,86 +335,53 @@ internal class ComposePostTool(
                                         }
                                         appendLine()
                                         appendAccountArgs(args)
-                                        appendLine("内容：")
+                                        appendLine("${AgentUiStrings.Common.Content}：")
                                         append(content)
                                     },
                             )
                         },
                 allowFreeText = true,
-                freeTextPlaceholder = "也可以直接输入平台、账号或修改内容...",
+                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposePlatformPlaceholder),
             ),
         )
-        return prompt
+        return localizedPrompt.toAgentProtocolText()
     }
-
-    private fun AgentComposeTarget.confirmationMessage(
-        data: ComposeData,
-        action: ComposeAction,
-        reference: ComposeReference?,
-        userPreview: UiProfile?,
-    ): String =
-        buildString {
-            appendLine(action.confirmationTitle)
-            appendLine()
-            appendLine("账号：${userPreview?.composeDisplayLabel() ?: composeAccountLabel()}")
-            userPreview?.handle?.canonical?.let {
-                appendLine("Handle：$it")
-            }
-            appendLine("账号 Key：$accountKey")
-            appendLine("平台：${platformType.name}")
-            appendLine("可见性：${data.visibility.name}")
-            reference?.let {
-                appendLine()
-                appendLine("目标帖子：")
-                appendLine("statusKey：${it.statusKey}")
-                it.post?.let { post ->
-                    post.user?.let { author ->
-                        appendLine("作者：${author.composeDisplayLabel()}")
-                    }
-                    appendLine("内容摘要：${post.content.raw.take(160)}")
-                }
-            }
-            if (data.language.isNotEmpty()) {
-                appendLine("语言：${data.language.joinToString()}")
-            }
-            if (data.sensitive) {
-                appendLine("敏感内容：是")
-            }
-            data.spoilerText?.let {
-                appendLine("内容警告：$it")
-            }
-            appendLine()
-            appendLine("内容：")
-            appendLine(data.content)
-            appendLine()
-            append("如果确认，请回复“确认发送”。")
-        }.trim()
 
     private fun AgentComposeTarget.confirmationInputRequest(
         data: ComposeData,
         action: ComposeAction,
         reference: ComposeReference?,
-        confirmationMessage: String,
         userPreview: UiProfile?,
     ): AgentInputRequest =
         AgentInputRequest(
             requestId = "compose:${action.name}:$accountKey:${reference?.statusKey}:${data.content.hashCode()}",
-            prompt = confirmationMessage,
+            localizedPrompt =
+                AgentUiStrings.text(
+                    AgentLocalizedTextKey.ComposeConfirmationMessage,
+                    action.confirmationTextKey.name,
+                    userPreview?.composeDisplayLabel() ?: composeAccountLabel(),
+                    userPreview?.handle?.canonical.orEmpty(),
+                    accountKey.toString(),
+                    platformType.name,
+                    data.visibility.name,
+                    reference?.statusKey?.toString().orEmpty(),
+                    reference?.post?.user?.composeDisplayLabel().orEmpty(),
+                    reference?.post?.content?.raw?.take(160).orEmpty(),
+                    data.language.joinToString(),
+                    data.sensitive.toString(),
+                    data.spoilerText.orEmpty(),
+                    data.content,
+                ),
             options =
                 listOf(
                     AgentInputRequest.Option(
-                        id = "cancel",
-                        label = "取消",
-                        value = "取消发送",
-                    ),
-                    AgentInputRequest.Option(
                         id = "confirm",
-                        label = "确认发送",
-                        value = "确认发送",
+                        value = AgentUiStrings.Compose.ConfirmSend,
+                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmSendPost),
                     ),
                 ),
             allowFreeText = true,
-            freeTextPlaceholder = "也可以直接输入修改后的内容...",
+            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposeConfirmationPlaceholder),
             postPreview = composePreviewPost(data = data, userPreview = userPreview),
         )
 
@@ -485,20 +454,7 @@ internal class ComposePostTool(
     private fun AgentComposeTarget.composeAccountLabel(): String = "${platformType.name} / $accountKey"
 
     private fun PlatformType.composePlatformLabel(accountCount: Int): String =
-        buildString {
-            append(
-                when (this@composePlatformLabel) {
-                    PlatformType.xQt -> "Twitter/X"
-                    PlatformType.VVo -> "微博"
-                    else -> name
-                },
-            )
-            if (accountCount > 1) {
-                append("（")
-                append(accountCount)
-                append(" 个账号）")
-            }
-        }
+        AgentUiStrings.Compose.platformLabel(this, accountCount)
 
     private fun UiProfile.composeDisplayLabel(): String =
         listOf(
@@ -548,26 +504,30 @@ private data class ComposeReference(
 private enum class ComposeAction(
     val composeType: ComposeType,
     val label: String,
-    val zhVerb: String,
+    val uiVerb: String,
     val confirmationTitle: String,
+    val confirmationTextKey: AgentLocalizedTextKey,
 ) {
     New(
         composeType = ComposeType.New,
         label = "new",
-        zhVerb = "发送",
-        confirmationTitle = "确认使用以下账号发送以下内容吗？",
+        uiVerb = AgentUiStrings.Compose.SendVerb,
+        confirmationTitle = AgentUiStrings.Compose.SendConfirmationTitle,
+        confirmationTextKey = AgentLocalizedTextKey.ComposeSendConfirmationTitle,
     ),
     Reply(
         composeType = ComposeType.Reply,
         label = "reply",
-        zhVerb = "回复",
-        confirmationTitle = "确认使用以下账号回复以下帖子，并发送以下内容吗？",
+        uiVerb = AgentUiStrings.Compose.ReplyVerb,
+        confirmationTitle = AgentUiStrings.Compose.ReplyConfirmationTitle,
+        confirmationTextKey = AgentLocalizedTextKey.ComposeReplyConfirmationTitle,
     ),
     Quote(
         composeType = ComposeType.Quote,
         label = "quote",
-        zhVerb = "引用",
-        confirmationTitle = "确认使用以下账号引用以下帖子，并发送以下内容吗？",
+        uiVerb = AgentUiStrings.Compose.QuoteVerb,
+        confirmationTitle = AgentUiStrings.Compose.QuoteConfirmationTitle,
+        confirmationTextKey = AgentLocalizedTextKey.ComposeQuoteConfirmationTitle,
     ),
 }
 

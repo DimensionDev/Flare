@@ -193,8 +193,8 @@
     <string name="settings_guest_setting_description">Επιλέξτε σε ποιον διακομιστή συνδέεται η λειτουργία επισκέπτη</string>
     <string name="settings_local_history_title">Τοπικό Ιστορικό</string>
     <string name="settings_local_history_description">Αναζήτηση δημοσιεύσεων και προφίλ που έχουν αποθηκευτεί προσωρινά σε αυτήν τη συσκευή</string>
-    <string name="settings_agent_history_title">Flare Agent</string>
-    <string name="settings_agent_history_description">Δείτε το ιστορικό συνομιλίας του τοπικού παράγοντα Flare Agent</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Δείτε το ιστορικό συνομιλίας του τοπικού παράγοντα Flare AI</string>
     <string name="agent_history_empty">Δεν υπάρχει ιστορικό συνομιλίας πράκτορα ακόμα.</string>
     <string name="settings_app_logging_title">Καταγραφές εφαρμογής</string>
     <string name="settings_app_logging_save">Αποθήκευση καταγραφών</string>

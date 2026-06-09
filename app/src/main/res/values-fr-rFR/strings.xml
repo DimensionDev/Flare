@@ -76,7 +76,7 @@
     <string name="status_insight_trace_agent_closing">Fermeture de l\'analyse…</string>
     <string name="ask_ai">Demander à l\'IA</string>
     <string name="agent_chat_title">Chat IA</string>
-    <string name="agent_history_title">Agent Fusée éclairante</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Aucun historique de chat d\'agent pour le moment.</string>
     <string name="agent_chat_input_placeholder">Demander quoi que ce soit…</string>
     <string name="agent_chat_send">Envoyer</string>

@@ -80,7 +80,7 @@
     <string name="status_insight_trace_agent_closing">Закрытие анализа…</string>
     <string name="ask_ai">Спросить ИИ</string>
     <string name="agent_chat_title">AI Чат</string>
-    <string name="agent_history_title">Агент сигнала</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Пока нет истории чата агента.</string>
     <string name="agent_chat_input_placeholder">Спросите что-нибудь…</string>
     <string name="agent_chat_send">Отправить</string>

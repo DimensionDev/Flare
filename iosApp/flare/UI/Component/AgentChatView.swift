@@ -13,6 +13,7 @@ struct AgentChatView<Message>: View {
     let inputRequest: AgentInputRequest?
     let inputPlaceholder: String
     let messageText: (Message) -> String
+    let messageLocalizedText: (Message) -> AgentLocalizedText?
     let messageParts: (Message) -> [AgentMessagePart]
     let messageInputRequest: (Message) -> AgentInputRequest?
     let messageInputRequestSelected: (Message) -> Bool
@@ -38,6 +39,7 @@ struct AgentChatView<Message>: View {
         inputRequest: AgentInputRequest? = nil,
         inputPlaceholder: String,
         messageText: @escaping (Message) -> String,
+        messageLocalizedText: @escaping (Message) -> AgentLocalizedText? = { _ in nil },
         messageParts: @escaping (Message) -> [AgentMessagePart],
         messageInputRequest: @escaping (Message) -> AgentInputRequest? = { _ in nil },
         messageInputRequestSelected: @escaping (Message) -> Bool = { _ in false },
@@ -59,6 +61,7 @@ struct AgentChatView<Message>: View {
         self.inputRequest = inputRequest
         self.inputPlaceholder = inputPlaceholder
         self.messageText = messageText
+        self.messageLocalizedText = messageLocalizedText
         self.messageParts = messageParts
         self.messageInputRequest = messageInputRequest
         self.messageInputRequestSelected = messageInputRequestSelected
@@ -82,7 +85,7 @@ struct AgentChatView<Message>: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HStack(alignment: .center, spacing: 10) {
-                TextField(inputRequest?.freeTextPlaceholder ?? inputPlaceholder, text: $draft, axis: .vertical)
+                TextField(inputRequest?.localizedFreeTextPlaceholder.localizedAgentText ?? inputPlaceholder, text: $draft, axis: .vertical)
                     .lineLimit(1...4)
                     .submitLabel(.send)
                     .onSubmit {
@@ -137,10 +140,12 @@ struct AgentChatView<Message>: View {
 
         result.append(
             contentsOf: messages.enumerated().map { index, message in
-                .message(
+                let localizedText = messageLocalizedText(message)?.localizedAgentText
+                let text = localizedText ?? messageText(message)
+                return .message(
                     id: "message-\(index)",
-                    text: messageText(message),
-                    parts: messageParts(message),
+                    text: text,
+                    parts: localizedText == nil ? messageParts(message) : [],
                     inputRequest: messageInputRequest(message),
                     inputRequestSelected: messageInputRequestSelected(message),
                     inputRequestSelectedOptionId: messageInputRequestSelectedOptionId(message),
@@ -172,6 +177,155 @@ struct AgentChatView<Message>: View {
     }
 }
 
+private extension Optional where Wrapped == AgentLocalizedText {
+    var localizedAgentText: String? {
+        self?.localizedAgentText
+    }
+}
+
+private extension AgentLocalizedText {
+    var localizedAgentText: String {
+        func arg(_ index: Int) -> String {
+            guard index < args.count else {
+                return ""
+            }
+            return args[index]
+        }
+        func composeConfirmationTitle(_ keyName: String) -> String {
+            switch keyName {
+            case "ComposeReplyConfirmationTitle":
+                return String(localized: "agent_ui_compose_reply_confirmation_title", defaultValue: "Reply to this post with the selected account?")
+            case "ComposeQuoteConfirmationTitle":
+                return String(localized: "agent_ui_compose_quote_confirmation_title", defaultValue: "Quote this post with the selected account?")
+            default:
+                return String(localized: "agent_ui_compose_send_confirmation_title", defaultValue: "Send this content with the selected account?")
+            }
+        }
+
+        switch key.name {
+        case "DynamicText":
+            return arg(0)
+        case "Cancel":
+            return String(localized: "agent_ui_cancel", defaultValue: "Cancel")
+        case "ConfirmExecute":
+            return String(localized: "agent_ui_confirm_execute", defaultValue: "Confirm")
+        case "ConfirmSaveSubscription":
+            return String(localized: "agent_ui_confirm_save_subscription", defaultValue: "Save")
+        case "CancelSaveSubscription":
+            return String(localized: "agent_ui_cancel_save_subscription", defaultValue: "Cancel save")
+        case "ConfirmDeleteSubscription":
+            return String(localized: "agent_ui_confirm_delete_subscription", defaultValue: "Delete")
+        case "CancelDeleteSubscription":
+            return String(localized: "agent_ui_cancel_delete_subscription", defaultValue: "Cancel delete")
+        case "ConfirmSendPost":
+            return String(localized: "agent_ui_confirm_send_post", defaultValue: "Send")
+        case "CancelSendPost":
+            return String(localized: "agent_ui_cancel_send_post", defaultValue: "Cancel send")
+        case "SelectLoadSubscriptionSource":
+            return String(localized: "agent_ui_select_load_subscription_source", defaultValue: "Select a subscription source to load.")
+        case "SelectDeleteSubscriptionSource":
+            return String(localized: "agent_ui_select_delete_subscription_source", defaultValue: "Select a subscription source to delete.")
+        case "SelectSaveSubscriptionSource":
+            return String(localized: "agent_ui_select_save_subscription_source", defaultValue: "Select a subscription source to save.")
+        case "SubscriptionSourcePlaceholder":
+            return String(localized: "agent_ui_subscription_source_placeholder", defaultValue: "You can also enter a subscription URL, host, or type…")
+        case "SubscriptionSaveSelectionPlaceholder":
+            return String(localized: "agent_ui_subscription_save_selection_placeholder", defaultValue: "You can also enter the subscription source or type to save…")
+        case "SubscriptionSaveConfirmationPlaceholder":
+            return String(localized: "agent_ui_subscription_save_confirmation_placeholder", defaultValue: "You can also enter a new source, type, or title…")
+        case "SubscriptionDeleteConfirmationPlaceholder":
+            return String(localized: "agent_ui_subscription_delete_confirmation_placeholder", defaultValue: "You can also enter another source or cancel…")
+        case "SubscriptionSaveConfirmationMessage":
+            return String(
+                format: String(localized: "agent_ui_subscription_save_confirmation_message", defaultValue: "Save this subscription source?\n\nType: %@ (%@)\nURL/Host: %@\nTitle: %@\nIcon: %@\nRSS display mode: %@\n\nConfirm to save."),
+                arg(0), arg(1), arg(2), arg(3), arg(4), arg(5)
+            )
+        case "SubscriptionDeleteConfirmationMessage":
+            return String(
+                format: String(localized: "agent_ui_subscription_delete_confirmation_message", defaultValue: "Delete this subscription source?\n\nsourceId: %@\nType: %@ (%@)\nURL/Host: %@\nTitle: %@\n\nConfirm to delete."),
+                arg(0), arg(1), arg(2), arg(3), arg(4)
+            )
+        case "SelectComposeTargetPost":
+            return String(format: String(localized: "agent_ui_select_compose_target_post", defaultValue: "Select the post to %@."), arg(0))
+        case "SelectComposeAccount":
+            return String(format: String(localized: "agent_ui_select_compose_account", defaultValue: "Select the account to %@ this content."), arg(0))
+        case "SelectComposePlatform":
+            return String(format: String(localized: "agent_ui_select_compose_platform", defaultValue: "Select the platform to %@ this content."), arg(0))
+        case "ComposeTargetPostPlaceholder":
+            return String(localized: "agent_ui_compose_target_post_placeholder", defaultValue: "You can also enter a target post link, statusKey, or revised content…")
+        case "ComposeAccountPlaceholder":
+            return String(localized: "agent_ui_compose_account_placeholder", defaultValue: "You can also enter an account or revised content…")
+        case "ComposePlatformPlaceholder":
+            return String(localized: "agent_ui_compose_platform_placeholder", defaultValue: "You can also enter a platform, account, or revised content…")
+        case "ComposeConfirmationPlaceholder":
+            return String(localized: "agent_ui_compose_confirmation_placeholder", defaultValue: "You can also enter revised content…")
+        case "ComposeSendConfirmationTitle":
+            return String(localized: "agent_ui_compose_send_confirmation_title", defaultValue: "Send this content with the selected account?")
+        case "ComposeReplyConfirmationTitle":
+            return String(localized: "agent_ui_compose_reply_confirmation_title", defaultValue: "Reply to this post with the selected account?")
+        case "ComposeQuoteConfirmationTitle":
+            return String(localized: "agent_ui_compose_quote_confirmation_title", defaultValue: "Quote this post with the selected account?")
+        case "ComposeConfirmationMessage":
+            return String(
+                format: String(localized: "agent_ui_compose_confirmation_message", defaultValue: "%@\n\nAccount: %@\nPlatform: %@\n\n%@"),
+                composeConfirmationTitle(arg(0)), arg(1), arg(4), arg(12)
+            )
+        case "SelectPostActionPost":
+            return String(localized: "agent_ui_select_post_action_post", defaultValue: "Select a post to operate on.")
+        case "SelectPostAction":
+            return String(localized: "agent_ui_select_post_action", defaultValue: "Select an action for this post.")
+        case "PostActionTargetPostPlaceholder":
+            return String(localized: "agent_ui_post_action_target_post_placeholder", defaultValue: "You can also enter a target post attachmentRef or statusKey…")
+        case "PostActionPlaceholder":
+            return String(localized: "agent_ui_post_action_placeholder", defaultValue: "You can also enter the action to perform…")
+        case "PostActionConfirmationPlaceholder":
+            return String(localized: "agent_ui_post_action_confirmation_placeholder", defaultValue: "You can also enter another action or cancel…")
+        case "PostActionConfirmationMessage":
+            return String(
+                format: String(localized: "agent_ui_post_action_confirmation_message", defaultValue: "Confirm %@ for this post?\n\nAccount: %@\nTarget post: %@\nAuthor: %@\nSummary: %@\n\nConfirm to continue."),
+                arg(0), arg(1), arg(2), arg(3), arg(4)
+            )
+        case "SelectRelationStateUser":
+            return String(localized: "agent_ui_select_relation_state_user", defaultValue: "Select a user to inspect relationship status.")
+        case "SelectRelationUser":
+            return String(localized: "agent_ui_select_relation_user", defaultValue: "Select a user to operate on.")
+        case "SelectRelationAction":
+            return String(localized: "agent_ui_select_relation_action", defaultValue: "Select a relationship action for this user.")
+        case "SelectRelationAccount":
+            return String(localized: "agent_ui_select_relation_account", defaultValue: "Select the account to use for this relationship action.")
+        case "RelationUserPlaceholder":
+            return String(localized: "agent_ui_relation_user_placeholder", defaultValue: "You can also enter a user link, handle, or userKey…")
+        case "RelationActionPlaceholder":
+            return String(localized: "agent_ui_relation_action_placeholder", defaultValue: "You can also enter the relationship action…")
+        case "RelationAccountPlaceholder":
+            return String(localized: "agent_ui_relation_account_placeholder", defaultValue: "You can also enter an account, platform, or revised action…")
+        case "RelationConfirmationPlaceholder":
+            return String(localized: "agent_ui_relation_confirmation_placeholder", defaultValue: "You can also enter another action or cancel…")
+        case "RelationConfirmationMessage":
+            return String(
+                format: String(localized: "agent_ui_relation_confirmation_message", defaultValue: "Confirm %@ for this user?\n\nAccount: %@\nPlatform: %@\nTarget user: %@\nDisplay name: %@\nHandle: %@\n\nConfirm to continue."),
+                arg(0), arg(1), arg(2), arg(3), arg(4), arg(5)
+            )
+        case "SelectRecentPostsUser":
+            return String(localized: "agent_ui_select_recent_posts_user", defaultValue: "Select a user to view recent posts.")
+        case "SelectMatchedUser":
+            return String(localized: "agent_ui_select_matched_user", defaultValue: "Multiple matching users were found. Select one to continue.")
+        case "SelectProfileUser":
+            return String(localized: "agent_ui_select_profile_user", defaultValue: "Select a user to view their profile.")
+        case "SelectFollowingUser":
+            return String(localized: "agent_ui_select_following_user", defaultValue: "Select a user to view who they follow.")
+        case "SelectFollowersUser":
+            return String(localized: "agent_ui_select_followers_user", defaultValue: "Select a user to view their followers.")
+        case "SelectProfileTabsUser":
+            return String(localized: "agent_ui_select_profile_tabs_user", defaultValue: "Select a user to view profile tabs.")
+        case "StatusInsightUserPlaceholder":
+            return String(localized: "agent_ui_status_insight_user_placeholder", defaultValue: "You can also enter a user link, handle, or userKey…")
+        default:
+            return ""
+        }
+    }
+}
+
 private struct AgentChatInputBarHeightPreferenceKey: PreferenceKey {
     static let defaultValue: CGFloat = 0
 
@@ -192,18 +346,18 @@ private struct AgentInputRequestOptionsView: View {
             let postOptions = options.filter { $0.postPreview != nil }
             let userOptions = options.filter { $0.userPreview != nil }
             let actionOptions = options.filter { $0.postPreview == nil && $0.userPreview == nil }
+            let confirmOption = actionOptions.first { $0.id == "confirm" }
 
-            if let previewPost = request.postPreview,
-               !actionOptions.isEmpty {
-                AgentComposeConfirmationRequestView(
+            if let confirmOption {
+                AgentConfirmationRequestView(
                     request: request,
-                    previewPost: previewPost,
                     actionOptions: actionOptions,
+                    confirmOption: confirmOption,
                     enabled: enabled,
                     onOptionSelected: onOptionSelected
                 )
             } else {
-                Text(request.prompt)
+                Text(request.localizedPrompt.localizedAgentText)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -263,7 +417,7 @@ private struct AgentInputRequestOptionsView: View {
                                 }
                             } label: {
                                 HStack {
-                                    Text(option.label)
+                                    Text(option.localizedLabel.localizedAgentText)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 }
                                 .frame(maxWidth: .infinity)
@@ -288,59 +442,92 @@ private struct AgentInputRequestOptionsView: View {
     }
 }
 
-private struct AgentComposeConfirmationRequestView: View {
+private struct AgentConfirmationRequestView: View {
     let request: AgentInputRequest
-    let previewPost: UiTimelineV2.Post
     let actionOptions: [AgentInputRequest.Option]
+    let confirmOption: AgentInputRequest.Option
     let enabled: Bool
     let onOptionSelected: (AgentInputRequest.Option) -> Void
 
     private var title: String {
-        request.prompt
+        request.localizedPrompt.localizedAgentText
             .split(separator: "\n", omittingEmptySubsequences: false)
             .first
-            .map(String.init) ?? "确认发送这条内容吗？"
+            .map(String.init) ?? String(localized: "agent_compose_confirmation_prompt", defaultValue: "Send this post?")
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.isEmpty ? "确认发送这条内容吗？" : title)
+            Text(title.isEmpty ? String(localized: "agent_compose_confirmation_prompt", defaultValue: "Send this post?") : title)
                 .font(.subheadline)
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            StatusInsightPostPreview(
-                post: previewPost,
-                onClick: {}
-            )
+            if let previewPost = request.postPreview {
+                StatusInsightPostPreview(
+                    post: previewPost,
+                    onClick: {}
+                )
+            }
 
-            HStack(spacing: 8) {
-                ForEach(actionOptions, id: \.id) { option in
-                    if option.id == "confirm" {
-                        Button {
-                            if enabled {
-                                onOptionSelected(option)
-                            }
-                        } label: {
-                            Text(option.label)
-                                .frame(maxWidth: .infinity)
+            if let previewUser = request.userPreview {
+                UserCompatView(
+                    data: previewUser,
+                    trailing: { EmptyView() },
+                    onClicked: {}
+                )
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(.separator).opacity(0.55), lineWidth: 1)
+                )
+            }
+
+            AgentConfirmationButtonsView(
+                actionOptions: actionOptions,
+                confirmOption: confirmOption,
+                enabled: enabled,
+                onOptionSelected: onOptionSelected
+            )
+        }
+    }
+}
+
+private struct AgentConfirmationButtonsView: View {
+    let actionOptions: [AgentInputRequest.Option]
+    let confirmOption: AgentInputRequest.Option
+    let enabled: Bool
+    let onOptionSelected: (AgentInputRequest.Option) -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(actionOptions, id: \.id) { option in
+                if option.id == confirmOption.id {
+                    Button {
+                        if enabled {
+                            onOptionSelected(option)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .frame(maxWidth: .infinity)
-                        .disabled(!enabled)
-                    } else {
-                        Button(role: option.id == "cancel" ? .cancel : nil) {
-                            if enabled {
-                                onOptionSelected(option)
-                            }
-                        } label: {
-                            Text(option.label)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .disabled(!enabled)
+                    } label: {
+                        Text(option.localizedLabel.localizedAgentText)
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .frame(maxWidth: .infinity)
+                    .disabled(!enabled)
+                } else {
+                    Button(role: option.id == "cancel" ? .cancel : nil) {
+                        if enabled {
+                            onOptionSelected(option)
+                        }
+                    } label: {
+                        Text(option.localizedLabel.localizedAgentText)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .disabled(!enabled)
                 }
             }
         }

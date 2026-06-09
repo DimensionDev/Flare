@@ -206,8 +206,8 @@
     <string name="settings_guest_setting_description">Установить хост для гостевого режима</string>
     <string name="settings_local_history_title">Локальная история</string>
     <string name="settings_local_history_description">Просмотр или поиск в истории посещений</string>
-    <string name="settings_agent_history_title">Агент сигнала</string>
-    <string name="settings_agent_history_description">Просмотр истории локального мигания Агента</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Просмотр локальной истории чата Flare AI</string>
     <string name="agent_history_empty">Пока нет истории чата агента.</string>
     <string name="settings_app_logging_title">Журнал приложений</string>
     <string name="settings_app_logging_save">Сохранить журнал</string>
@@ -221,7 +221,7 @@
     <string name="settings_ai_config_server_url_requirement">URL сервера должен заканчиваться \'/\' и поддерживать AI-совместимый API чата/дополнений.</string>
     <string name="settings_ai_config_server_self_host_description">Вы можете использовать официальный сервер или собственный сервер</string>
     <string name="settings_ai_config_type">AI Type</string>
-    <string name="settings_ai_config_type_description">Нажмите, чтобы выбрать тип AI бэкэнда</string>
+    <string name="settings_ai_config_type_description">Выберите AI-бэкенд, который использует Flare</string>
     <string name="settings_ai_config_type_on_device">На устройстве ИИ</string>
     <string name="settings_ai_config_type_openai">AI-совместимый API</string>
     <string name="settings_ai_config_api_key">Ключ API</string>
@@ -323,7 +323,7 @@
     <string name="settings_appearance_full_width_post">Полная ширина поста</string>
     <string name="settings_appearance_full_width_post_description">Показать пост в полной ширине</string>
     <string name="settings_language_title">Язык</string>
-    <string name="settings_language_description">Изменить язык приложения</string>
+    <string name="settings_language_description">Изменить язык приложения Flare</string>
     <string name="settings_appearance_post_action_style">Стиль поста действия</string>
     <string name="settings_appearance_post_action_style_description">Изменить стиль действия поста</string>
     <string name="settings_appearance_post_action_style_hidden">Hidden</string>
@@ -339,7 +339,7 @@
     <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
     <string name="settings_about_discord_description">Присоединяйтесь к нашему серверу Discord</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
+    <string name="settings_about_localization_description">Помогите нам перевести Flare</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
     <string name="users">Пользователи</string>
     <string name="hashtags">Хэштеги</string>

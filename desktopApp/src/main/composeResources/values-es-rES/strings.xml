@@ -208,8 +208,8 @@
     <string name="settings_guest_setting_description">Elige a qué servidor se conecta el modo invitado</string>
     <string name="settings_local_history_title">Historial local</string>
     <string name="settings_local_history_description">Buscar publicaciones y perfiles guardados en este dispositivo</string>
-    <string name="settings_agent_history_title">Agente de bengala</string>
-    <string name="settings_agent_history_description">Ver historial de chat de Agente de Bengala local</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Ver historial de chat local de Flare AI</string>
     <string name="agent_history_empty">Aún no hay historial de chat de agentes.</string>
     <string name="settings_app_logging_title">Registros de la aplicación</string>
     <string name="settings_app_logging_save">Guardar registros</string>

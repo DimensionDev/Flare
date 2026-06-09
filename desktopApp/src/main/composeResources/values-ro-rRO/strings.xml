@@ -209,8 +209,8 @@
     <string name="settings_guest_setting_description">Alege serverul la care se conectează modul invitat</string>
     <string name="settings_local_history_title">Istoric local</string>
     <string name="settings_local_history_description">Caută postări și profiluri stocate în cache pe acest dispozitiv</string>
-    <string name="settings_agent_history_title">Agent Fierbinte</string>
-    <string name="settings_agent_history_description">Vezi istoricul chat-ului cu Agent Flare local</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Vezi istoricul local de chat Flare AI</string>
     <string name="agent_history_empty">Nici un agent de chat istoric.</string>
     <string name="settings_app_logging_title">Loguri aplicație</string>
     <string name="settings_app_logging_save">Salvează logurile</string>

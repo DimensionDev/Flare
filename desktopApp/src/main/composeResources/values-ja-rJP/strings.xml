@@ -189,9 +189,9 @@
     <string name="settings_guest_setting_description">ゲストモードで接続するサーバーを選択</string>
     <string name="settings_local_history_title">ローカル履歴</string>
     <string name="settings_local_history_description">デバイスに保存された投稿やプロファイルを検索</string>
-    <string name="settings_agent_history_title">フレアエージェント</string>
-    <string name="settings_agent_history_description">ローカルの Flare Agent チャット履歴を表示</string>
-    <string name="agent_history_empty">エージェントのチャット履歴はまだありません。</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">ローカルの Flare AI チャット履歴を表示</string>
+    <string name="agent_history_empty">AI チャット履歴はまだありません。</string>
     <string name="settings_app_logging_title">アプリログ</string>
     <string name="settings_app_logging_save">ログを保存</string>
     <string name="settings_app_logging_clear">ログを消去</string>

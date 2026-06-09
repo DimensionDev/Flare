@@ -210,8 +210,8 @@
     <string name="settings_guest_setting_description">Vyberte server, ke kterému se režim pro hosty připojuje</string>
     <string name="settings_local_history_title">Místní historie</string>
     <string name="settings_local_history_description">Vyhledávat v příspěvcích a profilech uložených v mezipaměti na tomto zařízení</string>
-    <string name="settings_agent_history_title">Flare Agent</string>
-    <string name="settings_agent_history_description">Zobrazit místní historii chatu Flare Agent</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Zobrazit místní historii chatu Flare AI</string>
     <string name="agent_history_empty">Historie konverzace agenta.</string>
     <string name="settings_app_logging_title">Protokoly aplikace</string>
     <string name="settings_app_logging_save">Uložit protokoly</string>

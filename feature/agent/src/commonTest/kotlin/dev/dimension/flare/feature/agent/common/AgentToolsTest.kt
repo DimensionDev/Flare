@@ -9,16 +9,33 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
+import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
+import dev.dimension.flare.data.datasource.subscription.SubscriptionSourceDetection
+import dev.dimension.flare.data.database.app.model.RssDisplayMode
+import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.network.rss.DocumentData
+import dev.dimension.flare.data.repository.LocalCacheRepository
+import dev.dimension.flare.data.repository.SubscriptionSourceInput
+import dev.dimension.flare.data.repository.toUiRssSource
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
@@ -68,6 +85,47 @@ internal class AgentToolsTest {
     }
 
     @Test
+    fun searchCachedPostsUsesLocalCacheRepositoryAndStoresAttachments() =
+        runTest {
+            val post =
+                createPost(
+                    statusKey = MicroBlogKey("cached-post", "example.social"),
+                    content = "cached local result".toUiPlainText(),
+                )
+            val repository = FakeLocalCacheRepository(cachedPosts = listOf(post))
+            val attachmentStore = AgentToolAttachmentStore()
+            val tool = SearchCachedPostsTool(localCacheSession(repository, attachmentStore))
+
+            val result =
+                tool.execute(
+                    SearchCachedPostsTool.Args(
+                        query = "cached",
+                        maxItems = 10,
+                    ),
+                )
+
+            assertEquals("cached", repository.searchPostsQuery)
+            assertTrue(result.contains("Local cached post search"))
+            assertTrue(result.contains("network not used"))
+            assertTrue(result.contains("cached local result"))
+            val attachment = attachmentStore.snapshot().single()
+            assertTrue(attachment is AgentConversationAttachment.Post)
+            assertEquals(post.statusKey, attachment.post.statusKey)
+        }
+
+    @Test
+    fun searchCachedUsersRejectsBlankQueryWithoutRepositoryCall() =
+        runTest {
+            val repository = FakeLocalCacheRepository()
+            val tool = SearchCachedUsersTool(localCacheSession(repository))
+
+            val result = tool.execute(SearchCachedUsersTool.Args(query = " "))
+
+            assertTrue(result.contains("requires a query"))
+            assertEquals(null, repository.searchUsersQuery)
+        }
+
+    @Test
     fun composeToolRequestsConfirmationBeforePublishing() =
         runTest {
             val dataSource = StubComposeDataSource(accountKey = MicroBlogKey("alice", "example.social"))
@@ -83,13 +141,13 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            assertTrue(result.contains("确认使用以下账号发送以下内容吗？"))
-            assertTrue(result.contains("账号 Key：alice@example.social"))
             assertTrue(result.contains("hello from agent"))
             assertFalse(dataSource.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
-            assertEquals("取消", inputRequest.options.first { it.id == "cancel" }.label)
-            assertEquals("确认发送", inputRequest.options.first { it.id == "confirm" }.label)
+            assertEquals(AgentLocalizedTextKey.ComposeConfirmationMessage, inputRequest.localizedPrompt.key)
+            assertEquals(AgentLocalizedTextKey.ComposeSendConfirmationTitle.name, inputRequest.localizedPrompt.args.first())
+            assertEquals(1, inputRequest.options.size)
+            assertEquals(AgentLocalizedTextKey.ConfirmSendPost, inputRequest.options.first { it.id == "confirm" }.localizedLabel.key)
             assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.raw)
         }
 
@@ -132,10 +190,11 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            assertEquals("请选择用于发送这条内容的账号。", result)
             assertFalse(alice.composed)
             assertFalse(bob.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(inputRequest.localizedPrompt.toAgentProtocolText(), result)
+            assertEquals(AgentLocalizedTextKey.SelectComposeAccount, inputRequest.localizedPrompt.key)
             assertEquals(2, inputRequest.options.size)
             assertTrue(
                 inputRequest.options
@@ -195,15 +254,17 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            assertEquals("请选择用于发送这条内容的平台。", result)
             assertFalse(mastodon.composed)
             assertFalse(twitter.composed)
             assertFalse(weibo.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(inputRequest.localizedPrompt.toAgentProtocolText(), result)
+            assertEquals(AgentLocalizedTextKey.SelectComposePlatform, inputRequest.localizedPrompt.key)
             assertEquals(3, inputRequest.options.size)
-            assertTrue(inputRequest.options.any { it.label == "Twitter/X" && it.value.contains("platforms=xQt") })
-            assertTrue(inputRequest.options.any { it.label == "微博" && it.value.contains("platforms=VVo") })
-            assertTrue(inputRequest.options.any { it.label == "Mastodon" && it.value.contains("hello from agent") })
+            assertTrue(inputRequest.options.all { it.localizedLabel.key == AgentLocalizedTextKey.DynamicText })
+            assertTrue(inputRequest.options.any { it.localizedLabel.args.firstOrNull() == "Twitter/X" && it.value.contains("platforms=xQt") })
+            assertTrue(inputRequest.options.any { it.value.contains("platforms=VVo") })
+            assertTrue(inputRequest.options.any { it.localizedLabel.args.firstOrNull() == "Mastodon" && it.value.contains("hello from agent") })
         }
 
     @Test
@@ -257,10 +318,11 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            assertTrue(result.contains("确认使用以下账号回复以下帖子，并发送以下内容吗？"))
-            assertTrue(result.contains("statusKey：post-1@example.social"))
             assertFalse(dataSource.composed)
-            assertNotNull(inputRequestStore.snapshot())
+            val inputRequest = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(AgentLocalizedTextKey.ComposeConfirmationMessage, inputRequest.localizedPrompt.key)
+            assertEquals(AgentLocalizedTextKey.ComposeReplyConfirmationTitle.name, inputRequest.localizedPrompt.args.first())
+            assertTrue(inputRequest.localizedPrompt.args.any { it.contains("post-1@example.social") })
         }
 
     @Test
@@ -325,9 +387,10 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            assertEquals("请选择要回复的帖子。", result)
             assertFalse(dataSource.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(inputRequest.localizedPrompt.toAgentProtocolText(), result)
+            assertEquals(AgentLocalizedTextKey.SelectComposeTargetPost, inputRequest.localizedPrompt.key)
             assertEquals(2, inputRequest.options.size)
             assertNotNull(inputRequest.options.first().postPreview)
             assertTrue(
@@ -404,7 +467,7 @@ internal class AgentToolsTest {
             assertFalse(result.contains("Share"))
             val request = assertNotNull(inputRequestStore.snapshot())
             assertEquals(1, request.options.size)
-            assertEquals("Like", request.options.first().label)
+            assertEquals("Like", request.options.first().localizedLabel.args.firstOrNull())
         }
 
     @Test
@@ -452,10 +515,12 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            assertTrue(result.contains("确认对以下帖子执行“Like”操作吗？"))
             assertTrue(handledEvents.isEmpty())
             val request = assertNotNull(inputRequestStore.snapshot())
-            assertEquals("确认执行", request.options.first().label)
+            assertEquals(AgentLocalizedTextKey.PostActionConfirmationMessage, request.localizedPrompt.key)
+            assertEquals("Like", request.localizedPrompt.args.first())
+            assertEquals(1, request.options.size)
+            assertEquals(AgentLocalizedTextKey.ConfirmExecute, request.options.first().localizedLabel.key)
         }
 
     @Test
@@ -503,6 +568,301 @@ internal class AgentToolsTest {
 
             assertTrue(result.contains("Post action executed successfully."))
             assertEquals(listOf<PostEvent>(event), handledEvents)
+        }
+
+    @Test
+    fun loadUserRelationLoadsRelationState() =
+        runTest {
+            val accountKey = MicroBlogKey("alice", "example.social")
+            val userKey = MicroBlogKey("bob", "example.social")
+            val dataSource =
+                StubRelationDataSource(
+                    accountKey = accountKey,
+                    relation = UiRelation(following = true, muted = true),
+                    supportedTypes = setOf(RelationActionType.Follow, RelationActionType.Mute),
+                )
+            val tool =
+                LoadUserRelationTool(
+                    relationSession(
+                        dataSource = dataSource,
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    LoadUserRelationTool.Args(
+                        targetUserId = userKey.id,
+                        targetUserHost = userKey.host,
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(result.contains("User relation"))
+            assertTrue(result.contains("following: true"))
+            assertTrue(result.contains("muted: true"))
+        }
+
+    @Test
+    fun listRelationActionsUsesSupportedTypesAndCurrentRelation() =
+        runTest {
+            val accountKey = MicroBlogKey("alice", "example.social")
+            val userKey = MicroBlogKey("bob", "example.social")
+            val dataSource =
+                StubRelationDataSource(
+                    accountKey = accountKey,
+                    relation = UiRelation(following = false, muted = true),
+                    supportedTypes = setOf(RelationActionType.Follow, RelationActionType.Mute),
+                )
+            val inputRequestStore = AgentToolInputRequestStore()
+            val tool =
+                ListRelationActionsTool(
+                    relationSession(
+                        dataSource = dataSource,
+                        inputRequestStore = inputRequestStore,
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    ListRelationActionsTool.Args(
+                        targetUserId = userKey.id,
+                        targetUserHost = userKey.host,
+                    ),
+                )
+
+            assertTrue(result.contains("actionId=follow"))
+            assertTrue(result.contains("actionId=unmute"))
+            assertFalse(result.contains("actionId=block"))
+            val request = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(2, request.options.size)
+        }
+
+    @Test
+    fun executeRelationActionRequestsConfirmationBeforeHandlingAction() =
+        runTest {
+            val accountKey = MicroBlogKey("alice", "example.social")
+            val dataSource =
+                StubRelationDataSource(
+                    accountKey = accountKey,
+                    supportedTypes = setOf(RelationActionType.Mute),
+                )
+            val handledActions = mutableListOf<RelationAction>()
+            val inputRequestStore = AgentToolInputRequestStore()
+            val tool =
+                ExecuteRelationActionTool(
+                    session =
+                        relationSession(
+                            dataSource = dataSource,
+                            inputRequestStore = inputRequestStore,
+                        ),
+                    actionHandler = { _, action, _, _ -> handledActions += action },
+                )
+
+            val result =
+                tool.execute(
+                    ExecuteRelationActionTool.Args(
+                        action = "mute",
+                        targetUserId = "bob",
+                        targetUserHost = "example.social",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(handledActions.isEmpty())
+            val request = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(AgentLocalizedTextKey.RelationConfirmationMessage, request.localizedPrompt.key)
+            assertEquals("Mute", request.localizedPrompt.args.first())
+            assertEquals(1, request.options.size)
+            assertEquals(AgentLocalizedTextKey.ConfirmExecute, request.options.first().localizedLabel.key)
+        }
+
+    @Test
+    fun executeRelationActionHandlesActionAfterConfirmation() =
+        runTest {
+            val accountKey = MicroBlogKey("alice", "example.social")
+            val userKey = MicroBlogKey("bob", "example.social")
+            val dataSource =
+                StubRelationDataSource(
+                    accountKey = accountKey,
+                    supportedTypes = setOf(RelationActionType.Follow),
+                )
+            val handledActions = mutableListOf<Pair<RelationAction, MicroBlogKey>>()
+            val tool =
+                ExecuteRelationActionTool(
+                    session = relationSession(dataSource = dataSource),
+                    actionHandler = { _, action, targetUserKey, _ -> handledActions += action to targetUserKey },
+                )
+
+            val result =
+                tool.execute(
+                    ExecuteRelationActionTool.Args(
+                        action = "unfollow",
+                        targetUserId = userKey.id,
+                        targetUserHost = userKey.host,
+                        accountId = accountKey.id,
+                        accountHost = accountKey.host,
+                        confirmed = true,
+                    ),
+                )
+
+            assertTrue(result.contains("Relation action submitted."))
+            assertEquals(listOf(RelationAction.Unfollow to userKey), handledActions)
+        }
+
+    @Test
+    fun listSubscriptionSourcesIncludesGenericSubscriptionTypes() =
+        runTest {
+            val dataSource =
+                StubSubscriptionDataSource(
+                    sources =
+                        listOf(
+                            subscriptionSource(
+                                id = 1,
+                                url = "https://example.com/feed.xml",
+                                title = "Example RSS",
+                                type = SubscriptionType.RSS,
+                            ),
+                            subscriptionSource(
+                                id = 2,
+                                url = "mastodon.example",
+                                title = "Mastodon Public",
+                                type = SubscriptionType.MASTODON_PUBLIC,
+                            ),
+                        ),
+                )
+            val tool = ListSubscriptionSourcesTool(subscriptionSession(dataSource))
+
+            val result = tool.execute(ListSubscriptionSourcesTool.Args())
+
+            assertTrue(result.contains("sourceId: 1"))
+            assertTrue(result.contains("type: RSS"))
+            assertTrue(result.contains("sourceId: 2"))
+            assertTrue(result.contains("type: MASTODON_PUBLIC"))
+        }
+
+    @Test
+    fun loadSubscriptionTimelineStoresRssFeedForArticleTool() =
+        runTest {
+            val feed =
+                createFeed(
+                    url = "https://example.com/article",
+                    title = "Article title",
+                    descriptionHtml = "<p>RSS description</p>",
+                    displayMode = RssDisplayMode.DESCRIPTION_ONLY,
+                )
+            val dataSource =
+                StubSubscriptionDataSource(
+                    timelineItems = mapOf(SubscriptionType.RSS to "https://example.com/feed.xml" to listOf(feed)),
+                    article =
+                        DocumentData(
+                            title = "Article title",
+                            content = "<p>RSS description</p>",
+                            textContent = "RSS description",
+                            length = null,
+                            excerpt = null,
+                            byline = null,
+                            dir = null,
+                            siteName = null,
+                            lang = null,
+                            publishedTime = null,
+                        ),
+                )
+            val session = subscriptionSession(dataSource)
+            val timelineTool = LoadSubscriptionTimelineTool(session)
+            val articleTool = LoadRssArticleTool(session)
+
+            val timelineResult =
+                timelineTool.execute(
+                    LoadSubscriptionTimelineTool.Args(
+                        type = "RSS",
+                        url = "https://example.com/feed.xml",
+                    ),
+                )
+
+            assertTrue(timelineResult.contains("rssArticleRef: [[rss:https://example.com/article]]"))
+
+            val articleResult =
+                articleTool.execute(
+                    LoadRssArticleTool.Args(
+                        articleRef = "[[rss:https://example.com/article]]",
+                    ),
+                )
+
+            assertTrue(articleResult.contains("RSS article"))
+            assertEquals("https://example.com/article", dataSource.lastArticleUrl)
+            assertEquals("<p>RSS description</p>", dataSource.lastArticleDescriptionHtml)
+        }
+
+    @Test
+    fun saveSubscriptionSourceRequestsConfirmationBeforeSavingDetectedRssFeed() =
+        runTest {
+            val dataSource =
+                StubSubscriptionDataSource(
+                    detections =
+                        mapOf(
+                            "example.com/feed.xml" to
+                                SubscriptionSourceDetection.RssFeed(
+                                    title = "Example RSS",
+                                    url = "https://example.com/feed.xml",
+                                    icon = "https://example.com/favicon.ico",
+                                ),
+                        ),
+                )
+            val inputRequestStore = AgentToolInputRequestStore()
+            val tool =
+                SaveSubscriptionSourceTool(
+                    subscriptionSession(
+                        dataSource = dataSource,
+                        inputRequestStore = inputRequestStore,
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    SaveSubscriptionSourceTool.Args(
+                        url = "example.com/feed.xml",
+                    ),
+                )
+
+            assertTrue(dataSource.savedInputs.isEmpty())
+            val request = assertNotNull(inputRequestStore.snapshot())
+            assertEquals(AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage, request.localizedPrompt.key)
+            assertEquals(1, request.options.size)
+            assertEquals(AgentLocalizedTextKey.ConfirmSaveSubscription, request.options.first().localizedLabel.key)
+        }
+
+    @Test
+    fun saveSubscriptionSourceSavesAfterConfirmation() =
+        runTest {
+            val dataSource =
+                StubSubscriptionDataSource(
+                    detections =
+                        mapOf(
+                            "example.com/feed.xml" to
+                                SubscriptionSourceDetection.RssFeed(
+                                    title = "Example RSS",
+                                    url = "https://example.com/feed.xml",
+                                    icon = "https://example.com/favicon.ico",
+                                ),
+                        ),
+                )
+            val tool = SaveSubscriptionSourceTool(subscriptionSession(dataSource))
+
+            val result =
+                tool.execute(
+                    SaveSubscriptionSourceTool.Args(
+                        url = "example.com/feed.xml",
+                        confirmed = true,
+                    ),
+                )
+
+            assertTrue(result.contains("Subscription source saved."))
+            val saved = dataSource.savedInputs.single()
+            assertEquals(SubscriptionType.RSS, saved.type)
+            assertEquals("https://example.com/feed.xml", saved.url)
+            assertEquals("Example RSS", saved.title)
         }
 
     private fun agentSearchTargets(): List<AgentSearchTarget> =
@@ -567,6 +927,51 @@ private fun createPost(
         accountType = AccountType.Specific(MicroBlogKey("viewer", "example.social")),
     )
 
+private fun localCacheSession(
+    repository: LocalCacheRepository,
+    attachmentStore: AgentToolAttachmentStore = AgentToolAttachmentStore(),
+): AgentToolSession =
+    AgentToolSession(
+        status = null,
+        searchTargets = emptyList(),
+        composeTargets = emptyList(),
+        postActionTargets = emptyList(),
+        userTargets = emptyList(),
+        attachmentStore = attachmentStore,
+        inputRequestStore = AgentToolInputRequestStore(),
+        localCacheRepository = repository,
+    )
+
+private class FakeLocalCacheRepository(
+    private val cachedPosts: List<UiTimelineV2.Post> = emptyList(),
+    private val viewedPosts: List<UiTimelineV2.Post> = emptyList(),
+    private val cachedUsers: List<UiProfile> = emptyList(),
+    private val viewedUsers: List<UiProfile> = emptyList(),
+) : LocalCacheRepository {
+    var searchPostsQuery: String? = null
+    var searchUsersQuery: String? = null
+
+    override suspend fun searchPosts(
+        query: String,
+        limit: Int,
+    ): List<UiTimelineV2.Post> {
+        searchPostsQuery = query
+        return cachedPosts.take(limit)
+    }
+
+    override suspend fun listViewedPosts(limit: Int): List<UiTimelineV2.Post> = viewedPosts.take(limit)
+
+    override suspend fun searchUsers(
+        query: String,
+        limit: Int,
+    ): List<UiProfile> {
+        searchUsersQuery = query
+        return cachedUsers.take(limit)
+    }
+
+    override suspend fun listViewedUsers(limit: Int): List<UiProfile> = viewedUsers.take(limit)
+}
+
 private fun postAction(
     type: ActionMenu.Item.Text.Localized.Type,
     event: PostEvent,
@@ -605,6 +1010,80 @@ private fun postActionSession(
         userTargets = emptyList(),
         attachmentStore = AgentToolAttachmentStore(),
         inputRequestStore = inputRequestStore,
+    )
+
+private fun relationSession(
+    dataSource: StubRelationDataSource,
+    attachmentStore: AgentToolAttachmentStore = AgentToolAttachmentStore(),
+    inputRequestStore: AgentToolInputRequestStore = AgentToolInputRequestStore(),
+): AgentToolSession =
+    AgentToolSession(
+        status = null,
+        searchTargets = emptyList(),
+        composeTargets = emptyList(),
+        postActionTargets = emptyList(),
+        relationTargets =
+            listOf(
+                AgentRelationTarget(
+                    accountKey = dataSource.accountKey,
+                    platformType = PlatformType.Mastodon,
+                    dataSource = dataSource,
+                ),
+            ),
+        userTargets = emptyList(),
+        attachmentStore = attachmentStore,
+        inputRequestStore = inputRequestStore,
+    )
+
+private fun subscriptionSession(
+    dataSource: SubscriptionDataSource,
+    inputRequestStore: AgentToolInputRequestStore = AgentToolInputRequestStore(),
+): AgentToolSession =
+    AgentToolSession(
+        status = null,
+        searchTargets = emptyList(),
+        composeTargets = emptyList(),
+        postActionTargets = emptyList(),
+        relationTargets = emptyList(),
+        subscriptionDataSource = dataSource,
+        userTargets = emptyList(),
+        attachmentStore = AgentToolAttachmentStore(),
+        inputRequestStore = inputRequestStore,
+    )
+
+private fun subscriptionSource(
+    id: Int,
+    url: String,
+    title: String,
+    type: SubscriptionType,
+): UiRssSource =
+    UiRssSource(
+        id = id,
+        url = url,
+        title = title,
+        lastUpdate = Clock.System.now().toUi(),
+        favIcon = null,
+        displayMode = RssDisplayMode.FULL_CONTENT,
+        type = type,
+    )
+
+private fun createFeed(
+    url: String,
+    title: String,
+    descriptionHtml: String?,
+    displayMode: RssDisplayMode,
+): UiTimelineV2.Feed =
+    UiTimelineV2.Feed(
+        title = title,
+        description = "description",
+        descriptionHtml = descriptionHtml,
+        url = url,
+        createdAt = Clock.System.now().toUi(),
+        source = UiTimelineV2.Feed.Source(name = "Example RSS", icon = null),
+        displayMode = displayMode,
+        media = null,
+        clickEvent = ClickEvent.Noop,
+        accountType = AccountType.Guest,
     )
 
 private object StubPostDataSource : PostDataSource {
@@ -648,6 +1127,112 @@ private object StubMicroblogDataSource : MicroblogDataSource {
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+}
+
+private class StubRelationDataSource(
+    val accountKey: MicroBlogKey,
+    relation: UiRelation = UiRelation(),
+    supportedTypes: Set<RelationActionType> = RelationActionType.entries.toSet(),
+) : RelationDataSource {
+    private val loader = StubRelationLoader(relation, supportedTypes)
+
+    override val relationHandler: RelationHandler =
+        RelationHandler(
+            accountType = AccountType.Specific(accountKey),
+            dataSource = loader,
+        )
+
+    override val supportedRelationTypes: Set<RelationActionType> = supportedTypes
+}
+
+private class StubRelationLoader(
+    private val relation: UiRelation,
+    override val supportedTypes: Set<RelationActionType>,
+) : RelationLoader {
+    override suspend fun relation(userKey: MicroBlogKey): UiRelation = relation
+
+    override suspend fun follow(userKey: MicroBlogKey) = Unit
+
+    override suspend fun unfollow(userKey: MicroBlogKey) = Unit
+
+    override suspend fun block(userKey: MicroBlogKey) = Unit
+
+    override suspend fun unblock(userKey: MicroBlogKey) = Unit
+
+    override suspend fun mute(userKey: MicroBlogKey) = Unit
+
+    override suspend fun unmute(userKey: MicroBlogKey) = Unit
+}
+
+private class StubSubscriptionDataSource(
+    private val sources: List<UiRssSource> = emptyList(),
+    private val detections: Map<String, SubscriptionSourceDetection> = emptyMap(),
+    private val timelineItems: Map<Pair<SubscriptionType, String>, List<UiTimelineV2>> = emptyMap(),
+    private val article: DocumentData =
+        DocumentData(
+            title = "Article",
+            content = "<p>Article</p>",
+            textContent = "Article",
+            length = null,
+            excerpt = null,
+            byline = null,
+            dir = null,
+            siteName = null,
+            lang = null,
+            publishedTime = null,
+        ),
+) : SubscriptionDataSource {
+    val savedInputs = mutableListOf<SubscriptionSourceInput>()
+    val deletedIds = mutableListOf<Int>()
+    var lastArticleUrl: String? = null
+    var lastArticleDescriptionHtml: String? = null
+    var lastArticleDescriptionTitle: String? = null
+
+    override suspend fun listSources(): List<UiRssSource> = sources
+
+    override suspend fun detectSource(input: String): SubscriptionSourceDetection =
+        detections[input] ?: error("No detection stub for $input")
+
+    override fun createTimelineLoader(
+        type: SubscriptionType,
+        url: String,
+    ): CacheableRemoteLoader<UiTimelineV2> = StubSubscriptionTimelineLoader(timelineItems[type to url].orEmpty())
+
+    override suspend fun saveSource(input: SubscriptionSourceInput): UiRssSource {
+        savedInputs += input
+        return input.toUiRssSource()
+    }
+
+    override suspend fun deleteSource(id: Int): UiRssSource? {
+        deletedIds += id
+        return sources.firstOrNull { it.id == id }
+    }
+
+    override suspend fun loadRssArticle(
+        url: String,
+        descriptionHtml: String?,
+        descriptionTitle: String?,
+    ): DocumentData {
+        lastArticleUrl = url
+        lastArticleDescriptionHtml = descriptionHtml
+        lastArticleDescriptionTitle = descriptionTitle
+        return article
+    }
+}
+
+private class StubSubscriptionTimelineLoader(
+    private val items: List<UiTimelineV2>,
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "stub-subscription"
+
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> =
+        PagingResult(
+            endOfPaginationReached = true,
+            data = items.take(pageSize),
+        )
 }
 
 private class StubComposeDataSource(

@@ -5,8 +5,12 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.subscription.KoinSubscriptionDataSource
+import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
+import dev.dimension.flare.data.repository.LocalCacheRepository
 import dev.dimension.flare.feature.agent.status.LoadDiscoverHashtagsTool
 import dev.dimension.flare.feature.agent.status.LoadDiscoverStatusesTool
 import dev.dimension.flare.feature.agent.status.LoadDiscoverUsersTool
@@ -32,7 +36,9 @@ import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
 
 @Single
-internal class AgentToolProvider {
+internal class AgentToolProvider(
+    private val localCacheRepository: LocalCacheRepository,
+) {
     fun resolve(context: AgentToolContext): AgentToolSet {
         val statusContext = context.status
         val microblogDataSource = statusContext?.postDataSource as? MicroblogDataSource
@@ -60,6 +66,23 @@ internal class AgentToolProvider {
                     }
                 }
             }
+        val relationTargets =
+            buildList {
+                addAll(context.searchDataSources.toAgentRelationTargets())
+                if (statusContext != null) {
+                    val authenticated = statusContext.postDataSource as? AuthenticatedMicroblogDataSource
+                    val relationDataSource = statusContext.postDataSource as? RelationDataSource
+                    if (authenticated != null && relationDataSource != null && none { it.dataSource === relationDataSource }) {
+                        add(
+                            AgentRelationTarget(
+                                accountKey = authenticated.accountKey,
+                                platformType = statusContext.currentPlatformType,
+                                dataSource = relationDataSource,
+                            ),
+                        )
+                    }
+                }
+            }
         val userTargets =
             buildList {
                 addAll(context.searchDataSources.toAgentUserTargets())
@@ -78,6 +101,9 @@ internal class AgentToolProvider {
                 searchTargets = searchTargets,
                 composeTargets = composeTargets,
                 postActionTargets = postActionTargets,
+                relationTargets = relationTargets,
+                subscriptionDataSource = KoinSubscriptionDataSource,
+                localCacheRepository = localCacheRepository,
                 userTargets = userTargets,
                 attachmentStore = AgentToolAttachmentStore(),
                 inputRequestStore = AgentToolInputRequestStore(),
@@ -101,15 +127,32 @@ internal class AgentToolProvider {
                     tool(ComposePostTool(session))
                     tool(ListPostActionsTool(session))
                     tool(ExecutePostActionTool(session))
+                    tool(LoadUserRelationTool(session))
+                    tool(ListRelationActionsTool(session))
+                    tool(ExecuteRelationActionTool(session))
+                    tool(ListSubscriptionSourcesTool(session))
+                    tool(DetectSubscriptionSourceTool(session))
+                    tool(LoadSubscriptionTimelineTool(session))
+                    tool(SaveSubscriptionSourceTool(session))
+                    tool(DeleteSubscriptionSourceTool(session))
+                    tool(LoadRssArticleTool(session))
+                    tool(SearchCachedPostsTool(session))
+                    tool(ListViewedPostsTool(session))
+                    tool(SearchCachedUsersTool(session))
+                    tool(ListViewedUsersTool(session))
                 },
             systemPromptGuidance =
                 listOf(
                     searchTargets.searchPlatformGuidance(),
                     composeTargets.composePlatformGuidance(),
                     postActionTargets.postActionGuidance(),
+                    relationTargets.relationActionGuidance(),
+                    AGENT_SUBSCRIPTION_TOOL_GUIDANCE,
+                    AGENT_LOCAL_CACHE_TOOL_GUIDANCE,
                     AGENT_MICROBLOG_TOOL_SOURCE_GUIDANCE,
                     AGENT_SEARCH_BEHAVIOR_GUIDANCE,
                     AGENT_COMPOSE_BEHAVIOR_GUIDANCE,
+                    AGENT_CONFIRMATION_BEHAVIOR_GUIDANCE,
                     AGENT_ATTACHMENT_GUIDANCE,
                 ).joinToString(separator = "\n\n"),
             traceRegistry = AGENT_TOOL_TRACE_REGISTRY,
@@ -226,6 +269,97 @@ internal class AgentToolProvider {
                         validationFailed = AgentToolKey.SearchPostsValidationFailed,
                         failed = AgentToolKey.SearchPostsFailed,
                     ),
+                LoadUserRelationTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
+                ListRelationActionsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
+                ExecuteRelationActionTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
+                ListSubscriptionSourcesTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                DetectSubscriptionSourceTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadSubscriptionTimelineTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                SaveSubscriptionSourceTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                DeleteSubscriptionSourceTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadRssArticleTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                SearchCachedPostsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                ListViewedPostsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                SearchCachedUsersTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
+                ListViewedUsersTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
             )
     }
 }
@@ -251,9 +385,13 @@ internal data class AgentToolSession(
     val searchTargets: List<AgentSearchTarget>,
     val composeTargets: List<AgentComposeTarget>,
     val postActionTargets: List<AgentPostActionTarget>,
+    val relationTargets: List<AgentRelationTarget> = emptyList(),
+    val subscriptionDataSource: SubscriptionDataSource? = null,
     val userTargets: List<AgentUserTarget>,
     val attachmentStore: AgentToolAttachmentStore,
     val inputRequestStore: AgentToolInputRequestStore,
+    val subscriptionItemStore: AgentSubscriptionItemStore = AgentSubscriptionItemStore(),
+    val localCacheRepository: LocalCacheRepository? = null,
 ) {
     fun statusMicroblogDataSource(): MicroblogDataSource? = status?.postDataSource as? MicroblogDataSource
 
@@ -339,6 +477,16 @@ internal data class AgentToolSet(
     }
 }
 
+private const val AGENT_CONFIRMATION_BEHAVIOR_GUIDANCE =
+    """
+    Confirmation UI guidance:
+    - For any action that changes user data or performs a side effect, call the relevant tool with confirmed=false first.
+    - After a confirmed=false call, always surface the confirmation content returned by the tool. Do not return an empty assistant message.
+    - If the action is about a concrete post or user, include the relevant attachmentRef in the visible response when available so Flare can render the post/user card.
+    - Do not ask the user to manually type confirmation when a confirmation input request is available; let Flare show the confirmation button.
+    - Only call the same tool with confirmed=true after the latest user input explicitly confirms the pending request.
+    """
+
 internal data class AgentSearchTarget(
     val platformType: PlatformType?,
     val dataSource: MicroblogDataSource,
@@ -354,6 +502,12 @@ internal data class AgentPostActionTarget(
     val accountKey: MicroBlogKey,
     val platformType: PlatformType,
     val dataSource: PostDataSource,
+)
+
+internal data class AgentRelationTarget(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+    val dataSource: RelationDataSource,
 )
 
 internal data class AgentUserTarget(
@@ -385,6 +539,16 @@ internal fun List<AccountMicroblogDataSource>.toAgentPostActionTargets(): List<A
     mapNotNull { item ->
         val dataSource = item.dataSource as? PostDataSource ?: return@mapNotNull null
         AgentPostActionTarget(
+            accountKey = item.accountKey,
+            platformType = item.platformType,
+            dataSource = dataSource,
+        )
+    }
+
+internal fun List<AccountMicroblogDataSource>.toAgentRelationTargets(): List<AgentRelationTarget> =
+    mapNotNull { item ->
+        val dataSource = item.dataSource as? RelationDataSource ?: return@mapNotNull null
+        AgentRelationTarget(
             accountKey = item.accountKey,
             platformType = item.platformType,
             dataSource = dataSource,
@@ -451,6 +615,15 @@ internal fun List<AgentUserTarget>.filterUserTargetsByPlatformNames(platforms: L
 }
 
 internal fun List<AgentComposeTarget>.filterComposeTargetsByPlatformNames(platforms: List<String>): List<AgentComposeTarget> {
+    val platformFilter = platforms.toPlatformFilter()
+    return when {
+        platformFilter.searchAll -> this
+        platformFilter.platformTypes.isEmpty() -> emptyList()
+        else -> filter { it.platformType in platformFilter.platformTypes }
+    }
+}
+
+internal fun List<AgentRelationTarget>.filterRelationTargetsByPlatformNames(platforms: List<String>): List<AgentRelationTarget> {
     val platformFilter = platforms.toPlatformFilter()
     return when {
         platformFilter.searchAll -> this
@@ -570,6 +743,31 @@ internal fun List<AgentPostActionTarget>.postActionGuidance(): String =
         """
     }.trimIndent()
 
+internal fun List<AgentRelationTarget>.relationActionGuidance(): String =
+    if (isEmpty()) {
+        """
+
+        Relation action guidance:
+        - No signed-in accounts currently expose relation actions.
+        """
+    } else {
+        val accountLines =
+            joinToString(separator = "\n") { target ->
+                "- accountKey=${target.accountKey}, platform=${target.platformType.name}, supported=${target.dataSource.supportedRelationTypes.joinToString()}"
+            }
+        """
+
+        Relation action guidance:
+        - Available relation-capable signed-in accounts are:
+        $accountLines
+        - Use load_user_relation when the user asks whether they follow, are followed by, blocked, muted, or have pending follow requests with a user.
+        - Use list_relation_actions when the user asks what account relationship actions are available for a user, or when the target action is ambiguous.
+        - Use execute_relation_action when the user asks to follow, unfollow, block, unblock, mute, or unmute a user.
+        - For relation actions, prefer a user attachmentRef, the current post author, or an explicit user key. If the target user or account is ambiguous, call the relation tool with blank target/account fields so it can show a structured picker.
+        - Always require confirmation before executing execute_relation_action. Do not call execute_relation_action with confirmed=true unless the latest user message clearly confirms the exact account, target user, and action already shown.
+        """
+    }.trimIndent()
+
 internal data class AgentToolTraceKeys(
     val started: AgentToolKey,
     val completed: AgentToolKey,
@@ -662,6 +860,20 @@ private val SEARCH_ALL_PLATFORM_KEYS =
         "跨平台",
         "各平台",
     ).map { it.searchPlatformKey() }.toSet()
+
+private const val AGENT_SUBSCRIPTION_TOOL_GUIDANCE =
+    """
+    Subscription tool guidance:
+    - Use subscription tools when the user asks about Flare subscriptions, subscribed sources, RSS feeds, RSS articles, or subscription-backed timelines such as Mastodon public/local/trends.
+    - Subscriptions are typed by SubscriptionType values: RSS, MASTODON_TRENDS, MASTODON_PUBLIC, and MASTODON_LOCAL. Future subscription types should be treated the same way when exposed by the app.
+    - Use detect_subscription_source before saving a URL or host when the exact type is unclear.
+    - Use load_subscription_timeline for a saved source or an explicit type + URL/host. RSS results are feed articles; Mastodon subscription timelines return post items.
+    - Use load_rss_article only for actual RSS article URLs or rssArticleRef values returned by load_subscription_timeline. Do not use it for Mastodon posts or other non-RSS subscription items.
+    - Saving or deleting a subscription is a user-visible side effect. Always require confirmation before calling save_subscription_source or delete_subscription_source with confirmed=true.
+    - When the user asks to add, save, update, remove, or delete a subscription source, do not write a manual confirmation message as the final answer. Call save_subscription_source or delete_subscription_source with confirmed=false first. The tool will create a structured confirmation request with one confirm button.
+    - After save_subscription_source or delete_subscription_source returns a confirmation message for confirmed=false, return that message to the user. Do not ask for confirmation in your own words and do not claim the source has been saved/deleted yet.
+    - Only call save_subscription_source or delete_subscription_source with confirmed=true when the latest user message explicitly confirms the exact source and action previously shown by the tool confirmation request.
+    """
 
 private const val AGENT_MICROBLOG_TOOL_SOURCE_GUIDANCE =
     """

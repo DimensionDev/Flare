@@ -2,9 +2,17 @@ import SwiftUI
 import KotlinSharedUI
 
 struct LocalHistoryScreen: View {
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @StateObject private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @State private var searchText = ""
+    @State private var isSearchPresented = false
     @State private var selection: HistorySelection = .status
+    let onAskAi: (String?, String) -> Void
+
+    init(onAskAi: @escaping (String?, String) -> Void = { _, _ in }) {
+        self.onAskAi = onAskAi
+    }
+
     var body: some View {
         List {
             if selection == .status {
@@ -49,14 +57,37 @@ struct LocalHistoryScreen: View {
         .detectScrolling()
         .background(Color(.systemGroupedBackground))
         .navigationTitle("local_history_title")
-        .searchable(text: $searchText, prompt: Text("local_history_search_prompt"))
+        .searchable(text: $searchText, isPresented: $isSearchPresented, prompt: Text("local_history_search_prompt"))
+        .askAiSearchOverlay(
+            agentEnabled: agentEnabled,
+            isSearchPresented: isSearchPresented
+        ) {
+            askAi()
+        }
         .onSubmit(of: .search) {
             presenter.state.setQuery(value: searchText)
         }
+    }
+
+    private func askAi() {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        isSearchPresented = false
+        onAskAi(query.isEmpty ? nil : query, selection.agentTargetRouteValue)
     }
 }
 
 enum HistorySelection {
     case status
     case user
+}
+
+private extension HistorySelection {
+    var agentTargetRouteValue: String {
+        switch self {
+        case .status:
+            return "posts"
+        case .user:
+            return "users"
+        }
+    }
 }

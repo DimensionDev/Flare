@@ -83,7 +83,7 @@
     <string name="status_insight_trace_agent_closing">Închidere analiza…</string>
     <string name="ask_ai">Întreabă AI</string>
     <string name="agent_chat_title">Chat AI</string>
-    <string name="agent_history_title">Agent Fierbinte</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Nici un agent de chat istoric.</string>
     <string name="agent_chat_input_placeholder">Întreabă orice…</string>
     <string name="agent_chat_send">Trimite</string>

@@ -201,8 +201,8 @@
     <string name="settings_guest_setting_description">Velg hvilken server gjestemodus skal koble til</string>
     <string name="settings_local_history_title">Lokal historikk</string>
     <string name="settings_local_history_description">Søk i innlegg og profiler bufret på denne enheten</string>
-    <string name="settings_agent_history_title">Kollektiv Agent</string>
-    <string name="settings_agent_history_description">Vis lokal flat Agent samtalelogg</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Vis lokal Flare AI samtalelogg</string>
     <string name="agent_history_empty">Ingen agent samtalelogg enda.</string>
     <string name="settings_app_logging_title">App-logger</string>
     <string name="settings_app_logging_save">Lagre logger</string>

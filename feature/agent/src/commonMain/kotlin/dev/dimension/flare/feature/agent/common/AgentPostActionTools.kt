@@ -42,15 +42,15 @@ internal class ListPostActionsTool(
         session.inputRequestStore.set(
             AgentInputRequest(
                 requestId = "post-actions:${post.statusKey}",
-                prompt = "请选择要对这条帖子执行的操作。",
+                localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectPostAction),
                 options =
                     actions.map { action ->
                         AgentInputRequest.Option(
                             id = action.id,
-                            label = action.label,
+                            localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, action.label),
                             value =
                                 buildString {
-                                    appendLine("对以下帖子执行操作：")
+                                    appendLine(AgentUiStrings.PostAction.ExecutePostActionPrefix)
                                     appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                     appendLine("targetStatusId=${post.statusKey.id}")
                                     appendLine("targetStatusHost=${post.statusKey.host}")
@@ -60,7 +60,7 @@ internal class ListPostActionsTool(
                         )
                     },
                 allowFreeText = true,
-                freeTextPlaceholder = "也可以直接输入要执行的操作...",
+                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionPlaceholder),
             ),
         )
         return buildString {
@@ -121,29 +121,33 @@ internal class ExecutePostActionTool(
                 ?: return "No signed-in post action account matches ${action.payload.accountKey} for ${action.label}."
 
         if (!args.confirmed) {
-            val confirmationMessage = action.confirmationMessage(post)
+            val localizedPrompt =
+                AgentUiStrings.text(
+                    AgentLocalizedTextKey.PostActionConfirmationMessage,
+                    action.label,
+                    action.payload.accountKey.toString(),
+                    post.statusKey.toString(),
+                    post.user?.let { it.name.raw.takeIf { name -> name.isNotBlank() } ?: it.handle.canonical }.orEmpty(),
+                    post.content.raw.take(160),
+                )
             session.inputRequestStore.set(
                 AgentInputRequest(
                     requestId = "post-action-confirm:${post.statusKey}:${action.id}",
-                    prompt = confirmationMessage,
+                    localizedPrompt = localizedPrompt,
                     options =
                         listOf(
                             AgentInputRequest.Option(
                                 id = "confirm",
-                                label = "确认执行",
-                                value = "确认执行",
-                            ),
-                            AgentInputRequest.Option(
-                                id = "cancel",
-                                label = "取消",
-                                value = "取消执行",
+                                value = AgentUiStrings.Common.ConfirmExecute,
+                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmExecute),
                             ),
                         ),
                     allowFreeText = true,
-                    freeTextPlaceholder = "也可以直接输入其他操作或取消...",
+                    localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionConfirmationPlaceholder),
+                    postPreview = post,
                 ),
             )
-            return confirmationMessage
+            return localizedPrompt.toAgentProtocolText()
         }
 
         actionHandler(target.dataSource, action.payload.postEvent)
@@ -225,19 +229,19 @@ private suspend fun AgentToolSession.postActionTargetSelectionMessage(args: Post
         return "Post action requires a target post with available action menus. " +
             "Open a post insight session, use search_posts/load_post_context first, or provide a target post attachmentRef."
     }
-    val prompt = "请选择要操作的帖子。"
+    val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectPostActionPost)
     inputRequestStore.set(
         AgentInputRequest(
             requestId = "post-action-target:${args.targetPostRef}:${args.targetStatusId}:${args.targetStatusHost}",
-            prompt = prompt,
+            localizedPrompt = localizedPrompt,
             options =
                 posts.map { post ->
                     AgentInputRequest.Option(
                         id = "post:${post.agentAttachmentRef()}",
-                        label = post.postActionLabel(),
+                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, post.postActionLabel()),
                         value =
                             buildString {
-                                appendLine("操作以下帖子：")
+                                appendLine(AgentUiStrings.PostAction.OperatePostPrefix)
                                 appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                 appendLine("targetStatusId=${post.statusKey.id}")
                                 appendLine("targetStatusHost=${post.statusKey.host}")
@@ -246,29 +250,29 @@ private suspend fun AgentToolSession.postActionTargetSelectionMessage(args: Post
                     )
                 },
             allowFreeText = true,
-            freeTextPlaceholder = "也可以直接输入目标帖子 attachmentRef 或 statusKey...",
+            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionTargetPostPlaceholder),
         ),
     )
-    return prompt
+    return localizedPrompt.toAgentProtocolText()
 }
 
 private suspend fun AgentToolSession.postActionSelectionMessage(
     post: UiTimelineV2.Post,
     actions: List<ExecutablePostAction>,
 ): String {
-    val prompt = "请选择要对这条帖子执行的操作。"
+    val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectPostAction)
     inputRequestStore.set(
         AgentInputRequest(
             requestId = "post-action:${post.statusKey}",
-            prompt = prompt,
+            localizedPrompt = localizedPrompt,
             options =
                 actions.map { action ->
                     AgentInputRequest.Option(
                         id = action.id,
-                        label = action.label,
+                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, action.label),
                         value =
                             buildString {
-                                appendLine("对以下帖子执行操作：")
+                                appendLine(AgentUiStrings.PostAction.ExecutePostActionPrefix)
                                 appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                 appendLine("targetStatusId=${post.statusKey.id}")
                                 appendLine("targetStatusHost=${post.statusKey.host}")
@@ -278,27 +282,11 @@ private suspend fun AgentToolSession.postActionSelectionMessage(
                     )
                 },
             allowFreeText = true,
-            freeTextPlaceholder = "也可以直接输入要执行的操作...",
+            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionPlaceholder),
         ),
     )
-    return prompt
+    return localizedPrompt.toAgentProtocolText()
 }
-
-private fun ExecutablePostAction.confirmationMessage(post: UiTimelineV2.Post): String =
-    buildString {
-        appendLine("确认对以下帖子执行“$label”操作吗？")
-        appendLine()
-        appendLine("账号：${payload.accountKey}")
-        appendLine("目标帖子：${post.statusKey}")
-        post.user?.let {
-            appendLine("作者：${it.name.raw.takeIf { name -> name.isNotBlank() } ?: it.handle.canonical}")
-        }
-        post.content.raw.take(160).takeIf { it.isNotBlank() }?.let {
-            appendLine("内容摘要：$it")
-        }
-        appendLine()
-        append("如果确认，请回复“确认执行”。")
-    }.trim()
 
 private suspend fun AgentToolSession.availableActionPosts(): List<UiTimelineV2.Post> =
     buildList {

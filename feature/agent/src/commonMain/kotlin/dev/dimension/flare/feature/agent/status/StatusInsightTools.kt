@@ -9,6 +9,8 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentLocalizedTextKey
+import dev.dimension.flare.feature.agent.common.AgentUiStrings
 import dev.dimension.flare.feature.agent.common.AgentSearchTarget
 import dev.dimension.flare.feature.agent.common.AgentToolSession
 import dev.dimension.flare.feature.agent.common.AgentUserTarget
@@ -195,8 +197,8 @@ internal class LoadUserTimelineTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    prompt = "请从下方选择要查看最近帖子的用户。",
-                    valuePrefix = "查看这个用户最近发了什么：",
+                    valuePrefix = AgentUiStrings.StatusInsight.RecentPostsUserPrefix,
+                    promptKey = AgentLocalizedTextKey.SelectRecentPostsUser,
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { userTimeline(userKey = userKey, mediaOnly = args.mediaOnly) }
@@ -373,8 +375,8 @@ internal class SearchUsersTool(
         if (userResults.size > 1) {
             session.setUserSelectionRequest(
                 users = userResults,
-                prompt = "找到了多个匹配的用户，请从下方选择你要定位的用户。",
-                valuePrefix = "选择这个用户继续完成上一条请求：",
+                valuePrefix = AgentUiStrings.StatusInsight.MatchedUserPrefix,
+                promptKey = AgentLocalizedTextKey.SelectMatchedUser,
             )
         }
         return buildString {
@@ -427,8 +429,8 @@ internal class LoadUserProfileTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    prompt = "请从下方选择要查看资料的用户。",
-                    valuePrefix = "查看这个用户资料：",
+                    valuePrefix = AgentUiStrings.StatusInsight.ProfileUserPrefix,
+                    promptKey = AgentLocalizedTextKey.SelectProfileUser,
                 ) ?: "User id is blank."
         val targets = session.userTargets.resolveUserTargetsOrNull(args.platforms) ?: return noUserTargetsMessage(args.platforms)
         val users = targets.loadUserProfiles(userKey)
@@ -562,8 +564,8 @@ internal class LoadFollowingTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    prompt = "请从下方选择要查看关注列表的用户。",
-                    valuePrefix = "查看这个用户关注了谁：",
+                    valuePrefix = AgentUiStrings.StatusInsight.FollowingUserPrefix,
+                    promptKey = AgentLocalizedTextKey.SelectFollowingUser,
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { following(userKey) }
@@ -615,8 +617,8 @@ internal class LoadFollowersTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    prompt = "请从下方选择要查看粉丝列表的用户。",
-                    valuePrefix = "查看这个用户的粉丝：",
+                    valuePrefix = AgentUiStrings.StatusInsight.FollowersUserPrefix,
+                    promptKey = AgentLocalizedTextKey.SelectFollowersUser,
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { fans(userKey) }
@@ -673,8 +675,8 @@ internal class LoadProfileTabsTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    prompt = "请从下方选择要查看 profile tabs 的用户。",
-                    valuePrefix = "查看这个用户的 profile tabs：",
+                    valuePrefix = AgentUiStrings.StatusInsight.ProfileTabsUserPrefix,
+                    promptKey = AgentLocalizedTextKey.SelectProfileTabsUser,
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val tabResults = targets.loadProfileTabs(userKey)
@@ -772,8 +774,8 @@ private fun List<AgentUserTarget>.userPlatformNames(): String = joinToString { i
 
 private suspend fun AgentToolSession.requestUserSelectionFromAttachments(
     platforms: List<String>,
-    prompt: String,
     valuePrefix: String,
+    promptKey: AgentLocalizedTextKey,
 ): String? {
     val candidates =
         attachmentStore
@@ -786,16 +788,16 @@ private suspend fun AgentToolSession.requestUserSelectionFromAttachments(
             ?: return null
     setUserSelectionRequest(
         users = candidates,
-        prompt = prompt,
         valuePrefix = valuePrefix,
+        promptKey = promptKey,
     )
-    return prompt
+    return AgentUiStrings.text(promptKey).toAgentProtocolText()
 }
 
 private suspend fun AgentToolSession.setUserSelectionRequest(
     users: List<UiProfile>,
-    prompt: String,
     valuePrefix: String,
+    promptKey: AgentLocalizedTextKey,
 ) {
     val candidates =
         users
@@ -804,18 +806,18 @@ private suspend fun AgentToolSession.setUserSelectionRequest(
     inputRequestStore.set(
         AgentInputRequest(
             requestId = "user-selection:${candidates.joinToString { it.agentAttachmentRef() }}",
-            prompt = prompt,
+            localizedPrompt = AgentUiStrings.text(promptKey),
             options =
                 candidates.map { user ->
                     AgentInputRequest.Option(
                         id = "user:${user.agentAttachmentRef()}",
-                        label = user.userSelectionLabel(),
+                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, user.userSelectionLabel()),
                         value = user.userSelectionValue(valuePrefix),
                         userPreview = user,
                     )
                 },
             allowFreeText = true,
-            freeTextPlaceholder = "也可以直接输入用户链接、handle 或 userKey...",
+            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.StatusInsightUserPlaceholder),
         ),
     )
 }

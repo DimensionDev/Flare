@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
+import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableMap
@@ -223,6 +224,13 @@ internal sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
+    data class LocalHistoryAgent(
+        val conversationId: String,
+        val query: String? = null,
+        val target: LocalHistoryAgentTarget = LocalHistoryAgentTarget.All,
+    ) : Route
+
+    @Serializable
     sealed interface Profile : Route {
         @Serializable
         data class User(
@@ -245,6 +253,12 @@ internal sealed interface Route : NavKey {
 
         @Serializable
         data class Fans(
+            val accountType: AccountType,
+            val userKey: MicroBlogKey,
+        ) : Profile
+
+        @Serializable
+        data class Insight(
             val accountType: AccountType,
             val userKey: MicroBlogKey,
         ) : Profile

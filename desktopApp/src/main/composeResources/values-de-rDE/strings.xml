@@ -208,8 +208,8 @@
     <string name="settings_guest_setting_description">Wählen Sie den Server aus, mit dem sich der Gastmodus verbindet</string>
     <string name="settings_local_history_title">Lokaler Verlauf</string>
     <string name="settings_local_history_description">Auf diesem Gerät gespeicherte Beiträge und Profile suchen</string>
-    <string name="settings_agent_history_title">Leuchtmittel-Agent</string>
-    <string name="settings_agent_history_description">Zeige den lokalen Flare Agent Chatverlauf</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Zeige den lokalen Flare AI Chatverlauf</string>
     <string name="agent_history_empty">Noch kein Agenten-Chat-Verlauf.</string>
     <string name="settings_app_logging_title">App-Protokolle</string>
     <string name="settings_app_logging_save">Protokolle speichern</string>

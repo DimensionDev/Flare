@@ -23,6 +23,7 @@ import dev.dimension.flare.agent_chat_title
 import dev.dimension.flare.feature.agent.presenter.chat.GenericChatPresenter
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
+import dev.dimension.flare.ui.component.agent.label
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.presenter.invoke
@@ -84,11 +85,12 @@ internal fun AgentChatScreen(
             isRunning = state.isRunning,
             canSend = state.canSend,
             error = state.error,
-            runningTrace = stringResource(Res.string.agent_chat_thinking),
+            runningTrace = state.currentTrace?.label() ?: stringResource(Res.string.agent_chat_thinking),
             inputRequest = state.inputRequest,
             inputPlaceholder = stringResource(Res.string.agent_chat_input_placeholder),
             sendContentDescription = stringResource(Res.string.agent_chat_send),
             messageText = GenericChatPresenter.Message::text,
+            messageLocalizedText = GenericChatPresenter.Message::localizedText,
             messageParts = GenericChatPresenter.Message::parts,
             messageInputRequest = GenericChatPresenter.Message::inputRequest,
             messageInputRequestSelected = GenericChatPresenter.Message::inputRequestSelected,

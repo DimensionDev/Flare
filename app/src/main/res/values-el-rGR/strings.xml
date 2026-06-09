@@ -68,7 +68,7 @@
     <string name="status_insight_trace_agent_closing">Περάτωση της ανάλυσης…</string>
     <string name="ask_ai">Ερώτηση Τεχνητής Νοημοσύνης</string>
     <string name="agent_chat_title">AI Συνομιλία</string>
-    <string name="agent_history_title">Flare Agent</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Δεν υπάρχει ιστορικό συνομιλίας πράκτορα ακόμα.</string>
     <string name="agent_chat_send">Αποστολή</string>
     <string name="draft_box_title">Πρόχειρα</string>

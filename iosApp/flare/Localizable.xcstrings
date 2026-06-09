@@ -672,7 +672,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تعرف على المزيد حول Ffluy"
+            "value" : "تعرف على المزيد حول Flare"
           }
         },
         "bg" : {
@@ -3148,6 +3148,17 @@
         }
       }
     },
+    "agent_compose_confirmation_prompt" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Send this post?"
+          }
+        }
+      }
+    },
     "agent_history_empty" : {
       "localizations" : {
         "ar" : {
@@ -3183,7 +3194,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No agent chat history yet."
+            "value" : "No AI chat history yet."
           }
         },
         "es" : {
@@ -3213,7 +3224,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エージェントのチャット履歴はまだありません。"
+            "value" : "AI チャット履歴はまだありません。"
           }
         },
         "nb" : {
@@ -3273,7 +3284,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "暂无代理聊天历史记录。"
+            "value" : "暂无 AI 聊天历史记录。"
           }
         }
       }
@@ -3283,127 +3294,677 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الوكيل المتلاعب"
+            "value" : "Flare AI"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leuchtmittel-Agent"
+            "value" : "Flare AI"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente de bengala"
+            "value" : "Flare AI"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Fusée éclairante"
+            "value" : "Flare AI"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente Chiarore"
+            "value" : "Flare AI"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "フレアエージェント"
+            "value" : "Flare AI"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kollektiv Agent"
+            "value" : "Flare AI"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verspreid agent"
+            "value" : "Flare AI"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Flara"
+            "value" : "Flare AI"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente Sinalizador"
+            "value" : "Flare AI"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente Sinalizador"
+            "value" : "Flare AI"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Fierbinte"
+            "value" : "Flare AI"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Агент сигнала"
+            "value" : "Flare AI"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "闪光代理"
+            "value" : "Flare AI"
+          }
+        }
+      }
+    },
+    "agent_ui_cancel" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "agent_ui_cancel_delete_subscription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cancel delete"
+          }
+        }
+      }
+    },
+    "agent_ui_cancel_save_subscription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cancel save"
+          }
+        }
+      }
+    },
+    "agent_ui_cancel_send_post" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cancel send"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_account_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter an account or revised content…"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_confirmation_message" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@\n\nAccount: %2$@\nPlatform: %3$@\n\n%4$@"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_confirmation_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter revised content…"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_platform_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a platform, account, or revised content…"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_quote_confirmation_title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Quote this post with the selected account?"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_reply_confirmation_title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reply to this post with the selected account?"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_send_confirmation_title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Send this content with the selected account?"
+          }
+        }
+      }
+    },
+    "agent_ui_compose_target_post_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a target post link, statusKey, or revised content…"
+          }
+        }
+      }
+    },
+    "agent_ui_confirm_delete_subscription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "agent_ui_confirm_execute" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Confirm"
+          }
+        }
+      }
+    },
+    "agent_ui_confirm_save_subscription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save"
+          }
+        }
+      }
+    },
+    "agent_ui_confirm_send_post" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Send"
+          }
+        }
+      }
+    },
+    "agent_ui_post_action_confirmation_message" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Confirm %1$@ for this post?\n\nAccount: %2$@\nTarget post: %3$@\nAuthor: %4$@\nSummary: %5$@\n\nConfirm to continue."
+          }
+        }
+      }
+    },
+    "agent_ui_post_action_confirmation_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter another action or cancel…"
+          }
+        }
+      }
+    },
+    "agent_ui_post_action_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter the action to perform…"
+          }
+        }
+      }
+    },
+    "agent_ui_post_action_target_post_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a target post attachmentRef or statusKey…"
+          }
+        }
+      }
+    },
+    "agent_ui_relation_account_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter an account, platform, or revised action…"
+          }
+        }
+      }
+    },
+    "agent_ui_relation_action_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter the relationship action…"
+          }
+        }
+      }
+    },
+    "agent_ui_relation_confirmation_message" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Confirm %1$@ for this user?\n\nAccount: %2$@\nPlatform: %3$@\nTarget user: %4$@\nDisplay name: %5$@\nHandle: %6$@\n\nConfirm to continue."
+          }
+        }
+      }
+    },
+    "agent_ui_relation_confirmation_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter another action or cancel…"
+          }
+        }
+      }
+    },
+    "agent_ui_relation_user_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a user link, handle, or userKey…"
+          }
+        }
+      }
+    },
+    "agent_ui_select_compose_account" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select the account to %@ this content."
+          }
+        }
+      }
+    },
+    "agent_ui_select_compose_platform" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select the platform to %@ this content."
+          }
+        }
+      }
+    },
+    "agent_ui_select_compose_target_post" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select the post to %@."
+          }
+        }
+      }
+    },
+    "agent_ui_select_delete_subscription_source" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a subscription source to delete."
+          }
+        }
+      }
+    },
+    "agent_ui_select_followers_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to view their followers."
+          }
+        }
+      }
+    },
+    "agent_ui_select_following_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to view who they follow."
+          }
+        }
+      }
+    },
+    "agent_ui_select_load_subscription_source" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a subscription source to load."
+          }
+        }
+      }
+    },
+    "agent_ui_select_matched_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Multiple matching users were found. Select one to continue."
+          }
+        }
+      }
+    },
+    "agent_ui_select_post_action" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select an action for this post."
+          }
+        }
+      }
+    },
+    "agent_ui_select_post_action_post" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a post to operate on."
+          }
+        }
+      }
+    },
+    "agent_ui_select_profile_tabs_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to view profile tabs."
+          }
+        }
+      }
+    },
+    "agent_ui_select_profile_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to view their profile."
+          }
+        }
+      }
+    },
+    "agent_ui_select_recent_posts_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to view recent posts."
+          }
+        }
+      }
+    },
+    "agent_ui_select_relation_account" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select the account to use for this relationship action."
+          }
+        }
+      }
+    },
+    "agent_ui_select_relation_action" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a relationship action for this user."
+          }
+        }
+      }
+    },
+    "agent_ui_select_relation_state_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to inspect relationship status."
+          }
+        }
+      }
+    },
+    "agent_ui_select_relation_user" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a user to operate on."
+          }
+        }
+      }
+    },
+    "agent_ui_select_save_subscription_source" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a subscription source to save."
+          }
+        }
+      }
+    },
+    "agent_ui_status_insight_user_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a user link, handle, or userKey…"
+          }
+        }
+      }
+    },
+    "agent_ui_subscription_delete_confirmation_message" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete this subscription source?\n\nsourceId: %1$@\nType: %2$@ (%3$@)\nURL/Host: %4$@\nTitle: %5$@\n\nConfirm to delete."
+          }
+        }
+      }
+    },
+    "agent_ui_subscription_delete_confirmation_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter another source or cancel…"
+          }
+        }
+      }
+    },
+    "agent_ui_subscription_save_confirmation_message" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save this subscription source?\n\nType: %1$@ (%2$@)\nURL/Host: %3$@\nTitle: %4$@\nIcon: %5$@\nRSS display mode: %6$@\n\nConfirm to save."
+          }
+        }
+      }
+    },
+    "agent_ui_subscription_save_confirmation_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a new source, type, or title…"
+          }
+        }
+      }
+    },
+    "agent_ui_subscription_save_selection_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter the subscription source or type to save…"
+          }
+        }
+      }
+    },
+    "agent_ui_subscription_source_placeholder" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You can also enter a subscription URL, host, or type…"
           }
         }
       }
@@ -10346,7 +10907,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تخصيص مظهر و إحساس Felle"
+            "value" : "تخصيص مظهر و إحساس Flare"
           }
         },
         "bg" : {
@@ -10442,7 +11003,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tilpass utseendet og følelsen til flare"
+            "value" : "Tilpass utseendet og følelsen til Flare"
           }
         },
         "nl" : {
@@ -40214,103 +40775,103 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "شباك"
+            "value" : "Flare"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plocha"
+            "value" : "Flare"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Blus"
+            "value" : "Flare"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leuchtturm"
+            "value" : "Flare"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Λάμψη"
+            "value" : "Flare"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bengala"
+            "value" : "Flare"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Häikäisy"
+            "value" : "Flare"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fusée éclairante"
+            "value" : "Flare"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Riflessione"
+            "value" : "Flare"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "フレア"
+            "value" : "Flare"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oppblussing"
+            "value" : "Flare"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Waaier"
+            "value" : "Flare"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flara"
+            "value" : "Flare"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sinalizador"
+            "value" : "Flare"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sinalizador"
+            "value" : "Flare"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Steag"
+            "value" : "Flare"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сигнал"
+            "value" : "Flare"
           }
         },
         "sv" : {
@@ -40322,13 +40883,13 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Фальшфейєр"
+            "value" : "Flare"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "闪光灯"
+            "value" : "Flare"
           }
         }
       }
@@ -42921,7 +43482,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Filla"
+            "value" : "https://github.com/DimensionDev/Flare"
           }
         },
         "cs" : {
@@ -42951,7 +43512,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Bengala"
+            "value" : "https://github.com/DimensionDev/Flare"
           }
         },
         "fi" : {
@@ -43017,7 +43578,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Сигнал"
+            "value" : "https://github.com/DimensionDev/Flare"
           }
         },
         "sv" : {
@@ -105900,6 +106461,28 @@
         }
       }
     },
+    "profile_insight_analyzing" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Analyzing this profile…"
+          }
+        }
+      }
+    },
+    "profile_insight_title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Profile insight"
+          }
+        }
+      }
+    },
     "profile_tab_likes" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -117086,7 +117669,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このサーバーは%@を使用しています。互換モードで動作するため、一部の機能が正しく動作しない可能性があります。"
+            "value" : "このサーバーは%@を使用しています。Flare は互換モードで動作するため、一部の機能が正しく動作しない可能性があります。"
           }
         },
         "ko" : {
@@ -119222,7 +119805,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ساعدنا في ترجمة الشفق"
+            "value" : "ساعدنا في ترجمة Flare"
           }
         },
         "bg" : {
@@ -119270,7 +119853,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ayúdanos a traducir bengala"
+            "value" : "Ayúdanos a traducir Flare"
           }
         },
         "fi" : {
@@ -119288,7 +119871,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "עזרו לנו לתרגם את פלייר"
+            "value" : "עזרו לנו לתרגם את Flare"
           }
         },
         "hu" : {
@@ -119336,7 +119919,7 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajude-nos a traduzir o Sinalizador"
+            "value" : "Ajude-nos a traduzir o Flare"
           }
         },
         "pt-BR" : {
@@ -119354,7 +119937,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Помогите нам перевести сигнал"
+            "value" : "Помогите нам перевести Flare"
           }
         },
         "sr" : {
@@ -119977,127 +120560,127 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "عرض محفوظات المحادثة المحلية للوكيل المتحرك"
+            "value" : "عرض محفوظات المحادثة المحلية لـ Flare AI"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zobrazit místní historii chatu Flare Agent"
+            "value" : "Zobrazit místní historii chatu Flare AI"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se lokal Flare Agent chat historik"
+            "value" : "Se lokal Flare AI chat historik"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zeige den lokalen Flare Agent Chatverlauf"
+            "value" : "Zeige den lokalen Flare AI Chatverlauf"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Δείτε το ιστορικό συνομιλίας του τοπικού παράγοντα Flare Agent"
+            "value" : "Δείτε το ιστορικό συνομιλίας του τοπικού παράγοντα Flare AI"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "View local Flare Agent chat history"
+            "value" : "View local Flare AI chat history"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ver historial de chat de Agente de Bengala local"
+            "value" : "Ver historial de chat local de Flare AI"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Näytä paikallinen Flare Agent chat historia"
+            "value" : "Näytä paikallinen Flare AI chat historia"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Afficher l'historique de discussion de l'agent de fusée éclairante locale"
+            "value" : "Afficher l'historique de discussion local de Flare AI"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Visualizza la cronologia delle chat degli agenti chiarenti locali"
+            "value" : "Visualizza la cronologia chat locale di Flare AI"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ローカルの Flare Agent チャット履歴を表示"
+            "value" : "ローカルの Flare AI チャット履歴を表示"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vis lokal flat Agent samtalelogg"
+            "value" : "Vis lokal Flare AI samtalelogg"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bekijk lokale Flare agent chat geschiedenis"
+            "value" : "Bekijk lokale Flare AI chatgeschiedenis"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zobacz historię czatu Flare Agent"
+            "value" : "Zobacz historię czatu Flare AI"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ver o histórico local do Flare Agent"
+            "value" : "Ver o histórico local do Flare AI"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ver o histórico local do Flare Agent"
+            "value" : "Ver o histórico local do Flare AI"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vezi istoricul chat-ului cu Agent Flare local"
+            "value" : "Vezi istoricul local de chat Flare AI"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Просмотр истории локального мигания Агента"
+            "value" : "Просмотр локальной истории чата Flare AI"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Visa lokal Flare Agent chatthistorik"
+            "value" : "Visa lokal Flare AI chatthistorik"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Переглянути локальну історію чату Flare Agent"
+            "value" : "Переглянути локальну історію чату Flare AI"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "查看本地闪光代理聊天记录"
+            "value" : "查看本地 Flare AI 聊天记录"
           }
         }
       }
@@ -120107,127 +120690,127 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الوكيل المتلاعب"
+            "value" : "Flare AI"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leuchtmittel-Agent"
+            "value" : "Flare AI"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente de bengala"
+            "value" : "Flare AI"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Fusée éclairante"
+            "value" : "Flare AI"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente Chiarore"
+            "value" : "Flare AI"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "フレアエージェント"
+            "value" : "Flare AI"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kollektiv Agent"
+            "value" : "Flare AI"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verspreid agent"
+            "value" : "Flare AI"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Flara"
+            "value" : "Flare AI"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente Sinalizador"
+            "value" : "Flare AI"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agente Sinalizador"
+            "value" : "Flare AI"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Fierbinte"
+            "value" : "Flare AI"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Агент сигнала"
+            "value" : "Flare AI"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flare Agent"
+            "value" : "Flare AI"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "闪光代理"
+            "value" : "Flare AI"
           }
         }
       }
@@ -133478,49 +134061,49 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toepassingsinstellings en inligting."
+            "value" : "Werk Flare se toestemmings of taal op"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "إعدادات التطبيق ومعلوماته."
+            "value" : "حدّث أذونات Flare أو لغته"
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Настройки и информация за приложението."
+            "value" : "Актуализирайте разрешенията или езика на Flare"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configuració i informació de l'aplicació."
+            "value" : "Actualitza els permisos o l'idioma de Flare"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nastavení a informace o aplikaci."
+            "value" : "Aktualizujte oprávnění nebo jazyk aplikace Flare"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App-indstillinger og oplysninger."
+            "value" : "Opdater Flares tilladelser eller sprog"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App-Einstellungen und Informationen."
+            "value" : "Berechtigungen oder Sprache von Flare aktualisieren"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ρυθμίσεις και πληροφορίες εφαρμογής."
+            "value" : "Ενημερώστε τα δικαιώματα ή τη γλώσσα του Flare"
           }
         },
         "en" : {
@@ -133532,133 +134115,133 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configuración e información de la aplicación."
+            "value" : "Actualiza los permisos o el idioma de Flare"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sovelluksen asetukset ja tiedot."
+            "value" : "Päivitä Flaren käyttöoikeudet tai kieli"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paramètres et informations de l'application."
+            "value" : "Mettre à jour les autorisations ou la langue de Flare"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הגדרות ומידע על האפליקציה."
+            "value" : "עדכנו את ההרשאות או השפה של Flare"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alkalmazásbeállítások és információk."
+            "value" : "Frissítsd a Flare engedélyeit vagy nyelvét"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impostazioni e informazioni dell'app."
+            "value" : "Aggiorna i permessi o la lingua di Flare"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリの設定と情報。"
+            "value" : "Flare の権限または言語を更新"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "앱 설정 및 정보."
+            "value" : "Flare의 권한 또는 언어 업데이트"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oppdatere flammets tillatelse eller språk"
+            "value" : "Oppdater Flares tillatelser eller språk"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App-instellingen en informatie."
+            "value" : "Werk de machtigingen of taal van Flare bij"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ustawienia i informacje o aplikacji."
+            "value" : "Zaktualizuj uprawnienia lub język Flare"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definições e informações da aplicação."
+            "value" : "Atualize as permissões ou o idioma do Flare"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurações e informações do aplicativo."
+            "value" : "Atualize as permissões ou o idioma do Flare"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Setări și informații despre aplicație."
+            "value" : "Actualizează permisiunile sau limba Flare"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Настройки и информация о приложении."
+            "value" : "Обновите разрешения или язык Flare"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Подешавања и информације о апликацији."
+            "value" : "Ажурирајте дозволе или језик за Flare"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appinställningar och information."
+            "value" : "Uppdatera Flares behörigheter eller språk"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uygulama ayarları ve bilgileri."
+            "value" : "Flare izinlerini veya dilini güncelleyin"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Налаштування та інформація про програму."
+            "value" : "Оновіть дозволи або мову Flare"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cài đặt và thông tin ứng dụng."
+            "value" : "Cập nhật quyền hoặc ngôn ngữ của Flare"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "应用设置和信息。"
+            "value" : "更新 Flare 的权限或语言"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "應用程式設定與資訊。"
+            "value" : "更新 Flare 的權限或語言"
           }
         }
       }

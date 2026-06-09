@@ -208,8 +208,8 @@
     <string name="settings_guest_setting_description">Scegli a quale server si connette la modalità ospite</string>
     <string name="settings_local_history_title">Cronologia locale</string>
     <string name="settings_local_history_description">Cerca post e profili memorizzati nella cache di questo dispositivo</string>
-    <string name="settings_agent_history_title">Agente Chiarore</string>
-    <string name="settings_agent_history_description">Visualizza la cronologia delle chat degli agenti chiarenti locali</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Visualizza la cronologia chat locale di Flare AI</string>
     <string name="agent_history_empty">Nessuna cronologia chat agente ancora.</string>
     <string name="settings_app_logging_title">Log dell\'app</string>
     <string name="settings_app_logging_save">Salva log</string>

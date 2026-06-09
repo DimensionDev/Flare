@@ -381,7 +381,7 @@
     <string name="service_select_instance_input_placeholder">インスタンスURL</string>
     <string name="service_select_next_button">次へ</string>
     <string name="service_select_empty_message">インスタンスが見つかりませんでした</string>
-    <string name="service_select_compatibility_warning">このサーバーは%1$sを使用しています。互換モードで動作するため、一部の機能が正しく動作しない可能性があります。</string>
+    <string name="service_select_compatibility_warning">このサーバーは%1$sを使用しています。Flare は互換モードで動作するため、一部の機能が正しく動作しない可能性があります。</string>
     <string name="login_agreement">ログインすると、%1$sに同意したものとみなされます。</string>
     <string name="eula_privacy_policy">利用規約とプライバシーポリシー</string>
     <string name="home_tab_home_title">ホーム</string>

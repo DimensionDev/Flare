@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -56,9 +57,12 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.Res
+import dev.dimension.flare.*
 import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentLocalizedText
+import dev.dimension.flare.feature.agent.common.AgentLocalizedTextKey
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.status_insight_error
 import dev.dimension.flare.ui.component.FAIcon
@@ -91,6 +95,7 @@ internal fun <Message : Any> AgentChatScaffold(
     inputPlaceholder: String,
     sendContentDescription: String,
     messageText: (Message) -> String,
+    messageLocalizedText: (Message) -> AgentLocalizedText? = { null },
     messageParts: (Message) -> List<AgentMessagePart>,
     messageInputRequest: (Message) -> AgentInputRequest? = { null },
     messageInputRequestSelected: (Message) -> Boolean = { false },
@@ -129,6 +134,7 @@ internal fun <Message : Any> AgentChatScaffold(
             error = error,
             runningTrace = runningTrace,
             messageText = messageText,
+            messageLocalizedText = messageLocalizedText,
             messageParts = messageParts,
             messageInputRequest = messageInputRequest,
             messageInputRequestSelected = messageInputRequestSelected,
@@ -169,6 +175,7 @@ private fun <Message : Any> AgentChatMessageList(
     error: Throwable?,
     runningTrace: String,
     messageText: (Message) -> String,
+    messageLocalizedText: (Message) -> AgentLocalizedText? = { null },
     messageParts: (Message) -> List<AgentMessagePart>,
     messageInputRequest: (Message) -> AgentInputRequest?,
     messageInputRequestSelected: (Message) -> Boolean,
@@ -224,9 +231,11 @@ private fun <Message : Any> AgentChatMessageList(
             }
 
             items(messages.asReversed()) { message ->
+                val localizedText = messageLocalizedText(message)?.resolveAgentLocalizedText()
+                val text = localizedText ?: messageText(message)
                 AgentChatMessageBubble(
-                    text = messageText(message),
-                    parts = messageParts(message),
+                    text = text,
+                    parts = localizedText?.let { listOf(AgentMessagePart.Text(it)) } ?: messageParts(message),
                     inputRequest = messageInputRequest(message),
                     inputRequestSelected = messageInputRequestSelected(message),
                     inputRequestSelectedOptionId = messageInputRequestSelectedOptionId(message),
@@ -350,8 +359,10 @@ private fun AgentMarkdownText(
         textStyleBackProvider = { _, content -> content() },
         contentColorBackProvider = { _, content -> content() },
     ) {
-        BasicRichText(modifier = modifier) {
-            Markdown(content = markdown)
+        SelectionContainer {
+            BasicRichText(modifier = modifier) {
+                Markdown(content = markdown)
+            }
         }
     }
 }
@@ -473,7 +484,7 @@ private fun AgentChatInput(
             }
         },
         placeholder = {
-            Text(text = inputRequest?.freeTextPlaceholder ?: placeholder)
+            Text(text = inputRequest?.localizedFreeTextPlaceholder?.resolveAgentLocalizedText() ?: placeholder)
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
         onKeyboardAction = {
@@ -502,11 +513,9 @@ private fun AgentInputRequestOptionsContent(
             } ?: request.options
         val actionOptions = visibleOptions.filter { it.postPreview == null && it.userPreview == null }
         val confirmOption = actionOptions.firstOrNull { it.id == "confirm" }
-        val cancelOption = actionOptions.firstOrNull { it.id == "cancel" }
-        if (request.postPreview != null && actionOptions.isNotEmpty()) {
-            AgentComposeConfirmationRequest(
+        if (confirmOption != null) {
+            AgentConfirmationRequest(
                 request = request,
-                cancelOption = cancelOption,
                 confirmOption = confirmOption,
                 actionOptions = actionOptions,
                 enabled = enabled,
@@ -515,7 +524,7 @@ private fun AgentInputRequestOptionsContent(
             return@Column
         }
         Text(
-            text = request.prompt,
+            text = request.localizedPrompt.resolveAgentLocalizedText(),
             style = FluentTheme.typography.caption,
             color = FluentTheme.colors.text.text.secondary,
         )
@@ -559,7 +568,7 @@ private fun AgentInputRequestOptionsContent(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(text = option.label)
+                        Text(text = option.localizedLabel.resolveAgentLocalizedText())
                     }
                 }
             }
@@ -568,9 +577,8 @@ private fun AgentInputRequestOptionsContent(
 }
 
 @Composable
-private fun AgentComposeConfirmationRequest(
+private fun AgentConfirmationRequest(
     request: AgentInputRequest,
-    cancelOption: AgentInputRequest.Option?,
     confirmOption: AgentInputRequest.Option?,
     actionOptions: List<AgentInputRequest.Option>,
     enabled: Boolean,
@@ -578,11 +586,12 @@ private fun AgentComposeConfirmationRequest(
 ) {
     Text(
         text =
-            request.prompt
+            request.localizedPrompt
+                .resolveAgentLocalizedText()
                 .lineSequence()
                 .firstOrNull()
                 .orEmpty()
-                .ifBlank { "确认发送这条内容吗？" },
+                .ifBlank { stringResource(Res.string.agent_compose_confirmation_prompt) },
         style = FluentTheme.typography.body,
         color = FluentTheme.colors.text.text.primary,
     )
@@ -592,6 +601,27 @@ private fun AgentComposeConfirmationRequest(
             onClick = null,
         )
     }
+    request.userPreview?.let { user ->
+        AgentUserCard(
+            user = user,
+            onClick = null,
+        )
+    }
+    AgentConfirmationButtons(
+        actionOptions = actionOptions,
+        confirmOption = confirmOption,
+        enabled = enabled,
+        onOptionSelected = onOptionSelected,
+    )
+}
+
+@Composable
+private fun AgentConfirmationButtons(
+    actionOptions: List<AgentInputRequest.Option>,
+    confirmOption: AgentInputRequest.Option?,
+    enabled: Boolean,
+    onOptionSelected: (AgentInputRequest.Option) -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -606,7 +636,7 @@ private fun AgentComposeConfirmationRequest(
                     },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text(text = option.label)
+                    Text(text = option.localizedLabel.resolveAgentLocalizedText())
                 }
             } else {
                 Button(
@@ -617,11 +647,85 @@ private fun AgentComposeConfirmationRequest(
                     },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text(text = option.label)
+                    Text(text = option.localizedLabel.resolveAgentLocalizedText())
                 }
             }
         }
     }
+}
+
+@Composable
+private fun AgentLocalizedText.resolveAgentLocalizedText(): String {
+    fun arg(index: Int): String = args.getOrNull(index).orEmpty()
+    return when (key) {
+        AgentLocalizedTextKey.DynamicText -> arg(0)
+        AgentLocalizedTextKey.Cancel -> stringResource(Res.string.agent_ui_cancel)
+        AgentLocalizedTextKey.ConfirmExecute -> stringResource(Res.string.agent_ui_confirm_execute)
+        AgentLocalizedTextKey.ConfirmSaveSubscription -> stringResource(Res.string.agent_ui_confirm_save_subscription)
+        AgentLocalizedTextKey.CancelSaveSubscription -> stringResource(Res.string.agent_ui_cancel_save_subscription)
+        AgentLocalizedTextKey.ConfirmDeleteSubscription -> stringResource(Res.string.agent_ui_confirm_delete_subscription)
+        AgentLocalizedTextKey.CancelDeleteSubscription -> stringResource(Res.string.agent_ui_cancel_delete_subscription)
+        AgentLocalizedTextKey.ConfirmSendPost -> stringResource(Res.string.agent_ui_confirm_send_post)
+        AgentLocalizedTextKey.CancelSendPost -> stringResource(Res.string.agent_ui_cancel_send_post)
+        AgentLocalizedTextKey.SelectLoadSubscriptionSource -> stringResource(Res.string.agent_ui_select_load_subscription_source)
+        AgentLocalizedTextKey.SelectDeleteSubscriptionSource -> stringResource(Res.string.agent_ui_select_delete_subscription_source)
+        AgentLocalizedTextKey.SelectSaveSubscriptionSource -> stringResource(Res.string.agent_ui_select_save_subscription_source)
+        AgentLocalizedTextKey.SubscriptionSourcePlaceholder -> stringResource(Res.string.agent_ui_subscription_source_placeholder)
+        AgentLocalizedTextKey.SubscriptionSaveSelectionPlaceholder -> stringResource(Res.string.agent_ui_subscription_save_selection_placeholder)
+        AgentLocalizedTextKey.SubscriptionSaveConfirmationPlaceholder -> stringResource(Res.string.agent_ui_subscription_save_confirmation_placeholder)
+        AgentLocalizedTextKey.SubscriptionDeleteConfirmationPlaceholder -> stringResource(Res.string.agent_ui_subscription_delete_confirmation_placeholder)
+        AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage ->
+            stringResource(Res.string.agent_ui_subscription_save_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4), arg(5))
+        AgentLocalizedTextKey.SubscriptionDeleteConfirmationMessage ->
+            stringResource(Res.string.agent_ui_subscription_delete_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4))
+        AgentLocalizedTextKey.SelectComposeTargetPost -> stringResource(Res.string.agent_ui_select_compose_target_post, arg(0))
+        AgentLocalizedTextKey.SelectComposeAccount -> stringResource(Res.string.agent_ui_select_compose_account, arg(0))
+        AgentLocalizedTextKey.SelectComposePlatform -> stringResource(Res.string.agent_ui_select_compose_platform, arg(0))
+        AgentLocalizedTextKey.ComposeTargetPostPlaceholder -> stringResource(Res.string.agent_ui_compose_target_post_placeholder)
+        AgentLocalizedTextKey.ComposeAccountPlaceholder -> stringResource(Res.string.agent_ui_compose_account_placeholder)
+        AgentLocalizedTextKey.ComposePlatformPlaceholder -> stringResource(Res.string.agent_ui_compose_platform_placeholder)
+        AgentLocalizedTextKey.ComposeConfirmationPlaceholder -> stringResource(Res.string.agent_ui_compose_confirmation_placeholder)
+        AgentLocalizedTextKey.ComposeSendConfirmationTitle -> stringResource(Res.string.agent_ui_compose_send_confirmation_title)
+        AgentLocalizedTextKey.ComposeReplyConfirmationTitle -> stringResource(Res.string.agent_ui_compose_reply_confirmation_title)
+        AgentLocalizedTextKey.ComposeQuoteConfirmationTitle -> stringResource(Res.string.agent_ui_compose_quote_confirmation_title)
+        AgentLocalizedTextKey.ComposeConfirmationMessage -> resolveComposeConfirmationText()
+        AgentLocalizedTextKey.SelectPostActionPost -> stringResource(Res.string.agent_ui_select_post_action_post)
+        AgentLocalizedTextKey.SelectPostAction -> stringResource(Res.string.agent_ui_select_post_action)
+        AgentLocalizedTextKey.PostActionTargetPostPlaceholder -> stringResource(Res.string.agent_ui_post_action_target_post_placeholder)
+        AgentLocalizedTextKey.PostActionPlaceholder -> stringResource(Res.string.agent_ui_post_action_placeholder)
+        AgentLocalizedTextKey.PostActionConfirmationPlaceholder -> stringResource(Res.string.agent_ui_post_action_confirmation_placeholder)
+        AgentLocalizedTextKey.PostActionConfirmationMessage ->
+            stringResource(Res.string.agent_ui_post_action_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4))
+        AgentLocalizedTextKey.SelectRelationStateUser -> stringResource(Res.string.agent_ui_select_relation_state_user)
+        AgentLocalizedTextKey.SelectRelationUser -> stringResource(Res.string.agent_ui_select_relation_user)
+        AgentLocalizedTextKey.SelectRelationAction -> stringResource(Res.string.agent_ui_select_relation_action)
+        AgentLocalizedTextKey.SelectRelationAccount -> stringResource(Res.string.agent_ui_select_relation_account)
+        AgentLocalizedTextKey.RelationUserPlaceholder -> stringResource(Res.string.agent_ui_relation_user_placeholder)
+        AgentLocalizedTextKey.RelationActionPlaceholder -> stringResource(Res.string.agent_ui_relation_action_placeholder)
+        AgentLocalizedTextKey.RelationAccountPlaceholder -> stringResource(Res.string.agent_ui_relation_account_placeholder)
+        AgentLocalizedTextKey.RelationConfirmationPlaceholder -> stringResource(Res.string.agent_ui_relation_confirmation_placeholder)
+        AgentLocalizedTextKey.RelationConfirmationMessage ->
+            stringResource(Res.string.agent_ui_relation_confirmation_message, arg(0), arg(1), arg(2), arg(3), arg(4), arg(5))
+        AgentLocalizedTextKey.SelectRecentPostsUser -> stringResource(Res.string.agent_ui_select_recent_posts_user)
+        AgentLocalizedTextKey.SelectMatchedUser -> stringResource(Res.string.agent_ui_select_matched_user)
+        AgentLocalizedTextKey.SelectProfileUser -> stringResource(Res.string.agent_ui_select_profile_user)
+        AgentLocalizedTextKey.SelectFollowingUser -> stringResource(Res.string.agent_ui_select_following_user)
+        AgentLocalizedTextKey.SelectFollowersUser -> stringResource(Res.string.agent_ui_select_followers_user)
+        AgentLocalizedTextKey.SelectProfileTabsUser -> stringResource(Res.string.agent_ui_select_profile_tabs_user)
+        AgentLocalizedTextKey.StatusInsightUserPlaceholder -> stringResource(Res.string.agent_ui_status_insight_user_placeholder)
+    }
+}
+
+@Composable
+private fun AgentLocalizedText.resolveComposeConfirmationText(): String {
+    val title =
+        AgentLocalizedText(
+            key = runCatching { AgentLocalizedTextKey.valueOf(args.getOrNull(0).orEmpty()) }.getOrDefault(AgentLocalizedTextKey.ComposeSendConfirmationTitle),
+        ).resolveAgentLocalizedText()
+    val account = args.getOrNull(1).orEmpty()
+    val platform = args.getOrNull(4).orEmpty()
+    val content = args.getOrNull(12).orEmpty()
+    return stringResource(Res.string.agent_ui_compose_confirmation_message, title, account, platform, content)
 }
 
 @Composable

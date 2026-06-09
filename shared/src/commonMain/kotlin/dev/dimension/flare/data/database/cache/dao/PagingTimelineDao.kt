@@ -65,6 +65,18 @@ internal interface PagingTimelineDao {
     fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "SELECT * FROM DbStatus " +
+            "WHERE DbStatus.text LIKE :query ESCAPE '\\' " +
+            "LIMIT :limit",
+    )
+    suspend fun searchCachedStatuses(
+        query: String,
+        limit: Int,
+    ): List<DbStatusWithReference>
+
+    @Transaction
     @Query(
         "SELECT DbStatus.* FROM DbStatus " +
             "WHERE DbStatus.accountType = :accountType " +
@@ -88,6 +100,19 @@ internal interface PagingTimelineDao {
             "ORDER BY DbPagingTimeline.sortId DESC",
     )
     fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbStatusWithReference>
+
+    @Transaction
+    @Query(
+        "SELECT DbStatus.* FROM DbStatus " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
+            "ORDER BY DbPagingTimeline.sortId DESC " +
+            "LIMIT :limit",
+    )
+    suspend fun getStatusHistoryPage(
+        pagingKey: String,
+        limit: Int,
+    ): List<DbStatusWithReference>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)

@@ -208,8 +208,8 @@
     <string name="settings_guest_setting_description">Vælg hvilken server gæstetilstand opretter forbindelse til</string>
     <string name="settings_local_history_title">Lokal historik</string>
     <string name="settings_local_history_description">Søg i opslag og profiler, der er cachet på denne enhed</string>
-    <string name="settings_agent_history_title">Flare Agent</string>
-    <string name="settings_agent_history_description">Se lokal Flare Agent chat historik</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Se lokal Flare AI chat historik</string>
     <string name="agent_history_empty">Ingen agent chat historik endnu.</string>
     <string name="settings_app_logging_title">App-logs</string>
     <string name="settings_app_logging_save">Gem logs</string>

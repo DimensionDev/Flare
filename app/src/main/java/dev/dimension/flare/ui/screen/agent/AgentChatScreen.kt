@@ -60,6 +60,7 @@ internal fun AgentChatScreen(
         inputPlaceholder = stringResource(id = R.string.agent_chat_input_placeholder),
         sendContentDescription = stringResource(id = R.string.agent_chat_send),
         messageText = GenericChatPresenter.Message::text,
+        messageLocalizedText = GenericChatPresenter.Message::localizedText,
         messageParts = GenericChatPresenter.Message::parts,
         messageInputRequest = GenericChatPresenter.Message::inputRequest,
         messageInputRequestSelected = GenericChatPresenter.Message::inputRequestSelected,

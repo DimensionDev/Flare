@@ -86,7 +86,7 @@
     <string name="status_insight_trace_agent_closing">إغلاق التحليل…</string>
     <string name="ask_ai">اسأل AI</string>
     <string name="agent_chat_title">دردشة AI</string>
-    <string name="agent_history_title">الوكيل المتلاعب</string>
+    <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">لا يوجد وكيل سجل الدردشة حتى الآن.</string>
     <string name="agent_chat_input_placeholder">اسأل عن أي شيء…</string>
     <string name="agent_chat_send">إرسال</string>

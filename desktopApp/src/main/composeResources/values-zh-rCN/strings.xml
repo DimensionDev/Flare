@@ -199,9 +199,9 @@
     <string name="settings_guest_setting_description">选择访客模式连接的服务器</string>
     <string name="settings_local_history_title">本地历史</string>
     <string name="settings_local_history_description">搜索此设备上缓存的动态和个人资料</string>
-    <string name="settings_agent_history_title">闪光代理</string>
-    <string name="settings_agent_history_description">查看本地闪光代理聊天记录</string>
-    <string name="agent_history_empty">暂无代理聊天历史记录。</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">查看本地 Flare AI 聊天记录</string>
+    <string name="agent_history_empty">暂无 AI 聊天历史记录。</string>
     <string name="settings_app_logging_title">应用日志</string>
     <string name="settings_app_logging_save">保存日志</string>
     <string name="settings_app_logging_clear">清除日志</string>

@@ -208,8 +208,8 @@
     <string name="settings_guest_setting_description">Välj vilken server gästläget ansluter till</string>
     <string name="settings_local_history_title">Lokal historik</string>
     <string name="settings_local_history_description">Sök efter inlägg och profiler cachade på denna enhet</string>
-    <string name="settings_agent_history_title">Flare Agent</string>
-    <string name="settings_agent_history_description">Visa lokal Flare Agent chatthistorik</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Visa lokal Flare AI chatthistorik</string>
     <string name="agent_history_empty">Ingen agent chatthistorik än.</string>
     <string name="settings_app_logging_title">Apploggar</string>
     <string name="settings_app_logging_save">Spara loggar</string>

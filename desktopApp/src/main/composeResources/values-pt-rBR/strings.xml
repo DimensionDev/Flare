@@ -208,8 +208,8 @@
     <string name="settings_guest_setting_description">Escolha qual servidor o modo convidado se conecta</string>
     <string name="settings_local_history_title">Histórico Local</string>
     <string name="settings_local_history_description">Buscar posts e perfis em cache neste dispositivo</string>
-    <string name="settings_agent_history_title">Agente Sinalizador</string>
-    <string name="settings_agent_history_description">Ver o histórico local do Flare Agent</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Ver o histórico local do Flare AI</string>
     <string name="agent_history_empty">Nenhum histórico de bate-papo dos agentes ainda.</string>
     <string name="settings_app_logging_title">Logs do app</string>
     <string name="settings_app_logging_save">Salvar logs</string>

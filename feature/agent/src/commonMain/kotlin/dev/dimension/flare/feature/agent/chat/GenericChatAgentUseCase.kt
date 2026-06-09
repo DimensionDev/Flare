@@ -10,7 +10,7 @@ import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
 import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
-import dev.dimension.flare.feature.agent.common.cleanAgentVisibleText
+import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.SendChannel
@@ -67,7 +67,7 @@ internal class GenericChatAgentUseCase(
                                 ),
                             temperature = 0.5,
                             maxIterations = MAX_AGENT_ITERATIONS,
-                            finishAfterToolResults = true,
+                            finishAfterToolResults = false,
                             chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
                         ),
                     conversationId = conversationId,
@@ -84,15 +84,19 @@ internal class GenericChatAgentUseCase(
                 throw throwable
             }
 
+        val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
         chatHistoryProvider.storeAssistantAttachments(conversationId, result.attachments)
-        result.inputRequest?.let { inputRequest ->
+        visibleResult.inputRequest?.let { inputRequest ->
             chatHistoryProvider.storeAssistantInputRequest(conversationId, inputRequest)
+        }
+        if (!visibleResult.hasVisibleContent(result.attachments)) {
+            return
         }
         send(
             AgentConversationEvent.Result(
-                text = result.text.cleanAgentVisibleText(),
+                text = visibleResult.text,
                 attachments = result.attachments,
-                inputRequest = result.inputRequest,
+                inputRequest = visibleResult.inputRequest,
             ),
         )
     }
@@ -137,6 +141,7 @@ internal class GenericChatAgentUseCase(
             - Do not merely say "I found a post/user" when a relevant attachmentRef is available; show the card and add concise context around it.
             - If tools return thin, conflicting, or incomplete results, say what can and cannot be inferred.
             - Keep answers grounded. Distinguish facts from inference when uncertainty matters.
+            - When the user's request needs confirmation for a side effect and an available tool supports confirmed=false, call that tool with confirmed=false so Flare can show a confirmation button. Do not only write prose asking the user to reply with confirmation.
             - Do not moralize, lecture, or add filler.
             """
     }

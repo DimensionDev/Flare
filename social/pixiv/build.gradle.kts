@@ -17,6 +17,7 @@ kotlin {
             FlarePlatform.ANDROID,
             FlarePlatform.JVM,
             FlarePlatform.IOS,
+            FlarePlatform.MACOS,
         )
         ksp(libs.ktorfit.ksp)
     }

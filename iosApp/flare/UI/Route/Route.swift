@@ -47,7 +47,13 @@ enum Route: Hashable, Identifiable {
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
         case .profileUser(let accountType, let userKey):
-            ProfileScreen(accountType: accountType, userKey: userKey, onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) }, onFansClick: { key in onNavigate(.userFans(accountType, key)) })
+            ProfileScreen(
+                accountType: accountType,
+                userKey: userKey,
+                onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) },
+                onFansClick: { key in onNavigate(.userFans(accountType, key)) },
+                onProfileInsight: { key in onNavigate(.profileInsight(accountType, key)) }
+            )
         case .settings:
             SettingsScreen()
         case .notification:
@@ -75,7 +81,14 @@ enum Route: Hashable, Identifiable {
         case .composeVVOReplyComment(let accountType, let statueKey, let rootId):
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
         case .profileUserNameWithHost(let accountType, let userName, let host):
-            ProfileWithUserNameAndHostScreen(userName: userName, host: host, accountType: accountType, onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) }, onFansClick: { key in onNavigate(.userFans(accountType, key)) })
+            ProfileWithUserNameAndHostScreen(
+                userName: userName,
+                host: host,
+                accountType: accountType,
+                onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) },
+                onFansClick: { key in onNavigate(.userFans(accountType, key)) },
+                onProfileInsight: { key in onNavigate(.profileInsight(accountType, key)) }
+            )
         case .appearanceTheme:
             AppearanceThemeScreen()
         case .appearanceLayout:
@@ -89,7 +102,9 @@ enum Route: Hashable, Identifiable {
         case .about:
             AboutScreen()
         case .localHostory:
-            LocalHistoryScreen()
+            LocalHistoryScreen { query, target in
+                onNavigate(.localHistoryAgent(Self.newLocalHistoryAgentConversationId(), query, target))
+            }
         case .storage:
             StorageScreen()
         case .localFilter:
@@ -100,6 +115,8 @@ enum Route: Hashable, Identifiable {
             AgentChatHistoryScreen()
         case .agentChat(let conversationId, let initialMessage):
             AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage, onNavigate: onNavigate)
+        case .localHistoryAgent(let conversationId, let query, let target):
+            LocalHistoryAgentScreen(conversationId: conversationId, query: query, target: target, onNavigate: onNavigate)
         case .translationConfig:
             TranslationConfigScreen()
         case .tabSettings:
@@ -122,6 +139,8 @@ enum Route: Hashable, Identifiable {
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
         case .statusInsight(let accountType, let statusKey):
             StatusInsightSheet(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
+        case .profileInsight(let accountType, let userKey):
+            ProfileInsightSheet(accountType: accountType, userKey: userKey, onNavigate: onNavigate)
         case .userFans(let account, let userKey):
             UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
         case .userFollowing(let account, let userKey):
@@ -176,6 +195,7 @@ enum Route: Hashable, Identifiable {
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
+    case profileInsight(AccountType, MicroBlogKey)
     case rssDetail(String, String?, String?)
     case twitterArticle(AccountType, String, String?)
     case search(AccountType, String)
@@ -199,6 +219,7 @@ enum Route: Hashable, Identifiable {
     case aiConfig
     case agentHistory
     case agentChat(String, String?)
+    case localHistoryAgent(String, String?, String)
     case translationConfig
     case storage
     case appearanceTheme
@@ -234,6 +255,10 @@ enum Route: Hashable, Identifiable {
 
     static func newGenericChatConversationId() -> String {
         "generic-chat:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
+
+    static func newLocalHistoryAgentConversationId() -> String {
+        "local-history:\(Int64(Date().timeIntervalSince1970 * 1000))"
     }
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {

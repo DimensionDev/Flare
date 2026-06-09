@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
+import dev.dimension.flare.Res
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
@@ -42,9 +43,14 @@ import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Robot
+import dev.dimension.flare.profile_insight_title
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
@@ -73,10 +79,12 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ProfileWithUserNameAndHostDeeplinkRoute(
@@ -87,6 +95,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onRawMediaClick: (media: UiMedia.Image) -> Unit,
+    onProfileInsightClick: (userKey: MicroBlogKey) -> Unit,
     onBack: () -> Unit = {},
 ) {
     val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
@@ -104,6 +113,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                 onFansListClick = onFansListClick,
                 onMediaClick = onMediaClick,
                 onRawMediaClick = onRawMediaClick,
+                onProfileInsightClick = onProfileInsightClick,
                 userKey = it.key,
             )
         }.onLoading {
@@ -176,6 +186,7 @@ internal fun ProfileScreen(
     onFansListClick: (userKey: MicroBlogKey) -> Unit = {},
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit = { _, _, _ -> },
     onRawMediaClick: (media: UiMedia.Image) -> Unit = {},
+    onProfileInsightClick: (userKey: MicroBlogKey) -> Unit = {},
 ) {
     val state by producePresenter(
         key = "profile_${accountType}_$userKey",
@@ -207,6 +218,10 @@ internal fun ProfileScreen(
                             ProfileHeader(
                                 state = state.state,
                                 menu = {
+                                    ProfileInsightAction(
+                                        profileState = state.state,
+                                        onClick = onProfileInsightClick,
+                                    )
                                     ProfileMenu(
                                         profileState = state.state,
                                         modifier = Modifier.padding(horizontal = 8.dp),
@@ -258,6 +273,10 @@ internal fun ProfileScreen(
                                 ProfileHeader(
                                     state = state.state,
                                     menu = {
+                                        ProfileInsightAction(
+                                            profileState = state.state,
+                                            onClick = onProfileInsightClick,
+                                        )
                                         ProfileMenu(
                                             profileState = state.state,
                                             modifier = Modifier.padding(horizontal = 8.dp),
@@ -404,6 +423,31 @@ internal fun ProfileScreen(
                             .fillMaxWidth(),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ProfileInsightAction(
+    profileState: ProfileState,
+    onClick: (MicroBlogKey) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (!LocalTimelineAppearance.current.aiConfig.agent) {
+        return
+    }
+    profileState.userState.onSuccess { profile ->
+        SubtleButton(
+            onClick = {
+                onClick(profile.key)
+            },
+            iconOnly = true,
+            modifier = modifier,
+        ) {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Robot,
+                contentDescription = stringResource(Res.string.profile_insight_title),
+            )
         }
     }
 }

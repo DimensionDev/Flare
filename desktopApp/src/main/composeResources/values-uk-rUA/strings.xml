@@ -200,8 +200,8 @@
     <string name="settings_guest_setting_description">Виберіть сервер, до якого підключається гостьовий режим</string>
     <string name="settings_local_history_title">Локальна історія</string>
     <string name="settings_local_history_description">Пошук дописів та профілів, кешованих на цьому пристрої</string>
-    <string name="settings_agent_history_title">Flare Agent</string>
-    <string name="settings_agent_history_description">Переглянути локальну історію чату Flare Agent</string>
+    <string name="settings_agent_history_title">Flare AI</string>
+    <string name="settings_agent_history_description">Переглянути локальну історію чату Flare AI</string>
     <string name="agent_history_empty">Ще немає історії чатів.</string>
     <string name="settings_app_logging_title">Журнали додатка</string>
     <string name="settings_app_logging_save">Зберегти журнали</string>

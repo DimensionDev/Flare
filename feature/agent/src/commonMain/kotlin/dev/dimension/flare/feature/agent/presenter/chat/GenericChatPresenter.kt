@@ -13,6 +13,7 @@ import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
 import dev.dimension.flare.feature.agent.common.AgentConversationAttachmentOwner
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentLocalizedText
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.parseAgentMessageParts
@@ -91,7 +92,9 @@ public class GenericChatPresenter(
                         conversationId = currentConversationId,
                     )
                 },
-                userMessage = Message::User,
+                userMessage = { text, localizedText ->
+                    Message.User(text = text, localizedText = localizedText)
+                },
                 assistantMessage = { text, attachments, inputRequest ->
                     Message.Assistant(
                         text = text,
@@ -153,6 +156,8 @@ public class GenericChatPresenter(
     @Immutable
     public sealed interface Message {
         public val text: String
+        public val localizedText: AgentLocalizedText?
+            get() = null
         public val parts: ImmutableList<AgentMessagePart>
         public val inputRequest: AgentInputRequest?
             get() = null
@@ -164,6 +169,7 @@ public class GenericChatPresenter(
         @Immutable
         public data class User(
             override val text: String,
+            override val localizedText: AgentLocalizedText? = null,
             override val parts: ImmutableList<AgentMessagePart> = text.toAgentTextParts(),
         ) : Message
 

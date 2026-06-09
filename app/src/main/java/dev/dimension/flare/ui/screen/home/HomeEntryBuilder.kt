@@ -13,6 +13,7 @@ import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
 import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.agent.AgentChatScreen
+import dev.dimension.flare.ui.screen.agent.LocalHistoryAgentScreen
 import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
@@ -77,6 +78,15 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         AgentChatScreen(
             conversationId = it.conversationId,
             initialMessage = it.initialMessage,
+            onBack = onBack,
+            navigate = navigate,
+        )
+    }
+    entry<Route.LocalHistoryAgent> {
+        LocalHistoryAgentScreen(
+            conversationId = it.conversationId,
+            query = it.query,
+            target = it.target,
             onBack = onBack,
             navigate = navigate,
         )

@@ -364,6 +364,7 @@ internal fun AgentChatMessageBubble(
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
 ) {
+    val previewOnlyUserMessage = isUser && parts.isPreviewOnly()
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement =
@@ -373,20 +374,9 @@ internal fun AgentChatMessageBubble(
                 Arrangement.Start
             },
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(0.88f),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        if (isUser) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                ),
-        ) {
+        if (previewOnlyUserMessage) {
             Column(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.fillMaxWidth(0.88f),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 AgentChatMessageParts(
@@ -396,6 +386,32 @@ internal fun AgentChatMessageBubble(
                     onUserClick = onUserClick,
                     onInputRequestOptionSelected = onInputRequestOptionSelected,
                 )
+            }
+        } else {
+            Card(
+                modifier = Modifier.fillMaxWidth(0.88f),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor =
+                            if (isUser) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                    ),
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    AgentChatMessageParts(
+                        parts = parts,
+                        isUser = isUser,
+                        onPostClick = onPostClick,
+                        onUserClick = onUserClick,
+                        onInputRequestOptionSelected = onInputRequestOptionSelected,
+                    )
+                }
             }
         }
     }
@@ -688,6 +704,12 @@ private fun AgentRequestActionButtons(
 private fun AgentOptionButtonContent(option: AgentInputRequest.Option) {
     Text(text = option.label)
 }
+
+private fun List<AgentMessagePart>.isPreviewOnly(): Boolean =
+    isNotEmpty() &&
+        all { part ->
+            part is AgentMessagePart.PostCard || part is AgentMessagePart.UserCard
+        }
 
 @Composable
 internal fun AgentChatError(

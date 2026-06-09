@@ -231,32 +231,48 @@ private fun AgentChatMessageBubble(
     onUserClick: (UiProfile) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val previewOnlyUserMessage = isUser && parts.isPreviewOnly()
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth(0.82f)
-                    .background(
-                        color =
-                            if (isUser) {
-                                FluentTheme.colors.fillAccent.default
-                            } else {
-                                FluentTheme.colors.background.layer.default
-                            },
-                        shape = RoundedCornerShape(8.dp),
-                    ).padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            AgentChatMessageParts(
-                parts = parts,
-                isUser = isUser,
-                onPostClick = onPostClick,
-                onUserClick = onUserClick,
-                onInputRequestOptionSelected = onInputRequestOptionSelected,
-            )
+        if (previewOnlyUserMessage) {
+            Column(
+                modifier = Modifier.fillMaxWidth(0.82f),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                AgentChatMessageParts(
+                    parts = parts,
+                    isUser = isUser,
+                    onPostClick = onPostClick,
+                    onUserClick = onUserClick,
+                    onInputRequestOptionSelected = onInputRequestOptionSelected,
+                )
+            }
+        } else {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.82f)
+                        .background(
+                            color =
+                                if (isUser) {
+                                    FluentTheme.colors.fillAccent.default
+                                } else {
+                                    FluentTheme.colors.background.layer.default
+                                },
+                            shape = RoundedCornerShape(8.dp),
+                        ).padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                AgentChatMessageParts(
+                    parts = parts,
+                    isUser = isUser,
+                    onPostClick = onPostClick,
+                    onUserClick = onUserClick,
+                    onInputRequestOptionSelected = onInputRequestOptionSelected,
+                )
+            }
         }
     }
 }
@@ -575,6 +591,12 @@ private fun AgentRequestActionButtons(
 private fun AgentOptionButtonContent(option: AgentInputRequest.Option) {
     Text(text = option.label)
 }
+
+private fun List<AgentMessagePart>.isPreviewOnly(): Boolean =
+    isNotEmpty() &&
+        all { part ->
+            part is AgentMessagePart.PostCard || part is AgentMessagePart.UserCard
+        }
 
 @Composable
 private fun AgentChatCurrentTrace(trace: String) {

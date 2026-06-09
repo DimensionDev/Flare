@@ -708,7 +708,13 @@ private struct AgentChatMessageBubble: View {
                 Spacer(minLength: 44)
             }
 
-            messageContent
+            if isPreviewOnlyUserMessage {
+                messageContent
+                    .textSelection(.enabled)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                messageContent
                     .textSelection(.enabled)
                     .padding(12)
                     .foregroundStyle(isUser ? .white : .primary)
@@ -721,6 +727,7 @@ private struct AgentChatMessageBubble: View {
                         RoundedRectangle(cornerRadius: 14)
                             .stroke(isUser ? Color.clear : Color(.separator).opacity(0.35), lineWidth: 1)
                     )
+            }
 
             if !isUser {
                 Spacer(minLength: 44)
@@ -779,6 +786,12 @@ private struct AgentChatMessageBubble: View {
             Text(verbatim: value)
         }
     }
+
+    private var isPreviewOnlyUserMessage: Bool {
+        isUser && !parts.isEmpty && parts.allSatisfy { part in
+            part is AgentMessagePartPostCard || part is AgentMessagePartUserCard
+        }
+    }
 }
 
 private struct AgentUserPreview: View {
@@ -792,6 +805,7 @@ private struct AgentUserPreview: View {
             onClicked: onClick
         )
         .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)

@@ -39,8 +39,8 @@ internal fun AgentChatScreen(
         ).invoke()
     }
     val fallbackTitle = stringResource(id = R.string.agent_chat_title)
-    val title = state.title?.takeIf { it.isNotBlank() } ?: fallbackTitle
-    val currentTrace = state.currentTrace
+    val title = state.room.title.takeIf { it.isNotBlank() } ?: fallbackTitle
+    val currentTrace = state.room.currentTrace
     val runningTrace =
         if (currentTrace != null) {
             currentTrace.label()
@@ -52,20 +52,12 @@ internal fun AgentChatScreen(
     AgentChatScaffold(
         messages = state.messages,
         input = state.input,
-        isRunning = state.isRunning,
+        isRunning = state.room.isRunning,
         canSend = state.canSend,
-        error = state.error,
+        errorMessage = state.room.errorMessage,
         runningTrace = runningTrace,
-        inputRequest = state.inputRequest,
         inputPlaceholder = stringResource(id = R.string.agent_chat_input_placeholder),
         sendContentDescription = stringResource(id = R.string.agent_chat_send),
-        messageText = GenericChatPresenter.Message::text,
-        messageLocalizedText = GenericChatPresenter.Message::localizedText,
-        messageParts = GenericChatPresenter.Message::parts,
-        messageInputRequest = GenericChatPresenter.Message::inputRequest,
-        messageInputRequestSelected = GenericChatPresenter.Message::inputRequestSelected,
-        messageInputRequestSelectedOptionId = GenericChatPresenter.Message::inputRequestSelectedOptionId,
-        isUserMessage = { it is GenericChatPresenter.Message.User },
         onInputChange = state::setInput,
         onSend = state::sendMessage,
         onInputRequestOptionSelected = state::selectInputRequestOption,

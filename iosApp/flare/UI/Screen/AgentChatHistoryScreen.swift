@@ -6,7 +6,7 @@ struct AgentChatHistoryScreen: View {
 
     var body: some View {
         Group {
-            if presenter.state.conversations.isEmpty {
+            if presenter.state.rooms.isEmpty {
                 ContentUnavailableView {
                     Label {
                         Text("agent_history_empty")
@@ -16,14 +16,14 @@ struct AgentChatHistoryScreen: View {
                 }
             } else {
                 List {
-                    ForEach(presenter.state.conversations, id: \.id) { conversation in
-                        NavigationLink(value: Route.agentChat(conversation.id, nil)) {
+                    ForEach(presenter.state.rooms, id: \.id) { room in
+                        NavigationLink(value: Route.agentChat(room.id, nil)) {
                             VStack(alignment: .leading, spacing: 6) {
-                                Text(verbatim: conversation.title)
+                                Text(verbatim: room.title)
                                     .font(.headline)
                                     .lineLimit(2)
 
-                                DateTimeText(data: conversation.updatedAt)
+                                Text(Date(timeIntervalSince1970: TimeInterval(room.updatedAt) / 1000), style: .relative)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

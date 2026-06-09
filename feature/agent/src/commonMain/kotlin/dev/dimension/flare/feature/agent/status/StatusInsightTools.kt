@@ -7,18 +7,17 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
-import dev.dimension.flare.feature.agent.common.AgentInputRequest
-import dev.dimension.flare.feature.agent.common.AgentLocalizedTextKey
 import dev.dimension.flare.feature.agent.common.AgentSearchTarget
 import dev.dimension.flare.feature.agent.common.AgentToolSession
-import dev.dimension.flare.feature.agent.common.AgentUiStrings
 import dev.dimension.flare.feature.agent.common.AgentUserTarget
 import dev.dimension.flare.feature.agent.common.agentAttachmentMarker
 import dev.dimension.flare.feature.agent.common.agentAttachmentRef
 import dev.dimension.flare.feature.agent.common.filterByPlatformNames
 import dev.dimension.flare.feature.agent.common.filterPlatformTypesByPlatformNames
 import dev.dimension.flare.feature.agent.common.filterUserTargetsByPlatformNames
+import dev.dimension.flare.feature.agent.common.setUserSelectionRequest
+import dev.dimension.flare.feature.agent.common.userSelectionRequestToolText
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiMedia
@@ -57,7 +56,7 @@ internal class LoadStatusContextTool(
                     request = PagingRequest.Refresh,
                 ).data
                 .filterIsInstance<UiTimelineV2.Post>()
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Status context",
             emptyMessage = "No additional context posts were returned.",
@@ -104,7 +103,7 @@ internal class LoadPostContextTool(
         val statusKey = microBlogKeyOrNull(id = args.statusId, host = args.statusHost) ?: return "Status id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { context(statusKey) }
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Post context",
             emptyMessage = "No context posts were returned.",
@@ -147,7 +146,7 @@ internal class LoadHomeTimelineTool(
     override suspend fun execute(args: Args): String {
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { homeTimeline() }
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Home timeline posts",
             emptyMessage = "No home timeline posts were returned.",
@@ -197,12 +196,11 @@ internal class LoadUserTimelineTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    valuePrefix = AgentUiStrings.StatusInsight.RecentPostsUserPrefix,
-                    promptKey = AgentLocalizedTextKey.SelectRecentPostsUser,
+                    requestType = "user_timeline",
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { userTimeline(userKey = userKey, mediaOnly = args.mediaOnly) }
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "User timeline posts",
             emptyMessage = "No user timeline posts were returned.",
@@ -246,7 +244,7 @@ internal class LoadDiscoverStatusesTool(
     override suspend fun execute(args: Args): String {
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { discoverStatuses() }
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Discover posts",
             emptyMessage = "No discover posts were returned.",
@@ -307,7 +305,7 @@ internal class SearchPostsTool(
             }
         }
         val postResults = targets.searchPosts(query)
-        session.attachmentStore.addPosts(postResults)
+        session.messagePartStore.addPosts(postResults)
         return buildString {
             appendLine("Search query: \"$query\"")
             appendLine("Search target: Posts")
@@ -371,27 +369,40 @@ internal class SearchUsersTool(
             }
         }
         val userResults = targets.searchUsers(query)
-        session.attachmentStore.addUsers(userResults)
-        if (userResults.size > 1) {
-            session.setUserSelectionRequest(
-                users = userResults,
-                valuePrefix = AgentUiStrings.StatusInsight.MatchedUserPrefix,
-                promptKey = AgentLocalizedTextKey.SelectMatchedUser,
-            )
-        }
+        session.messagePartStore.addUsers(userResults)
+        val selectionRequest =
+            userResults
+                .takeIf { it.size > 1 }
+                ?.let { users ->
+                    session.setUserSelectionRequest(
+                        users = users,
+                        requestType = "user_search_match",
+                    )
+                }
         return buildString {
             appendLine("Search query: \"$query\"")
             appendLine("Search target: Users")
             appendLine("Platforms searched: ${targets.joinToString { it.platformType?.name ?: "Unknown" }}")
             appendLine(DIRECT_MICROBLOG_DATA_SOURCE_RESULT_NOTE)
             appendLine()
-            append(
-                userResults.toInsightUserToolListText(
-                    title = "User search results",
-                    emptyMessage = "No matching users were returned.",
-                    maxItems = USER_SEARCH_PAGE_SIZE,
-                ),
-            )
+            if (selectionRequest != null) {
+                append(
+                    userSelectionRequestToolText(
+                        event = "user_search_selection_required",
+                        requestType = "user_search_match",
+                        request = selectionRequest,
+                        candidates = userResults,
+                    ),
+                )
+            } else {
+                append(
+                    userResults.toInsightUserToolListText(
+                        title = "User search results",
+                        emptyMessage = "No matching users were returned.",
+                        maxItems = USER_SEARCH_PAGE_SIZE,
+                    ),
+                )
+            }
         }.take(MAX_TOOL_RESULT_LENGTH)
     }
 
@@ -429,12 +440,11 @@ internal class LoadUserProfileTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    valuePrefix = AgentUiStrings.StatusInsight.ProfileUserPrefix,
-                    promptKey = AgentLocalizedTextKey.SelectProfileUser,
+                    requestType = "user_profile",
                 ) ?: "User id is blank."
         val targets = session.userTargets.resolveUserTargetsOrNull(args.platforms) ?: return noUserTargetsMessage(args.platforms)
         val users = targets.loadUserProfiles(userKey)
-        session.attachmentStore.addUsers(users)
+        session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "User profiles",
             emptyMessage = "No user profile was returned for $userKey.",
@@ -476,7 +486,7 @@ internal class LoadDiscoverUsersTool(
     override suspend fun execute(args: Args): String {
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { discoverUsers() }
-        session.attachmentStore.addUsers(users)
+        session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "Discover users",
             emptyMessage = "No discover users were returned.",
@@ -564,12 +574,11 @@ internal class LoadFollowingTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    valuePrefix = AgentUiStrings.StatusInsight.FollowingUserPrefix,
-                    promptKey = AgentLocalizedTextKey.SelectFollowingUser,
+                    requestType = "following",
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { following(userKey) }
-        session.attachmentStore.addUsers(users)
+        session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "Following users",
             emptyMessage = "No following users were returned.",
@@ -617,12 +626,11 @@ internal class LoadFollowersTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    valuePrefix = AgentUiStrings.StatusInsight.FollowersUserPrefix,
-                    promptKey = AgentLocalizedTextKey.SelectFollowersUser,
+                    requestType = "followers",
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { fans(userKey) }
-        session.attachmentStore.addUsers(users)
+        session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "Followers",
             emptyMessage = "No followers were returned.",
@@ -675,8 +683,7 @@ internal class LoadProfileTabsTool(
             microBlogKeyOrNull(id = args.userId, host = args.userHost)
                 ?: return session.requestUserSelectionFromAttachments(
                     platforms = args.platforms,
-                    valuePrefix = AgentUiStrings.StatusInsight.ProfileTabsUserPrefix,
-                    promptKey = AgentLocalizedTextKey.SelectProfileTabsUser,
+                    requestType = "profile_tabs",
                 ) ?: "User id is blank."
         val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
         val tabResults = targets.loadProfileTabs(userKey)
@@ -711,7 +718,7 @@ internal class LoadProfileTabsTool(
             return "No matching profile tab was found for user key $userKey."
         }
         val posts = selectedTabs.loadProfileTabPosts()
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Profile tab posts",
             emptyMessage = "No posts were returned from the selected profile tab.",
@@ -774,51 +781,27 @@ private fun List<AgentUserTarget>.userPlatformNames(): String = joinToString { i
 
 private suspend fun AgentToolSession.requestUserSelectionFromAttachments(
     platforms: List<String>,
-    valuePrefix: String,
-    promptKey: AgentLocalizedTextKey,
+    requestType: String,
 ): String? {
     val candidates =
-        attachmentStore
+        messagePartStore
             .snapshot()
-            .filterIsInstance<AgentConversationAttachment.User>()
+            .filterIsInstance<AgentMessagePart.UserCard>()
             .map { it.user }
             .filterByPlatformNames(platforms)
             .distinctBy { it.platformType to it.key }
             .takeIf { it.isNotEmpty() }
             ?: return null
-    setUserSelectionRequest(
-        users = candidates,
-        valuePrefix = valuePrefix,
-        promptKey = promptKey,
-    )
-    return AgentUiStrings.text(promptKey).toAgentProtocolText()
-}
-
-private suspend fun AgentToolSession.setUserSelectionRequest(
-    users: List<UiProfile>,
-    valuePrefix: String,
-    promptKey: AgentLocalizedTextKey,
-) {
-    val candidates =
-        users
-            .distinctBy { it.platformType to it.key }
-            .take(USER_SELECTION_OPTION_LIMIT)
-    inputRequestStore.set(
-        AgentInputRequest(
-            requestId = "user-selection:${candidates.joinToString { it.agentAttachmentRef() }}",
-            localizedPrompt = AgentUiStrings.text(promptKey),
-            options =
-                candidates.map { user ->
-                    AgentInputRequest.Option(
-                        id = "user:${user.agentAttachmentRef()}",
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, user.userSelectionLabel()),
-                        value = user.userSelectionValue(valuePrefix),
-                        userPreview = user,
-                    )
-                },
-            allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.StatusInsightUserPlaceholder),
-        ),
+    val request =
+        setUserSelectionRequest(
+            users = candidates,
+            requestType = requestType,
+        )
+    return userSelectionRequestToolText(
+        event = "user_selection_required",
+        requestType = requestType,
+        request = request,
+        candidates = candidates,
     )
 }
 
@@ -830,27 +813,6 @@ private fun List<UiProfile>.filterByPlatformNames(platforms: List<String>): List
         else -> filter { it.platformType in platformTypes }
     }
 }
-
-private fun UiProfile.userSelectionLabel(): String =
-    buildString {
-        append(name.raw.ifBlank { handle.raw.ifBlank { key.id } })
-        val handleText = handle.raw.takeIf { it.isNotBlank() && it != name.raw }
-        if (handleText != null) {
-            append(" ")
-            append(handleText)
-        }
-    }
-
-private fun UiProfile.userSelectionValue(valuePrefix: String): String =
-    buildString {
-        appendLine(valuePrefix)
-        appendLine("userRef=${agentAttachmentMarker()}")
-        appendLine("userId=${key.id}")
-        appendLine("userHost=${key.host}")
-        appendLine("platform=${platformType.name}")
-        appendLine("displayName=${name.raw}")
-        appendLine("handle=${handle.raw}")
-    }
 
 private suspend fun List<AgentSearchTarget>.loadPosts(
     loaderFactory: MicroblogDataSource.() -> RemoteLoader<UiTimelineV2>,
@@ -1156,7 +1118,6 @@ private const val STATUS_SEARCH_PAGE_SIZE = 200
 private const val POST_TOOL_PAGE_SIZE = 200
 private const val USER_SEARCH_PAGE_SIZE = 200
 private const val USER_TOOL_PAGE_SIZE = 200
-private const val USER_SELECTION_OPTION_LIMIT = 8
 private const val HASHTAG_TOOL_PAGE_SIZE = 200
 private const val MAX_TOOL_RESULT_LENGTH = 80_000
 private const val MAX_TOOL_POST_TEXT_LENGTH = 800

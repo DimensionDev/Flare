@@ -1,11 +1,15 @@
 package dev.dimension.flare.feature.agent.common
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 public data class AgentTrace(
     public val phase: AgentPhase,
     public val detail: String? = null,
     public val toolKey: AgentToolKey? = null,
 )
 
+@Serializable
 public enum class AgentPhase {
     LoadingPostContext,
     PostContextLoaded,
@@ -35,6 +39,7 @@ public enum class AgentPhase {
     AgentClosing,
 }
 
+@Serializable
 public enum class AgentToolKey {
     LoadStatusContextStarted,
     LoadStatusContextCompleted,

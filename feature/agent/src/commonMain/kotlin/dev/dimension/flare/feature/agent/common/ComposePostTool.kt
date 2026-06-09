@@ -5,6 +5,7 @@ import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.serialization.typeToken
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -120,7 +121,13 @@ internal class ComposePostTool(
                     userPreview = userPreview,
                 )
             session.inputRequestStore.set(inputRequest)
-            return inputRequest.localizedPrompt.toAgentProtocolText()
+            return target.confirmationMessage(
+                data = data,
+                action = action,
+                reference = reference,
+                userPreview = userPreview,
+                inputRequest = inputRequest,
+            )
         }
 
         target.dataSource.compose(data = data) {
@@ -205,36 +212,45 @@ internal class ComposePostTool(
             return "${action.label} requires a target post. Open a post insight session, " +
                 "use search_posts/load_post_context first, or provide targetStatusId and targetStatusHost."
         }
-        val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectComposeTargetPost, action.uiVerb)
-        session.inputRequestStore.set(
-            AgentInputRequest(
-                requestId = "compose-target:${action.name}:${content.hashCode()}:${args.platforms.joinToString()}",
-                localizedPrompt = localizedPrompt,
+        val request =
+            AgentPendingInputRequest(
+                requestId = "compose-target:${action.label}:${content.hashCode()}:${args.platforms.joinToString()}",
                 options =
                     postTargets.map { post ->
-                        AgentInputRequest.Option(
+                        AgentPendingInputRequest.Option(
                             id = "post:${post.agentAttachmentRef()}",
-                            localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, post.composePostLabel()),
                             value =
                                 buildString {
-                                    appendLine(AgentUiStrings.Compose.targetPostPrefix(action.uiVerb))
-                                    appendLine("action=${action.name}")
+                                    appendLine("event=compose_target_selected")
+                                    appendLine("action=${action.label}")
                                     appendLine("targetStatusId=${post.statusKey.id}")
                                     appendLine("targetStatusHost=${post.statusKey.host}")
                                     appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                     appendLine()
                                     appendAccountArgs(args)
-                                    appendLine("${AgentUiStrings.Common.Content}：")
+                                    appendLine("content:")
                                     append(content)
                                 },
                             postPreview = post,
                         )
                     },
                 allowFreeText = true,
-                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposeTargetPostPlaceholder),
-            ),
-        )
-        return localizedPrompt.toAgentProtocolText()
+            )
+        session.inputRequestStore.set(request)
+        return buildString {
+            appendLine("event=compose_target_selection_required")
+            appendLine("action=${action.label}")
+            appendLine("inputRequestId=${request.requestId}")
+            appendLine("inputRequestOptions:")
+            postTargets.forEach { post ->
+                appendLine("- optionId=post:${post.agentAttachmentRef()}")
+                appendLine("  optionKind=post")
+                appendLine("  platform=${post.platformType.name}")
+                appendLine("  targetStatus=${post.statusKey}")
+                appendLine("  author=${post.user?.composeDisplayLabel().orEmpty()}")
+                appendLine("  summary=${post.content.raw.take(120)}")
+            }
+        }.trim()
     }
 
     private suspend fun accountSelectionMessage(
@@ -265,25 +281,24 @@ internal class ComposePostTool(
                 platformGroups = platformGroups,
             )
         }
-        val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectComposeAccount, action.uiVerb)
-        session.inputRequestStore.set(
-            AgentInputRequest(
-                requestId = "compose-account:${action.name}:${content.hashCode()}:${args.platforms.joinToString()}:${reference?.statusKey}",
-                localizedPrompt = localizedPrompt,
+        val targetOptions =
+            targets.map { target ->
+                val userPreview = target.loadUserPreview()
+                target to userPreview
+            }
+        val request =
+            AgentPendingInputRequest(
+                requestId =
+                    "compose-account:${action.label}:${content.hashCode()}:" +
+                        "${args.platforms.joinToString()}:${reference?.statusKey}",
                 options =
-                    targets.map { target ->
-                        val userPreview = target.loadUserPreview()
-                        AgentInputRequest.Option(
+                    targetOptions.map { (target, userPreview) ->
+                        AgentPendingInputRequest.Option(
                             id = "account:${target.accountKey}",
-                            localizedLabel =
-                                AgentUiStrings.text(
-                                    AgentLocalizedTextKey.DynamicText,
-                                    userPreview?.composeDisplayLabel() ?: target.composeAccountLabel(),
-                                ),
                             value =
                                 buildString {
-                                    appendLine(AgentUiStrings.Compose.accountPrefix(action.uiVerb))
-                                    appendLine("action=${action.name}")
+                                    appendLine("event=compose_account_selected")
+                                    appendLine("action=${action.label}")
                                     appendLine("accountId=${target.accountKey.id}")
                                     appendLine("accountHost=${target.accountKey.host}")
                                     appendLine("platform=${target.platformType.name}")
@@ -292,17 +307,29 @@ internal class ComposePostTool(
                                         appendLine("targetStatusHost=${it.statusKey.host}")
                                     }
                                     appendLine()
-                                    appendLine("${AgentUiStrings.Common.Content}：")
+                                    appendLine("content:")
                                     append(content)
                                 },
                             userPreview = userPreview,
                         )
                     },
                 allowFreeText = true,
-                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposeAccountPlaceholder),
-            ),
-        )
-        return localizedPrompt.toAgentProtocolText()
+            )
+        session.inputRequestStore.set(request)
+        return buildString {
+            appendLine("event=compose_account_selection_required")
+            appendLine("action=${action.label}")
+            appendLine("inputRequestId=${request.requestId}")
+            appendLine("inputRequestOptions:")
+            targetOptions.forEach { (target, userPreview) ->
+                appendLine("- optionId=account:${target.accountKey}")
+                appendLine("  optionKind=account")
+                appendLine("  accountKey=${target.accountKey}")
+                appendLine("  platform=${target.platformType.name}")
+                appendLine("  displayName=${userPreview?.name?.raw.orEmpty()}")
+                appendLine("  handle=${userPreview?.handle?.canonical.orEmpty()}")
+            }
+        }.trim()
     }
 
     private suspend fun platformSelectionMessage(
@@ -312,26 +339,19 @@ internal class ComposePostTool(
         reference: ComposeReference?,
         platformGroups: Map<PlatformType, List<AgentComposeTarget>>,
     ): String {
-        val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectComposePlatform, action.uiVerb)
-        session.inputRequestStore.set(
-            AgentInputRequest(
-                requestId = "compose-platform:${action.name}:${content.hashCode()}:${reference?.statusKey}",
-                localizedPrompt = localizedPrompt,
+        val request =
+            AgentPendingInputRequest(
+                requestId = "compose-platform:${action.label}:${content.hashCode()}:${reference?.statusKey}",
                 options =
                     platformGroups.entries
                         .sortedBy { it.key.name }
                         .map { (platformType, targets) ->
-                            AgentInputRequest.Option(
+                            AgentPendingInputRequest.Option(
                                 id = "platform:${platformType.name}",
-                                localizedLabel =
-                                    AgentUiStrings.text(
-                                        AgentLocalizedTextKey.DynamicText,
-                                        platformType.composePlatformLabel(targets.size),
-                                    ),
                                 value =
                                     buildString {
-                                        appendLine(AgentUiStrings.Compose.platformPrefix(action.uiVerb))
-                                        appendLine("action=${action.name}")
+                                        appendLine("event=compose_platform_selected")
+                                        appendLine("action=${action.label}")
                                         appendLine("platforms=${platformType.name}")
                                         reference?.let {
                                             appendLine("targetStatusId=${it.statusKey.id}")
@@ -339,16 +359,28 @@ internal class ComposePostTool(
                                         }
                                         appendLine()
                                         appendAccountArgs(args)
-                                        appendLine("${AgentUiStrings.Common.Content}：")
+                                        appendLine("content:")
                                         append(content)
                                     },
                             )
                         },
                 allowFreeText = true,
-                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposePlatformPlaceholder),
-            ),
-        )
-        return localizedPrompt.toAgentProtocolText()
+            )
+        session.inputRequestStore.set(request)
+        return buildString {
+            appendLine("event=compose_platform_selection_required")
+            appendLine("action=${action.label}")
+            appendLine("inputRequestId=${request.requestId}")
+            appendLine("inputRequestOptions:")
+            platformGroups.entries
+                .sortedBy { it.key.name }
+                .forEach { (platformType, targets) ->
+                    appendLine("- optionId=platform:${platformType.name}")
+                    appendLine("  optionKind=platform")
+                    appendLine("  platform=${platformType.name}")
+                    appendLine("  accountCount=${targets.size}")
+                }
+        }.trim()
     }
 
     private fun AgentComposeTarget.confirmationInputRequest(
@@ -356,47 +388,84 @@ internal class ComposePostTool(
         action: ComposeAction,
         reference: ComposeReference?,
         userPreview: UiProfile?,
-    ): AgentInputRequest =
-        AgentInputRequest(
-            requestId = "compose:${action.name}:$accountKey:${reference?.statusKey}:${data.content.hashCode()}",
-            localizedPrompt =
-                AgentUiStrings.text(
-                    AgentLocalizedTextKey.ComposeConfirmationMessage,
-                    action.confirmationTextKey.name,
-                    userPreview?.composeDisplayLabel() ?: composeAccountLabel(),
-                    userPreview?.handle?.canonical.orEmpty(),
-                    accountKey.toString(),
-                    platformType.name,
-                    data.visibility.name,
-                    reference?.statusKey?.toString().orEmpty(),
-                    reference
-                        ?.post
-                        ?.user
-                        ?.composeDisplayLabel()
-                        .orEmpty(),
-                    reference
-                        ?.post
-                        ?.content
-                        ?.raw
-                        ?.take(160)
-                        .orEmpty(),
-                    data.language.joinToString(),
-                    data.sensitive.toString(),
-                    data.spoilerText.orEmpty(),
-                    data.content,
-                ),
+    ): AgentPendingInputRequest =
+        AgentPendingInputRequest(
+            requestId = "compose:${action.label}:$accountKey:${reference?.statusKey}:${data.content.hashCode()}",
             options =
                 listOf(
-                    AgentInputRequest.Option(
+                    AgentPendingInputRequest.Option(
                         id = "confirm",
-                        value = AgentUiStrings.Compose.ConfirmSend,
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmSendPost),
+                        value =
+                            buildString {
+                                appendLine("event=compose_confirmed")
+                                appendLine("confirmed=true")
+                                appendLine("action=${action.label}")
+                                appendLine("accountId=${accountKey.id}")
+                                appendLine("accountHost=${accountKey.host}")
+                                appendLine("platform=${platformType.name}")
+                                reference?.let {
+                                    appendLine("targetStatusId=${it.statusKey.id}")
+                                    appendLine("targetStatusHost=${it.statusKey.host}")
+                                }
+                                appendLine("visibility=${data.visibility.name}")
+                                if (data.language.isNotEmpty()) {
+                                    appendLine("languages=${data.language.joinToString()}")
+                                }
+                                appendLine("sensitive=${data.sensitive}")
+                                data.spoilerText?.takeIf { it.isNotBlank() }?.let {
+                                    appendLine("spoilerText=$it")
+                                }
+                                appendLine("content:")
+                                append(data.content)
+                            },
                     ),
                 ),
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.ComposeConfirmationPlaceholder),
             postPreview = composePreviewPost(data = data, userPreview = userPreview),
         )
+
+    private fun AgentComposeTarget.confirmationMessage(
+        data: ComposeData,
+        action: ComposeAction,
+        reference: ComposeReference?,
+        userPreview: UiProfile?,
+        inputRequest: AgentPendingInputRequest,
+    ): String =
+        buildString {
+            appendLine("event=compose_confirmation_required")
+            appendLine("inputRequestId=${inputRequest.requestId}")
+            appendLine("inputRequestOptions:")
+            appendLine("- optionId=confirm")
+            appendLine("  optionKind=confirmation")
+            appendLine("action=${action.label}")
+            appendLine("accountLabel=${userPreview?.composeDisplayLabel() ?: composeAccountLabel()}")
+            appendLine("handle=${userPreview?.handle?.canonical.orEmpty()}")
+            appendLine("accountKey=$accountKey")
+            appendLine("accountId=${accountKey.id}")
+            appendLine("accountHost=${accountKey.host}")
+            appendLine("platform=${platformType.name}")
+            appendLine("visibility=${data.visibility.name}")
+            reference?.let {
+                appendLine("targetStatus=${it.statusKey}")
+                appendLine("targetStatusId=${it.statusKey.id}")
+                appendLine("targetStatusHost=${it.statusKey.host}")
+                it.post?.user?.composeDisplayLabel()?.takeIf { label -> label.isNotBlank() }?.let { label ->
+                    appendLine("targetAuthor=$label")
+                }
+                it.post?.content?.raw?.take(160)?.takeIf { summary -> summary.isNotBlank() }?.let { summary ->
+                    appendLine("targetSummary=$summary")
+                }
+            }
+            if (data.language.isNotEmpty()) {
+                appendLine("languages=${data.language.joinToString()}")
+            }
+            appendLine("sensitive=${data.sensitive}")
+            data.spoilerText?.takeIf { it.isNotBlank() }?.let {
+                appendLine("spoilerText=$it")
+            }
+            appendLine("content:")
+            append(data.content)
+        }
 
     private fun AgentComposeTarget.composePreviewPost(
         data: ComposeData,
@@ -445,9 +514,9 @@ internal class ComposePostTool(
                 ?.currentPost
                 ?.agentDisplayPost()
                 ?.let(::add)
-            session.attachmentStore
+            session.messagePartStore
                 .snapshot()
-                .filterIsInstance<AgentConversationAttachment.Post>()
+                .filterIsInstance<AgentMessagePart.PostCard>()
                 .map { it.post.agentDisplayPost() }
                 .forEach(::add)
         }.distinctBy { it.platformType to it.statusKey }
@@ -466,8 +535,6 @@ internal class ComposePostTool(
 
     private fun AgentComposeTarget.composeAccountLabel(): String = "${platformType.name} / $accountKey"
 
-    private fun PlatformType.composePlatformLabel(accountCount: Int): String = AgentUiStrings.Compose.platformLabel(this, accountCount)
-
     private fun UiProfile.composeDisplayLabel(): String =
         listOf(
             name.raw.takeIf { it.isNotBlank() },
@@ -475,13 +542,6 @@ internal class ComposePostTool(
         ).filterNotNull()
             .distinct()
             .joinToString(" ")
-
-    private fun UiTimelineV2.Post.composePostLabel(): String =
-        listOfNotNull(
-            user?.composeDisplayLabel(),
-            content.raw.take(48).takeIf { it.isNotBlank() },
-        ).joinToString(" - ")
-            .ifBlank { statusKey.toString() }
 
     private fun ComposeReference.toComposeReference(action: ComposeAction): ComposeData.ReferenceStatus =
         ComposeData.ReferenceStatus(
@@ -516,30 +576,18 @@ private data class ComposeReference(
 private enum class ComposeAction(
     val composeType: ComposeType,
     val label: String,
-    val uiVerb: String,
-    val confirmationTitle: String,
-    val confirmationTextKey: AgentLocalizedTextKey,
 ) {
     New(
         composeType = ComposeType.New,
         label = "new",
-        uiVerb = AgentUiStrings.Compose.SendVerb,
-        confirmationTitle = AgentUiStrings.Compose.SendConfirmationTitle,
-        confirmationTextKey = AgentLocalizedTextKey.ComposeSendConfirmationTitle,
     ),
     Reply(
         composeType = ComposeType.Reply,
         label = "reply",
-        uiVerb = AgentUiStrings.Compose.ReplyVerb,
-        confirmationTitle = AgentUiStrings.Compose.ReplyConfirmationTitle,
-        confirmationTextKey = AgentLocalizedTextKey.ComposeReplyConfirmationTitle,
     ),
     Quote(
         composeType = ComposeType.Quote,
         label = "quote",
-        uiVerb = AgentUiStrings.Compose.QuoteVerb,
-        confirmationTitle = AgentUiStrings.Compose.QuoteConfirmationTitle,
-        confirmationTextKey = AgentLocalizedTextKey.ComposeQuoteConfirmationTitle,
     ),
 }
 

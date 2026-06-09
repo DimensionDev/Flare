@@ -11,6 +11,7 @@ internal data class DbAgentMessage(
     val position: Int,
     val role: String,
     val text: String,
+    val contentJson: String,
     val messageJson: String,
     val createdAt: Long,
 )

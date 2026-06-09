@@ -100,12 +100,12 @@ import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlin.math.max
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.nestedscrollview.VerticalNestedScrollView
 import moe.tlaster.nestedscrollview.rememberNestedScrollViewState
 import moe.tlaster.precompose.molecule.producePresenter
+import kotlin.math.max
 
 @Composable
 internal fun ProfileWithUserNameAndHostDeeplinkRoute(
@@ -333,11 +333,12 @@ internal fun ProfileScreen(
                     },
                     actions = {
                         Row(
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.background,
-                                    MaterialTheme.shapes.medium,
-                                ),
+                            modifier =
+                                Modifier
+                                    .background(
+                                        MaterialTheme.colorScheme.background,
+                                        MaterialTheme.shapes.medium,
+                                    ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             if (!bigScreen) {

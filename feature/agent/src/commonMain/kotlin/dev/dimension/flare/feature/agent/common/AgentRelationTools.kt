@@ -5,6 +5,7 @@ import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.serialization.typeToken
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiProfile
@@ -46,8 +47,7 @@ internal class LoadUserRelationTool(
             session.resolveRelationUser(args.toRelationUserArgs())
                 ?: return session.relationUserSelectionMessage(
                     args = args.toRelationToolArgs(),
-                    promptKey = AgentLocalizedTextKey.SelectRelationStateUser,
-                    valuePrefix = AgentUiStrings.Relation.RelationStateUserPrefix,
+                    requestType = "relation_state_user",
                 )
         val targets = session.resolveRelationTargets(args.toRelationAccountArgs(), user)
         if (targets.isEmpty()) {
@@ -123,19 +123,22 @@ internal class ListRelationActionsTool(
             session.resolveRelationUser(toolArgs.user)
                 ?: return session.relationUserSelectionMessage(
                     args = toolArgs,
-                    promptKey = AgentLocalizedTextKey.SelectRelationUser,
-                    valuePrefix = AgentUiStrings.Relation.ExecuteRelationUserPrefix,
+                    requestType = "relation_action_user",
                 )
         val candidates = session.relationActionCandidates(user, toolArgs.account)
         if (candidates.isEmpty()) {
             return session.noRelationActionsMessage(toolArgs.account.platforms, user)
         }
-        session.setRelationActionSelectionRequest(user, candidates)
+        val request = session.setRelationActionSelectionRequest(user, candidates)
         return buildString {
             appendLine("Available relation actions for ${user.userKey}:")
+            appendLine("inputRequestId=${request.requestId}")
+            appendLine("inputRequestOptions:")
             candidates.forEach { candidate ->
                 appendLine(
-                    "- accountKey=${candidate.target.accountKey}, platform=${candidate.target.platformType.name}, " +
+                    "- optionId=relation:${candidate.target.accountKey}:${candidate.action.id}, " +
+                        "optionKind=relation_action, accountKey=${candidate.target.accountKey}, " +
+                        "platform=${candidate.target.platformType.name}, " +
                         "actionId=${candidate.action.id}, actionName=${candidate.action.label}, " +
                         "supportedType=${candidate.action.requiredType.name}",
                 )
@@ -207,8 +210,7 @@ internal class ExecuteRelationActionTool(
             session.resolveRelationUser(toolArgs.user)
                 ?: return session.relationUserSelectionMessage(
                     args = toolArgs,
-                    promptKey = AgentLocalizedTextKey.SelectRelationUser,
-                    valuePrefix = AgentUiStrings.Relation.ExecuteRelationUserPrefix,
+                    requestType = "relation_action_user",
                 )
         val action =
             args.action.toRelationActionOrNull()
@@ -223,40 +225,54 @@ internal class ExecuteRelationActionTool(
             return "${target.platformType.name} account ${target.accountKey} does not support ${action.label}."
         }
         if (!args.confirmed) {
-            val localizedPrompt =
-                AgentUiStrings.text(
-                    AgentLocalizedTextKey.RelationConfirmationMessage,
-                    action.label,
-                    target.accountKey.toString(),
-                    target.platformType.name,
-                    user.userKey.toString(),
-                    user.profile
-                        ?.name
-                        ?.raw
-                        .orEmpty(),
-                    user.profile
-                        ?.handle
-                        ?.raw
-                        .orEmpty(),
-                )
+            val requestId = "relation-confirm:${target.accountKey}:${user.userKey}:${action.id}"
+            val prompt =
+                buildString {
+                    appendLine("event=relation_confirmation_required")
+                    appendLine("inputRequestId=$requestId")
+                    appendLine("inputRequestOptions:")
+                    appendLine("- optionId=confirm")
+                    appendLine("  optionKind=confirmation")
+                    appendLine("action=${action.id}")
+                    appendLine("actionName=${action.label}")
+                    appendLine("account=${target.accountKey}")
+                    appendLine("accountId=${target.accountKey.id}")
+                    appendLine("accountHost=${target.accountKey.host}")
+                    appendLine("platform=${target.platformType.name}")
+                    user.profile?.let { profile ->
+                        appendLine("targetUserRef=${profile.agentAttachmentMarker()}")
+                        appendLine("displayName=${profile.name.raw}")
+                        appendLine("handle=${profile.handle.raw}")
+                    }
+                    appendLine("targetUser=${user.userKey}")
+                    appendLine("targetUserId=${user.userKey.id}")
+                    appendLine("targetUserHost=${user.userKey.host}")
+                }
             session.inputRequestStore.set(
-                AgentInputRequest(
-                    requestId = "relation-confirm:${target.accountKey}:${user.userKey}:${action.id}",
-                    localizedPrompt = localizedPrompt,
+                AgentPendingInputRequest(
+                    requestId = requestId,
                     options =
                         listOf(
-                            AgentInputRequest.Option(
+                            AgentPendingInputRequest.Option(
                                 id = "confirm",
-                                value = AgentUiStrings.Common.ConfirmExecute,
-                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmExecute),
+                                value =
+                                    buildString {
+                                        appendLine("event=relation_confirmed")
+                                        appendLine("confirmed=true")
+                                        appendRelationActionArgs(
+                                            action = action,
+                                            user = user,
+                                            target = target,
+                                            requestFollow = args.requestFollow,
+                                        )
+                                    },
                             ),
                         ),
                     allowFreeText = true,
-                    localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.RelationConfirmationPlaceholder),
                     userPreview = user.profile,
                 ),
             )
-            return localizedPrompt.toAgentProtocolText()
+            return prompt
         }
 
         actionHandler(target.dataSource, action, user.userKey, args.requestFollow)
@@ -426,22 +442,24 @@ private suspend fun AgentToolSession.availableRelationUsers(): List<UiProfile> =
             ?.agentDisplayPost()
             ?.user
             ?.let(::add)
-        attachmentStore
+        messagePartStore
             .snapshot()
-            .forEach { attachment ->
-                when (attachment) {
-                    is AgentConversationAttachment.Post -> {
-                        attachment.post
+            .forEach { part ->
+                when (part) {
+                    is AgentMessagePart.PostCard -> {
+                        part.post
                             .agentDisplayPost()
                             .user
                             ?.let(::add)
                     }
 
-                    is AgentConversationAttachment.User -> {
-                        add(attachment.user)
+                    is AgentMessagePart.UserCard -> {
+                        add(part.user)
                     }
 
-                    is AgentConversationAttachment.InputRequest -> {
+                    is AgentMessagePart.Actions,
+                    is AgentMessagePart.Text,
+                    -> {
                         Unit
                     }
                 }
@@ -583,36 +601,47 @@ private fun AgentRelationTarget.supports(action: RelationAction): Boolean = acti
 
 private suspend fun AgentToolSession.relationUserSelectionMessage(
     args: RelationToolArgs,
-    promptKey: AgentLocalizedTextKey,
-    valuePrefix: String,
+    requestType: String,
 ): String {
     val candidates = availableRelationUsers().takeIf { it.isNotEmpty() }
     if (candidates == null) {
         return "Relation tool requires a target user. Use search_users/load_user_profile first, " +
             "target the current post author, or provide targetUserId and targetUserHost."
     }
-    inputRequestStore.set(
-        AgentInputRequest(
-            requestId = "relation-user:${args.action}:${candidates.joinToString { it.agentAttachmentRef() }}",
-            localizedPrompt = AgentUiStrings.text(promptKey),
+    val options = candidates.take(RELATION_SELECTION_OPTION_LIMIT)
+    val request =
+        AgentPendingInputRequest(
+            requestId = "relation-user:${args.action}:${options.joinToString { it.agentAttachmentRef() }}",
             options =
-                candidates.take(RELATION_SELECTION_OPTION_LIMIT).map { user ->
-                    AgentInputRequest.Option(
+                options.map { user ->
+                    AgentPendingInputRequest.Option(
                         id = "user:${user.agentAttachmentRef()}",
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, user.relationUserLabel()),
                         value =
                             buildString {
-                                appendLine(valuePrefix)
+                                appendLine("event=relation_user_selected")
+                                appendLine("requestType=$requestType")
                                 appendRelationToolArgs(args.copy(user = user.toRelationUserTarget().toRelationUserArgs()))
                             },
                         userPreview = user,
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.RelationUserPlaceholder),
-        ),
-    )
-    return AgentUiStrings.text(promptKey).toAgentProtocolText()
+        )
+    inputRequestStore.set(request)
+    return buildString {
+        appendLine("event=relation_user_selection_required")
+        appendLine("requestType=$requestType")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("inputRequestOptions:")
+        options.forEach { user ->
+            appendLine("- optionId=user:${user.agentAttachmentRef()}")
+            appendLine("  optionKind=user")
+            appendLine("  platform=${user.platformType.name}")
+            appendLine("  userKey=${user.key}")
+            appendLine("  displayName=${user.name.raw}")
+            appendLine("  handle=${user.handle.raw}")
+        }
+    }.trim()
 }
 
 private suspend fun AgentToolSession.relationActionSelectionMessage(
@@ -623,32 +652,39 @@ private suspend fun AgentToolSession.relationActionSelectionMessage(
     if (candidates.isEmpty()) {
         return noRelationActionsMessage(args.account.platforms, user)
     }
-    setRelationActionSelectionRequest(user, candidates)
-    return AgentUiStrings.text(AgentLocalizedTextKey.SelectRelationAction).toAgentProtocolText()
+    val request = setRelationActionSelectionRequest(user, candidates)
+    return buildString {
+        appendLine("event=relation_action_selection_required")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("targetUser=${user.userKey}")
+        appendLine("inputRequestOptions:")
+        candidates.take(RELATION_SELECTION_OPTION_LIMIT).forEach { candidate ->
+            appendLine("- optionId=relation:${candidate.target.accountKey}:${candidate.action.id}")
+            appendLine("  optionKind=relation_action")
+            appendLine("  action=${candidate.action.id}")
+            appendLine("  actionName=${candidate.action.label}")
+            appendLine("  account=${candidate.target.accountKey}")
+            appendLine("  platform=${candidate.target.platformType.name}")
+        }
+    }.trim()
 }
 
 private suspend fun AgentToolSession.setRelationActionSelectionRequest(
     user: RelationUserTarget,
     candidates: List<RelationActionCandidate>,
-) {
-    inputRequestStore.set(
-        AgentInputRequest(
+): AgentPendingInputRequest {
+    val request =
+        AgentPendingInputRequest(
             requestId = "relation-action:${user.userKey}:${candidates.joinToString {
                 it.target.accountKey.toString() + ':' + it.action.id
             }}",
-            localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectRelationAction),
             options =
                 candidates.take(RELATION_SELECTION_OPTION_LIMIT).map { candidate ->
-                    AgentInputRequest.Option(
+                    AgentPendingInputRequest.Option(
                         id = "relation:${candidate.target.accountKey}:${candidate.action.id}",
-                        localizedLabel =
-                            AgentUiStrings.text(
-                                AgentLocalizedTextKey.DynamicText,
-                                "${candidate.action.label} / ${candidate.target.platformType.name}",
-                            ),
                         value =
                             buildString {
-                                appendLine(AgentUiStrings.Relation.ExecuteActionPrefix)
+                                appendLine("event=relation_action_selected")
                                 appendRelationActionArgs(
                                     action = candidate.action,
                                     user = user,
@@ -660,9 +696,9 @@ private suspend fun AgentToolSession.setRelationActionSelectionRequest(
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.RelationActionPlaceholder),
-        ),
-    )
+        )
+    inputRequestStore.set(request)
+    return request
 }
 
 private suspend fun AgentToolSession.relationAccountSelectionMessage(
@@ -674,18 +710,17 @@ private suspend fun AgentToolSession.relationAccountSelectionMessage(
     if (targets.isEmpty()) {
         return noRelationTargetsMessage(args.account.platforms, user)
     }
-    inputRequestStore.set(
-        AgentInputRequest(
+    val options = targets.take(RELATION_SELECTION_OPTION_LIMIT)
+    val request =
+        AgentPendingInputRequest(
             requestId = "relation-account:${action.id}:${user.userKey}:${args.account.platforms.joinToString()}",
-            localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectRelationAccount),
             options =
-                targets.take(RELATION_SELECTION_OPTION_LIMIT).map { target ->
-                    AgentInputRequest.Option(
+                options.map { target ->
+                    AgentPendingInputRequest.Option(
                         id = "account:${target.accountKey}",
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, target.relationAccountLabel()),
                         value =
                             buildString {
-                                appendLine(AgentUiStrings.Relation.AccountPrefix)
+                                appendLine("event=relation_account_selected")
                                 appendRelationActionArgs(
                                     action = action,
                                     user = user,
@@ -697,10 +732,21 @@ private suspend fun AgentToolSession.relationAccountSelectionMessage(
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.RelationAccountPlaceholder),
-        ),
-    )
-    return AgentUiStrings.text(AgentLocalizedTextKey.SelectRelationAccount).toAgentProtocolText()
+        )
+    inputRequestStore.set(request)
+    return buildString {
+        appendLine("event=relation_account_selection_required")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("action=${action.id}")
+        appendLine("targetUser=${user.userKey}")
+        appendLine("inputRequestOptions:")
+        options.forEach { target ->
+            appendLine("- optionId=account:${target.accountKey}")
+            appendLine("  optionKind=account")
+            appendLine("  account=${target.accountKey}")
+            appendLine("  platform=${target.platformType.name}")
+        }
+    }.trim()
 }
 
 private fun AgentToolSession.noRelationTargetsMessage(
@@ -786,17 +832,6 @@ private fun String.normalizedUserRef(): String =
         .removePrefix("[[user:")
         .removeSuffix("]]")
         .lowercase()
-
-private fun UiProfile.relationUserLabel(): String =
-    listOf(
-        name.raw.takeIf { it.isNotBlank() },
-        handle.raw.takeIf { it.isNotBlank() },
-        key.toString(),
-    ).filterNotNull()
-        .distinct()
-        .joinToString(" ")
-
-private fun AgentRelationTarget.relationAccountLabel(): String = "${platformType.name} / $accountKey"
 
 private fun RelationUserTarget.toRelationUserArgs(): RelationUserArgs =
     RelationUserArgs(

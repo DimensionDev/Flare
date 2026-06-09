@@ -11,6 +11,8 @@ import dev.dimension.flare.data.datasource.subscription.KoinSubscriptionDataSour
 import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.LocalCacheRepository
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.status.LoadDiscoverHashtagsTool
 import dev.dimension.flare.feature.agent.status.LoadDiscoverStatusesTool
 import dev.dimension.flare.feature.agent.status.LoadDiscoverUsersTool
@@ -105,7 +107,7 @@ internal class AgentToolProvider(
                 subscriptionDataSource = KoinSubscriptionDataSource,
                 localCacheRepository = localCacheRepository,
                 userTargets = userTargets,
-                attachmentStore = AgentToolAttachmentStore(),
+                messagePartStore = AgentToolMessagePartStore(),
                 inputRequestStore = AgentToolInputRequestStore(),
             )
         return AgentToolSet(
@@ -156,7 +158,7 @@ internal class AgentToolProvider(
                     AGENT_ATTACHMENT_GUIDANCE,
                 ).joinToString(separator = "\n\n"),
             traceRegistry = AGENT_TOOL_TRACE_REGISTRY,
-            attachmentStore = session.attachmentStore,
+            messagePartStore = session.messagePartStore,
             inputRequestStore = session.inputRequestStore,
         )
     }
@@ -388,7 +390,7 @@ internal data class AgentToolSession(
     val relationTargets: List<AgentRelationTarget> = emptyList(),
     val subscriptionDataSource: SubscriptionDataSource? = null,
     val userTargets: List<AgentUserTarget>,
-    val attachmentStore: AgentToolAttachmentStore,
+    val messagePartStore: AgentToolMessagePartStore,
     val inputRequestStore: AgentToolInputRequestStore,
     val subscriptionItemStore: AgentSubscriptionItemStore = AgentSubscriptionItemStore(),
     val localCacheRepository: LocalCacheRepository? = null,
@@ -413,46 +415,39 @@ internal data class AgentToolSession(
         }
 }
 
-internal class AgentToolAttachmentStore {
+internal class AgentToolMessagePartStore {
     private val mutex = Mutex()
-    private val attachments = mutableListOf<AgentConversationAttachment>()
+    private val parts = mutableListOf<AgentMessagePart>()
 
     suspend fun addPosts(posts: List<UiTimelineV2.Post>) {
         mutex.withLock {
-            attachments += posts.map { AgentConversationAttachment.Post(it) }
+            parts += posts.map { AgentMessagePart.PostCard(it) }
         }
     }
 
     suspend fun addUsers(users: List<UiProfile>) {
         mutex.withLock {
-            attachments += users.map { AgentConversationAttachment.User(it) }
+            parts += users.map { AgentMessagePart.UserCard(it) }
         }
     }
 
-    suspend fun snapshot(): List<AgentConversationAttachment> =
+    suspend fun snapshot(): List<AgentMessagePart> =
         mutex.withLock {
-            attachments
-                .distinctBy {
-                    when (it) {
-                        is AgentConversationAttachment.Post -> "post:${it.post.platformType}:${it.post.statusKey}"
-                        is AgentConversationAttachment.User -> "user:${it.user.platformType}:${it.user.key}"
-                        is AgentConversationAttachment.InputRequest -> "input-request:${it.state.request.requestId}"
-                    }
-                }
+            parts.distinctAgentMessageParts()
         }
 }
 
 internal class AgentToolInputRequestStore {
     private val mutex = Mutex()
-    private var inputRequest: AgentInputRequest? = null
+    private var inputRequest: AgentPendingInputRequest? = null
 
-    suspend fun set(request: AgentInputRequest) {
+    suspend fun set(request: AgentPendingInputRequest) {
         mutex.withLock {
             inputRequest = request
         }
     }
 
-    suspend fun snapshot(): AgentInputRequest? =
+    suspend fun snapshot(): AgentPendingInputRequest? =
         mutex.withLock {
             inputRequest
         }
@@ -462,7 +457,7 @@ internal data class AgentToolSet(
     val toolRegistry: ToolRegistry,
     val systemPromptGuidance: String,
     val traceRegistry: AgentToolTraceRegistry,
-    val attachmentStore: AgentToolAttachmentStore,
+    val messagePartStore: AgentToolMessagePartStore,
     val inputRequestStore: AgentToolInputRequestStore,
 ) {
     companion object {
@@ -471,7 +466,7 @@ internal data class AgentToolSet(
                 toolRegistry = ToolRegistry.EMPTY,
                 systemPromptGuidance = "",
                 traceRegistry = AgentToolTraceRegistry(emptyMap()),
-                attachmentStore = AgentToolAttachmentStore(),
+                messagePartStore = AgentToolMessagePartStore(),
                 inputRequestStore = AgentToolInputRequestStore(),
             )
     }
@@ -481,9 +476,10 @@ private const val AGENT_CONFIRMATION_BEHAVIOR_GUIDANCE =
     """
     Confirmation UI guidance:
     - For any action that changes user data or performs a side effect, call the relevant tool with confirmed=false first.
-    - After a confirmed=false call, always surface the confirmation content returned by the tool. Do not return an empty assistant message.
+    - After a confirmed=false call, write the user-visible confirmation or selection copy yourself from the structured fields returned by the tool and include the required flare-agent-actions metadata comment. Do not return an empty assistant message.
     - If the action is about a concrete post or user, include the relevant attachmentRef in the visible response when available so Flare can render the post/user card.
     - Do not ask the user to manually type confirmation when a confirmation input request is available; let Flare show the confirmation button.
+    - When a tool result contains inputRequestId/inputRequestOptions, the user choice must be shown through Flare actions. Do not rewrite those options as a visible numbered or bulleted list in the assistant message.
     - Only call the same tool with confirmed=true after the latest user input explicitly confirms the pending request.
     """
 
@@ -712,7 +708,7 @@ internal fun List<AgentComposeTarget>.composePlatformGuidance(): String =
         - Use compose_post when the user asks to publish, post, toot, tweet, send a status, reply to a post, quote a post, or otherwise compose social content.
         - For replies and quotes, call compose_post with action=reply or action=quote and provide the current status, a returned post attachmentRef, or an explicit target status key.
         - If the user did not specify a platform or account and several accounts could match, still call compose_post with confirmed=false, blank account fields, and empty platforms so the tool can show a structured platform/account picker. Do not ask with a numbered prose list.
-        - For the first compose request, call compose_post with confirmed=false and then show the returned confirmation wording to the user.
+        - For the first compose request, call compose_post with confirmed=false and then write the confirmation or selection copy from the structured tool result.
         - Only call compose_post with confirmed=true when the latest user message explicitly confirms the exact account and content already shown for confirmation.
         - Never publish if the latest user message changes the account, content, visibility, or other post settings; request confirmation again.
         """
@@ -871,7 +867,7 @@ private const val AGENT_SUBSCRIPTION_TOOL_GUIDANCE =
     - Use load_rss_article only for actual RSS article URLs or rssArticleRef values returned by load_subscription_timeline. Do not use it for Mastodon posts or other non-RSS subscription items.
     - Saving or deleting a subscription is a user-visible side effect. Always require confirmation before calling save_subscription_source or delete_subscription_source with confirmed=true.
     - When the user asks to add, save, update, remove, or delete a subscription source, do not write a manual confirmation message as the final answer. Call save_subscription_source or delete_subscription_source with confirmed=false first. The tool will create a structured confirmation request with one confirm button.
-    - After save_subscription_source or delete_subscription_source returns a confirmation message for confirmed=false, return that message to the user. Do not ask for confirmation in your own words and do not claim the source has been saved/deleted yet.
+    - After save_subscription_source or delete_subscription_source returns structured confirmation fields for confirmed=false, write the confirmation copy yourself from those fields and do not claim the source has been saved/deleted yet.
     - Only call save_subscription_source or delete_subscription_source with confirmed=true when the latest user message explicitly confirms the exact source and action previously shown by the tool confirmation request.
     """
 
@@ -897,7 +893,7 @@ private const val AGENT_COMPOSE_BEHAVIOR_GUIDANCE =
     """
     Compose behavior guidance:
     - Publishing is a user-visible side effect. Always require a confirmation step before sending.
-    - The confirmation message must restate the account, action, content, and target post when replying or quoting. Examples: "确认使用以下账号发送以下内容吗？", "确认使用以下账号回复以下帖子，并发送以下内容吗？"
+    - The confirmation message must be written by you from structured tool fields and restate the account, action, content, and target post when replying or quoting.
     - Do not call compose_post with confirmed=true unless the latest user message clearly confirms the previously restated account, action, target post, and content.
     - If the user says to edit or revise the post after a confirmation request, call compose_post again with confirmed=false for the revised content.
     - When platform, account, or target-post choice is ambiguous, prefer the structured input request returned by compose_post instead of writing a numbered list in prose.

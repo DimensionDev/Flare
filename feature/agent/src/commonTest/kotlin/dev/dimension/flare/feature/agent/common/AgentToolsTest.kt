@@ -28,6 +28,7 @@ import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.LocalCacheRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
 import dev.dimension.flare.data.repository.toUiRssSource
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -93,8 +94,8 @@ internal class AgentToolsTest {
                     content = "cached local result".toUiPlainText(),
                 )
             val repository = FakeLocalCacheRepository(cachedPosts = listOf(post))
-            val attachmentStore = AgentToolAttachmentStore()
-            val tool = SearchCachedPostsTool(localCacheSession(repository, attachmentStore))
+            val messagePartStore = AgentToolMessagePartStore()
+            val tool = SearchCachedPostsTool(localCacheSession(repository, messagePartStore))
 
             val result =
                 tool.execute(
@@ -108,9 +109,9 @@ internal class AgentToolsTest {
             assertTrue(result.contains("Local cached post search"))
             assertTrue(result.contains("network not used"))
             assertTrue(result.contains("cached local result"))
-            val attachment = attachmentStore.snapshot().single()
-            assertTrue(attachment is AgentConversationAttachment.Post)
-            assertEquals(post.statusKey, attachment.post.statusKey)
+            val messagePart = messagePartStore.snapshot().single()
+            assertTrue(messagePart is AgentMessagePart.PostCard)
+            assertEquals(post.statusKey, messagePart.post.statusKey)
         }
 
     @Test
@@ -144,15 +145,9 @@ internal class AgentToolsTest {
             assertTrue(result.contains("hello from agent"))
             assertFalse(dataSource.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(AgentLocalizedTextKey.ComposeConfirmationMessage, inputRequest.localizedPrompt.key)
-            assertEquals(AgentLocalizedTextKey.ComposeSendConfirmationTitle.name, inputRequest.localizedPrompt.args.first())
+            assertTrue(inputRequest.requestId.startsWith("compose:new:"))
             assertEquals(1, inputRequest.options.size)
-            assertEquals(
-                AgentLocalizedTextKey.ConfirmSendPost,
-                inputRequest.options
-                    .first { it.id == "confirm" }
-                    .localizedLabel.key,
-            )
+            assertEquals("confirm", inputRequest.options.first().id)
             assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.raw)
         }
 
@@ -182,7 +177,7 @@ internal class AgentToolsTest {
                             ),
                         postActionTargets = emptyList(),
                         userTargets = emptyList(),
-                        attachmentStore = AgentToolAttachmentStore(),
+                        messagePartStore = AgentToolMessagePartStore(),
                         inputRequestStore = inputRequestStore,
                     ),
                 )
@@ -198,8 +193,8 @@ internal class AgentToolsTest {
             assertFalse(alice.composed)
             assertFalse(bob.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(inputRequest.localizedPrompt.toAgentProtocolText(), result)
-            assertEquals(AgentLocalizedTextKey.SelectComposeAccount, inputRequest.localizedPrompt.key)
+            assertTrue(result.isNotBlank())
+            assertTrue(inputRequest.requestId.startsWith("compose-account:new:"))
             assertEquals(2, inputRequest.options.size)
             assertTrue(
                 inputRequest.options
@@ -247,7 +242,7 @@ internal class AgentToolsTest {
                             ),
                         postActionTargets = emptyList(),
                         userTargets = emptyList(),
-                        attachmentStore = AgentToolAttachmentStore(),
+                        messagePartStore = AgentToolMessagePartStore(),
                         inputRequestStore = inputRequestStore,
                     ),
                 )
@@ -263,17 +258,16 @@ internal class AgentToolsTest {
             assertFalse(twitter.composed)
             assertFalse(weibo.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(inputRequest.localizedPrompt.toAgentProtocolText(), result)
-            assertEquals(AgentLocalizedTextKey.SelectComposePlatform, inputRequest.localizedPrompt.key)
+            assertTrue(result.isNotBlank())
+            assertTrue(inputRequest.requestId.startsWith("compose-platform:new:"))
             assertEquals(3, inputRequest.options.size)
-            assertTrue(inputRequest.options.all { it.localizedLabel.key == AgentLocalizedTextKey.DynamicText })
             assertTrue(
-                inputRequest.options.any { it.localizedLabel.args.firstOrNull() == "Twitter/X" && it.value.contains("platforms=xQt") },
+                inputRequest.options.any { it.id == "platform:xQt" && it.value.contains("platforms=xQt") },
             )
             assertTrue(inputRequest.options.any { it.value.contains("platforms=VVo") })
             assertTrue(
                 inputRequest.options.any {
-                    it.localizedLabel.args.firstOrNull() == "Mastodon" &&
+                    it.id == "platform:Mastodon" &&
                         it.value.contains("hello from agent")
                 },
             )
@@ -332,9 +326,8 @@ internal class AgentToolsTest {
 
             assertFalse(dataSource.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(AgentLocalizedTextKey.ComposeConfirmationMessage, inputRequest.localizedPrompt.key)
-            assertEquals(AgentLocalizedTextKey.ComposeReplyConfirmationTitle.name, inputRequest.localizedPrompt.args.first())
-            assertTrue(inputRequest.localizedPrompt.args.any { it.contains("post-1@example.social") })
+            assertTrue(inputRequest.requestId.startsWith("compose:reply:"))
+            assertTrue(result.contains("post-1@example.social"))
         }
 
     @Test
@@ -379,13 +372,13 @@ internal class AgentToolsTest {
             val firstPost = createPost(statusKey = MicroBlogKey("post-1", "example.social"), content = "first".toUiPlainText())
             val secondPost = createPost(statusKey = MicroBlogKey("post-2", "example.social"), content = "second".toUiPlainText())
             val dataSource = StubComposeDataSource(accountKey = MicroBlogKey("alice", "example.social"))
-            val attachmentStore = AgentToolAttachmentStore()
+            val messagePartStore = AgentToolMessagePartStore()
             val inputRequestStore = AgentToolInputRequestStore()
-            attachmentStore.addPosts(listOf(firstPost, secondPost))
+            messagePartStore.addPosts(listOf(firstPost, secondPost))
             val tool =
                 composePostTool(
                     dataSource = dataSource,
-                    attachmentStore = attachmentStore,
+                    messagePartStore = messagePartStore,
                     inputRequestStore = inputRequestStore,
                 )
 
@@ -401,8 +394,8 @@ internal class AgentToolsTest {
 
             assertFalse(dataSource.composed)
             val inputRequest = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(inputRequest.localizedPrompt.toAgentProtocolText(), result)
-            assertEquals(AgentLocalizedTextKey.SelectComposeTargetPost, inputRequest.localizedPrompt.key)
+            assertTrue(result.isNotBlank())
+            assertTrue(inputRequest.requestId.startsWith("compose-target:reply:"))
             assertEquals(2, inputRequest.options.size)
             assertNotNull(inputRequest.options.first().postPreview)
             assertTrue(
@@ -480,11 +473,10 @@ internal class AgentToolsTest {
             val request = assertNotNull(inputRequestStore.snapshot())
             assertEquals(1, request.options.size)
             assertEquals(
-                "Like",
+                "action-0-like",
                 request.options
                     .first()
-                    .localizedLabel.args
-                    .firstOrNull(),
+                    .id,
             )
         }
 
@@ -535,15 +527,9 @@ internal class AgentToolsTest {
 
             assertTrue(handledEvents.isEmpty())
             val request = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(AgentLocalizedTextKey.PostActionConfirmationMessage, request.localizedPrompt.key)
-            assertEquals("Like", request.localizedPrompt.args.first())
+            assertTrue(request.requestId.startsWith("post-action-confirm:"))
             assertEquals(1, request.options.size)
-            assertEquals(
-                AgentLocalizedTextKey.ConfirmExecute,
-                request.options
-                    .first()
-                    .localizedLabel.key,
-            )
+            assertEquals("confirm", request.options.first().id)
         }
 
     @Test
@@ -695,15 +681,9 @@ internal class AgentToolsTest {
 
             assertTrue(handledActions.isEmpty())
             val request = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(AgentLocalizedTextKey.RelationConfirmationMessage, request.localizedPrompt.key)
-            assertEquals("Mute", request.localizedPrompt.args.first())
+            assertTrue(request.requestId.startsWith("relation-confirm:"))
             assertEquals(1, request.options.size)
-            assertEquals(
-                AgentLocalizedTextKey.ConfirmExecute,
-                request.options
-                    .first()
-                    .localizedLabel.key,
-            )
+            assertEquals("confirm", request.options.first().id)
         }
 
     @Test
@@ -856,14 +836,9 @@ internal class AgentToolsTest {
 
             assertTrue(dataSource.savedInputs.isEmpty())
             val request = assertNotNull(inputRequestStore.snapshot())
-            assertEquals(AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage, request.localizedPrompt.key)
+            assertTrue(request.requestId.startsWith("subscription-save:RSS:https://example.com/feed.xml"))
             assertEquals(1, request.options.size)
-            assertEquals(
-                AgentLocalizedTextKey.ConfirmSaveSubscription,
-                request.options
-                    .first()
-                    .localizedLabel.key,
-            )
+            assertEquals("confirm", request.options.first().id)
         }
 
     @Test
@@ -908,7 +883,7 @@ internal class AgentToolsTest {
     private fun composePostTool(
         dataSource: StubComposeDataSource,
         inputRequestStore: AgentToolInputRequestStore = AgentToolInputRequestStore(),
-        attachmentStore: AgentToolAttachmentStore = AgentToolAttachmentStore(),
+        messagePartStore: AgentToolMessagePartStore = AgentToolMessagePartStore(),
         status: AgentToolContext.StatusContext? = null,
     ): ComposePostTool =
         ComposePostTool(
@@ -925,7 +900,7 @@ internal class AgentToolsTest {
                     ),
                 postActionTargets = emptyList(),
                 userTargets = emptyList(),
-                attachmentStore = attachmentStore,
+                messagePartStore = messagePartStore,
                 inputRequestStore = inputRequestStore,
             ),
         )
@@ -962,7 +937,7 @@ private fun createPost(
 
 private fun localCacheSession(
     repository: LocalCacheRepository,
-    attachmentStore: AgentToolAttachmentStore = AgentToolAttachmentStore(),
+    messagePartStore: AgentToolMessagePartStore = AgentToolMessagePartStore(),
 ): AgentToolSession =
     AgentToolSession(
         status = null,
@@ -970,7 +945,7 @@ private fun localCacheSession(
         composeTargets = emptyList(),
         postActionTargets = emptyList(),
         userTargets = emptyList(),
-        attachmentStore = attachmentStore,
+        messagePartStore = messagePartStore,
         inputRequestStore = AgentToolInputRequestStore(),
         localCacheRepository = repository,
     )
@@ -1041,13 +1016,13 @@ private fun postActionSession(
                 ),
             ),
         userTargets = emptyList(),
-        attachmentStore = AgentToolAttachmentStore(),
+        messagePartStore = AgentToolMessagePartStore(),
         inputRequestStore = inputRequestStore,
     )
 
 private fun relationSession(
     dataSource: StubRelationDataSource,
-    attachmentStore: AgentToolAttachmentStore = AgentToolAttachmentStore(),
+    messagePartStore: AgentToolMessagePartStore = AgentToolMessagePartStore(),
     inputRequestStore: AgentToolInputRequestStore = AgentToolInputRequestStore(),
 ): AgentToolSession =
     AgentToolSession(
@@ -1064,7 +1039,7 @@ private fun relationSession(
                 ),
             ),
         userTargets = emptyList(),
-        attachmentStore = attachmentStore,
+        messagePartStore = messagePartStore,
         inputRequestStore = inputRequestStore,
     )
 
@@ -1080,7 +1055,7 @@ private fun subscriptionSession(
         relationTargets = emptyList(),
         subscriptionDataSource = dataSource,
         userTargets = emptyList(),
-        attachmentStore = AgentToolAttachmentStore(),
+        messagePartStore = AgentToolMessagePartStore(),
         inputRequestStore = inputRequestStore,
     )
 

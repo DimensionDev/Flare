@@ -11,7 +11,6 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostTranslationDisplay
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
-import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentPhase
 import dev.dimension.flare.feature.agent.common.AgentRunResult
@@ -21,6 +20,8 @@ import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
 import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
@@ -65,10 +66,6 @@ internal class StatusInsightAgentUseCase(
         }
         send(AgentTrace(AgentPhase.LoadingPostContext).toConversationEvent())
         val post = postDataSource.loadPost(statusKey)
-        chatHistoryProvider.storeStatusInsightSourcePosts(
-            conversationId = conversationId,
-            posts = listOf(post),
-        )
         send(AgentConversationEvent.ContentLoaded(post))
         send(AgentTrace(AgentPhase.PostContextLoaded).toConversationEvent())
         val imageAttachments = post.aiImageAttachments()
@@ -124,21 +121,23 @@ internal class StatusInsightAgentUseCase(
                 }
             }
 
-        val resultAttachments =
-            (listOf(AgentConversationAttachment.Post(post)) + result.attachments)
-                .distinctBy { it.attachmentIdentity() }
+        val supportingParts =
+            (listOf(AgentMessagePart.PostCard(post)) + result.parts).distinctAgentMessageParts()
         val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
-        chatHistoryProvider.storeAssistantAttachments(conversationId, resultAttachments)
-        visibleResult.inputRequest?.let { inputRequest ->
-            chatHistoryProvider.storeAssistantInputRequest(conversationId, inputRequest)
-        }
-        if (!visibleResult.hasVisibleContent(resultAttachments)) {
+        val parts =
+            chatHistoryProvider.storeAssistantUiContent(
+                conversationId = conversationId,
+                text = visibleResult.text,
+                supportingParts = supportingParts,
+                inputRequest = visibleResult.inputRequest,
+            )
+        if (parts.isEmpty()) {
             return
         }
         send(
             AgentConversationEvent.Result(
                 text = visibleResult.text,
-                attachments = resultAttachments,
+                parts = parts,
                 inputRequest = visibleResult.inputRequest,
             ),
         )
@@ -393,13 +392,6 @@ internal class StatusInsightAgentUseCase(
     }
 
     private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
-
-    private fun AgentConversationAttachment.attachmentIdentity(): String =
-        when (this) {
-            is AgentConversationAttachment.Post -> "post:${post.platformType}:${post.statusKey}"
-            is AgentConversationAttachment.User -> "user:${user.platformType}:${user.key}"
-            is AgentConversationAttachment.InputRequest -> "input-request:${state.request.requestId}"
-        }
 
     private companion object {
         const val MAX_RELATED_POSTS = 3

@@ -51,7 +51,7 @@ internal fun AgentChatScreen(
         ).invoke()
     }
     val fallbackTitle = stringResource(Res.string.agent_chat_title)
-    val title = state.title?.takeIf { it.isNotBlank() } ?: fallbackTitle
+    val title = state.room.title.takeIf { it.isNotBlank() } ?: fallbackTitle
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -82,20 +82,12 @@ internal fun AgentChatScreen(
         AgentChatScaffold(
             messages = state.messages,
             input = state.input,
-            isRunning = state.isRunning,
+            isRunning = state.room.isRunning,
             canSend = state.canSend,
-            error = state.error,
-            runningTrace = state.currentTrace?.label() ?: stringResource(Res.string.agent_chat_thinking),
-            inputRequest = state.inputRequest,
+            errorMessage = state.room.errorMessage,
+            runningTrace = state.room.currentTrace?.label() ?: stringResource(Res.string.agent_chat_thinking),
             inputPlaceholder = stringResource(Res.string.agent_chat_input_placeholder),
             sendContentDescription = stringResource(Res.string.agent_chat_send),
-            messageText = GenericChatPresenter.Message::text,
-            messageLocalizedText = GenericChatPresenter.Message::localizedText,
-            messageParts = GenericChatPresenter.Message::parts,
-            messageInputRequest = GenericChatPresenter.Message::inputRequest,
-            messageInputRequestSelected = GenericChatPresenter.Message::inputRequestSelected,
-            messageInputRequestSelectedOptionId = GenericChatPresenter.Message::inputRequestSelectedOptionId,
-            isUserMessage = { it is GenericChatPresenter.Message.User },
             onInputChange = state::setInput,
             onSend = state::sendMessage,
             onInputRequestOptionSelected = state::selectInputRequestOption,

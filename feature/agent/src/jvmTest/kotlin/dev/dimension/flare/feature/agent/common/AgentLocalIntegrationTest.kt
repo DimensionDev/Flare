@@ -106,8 +106,8 @@ internal class AgentLocalIntegrationTest {
             val inputRequest = assertNotNull(visibleResult.inputRequest, "Agent should create a confirmation input request.")
             assertTrue(visibleResult.text.isNotBlank(), "Confirmation responses must keep visible text.")
             assertTrue(
-                inputRequest.localizedPrompt.args.any { it.contains("mastodon.social") },
-                "Confirmation prompt should mention mastodon.social.",
+                inputRequest.requestId.contains("mastodon.social") || visibleResult.text.contains("mastodon.social"),
+                "Confirmation request should mention mastodon.social.",
             )
             assertEquals(1, inputRequest.options.size, "Confirmation request should only include one button.")
             assertTrue(inputRequest.options.any { it.id == "confirm" }, "Confirmation request should include a confirm button.")
@@ -128,7 +128,7 @@ internal class AgentLocalIntegrationTest {
                 relationTargets = emptyList(),
                 subscriptionDataSource = subscriptionDataSource,
                 userTargets = emptyList(),
-                attachmentStore = AgentToolAttachmentStore(),
+                messagePartStore = AgentToolMessagePartStore(),
                 inputRequestStore = inputRequestStore,
             )
         return AgentToolSet(
@@ -139,7 +139,7 @@ internal class AgentLocalIntegrationTest {
                 },
             systemPromptGuidance = LOCAL_SUBSCRIPTION_TOOL_GUIDANCE,
             traceRegistry = AgentToolTraceRegistry(emptyMap()),
-            attachmentStore = session.attachmentStore,
+            messagePartStore = session.messagePartStore,
             inputRequestStore = session.inputRequestStore,
         )
     }

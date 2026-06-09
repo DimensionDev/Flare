@@ -85,17 +85,20 @@ internal class GenericChatAgentUseCase(
             }
 
         val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
-        chatHistoryProvider.storeAssistantAttachments(conversationId, result.attachments)
-        visibleResult.inputRequest?.let { inputRequest ->
-            chatHistoryProvider.storeAssistantInputRequest(conversationId, inputRequest)
-        }
-        if (!visibleResult.hasVisibleContent(result.attachments)) {
+        val parts =
+            chatHistoryProvider.storeAssistantUiContent(
+                conversationId = conversationId,
+                text = visibleResult.text,
+                supportingParts = result.parts,
+                inputRequest = visibleResult.inputRequest,
+            )
+        if (parts.isEmpty()) {
             return
         }
         send(
             AgentConversationEvent.Result(
                 text = visibleResult.text,
-                attachments = result.attachments,
+                parts = parts,
                 inputRequest = visibleResult.inputRequest,
             ),
         )

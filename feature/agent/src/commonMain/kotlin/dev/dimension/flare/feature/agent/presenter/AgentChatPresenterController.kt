@@ -7,12 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
+import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
-import dev.dimension.flare.feature.agent.common.AgentLocalizedText
+import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -24,40 +24,36 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Immutable
-internal data class AgentChatPresenterController<Message : Any, Content : Any, Trace : Any, Context : Any>(
-    val messages: ImmutableList<Message>,
+internal data class AgentChatPresenterController<Content : Any, Context : Any>(
+    val room: AgentChatRoom,
+    val messages: ImmutableList<AgentChatHistoryMessage>,
     val input: String,
-    val isRunning: Boolean,
     val content: Content?,
-    val currentTrace: Trace?,
-    val traceHistory: ImmutableList<Trace>,
-    val inputRequest: AgentInputRequest?,
-    val error: Throwable?,
     private val setInput: (String) -> Unit,
     private val sendMessage: () -> Unit,
     private val selectInputRequestOption: (AgentInputRequest.Option) -> Unit,
-    private val isAssistantMessage: (Message) -> Boolean,
-    private val messageText: (Message) -> String,
 ) {
     val insight: UiState<String> =
         when {
-            error != null -> {
-                UiState.Error(error)
+            room.errorMessage != null -> {
+                UiState.Error(IllegalStateException(room.errorMessage))
             }
 
-            isRunning && messages.none(isAssistantMessage) -> {
+            room.isRunning && messages.none { it.isAssistant } -> {
                 UiState.Loading()
             }
 
             else -> {
                 messages
-                    .lastOrNull(isAssistantMessage)
-                    ?.let { UiState.Success(messageText(it)) }
+                    .lastOrNull { it.isAssistant }
+                    ?.parts
+                    ?.agentMessageText()
+                    ?.let { UiState.Success(it) }
                     ?: UiState.Loading()
             }
         }
 
-    val canSend: Boolean = input.isNotBlank() && !isRunning
+    val canSend: Boolean = input.isNotBlank() && !room.isRunning
 
     fun setInput(value: String) {
         setInput.invoke(value)
@@ -73,48 +69,38 @@ internal data class AgentChatPresenterController<Message : Any, Content : Any, T
 }
 
 @Composable
-internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> rememberAgentChatPresenterController(
+internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController(
     key: String,
     conversationId: String,
+    room: AgentChatRoom,
+    messageRecords: List<AgentChatHistoryMessage>,
     contextFlow: Flow<Context?>,
-    runAgent: (Context, String?, String) -> Flow<AgentConversationEvent<Content, Trace>>,
-    userMessage: (String, AgentLocalizedText?) -> Message,
-    assistantMessage: (String, List<AgentConversationAttachment>, AgentInputRequest?) -> Message,
-    isAssistantMessage: (Message) -> Boolean,
-    messageInputRequest: (Message) -> AgentInputRequest? = { null },
-    messageInputRequestSelected: (Message) -> Boolean = { false },
-    markMessageInputRequestSelected: (Message, String, String) -> Message = { message, _, _ -> message },
-    messageText: (Message) -> String,
+    runAgent: (Context, String?, String) -> Flow<AgentConversationEvent<Content, AgentTrace>>,
+    onUserMessageSubmitted: suspend (String) -> Unit = {},
+    onInputRequestOptionSubmitted: suspend (AgentInputRequest.Option) -> Unit = { option ->
+        val displayText = option.label.trim()
+        if (displayText.isNotEmpty()) {
+            onUserMessageSubmitted(displayText)
+        }
+    },
     onInputRequestSelected: suspend (String, String) -> Unit = { _, _ -> },
+    onRoomStateChanged: suspend (
+        isRunning: Boolean,
+        currentTrace: AgentTrace?,
+        traceHistory: List<AgentTrace>,
+        errorMessage: String?,
+    ) -> Unit,
     missingContextError: () -> Throwable,
     autoRunOnContext: Boolean = true,
     initialUserInput: String? = null,
-    initialMessages: List<Message> = emptyList(),
-): AgentChatPresenterController<Message, Content, Trace, Context> {
+): AgentChatPresenterController<Content, Context> {
     val scope = rememberCoroutineScope()
-    var messages: ImmutableList<Message> by remember(key) {
-        mutableStateOf(persistentListOf<Message>())
-    }
+    val messages = messageRecords.toImmutableList()
     var input by remember(key) {
         mutableStateOf("")
     }
-    var isRunning by remember(key) {
-        mutableStateOf(false)
-    }
     var content by remember(key) {
         mutableStateOf<Content?>(null)
-    }
-    var currentTrace by remember(key) {
-        mutableStateOf<Trace?>(null)
-    }
-    var traceHistory: ImmutableList<Trace> by remember(key) {
-        mutableStateOf(persistentListOf())
-    }
-    var inputRequest: AgentInputRequest? by remember(key) {
-        mutableStateOf(null)
-    }
-    var error by remember(key) {
-        mutableStateOf<Throwable?>(null)
     }
     var context by remember(key) {
         mutableStateOf<Context?>(null)
@@ -128,44 +114,61 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
     var initialUserInputConsumed by remember(key) {
         mutableStateOf(false)
     }
-    val currentInitialMessages by rememberUpdatedState(initialMessages)
-
-    fun updateMessages(transform: (List<Message>) -> List<Message>) {
-        messages = transform(messages).toImmutableList()
+    var traceHistoryDraft: ImmutableList<AgentTrace> by remember(key) {
+        mutableStateOf(persistentListOf())
     }
 
-    fun appendTrace(trace: Trace) {
-        if (traceHistory.lastOrNull() != trace) {
-            traceHistory = (traceHistory + trace).toImmutableList()
+    suspend fun setRoomState(
+        isRunning: Boolean,
+        currentTrace: AgentTrace?,
+        traceHistory: List<AgentTrace>,
+        errorMessage: String?,
+    ) {
+        onRoomStateChanged(
+            isRunning,
+            currentTrace,
+            traceHistory,
+            errorMessage,
+        )
+    }
+
+    suspend fun appendTrace(trace: AgentTrace) {
+        if (traceHistoryDraft.lastOrNull() != trace) {
+            traceHistoryDraft = (traceHistoryDraft + trace).toImmutableList()
         }
+        setRoomState(
+            isRunning = true,
+            currentTrace = trace,
+            traceHistory = traceHistoryDraft,
+            errorMessage = null,
+        )
     }
 
-    fun List<Message>.sameMessageTexts(other: List<Message>): Boolean =
-        size == other.size &&
-            zip(other).all { (left, right) ->
-                messageText(left) == messageText(right)
+    fun List<AgentChatHistoryMessage>.latestOpenInputRequest(): AgentInputRequest? =
+        asReversed()
+            .firstNotNullOfOrNull { message ->
+                message.parts.latestOpenAgentInputRequest()
             }
 
-    fun List<Message>.latestOpenInputRequest(): AgentInputRequest? =
-        lastOrNull { message ->
-            messageInputRequest(message) != null && !messageInputRequestSelected(message)
-        }?.let(messageInputRequest)
-
-    fun List<Message>.latestOpenInputRequestForOption(option: AgentInputRequest.Option): AgentInputRequest? =
-        lastOrNull { message ->
-            val request = messageInputRequest(message)
-            request != null &&
-                !messageInputRequestSelected(message) &&
-                request.options.any { requestOption ->
-                    requestOption.id == option.id && requestOption.value == option.value
-                }
-        }?.let(messageInputRequest)
+    fun List<AgentChatHistoryMessage>.latestOpenInputRequestForOption(option: AgentInputRequest.Option): AgentInputRequest? =
+        asReversed()
+            .firstNotNullOfOrNull { message ->
+                message.parts.latestOpenAgentInputRequestForOption(option)
+            }
 
     fun runCurrentAgent(userInput: String?) {
         val contextValue =
             context
                 ?: run {
-                    error = missingContextError()
+                    val throwable = missingContextError()
+                    scope.launch {
+                        setRoomState(
+                            isRunning = false,
+                            currentTrace = null,
+                            traceHistory = traceHistoryDraft,
+                            errorMessage = throwable.message,
+                        )
+                    }
                     return
                 }
         runJob?.cancel()
@@ -173,10 +176,14 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
         runGeneration = generation
         runJob =
             scope.launch {
-                isRunning = true
-                currentTrace = null
-                traceHistory = persistentListOf()
-                error = null
+                traceHistoryDraft = persistentListOf()
+                setRoomState(
+                    isRunning = true,
+                    currentTrace = null,
+                    traceHistory = traceHistoryDraft,
+                    errorMessage = null,
+                )
+                var failed = false
                 try {
                     runAgent(contextValue, userInput, conversationId).collect { event ->
                         when (event) {
@@ -185,47 +192,43 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
                             }
 
                             is AgentConversationEvent.Trace -> {
-                                currentTrace = event.trace
                                 appendTrace(event.trace)
                             }
 
                             is AgentConversationEvent.Result -> {
-                                currentTrace = null
-                                inputRequest = event.inputRequest
-                                updateMessages {
-                                    it + assistantMessage(event.text, event.attachments, event.inputRequest)
-                                }
+                                setRoomState(
+                                    isRunning = true,
+                                    currentTrace = null,
+                                    traceHistory = traceHistoryDraft,
+                                    errorMessage = null,
+                                )
                             }
                         }
                     }
                 } catch (throwable: Throwable) {
-                    currentTrace = null
                     if (throwable !is CancellationException && runGeneration == generation) {
-                        error = throwable
+                        failed = true
+                        setRoomState(
+                            isRunning = false,
+                            currentTrace = null,
+                            traceHistory = traceHistoryDraft,
+                            errorMessage = throwable.message,
+                        )
                     }
                 } finally {
                     if (runGeneration == generation) {
-                        isRunning = false
                         runJob = null
+                        if (!failed) {
+                            setRoomState(
+                                isRunning = false,
+                                currentTrace = null,
+                                traceHistory = traceHistoryDraft,
+                                errorMessage = null,
+                            )
+                        }
                     }
                 }
             }
-    }
-
-    LaunchedEffect(key, initialMessages) {
-        if (!isRunning && initialMessages.isNotEmpty()) {
-            when {
-                messages.isEmpty() -> {
-                    messages = initialMessages.toImmutableList()
-                    inputRequest = initialMessages.latestOpenInputRequest()
-                }
-
-                messages.sameMessageTexts(initialMessages) && messages != initialMessages -> {
-                    messages = initialMessages.toImmutableList()
-                    inputRequest = initialMessages.latestOpenInputRequest()
-                }
-            }
-        }
     }
 
     LaunchedEffect(key, conversationId) {
@@ -233,22 +236,20 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
             runJob?.cancel()
             runJob = null
             runGeneration += 1
-            messages = currentInitialMessages.toImmutableList()
             input = ""
-            isRunning = false
             content = null
-            currentTrace = null
-            traceHistory = persistentListOf()
-            inputRequest = null
-            error = null
+            traceHistoryDraft = persistentListOf()
             context = contextValue
-            inputRequest = messages.latestOpenInputRequest()
+            setRoomState(
+                isRunning = false,
+                currentTrace = null,
+                traceHistory = traceHistoryDraft,
+                errorMessage = null,
+            )
             val initialText = initialUserInput?.trim()?.takeIf { it.isNotEmpty() }
-            if (!initialUserInputConsumed && initialText != null) {
+            if (!initialUserInputConsumed && initialText != null && contextValue != null) {
                 initialUserInputConsumed = true
-                updateMessages {
-                    it + userMessage(initialText, null)
-                }
+                onUserMessageSubmitted(initialText)
                 runCurrentAgent(userInput = initialText)
             } else if (autoRunOnContext) {
                 runCurrentAgent(userInput = null)
@@ -257,52 +258,62 @@ internal fun <Message : Any, Content : Any, Trace : Any, Context : Any> remember
     }
 
     return AgentChatPresenterController(
+        room = room,
         messages = messages,
         input = input,
-        isRunning = isRunning,
         content = content,
-        currentTrace = currentTrace,
-        traceHistory = traceHistory,
-        inputRequest = inputRequest,
-        error = error,
         setInput = {
             input = it
         },
         sendMessage = {
             val text = input.trim()
-            if (text.isNotEmpty() && !isRunning) {
-                input = ""
-                inputRequest = null
-                updateMessages {
-                    it + userMessage(text, null)
+            if (text.isNotEmpty() && !room.isRunning) {
+                if (context == null) {
+                    val throwable = missingContextError()
+                    scope.launch {
+                        setRoomState(
+                            isRunning = false,
+                            currentTrace = null,
+                            traceHistory = traceHistoryDraft,
+                            errorMessage = throwable.message,
+                        )
+                    }
+                } else {
+                    input = ""
+                    scope.launch {
+                        onUserMessageSubmitted(text)
+                        runCurrentAgent(userInput = text)
+                    }
                 }
-                runCurrentAgent(userInput = text)
             }
         },
         selectInputRequestOption = { option ->
             val text = option.value.trim()
-            if (!option.submit && !isRunning) {
+            if (!option.submit && !room.isRunning) {
                 input = text
-            } else if (text.isNotEmpty() && !isRunning) {
-                messages.latestOpenInputRequestForOption(option)?.let { request ->
-                    updateMessages { currentMessages ->
-                        currentMessages.map { message ->
-                            markMessageInputRequestSelected(message, request.requestId, option.id)
-                        }
-                    }
+            } else if (text.isNotEmpty() && !room.isRunning) {
+                if (context == null) {
+                    val throwable = missingContextError()
                     scope.launch {
-                        onInputRequestSelected(request.requestId, option.id)
+                        setRoomState(
+                            isRunning = false,
+                            currentTrace = null,
+                            traceHistory = traceHistoryDraft,
+                            errorMessage = throwable.message,
+                        )
+                    }
+                } else {
+                    val request = messages.latestOpenInputRequestForOption(option)
+                    input = ""
+                    scope.launch {
+                        request?.let { selectedRequest ->
+                            onInputRequestSelected(selectedRequest.requestId, option.id)
+                        }
+                        onInputRequestOptionSubmitted(option)
+                        runCurrentAgent(userInput = text)
                     }
                 }
-                input = ""
-                inputRequest = null
-                updateMessages {
-                    it + userMessage(option.localizedLabel.toAgentProtocolText(), option.localizedLabel)
-                }
-                runCurrentAgent(userInput = text)
             }
         },
-        isAssistantMessage = isAssistantMessage,
-        messageText = messageText,
     )
 }

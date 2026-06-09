@@ -21,9 +21,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
-import dev.dimension.flare.feature.agent.common.AgentLocalizedText
-import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -31,27 +30,18 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun <Message : Any> AgentChatSheetScaffold(
-    messages: List<Message>,
+internal fun AgentChatSheetScaffold(
+    messages: List<AgentChatHistoryMessage>,
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    error: Throwable?,
+    errorMessage: String?,
     runningTrace: String,
-    errorText: String,
-    inputRequest: AgentInputRequest?,
     inputPlaceholder: String,
     sendContentDescription: String,
-    messageText: (Message) -> String,
-    messageParts: (Message) -> List<AgentMessagePart>,
-    isUserMessage: (Message) -> Boolean,
     onInputChange: (String) -> Unit,
     onSend: () -> Unit,
     modifier: Modifier = Modifier,
-    messageLocalizedText: (Message) -> AgentLocalizedText? = { null },
-    messageInputRequest: (Message) -> AgentInputRequest? = { null },
-    messageInputRequestSelected: (Message) -> Boolean = { false },
-    messageInputRequestSelectedOptionId: (Message) -> String? = { null },
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit = {},
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
@@ -77,7 +67,7 @@ internal fun <Message : Any> AgentChatSheetScaffold(
         messages.size +
             leadingContentItemCount +
             (if (isRunning) 1 else 0) +
-            (if (error != null) 1 else 0)
+            (if (errorMessage != null) 1 else 0)
 
     LaunchedEffect(itemCount) {
         if (itemCount > 0) {
@@ -102,14 +92,9 @@ internal fun <Message : Any> AgentChatSheetScaffold(
             leadingContent()
 
             items(messages) { message ->
-                val localizedText = messageLocalizedText(message)?.resolveAgentLocalizedText()
                 AgentChatMessageBubble(
-                    text = localizedText ?: messageText(message),
-                    parts = localizedText?.let { listOf(AgentMessagePart.Text(it)) } ?: messageParts(message),
-                    inputRequest = messageInputRequest(message),
-                    inputRequestSelected = messageInputRequestSelected(message),
-                    inputRequestSelectedOptionId = messageInputRequestSelectedOptionId(message),
-                    isUser = isUserMessage(message),
+                    parts = message.parts,
+                    isUser = message.isUser,
                     onInputRequestOptionSelected = onInputRequestOptionSelected,
                     onPostClick = onPostClick,
                     onUserClick = onUserClick,
@@ -122,10 +107,10 @@ internal fun <Message : Any> AgentChatSheetScaffold(
                 }
             }
 
-            error?.let { throwable ->
+            errorMessage?.let { text ->
                 item {
                     AgentChatError(
-                        text = throwable.message ?: errorText,
+                        text = text,
                     )
                 }
             }
@@ -133,7 +118,6 @@ internal fun <Message : Any> AgentChatSheetScaffold(
         AgentChatInput(
             state = textState,
             canSend = canSend,
-            inputRequest = inputRequest,
             placeholder = inputPlaceholder,
             sendContentDescription = sendContentDescription,
             onSend = onSend,

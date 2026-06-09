@@ -40,7 +40,7 @@ internal fun LocalHistoryAgentScreen(
             target = target,
         ).invoke()
     }
-    val currentTrace = state.currentTrace
+    val currentTrace = state.room.currentTrace
     val runningTrace =
         if (currentTrace != null) {
             currentTrace.label()
@@ -52,20 +52,12 @@ internal fun LocalHistoryAgentScreen(
     AgentChatScaffold(
         messages = state.messages,
         input = state.input,
-        isRunning = state.isRunning,
+        isRunning = state.room.isRunning,
         canSend = state.canSend,
-        error = state.error,
+        errorMessage = state.room.errorMessage,
         runningTrace = runningTrace,
-        inputRequest = state.inputRequest,
         inputPlaceholder = stringResource(id = R.string.agent_chat_input_placeholder),
         sendContentDescription = stringResource(id = R.string.agent_chat_send),
-        messageText = LocalHistoryAgentPresenter.Message::text,
-        messageLocalizedText = LocalHistoryAgentPresenter.Message::localizedText,
-        messageParts = LocalHistoryAgentPresenter.Message::parts,
-        messageInputRequest = LocalHistoryAgentPresenter.Message::inputRequest,
-        messageInputRequestSelected = LocalHistoryAgentPresenter.Message::inputRequestSelected,
-        messageInputRequestSelectedOptionId = LocalHistoryAgentPresenter.Message::inputRequestSelectedOptionId,
-        isUserMessage = { it is LocalHistoryAgentPresenter.Message.User },
         onInputChange = state::setInput,
         onSend = state::sendMessage,
         onInputRequestOptionSelected = state::selectInputRequestOption,

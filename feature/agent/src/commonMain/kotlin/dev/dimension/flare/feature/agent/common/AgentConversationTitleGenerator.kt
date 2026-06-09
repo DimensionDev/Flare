@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.agent.common
 
 import ai.koog.prompt.Prompt
+import dev.dimension.flare.feature.agent.presenter.agentMessageText
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
 import kotlinx.coroutines.CancellationException
 import org.koin.core.annotation.Single
@@ -14,8 +15,10 @@ internal class AgentConversationTitleGenerator(
             messages
                 .filter { it.role != AgentChatHistoryMessage.Role.System }
                 .takeLast(MAX_MESSAGES)
+                .map { message -> message.role to message.parts.agentMessageText() }
+                .filter { (_, text) -> text.isNotBlank() }
                 .joinToString("\n") { message ->
-                    "${message.role.name}: ${message.text.take(MAX_MESSAGE_CHARS)}"
+                    "${message.first.name}: ${message.second.take(MAX_MESSAGE_CHARS)}"
                 }.takeIf { it.isNotBlank() }
                 ?: return null
         val runtime = runtimeProvider.createRuntime() ?: return null

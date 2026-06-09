@@ -2,19 +2,18 @@ package dev.dimension.flare.feature.agent.presenter.history
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
+import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
-import dev.dimension.flare.feature.agent.common.AgentLocalizedText
-import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentUseCase
-import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
-import dev.dimension.flare.feature.agent.presenter.parseAgentMessageParts
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
-import dev.dimension.flare.feature.agent.presenter.toAgentTextParts
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
@@ -35,13 +34,9 @@ public class LocalHistoryAgentPresenter(
     @Immutable
     public interface State {
         public val response: UiState<String>
-        public val messages: ImmutableList<Message>
+        public val room: AgentChatRoom
+        public val messages: ImmutableList<AgentChatHistoryMessage>
         public val input: String
-        public val isRunning: Boolean
-        public val currentTrace: AgentTrace?
-        public val traceHistory: ImmutableList<AgentTrace>
-        public val inputRequest: AgentInputRequest?
-        public val error: Throwable?
         public val canSend: Boolean
 
         public fun setInput(value: String)
@@ -58,6 +53,13 @@ public class LocalHistoryAgentPresenter(
             remember(conversationId, normalizedQuery, target) {
                 "local_history_agent:$conversationId:${normalizedQuery.orEmpty()}:$target"
             }
+        val restoredMessages by remember(conversationId) {
+            historyProvider.observeMessages(conversationId)
+        }.collectAsState(emptyList())
+        val room by remember(conversationId) {
+            historyProvider.observeRoom(conversationId)
+        }.collectAsState(null)
+        val currentRoom = room ?: AgentChatRoom.empty(conversationId)
         val contextFlow =
             remember {
                 accountService
@@ -70,6 +72,8 @@ public class LocalHistoryAgentPresenter(
             rememberAgentChatPresenterController(
                 key = key,
                 conversationId = conversationId,
+                room = currentRoom,
+                messageRecords = restoredMessages,
                 contextFlow = contextFlow,
                 runAgent = { context, userInput, currentConversationId ->
                     localHistoryAgentUseCase(
@@ -80,40 +84,23 @@ public class LocalHistoryAgentPresenter(
                         conversationId = currentConversationId,
                     )
                 },
-                userMessage = { text, localizedText ->
-                    Message.User(text = text, localizedText = localizedText)
+                onUserMessageSubmitted = { text ->
+                    historyProvider.storeUserUiMessage(conversationId, text)
                 },
-                assistantMessage = { text, attachments, inputRequest ->
-                    Message.Assistant(
-                        text = text,
-                        parts = parseAgentMessageParts(text, attachments),
-                        inputRequest = inputRequest,
-                    )
+                onInputRequestOptionSubmitted = { option ->
+                    historyProvider.storeUserUiInputRequestOption(conversationId, option)
                 },
-                isAssistantMessage = { it is Message.Assistant },
-                messageInputRequest = Message::inputRequest,
-                messageInputRequestSelected = Message::inputRequestSelected,
-                markMessageInputRequestSelected = { message, requestId, optionId ->
-                    when (message) {
-                        is Message.Assistant -> {
-                            if (message.inputRequest?.requestId == requestId) {
-                                message.copy(
-                                    inputRequestSelected = true,
-                                    inputRequestSelectedOptionId = optionId,
-                                )
-                            } else {
-                                message
-                            }
-                        }
-
-                        is Message.User -> {
-                            message
-                        }
-                    }
-                },
-                messageText = Message::text,
                 onInputRequestSelected = { requestId, optionId ->
                     historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
+                },
+                onRoomStateChanged = { isRunning, currentTrace, traceHistory, errorMessage ->
+                    historyProvider.updateRoomState(
+                        conversationId = conversationId,
+                        isRunning = isRunning,
+                        currentTrace = currentTrace,
+                        traceHistory = traceHistory,
+                        errorMessage = errorMessage,
+                    )
                 },
                 missingContextError = {
                     IllegalStateException("Local history agent context is unavailable")
@@ -122,13 +109,9 @@ public class LocalHistoryAgentPresenter(
 
         return StateImpl(
             response = controller.insight,
+            room = controller.room,
             messages = controller.messages,
             input = controller.input,
-            isRunning = controller.isRunning,
-            currentTrace = controller.currentTrace,
-            traceHistory = controller.traceHistory,
-            inputRequest = controller.inputRequest,
-            error = controller.error,
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
@@ -137,45 +120,11 @@ public class LocalHistoryAgentPresenter(
     }
 
     @Immutable
-    public sealed interface Message {
-        public val text: String
-        public val localizedText: AgentLocalizedText?
-            get() = null
-        public val parts: ImmutableList<AgentMessagePart>
-        public val inputRequest: AgentInputRequest?
-            get() = null
-        public val inputRequestSelected: Boolean
-            get() = false
-        public val inputRequestSelectedOptionId: String?
-            get() = null
-
-        @Immutable
-        public data class User(
-            override val text: String,
-            override val localizedText: AgentLocalizedText? = null,
-            override val parts: ImmutableList<AgentMessagePart> = text.toAgentTextParts(),
-        ) : Message
-
-        @Immutable
-        public data class Assistant(
-            override val text: String,
-            override val parts: ImmutableList<AgentMessagePart>,
-            override val inputRequest: AgentInputRequest? = null,
-            override val inputRequestSelected: Boolean = false,
-            override val inputRequestSelectedOptionId: String? = null,
-        ) : Message
-    }
-
-    @Immutable
     private data class StateImpl(
         override val response: UiState<String>,
-        override val messages: ImmutableList<Message>,
+        override val room: AgentChatRoom,
+        override val messages: ImmutableList<AgentChatHistoryMessage>,
         override val input: String,
-        override val isRunning: Boolean,
-        override val currentTrace: AgentTrace?,
-        override val traceHistory: ImmutableList<AgentTrace>,
-        override val inputRequest: AgentInputRequest?,
-        override val error: Throwable?,
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,

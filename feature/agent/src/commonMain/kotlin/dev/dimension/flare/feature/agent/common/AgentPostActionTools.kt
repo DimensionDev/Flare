@@ -6,6 +6,7 @@ import ai.koog.serialization.typeToken
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickPostEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -39,18 +40,16 @@ internal class ListPostActionsTool(
         if (actions.isEmpty()) {
             return "No executable post actions are available for ${post.statusKey}. Translate and pure UI actions are not included."
         }
-        session.inputRequestStore.set(
-            AgentInputRequest(
+        val request =
+            AgentPendingInputRequest(
                 requestId = "post-actions:${post.statusKey}",
-                localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectPostAction),
                 options =
                     actions.map { action ->
-                        AgentInputRequest.Option(
+                        AgentPendingInputRequest.Option(
                             id = action.id,
-                            localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, action.label),
                             value =
                                 buildString {
-                                    appendLine(AgentUiStrings.PostAction.ExecutePostActionPrefix)
+                                    appendLine("event=post_action_selected")
                                     appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                     appendLine("targetStatusId=${post.statusKey.id}")
                                     appendLine("targetStatusHost=${post.statusKey.host}")
@@ -60,13 +59,16 @@ internal class ListPostActionsTool(
                         )
                     },
                 allowFreeText = true,
-                localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionPlaceholder),
-            ),
-        )
+            )
+        session.inputRequestStore.set(request)
         return buildString {
             appendLine("Available post actions for ${post.statusKey}:")
+            appendLine("inputRequestId=${request.requestId}")
+            appendLine("inputRequestOptions:")
             actions.forEach { action ->
-                appendLine("- actionId=${action.id}, actionName=${action.label}, safety=${action.safety.label}")
+                appendLine(
+                    "- optionId=${action.id}, optionKind=post_action, actionId=${action.id}, actionName=${action.label}, safety=${action.safety.label}",
+                )
             }
         }.trim()
     }
@@ -121,33 +123,49 @@ internal class ExecutePostActionTool(
                 ?: return "No signed-in post action account matches ${action.payload.accountKey} for ${action.label}."
 
         if (!args.confirmed) {
-            val localizedPrompt =
-                AgentUiStrings.text(
-                    AgentLocalizedTextKey.PostActionConfirmationMessage,
-                    action.label,
-                    action.payload.accountKey.toString(),
-                    post.statusKey.toString(),
-                    post.user?.let { it.name.raw.takeIf { name -> name.isNotBlank() } ?: it.handle.canonical }.orEmpty(),
-                    post.content.raw.take(160),
-                )
+            val prompt =
+                buildString {
+                    appendLine("event=post_action_confirmation_required")
+                    appendLine("inputRequestId=post-action-confirm:${post.statusKey}:${action.id}")
+                    appendLine("inputRequestOptions:")
+                    appendLine("- optionId=confirm")
+                    appendLine("  optionKind=confirmation")
+                    appendLine("actionId=${action.id}")
+                    appendLine("actionName=${action.label}")
+                    appendLine("account=${action.payload.accountKey}")
+                    appendLine("targetPostRef=${post.agentAttachmentMarker()}")
+                    appendLine("targetStatus=${post.statusKey}")
+                    appendLine("targetStatusId=${post.statusKey.id}")
+                    appendLine("targetStatusHost=${post.statusKey.host}")
+                    post.user?.let { user ->
+                        appendLine("author=${user.name.raw.takeIf { name -> name.isNotBlank() } ?: user.handle.canonical}")
+                    }
+                    appendLine("summary=${post.content.raw.take(160)}")
+                }
             session.inputRequestStore.set(
-                AgentInputRequest(
+                AgentPendingInputRequest(
                     requestId = "post-action-confirm:${post.statusKey}:${action.id}",
-                    localizedPrompt = localizedPrompt,
                     options =
                         listOf(
-                            AgentInputRequest.Option(
+                            AgentPendingInputRequest.Option(
                                 id = "confirm",
-                                value = AgentUiStrings.Common.ConfirmExecute,
-                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmExecute),
+                                value =
+                                    buildString {
+                                        appendLine("event=post_action_confirmed")
+                                        appendLine("confirmed=true")
+                                        appendLine("targetPostRef=${post.agentAttachmentMarker()}")
+                                        appendLine("targetStatusId=${post.statusKey.id}")
+                                        appendLine("targetStatusHost=${post.statusKey.host}")
+                                        appendLine("actionId=${action.id}")
+                                        appendLine("actionName=${action.label}")
+                                    },
                             ),
                         ),
                     allowFreeText = true,
-                    localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionConfirmationPlaceholder),
                     postPreview = post,
                 ),
             )
-            return localizedPrompt.toAgentProtocolText()
+            return prompt
         }
 
         actionHandler(target.dataSource, action.payload.postEvent)
@@ -229,19 +247,16 @@ private suspend fun AgentToolSession.postActionTargetSelectionMessage(args: Post
         return "Post action requires a target post with available action menus. " +
             "Open a post insight session, use search_posts/load_post_context first, or provide a target post attachmentRef."
     }
-    val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectPostActionPost)
-    inputRequestStore.set(
-        AgentInputRequest(
+    val request =
+        AgentPendingInputRequest(
             requestId = "post-action-target:${args.targetPostRef}:${args.targetStatusId}:${args.targetStatusHost}",
-            localizedPrompt = localizedPrompt,
             options =
                 posts.map { post ->
-                    AgentInputRequest.Option(
+                    AgentPendingInputRequest.Option(
                         id = "post:${post.agentAttachmentRef()}",
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, post.postActionLabel()),
                         value =
                             buildString {
-                                appendLine(AgentUiStrings.PostAction.OperatePostPrefix)
+                                appendLine("event=post_action_target_selected")
                                 appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                 appendLine("targetStatusId=${post.statusKey.id}")
                                 appendLine("targetStatusHost=${post.statusKey.host}")
@@ -250,29 +265,37 @@ private suspend fun AgentToolSession.postActionTargetSelectionMessage(args: Post
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionTargetPostPlaceholder),
-        ),
-    )
-    return localizedPrompt.toAgentProtocolText()
+        )
+    inputRequestStore.set(request)
+    return buildString {
+        appendLine("event=post_action_target_selection_required")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("inputRequestOptions:")
+        posts.forEach { post ->
+            appendLine("- optionId=post:${post.agentAttachmentRef()}")
+            appendLine("  optionKind=post")
+            appendLine("  platform=${post.platformType.name}")
+            appendLine("  targetStatus=${post.statusKey}")
+            appendLine("  author=${post.user?.let { user -> user.name.raw.takeIf { it.isNotBlank() } ?: user.handle.canonical }.orEmpty()}")
+            appendLine("  summary=${post.content.raw.take(120)}")
+        }
+    }.trim()
 }
 
 private suspend fun AgentToolSession.postActionSelectionMessage(
     post: UiTimelineV2.Post,
     actions: List<ExecutablePostAction>,
 ): String {
-    val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectPostAction)
-    inputRequestStore.set(
-        AgentInputRequest(
+    val request =
+        AgentPendingInputRequest(
             requestId = "post-action:${post.statusKey}",
-            localizedPrompt = localizedPrompt,
             options =
                 actions.map { action ->
-                    AgentInputRequest.Option(
+                    AgentPendingInputRequest.Option(
                         id = action.id,
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, action.label),
                         value =
                             buildString {
-                                appendLine(AgentUiStrings.PostAction.ExecutePostActionPrefix)
+                                appendLine("event=post_action_selected")
                                 appendLine("targetPostRef=${post.agentAttachmentMarker()}")
                                 appendLine("targetStatusId=${post.statusKey.id}")
                                 appendLine("targetStatusHost=${post.statusKey.host}")
@@ -282,18 +305,28 @@ private suspend fun AgentToolSession.postActionSelectionMessage(
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.PostActionPlaceholder),
-        ),
-    )
-    return localizedPrompt.toAgentProtocolText()
+        )
+    inputRequestStore.set(request)
+    return buildString {
+        appendLine("event=post_action_selection_required")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("targetPostRef=${post.agentAttachmentMarker()}")
+        appendLine("targetStatus=${post.statusKey}")
+        appendLine("inputRequestOptions:")
+        actions.forEach { action ->
+            appendLine(
+                "- optionId=${action.id}, optionKind=post_action, actionId=${action.id}, actionName=${action.label}, safety=${action.safety.label}",
+            )
+        }
+    }.trim()
 }
 
 private suspend fun AgentToolSession.availableActionPosts(): List<UiTimelineV2.Post> =
     buildList {
         status?.currentPost?.agentDisplayPost()?.let(::add)
-        attachmentStore
+        messagePartStore
             .snapshot()
-            .filterIsInstance<AgentConversationAttachment.Post>()
+            .filterIsInstance<AgentMessagePart.PostCard>()
             .map { it.post.agentDisplayPost() }
             .forEach(::add)
     }.distinctBy { it.platformType to it.statusKey }
@@ -408,13 +441,6 @@ private fun ActionMenu.Item.Text.Localized.Type?.actionSafety(): PostActionSafet
 
         else -> PostActionSafety.Medium
     }
-
-private fun UiTimelineV2.Post.postActionLabel(): String =
-    listOfNotNull(
-        user?.let { user -> user.name.raw.takeIf { it.isNotBlank() } ?: user.handle.canonical },
-        content.raw.take(48).takeIf { it.isNotBlank() },
-    ).joinToString(" - ")
-        .ifBlank { statusKey.toString() }
 
 private fun microBlogActionKeyOrNull(
     id: String,

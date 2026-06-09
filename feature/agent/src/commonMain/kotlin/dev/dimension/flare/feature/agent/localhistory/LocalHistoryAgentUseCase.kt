@@ -4,7 +4,6 @@ import ai.koog.prompt.Prompt
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
-import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
@@ -13,6 +12,7 @@ import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
 import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
+import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.SendChannel
@@ -112,19 +112,22 @@ internal class LocalHistoryAgentUseCase(
                 throw throwable
             }
 
-        val attachments = result.attachments.distinctBy { it.attachmentIdentity() }
+        val supportingParts = result.parts.distinctAgentMessageParts()
         val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
-        chatHistoryProvider.storeAssistantAttachments(conversationId, attachments)
-        visibleResult.inputRequest?.let { inputRequest ->
-            chatHistoryProvider.storeAssistantInputRequest(conversationId, inputRequest)
-        }
-        if (!visibleResult.hasVisibleContent(attachments)) {
+        val parts =
+            chatHistoryProvider.storeAssistantUiContent(
+                conversationId = conversationId,
+                text = visibleResult.text,
+                supportingParts = supportingParts,
+                inputRequest = visibleResult.inputRequest,
+            )
+        if (parts.isEmpty()) {
             return
         }
         send(
             AgentConversationEvent.Result(
                 text = visibleResult.text,
-                attachments = attachments,
+                parts = parts,
                 inputRequest = visibleResult.inputRequest,
             ),
         )
@@ -249,13 +252,6 @@ internal class LocalHistoryAgentUseCase(
             LocalHistoryAgentTarget.Posts -> "posts"
             LocalHistoryAgentTarget.Users -> "users"
             LocalHistoryAgentTarget.All -> "posts and users"
-        }
-
-    private fun AgentConversationAttachment.attachmentIdentity(): String =
-        when (this) {
-            is AgentConversationAttachment.Post -> "post:${post.platformType}:${post.statusKey}"
-            is AgentConversationAttachment.User -> "user:${user.platformType}:${user.key}"
-            is AgentConversationAttachment.InputRequest -> "input-request:${state.request.requestId}"
         }
 
     private companion object {

@@ -111,7 +111,6 @@ internal class LoadSubscriptionTimelineTool(
         val target =
             session.resolveSubscriptionTimelineTarget(args)
                 ?: return session.subscriptionSourceSelectionMessage(
-                    valuePrefix = AgentUiStrings.Subscription.LoadSourcePrefix,
                     action = "load",
                 )
         val pageSize = args.maxItems.coerceIn(1, MAX_SUBSCRIPTION_TOOL_ITEMS)
@@ -121,7 +120,7 @@ internal class LoadSubscriptionTimelineTool(
                 .load(pageSize = pageSize, request = PagingRequest.Refresh)
                 .data
                 .take(pageSize)
-        session.attachmentStore.addPosts(items.filterIsInstance<UiTimelineV2.Post>())
+        session.messagePartStore.addPosts(items.filterIsInstance<UiTimelineV2.Post>())
         session.subscriptionItemStore.addFeeds(items.filterIsInstance<UiTimelineV2.Feed>())
 
         return buildString {
@@ -191,24 +190,26 @@ internal class SaveSubscriptionSourceTool(
         }
         val candidate = candidates.single()
         if (!args.confirmed) {
-            val localizedPrompt = candidate.saveConfirmationLocalizedText()
+            val requestId = "subscription-save:${candidate.type.name}:${candidate.url}"
+            val prompt = candidate.saveConfirmationMessage(requestId)
             session.inputRequestStore.set(
-                AgentInputRequest(
-                    requestId = "subscription-save:${candidate.type.name}:${candidate.url}",
+                AgentPendingInputRequest(
+                    requestId = requestId,
                     options =
                         listOf(
-                            AgentInputRequest.Option(
+                            AgentPendingInputRequest.Option(
                                 id = "confirm",
-                                value = AgentUiStrings.Subscription.ConfirmSave,
-                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmSaveSubscription),
+                                value =
+                                    buildString {
+                                        appendLine("event=subscription_save_confirmed")
+                                        appendSubscriptionSaveArgs(candidate, confirmed = true)
+                                    },
                             ),
                         ),
                     allowFreeText = true,
-                    localizedPrompt = localizedPrompt,
-                    localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.SubscriptionSaveConfirmationPlaceholder),
                 ),
             )
-            return localizedPrompt.toAgentProtocolText()
+            return prompt
         }
 
         val saved =
@@ -264,28 +265,29 @@ internal class DeleteSubscriptionSourceTool(
         val source =
             session.resolveSubscriptionSource(args.sourceId, args.type, args.url)
                 ?: return session.subscriptionSourceSelectionMessage(
-                    valuePrefix = AgentUiStrings.Subscription.DeleteSourcePrefix,
                     action = "delete",
                 )
         if (!args.confirmed) {
-            val localizedPrompt = source.deleteConfirmationLocalizedText()
+            val requestId = "subscription-delete:${source.id}"
+            val prompt = source.deleteConfirmationMessage(requestId)
             session.inputRequestStore.set(
-                AgentInputRequest(
-                    requestId = "subscription-delete:${source.id}",
+                AgentPendingInputRequest(
+                    requestId = requestId,
                     options =
                         listOf(
-                            AgentInputRequest.Option(
+                            AgentPendingInputRequest.Option(
                                 id = "confirm",
-                                value = AgentUiStrings.Subscription.ConfirmDelete,
-                                localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.ConfirmDeleteSubscription),
+                                value =
+                                    buildString {
+                                        appendLine("event=subscription_delete_confirmed")
+                                        appendSubscriptionSourceArgs(source, action = "delete", confirmed = true)
+                                    },
                             ),
                         ),
                     allowFreeText = true,
-                    localizedPrompt = localizedPrompt,
-                    localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.SubscriptionDeleteConfirmationPlaceholder),
                 ),
             )
-            return localizedPrompt.toAgentProtocolText()
+            return prompt
         }
 
         val deleted = dataSource.deleteSource(source.id)
@@ -456,7 +458,7 @@ private suspend fun AgentToolSession.resolveSubscriptionTimelineTarget(
                             id = null,
                             type = type,
                             url = detected.host,
-                            title = "${detected.instanceName ?: detected.host} - ${type.displayName()}",
+                            title = "${detected.instanceName ?: detected.host} - ${type.name}",
                         )
                     }
                 }
@@ -530,7 +532,7 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(
                     args.title
                         .trim()
                         .ifBlank {
-                            detectedRss?.title ?: "$normalizedUrl - ${requestedType.displayName()}"
+                            detectedRss?.title ?: "$normalizedUrl - ${requestedType.name}"
                         },
                 icon = args.icon.trim().ifBlank { detectedRss?.icon },
                 displayMode = displayMode,
@@ -568,7 +570,7 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(
                 SubscriptionSaveCandidate(
                     type = type,
                     url = detected.host,
-                    title = args.title.trim().ifBlank { "${detected.instanceName ?: detected.host} - ${type.displayName()}" },
+                    title = args.title.trim().ifBlank { "${detected.instanceName ?: detected.host} - ${type.name}" },
                     icon = args.icon.trim().ifBlank { detected.icon },
                     displayMode = RssDisplayMode.FULL_CONTENT,
                 )
@@ -581,66 +583,80 @@ private suspend fun AgentToolSession.resolveSubscriptionSaveCandidates(
     }
 }
 
-private suspend fun AgentToolSession.subscriptionSourceSelectionMessage(
-    valuePrefix: String,
-    action: String,
-): String {
+private suspend fun AgentToolSession.subscriptionSourceSelectionMessage(action: String): String {
     val dataSource = subscriptionDataSource ?: return noSubscriptionDataSourceMessage()
     val sources = dataSource.listSources()
     if (sources.isEmpty()) {
         return "No saved subscription sources are available."
     }
-    val localizedPrompt =
-        when (action) {
-            "delete" -> AgentUiStrings.text(AgentLocalizedTextKey.SelectDeleteSubscriptionSource)
-            else -> AgentUiStrings.text(AgentLocalizedTextKey.SelectLoadSubscriptionSource)
-        }
-    inputRequestStore.set(
-        AgentInputRequest(
-            requestId = "subscription-source:$action:${sources.joinToString { it.id.toString() }}",
-            localizedPrompt = localizedPrompt,
+    val options = sources.take(SUBSCRIPTION_SELECTION_OPTION_LIMIT)
+    val request =
+        AgentPendingInputRequest(
+            requestId = "subscription-source:$action:${options.joinToString { it.id.toString() }}",
             options =
-                sources.take(SUBSCRIPTION_SELECTION_OPTION_LIMIT).map { source ->
-                    AgentInputRequest.Option(
+                options.map { source ->
+                    AgentPendingInputRequest.Option(
                         id = "subscription:${source.id}",
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, source.subscriptionLabel()),
                         value =
                             buildString {
-                                appendLine(valuePrefix)
-                                appendSubscriptionSourceArgs(source, action)
+                                appendLine("event=subscription_source_selected")
+                                appendSubscriptionSourceArgs(source, action = action, confirmed = false)
                             },
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.SubscriptionSourcePlaceholder),
-        ),
-    )
-    return localizedPrompt.toAgentProtocolText()
+        )
+    inputRequestStore.set(request)
+    return buildString {
+        appendLine("event=subscription_source_selection_required")
+        appendLine("action=$action")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("inputRequestOptions:")
+        options.forEach { source ->
+            appendLine("- optionId=subscription:${source.id}")
+            appendLine("  optionKind=subscription_source")
+            appendLine("  sourceId=${source.id}")
+            appendLine("  type=${source.type.name}")
+            appendLine("  url=${source.url}")
+            appendLine("  title=${source.title.orEmpty()}")
+            appendLine("  host=${source.host}")
+        }
+    }.trim()
 }
 
 private suspend fun AgentToolSession.subscriptionSaveSelectionMessage(candidates: List<SubscriptionSaveCandidate>): String {
-    val localizedPrompt = AgentUiStrings.text(AgentLocalizedTextKey.SelectSaveSubscriptionSource)
-    inputRequestStore.set(
-        AgentInputRequest(
-            requestId = "subscription-save-choice:${candidates.joinToString { it.type.name + ':' + it.url }}",
-            localizedPrompt = localizedPrompt,
+    val options = candidates.take(SUBSCRIPTION_SELECTION_OPTION_LIMIT)
+    val request =
+        AgentPendingInputRequest(
+            requestId = "subscription-save-choice:${options.joinToString { it.type.name + ':' + it.url }}",
             options =
-                candidates.take(SUBSCRIPTION_SELECTION_OPTION_LIMIT).mapIndexed { index, candidate ->
-                    AgentInputRequest.Option(
+                options.mapIndexed { index, candidate ->
+                    AgentPendingInputRequest.Option(
                         id = "subscription-save:${index + 1}",
-                        localizedLabel = AgentUiStrings.text(AgentLocalizedTextKey.DynamicText, candidate.subscriptionLabel()),
                         value =
                             buildString {
-                                appendLine(AgentUiStrings.Subscription.SaveSourcePrefix)
-                                appendSubscriptionSaveArgs(candidate)
+                                appendLine("event=subscription_save_candidate_selected")
+                                appendSubscriptionSaveArgs(candidate, confirmed = false)
                             },
                     )
                 },
             allowFreeText = true,
-            localizedFreeTextPlaceholder = AgentUiStrings.text(AgentLocalizedTextKey.SubscriptionSaveSelectionPlaceholder),
-        ),
-    )
-    return localizedPrompt.toAgentProtocolText()
+        )
+    inputRequestStore.set(request)
+    return buildString {
+        appendLine("event=subscription_save_selection_required")
+        appendLine("inputRequestId=${request.requestId}")
+        appendLine("inputRequestOptions:")
+        options.forEachIndexed { index, candidate ->
+            appendLine("- optionId=subscription-save:${index + 1}")
+            appendLine("  optionKind=subscription_save_candidate")
+            appendLine("  type=${candidate.type.name}")
+            appendLine("  url=${candidate.url}")
+            appendLine("  title=${candidate.title.orEmpty()}")
+            appendLine("  icon=${candidate.icon.orEmpty()}")
+            appendLine("  displayMode=${candidate.displayMode.name}")
+        }
+    }.trim()
 }
 
 private fun SubscriptionSourceDetection.toToolText(): String =
@@ -676,7 +692,7 @@ private fun SubscriptionSourceDetection.toToolText(): String =
                 appendLine("icon: ${icon.orEmpty()}")
                 appendLine("availableTypes: ${availableTimelines.joinToString { it.name }}")
                 availableTimelines.forEach { type ->
-                    appendLine("- type=${type.name}, displayName=${type.displayName()}, url=$host")
+                    appendLine("- type=${type.name}, typeName=${type.name}, url=$host")
                 }
             }.trim()
         }
@@ -705,7 +721,7 @@ private fun UiRssSource.toSubscriptionSourceToolText(): String =
     buildString {
         appendLine("sourceId: $id")
         appendLine("type: ${type.name}")
-        appendLine("typeName: ${type.displayName()}")
+        appendLine("typeName: ${type.name}")
         appendLine("url: $url")
         appendLine("host: $host")
         appendLine("title: ${title.orEmpty()}")
@@ -798,61 +814,58 @@ private fun UiRssSource.toTimelineTarget(): SubscriptionTimelineTarget =
         title = title,
     )
 
-private fun UiRssSource.subscriptionLabel(): String =
+private fun SubscriptionSaveCandidate.saveConfirmationMessage(requestId: String): String =
     buildString {
-        append(title?.takeIf { it.isNotBlank() } ?: host)
-        append(" / ")
-        append(type.displayName())
-    }
+        appendLine("event=subscription_save_confirmation_required")
+        appendLine("inputRequestId=$requestId")
+        appendLine("inputRequestOptions:")
+        appendLine("- optionId=confirm")
+        appendLine("  optionKind=confirmation")
+        appendLine("type=${type.name}")
+        appendLine("url=$url")
+        appendLine("title=${title.orEmpty()}")
+        appendLine("icon=${icon.orEmpty()}")
+        if (type == SubscriptionType.RSS) {
+            appendLine("displayMode=${displayMode.name}")
+        }
+    }.trim()
 
-private fun SubscriptionSaveCandidate.subscriptionLabel(): String =
+private fun UiRssSource.deleteConfirmationMessage(requestId: String): String =
     buildString {
-        append(title?.takeIf { it.isNotBlank() } ?: url)
-        append(" / ")
-        append(type.displayName())
-    }
-
-private fun SubscriptionSaveCandidate.saveConfirmationLocalizedText(): AgentLocalizedText =
-    AgentUiStrings.text(
-        AgentLocalizedTextKey.SubscriptionSaveConfirmationMessage,
-        type.name,
-        type.displayName(),
-        url,
-        title.orEmpty(),
-        icon.orEmpty(),
-        if (type == SubscriptionType.RSS) displayMode.name else "",
-    )
-
-private fun UiRssSource.deleteConfirmationLocalizedText(): AgentLocalizedText =
-    AgentUiStrings.text(
-        AgentLocalizedTextKey.SubscriptionDeleteConfirmationMessage,
-        id.toString(),
-        type.name,
-        type.displayName(),
-        url,
-        title.orEmpty(),
-    )
+        appendLine("event=subscription_delete_confirmation_required")
+        appendLine("inputRequestId=$requestId")
+        appendLine("inputRequestOptions:")
+        appendLine("- optionId=confirm")
+        appendLine("  optionKind=confirmation")
+        appendLine("sourceId=$id")
+        appendLine("type=${type.name}")
+        appendLine("url=$url")
+        appendLine("title=${title.orEmpty()}")
+        appendLine("icon=${favIcon.orEmpty()}")
+    }.trim()
 
 private fun StringBuilder.appendSubscriptionSourceArgs(
     source: UiRssSource,
     action: String,
+    confirmed: Boolean,
 ) {
+    appendLine("action=$action")
     appendLine("sourceId=${source.id}")
     appendLine("type=${source.type.name}")
     appendLine("url=${source.url}")
-    when (action) {
-        "delete" -> appendLine("confirmed=false")
-        else -> Unit
-    }
+    appendLine("confirmed=$confirmed")
 }
 
-private fun StringBuilder.appendSubscriptionSaveArgs(candidate: SubscriptionSaveCandidate) {
+private fun StringBuilder.appendSubscriptionSaveArgs(
+    candidate: SubscriptionSaveCandidate,
+    confirmed: Boolean,
+) {
     appendLine("type=${candidate.type.name}")
     appendLine("url=${candidate.url}")
     appendLine("title=${candidate.title.orEmpty()}")
     appendLine("icon=${candidate.icon.orEmpty()}")
     appendLine("displayMode=${candidate.displayMode.name}")
-    appendLine("confirmed=false")
+    appendLine("confirmed=$confirmed")
 }
 
 private fun UiTimelineV2.Feed.agentRssArticleRef(): String = url
@@ -915,14 +928,6 @@ private fun String.toRssDisplayModeOrNull(): RssDisplayMode? =
         "descriptiononly", "description", "summary", "摘要" -> RssDisplayMode.DESCRIPTION_ONLY
         "openinbrowser", "browser", "link", "浏览器", "打开链接" -> RssDisplayMode.OPEN_IN_BROWSER
         else -> null
-    }
-
-private fun SubscriptionType.displayName(): String =
-    when (this) {
-        SubscriptionType.RSS -> "RSS"
-        SubscriptionType.MASTODON_TRENDS -> "Mastodon trends"
-        SubscriptionType.MASTODON_PUBLIC -> "Mastodon federated timeline"
-        SubscriptionType.MASTODON_LOCAL -> "Mastodon local timeline"
     }
 
 private fun SubscriptionType.normalizeSubscriptionUrl(input: String): String =

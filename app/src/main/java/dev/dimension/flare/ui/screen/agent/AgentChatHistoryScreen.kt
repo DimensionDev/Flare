@@ -25,6 +25,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
+import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.presenter.AgentChatHistoryPresenter
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.DateTimeText
@@ -32,9 +33,11 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import moe.tlaster.precompose.molecule.producePresenter
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +73,7 @@ internal fun AgentChatHistoryScreen(
         },
         modifier = modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        if (state.conversations.isEmpty()) {
+        if (state.rooms.isEmpty()) {
             Text(
                 text = stringResource(id = R.string.agent_history_empty),
                 modifier =
@@ -90,13 +93,13 @@ internal fun AgentChatHistoryScreen(
                 contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
-                itemsIndexed(state.conversations, key = { _, item -> item.id }) { index, conversation ->
+                itemsIndexed(state.rooms, key = { _, item -> item.id }) { index, room ->
                     AgentHistoryConversationItem(
-                        conversation = conversation,
+                        room = room,
                         index = index,
-                        totalCount = state.conversations.size,
+                        totalCount = state.rooms.size,
                         onClick = {
-                            onConversationClick(conversation.id)
+                            onConversationClick(room.id)
                         },
                     )
                 }
@@ -107,7 +110,7 @@ internal fun AgentChatHistoryScreen(
 
 @Composable
 private fun AgentHistoryConversationItem(
-    conversation: AgentChatHistoryPresenter.Conversation,
+    room: AgentChatRoom,
     index: Int,
     totalCount: Int,
     onClick: () -> Unit,
@@ -119,14 +122,14 @@ private fun AgentHistoryConversationItem(
         content = {
             Row {
                 Text(
-                    text = conversation.title,
+                    text = room.title,
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
                 DateTimeText(
-                    data = conversation.updatedAt,
+                    data = Instant.fromEpochMilliseconds(room.updatedAt).toUi(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

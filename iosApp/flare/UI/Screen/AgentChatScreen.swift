@@ -9,21 +9,11 @@ struct AgentChatScreen: View {
         AgentChatView(
             messages: Array(presenter.state.messages),
             input: presenter.state.input,
-            isRunning: presenter.state.isRunning,
+            isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
-            error: presenter.state.error,
-            runningTrace: presenter.state.currentTrace?.localizedLabel ?? String(localized: "agent_chat_thinking"),
-            inputRequest: presenter.state.inputRequest,
+            errorMessage: presenter.state.room.errorMessage,
+            runningTrace: presenter.state.room.currentTrace?.localizedLabel ?? String(localized: "agent_chat_thinking"),
             inputPlaceholder: String(localized: "agent_chat_input_placeholder"),
-            messageText: { $0.text },
-            messageLocalizedText: { $0.localizedText },
-            messageParts: { Array($0.parts) },
-            messageInputRequest: { $0.inputRequest },
-            messageInputRequestSelected: { $0.inputRequestSelected },
-            messageInputRequestSelectedOptionId: { $0.inputRequestSelectedOptionId },
-            isUserMessage: { message in
-                String(describing: type(of: message)).contains("User")
-            },
             onInputChange: presenter.state.setInput,
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
@@ -48,7 +38,7 @@ struct AgentChatScreen: View {
                 )
             }
         )
-        .navigationTitle(presenter.state.title?.isEmpty == false ? presenter.state.title! : String(localized: "agent_chat_title"))
+        .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title") : presenter.state.room.title)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

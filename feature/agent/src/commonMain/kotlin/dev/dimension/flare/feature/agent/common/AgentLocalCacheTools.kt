@@ -31,7 +31,7 @@ internal class SearchCachedPostsTool(
         }
         val maxItems = args.maxItems.localCacheToolLimit()
         val posts = repository.searchPosts(query = query, limit = maxItems)
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return posts.toLocalCachePostToolText(
             title = "Local cached post search",
             emptyMessage = "No locally cached posts matched the query.",
@@ -67,7 +67,7 @@ internal class ListViewedPostsTool(
         val repository = session.localCacheRepository ?: return localCacheUnavailableMessage()
         val maxItems = args.maxItems.localCacheToolLimit()
         val posts = repository.listViewedPosts(limit = maxItems)
-        session.attachmentStore.addPosts(posts)
+        session.messagePartStore.addPosts(posts)
         return posts.toLocalCachePostToolText(
             title = "Local viewed posts",
             emptyMessage = "No locally viewed posts were found.",
@@ -105,17 +105,42 @@ internal class SearchCachedUsersTool(
         }
         val maxItems = args.maxItems.localCacheToolLimit()
         val users = repository.searchUsers(query = query, limit = maxItems)
-        session.attachmentStore.addUsers(users)
-        return users.toLocalCacheUserToolText(
-            title = "Local cached user search",
-            emptyMessage = "No locally cached users matched the query.",
-            metadata =
-                listOf(
-                    "query: \"$query\"",
-                    LOCAL_CACHE_TOOL_SOURCE_NOTE,
-                ),
-            maxItems = maxItems,
-        )
+        session.messagePartStore.addUsers(users)
+        val selectionRequest =
+            users
+                .takeIf { it.size > 1 }
+                ?.let { candidates ->
+                    session.setUserSelectionRequest(
+                        users = candidates,
+                        requestType = "local_cached_user_search_match",
+                    )
+                }
+        return if (selectionRequest != null) {
+            buildString {
+                appendLine("Local cached user search")
+                appendLine("query: \"$query\"")
+                appendLine(LOCAL_CACHE_TOOL_SOURCE_NOTE)
+                append(
+                    userSelectionRequestToolText(
+                        event = "local_cached_user_search_selection_required",
+                        requestType = "local_cached_user_search_match",
+                        request = selectionRequest,
+                        candidates = users,
+                    ),
+                )
+            }
+        } else {
+            users.toLocalCacheUserToolText(
+                title = "Local cached user search",
+                emptyMessage = "No locally cached users matched the query.",
+                metadata =
+                    listOf(
+                        "query: \"$query\"",
+                        LOCAL_CACHE_TOOL_SOURCE_NOTE,
+                    ),
+                maxItems = maxItems,
+            )
+        }
     }
 
     companion object {
@@ -141,7 +166,7 @@ internal class ListViewedUsersTool(
         val repository = session.localCacheRepository ?: return localCacheUnavailableMessage()
         val maxItems = args.maxItems.localCacheToolLimit()
         val users = repository.listViewedUsers(limit = maxItems)
-        session.attachmentStore.addUsers(users)
+        session.messagePartStore.addUsers(users)
         return users.toLocalCacheUserToolText(
             title = "Local viewed users",
             emptyMessage = "No locally viewed users were found.",

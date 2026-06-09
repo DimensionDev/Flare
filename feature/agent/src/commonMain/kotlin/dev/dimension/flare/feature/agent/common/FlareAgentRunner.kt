@@ -14,6 +14,7 @@ import ai.koog.agents.core.utils.ConfigureAction
 import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.Prompt
 import ai.koog.prompt.message.Message
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntime
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
@@ -43,7 +44,7 @@ internal class FlareAgentRunner(
         return try {
             AgentRunResult(
                 text = agent.run(request.prompt, conversationId),
-                attachments = toolSet.attachmentStore.snapshot(),
+                parts = toolSet.messagePartStore.snapshot(),
                 inputRequest = toolSet.inputRequestStore.snapshot(),
             )
         } finally {
@@ -172,8 +173,8 @@ internal class FlareAgentRunner(
 
 internal data class AgentRunResult(
     val text: String,
-    val attachments: List<AgentConversationAttachment>,
-    val inputRequest: AgentInputRequest?,
+    val parts: List<AgentMessagePart>,
+    val inputRequest: AgentPendingInputRequest?,
 )
 
 internal data class FlareAgentRequest(
@@ -231,5 +232,9 @@ private fun String.withAgentMarkdownGuidance(): String =
         - Do not use markdown tables because they are not needed in the chat bubble layout; use compact lists instead.
         - Do not wrap the entire answer in a fenced code block unless the user explicitly asks for code.
         - If you include a Flare attachment marker such as [[post:...]] or [[user:...]], keep it exactly unchanged and place it on its own line.
-        - Return only the final user-visible answer.
+        - When a tool creates an input request, write the visible prompt/confirmation copy yourself from the structured tool result and append exactly one hidden metadata comment:
+          <!-- flare-agent-actions {"requestId":"...","options":[{"id":"...","label":"...","buttonType":"Primary"}]} -->
+        - The buttonType enum values are Primary, Secondary, Destructive, and Cancel. Include every option id from the structured input request. Labels must be written by you in the user's language.
+        - If a tool result contains inputRequestId/inputRequestOptions, do not render the options as a visible numbered or bulleted list. Write only a concise prompt; Flare renders the selectable actions from the input request.
+        - Return only the final user-visible answer plus the required hidden metadata comment when applicable.
         """.trimIndent()

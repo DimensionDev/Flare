@@ -1,7 +1,7 @@
 package dev.dimension.flare.feature.agent.presenter
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
+import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.agentAttachmentRef
 import dev.dimension.flare.feature.agent.common.agentDisplayPost
 import dev.dimension.flare.model.MicroBlogKey
@@ -10,22 +10,35 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public sealed interface AgentMessagePart {
+    @Serializable
     @Immutable
     public data class Text(
         val markdown: String,
     ) : AgentMessagePart
 
+    @Serializable
     @Immutable
     public data class PostCard(
         val post: UiTimelineV2.Post,
     ) : AgentMessagePart
 
+    @Serializable
     @Immutable
     public data class UserCard(
         val user: UiProfile,
+    ) : AgentMessagePart
+
+    @Serializable
+    @Immutable
+    public data class Actions(
+        val request: AgentInputRequest,
+        val selected: Boolean = false,
+        val selectedOptionId: String? = null,
     ) : AgentMessagePart
 }
 
@@ -37,22 +50,22 @@ internal fun String.toAgentTextParts(): ImmutableList<AgentMessagePart> =
 
 internal fun parseAgentMessageParts(
     text: String,
-    attachments: List<AgentConversationAttachment>,
+    supportingParts: List<AgentMessagePart>,
 ): ImmutableList<AgentMessagePart> {
-    if (attachments.isEmpty()) {
+    if (supportingParts.isEmpty()) {
         return text.toAgentTextParts()
     }
     val posts =
-        attachments
-            .filterIsInstance<AgentConversationAttachment.Post>()
-            .flatMap { attachment ->
-                attachment.post.agentAttachmentRefAliases().map { ref -> ref to attachment }
+        supportingParts
+            .filterIsInstance<AgentMessagePart.PostCard>()
+            .flatMap { part ->
+                part.post.agentAttachmentRefAliases().map { ref -> ref to part }
             }.toMap()
     val users =
-        attachments
-            .filterIsInstance<AgentConversationAttachment.User>()
-            .flatMap { attachment ->
-                attachment.user.agentAttachmentRefAliases().map { ref -> ref to attachment }
+        supportingParts
+            .filterIsInstance<AgentMessagePart.UserCard>()
+            .flatMap { part ->
+                part.user.agentAttachmentRefAliases().map { ref -> ref to part }
             }.toMap()
     val parts = mutableListOf<AgentMessagePart>()
     var cursor = 0
@@ -71,6 +84,81 @@ internal fun parseAgentMessageParts(
 
     return parts.takeIf { it.isNotEmpty() }?.toImmutableList() ?: text.toAgentTextParts()
 }
+
+internal fun buildAgentMessageParts(
+    text: String,
+    supportingParts: List<AgentMessagePart>,
+    inputRequest: AgentInputRequest?,
+    selected: Boolean = false,
+    selectedOptionId: String? = null,
+): ImmutableList<AgentMessagePart> {
+    val parts = parseAgentMessageParts(text, supportingParts).toMutableList()
+    if (inputRequest != null) {
+        parts +=
+            AgentMessagePart.Actions(
+                request = inputRequest,
+                selected = selected,
+                selectedOptionId = selectedOptionId,
+            )
+    }
+    return parts.toImmutableList()
+}
+
+internal fun List<AgentMessagePart>.markAgentInputRequestSelected(
+    requestId: String,
+    optionId: String,
+): ImmutableList<AgentMessagePart> =
+    map { part ->
+        if (part is AgentMessagePart.Actions && part.request.requestId == requestId) {
+            part.copy(
+                selected = true,
+                selectedOptionId = optionId,
+            )
+        } else {
+            part
+        }
+    }.toImmutableList()
+
+internal fun List<AgentMessagePart>.agentMessageText(): String =
+    filterIsInstance<AgentMessagePart.Text>()
+        .joinToString(separator = "\n\n") { it.markdown }
+        .trim()
+
+internal fun List<AgentMessagePart>.latestOpenAgentInputRequest(): AgentInputRequest? =
+    filterIsInstance<AgentMessagePart.Actions>()
+        .lastOrNull { !it.selected }
+        ?.request
+
+internal fun List<AgentMessagePart>.latestOpenAgentInputRequestForOption(option: AgentInputRequest.Option): AgentInputRequest? =
+    filterIsInstance<AgentMessagePart.Actions>()
+        .lastOrNull { actions ->
+            !actions.selected &&
+                actions.request.options.any { requestOption ->
+                    requestOption.id == option.id && requestOption.value == option.value
+                }
+        }?.request
+
+internal fun AgentMessagePart.agentMessagePartIdentity(): String =
+    when (this) {
+        is AgentMessagePart.PostCard -> {
+            val post = post.agentDisplayPost()
+            "post:${post.platformType}:${post.statusKey}"
+        }
+
+        is AgentMessagePart.UserCard -> {
+            "user:${user.platformType}:${user.key}"
+        }
+
+        is AgentMessagePart.Actions -> {
+            "actions:${request.requestId}"
+        }
+
+        is AgentMessagePart.Text -> {
+            "text:$markdown"
+        }
+    }
+
+internal fun Iterable<AgentMessagePart>.distinctAgentMessageParts(): List<AgentMessagePart> = distinctBy { it.agentMessagePartIdentity() }
 
 private fun UiTimelineV2.Post.agentAttachmentRefAliases(): Set<String> =
     buildSet {

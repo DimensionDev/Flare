@@ -7,7 +7,6 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
-import dev.dimension.flare.feature.agent.common.AgentConversationAttachment
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
@@ -17,6 +16,8 @@ import dev.dimension.flare.feature.agent.common.FlareAgentRunner
 import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.agentAttachmentMarker
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -87,21 +88,23 @@ internal class ProfileInsightAgentUseCase(
                 throw throwable
             }
 
-        val resultAttachments =
-            (listOf(AgentConversationAttachment.User(profile)) + result.attachments)
-                .distinctBy { it.attachmentIdentity() }
+        val supportingParts =
+            (listOf(AgentMessagePart.UserCard(profile)) + result.parts).distinctAgentMessageParts()
         val visibleResult = resolveAgentVisibleResult(result.text, result.inputRequest)
-        chatHistoryProvider.storeAssistantAttachments(conversationId, resultAttachments)
-        visibleResult.inputRequest?.let { inputRequest ->
-            chatHistoryProvider.storeAssistantInputRequest(conversationId, inputRequest)
-        }
-        if (!visibleResult.hasVisibleContent(resultAttachments)) {
+        val parts =
+            chatHistoryProvider.storeAssistantUiContent(
+                conversationId = conversationId,
+                text = visibleResult.text,
+                supportingParts = supportingParts,
+                inputRequest = visibleResult.inputRequest,
+            )
+        if (parts.isEmpty()) {
             return
         }
         send(
             AgentConversationEvent.Result(
                 text = visibleResult.text,
-                attachments = resultAttachments,
+                parts = parts,
                 inputRequest = visibleResult.inputRequest,
             ),
         )
@@ -239,13 +242,6 @@ internal class ProfileInsightAgentUseCase(
         }
 
     private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
-
-    private fun AgentConversationAttachment.attachmentIdentity(): String =
-        when (this) {
-            is AgentConversationAttachment.Post -> "post:${post.platformType}:${post.statusKey}"
-            is AgentConversationAttachment.User -> "user:${user.platformType}:${user.key}"
-            is AgentConversationAttachment.InputRequest -> "input-request:${state.request.requestId}"
-        }
 
     private companion object {
         const val MAX_AGENT_ITERATIONS = 32

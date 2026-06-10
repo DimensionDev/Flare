@@ -2,15 +2,27 @@ package dev.dimension.flare.common
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PolymorphicKind
+import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 
@@ -47,6 +59,167 @@ public fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFro
 @HiddenFromObjC
 public val JsonElement.jsonObjectOrNull: JsonObject?
     get() = if (this is JsonObject) this else null
+
+internal fun <T> Json.decodeFromStringWithNullableFallback(
+    serializer: KSerializer<T>,
+    string: String,
+): T =
+    try {
+        decodeFromString(serializer, string)
+    } catch (cause: Exception) {
+        val element = parseToJsonElement(string)
+        decodeFromJsonElementWithNullableFallback(serializer, element, cause)
+    }
+
+internal fun <T> Json.decodeFromJsonElementWithNullableFallback(
+    serializer: KSerializer<T>,
+    element: JsonElement,
+    originalCause: Exception? = null,
+): T {
+    val sanitized = sanitizeNullableMismatches(serializer.descriptor, element)
+    return try {
+        decodeFromJsonElement(serializer, sanitized)
+    } catch (cause: Exception) {
+        throw originalCause ?: cause
+    }
+}
+
+private fun sanitizeNullableMismatches(
+    descriptor: SerialDescriptor,
+    element: JsonElement,
+): JsonElement {
+    if (element is JsonNull) {
+        return element
+    }
+    if (descriptor.isNullable && !descriptor.isCompatibleWith(element)) {
+        return JsonNull
+    }
+    return when {
+        element is JsonObject && descriptor.kind == StructureKind.CLASS -> {
+            sanitizeObject(descriptor, element)
+        }
+
+        element is JsonObject && descriptor.kind == StructureKind.OBJECT -> {
+            sanitizeObject(descriptor, element)
+        }
+
+        element is JsonArray && descriptor.kind == StructureKind.LIST -> {
+            JsonArray(element.map { sanitizeNullableMismatches(descriptor.getElementDescriptor(0), it) })
+        }
+
+        element is JsonObject && descriptor.kind == StructureKind.MAP -> {
+            sanitizeMap(descriptor, element)
+        }
+
+        else -> {
+            element
+        }
+    }
+}
+
+private fun sanitizeObject(
+    descriptor: SerialDescriptor,
+    element: JsonObject,
+): JsonObject {
+    val values = element.toMutableMap()
+    repeat(descriptor.elementsCount) { index ->
+        val name = descriptor.getElementName(index)
+        val value = values[name] ?: return@repeat
+        values[name] = sanitizeNullableMismatches(descriptor.getElementDescriptor(index), value)
+    }
+    return JsonObject(values)
+}
+
+private fun sanitizeMap(
+    descriptor: SerialDescriptor,
+    element: JsonObject,
+): JsonObject {
+    val valueDescriptor = descriptor.getElementDescriptor(1)
+    return JsonObject(
+        element.mapValues { (_, value) ->
+            sanitizeNullableMismatches(valueDescriptor, value)
+        },
+    )
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun SerialDescriptor.isCompatibleWith(element: JsonElement): Boolean =
+    when (kind) {
+        StructureKind.CLASS,
+        StructureKind.OBJECT,
+        -> {
+            element is JsonObject
+        }
+
+        StructureKind.LIST -> {
+            element is JsonArray
+        }
+
+        StructureKind.MAP -> {
+            element is JsonObject || element is JsonArray
+        }
+
+        SerialKind.ENUM -> {
+            element is JsonPrimitive
+        }
+
+        SerialKind.CONTEXTUAL -> {
+            true
+        }
+
+        is PolymorphicKind -> {
+            element is JsonObject || element is JsonArray
+        }
+
+        else -> {
+            isPrimitiveCompatibleWith(element)
+        }
+    }
+
+private fun SerialDescriptor.isPrimitiveCompatibleWith(element: JsonElement): Boolean {
+    val primitive = element as? JsonPrimitive ?: return false
+    return when (kind) {
+        PrimitiveKind.BOOLEAN -> {
+            primitive.booleanOrNull != null
+        }
+
+        PrimitiveKind.BYTE -> {
+            primitive.intOrNull?.let { it >= Byte.MIN_VALUE.toInt() && it <= Byte.MAX_VALUE.toInt() } == true
+        }
+
+        PrimitiveKind.SHORT -> {
+            primitive.intOrNull?.let { it >= Short.MIN_VALUE.toInt() && it <= Short.MAX_VALUE.toInt() } == true
+        }
+
+        PrimitiveKind.INT -> {
+            primitive.intOrNull != null
+        }
+
+        PrimitiveKind.LONG -> {
+            primitive.longOrNull != null
+        }
+
+        PrimitiveKind.FLOAT -> {
+            primitive.doubleOrNull != null
+        }
+
+        PrimitiveKind.DOUBLE -> {
+            primitive.doubleOrNull != null
+        }
+
+        PrimitiveKind.CHAR -> {
+            primitive.isString && primitive.content.length == 1
+        }
+
+        PrimitiveKind.STRING -> {
+            primitive.isString
+        }
+
+        else -> {
+            true
+        }
+    }
+}
 
 @OptIn(ExperimentalSerializationApi::class)
 @HiddenFromObjC

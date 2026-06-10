@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.pixiv
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.network.nullableFallbackJson
 import dev.dimension.flare.data.network.pixiv.api.PixivAppResources
 import dev.dimension.flare.data.network.pixiv.api.PixivAuthResources
 import dev.dimension.flare.data.network.pixiv.api.createPixivAppResources
@@ -24,7 +25,6 @@ import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Clock
@@ -49,7 +49,7 @@ private fun pixivHttpClient(configure: HttpClientConfigBuilder = {}) =
     ktorClient {
         expectSuccess = false
         install(ContentNegotiation) {
-            json(JSON)
+            nullableFallbackJson(JSON)
         }
         configure()
         install(PixivHeaderPlugin)

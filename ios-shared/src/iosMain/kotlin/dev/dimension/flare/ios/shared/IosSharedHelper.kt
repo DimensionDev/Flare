@@ -3,6 +3,7 @@ package dev.dimension.flare.ios.shared
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.SwiftOnDeviceAI
+import dev.dimension.flare.data.platform.AllRssTimelineLoaderFactory
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
@@ -54,7 +55,7 @@ internal class IosKoinApplication
 internal class IosKoinModule
 
 @Single
-internal fun runtimeData(): PlatformRuntimeData =
+internal fun runtimeData(allRssTimelineLoaderFactory: AllRssTimelineLoaderFactory): PlatformRuntimeData =
     PlatformRuntimeData(
         platformSpecs =
             listOf(
@@ -66,7 +67,7 @@ internal fun runtimeData(): PlatformRuntimeData =
                 XqtPlatformSpec,
                 VvoPlatformSpec,
             ),
-        extraTimelineSpecs = RssTimelineSpecs.timelineSpecs,
+        extraTimelineSpecs = RssTimelineSpecs.timelineSpecs(allRssTimelineLoaderFactory),
     )
 
 @Single

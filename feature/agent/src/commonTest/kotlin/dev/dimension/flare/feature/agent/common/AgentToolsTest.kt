@@ -8,6 +8,8 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -15,6 +17,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSour
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -34,6 +37,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiRssSource
@@ -124,6 +128,233 @@ internal class AgentToolsTest {
 
             assertTrue(result.contains("requires a query"))
             assertEquals(null, repository.searchUsersQuery)
+        }
+
+    @Test
+    fun loadNotificationsUsesRequestedAccountAndStoresAttachments() =
+        runTest {
+            val post =
+                createPost(
+                    statusKey = MicroBlogKey("notification-post", "example.social"),
+                    content = "mentioned you in a post".toUiPlainText(),
+                )
+            val alice =
+                StubNotificationDataSource(
+                    accountKey = MicroBlogKey("alice", "example.social"),
+                    items = listOf(post),
+                )
+            val bob =
+                StubNotificationDataSource(
+                    accountKey = MicroBlogKey("bob", "example.social"),
+                    items = listOf(createPost(statusKey = MicroBlogKey("bob-post", "example.social"))),
+                )
+            val messagePartStore = AgentToolMessagePartStore()
+            val tool =
+                LoadNotificationsTool(
+                    AgentToolSession(
+                        status = null,
+                        searchTargets = emptyList(),
+                        composeTargets = emptyList(),
+                        postActionTargets = emptyList(),
+                        notificationTargets =
+                            listOf(
+                                AgentNotificationTarget(
+                                    accountKey = alice.accountKey,
+                                    platformType = PlatformType.Mastodon,
+                                    dataSource = alice,
+                                ),
+                                AgentNotificationTarget(
+                                    accountKey = bob.accountKey,
+                                    platformType = PlatformType.Mastodon,
+                                    dataSource = bob,
+                                ),
+                            ),
+                        userTargets = emptyList(),
+                        messagePartStore = messagePartStore,
+                        inputRequestStore = AgentToolInputRequestStore(),
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    LoadNotificationsTool.Args(
+                        filter = "mention",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                        maxItems = 10,
+                    ),
+                )
+
+            assertEquals(NotificationFilter.Mention, alice.lastFilter)
+            assertEquals(null, bob.lastFilter)
+            assertTrue(result.contains("Notifications"))
+            assertTrue(result.contains("mentioned you in a post"))
+            val messagePart = messagePartStore.snapshot().single()
+            assertTrue(messagePart is AgentMessagePart.PostCard)
+            assertEquals(post.statusKey, messagePart.post.statusKey)
+        }
+
+    @Test
+    fun loadListTimelineStoresPostAttachments() =
+        runTest {
+            val post =
+                createPost(
+                    statusKey = MicroBlogKey("list-post", "example.social"),
+                    content = "list timeline post".toUiPlainText(),
+                )
+            val messagePartStore = AgentToolMessagePartStore()
+            val tool =
+                LoadListTimelineTool(
+                    AgentToolSession(
+                        status = null,
+                        searchTargets = emptyList(),
+                        composeTargets = emptyList(),
+                        postActionTargets = emptyList(),
+                        listTargets =
+                            listOf(
+                                stubListTarget(
+                                    timelineItems = listOf(post),
+                                ),
+                            ),
+                        userTargets = emptyList(),
+                        messagePartStore = messagePartStore,
+                        inputRequestStore = AgentToolInputRequestStore(),
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    LoadListTimelineTool.Args(
+                        listId = "friends",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(result.contains("list timeline post"))
+            val messagePart = messagePartStore.snapshot().single()
+            assertTrue(messagePart is AgentMessagePart.PostCard)
+            assertEquals(post.statusKey, messagePart.post.statusKey)
+        }
+
+    @Test
+    fun createListRequestsConfirmationBeforeCreating() =
+        runTest {
+            val created = mutableListOf<ListMetaData>()
+            val inputRequestStore = AgentToolInputRequestStore()
+            val tool =
+                CreateListTool(
+                    AgentToolSession(
+                        status = null,
+                        searchTargets = emptyList(),
+                        composeTargets = emptyList(),
+                        postActionTargets = emptyList(),
+                        listTargets =
+                            listOf(
+                                stubListTarget(
+                                    create = { created += it },
+                                ),
+                            ),
+                        userTargets = emptyList(),
+                        messagePartStore = AgentToolMessagePartStore(),
+                        inputRequestStore = inputRequestStore,
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    CreateListTool.Args(
+                        title = "Friends",
+                        description = "Close friends",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(created.isEmpty())
+            assertTrue(result.contains("confirmation_required"))
+            val request = assertNotNull(inputRequestStore.snapshot())
+            assertTrue(request.requestId.startsWith("list-create:"))
+            assertTrue(
+                request.options
+                    .single()
+                    .value
+                    .contains("confirmed=true"),
+            )
+        }
+
+    @Test
+    fun listBuiltInTimelinesReturnsAvailableTargets() =
+        runTest {
+            val tool =
+                ListBuiltInTimelinesTool(
+                    AgentToolSession(
+                        status = null,
+                        searchTargets = emptyList(),
+                        composeTargets = emptyList(),
+                        postActionTargets = emptyList(),
+                        builtInTimelineTargets =
+                            listOf(
+                                stubBuiltInTimelineTarget(
+                                    id = "common.home:alice@example.social",
+                                    specId = "common.home",
+                                    title = "Home",
+                                ),
+                            ),
+                        userTargets = emptyList(),
+                        messagePartStore = AgentToolMessagePartStore(),
+                        inputRequestStore = AgentToolInputRequestStore(),
+                    ),
+                )
+
+            val result = tool.execute(ListBuiltInTimelinesTool.Args(platforms = listOf("mastodon")))
+
+            assertTrue(result.contains("common.home:alice@example.social"))
+            assertTrue(result.contains("specId: common.home"))
+        }
+
+    @Test
+    fun loadBuiltInTimelineStoresPostAttachments() =
+        runTest {
+            val post =
+                createPost(
+                    statusKey = MicroBlogKey("built-in-post", "example.social"),
+                    content = "built-in timeline post".toUiPlainText(),
+                )
+            val messagePartStore = AgentToolMessagePartStore()
+            val tool =
+                LoadBuiltInTimelineTool(
+                    AgentToolSession(
+                        status = null,
+                        searchTargets = emptyList(),
+                        composeTargets = emptyList(),
+                        postActionTargets = emptyList(),
+                        builtInTimelineTargets =
+                            listOf(
+                                stubBuiltInTimelineTarget(
+                                    id = "common.home:alice@example.social",
+                                    specId = "common.home",
+                                    title = "Home",
+                                    items = listOf(post),
+                                ),
+                            ),
+                        userTargets = emptyList(),
+                        messagePartStore = messagePartStore,
+                        inputRequestStore = AgentToolInputRequestStore(),
+                    ),
+                )
+
+            val result =
+                tool.execute(
+                    LoadBuiltInTimelineTool.Args(
+                        timelineId = "common.home:alice@example.social",
+                    ),
+                )
+
+            assertTrue(result.contains("built-in timeline post"))
+            val messagePart = messagePartStore.snapshot().single()
+            assertTrue(messagePart is AgentMessagePart.PostCard)
+            assertEquals(post.statusKey, messagePart.post.statusKey)
         }
 
     @Test
@@ -906,6 +1137,52 @@ internal class AgentToolsTest {
         )
 }
 
+private fun stubListTarget(
+    accountKey: MicroBlogKey = MicroBlogKey("alice", "example.social"),
+    platformType: PlatformType = PlatformType.Mastodon,
+    lists: List<UiList.List> =
+        listOf(
+            UiList.List(
+                id = "friends",
+                title = "Friends",
+                description = "Close friends",
+            ),
+        ),
+    timelineItems: List<UiTimelineV2> = emptyList(),
+    create: suspend (ListMetaData) -> Unit = {},
+): AgentListTarget =
+    AgentListTarget(
+        accountKey = accountKey,
+        platformType = platformType,
+        supportedMetaData = setOf("TITLE", "DESCRIPTION"),
+        listCached = { lists },
+        loadListInfo = { listId -> lists.first { it.id == listId } },
+        loadListTimeline = { _, _ -> timelineItems },
+        loadUserLists = { lists },
+        createList = create,
+        updateList = { _, _ -> },
+        deleteList = { _ -> },
+        addMember = { _, _ -> },
+        removeMember = { _, _ -> },
+    )
+
+private fun stubBuiltInTimelineTarget(
+    id: String,
+    specId: String,
+    title: String,
+    accountKey: MicroBlogKey = MicroBlogKey("alice", "example.social"),
+    platformType: PlatformType = PlatformType.Mastodon,
+    items: List<UiTimelineV2> = emptyList(),
+): AgentBuiltInTimelineTarget =
+    AgentBuiltInTimelineTarget(
+        id = id,
+        specId = specId,
+        title = title,
+        accountKey = accountKey,
+        platformType = platformType,
+        loadTimeline = { pageSize -> items.take(pageSize) },
+    )
+
 private fun createPost(
     statusKey: MicroBlogKey,
     content: dev.dimension.flare.ui.render.UiRichText = "content".toUiPlainText(),
@@ -1111,6 +1388,53 @@ private object StubPostActionDataSource : PostDataSource {
 }
 
 private object StubMicroblogDataSource : MicroblogDataSource {
+    override fun homeTimeline(): RemoteLoader<UiTimelineV2> = notSupported()
+
+    override fun userTimeline(
+        userKey: MicroBlogKey,
+        mediaOnly: Boolean,
+    ): RemoteLoader<UiTimelineV2> = notSupported()
+
+    override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> = notSupported()
+
+    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> = notSupported()
+
+    override fun searchUser(query: String): RemoteLoader<UiProfile> = notSupported()
+
+    override fun discoverUsers(): RemoteLoader<UiProfile> = notSupported()
+
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = notSupported()
+
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> = notSupported()
+
+    override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
+
+    override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
+
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+}
+
+private class StubNotificationDataSource(
+    override val accountKey: MicroBlogKey,
+    private val items: List<UiTimelineV2>,
+    override val supportedNotificationFilter: List<NotificationFilter> = NotificationFilter.entries,
+) : NotificationTimelineDataSource {
+    var lastFilter: NotificationFilter? = null
+
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> {
+        lastFilter = type
+        return object : RemoteLoader<UiTimelineV2> {
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> =
+                PagingResult(
+                    endOfPaginationReached = true,
+                    data = items.take(pageSize),
+                )
+        }
+    }
+
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> = notSupported()
 
     override fun userTimeline(

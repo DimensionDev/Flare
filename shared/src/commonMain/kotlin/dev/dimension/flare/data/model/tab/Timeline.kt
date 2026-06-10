@@ -26,6 +26,7 @@ import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlin.native.HiddenFromObjC
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -389,6 +390,7 @@ private fun UiTimelineTabItem.toSlotForLoaderKey(): TimelineSlot =
         }
     }
 
+@HiddenFromObjC
 public fun interface TimelineLoaderFactory<T : TimelineSpec.Data> {
     public fun create(
         data: T,
@@ -396,19 +398,20 @@ public fun interface TimelineLoaderFactory<T : TimelineSpec.Data> {
     ): Flow<RemoteLoader<UiTimelineV2>>
 }
 
-public class TimelineLoaderContext internal constructor(
+@HiddenFromObjC
+public class TimelineLoaderContext(
     private val accountService: AccountService,
-) : KoinComponent {
+) {
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = accountService.accountServiceFlow(accountType)
-
-    public inline fun <reified T : Any> get(): T = getKoin().get(clazz = T::class)
 }
 
+@HiddenFromObjC
 public fun <T : TimelineSpec.Data> remoteLoaderFactory(factory: (data: T) -> RemoteLoader<UiTimelineV2>): TimelineLoaderFactory<T> =
     TimelineLoaderFactory { data, _ ->
         flowOf(factory(data))
     }
 
+@HiddenFromObjC
 public inline fun <reified S : Any, T> accountLoader(
     crossinline factory: S.(data: T) -> RemoteLoader<UiTimelineV2>,
 ): TimelineLoaderFactory<T>
@@ -424,11 +427,13 @@ public inline fun <reified S : Any, T> accountLoader(
             }
     }
 
+@HiddenFromObjC
 public data class TimelineTarget<T : TimelineSpec.Data>(
     val spec: TimelineSpec<T>,
     val data: T,
 )
 
+@HiddenFromObjC
 public data class TimelineCandidate<T : TimelineSpec.Data>(
     val target: TimelineTarget<T>,
     val title: UiText = target.spec.title.asText(),
@@ -456,6 +461,14 @@ public fun TimelineCandidate<*>.toUiTimelineTabItem(): UiSourceTimelineTabItem {
     )
 }
 
+@HiddenFromObjC
+public fun TimelineCandidate<*>.createLoader(context: TimelineLoaderContext): Flow<RemoteLoader<UiTimelineV2>> =
+    target.createLoader(context)
+
+private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(context: TimelineLoaderContext): Flow<RemoteLoader<UiTimelineV2>> =
+    spec.loaderFactory.create(data, context)
+
+@HiddenFromObjC
 public data class TimelineSpec<T : TimelineSpec.Data>(
     val id: String,
     val title: UiStrings,
@@ -530,6 +543,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
     ) : AccountData
 }
 
+@HiddenFromObjC
 public data class ShortcutSpec(
     val title: UiStrings,
     val icon: UiIcon,

@@ -4,12 +4,20 @@ import ai.koog.agents.core.tools.ToolRegistry
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.subscription.KoinSubscriptionDataSource
 import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
+import dev.dimension.flare.data.model.tab.TimelineLoaderContext
+import dev.dimension.flare.data.model.tab.createLoader
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.LocalCacheRepository
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
@@ -28,13 +36,19 @@ import dev.dimension.flare.feature.agent.status.SearchPostsTool
 import dev.dimension.flare.feature.agent.status.SearchUsersTool
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.toUi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.KSerializer
 import org.koin.core.annotation.Single
 
 @Single
@@ -96,6 +110,9 @@ internal class AgentToolProvider(
                         )?.let(::add)
                 }
             }
+        val notificationTargets = context.searchDataSources.toAgentNotificationTargets()
+        val listTargets = context.searchDataSources.toAgentListTargets()
+        val builtInTimelineTargets = context.searchDataSources.toAgentBuiltInTimelineTargets()
 
         val session =
             AgentToolSession(
@@ -104,6 +121,9 @@ internal class AgentToolProvider(
                 composeTargets = composeTargets,
                 postActionTargets = postActionTargets,
                 relationTargets = relationTargets,
+                notificationTargets = notificationTargets,
+                listTargets = listTargets,
+                builtInTimelineTargets = builtInTimelineTargets,
                 subscriptionDataSource = KoinSubscriptionDataSource,
                 localCacheRepository = localCacheRepository,
                 userTargets = userTargets,
@@ -126,6 +146,18 @@ internal class AgentToolProvider(
                     tool(LoadFollowingTool(session))
                     tool(LoadFollowersTool(session))
                     tool(LoadProfileTabsTool(session))
+                    tool(LoadNotificationsTool(session))
+                    tool(ListListsTool(session))
+                    tool(LoadListInfoTool(session))
+                    tool(LoadListTimelineTool(session))
+                    tool(LoadUserListsTool(session))
+                    tool(CreateListTool(session))
+                    tool(UpdateListTool(session))
+                    tool(DeleteListTool(session))
+                    tool(AddListMemberTool(session))
+                    tool(RemoveListMemberTool(session))
+                    tool(ListBuiltInTimelinesTool(session))
+                    tool(LoadBuiltInTimelineTool(session))
                     tool(ComposePostTool(session))
                     tool(ListPostActionsTool(session))
                     tool(ExecutePostActionTool(session))
@@ -146,6 +178,9 @@ internal class AgentToolProvider(
             systemPromptGuidance =
                 listOf(
                     searchTargets.searchPlatformGuidance(),
+                    notificationTargets.notificationGuidance(),
+                    listTargets.listGuidance(),
+                    builtInTimelineTargets.builtInTimelineGuidance(),
                     composeTargets.composePlatformGuidance(),
                     postActionTargets.postActionGuidance(),
                     relationTargets.relationActionGuidance(),
@@ -251,6 +286,90 @@ internal class AgentToolProvider(
                         failed = AgentToolKey.SearchUsersFailed,
                     ),
                 LoadProfileTabsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadNotificationsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                ListListsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadListInfoTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadListTimelineTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadUserListsTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                CreateListTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                UpdateListTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                DeleteListTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                AddListMemberTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
+                RemoveListMemberTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchUsersStarted,
+                        completed = AgentToolKey.SearchUsersCompleted,
+                        validationFailed = AgentToolKey.SearchUsersValidationFailed,
+                        failed = AgentToolKey.SearchUsersFailed,
+                    ),
+                ListBuiltInTimelinesTool.NAME to
+                    AgentToolTraceKeys(
+                        started = AgentToolKey.SearchPostsStarted,
+                        completed = AgentToolKey.SearchPostsCompleted,
+                        validationFailed = AgentToolKey.SearchPostsValidationFailed,
+                        failed = AgentToolKey.SearchPostsFailed,
+                    ),
+                LoadBuiltInTimelineTool.NAME to
                     AgentToolTraceKeys(
                         started = AgentToolKey.SearchPostsStarted,
                         completed = AgentToolKey.SearchPostsCompleted,
@@ -388,6 +507,9 @@ internal data class AgentToolSession(
     val composeTargets: List<AgentComposeTarget>,
     val postActionTargets: List<AgentPostActionTarget>,
     val relationTargets: List<AgentRelationTarget> = emptyList(),
+    val notificationTargets: List<AgentNotificationTarget> = emptyList(),
+    val listTargets: List<AgentListTarget> = emptyList(),
+    val builtInTimelineTargets: List<AgentBuiltInTimelineTarget> = emptyList(),
     val subscriptionDataSource: SubscriptionDataSource? = null,
     val userTargets: List<AgentUserTarget>,
     val messagePartStore: AgentToolMessagePartStore,
@@ -506,6 +628,36 @@ internal data class AgentRelationTarget(
     val dataSource: RelationDataSource,
 )
 
+internal data class AgentNotificationTarget(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+    val dataSource: NotificationTimelineDataSource,
+)
+
+internal data class AgentListTarget(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+    val supportedMetaData: Set<String>,
+    val listCached: suspend () -> List<UiList.List>,
+    val loadListInfo: suspend (String) -> UiList.List,
+    val loadListTimeline: suspend (String, Int) -> List<UiTimelineV2>,
+    val loadUserLists: suspend (MicroBlogKey) -> List<UiList>,
+    val createList: suspend (ListMetaData) -> Unit,
+    val updateList: suspend (String, ListMetaData) -> Unit,
+    val deleteList: suspend (String) -> Unit,
+    val addMember: suspend (String, MicroBlogKey) -> Unit,
+    val removeMember: suspend (String, MicroBlogKey) -> Unit,
+)
+
+internal data class AgentBuiltInTimelineTarget(
+    val id: String,
+    val specId: String,
+    val title: String,
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+    val loadTimeline: suspend (Int) -> List<UiTimelineV2>,
+)
+
 internal data class AgentUserTarget(
     val accountKey: MicroBlogKey?,
     val platformType: PlatformType,
@@ -550,6 +702,125 @@ internal fun List<AccountMicroblogDataSource>.toAgentRelationTargets(): List<Age
             dataSource = dataSource,
         )
     }
+
+internal fun List<AccountMicroblogDataSource>.toAgentNotificationTargets(): List<AgentNotificationTarget> =
+    mapNotNull { item ->
+        val dataSource = item.dataSource as? NotificationTimelineDataSource ?: return@mapNotNull null
+        AgentNotificationTarget(
+            accountKey = item.accountKey,
+            platformType = item.platformType,
+            dataSource = dataSource,
+        )
+    }
+
+internal fun List<AccountMicroblogDataSource>.toAgentListTargets(): List<AgentListTarget> =
+    mapNotNull { item ->
+        val dataSource = item.dataSource as? ListDataSource ?: return@mapNotNull null
+        AgentListTarget(
+            accountKey = item.accountKey,
+            platformType = item.platformType,
+            supportedMetaData =
+                dataSource.listHandler.supportedMetaData
+                    .map { it.name }
+                    .toSet(),
+            listCached = {
+                dataSource.listHandler.cacheData.first()
+            },
+            loadListInfo = { listId ->
+                when (
+                    val state =
+                        dataSource
+                            .listHandler
+                            .listInfo(listId)
+                            .toUi()
+                            .first { it !is UiState.Loading }
+                ) {
+                    is UiState.Success -> state.data
+                    is UiState.Error -> throw state.throwable
+                    is UiState.Loading -> error("List info is still loading.")
+                }
+            },
+            loadListTimeline = { listId, pageSize ->
+                dataSource
+                    .listTimeline(listId)
+                    .load(pageSize = pageSize, request = PagingRequest.Refresh)
+                    .data
+            },
+            loadUserLists = { userKey ->
+                when (
+                    val state =
+                        dataSource
+                            .listMemberHandler
+                            .userLists(userKey)
+                            .toUi()
+                            .first { it !is UiState.Loading }
+                ) {
+                    is UiState.Success -> state.data
+                    is UiState.Error -> throw state.throwable
+                    is UiState.Loading -> error("User lists are still loading.")
+                }
+            },
+            createList = { metadata -> dataSource.listHandler.create(metadata) },
+            updateList = { listId, metadata -> dataSource.listHandler.update(listId, metadata) },
+            deleteList = { listId -> dataSource.listHandler.delete(listId) },
+            addMember = { listId, userKey -> dataSource.listMemberHandler.addMember(listId, userKey) },
+            removeMember = { listId, userKey -> dataSource.listMemberHandler.removeMember(listId, userKey) },
+        )
+    }
+
+internal fun List<AccountMicroblogDataSource>.toAgentBuiltInTimelineTargets(): List<AgentBuiltInTimelineTarget> {
+    val accountService = agentTimelineAccountService()
+    val context = TimelineLoaderContext(accountService)
+    return flatMap { item ->
+        val dataSource = item.dataSource as? TimelineTabConfigurationDataSource ?: return@flatMap emptyList()
+        dataSource.builtInTimelineTabs.map { candidate ->
+            AgentBuiltInTimelineTarget(
+                id = candidate.id,
+                specId = candidate.target.spec.id,
+                title = candidate.title.agentTimelineTitle(),
+                accountKey = item.accountKey,
+                platformType = item.platformType,
+                loadTimeline = { pageSize ->
+                    candidate
+                        .createLoader(context)
+                        .first()
+                        .load(pageSize = pageSize, request = PagingRequest.Refresh)
+                        .data
+                },
+            )
+        }
+    }
+}
+
+private fun List<AccountMicroblogDataSource>.agentTimelineAccountService(): AccountService {
+    val dataSources = associateBy { it.accountKey }
+    return object : AccountService {
+        override fun accountServiceFlow(accountType: dev.dimension.flare.model.AccountType): Flow<MicroblogDataSource> {
+            val specific = accountType as? dev.dimension.flare.model.AccountType.Specific
+            val dataSource = specific?.let { dataSources[it.accountKey]?.dataSource }
+            return flowOf(dataSource ?: error("No agent timeline account data source for $accountType"))
+        }
+
+        override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> = flowOf(this@agentTimelineAccountService)
+
+        override fun <T : Any> addAccount(
+            account: UiAccount,
+            credential: T,
+            serializer: KSerializer<T>,
+        ): Job = error("Agent timeline tools cannot add accounts.")
+
+        override fun <T : Any> credentialFlow(
+            accountKey: MicroBlogKey,
+            serializer: KSerializer<T>,
+        ): Flow<T> = error("Agent timeline tools cannot read credentials.")
+
+        override fun <T : Any> updateCredential(
+            accountKey: MicroBlogKey,
+            credential: T,
+            serializer: KSerializer<T>,
+        ): Job = error("Agent timeline tools cannot update credentials.")
+    }
+}
 
 internal fun List<AccountMicroblogDataSource>.toAgentUserTargets(): List<AgentUserTarget> =
     mapNotNull { item ->
@@ -628,6 +899,37 @@ internal fun List<AgentRelationTarget>.filterRelationTargetsByPlatformNames(plat
     }
 }
 
+internal fun List<AgentNotificationTarget>.filterNotificationTargetsByPlatformNames(
+    platforms: List<String>,
+): List<AgentNotificationTarget> {
+    val platformFilter = platforms.toPlatformFilter()
+    return when {
+        platformFilter.searchAll -> this
+        platformFilter.platformTypes.isEmpty() -> emptyList()
+        else -> filter { it.platformType in platformFilter.platformTypes }
+    }
+}
+
+internal fun List<AgentListTarget>.filterListTargetsByPlatformNames(platforms: List<String>): List<AgentListTarget> {
+    val platformFilter = platforms.toPlatformFilter()
+    return when {
+        platformFilter.searchAll -> this
+        platformFilter.platformTypes.isEmpty() -> emptyList()
+        else -> filter { it.platformType in platformFilter.platformTypes }
+    }
+}
+
+internal fun List<AgentBuiltInTimelineTarget>.filterBuiltInTimelineTargetsByPlatformNames(
+    platforms: List<String>,
+): List<AgentBuiltInTimelineTarget> {
+    val platformFilter = platforms.toPlatformFilter()
+    return when {
+        platformFilter.searchAll -> this
+        platformFilter.platformTypes.isEmpty() -> emptyList()
+        else -> filter { it.platformType in platformFilter.platformTypes }
+    }
+}
+
 internal fun Iterable<PlatformType>.filterPlatformTypesByPlatformNames(platforms: List<String>): Set<PlatformType> {
     val platformFilter = platforms.toPlatformFilter()
     return when {
@@ -675,6 +977,83 @@ internal fun List<AgentSearchTarget>.searchPlatformGuidance(): String {
         """
     }.trimIndent()
 }
+
+internal fun List<AgentNotificationTarget>.notificationGuidance(): String =
+    if (isEmpty()) {
+        """
+
+        Notification guidance:
+        - No signed-in accounts currently expose notification timelines.
+        """
+    } else {
+        val accountLines =
+            joinToString(separator = "\n") { target ->
+                buildString {
+                    append("- accountKey=")
+                    append(target.accountKey)
+                    append(", platform=")
+                    append(target.platformType.name)
+                    append(", filters=")
+                    append(target.dataSource.supportedNotificationFilter.joinToString())
+                }
+            }
+        """
+
+        Notification guidance:
+        - Available notification-capable signed-in accounts are:
+        $accountLines
+        - Use load_notifications when the user asks about notifications, mentions, comments/replies, likes/favorites, or recent account activity directed at them.
+        - Use filter=All unless the user asks for a specific notification kind. Supported filter values are All, Mention, Comment, and Like, but each account may support only a subset listed above.
+        - Leave platforms empty to load notifications from every notification-capable signed-in account, or pass platform names/aliases when the user names specific platforms.
+        """
+    }.trimIndent()
+
+internal fun List<AgentListTarget>.listGuidance(): String =
+    if (isEmpty()) {
+        """
+
+        List guidance:
+        - No signed-in accounts currently expose list tools.
+        """
+    } else {
+        val accountLines =
+            joinToString(separator = "\n") { target ->
+                "- accountKey=${target.accountKey}, platform=${target.platformType.name}, metadata=${target.supportedMetaData.joinToString()}"
+            }
+        """
+
+        List guidance:
+        - Available list-capable signed-in accounts are:
+        $accountLines
+        - Use list_lists to inspect saved account lists, load_list_info for one list, load_list_timeline for posts in a list, and load_user_lists to see which lists contain a user.
+        - Use create_list, update_list, delete_list, add_list_member, and remove_list_member only for explicit user requests that change lists.
+        - List-changing tools require confirmation. Call them with confirmed=false first so Flare can show a structured confirmation button.
+        - Leave platforms empty to use every list-capable account, or pass platform names/aliases when the user names specific platforms.
+        """
+    }.trimIndent()
+
+internal fun List<AgentBuiltInTimelineTarget>.builtInTimelineGuidance(): String =
+    if (isEmpty()) {
+        """
+
+        Built-in timeline guidance:
+        - No signed-in accounts currently expose built-in timeline tabs.
+        """
+    } else {
+        val timelineLines =
+            joinToString(separator = "\n") { target ->
+                "- timelineId=${target.id}, specId=${target.specId}, title=${target.title}, accountKey=${target.accountKey}, platform=${target.platformType.name}"
+            }
+        """
+
+        Built-in timeline guidance:
+        - Available built-in timelines are:
+        $timelineLines
+        - Use list_builtin_timelines when the user asks what timelines are available.
+        - Use load_builtin_timeline when the user asks to load, inspect, summarize, compare, or analyze a built-in timeline such as home, discover, local, public, bookmarks, favourites, featured, or liked.
+        - Prefer exact timelineId from list_builtin_timelines. Use specId/title/platform only when the user has clearly identified one timeline.
+        """
+    }.trimIndent()
 
 internal fun List<AgentComposeTarget>.composePlatformGuidance(): String =
     if (isEmpty()) {
@@ -840,6 +1219,12 @@ private fun String.searchPlatformKey(): String =
         .replace("_", "")
         .replace(" ", "")
         .replace(".", "")
+
+private fun dev.dimension.flare.ui.model.UiText.agentTimelineTitle(): String =
+    when (this) {
+        is dev.dimension.flare.ui.model.UiText.Localized -> string.name
+        is dev.dimension.flare.ui.model.UiText.Raw -> string
+    }
 
 private val SEARCH_ALL_PLATFORM_KEYS =
     setOf(

@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
@@ -398,7 +399,7 @@ private fun LoginFlowContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        flowState.fields.forEach { field ->
+        flowState.fields.fastForEach { field ->
             key(field.id) {
                 LoginFieldInput(
                     field = field,
@@ -418,7 +419,7 @@ private fun LoginFlowContent(
                 onDismiss = onQrDismiss,
             )
         }
-        flowState.actions.forEach { action ->
+        flowState.actions.fastForEach { action ->
             PlatformFilledTonalButton(
                 onClick = {
                     state.perform(action.id)

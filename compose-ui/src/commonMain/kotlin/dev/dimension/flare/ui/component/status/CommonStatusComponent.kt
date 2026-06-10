@@ -45,6 +45,7 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
@@ -566,7 +567,7 @@ private fun StatusQuoteComponent(
                         postActionStyle = PostActionStyle.Hidden,
                     ),
             ) {
-                quotes.forEachIndexed { index, quote ->
+                quotes.fastForEachIndexed { index, quote ->
                     CommonStatusComponent(
                         quote,
                         isQuote = true,
@@ -638,7 +639,7 @@ private fun StatusReactionComponent(
                         )
                     },
             ) {
-                data.emojiReactions.forEach { reaction ->
+                data.emojiReactions.fastForEach { reaction ->
                     val color =
                         if (reaction.me) {
                             PlatformTheme.colorScheme.primaryContainer
@@ -923,7 +924,7 @@ internal fun StatusActions(
             },
 //        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        items.forEachIndexed { index, action ->
+        items.fastForEachIndexed { index, action ->
             if (index == items.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
                 Spacer(modifier = Modifier.weight(1f))
             }
@@ -1217,7 +1218,7 @@ private fun StatusPollComponent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        poll.options.forEachIndexed { index, option ->
+        poll.options.fastForEachIndexed { index, option ->
             PollOption(
                 option = option,
                 modifier = Modifier.fillMaxWidth(),

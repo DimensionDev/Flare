@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.util.fastForEachIndexed
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
@@ -21,7 +22,7 @@ internal actual fun PlatformPicker(
     LiteFilter(
         modifier = modifier,
     ) {
-        options.forEachIndexed { index, option ->
+        options.fastForEachIndexed { index, option ->
             PillButton(
                 selected = selectedIndex == index,
                 onSelectedChanged = {

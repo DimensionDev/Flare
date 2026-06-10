@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachIndexed
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -24,7 +25,7 @@ internal actual fun PlatformPicker(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        options.forEachIndexed { index, option ->
+        options.fastForEachIndexed { index, option ->
             FilterChip(
                 selected = selectedIndex == index,
                 onClick = {

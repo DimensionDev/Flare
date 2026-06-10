@@ -11,6 +11,8 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.theme.PlatformTheme
 
@@ -87,7 +89,7 @@ internal fun AdaptiveGrid(
                     }
                 return@SubcomposeLayout layout(placeable.width, placeable.height) {
                     placeable.placeRelative(0, 0)
-                    overflowPlaceables.forEach {
+                    overflowPlaceables.fastForEach {
                         it.placeRelative(overflowX, overflowY)
                     }
                 }
@@ -212,7 +214,7 @@ internal fun AdaptiveGrid(
                         4 -> {
                             val cellW = placeables[0].width
                             val cellH = placeables[0].height
-                            placeables.forEachIndexed { index, p ->
+                            placeables.fastForEachIndexed { index, p ->
                                 val col = index % 2
                                 val row = index / 2
                                 p.placeRelative(
@@ -222,7 +224,7 @@ internal fun AdaptiveGrid(
                             }
                         }
                     }
-                    overflowPlaceables.forEach {
+                    overflowPlaceables.fastForEach {
                         it.placeRelative(overflowX, overflowY)
                     }
                 }
@@ -283,7 +285,7 @@ internal fun AdaptiveGrid(
                 }
 
             layout(constraints.maxWidth, totalHeight) {
-                placeables.forEachIndexed { index, p ->
+                placeables.fastForEachIndexed { index, p ->
                     val row = index / columns
                     val col = index % columns
                     val isLastRow = row == rows - 1 && lastRowFlexible
@@ -300,7 +302,7 @@ internal fun AdaptiveGrid(
                         y = row * (itemSize + gapPx),
                     )
                 }
-                overflowPlaceables.forEach {
+                overflowPlaceables.fastForEach {
                     it.placeRelative(overflowX, overflowY)
                 }
             }

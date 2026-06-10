@@ -60,7 +60,8 @@ struct LocalHistoryScreen: View {
         .searchable(text: $searchText, isPresented: $isSearchPresented, prompt: Text("local_history_search_prompt"))
         .askAiSearchOverlay(
             agentEnabled: agentEnabled,
-            isSearchPresented: isSearchPresented
+            isSearchPresented: isSearchPresented,
+            bottomInset: 0
         ) {
             askAi()
         }

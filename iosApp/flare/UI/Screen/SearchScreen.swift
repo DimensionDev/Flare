@@ -179,13 +179,10 @@ struct SearchScreen: View {
     }
 }
 
-private enum SearchAccessoryMetrics {
-    static let activeSearchFieldHeight: CGFloat = 72
-}
-
 struct AskAiSearchOverlayModifier: ViewModifier {
     let agentEnabled: Bool
     let isSearchPresented: Bool
+    let bottomInset: CGFloat
     let action: () -> Void
 
     private var isVisible: Bool {
@@ -197,7 +194,7 @@ struct AskAiSearchOverlayModifier: ViewModifier {
             .overlay(alignment: .bottom) {
                 if isVisible {
                     AskAiSearchAccessory(action: action)
-                        .padding(.bottom, SearchAccessoryMetrics.activeSearchFieldHeight)
+                        .padding(.bottom, bottomInset)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                         .zIndex(1)
                 }
@@ -210,12 +207,14 @@ extension View {
     func askAiSearchOverlay(
         agentEnabled: Bool,
         isSearchPresented: Bool,
+        bottomInset: CGFloat = 16,
         action: @escaping () -> Void
     ) -> some View {
         modifier(
             AskAiSearchOverlayModifier(
                 agentEnabled: agentEnabled,
                 isSearchPresented: isSearchPresented,
+                bottomInset: bottomInset,
                 action: action
             )
         )
@@ -239,7 +238,5 @@ struct AskAiSearchAccessory: View {
             .controlSize(.large)
         }
         .padding(.horizontal)
-        .padding(.vertical, 8)
-        .background(.regularMaterial)
     }
 }

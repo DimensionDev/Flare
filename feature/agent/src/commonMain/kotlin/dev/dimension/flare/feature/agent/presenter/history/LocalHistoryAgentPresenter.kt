@@ -105,6 +105,7 @@ public class LocalHistoryAgentPresenter(
                 missingContextError = {
                     IllegalStateException("Local history agent context is unavailable")
                 },
+                autoRunOnContext = normalizedQuery != null,
             )
 
         return StateImpl(

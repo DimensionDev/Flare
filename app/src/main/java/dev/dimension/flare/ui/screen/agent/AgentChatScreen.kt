@@ -47,7 +47,6 @@ internal fun AgentChatScreen(
         } else {
             stringResource(id = R.string.agent_chat_thinking)
         }
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     AgentChatScaffold(
         messages = state.messages,
@@ -67,7 +66,7 @@ internal fun AgentChatScreen(
         onUserClick = { user ->
             user.toRoute()?.let(navigate)
         },
-        modifier = modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+        modifier = modifier,
         leadingContentItemCount = state.statusInsightPosts.size,
         leadingContent = {
             state.statusInsightPosts.forEach { post ->
@@ -93,7 +92,6 @@ internal fun AgentChatScreen(
                 navigationIcon = {
                     BackButton(onBack = onBack)
                 },
-                scrollBehavior = topAppBarScrollBehavior,
             )
         },
     )

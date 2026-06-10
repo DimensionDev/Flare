@@ -4,7 +4,7 @@
 	import { createSecondaryTabsPresenter } from '@flare/web-presenters/secondaryTabs.svelte';
 	import type {
 		SecondaryTabsPresenterTab,
-		TimelineTabItemV2,
+		UiTimelineTabItem,
 	} from '@flare/web-presenters/secondaryTabs.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { localizedUiString } from '$lib/i18n/uiStrings';
@@ -16,7 +16,7 @@
 		onTimelineSelected,
 	}: {
 		selectedTimelineKey?: string | null;
-		onTimelineSelected: (tab: TimelineTabItemV2) => void;
+		onTimelineSelected: (tab: UiTimelineTabItem) => void;
 	} = $props();
 
 	let searchQuery = $state('');

@@ -1,6 +1,10 @@
 package dev.dimension.flare.data.model.tab
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.appearance.AppearanceBag
@@ -10,17 +14,25 @@ import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -29,6 +41,8 @@ import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.koin.core.annotation.Single
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 @Immutable
 @Serializable
@@ -62,18 +76,17 @@ public enum class TimelinePostContent {
 }
 
 @Immutable
-public sealed interface TimelineTabItemV2 {
+public sealed interface UiTimelineTabItem {
     public val id: String
     public val title: UiText
     public val icon: IconType
     public val appearancePatch: AppearancePatch?
     public val enabled: Boolean
     public val filterConfig: TimelineFilterConfig
+    public val loaderKey: String
 
     // for iOS and Compose call sites
     public val key: String get() = id
-
-    public fun createPresenter(): TimelinePresenter
 
     public fun withPresentationOverrides(
         title: String,
@@ -81,10 +94,10 @@ public sealed interface TimelineTabItemV2 {
         appearancePatch: AppearancePatch? = this.appearancePatch,
         enabled: Boolean = this.enabled,
         filterConfig: TimelineFilterConfig = this.filterConfig,
-    ): TimelineTabItemV2
+    ): UiTimelineTabItem
 }
 
-public fun TimelineTabItemV2.resolveTimelineAppearance(base: TimelineAppearance): TimelineAppearance = base.withPatch(appearancePatch)
+public fun UiTimelineTabItem.resolveTimelineAppearance(base: TimelineAppearance): TimelineAppearance = base.withPatch(appearancePatch)
 
 private val galleryAppearancePatch: AppearancePatch =
     AppearancePatch.EMPTY.set(
@@ -93,7 +106,7 @@ private val galleryAppearancePatch: AppearancePatch =
     )
 
 @Immutable
-public class SourceTimelineTabItemV2 private constructor(
+public class UiSourceTimelineTabItem internal constructor(
     override val id: String,
     internal val source: TimelineSourceRef?,
     internal val presentation: TimelinePresentation?,
@@ -101,12 +114,14 @@ public class SourceTimelineTabItemV2 private constructor(
     override val icon: IconType,
     override val appearancePatch: AppearancePatch?,
     override val enabled: Boolean,
-    private val presenterFactory: () -> TimelinePresenter,
-) : TimelineTabItemV2 {
+) : UiTimelineTabItem {
+    public companion object {}
+
     override val filterConfig: TimelineFilterConfig
         get() = presentation?.filterConfig ?: TimelineFilterConfig()
 
-    override fun createPresenter(): TimelinePresenter = presenterFactory().also { it.bindTimelineTabItemId(id) }
+    override val loaderKey: String
+        get() = encodeTimelineLoaderKey(toSlotForLoaderKey())
 
     override fun withPresentationOverrides(
         title: String,
@@ -114,7 +129,7 @@ public class SourceTimelineTabItemV2 private constructor(
         appearancePatch: AppearancePatch?,
         enabled: Boolean,
         filterConfig: TimelineFilterConfig,
-    ): TimelineTabItemV2 {
+    ): UiTimelineTabItem {
         val updatedPresentation =
             presentation?.withOverrides(
                 titleOverride = title,
@@ -129,7 +144,7 @@ public class SourceTimelineTabItemV2 private constructor(
                 enabled = enabled,
                 filterConfig = filterConfig,
             )
-        return SourceTimelineTabItemV2(
+        return UiSourceTimelineTabItem(
             id = id,
             source = source,
             presentation = updatedPresentation,
@@ -137,73 +152,14 @@ public class SourceTimelineTabItemV2 private constructor(
             icon = icon,
             appearancePatch = updatedPresentation.appearance,
             enabled = updatedPresentation.enabled,
-            presenterFactory = presenterFactory,
         )
-    }
-
-    public companion object {
-        public fun runtime(
-            id: String,
-            title: UiText,
-            icon: IconType,
-            appearancePatch: AppearancePatch? = null,
-            enabled: Boolean = true,
-            createPresenter: () -> TimelinePresenter,
-        ): SourceTimelineTabItemV2 =
-            SourceTimelineTabItemV2(
-                id = id,
-                source = null,
-                presentation = null,
-                title = title,
-                icon = icon,
-                appearancePatch = appearancePatch,
-                enabled = enabled,
-                presenterFactory = createPresenter,
-            )
-
-        internal fun fromSlot(
-            slot: TimelineSlot,
-            source: TimelineSourceRef,
-            presenterFactory: () -> TimelinePresenter,
-        ): SourceTimelineTabItemV2 =
-            SourceTimelineTabItemV2(
-                id = slot.id,
-                source = source,
-                presentation = slot.presentation,
-                title = slot.title,
-                icon = slot.icon,
-                appearancePatch = slot.presentation.appearance,
-                enabled = slot.presentation.enabled,
-                presenterFactory = presenterFactory,
-            )
-
-        internal fun fromSource(
-            source: TimelineSourceRef,
-            appearancePatch: AppearancePatch? = null,
-            presenterFactory: () -> TimelinePresenter,
-        ): SourceTimelineTabItemV2 {
-            val presentation =
-                appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.let {
-                    TimelinePresentation(appearanceOverride = it.toBag())
-                }
-            return SourceTimelineTabItemV2(
-                id = source.id,
-                source = source,
-                presentation = presentation,
-                title = source.title,
-                icon = source.icon,
-                appearancePatch = presentation?.appearance,
-                enabled = presentation?.enabled ?: true,
-                presenterFactory = presenterFactory,
-            )
-        }
     }
 }
 
 @Immutable
-public class GroupTimelineTabItemV2 internal constructor(
+public class UiGroupTimelineTabItem internal constructor(
     override val id: String,
-    public val children: List<TimelineTabItemV2>,
+    public val children: List<UiTimelineTabItem>,
     public val mergePolicy: TimelineMergePolicy,
     internal val source: GroupSource,
     internal val presentation: TimelinePresentation,
@@ -211,20 +167,12 @@ public class GroupTimelineTabItemV2 internal constructor(
     override val icon: IconType,
     override val appearancePatch: AppearancePatch?,
     override val enabled: Boolean,
-) : TimelineTabItemV2 {
+) : UiTimelineTabItem {
     override val filterConfig: TimelineFilterConfig
         get() = presentation.filterConfig
 
-    override fun createPresenter(): TimelinePresenter =
-        when (source) {
-            GroupSource.SystemHome -> {
-                SystemHomeMixedTimelinePresenter(id = id)
-            }
-
-            GroupSource.Manual -> {
-                MixedTimelinePresenter(id = id)
-            }
-        }
+    override val loaderKey: String
+        get() = encodeTimelineLoaderKey(toSlotForLoaderKey())
 
     override fun withPresentationOverrides(
         title: String,
@@ -232,7 +180,7 @@ public class GroupTimelineTabItemV2 internal constructor(
         appearancePatch: AppearancePatch?,
         enabled: Boolean,
         filterConfig: TimelineFilterConfig,
-    ): TimelineTabItemV2 {
+    ): UiTimelineTabItem {
         val updatedPresentation =
             presentation.withOverrides(
                 titleOverride = title,
@@ -241,7 +189,7 @@ public class GroupTimelineTabItemV2 internal constructor(
                 enabled = enabled,
                 filterConfig = filterConfig,
             )
-        return GroupTimelineTabItemV2(
+        return UiGroupTimelineTabItem(
             id = id,
             children = children,
             mergePolicy = mergePolicy,
@@ -255,30 +203,30 @@ public class GroupTimelineTabItemV2 internal constructor(
     }
 }
 
-public val TimelineTabItemV2.isSystemHomeMixedTimeline: Boolean
-    get() = this is GroupTimelineTabItemV2 && source == GroupSource.SystemHome
+public val UiTimelineTabItem.isSystemHomeMixedTimeline: Boolean
+    get() = this is UiGroupTimelineTabItem && source == GroupSource.SystemHome
 
-internal fun TimelineTabItemV2.findById(id: String): TimelineTabItemV2? =
+internal fun UiTimelineTabItem.findById(id: String): UiTimelineTabItem? =
     when (this) {
-        is SourceTimelineTabItemV2 -> takeIf { this.id == id }
-        is GroupTimelineTabItemV2 -> takeIf { this.id == id } ?: children.firstNotNullOfOrNull { it.findById(id) }
+        is UiSourceTimelineTabItem -> takeIf { this.id == id }
+        is UiGroupTimelineTabItem -> takeIf { this.id == id } ?: children.firstNotNullOfOrNull { it.findById(id) }
     }
 
-internal fun List<TimelineTabItemV2>.findById(id: String): TimelineTabItemV2? = firstNotNullOfOrNull { it.findById(id) }
+internal fun List<UiTimelineTabItem>.findById(id: String): UiTimelineTabItem? = firstNotNullOfOrNull { it.findById(id) }
 
-public fun List<TimelineTabItemV2>.withSystemHomeMixedTimelineEnabled(
+public fun List<UiTimelineTabItem>.withSystemHomeMixedTimelineEnabled(
     enabled: Boolean,
     mergePolicy: TimelineMergePolicy? = null,
     filterConfig: TimelineFilterConfig? = null,
-): List<TimelineTabItemV2> {
-    val existingGroup = filterIsInstance<GroupTimelineTabItemV2>().firstOrNull { it.source == GroupSource.SystemHome }
+): List<UiTimelineTabItem> {
+    val existingGroup = filterIsInstance<UiGroupTimelineTabItem>().firstOrNull { it.source == GroupSource.SystemHome }
     val tabsWithoutSystemGroup = filterNot { it.isSystemHomeMixedTimeline }
     if (!enabled || tabsWithoutSystemGroup.size < 2) {
         return tabsWithoutSystemGroup
     }
 
     val systemGroup =
-        GroupTimelineTabItemV2(
+        UiGroupTimelineTabItem(
             id = SYSTEM_HOME_MIXED_TIMELINE_ID,
             children = tabsWithoutSystemGroup,
             mergePolicy = mergePolicy ?: existingGroup?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
@@ -307,7 +255,7 @@ internal const val SYSTEM_HOME_MIXED_TIMELINE_ID = "mixed_timeline_system_home"
 
 @Immutable
 @Serializable
-public data class TimelineSlot(
+internal data class TimelineSlot(
     val id: String,
     val content: TimelineSlotContent,
     val presentation: TimelinePresentation = TimelinePresentation(),
@@ -327,14 +275,14 @@ public data class TimelineSlot(
 
 @Immutable
 @Serializable
-public data class TimelinePresentation internal constructor(
+internal data class TimelinePresentation internal constructor(
     val titleOverride: String? = null,
     val iconOverride: IconType? = null,
     private val appearanceOverride: AppearanceBag? = null,
     val enabled: Boolean = true,
     val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
 ) {
-    public val appearance: AppearancePatch? by lazy {
+    val appearance: AppearancePatch? by lazy {
         appearanceOverride?.toPatch()
     }
 
@@ -356,28 +304,28 @@ public data class TimelinePresentation internal constructor(
 
 @Immutable
 @Serializable
-public sealed interface TimelineSlotContent {
+internal sealed interface TimelineSlotContent {
     @Immutable
     @Serializable
     @SerialName("source")
-    public data class Source(
+    data class Source(
         @SerialName("target")
-        public val source: TimelineSourceRef,
+        val source: TimelineSourceRef,
     ) : TimelineSlotContent
 
     @Immutable
     @Serializable
     @SerialName("group")
-    public data class Group(
-        public val children: List<TimelineSlot> = emptyList(),
-        public val source: GroupSource = GroupSource.Manual,
-        public val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.Time,
+    data class Group(
+        val children: List<TimelineSlot> = emptyList(),
+        val source: GroupSource = GroupSource.Manual,
+        val mergePolicy: TimelineMergePolicy = TimelineMergePolicy.Time,
     ) : TimelineSlotContent
 }
 
 @Immutable
 @Serializable
-public enum class GroupSource {
+internal enum class GroupSource {
     Manual,
     SystemHome,
 }
@@ -392,7 +340,7 @@ public enum class TimelineMergePolicy {
 
 @Immutable
 @Serializable
-public data class TimelineSourceRef(
+internal data class TimelineSourceRef(
     val id: String,
     val specId: String,
     val title: UiText,
@@ -410,18 +358,145 @@ internal fun TimelineSourceRef.toSlot(
         presentation = presentation,
     )
 
+@OptIn(ExperimentalSerializationApi::class)
+private fun encodeTimelineLoaderKey(slot: TimelineSlot): String = ProtoBuf.encodeToHexString(TimelineSlot.serializer(), slot)
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun decodeTimelineLoaderKey(key: String): TimelineSlot = ProtoBuf.decodeFromHexString(TimelineSlot.serializer(), key)
+
+private fun UiTimelineTabItem.toSlotForLoaderKey(): TimelineSlot =
+    when (this) {
+        is UiSourceTimelineTabItem -> {
+            val source =
+                source ?: throw IllegalArgumentException("Timeline tab has no source: $id")
+            source.toSlot(
+                slotId = id,
+                presentation = presentation ?: TimelinePresentation(),
+            )
+        }
+
+        is UiGroupTimelineTabItem -> {
+            TimelineSlot(
+                id = id,
+                content =
+                    TimelineSlotContent.Group(
+                        children = children.map { it.toSlotForLoaderKey() },
+                        source = source,
+                        mergePolicy = mergePolicy,
+                    ),
+                presentation = presentation,
+            )
+        }
+    }
+
+public fun interface TimelineLoaderFactory<T : TimelineSpec.Data> {
+    public fun create(
+        data: T,
+        context: TimelineLoaderContext,
+    ): Flow<RemoteLoader<UiTimelineV2>>
+}
+
+public class TimelineLoaderContext internal constructor(
+    private val accountService: AccountService,
+) : KoinComponent {
+    public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = accountService.accountServiceFlow(accountType)
+
+    public inline fun <reified T : Any> get(): T = getKoin().get(clazz = T::class)
+}
+
+public fun <T : TimelineSpec.Data> remoteLoaderFactory(factory: (data: T) -> RemoteLoader<UiTimelineV2>): TimelineLoaderFactory<T> =
+    TimelineLoaderFactory { data, _ ->
+        flowOf(factory(data))
+    }
+
+public inline fun <reified S : Any, T> accountLoader(
+    crossinline factory: S.(data: T) -> RemoteLoader<UiTimelineV2>,
+): TimelineLoaderFactory<T>
+    where T : TimelineSpec.Data, T : TimelineSpec.AccountData =
+    TimelineLoaderFactory { data, context ->
+        context
+            .accountServiceFlow(AccountType.Specific(data.accountKey))
+            .map { service ->
+                require(service is S) {
+                    "Expected ${S::class} for ${data.accountKey}, but got ${service::class}"
+                }
+                service.factory(data)
+            }
+    }
+
+public data class TimelineTarget<T : TimelineSpec.Data>(
+    val spec: TimelineSpec<T>,
+    val data: T,
+)
+
+public data class TimelineCandidate<T : TimelineSpec.Data>(
+    val target: TimelineTarget<T>,
+    val title: UiText = target.spec.title.asText(),
+    val icon: IconType = target.spec.icon,
+    val appearancePatch: AppearancePatch? = null,
+    val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
+) {
+    public val id: String get() = target.spec.itemId(target.data)
+}
+
+public fun TimelineCandidate<*>.toUiTimelineTabItem(): UiSourceTimelineTabItem {
+    val source = target.toSource(title, icon)
+    val presentation =
+        appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.let {
+            TimelinePresentation(appearanceOverride = it.toBag(), filterConfig = filterConfig)
+        } ?: TimelinePresentation(filterConfig = filterConfig)
+    return UiSourceTimelineTabItem(
+        id = id,
+        source = source,
+        presentation = presentation,
+        title = title,
+        icon = icon,
+        appearancePatch = presentation.appearance,
+        enabled = presentation.enabled,
+    )
+}
+
 public data class TimelineSpec<T : TimelineSpec.Data>(
     val id: String,
     val title: UiStrings,
     val icon: IconType,
     val serializer: KSerializer<T>,
     val targetId: (data: T) -> String,
-    private val presenterFactory: (data: T) -> TimelinePresenter,
+    val loaderFactory: TimelineLoaderFactory<T>,
 ) {
     public fun itemId(data: T): String = "$id:${targetId(data)}"
 
+    public fun target(data: T): TimelineTarget<T> = TimelineTarget(this, data)
+
+    public fun candidate(
+        data: T,
+        title: UiText = this.title.asText(),
+        icon: IconType = this.icon,
+        filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
+    ): TimelineCandidate<T> =
+        TimelineCandidate(
+            target = target(data),
+            title = title,
+            icon = icon,
+            filterConfig = filterConfig,
+        )
+
+    public fun galleryCandidate(
+        data: T,
+        title: UiText = this.title.asText(),
+        icon: IconType = this.icon,
+        filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
+    ): TimelineCandidate<T> =
+        TimelineCandidate(
+            target = target(data),
+            title = title,
+            icon = icon,
+            appearancePatch = galleryAppearancePatch,
+            filterConfig = filterConfig,
+        )
+
     @OptIn(ExperimentalSerializationApi::class)
-    internal fun target(
+    internal fun source(
         data: T,
         title: UiText = this.title.asText(),
         icon: IconType = this.icon,
@@ -434,55 +509,8 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
             data = ProtoBuf.encodeToHexString(serializer, data),
         )
 
-    public fun tabItem(
-        data: T,
-        title: UiText = this.title.asText(),
-        icon: IconType = this.icon,
-    ): SourceTimelineTabItemV2 =
-        tabItem(
-            data = data,
-            title = title,
-            icon = icon,
-            appearancePatch = null,
-        )
-
-    public fun galleryTabItem(
-        data: T,
-        title: UiText = this.title.asText(),
-        icon: IconType = this.icon,
-    ): SourceTimelineTabItemV2 =
-        tabItem(
-            data = data,
-            title = title,
-            icon = icon,
-            appearancePatch = galleryAppearancePatch,
-        )
-
-    private fun tabItem(
-        data: T,
-        title: UiText,
-        icon: IconType,
-        appearancePatch: AppearancePatch?,
-    ): SourceTimelineTabItemV2 {
-        val source =
-            target(
-                data = data,
-                title = title,
-                icon = icon,
-            )
-        return SourceTimelineTabItemV2.fromSource(
-            source = source,
-            appearancePatch = appearancePatch,
-        ) {
-            createPresenter(source.data)
-        }
-    }
-
     @OptIn(ExperimentalSerializationApi::class)
-    public fun createPresenter(encodedData: String): TimelinePresenter {
-        val data = ProtoBuf.decodeFromHexString(serializer, encodedData)
-        return presenterFactory(data)
-    }
+    internal fun decode(encodedData: String): T = ProtoBuf.decodeFromHexString(serializer, encodedData)
 
     public interface Data
 
@@ -509,7 +537,7 @@ public data class ShortcutSpec(
 ) {
     public sealed interface Target {
         public data class Timeline(
-            val tabItem: SourceTimelineTabItemV2,
+            val candidate: TimelineCandidate<*>,
         ) : Target
 
         public data class Route(
@@ -519,27 +547,34 @@ public data class ShortcutSpec(
 }
 
 @Single
-public class TimelineResolver(
+internal class TimelineResolver(
     data: PlatformRuntimeData,
+    accountService: AccountService,
 ) {
+    private val loaderContext = TimelineLoaderContext(accountService)
+
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         data.timelineSpecs
             .distinctBy { it.id }
             .associateBy { it.id }
     }
 
-    internal fun toTabItem(slot: TimelineSlot): TimelineTabItemV2 =
+    fun toTabItem(slot: TimelineSlot): UiTimelineTabItem =
         when (val content = slot.content) {
             is TimelineSlotContent.Source -> {
-                SourceTimelineTabItemV2.fromSlot(
-                    slot = slot,
+                UiSourceTimelineTabItem(
+                    id = slot.id,
                     source = content.source,
-                    presenterFactory = { resolvePresenter(content.source) },
+                    presentation = slot.presentation,
+                    title = slot.title,
+                    icon = slot.icon,
+                    appearancePatch = slot.presentation.appearance,
+                    enabled = slot.presentation.enabled,
                 )
             }
 
             is TimelineSlotContent.Group -> {
-                GroupTimelineTabItemV2(
+                UiGroupTimelineTabItem(
                     id = slot.id,
                     children = content.children.map { toTabItem(it) }.filter { it.enabled },
                     mergePolicy = content.mergePolicy,
@@ -553,15 +588,22 @@ public class TimelineResolver(
             }
         }
 
-    public fun toTabItem(source: TimelineSourceRef): SourceTimelineTabItemV2 =
-        SourceTimelineTabItemV2.fromSource(
-            source = source,
-            presenterFactory = { resolvePresenter(source) },
-        )
+    fun toTabItem(candidate: TimelineCandidate<*>): UiSourceTimelineTabItem = candidate.toUiTimelineTabItem()
 
-    internal fun toSlot(item: TimelineTabItemV2): TimelineSlot =
+    fun toTabItem(loaderKey: String): UiTimelineTabItem = toTabItem(decodeTimelineLoaderKey(loaderKey))
+
+    fun toSlot(candidate: TimelineCandidate<*>): TimelineSlot {
+        val source = candidate.target.toSource(candidate.title, candidate.icon)
+        val presentation =
+            candidate.appearancePatch?.takeUnless { it == AppearancePatch.EMPTY }?.let {
+                TimelinePresentation(appearanceOverride = it.toBag())
+            } ?: TimelinePresentation()
+        return source.toSlot(presentation = presentation)
+    }
+
+    fun toSlot(item: UiTimelineTabItem): TimelineSlot =
         when (item) {
-            is SourceTimelineTabItemV2 -> {
+            is UiSourceTimelineTabItem -> {
                 val source =
                     item.source
                         ?: throw IllegalArgumentException("Runtime timeline tab cannot be persisted: ${item.id}")
@@ -571,7 +613,7 @@ public class TimelineResolver(
                 )
             }
 
-            is GroupTimelineTabItemV2 -> {
+            is UiGroupTimelineTabItem -> {
                 TimelineSlot(
                     id = item.id,
                     content =
@@ -585,30 +627,113 @@ public class TimelineResolver(
             }
         }
 
-    private fun resolvePresenter(source: TimelineSourceRef): TimelinePresenter = resolveSpec(source).createPresenter(source.data)
+    fun resolveLoader(item: UiTimelineTabItem): Flow<RemoteLoader<UiTimelineV2>> =
+        when (item) {
+            is UiSourceTimelineTabItem -> {
+                val source = item.source ?: return flowOf(notSupported())
+                resolveLoader(source)
+            }
+
+            is UiGroupTimelineTabItem -> {
+                resolveGroupLoader(item)
+            }
+        }
+
+    fun resolveLoader(target: TimelineTarget<out TimelineSpec.Data>): Flow<RemoteLoader<UiTimelineV2>> = target.createLoader()
 
     @OptIn(ExperimentalSerializationApi::class)
-    public fun resolveAccountKey(item: TimelineTabItemV2): MicroBlogKey? =
+    fun resolveAccountKey(item: UiTimelineTabItem): MicroBlogKey? =
         when (item) {
-            is SourceTimelineTabItemV2 -> item.source?.let(::resolveAccountKey)
-            is GroupTimelineTabItemV2 -> null
+            is UiSourceTimelineTabItem -> item.source?.let(::resolveAccountKey)
+            is UiGroupTimelineTabItem -> null
         }
 
     @OptIn(ExperimentalSerializationApi::class)
-    internal fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
+    fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
         when (val content = slot.content) {
             is TimelineSlotContent.Source -> resolveAccountKey(content.source)
             is TimelineSlotContent.Group -> null
         }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
-        val spec = resolveSpec(source)
-        val data = ProtoBuf.decodeFromHexString(spec.serializer, source.data)
-        return (data as? TimelineSpec.AccountData)?.accountKey
-    }
+    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> = resolveSpec(source).createLoader(source.data)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun resolveGroupLoader(item: UiGroupTimelineTabItem): Flow<RemoteLoader<UiTimelineV2>> =
+        flowOf(item.children.filter { it.enabled })
+            .distinctUntilChangedByTabIds()
+            .flatMapLatest { tabs ->
+                if (tabs.isEmpty()) {
+                    flowOf(notSupported())
+                } else {
+                    combine(tabs.map { resolveLoader(it) }) { loaders ->
+                        MixedTimelineLoaderFactory.create(
+                            loaders = loaders.toList(),
+                            mergePolicy = item.mergePolicy,
+                        )
+                    }
+                }
+            }
 
     private fun resolveSpec(source: TimelineSourceRef): TimelineSpec<out TimelineSpec.Data> =
         specs[source.specId]
             ?: throw IllegalArgumentException("No timeline spec found for source ID: ${source.specId}")
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
+        val spec = resolveSpec(source)
+        val data = spec.decode(source.data)
+        return (data as? TimelineSpec.AccountData)?.accountKey
+    }
+
+    private fun <T : TimelineSpec.Data> TimelineSpec<T>.createLoader(encodedData: String): Flow<RemoteLoader<UiTimelineV2>> =
+        loaderFactory.create(decode(encodedData), loaderContext)
+
+    private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(): Flow<RemoteLoader<UiTimelineV2>> =
+        spec.loaderFactory.create(data, loaderContext)
 }
+
+private fun <T : TimelineSpec.Data> TimelineTarget<T>.toSource(
+    title: UiText,
+    icon: IconType,
+): TimelineSourceRef =
+    spec.source(
+        data = data,
+        title = title,
+        icon = icon,
+    )
+
+@Single
+internal class TimelinePresenterFactory(
+    private val timelineResolver: TimelineResolver,
+) {
+    fun create(item: UiTimelineTabItem): TimelinePresenter =
+        TimelinePresenter(
+            tabId = item.id,
+            loader = timelineResolver.resolveLoader(item),
+        )
+}
+
+internal object MixedTimelineLoaderFactory : KoinComponent {
+    private val database: dev.dimension.flare.data.database.cache.CacheDatabase by inject()
+
+    fun create(
+        loaders: List<RemoteLoader<UiTimelineV2>>,
+        mergePolicy: TimelineMergePolicy,
+    ): RemoteLoader<UiTimelineV2> {
+        val cacheableLoaders = loaders.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>()
+        return if (cacheableLoaders.isEmpty()) {
+            notSupported()
+        } else {
+            dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator(
+                database = database,
+                mediators = cacheableLoaders,
+                mergePolicy = mergePolicy,
+            )
+        }
+    }
+}
+
+private fun Flow<List<UiTimelineTabItem>>.distinctUntilChangedByTabIds(): Flow<List<UiTimelineTabItem>> =
+    distinctUntilChanged { old, new ->
+        old.map { it.id } == new.map { it.id }
+    }

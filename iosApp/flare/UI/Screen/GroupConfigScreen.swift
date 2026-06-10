@@ -5,23 +5,23 @@ import SwiftUIBackports
 struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var baseTimelineAppearance
-    let item: GroupTimelineTabItemV2?
-    let onConfirm: (GroupTimelineTabItemV2?) -> Void
+    let item: UiGroupTimelineTabItem?
+    let onConfirm: (UiGroupTimelineTabItem?) -> Void
     @State private var name: String
     @State private var icon: IconType
     @State private var enabled: Bool
     @State private var mergePolicy: TimelineMergePolicy
     @State private var filterConfig: TimelineFilterConfig
     @State private var appearancePatch: AppearancePatch
-    @State private var tabs: [TimelineTabItemV2]
+    @State private var tabs: [UiTimelineTabItem]
     @State private var showAddTabSheet = false
     @State private var showFilterSheet = false
-    @State private var editItem: TimelineTabItemV2? = nil
+    @State private var editItem: UiTimelineTabItem? = nil
     @StateObject private var presenter: KotlinPresenter<GroupConfigPresenterState>
 
     init(
-        item: GroupTimelineTabItemV2? = nil,
-        onConfirm: @escaping (GroupTimelineTabItemV2?) -> Void
+        item: UiGroupTimelineTabItem? = nil,
+        onConfirm: @escaping (UiGroupTimelineTabItem?) -> Void
     ) {
         self.item = item
         self.onConfirm = onConfirm
@@ -33,7 +33,7 @@ struct GroupConfigScreen: View {
         _appearancePatch = State(
             initialValue: item?.appearancePatch ?? TimelinePresentationAppearancePatchHelper.shared.empty
         )
-        _tabs = State(initialValue: Array((item?.children ?? []).reduce(into: [TimelineTabItemV2]()) { result, tab in
+        _tabs = State(initialValue: Array((item?.children ?? []).reduce(into: [UiTimelineTabItem]()) { result, tab in
             if !result.contains(where: { $0.id == tab.id }) {
                 result.append(tab)
             }

@@ -3,9 +3,10 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -18,8 +19,6 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.BlueskyLoginProvider
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -55,26 +54,23 @@ public data object BlueskyPlatformSpec :
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                BlueskyBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<BlueskyDataSource, TimelineSpec.AccountBasedData> {
+                    bookmarkTimeline()
+                },
         )
 
-    internal val feedTimelineSpec =
+    public val feedTimelineSpec: TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
             id = TimelineSpecIds.BLUESKY_FEED,
             title = UiStrings.Feeds,
             icon = UiIcon.Feeds.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
-            presenterFactory = {
-                BlueskyFeedTimelinePresenter(
-                    accountType = AccountType.Specific(it.accountKey),
-                    uri = it.resourceId,
-                )
-            },
+            loaderFactory =
+                accountLoader<BlueskyDataSource, TimelineSpec.AccountResourceData> {
+                    feedTimelineLoader(it.resourceId)
+                },
         )
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
@@ -165,9 +161,9 @@ private fun profileRoute(
     )
 }
 
-internal fun UiList.Feed.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+internal fun UiList.Feed.toTimelineCandidate(accountKey: MicroBlogKey): TimelineCandidate<*> =
     BlueskyPlatformSpec.feedTimelineSpec
-        .tabItem(
+        .candidate(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = avatar?.let { IconType.Url(it) } ?: UiIcon.Feeds.asType(),

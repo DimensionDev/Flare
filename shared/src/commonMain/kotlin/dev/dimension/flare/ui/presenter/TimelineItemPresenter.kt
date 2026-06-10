@@ -4,15 +4,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
+import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 public class TimelineItemPresenter(
-    private val timelineTabItem: TimelineTabItemV2,
+    private val timelineTabItem: UiTimelineTabItem,
 ) : PresenterBase<TimelineItemPresenter.State>(),
     KoinComponent {
+    private val timelinePresenterFactory by inject<TimelinePresenterFactory>()
+
     public interface State {
         public val listState: PagingState<UiTimelineV2>
 
@@ -24,7 +30,7 @@ public class TimelineItemPresenter(
     }
 
     private val timelinePresenter by lazy {
-        timelineTabItem.createPresenter()
+        timelinePresenterFactory.create(timelineTabItem)
     }
 
     @Composable
@@ -46,4 +52,19 @@ public class TimelineItemPresenter(
             }
         }
     }
+}
+
+@WebPresenter("timelineItem")
+public class WebTimelineItemPresenter(
+    private val loaderKey: String,
+) : PresenterBase<TimelineItemPresenter.State>(),
+    KoinComponent {
+    private val timelineResolver by inject<TimelineResolver>()
+
+    private val delegate by lazy {
+        TimelineItemPresenter(timelineResolver.toTabItem(loaderKey))
+    }
+
+    @Composable
+    override fun body(): TimelineItemPresenter.State = delegate.body()
 }

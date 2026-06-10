@@ -32,7 +32,7 @@ import compose.icons.fontawesomeicons.solid.CirclePlus
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.ok
 import dev.dimension.flare.rss_title
 import dev.dimension.flare.tab_settings_add
@@ -64,9 +64,9 @@ import dev.dimension.flare.ui.component.Text as UiText
 internal fun AddTabDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
-    tabs: ImmutableList<TimelineTabItemV2>,
+    tabs: ImmutableList<UiTimelineTabItem>,
     allTabs: AllTabsPresenter.State,
-    onAddTab: (TimelineTabItemV2) -> Unit,
+    onAddTab: (UiTimelineTabItem) -> Unit,
     onDeleteTab: (String) -> Unit,
     toAddRssSource: () -> Unit,
 ) {
@@ -80,7 +80,7 @@ internal fun AddTabDialog(
         content = {
             @Composable
             fun TabItem(
-                tabItem: TimelineTabItemV2,
+                tabItem: UiTimelineTabItem,
                 modifier: Modifier = Modifier,
             ) {
                 ListTabItem(
@@ -277,7 +277,7 @@ internal fun AddTabDialog(
 
 @Composable
 internal fun ListTabItem(
-    data: TimelineTabItemV2,
+    data: UiTimelineTabItem,
     isAdded: Boolean,
     modifier: Modifier = Modifier,
 ) {

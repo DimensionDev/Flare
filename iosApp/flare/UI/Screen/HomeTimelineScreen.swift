@@ -36,7 +36,7 @@ struct HomeTimelineScreen: View {
     var body: some View {
         GeometryReader { proxy in
             StateView(state: presenter.state.tabState) { state in
-                let tabs: [TimelineTabItemV2] = state.cast(TimelineTabItemV2.self)
+                let tabs: [UiTimelineTabItem] = state.cast(UiTimelineTabItem.self)
                 if tabs.isEmpty {
                     ContentUnavailableView("tab_settings_title", systemImage: "square.grid.2x2")
                         .toolbar {
@@ -190,7 +190,7 @@ struct HomeTimelineScreen: View {
 }
 
 private struct DeckTimelineLayout: View {
-    let tabs: [TimelineTabItemV2]
+    let tabs: [UiTimelineTabItem]
     let baseTimelineAppearance: TimelineAppearance
     let columnWidth: CGFloat
     let toTabSetting: () -> Void
@@ -222,7 +222,7 @@ private struct DeckTimelineLayout: View {
 }
 
 private struct DeckTimelineColumnRoot: View {
-    let tabItem: TimelineTabItemV2
+    let tabItem: UiTimelineTabItem
     let baseTimelineAppearance: TimelineAppearance
     let toTabSetting: () -> Void
 

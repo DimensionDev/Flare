@@ -5,7 +5,7 @@
 	import { createHomeTabsPresenter } from '@flare/web-presenters/homeTabs.svelte';
 	import { createNotificationBadgePresenter } from '@flare/web-presenters/notificationBadge.svelte';
 	import type { HomeTabsPresenterStateHomeTabs } from '@flare/web-presenters/homeTabs.svelte';
-	import type { TimelineTabItemV2 as SecondaryTimelineTabItemV2 } from '@flare/web-presenters/secondaryTabs.svelte';
+	import type { UiTimelineTabItem as SecondaryUiTimelineTabItem } from '@flare/web-presenters/secondaryTabs.svelte';
 	import DeepLinkProvider from '$lib/components/deeplink/DeepLinkProvider.svelte';
 	import EnvironmentSettingsProvider from '$lib/components/environment/EnvironmentSettingsProvider.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
@@ -14,7 +14,7 @@
 	import SecondarySidebar from '$lib/components/secondary/SecondarySidebar.svelte';
 	import { timelineTabTitle } from '$lib/components/secondary/secondaryTabs';
 	import ThemeController from '$lib/components/environment/ThemeController.svelte';
-	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
+	import type { UiTimelineTabItem } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { initializeFirebaseAnalytics } from '$lib/firebase/firebase';
 	import logo from '$lib/assets/logo.svg';
@@ -30,7 +30,7 @@
 	const accountsPresenter = createAccountsPresenter();
 	const homeTabs = createHomeTabsPresenter();
 	const notificationBadge = createNotificationBadgePresenter();
-	let selectedSecondaryTimeline = $state<SecondaryTimelineTabItemV2 | null>(null);
+	let selectedSecondaryTimeline = $state<SecondaryUiTimelineTabItem | null>(null);
 	let composeOverlayOpen = $state(false);
 	let composeOverlayUrl = $state('/compose');
 	let backgroundSnapshotElement = $state<HTMLElement | null>(null);
@@ -294,7 +294,7 @@
 						<div class="content-stage">
 							{#if selectedSecondaryTimeline}
 								{#key selectedSecondaryTimeline.id}
-									<HomeTimelineTabPanel tab={selectedSecondaryTimeline as unknown as TimelineTabItemV2} />
+									<HomeTimelineTabPanel tab={selectedSecondaryTimeline as unknown as UiTimelineTabItem} />
 								{/key}
 							{:else}
 								{@render children()}

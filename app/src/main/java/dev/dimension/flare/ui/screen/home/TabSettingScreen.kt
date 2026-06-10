@@ -37,9 +37,9 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
 import dev.dimension.flare.ui.component.BackButton
@@ -67,7 +67,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun TabSettingScreen(
     onBack: () -> Unit,
     toAddRssSource: () -> Unit,
-    toGroupConfig: (GroupTimelineTabItemV2?) -> Unit,
+    toGroupConfig: (UiGroupTimelineTabItem?) -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val haptics = LocalHapticFeedback.current
@@ -207,7 +207,7 @@ internal fun TabSettingScreen(
                     shapes = ListItemDefaults.segmentedShapes2(index, state.currentTabs.size),
                     deleteTab = { state.deleteTab(it) },
                     editTab = {
-                        if (it is GroupTimelineTabItemV2 && !it.isSystemHomeMixedTimeline) {
+                        if (it is UiGroupTimelineTabItem && !it.isSystemHomeMixedTimeline) {
                             toGroupConfig(it)
                         } else {
                             state.setEditTab(it)
@@ -242,12 +242,12 @@ internal fun TabSettingScreen(
 @Composable
 private fun presenter() =
     run {
-        var selectedEditTab by remember { mutableStateOf<TimelineTabItemV2?>(null) }
+        var selectedEditTab by remember { mutableStateOf<UiTimelineTabItem?>(null) }
         val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
         val allTabsState = remember { AllTabsPresenter() }.invoke()
         val cacheTabs =
             remember {
-                mutableStateListOf<TimelineTabItemV2>()
+                mutableStateListOf<UiTimelineTabItem>()
             }
         var loadedTabs by remember { mutableStateOf(false) }
         tabSettingsState.homeTimelineTabs
@@ -269,7 +269,7 @@ private fun presenter() =
             val canShowMixedTimelineSetting = cacheTabs.filterNot { it.isSystemHomeMixedTimeline }.size > 1
             val systemHomeMergePolicy =
                 cacheTabs
-                    .filterIsInstance<GroupTimelineTabItemV2>()
+                    .filterIsInstance<UiGroupTimelineTabItem>()
                     .firstOrNull { it.isSystemHomeMixedTimeline }
                     ?.mergePolicy
                     ?: TimelineMergePolicy.TimePerPage
@@ -289,11 +289,11 @@ private fun presenter() =
                 )
             }
 
-            fun setEditTab(tab: TimelineTabItemV2?) {
+            fun setEditTab(tab: UiTimelineTabItem?) {
                 selectedEditTab = tab
             }
 
-            fun updateTab(tab: TimelineTabItemV2) {
+            fun updateTab(tab: UiTimelineTabItem) {
                 val index = cacheTabs.indexOfFirst { it.id == tab.id }
                 if (index != -1) {
                     cacheTabs[index] = tab
@@ -318,7 +318,7 @@ private fun presenter() =
                 tabSettingsState.replaceHomeTimelineTabs(cacheTabs)
             }
 
-            fun deleteTab(tab: TimelineTabItemV2) {
+            fun deleteTab(tab: UiTimelineTabItem) {
                 cacheTabs.removeIf { it.id == tab.id }
                 syncSystemHomeMixedTimeline()
             }
@@ -328,7 +328,7 @@ private fun presenter() =
                 syncSystemHomeMixedTimeline()
             }
 
-            fun addTab(tab: TimelineTabItemV2) {
+            fun addTab(tab: UiTimelineTabItem) {
                 if (cacheTabs.none { it.id == tab.id }) {
                     cacheTabs.add(tab)
                     syncSystemHomeMixedTimeline()
@@ -345,7 +345,7 @@ private fun presenter() =
                 }
             }
 
-            private fun replaceTabs(tabs: List<TimelineTabItemV2>) {
+            private fun replaceTabs(tabs: List<UiTimelineTabItem>) {
                 cacheTabs.clear()
                 cacheTabs.addAll(tabs)
             }

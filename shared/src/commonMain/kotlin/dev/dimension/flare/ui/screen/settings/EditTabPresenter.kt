@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
@@ -20,7 +20,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 public class EditTabPresenter(
-    private val tabItem: TimelineTabItemV2,
+    private val tabItem: UiTimelineTabItem,
     private val localizedString: suspend (UiStrings) -> String = { it.name },
 ) : PresenterBase<EditTabPresenter.State>(),
     KoinComponent {

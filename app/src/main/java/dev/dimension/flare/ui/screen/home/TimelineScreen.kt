@@ -21,7 +21,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -43,7 +43,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DeckTimelineScreen(
-//    tabItem: TimelineTabItemV2,
+//    tabItem: UiTimelineTabItem,
     id: String,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
@@ -130,7 +130,7 @@ internal fun DeckTimelineScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TimelineScreen(
-    tabItem: TimelineTabItemV2,
+    tabItem: UiTimelineTabItem,
     onBack: (() -> Unit)?,
 ) {
     val scope = rememberCoroutineScope()

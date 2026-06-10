@@ -97,7 +97,7 @@ internal class VVODataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .tabItem(
+                .candidate(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.Material(UiIcon.Weibo),
                     title = UiText.Raw("Weibo"),
@@ -107,16 +107,16 @@ internal class VVODataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            CommonTimelineSpecs.home.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            CommonTimelineSpecs.discover.tabItem(
+            CommonTimelineSpecs.discover.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Weibo),
             ),
-            VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.favoriteTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            VvoPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
@@ -127,7 +127,7 @@ internal class VVODataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        CommonTimelineSpecs.discover.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        CommonTimelineSpecs.discover.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -135,7 +135,7 @@ internal class VVODataSource(
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.favoriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        VvoPlatformSpec.favoriteTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -143,7 +143,7 @@ internal class VVODataSource(
                 icon = UiIcon.Heart,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        VvoPlatformSpec.likedTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        VvoPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
         )

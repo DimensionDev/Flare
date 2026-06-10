@@ -38,7 +38,7 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.isRefreshing
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.edit_tab_title
 import dev.dimension.flare.home_timeline_new_toots
@@ -197,7 +197,7 @@ internal fun DeckTimelineScreen(
 
 @Composable
 internal fun TimelineScreen(
-    tabItem: TimelineTabItemV2,
+    tabItem: UiTimelineTabItem,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,

@@ -7,7 +7,6 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.tab.GroupSource
-import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
@@ -15,7 +14,8 @@ import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -44,16 +44,16 @@ public class GroupConfigPresenter :
             override val availableIcons: ImmutableList<IconType> = availableIcons
 
             override fun buildGroupItem(
-                initialItem: GroupTimelineTabItemV2?,
+                initialItem: UiGroupTimelineTabItem?,
                 name: String,
                 icon: IconType,
                 appearancePatch: AppearancePatch?,
                 enabled: Boolean,
-                tabs: List<TimelineTabItemV2>,
+                tabs: List<UiTimelineTabItem>,
                 mergePolicy: TimelineMergePolicy,
                 filterConfig: TimelineFilterConfig,
                 defaultGroupName: String,
-            ): GroupTimelineTabItemV2? {
+            ): UiGroupTimelineTabItem? {
                 val childSlots =
                     tabs
                         .distinctBy { it.id }
@@ -72,16 +72,16 @@ public class GroupConfigPresenter :
                         defaultGroupName = defaultGroupName,
                         childSlots = childSlots,
                     ),
-                ) as GroupTimelineTabItemV2
+                ) as UiGroupTimelineTabItem
             }
 
             override fun commit(
-                initialItem: GroupTimelineTabItemV2?,
+                initialItem: UiGroupTimelineTabItem?,
                 name: String,
                 icon: IconType,
                 appearancePatch: AppearancePatch?,
                 enabled: Boolean,
-                tabs: List<TimelineTabItemV2>,
+                tabs: List<UiTimelineTabItem>,
                 mergePolicy: TimelineMergePolicy,
                 filterConfig: TimelineFilterConfig,
                 defaultGroupName: String,
@@ -111,24 +111,24 @@ public class GroupConfigPresenter :
         public val availableIcons: ImmutableList<IconType>
 
         public fun buildGroupItem(
-            initialItem: GroupTimelineTabItemV2?,
+            initialItem: UiGroupTimelineTabItem?,
             name: String,
             icon: IconType,
             appearancePatch: AppearancePatch?,
             enabled: Boolean,
-            tabs: List<TimelineTabItemV2>,
+            tabs: List<UiTimelineTabItem>,
             mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
             filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
             defaultGroupName: String,
-        ): GroupTimelineTabItemV2?
+        ): UiGroupTimelineTabItem?
 
         public fun commit(
-            initialItem: GroupTimelineTabItemV2?,
+            initialItem: UiGroupTimelineTabItem?,
             name: String,
             icon: IconType,
             appearancePatch: AppearancePatch?,
             enabled: Boolean,
-            tabs: List<TimelineTabItemV2>,
+            tabs: List<UiTimelineTabItem>,
             mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
             filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
             defaultGroupName: String,
@@ -137,12 +137,12 @@ public class GroupConfigPresenter :
 }
 
 internal fun TabSettingsV2.upsertGroupConfig(
-    initialItem: GroupTimelineTabItemV2?,
+    initialItem: UiGroupTimelineTabItem?,
     name: String,
     icon: IconType,
     appearancePatch: AppearancePatch?,
     enabled: Boolean,
-    tabs: List<TimelineTabItemV2>,
+    tabs: List<UiTimelineTabItem>,
     mergePolicy: TimelineMergePolicy = initialItem?.mergePolicy ?: TimelineMergePolicy.TimePerPage,
     filterConfig: TimelineFilterConfig = initialItem?.filterConfig ?: TimelineFilterConfig(),
     defaultGroupName: String,

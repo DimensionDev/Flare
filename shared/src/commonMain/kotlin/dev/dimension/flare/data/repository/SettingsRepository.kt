@@ -24,7 +24,7 @@ import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.findById
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.migrateTabSettingsV1ToV2
@@ -161,7 +161,7 @@ public class SettingsRepository internal constructor(
         }
     }
 
-    public val homeTimelineTabs: Flow<List<TimelineTabItemV2>> by lazy {
+    public val homeTimelineTabs: Flow<List<UiTimelineTabItem>> by lazy {
         tabSettingsV2
             .distinctUntilChangedBy { it.homeSlots }
             .map { settings ->
@@ -175,7 +175,7 @@ public class SettingsRepository internal constructor(
             }
     }
 
-    internal fun homeTimelineTab(id: String): Flow<TimelineTabItemV2?> =
+    internal fun homeTimelineTab(id: String): Flow<UiTimelineTabItem?> =
         homeTimelineTabs.map { tabs ->
             tabs.findById(id)
         }
@@ -196,7 +196,7 @@ public class SettingsRepository internal constructor(
         }
     }
 
-    internal suspend fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
+    internal suspend fun replaceHomeTimelineTabs(tabs: List<UiTimelineTabItem>) {
         updateTabSettingsV2 {
             val normalizedTabs =
                 tabs.withSystemHomeMixedTimelineEnabled(

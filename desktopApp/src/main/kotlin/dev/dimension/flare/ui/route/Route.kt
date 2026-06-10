@@ -1,8 +1,8 @@
 package dev.dimension.flare.ui.route
 
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
@@ -29,7 +29,7 @@ internal sealed interface Route : NavKey {
     }
 
     data class Timeline(
-        val tabItem: TimelineTabItemV2,
+        val tabItem: UiTimelineTabItem,
     ) : ScreenRoute
 
     data class DeckTimeline(
@@ -324,7 +324,7 @@ internal sealed interface Route : NavKey {
                 is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
                     val accountKey = (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey ?: return null
                     Route.Timeline(
-                        tabItem = SourceTimelineTabItemV2.xqtDeviceFollow(accountKey),
+                        tabItem = UiSourceTimelineTabItem.xqtDeviceFollow(accountKey),
                     )
                 }
 

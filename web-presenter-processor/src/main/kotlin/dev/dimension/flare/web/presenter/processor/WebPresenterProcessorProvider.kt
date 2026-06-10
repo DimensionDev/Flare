@@ -93,12 +93,19 @@ private class WebPresenterProcessor(
                     ) ?: return null
                 }
 
-        val presenterName =
+        val webPresenterAnnotation =
             declaration.annotations
                 .firstOrNull { it.shortName.asString() == "WebPresenter" }
+        val presenterName =
+            webPresenterAnnotation
                 ?.arguments
                 ?.firstOrNull { it.name?.asString() == "name" }
                 ?.value as? String
+        val creatable =
+            webPresenterAnnotation
+                ?.arguments
+                ?.firstOrNull { it.name?.asString() == "creatable" }
+                ?.value as? Boolean ?: true
         if (presenterName.isNullOrBlank()) {
             logger.error("@WebPresenter name cannot be blank.", declaration)
             return null
@@ -149,7 +156,7 @@ private class WebPresenterProcessor(
             specName = "${declaration.simpleName.asString()}WebSpec",
             stateType = stateDeclaration.qualifiedName?.asString().orEmpty(),
             stateTypeName = stateDeclaration.webStateTypeName(declaration),
-            creatable = Modifier.ABSTRACT !in declaration.modifiers,
+            creatable = creatable && Modifier.ABSTRACT !in declaration.modifiers,
             parameters = constructorParameters,
             properties = properties,
             actions = actions,

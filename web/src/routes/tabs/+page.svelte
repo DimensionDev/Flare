@@ -15,13 +15,13 @@
 		type TimelineMergePolicy,
 		type TimelinePostContent,
 		type TimelinePostKind,
-		type TimelineTabItemV2,
+		type UiTimelineTabItem,
 		type UiText,
 		type VideoAutoplay,
 	} from '@flare/web-presenters/homeTabSettings.svelte';
 	import {
 		createAllTabsPresenter,
-		type TimelineTabItemV2 as CandidateTimelineTabItemV2,
+		type UiTimelineTabItem as CandidateUiTimelineTabItem,
 	} from '@flare/web-presenters/allTabs.svelte';
 
 	const SYSTEM_HOME_MIXED_TIMELINE_ID = 'mixed_timeline_system_home';
@@ -89,7 +89,7 @@
 	} as unknown as TimelineAppearance;
 
 	type EditForm = {
-		tab: TimelineTabItemV2;
+		tab: UiTimelineTabItem;
 		title: string;
 		icon: IconType;
 		enabled: boolean;
@@ -116,7 +116,7 @@
 	};
 
 	type GroupForm = {
-		initialItem: TimelineTabItemV2 | null;
+		initialItem: UiTimelineTabItem | null;
 		title: string;
 		icon: IconType;
 		enabled: boolean;
@@ -141,10 +141,10 @@
 		videoAutoplay: VideoAutoplay;
 		themeOverride: boolean;
 		avatarShape: AvatarShape;
-		children: TimelineTabItemV2[];
+		children: UiTimelineTabItem[];
 	};
 
-	let tabItems = $state<TimelineTabItemV2[]>([]);
+	let tabItems = $state<UiTimelineTabItem[]>([]);
 	let loadedTabs = $state(false);
 	let enableMixedTimeline = $state(false);
 	let mergePolicy = $state<TimelineMergePolicy>('TimePerPage');
@@ -185,7 +185,7 @@
 		return localizedUiString(title.string);
 	}
 
-	function tabIconName(tab: TimelineTabItemV2): string {
+	function tabIconName(tab: UiTimelineTabItem): string {
 		switch (tab.icon.type) {
 			case 'Material':
 				return tab.icon.icon;
@@ -242,11 +242,11 @@
 		});
 	}
 
-	function isSystemHomeMixedTimeline(tab: TimelineTabItemV2): boolean {
+	function isSystemHomeMixedTimeline(tab: UiTimelineTabItem): boolean {
 		return tab.id === SYSTEM_HOME_MIXED_TIMELINE_ID;
 	}
 
-	function isAdded(tab: CandidateTimelineTabItemV2 | TimelineTabItemV2, list = tabItems): boolean {
+	function isAdded(tab: CandidateUiTimelineTabItem | UiTimelineTabItem, list = tabItems): boolean {
 		return list.some((item) => item.id === tab.id);
 	}
 
@@ -255,7 +255,7 @@
 		saved = false;
 	}
 
-	function syncSystemHomeMixedTimeline(tabs: TimelineTabItemV2[]): TimelineTabItemV2[] {
+	function syncSystemHomeMixedTimeline(tabs: UiTimelineTabItem[]): UiTimelineTabItem[] {
 		if (!tabs.some(isSystemHomeMixedTimeline)) return tabs;
 		return tabSettings.homeTimelineTabsWithSystemHomeMixedTimeline(tabs, true, mergePolicy);
 	}
@@ -310,8 +310,8 @@
 		saved = true;
 	}
 
-	function addCandidate(tab: CandidateTimelineTabItemV2 | TimelineTabItemV2): void {
-		const item = tab as unknown as TimelineTabItemV2;
+	function addCandidate(tab: CandidateUiTimelineTabItem | UiTimelineTabItem): void {
+		const item = tab as unknown as UiTimelineTabItem;
 		if (groupForm) {
 			if (!isAdded(item, groupForm.children)) {
 				groupForm = { ...groupForm, children: [...groupForm.children, item] };
@@ -343,8 +343,8 @@
 		expandedPickerSections = next;
 	}
 
-	function toggleCandidate(tab: CandidateTimelineTabItemV2 | TimelineTabItemV2): void {
-		const item = tab as unknown as TimelineTabItemV2;
+	function toggleCandidate(tab: CandidateUiTimelineTabItem | UiTimelineTabItem): void {
+		const item = tab as unknown as UiTimelineTabItem;
 		const targetList = groupForm ? groupForm.children : tabItems;
 		if (isAdded(item, targetList)) {
 			if (groupForm) {
@@ -363,7 +363,7 @@
 			: defaultTimelineAppearance;
 	}
 
-	function openEditTab(tab: TimelineTabItemV2): void {
+	function openEditTab(tab: UiTimelineTabItem): void {
 		const appearance = tabSettings.resolveAppearance(tab, baseTimelineAppearance());
 		editForm = {
 			tab,
@@ -393,7 +393,7 @@
 		};
 	}
 
-	function openGroupDialog(tab: TimelineTabItemV2 | null = null): void {
+	function openGroupDialog(tab: UiTimelineTabItem | null = null): void {
 		const appearance = tab
 			? tabSettings.resolveAppearance(tab, baseTimelineAppearance())
 			: baseTimelineAppearance();
@@ -427,7 +427,7 @@
 		};
 	}
 
-	function editTab(tab: TimelineTabItemV2): void {
+	function editTab(tab: UiTimelineTabItem): void {
 		if (!isSystemHomeMixedTimeline(tab) && tabSettings.isGroup(tab)) {
 			openGroupDialog(tab);
 		} else {
@@ -907,8 +907,8 @@
 	</div>
 {/if}
 
-{#snippet CandidateRow(tab: CandidateTimelineTabItemV2 | TimelineTabItemV2)}
-	{@const item = tab as unknown as TimelineTabItemV2}
+{#snippet CandidateRow(tab: CandidateUiTimelineTabItem | UiTimelineTabItem)}
+	{@const item = tab as unknown as UiTimelineTabItem}
 	{@const targetList = groupForm ? groupForm.children : tabItems}
 	{@const added = isAdded(item, targetList)}
 	<label

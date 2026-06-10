@@ -5,15 +5,16 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.unavailableAccountService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -21,7 +22,7 @@ import kotlin.test.assertIs
 class GroupConfigPresenterTest {
     @Test
     fun upsertGroupConfigReplacesDuplicateKeyInsteadOfAppending() {
-        val timelineResolver = TimelineResolver(testPlatformRuntimeData())
+        val timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService())
         val accountKey = MicroBlogKey("1872639344760254464", "x.com")
         val accountType = AccountType.Specific(accountKey)
         val homeTab = timelineResolver.toTabItem(HomeTimelineTabItem(accountType).toTimelineSlotOrNull()!!)
@@ -51,7 +52,7 @@ class GroupConfigPresenterTest {
                 ).homeSlots
                 .single()
                 .let(timelineResolver::toTabItem)
-        val existingGroupItem = assertIs<GroupTimelineTabItemV2>(existingGroup)
+        val existingGroupItem = assertIs<UiGroupTimelineTabItem>(existingGroup)
 
         val updated =
             TabSettingsV2(homeSlots = listOf(timelineResolver.toSlot(existingGroupItem)))
@@ -69,7 +70,7 @@ class GroupConfigPresenterTest {
 
         assertEquals(1, updated.homeSlots.size)
         assertEquals(existingGroupItem.id, updated.homeSlots.single().id)
-        val updatedGroup = assertIs<GroupTimelineTabItemV2>(timelineResolver.toTabItem(updated.homeSlots.single()))
+        val updatedGroup = assertIs<UiGroupTimelineTabItem>(timelineResolver.toTabItem(updated.homeSlots.single()))
         assertEquals(
             listOf(homeTab.id, listTab.id),
             updatedGroup.children.map { it.id },

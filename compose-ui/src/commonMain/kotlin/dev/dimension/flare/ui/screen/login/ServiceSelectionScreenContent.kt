@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.screen.login
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +19,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -375,9 +373,7 @@ private fun LoginMethodPicker(
             .toImmutableList()
     PlatformPicker(
         modifier =
-            Modifier
-                .width(300.dp)
-                .horizontalScroll(rememberScrollState()),
+            Modifier.width(300.dp),
         options = labels,
         onSelected = { index ->
             methods.getOrNull(index)?.let(onSelected)

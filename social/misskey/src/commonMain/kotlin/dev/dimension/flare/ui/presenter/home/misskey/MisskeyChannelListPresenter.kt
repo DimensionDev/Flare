@@ -14,7 +14,8 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
@@ -63,7 +64,7 @@ public class MisskeyChannelListPresenter(
 
         public fun setType(data: Type)
 
-        public fun timelineTabItem(item: UiList.Channel): TimelineTabItemV2
+        public fun timelineTabItem(item: UiList.Channel): UiTimelineTabItem
 
         public val allTypes: ImmutableList<Type> get() = Type.entries.toImmutableList()
 
@@ -100,12 +101,13 @@ public class MisskeyChannelListPresenter(
                 type = data
             }
 
-            override fun timelineTabItem(item: UiList.Channel): TimelineTabItemV2 =
-                MisskeyPlatformSpec.channelTimelineSpec.tabItem(
-                    data = TimelineSpec.AccountResourceData((accountType as AccountType.Specific).accountKey, item.id),
-                    title = UiText.Raw(item.title),
-                    icon = item.banner?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Channel),
-                )
+            override fun timelineTabItem(item: UiList.Channel): UiTimelineTabItem =
+                MisskeyPlatformSpec.channelTimelineSpec
+                    .candidate(
+                        data = TimelineSpec.AccountResourceData((accountType as AccountType.Specific).accountKey, item.id),
+                        title = UiText.Raw(item.title),
+                        icon = item.banner?.let { IconType.Url(it) } ?: IconType.Material(UiIcon.Channel),
+                    ).toUiTimelineTabItem()
 
             override suspend fun refreshSuspend() {
                 data.refreshSuspend()

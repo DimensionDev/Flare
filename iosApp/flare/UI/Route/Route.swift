@@ -184,7 +184,7 @@ enum Route: Hashable, Identifiable {
     }
 
     case home
-    case timeline(TimelineTabItemV2)
+    case timeline(UiTimelineTabItem)
     case composeNew
     case composeDraft(String)
     case composeQuote(AccountType, MicroBlogKey)
@@ -403,7 +403,7 @@ enum Route: Hashable, Identifiable {
         case .timeline(let data):
             switch onEnum(of: data) {
             case .xQTDeviceFollow(let data):
-                if let tabItem = XQTTimelineTabItemV2Helpers.shared.xqtDeviceFollow(accountType: data.accountType) {
+                if let tabItem = XQTUiTimelineTabItemHelpers.shared.xqtDeviceFollow(accountType: data.accountType) {
                     return .timeline(tabItem)
                 } else {
                     return nil

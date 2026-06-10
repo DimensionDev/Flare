@@ -84,7 +84,7 @@ internal class NostrDataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .tabItem(
+                .candidate(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.Material(UiIcon.Nostr),
                     title = UiText.Raw("Nostr"),
@@ -94,7 +94,7 @@ internal class NostrDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            CommonTimelineSpecs.home.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Nostr),
             ),

@@ -60,7 +60,7 @@ import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.platform.XqtPlatformSpec
-import dev.dimension.flare.data.platform.toTimelineTabItemV2
+import dev.dimension.flare.data.platform.toTimelineCandidate
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -297,7 +297,7 @@ internal class XQTDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineCandidate(accountKey) }
                     },
             ),
         )
@@ -306,13 +306,13 @@ internal class XQTDataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .tabItem(
+                .candidate(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
                     title = UiText.Raw("X"),
                 ),
             XqtPlatformSpec.featuredTimelineSpec
-                .tabItem(
+                .candidate(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
                 ),
@@ -321,16 +321,16 @@ internal class XQTDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            CommonTimelineSpecs.home.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            XqtPlatformSpec.featuredTimelineSpec.tabItem(
+            XqtPlatformSpec.featuredTimelineSpec.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            XqtPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            XqtPlatformSpec.deviceFollowTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            XqtPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            XqtPlatformSpec.deviceFollowTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
@@ -341,7 +341,7 @@ internal class XQTDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        XqtPlatformSpec.featuredTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        XqtPlatformSpec.featuredTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -349,7 +349,7 @@ internal class XQTDataSource(
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        XqtPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        XqtPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(

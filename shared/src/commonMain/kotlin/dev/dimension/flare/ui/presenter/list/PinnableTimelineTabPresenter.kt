@@ -7,12 +7,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineCandidate
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
@@ -45,13 +48,13 @@ public class PinnableTimelineTabPresenter(
     @Immutable
     public data class PinnableTimelineTab(
         val title: UiStrings,
-        val data: PagingState<TimelineTabItemV2>,
+        val data: PagingState<UiTimelineTabItem>,
     )
 
     private val accountRepository: AccountRepository by inject()
 
     private data class Sections(
-        val builtInTabs: ImmutableList<TimelineTabItemV2>,
+        val builtInTabs: ImmutableList<TimelineCandidate<*>>,
         val pinnableTabs: List<PinnableTimelineTabSection>,
     )
 
@@ -86,7 +89,12 @@ public class PinnableTimelineTabPresenter(
                     } else {
                         PinnableTimelineTab(
                             title = UiStrings.Default,
-                            data = PagingState.Success.ImmutableSuccess(sections.builtInTabs),
+                            data =
+                                PagingState.Success.ImmutableSuccess(
+                                    sections.builtInTabs
+                                        .map<TimelineCandidate<*>, UiTimelineTabItem> { it.toUiTimelineTabItem() }
+                                        .toImmutableList(),
+                                ),
                         )
                     }
                 (
@@ -94,7 +102,10 @@ public class PinnableTimelineTabPresenter(
                         sections.pinnableTabs.map { section ->
                             val pagingState =
                                 remember(section) {
-                                    section.data.cachedIn(scope)
+                                    section.data
+                                        .map { pagingData ->
+                                            pagingData.map { it.toUiTimelineTabItem() as UiTimelineTabItem }
+                                        }.cachedIn(scope)
                                 }.collectAsLazyPagingItems().toPagingState()
                             PinnableTimelineTab(
                                 title = section.title,

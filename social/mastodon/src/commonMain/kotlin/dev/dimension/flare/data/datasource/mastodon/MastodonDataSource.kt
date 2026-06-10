@@ -46,7 +46,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
-import dev.dimension.flare.data.platform.toTimelineTabItemV2
+import dev.dimension.flare.data.platform.toTimelineCandidate
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -492,7 +492,7 @@ internal open class MastodonDataSource(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
-                        paging.map { it.toTimelineTabItemV2(accountKey) }
+                        paging.map { it.toTimelineCandidate(accountKey) }
                     },
             ),
         )
@@ -501,7 +501,7 @@ internal open class MastodonDataSource(
     override val defaultTabs by lazy {
         persistentListOf(
             CommonTimelineSpecs.home
-                .tabItem(
+                .candidate(
                     data = TimelineSpec.AccountBasedData(accountKey),
                     icon = IconType.FavIcon(accountKey.host),
                     title = UiText.Raw("Mastodon"),
@@ -511,18 +511,18 @@ internal open class MastodonDataSource(
 
     override val builtInTimelineTabs by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.tabItem(
+            CommonTimelineSpecs.home.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            CommonTimelineSpecs.discover.tabItem(
+            CommonTimelineSpecs.discover.candidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
-            MastodonPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MastodonPlatformSpec.publicTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MastodonPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
-            MastodonPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.localTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.publicTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            MastodonPlatformSpec.favouriteTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
 
@@ -533,7 +533,7 @@ internal open class MastodonDataSource(
                 icon = UiIcon.Local,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MastodonPlatformSpec.localTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        MastodonPlatformSpec.localTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -541,7 +541,7 @@ internal open class MastodonDataSource(
                 icon = UiIcon.World,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MastodonPlatformSpec.publicTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        MastodonPlatformSpec.publicTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -549,7 +549,7 @@ internal open class MastodonDataSource(
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MastodonPlatformSpec.bookmarkTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        MastodonPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -557,7 +557,7 @@ internal open class MastodonDataSource(
                 icon = UiIcon.Favourite,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        MastodonPlatformSpec.favouriteTimelineSpec.tabItem(TimelineSpec.AccountBasedData(accountKey)),
+                        MastodonPlatformSpec.favouriteTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(

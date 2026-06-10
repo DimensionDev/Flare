@@ -135,7 +135,7 @@ struct TabIcon: View {
 
 extension TabIcon {
     init(
-        tabItem: TimelineTabItemV2,
+        tabItem: UiTimelineTabItem,
         size: CGFloat = 20,
         iconOnly: Bool = false
     ) {

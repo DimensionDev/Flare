@@ -21,6 +21,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -74,7 +75,7 @@ public class ProfileInsightPresenter(
                                 searchDataSources = availableSearchDataSources,
                             )
                         }
-                    }
+                    }.distinctUntilChanged()
             }
         val controller =
             rememberAgentChatPresenterController(

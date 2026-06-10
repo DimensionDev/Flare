@@ -251,7 +251,7 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                 initialUserInputConsumed = true
                 onUserMessageSubmitted(initialText)
                 runCurrentAgent(userInput = initialText)
-            } else if (autoRunOnContext) {
+            } else if (autoRunOnContext && contextValue != null) {
                 runCurrentAgent(userInput = null)
             }
         }

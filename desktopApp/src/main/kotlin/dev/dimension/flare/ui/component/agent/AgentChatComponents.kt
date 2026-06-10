@@ -193,7 +193,10 @@ private fun AgentChatMessageList(
             modifier = Modifier.fillMaxSize(),
         ) {
             errorMessage?.let { text ->
-                item {
+                item(
+                    key = "agent-chat-error",
+                    contentType = "agent-chat-error",
+                ) {
                     Text(
                         text = text,
                         color = FluentTheme.colors.system.critical,
@@ -202,12 +205,25 @@ private fun AgentChatMessageList(
             }
 
             if (isRunning) {
-                item {
+                item(
+                    key = "agent-chat-current-trace",
+                    contentType = "agent-chat-current-trace",
+                ) {
                     AgentChatCurrentTrace(trace = runningTrace.ifBlank { stringResource(Res.string.agent_chat_thinking) })
                 }
             }
 
-            items(messages.asReversed()) { message ->
+            items(
+                items = messages.asReversed(),
+                key = { message -> "agent-chat-message:${message.id}" },
+                contentType = { message ->
+                    if (message.isUser) {
+                        "agent-chat-user-message"
+                    } else {
+                        "agent-chat-assistant-message"
+                    }
+                },
+            ) { message ->
                 AgentChatMessageBubble(
                     parts = message.parts,
                     isUser = message.isUser,

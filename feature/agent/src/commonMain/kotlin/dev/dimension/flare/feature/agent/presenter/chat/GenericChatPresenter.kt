@@ -18,6 +18,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -65,7 +66,7 @@ public class GenericChatPresenter(
                     .allAccountServicesFlow()
                     .map { searchDataSources ->
                         GenericChatContext(searchDataSources)
-                    }
+                    }.distinctUntilChanged()
             }
         val controller =
             rememberAgentChatPresenterController(

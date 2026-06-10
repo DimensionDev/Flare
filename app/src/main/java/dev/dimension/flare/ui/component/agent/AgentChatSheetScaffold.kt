@@ -91,7 +91,17 @@ internal fun AgentChatSheetScaffold(
         ) {
             leadingContent()
 
-            items(messages) { message ->
+            items(
+                items = messages,
+                key = { message -> "agent-chat-message:${message.id}" },
+                contentType = { message ->
+                    if (message.isUser) {
+                        "agent-chat-user-message"
+                    } else {
+                        "agent-chat-assistant-message"
+                    }
+                },
+            ) { message ->
                 AgentChatMessageBubble(
                     parts = message.parts,
                     isUser = message.isUser,
@@ -102,13 +112,19 @@ internal fun AgentChatSheetScaffold(
             }
 
             if (isRunning) {
-                item {
+                item(
+                    key = "agent-chat-current-trace",
+                    contentType = "agent-chat-current-trace",
+                ) {
                     AgentChatCurrentTrace(trace = runningTrace)
                 }
             }
 
             errorMessage?.let { text ->
-                item {
+                item(
+                    key = "agent-chat-error",
+                    contentType = "agent-chat-error",
+                ) {
                     AgentChatError(
                         text = text,
                     )

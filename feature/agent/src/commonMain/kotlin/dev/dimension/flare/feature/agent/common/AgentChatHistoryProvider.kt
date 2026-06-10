@@ -393,15 +393,18 @@ internal class AgentChatHistoryProvider(
         if (text.isBlank()) {
             return null
         }
+        val createdAt = metaInfo.timestamp.toEpochMilliseconds()
+        val role =
+            when (this) {
+                is Message.System -> AgentChatHistoryMessage.Role.System
+                is Message.User -> AgentChatHistoryMessage.Role.User
+                is Message.Assistant -> AgentChatHistoryMessage.Role.Assistant
+            }
         return AgentChatHistoryMessage(
-            role =
-                when (this) {
-                    is Message.System -> AgentChatHistoryMessage.Role.System
-                    is Message.User -> AgentChatHistoryMessage.Role.User
-                    is Message.Assistant -> AgentChatHistoryMessage.Role.Assistant
-                },
+            id = "${conversationId.orEmpty()}:${role.name}:$createdAt:${text.hashCode()}",
+            role = role,
             parts = text.toAgentTextParts(),
-            createdAt = metaInfo.timestamp.toEpochMilliseconds(),
+            createdAt = createdAt,
         )
     }
 
@@ -411,6 +414,7 @@ internal class AgentChatHistoryProvider(
             return null
         }
         return AgentChatHistoryMessage(
+            id = "$conversationId:$position",
             role =
                 when (role) {
                     Message.Role.System.name -> return null
@@ -592,6 +596,7 @@ public data class AgentChatRoom(
 }
 
 public data class AgentChatHistoryMessage(
+    val id: String,
     val role: Role,
     val parts: ImmutableList<AgentMessagePart>,
     val createdAt: Long,

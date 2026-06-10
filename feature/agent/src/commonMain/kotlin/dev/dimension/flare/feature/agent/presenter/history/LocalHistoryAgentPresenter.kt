@@ -17,6 +17,7 @@ import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterCon
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -66,7 +67,7 @@ public class LocalHistoryAgentPresenter(
                     .allAccountServicesFlow()
                     .map { searchDataSources ->
                         LocalHistoryAgentContext(searchDataSources)
-                    }
+                    }.distinctUntilChanged()
             }
         val controller =
             rememberAgentChatPresenterController(

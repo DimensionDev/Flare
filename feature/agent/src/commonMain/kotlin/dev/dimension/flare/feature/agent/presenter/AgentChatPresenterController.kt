@@ -19,9 +19,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Immutable
 internal data class AgentChatPresenterController<Content : Any, Context : Any>(
@@ -104,6 +106,9 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
     }
     var context by remember(key) {
         mutableStateOf<Context?>(null)
+    }
+    var contextInitialized by remember(key) {
+        mutableStateOf(false)
     }
     var runJob by remember(key) {
         mutableStateOf<Job?>(null)
@@ -219,12 +224,14 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                     if (runGeneration == generation) {
                         runJob = null
                         if (!failed) {
-                            setRoomState(
-                                isRunning = false,
-                                currentTrace = null,
-                                traceHistory = traceHistoryDraft,
-                                errorMessage = null,
-                            )
+                            withContext(NonCancellable) {
+                                setRoomState(
+                                    isRunning = false,
+                                    currentTrace = null,
+                                    traceHistory = traceHistoryDraft,
+                                    errorMessage = null,
+                                )
+                            }
                         }
                     }
                 }
@@ -233,6 +240,10 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
 
     LaunchedEffect(key, conversationId) {
         contextFlow.collectLatest { contextValue ->
+            if (contextInitialized && context == contextValue) {
+                return@collectLatest
+            }
+            contextInitialized = true
             runJob?.cancel()
             runJob = null
             runGeneration += 1

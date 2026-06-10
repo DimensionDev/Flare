@@ -328,7 +328,10 @@ internal fun AgentChatMessageList(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
     ) {
         errorMessage?.let { text ->
-            item {
+            item(
+                key = "agent-chat-error",
+                contentType = "agent-chat-error",
+            ) {
                 AgentChatError(
                     text = text,
                 )
@@ -336,12 +339,25 @@ internal fun AgentChatMessageList(
         }
 
         if (isRunning) {
-            item {
+            item(
+                key = "agent-chat-current-trace",
+                contentType = "agent-chat-current-trace",
+            ) {
                 AgentChatCurrentTrace(trace = runningTrace)
             }
         }
 
-        items(messages.asReversed()) { message ->
+        items(
+            items = messages.asReversed(),
+            key = { message -> "agent-chat-message:${message.id}" },
+            contentType = { message ->
+                if (message.isUser) {
+                    "agent-chat-user-message"
+                } else {
+                    "agent-chat-assistant-message"
+                }
+            },
+        ) { message ->
             AgentChatMessageBubble(
                 parts = message.parts,
                 isUser = message.isUser,

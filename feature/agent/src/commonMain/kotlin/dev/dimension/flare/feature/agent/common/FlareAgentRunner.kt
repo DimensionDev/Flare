@@ -18,6 +18,8 @@ import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntime
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 
 @Single
@@ -48,7 +50,9 @@ internal class FlareAgentRunner(
                 inputRequest = toolSet.inputRequestStore.snapshot(),
             )
         } finally {
-            agent.close()
+            withContext(NonCancellable) {
+                agent.close()
+            }
         }
     }
 

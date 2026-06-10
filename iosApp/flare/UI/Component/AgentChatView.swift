@@ -115,9 +115,9 @@ struct AgentChatView: View {
         ]
 
         result.append(
-            contentsOf: messages.enumerated().map { index, message in
+            contentsOf: messages.map { message in
                 .message(
-                    id: "message-\(index)",
+                    id: "message-\(message.id)",
                     parts: Array(message.parts),
                     isUser: message.isUser,
                     onInputRequestOptionSelected: onInputRequestOptionSelected,

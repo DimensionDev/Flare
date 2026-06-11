@@ -284,11 +284,21 @@ internal class PixivService private constructor(
 
 private suspend fun PixivTokenResponse.toCredentialFallback(credentialFlow: Flow<PixivCredential>): PixivCredential? {
     val current = credentialFlow.firstOrNull() ?: return null
+    val profileImageUrl =
+        user?.profileImageUrls?.medium
+            ?: user?.profileImageUrls?.px170x170
+            ?: user?.profileImageUrls?.px50x50
+            ?: user?.profileImageUrls?.px16x16
+            ?: current.profileImageUrl
     return current.copy(
         accessToken = accessToken,
         refreshToken = refreshToken,
         expiresAtEpochSeconds = Clock.System.now().epochSeconds + expiresIn,
         userId = user?.id ?: current.userId,
+        userName = user?.name ?: current.userName,
+        userAccount = user?.account ?: current.userAccount,
+        profileImageUrl = profileImageUrl,
+        userIsPremium = user?.isPremium ?: current.userIsPremium,
     )
 }
 

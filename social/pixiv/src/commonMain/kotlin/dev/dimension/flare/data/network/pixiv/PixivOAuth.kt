@@ -57,15 +57,26 @@ internal fun parsePixivCallbackCode(
 internal fun PixivTokenResponse.toCredential(
     clientId: String = PIXIV_ANDROID_CLIENT_ID,
     clientSecret: String = PIXIV_ANDROID_CLIENT_SECRET,
-): PixivCredential =
-    PixivCredential(
+): PixivCredential {
+    val tokenUser = user ?: error("Pixiv token response does not include user id")
+    val profileImageUrl =
+        tokenUser.profileImageUrls?.medium
+            ?: tokenUser.profileImageUrls?.px170x170
+            ?: tokenUser.profileImageUrls?.px50x50
+            ?: tokenUser.profileImageUrls?.px16x16
+    return PixivCredential(
         accessToken = accessToken,
         refreshToken = refreshToken,
         expiresAtEpochSeconds = Clock.System.now().epochSeconds + expiresIn,
-        userId = user?.id ?: error("Pixiv token response does not include user id"),
+        userId = tokenUser.id,
         clientId = clientId,
         clientSecret = clientSecret,
+        userName = tokenUser.name,
+        userAccount = tokenUser.account,
+        profileImageUrl = profileImageUrl,
+        userIsPremium = tokenUser.isPremium,
     )
+}
 
 internal fun PixivCredential.accountKey(): MicroBlogKey = MicroBlogKey(userId.toString(), PIXIV_HOST)
 

@@ -10,4 +10,8 @@ public data class PixivCredential(
     val userId: Long,
     val clientId: String? = null,
     val clientSecret: String? = null,
+    val userName: String? = null,
+    val userAccount: String? = null,
+    val profileImageUrl: String? = null,
+    val userIsPremium: Boolean = false,
 )

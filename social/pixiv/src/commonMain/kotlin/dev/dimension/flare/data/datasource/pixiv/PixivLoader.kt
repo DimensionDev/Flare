@@ -5,15 +5,20 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.pixiv.PixivService
+import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 
 internal class PixivLoader(
     private val accountKey: MicroBlogKey,
     private val service: PixivService,
+    private val credentialFlow: Flow<PixivCredential>,
 ) : UserLoader,
     PostLoader,
     RelationLoader {
@@ -38,10 +43,21 @@ internal class PixivLoader(
 
     override suspend fun userById(id: String): UiProfile {
         val userId = id.toLongOrNull() ?: throw IllegalArgumentException("Invalid Pixiv user id: $id")
-        return service
-            .userDetail(
-                userId = userId,
-            ).toUiProfile(accountKey)
+        return try {
+            service
+                .userDetail(
+                    userId = userId,
+                ).toUiProfile(accountKey)
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+            credentialFlow
+                .firstOrNull()
+                ?.takeIf { it.userId == userId }
+                ?.toUiProfile(accountKey)
+                ?: throw e
+        }
     }
 
     override suspend fun status(statusKey: MicroBlogKey): UiTimelineV2 {

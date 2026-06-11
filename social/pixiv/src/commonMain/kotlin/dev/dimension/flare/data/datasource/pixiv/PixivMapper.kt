@@ -7,6 +7,7 @@ import dev.dimension.flare.data.network.pixiv.model.PixivTrendTag
 import dev.dimension.flare.data.network.pixiv.model.PixivUser
 import dev.dimension.flare.data.network.pixiv.model.PixivUserDetailResponse
 import dev.dimension.flare.data.platform.PIXIV_HOST
+import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -117,6 +118,37 @@ internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile 
             ),
         mark =
             if (isPremium) {
+                persistentListOf(UiProfile.Mark.Verified)
+            } else {
+                persistentListOf()
+            },
+        bottomContent = null,
+    )
+
+internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile =
+    UiProfile(
+        key = pixivUserKey(userId),
+        handle = UiHandle(raw = userAccount ?: userId.toString(), host = PIXIV_HOST),
+        avatar = profileImageUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
+        nameInternal = (userName ?: userAccount ?: userId.toString()).toUiPlainText(),
+        platformType = PlatformType.Pixiv,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile.User(
+                    accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.GuestHost(PIXIV_HOST),
+                    userKey = pixivUserKey(userId),
+                ),
+            ),
+        banner = null,
+        description = null,
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+            ),
+        mark =
+            if (userIsPremium) {
                 persistentListOf(UiProfile.Mark.Verified)
             } else {
                 persistentListOf()

@@ -60,6 +60,7 @@ internal class PixivDataSource(
         PixivLoader(
             accountKey = accountKey,
             service = service,
+            credentialFlow = credentialFlow,
         )
     }
 

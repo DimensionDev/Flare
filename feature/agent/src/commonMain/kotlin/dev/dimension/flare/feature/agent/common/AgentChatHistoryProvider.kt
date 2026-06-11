@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.agent.common
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.prompt.message.Message
+import ai.koog.prompt.message.MessagePart
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.feature.agent.database.AgentDatabase
 import dev.dimension.flare.feature.agent.database.connect
@@ -324,6 +325,7 @@ internal class AgentChatHistoryProvider(
             .conversationDao()
             .getMessages(conversationId)
             .mapNotNull { it.toMessage() }
+            .sanitizeForReplay()
 
     suspend fun generateTitleIfNeeded(conversationId: String) {
         val existing = database.conversationDao().getConversation(conversationId) ?: return
@@ -376,6 +378,28 @@ internal class AgentChatHistoryProvider(
         runCatching {
             json.decodeFromString<Message>(messageJson)
         }.getOrNull()
+
+    private fun List<Message>.sanitizeForReplay(): List<Message> =
+        mapNotNull { message ->
+            when (message) {
+                is Message.System -> {
+                    message
+                }
+
+                is Message.User -> {
+                    val parts = message.parts.filterNot { it is MessagePart.Tool.Result }
+                    parts.takeIf { it.isNotEmpty() }?.let { message.copy(parts = it) }
+                }
+
+                is Message.Assistant -> {
+                    val parts =
+                        message.parts.filterNot { part ->
+                            part is MessagePart.Reasoning || part is MessagePart.Tool.Call
+                        }
+                    parts.takeIf { it.isNotEmpty() }?.let { message.copy(parts = it) }
+                }
+            }
+        }
 
     private fun DbAgentConversation.toChatRoom(): AgentChatRoom =
         AgentChatRoom(

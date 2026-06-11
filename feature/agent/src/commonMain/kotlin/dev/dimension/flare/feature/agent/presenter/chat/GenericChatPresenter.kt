@@ -91,6 +91,9 @@ public class GenericChatPresenter(
                 onInputRequestSelected = { requestId, optionId ->
                     historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
                 },
+                onAgentRunCompleted = {
+                    historyProvider.generateTitleIfNeeded(conversationId)
+                },
                 onRoomStateChanged = { isRunning, currentTrace, traceHistory, errorMessage ->
                     historyProvider.updateRoomState(
                         conversationId = conversationId,

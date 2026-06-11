@@ -408,4 +408,15 @@
     <string name="settings_appearance_absolute_timestamp">絕對時間戳記</string>
     <string name="settings_appearance_absolute_timestamp_description">在貼文上顯示確切的時間戳記</string>
     <string name="channel_title">頻道</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="posts_with_replies_title">貼文和回覆</string>
+    <string name="pixiv_ranking_week_title">週排名</string>
+    <string name="pixiv_ranking_month_title">月排名</string>
+    <string name="pixiv_ranking_day_male_title">男性排名</string>
+    <string name="pixiv_ranking_day_female_title">女性排名</string>
+    <string name="pixiv_ranking_week_original_title">原創排名</string>
+    <string name="pixiv_ranking_week_rookie_title">新人排名</string>
+    <string name="pixiv_ranking_day_manga_title">漫畫排名</string>
+    <string name="illustrations_title">插畫</string>
+    <string name="manga_title">漫畫</string>
 </resources>

@@ -3,7 +3,6 @@ package dev.dimension.flare.feature.agent.common
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.prompt.message.Message
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.feature.agent.database.AgentDatabase
 import dev.dimension.flare.feature.agent.database.connect
 import dev.dimension.flare.feature.agent.database.model.DbAgentConversation
@@ -17,11 +16,8 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -33,8 +29,6 @@ internal class AgentChatHistoryProvider(
     private val database: AgentDatabase,
     private val titleGenerator: AgentConversationTitleGenerator,
 ) : ChatHistoryProvider {
-    private val titleScope = CoroutineScope(SupervisorJob() + PlatformDispatchers.IO)
-
     fun observeRooms(): Flow<List<AgentChatRoom>> =
         database
             .conversationDao()
@@ -201,6 +195,7 @@ internal class AgentChatHistoryProvider(
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
         val existing = database.conversationDao().getConversation(conversationId)
+        val latestMessageAt = database.conversationDao().getLatestVisibleMessageCreatedAt(conversationId)
         val isEmptyIdleState =
             !isRunning &&
                 currentTrace == null &&
@@ -219,7 +214,7 @@ internal class AgentChatHistoryProvider(
                     title = existing?.title,
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
-                    updatedAt = now,
+                    updatedAt = latestMessageAt ?: existing?.updatedAt ?: now,
                     isRunning = isRunning,
                     currentTraceJson = currentTrace?.let { encodeTrace(it) },
                     traceHistoryJson = encodeTraceHistory(traceHistory),
@@ -282,6 +277,7 @@ internal class AgentChatHistoryProvider(
         messages: List<Message>,
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
+        val latestMessageAt = messages.latestVisibleMessageCreatedAt() ?: now
         val existing = database.conversationDao().getConversation(conversationId)
         val existingUiContent =
             MessageUiContentIndex(
@@ -303,7 +299,7 @@ internal class AgentChatHistoryProvider(
                     title = fallbackTitle,
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
-                    updatedAt = now,
+                    updatedAt = latestMessageAt,
                     isRunning = existing?.isRunning ?: false,
                     currentTraceJson = existing?.currentTraceJson,
                     traceHistoryJson = existing?.traceHistoryJson ?: EMPTY_JSON_ARRAY,
@@ -321,11 +317,6 @@ internal class AgentChatHistoryProvider(
                 },
             )
         }
-        maybeGenerateTitle(
-            conversationId = conversationId,
-            messages = historyMessages,
-            existing = existing,
-        )
     }
 
     override suspend fun load(conversationId: String): List<Message> =
@@ -334,21 +325,27 @@ internal class AgentChatHistoryProvider(
             .getMessages(conversationId)
             .mapNotNull { it.toMessage() }
 
-    private fun maybeGenerateTitle(
-        conversationId: String,
-        messages: List<AgentChatHistoryMessage>,
-        existing: DbAgentConversation?,
-    ) {
-        if (existing?.titleGenerated == true || messages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
+    suspend fun generateTitleIfNeeded(conversationId: String) {
+        val existing = database.conversationDao().getConversation(conversationId) ?: return
+        if (existing.titleGenerated) {
             return
         }
-        titleScope.launch {
-            val generatedTitle = titleGenerator.generate(messages) ?: return@launch
-            database.conversationDao().updateGeneratedTitle(
-                conversationId = conversationId,
-                title = generatedTitle,
-            )
+        val messages =
+            database
+                .conversationDao()
+                .getMessages(conversationId)
+                .mapNotNull { it.toHistoryMessage() }
+        if (messages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
+            return
         }
+        val generatedTitle = titleGenerator.generate(messages) ?: return
+        if (database.conversationDao().getConversation(conversationId)?.titleGenerated == true) {
+            return
+        }
+        database.conversationDao().updateGeneratedTitle(
+            conversationId = conversationId,
+            title = generatedTitle,
+        )
     }
 
     private fun Message.toDbMessage(
@@ -370,6 +367,10 @@ internal class AgentChatHistoryProvider(
             createdAt = metaInfo.timestamp.toEpochMilliseconds(),
         )
     }
+
+    private fun List<Message>.latestVisibleMessageCreatedAt(): Long? =
+        filterNot { it is Message.System }
+            .maxOfOrNull { it.metaInfo.timestamp.toEpochMilliseconds() }
 
     private fun DbAgentMessage.toMessage(): Message? =
         runCatching {

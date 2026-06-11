@@ -4,6 +4,8 @@ import ai.koog.prompt.Prompt
 import dev.dimension.flare.feature.agent.presenter.agentMessageText
 import dev.dimension.flare.feature.agent.runtime.FlareAgentRuntimeProvider
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 
 @Single
@@ -54,7 +56,9 @@ internal class AgentConversationTitleGenerator(
             }
             null
         } finally {
-            runtime.promptExecutor.close()
+            withContext(NonCancellable) {
+                runtime.promptExecutor.close()
+            }
         }
     }
 

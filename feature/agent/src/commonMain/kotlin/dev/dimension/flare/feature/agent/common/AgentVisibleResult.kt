@@ -82,7 +82,7 @@ private data class AgentInputRequestUiMetadata(
 }
 
 private val agentInputRequestUiMetadataRegex =
-    Regex("""<!--\s*flare-agent-actions\s*(.*?)\s*-->""", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
+    Regex("""<!--\s*flare-agent-actions\s*([\s\S]*?)\s*-->""", RegexOption.IGNORE_CASE)
 
 private val agentInputRequestUiJson =
     Json {

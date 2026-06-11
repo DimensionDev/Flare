@@ -86,6 +86,7 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         }
     },
     onInputRequestSelected: suspend (String, String) -> Unit = { _, _ -> },
+    onAgentRunCompleted: suspend () -> Unit = {},
     onRoomStateChanged: suspend (
         isRunning: Boolean,
         currentTrace: AgentTrace?,
@@ -111,6 +112,9 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         mutableStateOf(false)
     }
     var runJob by remember(key) {
+        mutableStateOf<Job?>(null)
+    }
+    var titleGenerationJob by remember(key) {
         mutableStateOf<Job?>(null)
     }
     var runGeneration by remember(key) {
@@ -147,6 +151,22 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             traceHistory = traceHistoryDraft,
             errorMessage = null,
         )
+    }
+
+    fun scheduleAgentRunCompleted() {
+        if (titleGenerationJob?.isActive == true) {
+            return
+        }
+        titleGenerationJob =
+            scope.launch {
+                try {
+                    onAgentRunCompleted()
+                } catch (throwable: Throwable) {
+                    if (throwable is CancellationException) {
+                        throw throwable
+                    }
+                }
+            }
     }
 
     fun List<AgentChatHistoryMessage>.latestOpenInputRequest(): AgentInputRequest? =
@@ -189,6 +209,7 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                     errorMessage = null,
                 )
                 var failed = false
+                var cancelled = false
                 try {
                     runAgent(contextValue, userInput, conversationId).collect { event ->
                         when (event) {
@@ -211,7 +232,9 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                         }
                     }
                 } catch (throwable: Throwable) {
-                    if (throwable !is CancellationException && runGeneration == generation) {
+                    if (throwable is CancellationException) {
+                        cancelled = true
+                    } else if (runGeneration == generation) {
                         failed = true
                         setRoomState(
                             isRunning = false,
@@ -231,6 +254,9 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                                     traceHistory = traceHistoryDraft,
                                     errorMessage = null,
                                 )
+                            }
+                            if (!cancelled) {
+                                scheduleAgentRunCompleted()
                             }
                         }
                     }

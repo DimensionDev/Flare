@@ -51,7 +51,11 @@ internal class FlareAgentRunner(
             )
         } finally {
             withContext(NonCancellable) {
-                agent.close()
+                try {
+                    agent.close()
+                } finally {
+                    runtime.promptExecutor.close()
+                }
             }
         }
     }

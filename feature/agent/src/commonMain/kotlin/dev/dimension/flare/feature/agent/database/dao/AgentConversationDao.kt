@@ -10,7 +10,26 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface AgentConversationDao {
-    @Query("SELECT * FROM agent_conversations ORDER BY updatedAt DESC")
+    @Query(
+        """
+        SELECT
+            conversation.conversationId AS conversationId,
+            conversation.title AS title,
+            conversation.titleGenerated AS titleGenerated,
+            conversation.createdAt AS createdAt,
+            COALESCE(MAX(message.createdAt), conversation.createdAt) AS updatedAt,
+            conversation.isRunning AS isRunning,
+            conversation.currentTraceJson AS currentTraceJson,
+            conversation.traceHistoryJson AS traceHistoryJson,
+            conversation.errorMessage AS errorMessage
+        FROM agent_conversations AS conversation
+        LEFT JOIN agent_messages AS message
+            ON message.conversationId = conversation.conversationId
+            AND message.role != 'System'
+        GROUP BY conversation.conversationId
+        ORDER BY COALESCE(MAX(message.createdAt), conversation.createdAt) DESC, conversation.createdAt DESC
+        """,
+    )
     fun observeConversations(): Flow<List<DbAgentConversation>>
 
     @Query("SELECT * FROM agent_conversations WHERE conversationId = :conversationId")
@@ -21,6 +40,9 @@ internal interface AgentConversationDao {
 
     @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position ASC")
     suspend fun getMessages(conversationId: String): List<DbAgentMessage>
+
+    @Query("SELECT MAX(createdAt) FROM agent_messages WHERE conversationId = :conversationId AND role != 'System'")
+    suspend fun getLatestVisibleMessageCreatedAt(conversationId: String): Long?
 
     @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId AND role = :role ORDER BY position DESC LIMIT 1")
     suspend fun getLatestMessageByRole(
@@ -47,25 +69,5 @@ internal interface AgentConversationDao {
     suspend fun updateGeneratedTitle(
         conversationId: String,
         title: String,
-    )
-
-    @Query(
-        """
-        UPDATE agent_conversations
-        SET isRunning = :isRunning,
-            currentTraceJson = :currentTraceJson,
-            traceHistoryJson = :traceHistoryJson,
-            errorMessage = :errorMessage,
-            updatedAt = :updatedAt
-        WHERE conversationId = :conversationId
-        """,
-    )
-    suspend fun updateRoomState(
-        conversationId: String,
-        isRunning: Boolean,
-        currentTraceJson: String?,
-        traceHistoryJson: String,
-        errorMessage: String?,
-        updatedAt: Long,
     )
 }

@@ -406,4 +406,17 @@
     <string name="settings_appearance_absolute_timestamp">Marca de temps absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra marques de temps exactes a les publicacions</string>
     <string name="channel_title">Canal</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="profile_header_button_request_follow">Sol·licita seguir</string>
+    <string name="social_title">Social</string>
+    <string name="posts_with_replies_title">Publicacions i respostes</string>
+    <string name="pixiv_ranking_week_title">Rànquing setmanal</string>
+    <string name="pixiv_ranking_month_title">Rànquing mensual</string>
+    <string name="pixiv_ranking_day_male_title">Rànquing masculí</string>
+    <string name="pixiv_ranking_day_female_title">Rànquing femení</string>
+    <string name="pixiv_ranking_week_original_title">Rànquing original</string>
+    <string name="pixiv_ranking_week_rookie_title">Rànquing de debutants</string>
+    <string name="pixiv_ranking_day_manga_title">Rànquing de manga</string>
+    <string name="illustrations_title">Il·lustracions</string>
+    <string name="manga_title">Manga</string>
 </resources>

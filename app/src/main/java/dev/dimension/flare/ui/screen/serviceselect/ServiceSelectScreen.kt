@@ -8,10 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import dev.dimension.flare.ui.common.OnNewIntent
+import dev.dimension.flare.ui.common.isLoginCallbackDeepLink
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -45,7 +45,7 @@ internal fun ServiceSelectScreen(
             registerDeeplinkCallback = { callback ->
                 OnNewIntent {
                     val url = it.dataString.orEmpty()
-                    if (url.startsWith("$APPSCHEMA://", ignoreCase = true) || url.isPixivOAuthCallback()) {
+                    if (url.isLoginCallbackDeepLink()) {
                         callback.invoke(url)
                     }
                 }
@@ -54,13 +54,3 @@ internal fun ServiceSelectScreen(
         )
     }
 }
-
-private fun String.isPixivOAuthCallback(): Boolean =
-    startsWith(
-        prefix = "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback",
-        ignoreCase = true,
-    ) ||
-        startsWith(
-            prefix = "pixiv://account/login",
-            ignoreCase = true,
-        )

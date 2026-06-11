@@ -108,7 +108,7 @@ public fun ServiceSelectionScreenContent(
     onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
-    registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
+    registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
     contentPadding: PaddingValues,
     listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
@@ -296,7 +296,7 @@ private fun GenericLoginContent(
     host: String,
     openUri: (String) -> Unit,
     onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
-    registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
+    registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
 ) {
     val methods = state.loginMethods(platformType)
     if (methods.isEmpty()) return
@@ -315,7 +315,12 @@ private fun GenericLoginContent(
     }
     var qrContent by remember(handler) { mutableStateOf<String?>(null) }
     registerDeeplinkCallback {
-        loginState.resume(it)
+        if (loginState.canResume(it)) {
+            loginState.resume(it)
+            true
+        } else {
+            false
+        }
     }
     LaunchedEffect(loginState.effects) {
         loginState.effects.collect { effect ->

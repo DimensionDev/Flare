@@ -58,6 +58,7 @@ import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.OnNewIntent
+import dev.dimension.flare.ui.common.isLoginCallbackDeepLink
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
@@ -109,7 +110,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
             OnNewIntent(
                 withOnCreateIntent = true,
             ) {
-                it.dataString?.let { url -> state.deeplinkPresenter.handle(url) }
+                it.dataString
+                    ?.takeUnless { url -> url.isLoginCallbackDeepLink() }
+                    ?.let { url -> state.deeplinkPresenter.handle(url) }
             }
             LaunchedEffect(Unit) {
                 afterInit.invoke()

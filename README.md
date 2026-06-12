@@ -55,7 +55,7 @@ Here're some features we're planning to implement in the future.
 ### iOS
  - Make sure you have JDK 25 installed
  - Make sure you have a Mac with Xcode 26 installed
- - open `iosApp/Flare.xcodeproj` in Xcode
+ - open `appleApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Desktop

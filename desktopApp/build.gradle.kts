@@ -203,7 +203,7 @@ $localizationsXml
             }
 
             iconFile.set(project.file("resources/ic_launcher.icns"))
-            layeredIconDir.set(rootProject.file("iosApp/flare/AppIcon.icon"))
+            layeredIconDir.set(rootProject.file("appleApp/ios/AppIcon.icon"))
         }
         windows {
             iconFile.set(project.file("resources/ic_launcher.ico"))

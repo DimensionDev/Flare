@@ -1,0 +1,247 @@
+name: Flare
+
+options:
+  minimumXcodeGenVersion: 2.45.4
+  developmentLanguage: en
+  defaultConfig: Release
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+settingGroups:
+  appVersion:
+    CURRENT_PROJECT_VERSION: 1600
+    MARKETING_VERSION: 1.6.0
+  appleApp:
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_PREVIEWS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    FRAMEWORK_SEARCH_PATHS:
+      - "$(inherited)"
+      - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+    PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare
+    PRODUCT_NAME: Flare
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: 7LFDZ96332
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    STRING_CATALOG_GENERATE_SYMBOLS: YES
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_EMIT_LOC_STRINGS: YES
+    SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+    SWIFT_VERSION: "6.3"
+  configs:
+    Release:
+      VALIDATE_PRODUCT: YES
+
+packages:
+  AppleFontAwesome:
+    url: https://github.com/Tlaster/AppleFontAwesome
+    branch: main
+  ChatLayout:
+    url: https://github.com/ekazaev/ChatLayout
+    exactVersion: 2.4.2
+  CHTCollectionViewWaterfallLayout:
+    url: https://github.com/Tlaster/CHTCollectionViewWaterfallLayout
+    branch: master
+  Drops:
+    url: https://github.com/omaralbeik/Drops.git
+    exactVersion: 1.7.0
+  GSPlayer:
+    url: https://github.com/wxxsw/GSPlayer
+    from: 0.2.30
+  iOS-Backports:
+    url: https://github.com/superwall/iOS-Backports
+    exactVersion: 1.0.5
+  Kingfisher:
+    url: https://github.com/onevcat/Kingfisher.git
+    exactVersion: 8.8.1
+  LazyPager:
+    url: https://github.com/gh123man/LazyPager
+    exactVersion: 1.2.1
+  SwiftLintPlugins:
+    url: https://github.com/SimplyDanny/SwiftLintPlugins
+    exactVersion: 0.62.2
+  SwiftUI-Flow:
+    url: https://github.com/tevelee/SwiftUI-Flow
+    exactVersion: 3.1.1
+  swiftui-introspect:
+    url: https://github.com/siteline/swiftui-introspect
+    exactVersion: 26.0.1
+  VideoPlayer:
+    url: https://github.com/wxxsw/VideoPlayer
+    exactVersion: 1.2.5
+
+targets:
+  iOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: ios
+        excludes:
+          - .DS_Store
+          - Assets.xcassets/.DS_Store
+          - Info.plist
+          - AppIcon_*.icon
+    dependencies:
+      - package: AppleFontAwesome
+      - package: Kingfisher
+      - package: LazyPager
+      - package: SwiftUI-Flow
+        product: Flow
+      - package: swiftui-introspect
+        product: SwiftUIIntrospect
+      - package: Drops
+      - package: iOS-Backports
+        product: SwiftUIBackports
+      - package: VideoPlayer
+      - package: CHTCollectionViewWaterfallLayout
+      - package: GSPlayer
+      - package: ChatLayout
+      - target: FlareAppleCore
+        embed: true
+        destinationFilters: [iOS]
+      - target: FlareAppleUI
+        embed: true
+        destinationFilters: [iOS]
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+    settings:
+      groups:
+        - appVersion
+        - appleApp
+      base:
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow"
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
+        INFOPLIST_FILE: ios/Info.plist
+
+  macOS:
+    type: application
+    platform: macOS
+    sources:
+      - path: macos
+        excludes:
+          - Info.plist
+    dependencies:
+      - package: AppleFontAwesome
+      - package: CHTCollectionViewWaterfallLayout
+      - target: FlareAppleCore
+        embed: true
+        destinationFilters: [macOS]
+      - target: FlareAppleUI
+        embed: true
+        destinationFilters: [macOS]
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+    settings:
+      groups:
+        - appVersion
+        - appleApp
+      base:
+        CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+        CODE_SIGN_ENTITLEMENTS: macos/Flare.entitlements
+        DEAD_CODE_STRIPPING: YES
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+        ENABLE_USER_SELECTED_FILES: readonly
+        INFOPLIST_FILE: macos/Info.plist
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3"
+        REGISTER_APP_GROUPS: YES
+
+  FlareAppleCore:
+    type: framework
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Shared/FlareAppleCore/Sources/FlareAppleCore
+    dependencies:
+      - package: AppleFontAwesome
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+    settings:
+      base:
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: YES
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.applecore
+
+  FlareAppleUI:
+    type: framework
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI
+    dependencies:
+      - package: AppleFontAwesome
+      - package: Kingfisher
+      - package: iOS-Backports
+        product: SwiftUIBackports
+      - target: FlareAppleCore
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+    settings:
+      base:
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: YES
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleui
+
+schemes:
+  iOS:
+    build:
+      targets:
+        iOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  macOS:
+    build:
+      targets:
+        macOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

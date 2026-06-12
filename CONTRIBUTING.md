@@ -34,7 +34,7 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
 ### iOS
  - Make sure you have JDK 25 installed
  - Make sure you have a Mac with Xcode 26 installed
- - open `iosApp/Flare.xcodeproj` in Xcode
+ - open `appleApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Desktop
@@ -46,10 +46,10 @@ The project is split into theses parts:
  - `shared`: The common code, including bussiness logic.
  - `compose-ui`: The Compose UI code that shared between Android, iOS, Desktop.
  - `app`: The Android app.
- - `iosApp`: The iOS app.
+ - `appleApp`: The iOS and macOS apps.
  - `desktopApp`: The desktop app for Windows/macOS.  
 
-Most of the business logic is in `shared`, and the platform specific code and UI is in `app` and `iosApp`.
+Most of the business logic is in `shared`, and the platform specific code and UI is in `app` and `appleApp`.
 Flare uses [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) to share code between platforms, [Jetpack Compose](https://developer.android.com/jetpack/compose) for the UI on Android, [SwiftUI](https://developer.apple.com/xcode/swiftui/) for the UI on iOS.
 
 ### Business logic

@@ -407,4 +407,16 @@
     <string name="settings_appearance_absolute_timestamp">Dấu thời gian tuyệt đối</string>
     <string name="settings_appearance_absolute_timestamp_description">Hiển thị thời gian chính xác trên bài đăng</string>
     <string name="channel_title">Kênh</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="profile_header_button_request_follow">Yêu cầu theo dõi</string>
+    <string name="posts_with_replies_title">Bài viết và trả lời</string>
+    <string name="pixiv_ranking_week_title">Xếp hạng tuần</string>
+    <string name="pixiv_ranking_month_title">Xếp hạng tháng</string>
+    <string name="pixiv_ranking_day_male_title">Xếp hạng nam</string>
+    <string name="pixiv_ranking_day_female_title">Xếp hạng nữ</string>
+    <string name="pixiv_ranking_week_original_title">Xếp hạng nguyên bản</string>
+    <string name="pixiv_ranking_week_rookie_title">Xếp hạng tân binh</string>
+    <string name="pixiv_ranking_day_manga_title">Xếp hạng manga</string>
+    <string name="illustrations_title">Minh họa</string>
+    <string name="manga_title">Manga</string>
 </resources>

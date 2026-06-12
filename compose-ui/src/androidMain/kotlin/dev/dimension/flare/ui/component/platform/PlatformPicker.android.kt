@@ -1,7 +1,9 @@
 package dev.dimension.flare.ui.component.platform
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachIndexed
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -21,10 +24,10 @@ internal actual fun PlatformPicker(
 ) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     Row(
-        modifier = modifier,
+        modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        options.forEachIndexed { index, option ->
+        options.fastForEachIndexed { index, option ->
             FilterChip(
                 selected = selectedIndex == index,
                 onClick = {

@@ -12,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
@@ -38,7 +38,7 @@ public interface TimelineWithLazyListState : TimelineItemPresenter.State {
  */
 @Composable
 public fun rememberTimelineItemPresenterWithLazyListState(
-    item: TimelineTabItemV2,
+    item: UiTimelineTabItem,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ): TimelineWithLazyListState {
     val baseState by producePresenter("timeline_${item.id}") {

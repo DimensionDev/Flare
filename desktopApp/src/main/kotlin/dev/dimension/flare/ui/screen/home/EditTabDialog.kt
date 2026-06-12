@@ -27,7 +27,7 @@ import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.dm_list_title
 import dev.dimension.flare.edit_tab_name
@@ -81,9 +81,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun EditTabDialog(
     visible: Boolean,
-    tabItem: TimelineTabItemV2,
+    tabItem: UiTimelineTabItem,
     onDismissRequest: () -> Unit,
-    onConfirm: (TimelineTabItemV2) -> Unit,
+    onConfirm: (UiTimelineTabItem) -> Unit,
     titleAndIconOnly: Boolean = false,
 ) {
     val appearance = LocalTimelineAppearance.current
@@ -159,7 +159,7 @@ internal fun EditTabDialog(
 
 @Composable
 private fun presenter(
-    tabItem: TimelineTabItemV2,
+    tabItem: UiTimelineTabItem,
     appearance: TimelineAppearance,
 ) = run {
     val text = rememberTextFieldState()

@@ -68,7 +68,7 @@ import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -89,10 +89,10 @@ import dev.dimension.flare.ui.component.Text as UiText
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TabAddBottomSheet(
-    tabs: ImmutableList<TimelineTabItemV2>,
+    tabs: ImmutableList<UiTimelineTabItem>,
     allTabs: AllTabsPresenter.State,
     onDismissRequest: () -> Unit,
-    onAddTab: (TimelineTabItemV2) -> Unit,
+    onAddTab: (UiTimelineTabItem) -> Unit,
     onDeleteTab: (String) -> Unit,
     toAddRssSource: () -> Unit,
 ) {
@@ -101,7 +101,7 @@ internal fun TabAddBottomSheet(
     ) {
         @Composable
         fun TabItem(
-            tabItem: TimelineTabItemV2,
+            tabItem: UiTimelineTabItem,
             modifier: Modifier = Modifier,
         ) {
             ListTabItem(
@@ -286,7 +286,7 @@ internal fun TabAddBottomSheet(
 
 @Composable
 internal fun ListTabItem(
-    data: TimelineTabItemV2,
+    data: UiTimelineTabItem,
     isAdded: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -317,10 +317,10 @@ internal fun ListTabItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun LazyItemScope.TabCustomItem(
-    item: TimelineTabItemV2,
+    item: UiTimelineTabItem,
     isEditing: Boolean,
-    deleteTab: (TimelineTabItemV2) -> Unit,
-    editTab: (TimelineTabItemV2) -> Unit,
+    deleteTab: (UiTimelineTabItem) -> Unit,
+    editTab: (UiTimelineTabItem) -> Unit,
     reorderableLazyColumnState: ReorderableLazyListState,
     canSwipeToDelete: Boolean,
     modifier: Modifier = Modifier,

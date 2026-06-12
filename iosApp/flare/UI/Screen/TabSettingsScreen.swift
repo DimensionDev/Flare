@@ -4,11 +4,11 @@ struct TabSettingsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @Environment(\.dismiss) private var dismiss
     @State private var enableMixedTimeline: Bool = false
-    @State private var tabItems: [TimelineTabItemV2] = []
+    @State private var tabItems: [UiTimelineTabItem] = []
     @State private var loadedTabs = false
     @State private var showAddTabSheet = false
-    @State private var editItem: TimelineTabItemV2? = nil
-    @State private var editGroup: GroupTimelineTabItemV2? = nil
+    @State private var editItem: UiTimelineTabItem? = nil
+    @State private var editGroup: UiGroupTimelineTabItem? = nil
     @State private var showCreateGroup = false
     var body: some View {
         List {
@@ -50,7 +50,7 @@ struct TabSettingsScreen: View {
                         }
                         Spacer()
                         Button {
-                            if let group = item as? GroupTimelineTabItemV2, !isSystemHomeMixedTimeline(item) {
+                            if let group = item as? UiGroupTimelineTabItem, !isSystemHomeMixedTimeline(item) {
                                 editGroup = group
                             } else {
                                 editItem = item
@@ -64,7 +64,7 @@ struct TabSettingsScreen: View {
                     }
                     .swipeActions(edge: .leading) {
                         Button {
-                            if let group = item as? GroupTimelineTabItemV2, !isSystemHomeMixedTimeline(item) {
+                            if let group = item as? UiGroupTimelineTabItem, !isSystemHomeMixedTimeline(item) {
                                 editGroup = group
                             } else {
                                 editItem = item
@@ -96,7 +96,7 @@ struct TabSettingsScreen: View {
         }
         .onChange(of: presenter.state.homeTimelineTabs) { oldValue, newValue in
             if !loadedTabs, case .success(let tabs) = onEnum(of: newValue) {
-                tabItems = tabs.data.cast(TimelineTabItemV2.self)
+                tabItems = tabs.data.cast(UiTimelineTabItem.self)
                 enableMixedTimeline = tabItems.contains { isSystemHomeMixedTimeline($0) }
                 loadedTabs = true
             }
@@ -202,20 +202,20 @@ struct TabSettingsScreen: View {
         tabItems.move(fromOffsets: source, toOffset: destination)
     }
 
-    private func isSystemHomeMixedTimeline(_ item: TimelineTabItemV2) -> Bool {
+    private func isSystemHomeMixedTimeline(_ item: UiTimelineTabItem) -> Bool {
         item.isSystemHomeMixedTimeline
     }
 
-    private func withSystemHomeMixedTimelineEnabled(_ tabs: [TimelineTabItemV2], enabled: Bool) -> [TimelineTabItemV2] {
+    private func withSystemHomeMixedTimelineEnabled(_ tabs: [UiTimelineTabItem], enabled: Bool) -> [UiTimelineTabItem] {
         withSystemHomeMixedTimelineEnabled(tabs, enabled: enabled, mergePolicy: nil)
     }
 
     private func withSystemHomeMixedTimelineEnabled(
-        _ tabs: [TimelineTabItemV2],
+        _ tabs: [UiTimelineTabItem],
         enabled: Bool,
         mergePolicy: TimelineMergePolicy?
-    ) -> [TimelineTabItemV2] {
-        TimelineTabItemV2Helpers.shared
+    ) -> [UiTimelineTabItem] {
+        UiTimelineTabItemHelpers.shared
             .withSystemHomeMixedTimelineEnabled(
                 tabs: tabs,
                 enabled: enabled,
@@ -225,14 +225,14 @@ struct TabSettingsScreen: View {
 
     private var systemHomeMergePolicy: TimelineMergePolicy {
         tabItems
-            .compactMap { $0 as? GroupTimelineTabItemV2 }
+            .compactMap { $0 as? UiGroupTimelineTabItem }
             .first(where: { isSystemHomeMixedTimeline($0) })?
             .mergePolicy ?? .timePerPage
     }
 
     private func upsertGroup(
-        initialItem: GroupTimelineTabItemV2?,
-        updatedItem: GroupTimelineTabItemV2?
+        initialItem: UiGroupTimelineTabItem?,
+        updatedItem: UiGroupTimelineTabItem?
     ) {
         let targetIndex = initialItem
             .flatMap { item in tabItems.firstIndex(where: { $0.id == item.id }) }
@@ -251,8 +251,8 @@ struct TabSettingsScreen: View {
 struct EditTabSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var baseTimelineAppearance
-    let onConfirm: (TimelineTabItemV2) -> Void
-    let tabItem: TimelineTabItemV2
+    let onConfirm: (UiTimelineTabItem) -> Void
+    let tabItem: UiTimelineTabItem
     let titleAndIconOnly: Bool
     @StateObject private var presenter: KotlinPresenter<EditTabPresenterState>
     @State private var text: String = ""
@@ -261,7 +261,7 @@ struct EditTabSheet: View {
     @State private var appearancePatch: AppearancePatch
     @State private var showFilterSheet = false
     
-    init(onConfirm: @escaping (TimelineTabItemV2) -> Void, tabItem: TimelineTabItemV2, titleAndIconOnly: Bool = false) {
+    init(onConfirm: @escaping (UiTimelineTabItem) -> Void, tabItem: UiTimelineTabItem, titleAndIconOnly: Bool = false) {
         self.onConfirm = onConfirm
         self.tabItem = tabItem
         self.titleAndIconOnly = titleAndIconOnly
@@ -360,9 +360,9 @@ struct EditTabSheet: View {
 struct AddTabSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<AllTabsPresenterState>
-    let selectedTabs: [TimelineTabItemV2]
-    let onDelete: (TimelineTabItemV2) -> Void
-    let onAdd: (TimelineTabItemV2) -> Void
+    let selectedTabs: [UiTimelineTabItem]
+    let onDelete: (UiTimelineTabItem) -> Void
+    let onAdd: (UiTimelineTabItem) -> Void
     @State private var showAddRssSource = false
     @State private var importOpmlUrl: URL? = nil
     @State private var expandedSections: Set<String> = ["rss"]
@@ -465,10 +465,10 @@ struct AddTabSheet: View {
 
 struct AccountTabListView: View {
     let accountTabs: AllTabsPresenterStateAccountTabs
-    let selectedTabs: [TimelineTabItemV2]
+    let selectedTabs: [UiTimelineTabItem]
     @Binding var expandedSections: Set<String>
-    let onDelete: (TimelineTabItemV2) -> Void
-    let onAdd: (TimelineTabItemV2) -> Void
+    let onDelete: (UiTimelineTabItem) -> Void
+    let onAdd: (UiTimelineTabItem) -> Void
     var body: some View {
         ForEach(0..<accountTabs.tabs.count, id: \.self) { index in
             let tabItem = accountTabs.tabs[index]
@@ -527,10 +527,10 @@ struct AccountTabListView: View {
 }
 
 private struct AddTabRow: View {
-    let tabItem: TimelineTabItemV2
+    let tabItem: UiTimelineTabItem
     let isSelected: Bool
-    let onDelete: (TimelineTabItemV2) -> Void
-    let onAdd: (TimelineTabItemV2) -> Void
+    let onDelete: (UiTimelineTabItem) -> Void
+    let onAdd: (UiTimelineTabItem) -> Void
     
     var body: some View {
         HStack {
@@ -563,10 +563,10 @@ private struct AddTabRow: View {
 
 extension AddTabSheet {
     init(
-        selectedTabs: [TimelineTabItemV2],
+        selectedTabs: [UiTimelineTabItem],
         filterIsTimeline: Bool,
-        onDelete: @escaping (TimelineTabItemV2) -> Void,
-        onAdd: @escaping (TimelineTabItemV2) -> Void,
+        onDelete: @escaping (UiTimelineTabItem) -> Void,
+        onAdd: @escaping (UiTimelineTabItem) -> Void,
     ) {
         self.selectedTabs = selectedTabs
         self.onDelete = onDelete

@@ -5,6 +5,7 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public object TimelineSpecIds {
     public const val COMMON_HOME: String = "common.home"
+    public const val COMMON_GUEST_HOME: String = "common.guest_home"
     public const val COMMON_DISCOVER: String = "common.discover"
     public const val COMMON_LIST: String = "common.list"
 

@@ -9,8 +9,11 @@ import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.VideoAutoplay
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -125,17 +128,18 @@ class AppearancePatchTest {
     @Test
     fun timelineTabItemV2ResolvesTimelineAppearanceFromItemPatch() {
         val item =
-            SourceTimelineTabItemV2.runtime(
-                id = "test",
-                title = UiText.Raw("Test"),
-                icon = IconType.Material(UiIcon.List),
-                appearancePatch =
-                    AppearancePatch.EMPTY
-                        .set(AppearanceKeys.ShowNumbers, false)
-                        .set(AppearanceKeys.ExpandContentWarning, true)
-                        .set(AppearanceKeys.AbsoluteTimestamp, true),
-                createPresenter = { error("unused in test") },
-            )
+            CommonTimelineSpecs.home
+                .candidate(
+                    data = TimelineSpec.AccountBasedData(MicroBlogKey("test", "example.test")),
+                    title = UiText.Raw("Test"),
+                    icon = IconType.Material(UiIcon.List),
+                ).copy(
+                    appearancePatch =
+                        AppearancePatch.EMPTY
+                            .set(AppearanceKeys.ShowNumbers, false)
+                            .set(AppearanceKeys.ExpandContentWarning, true)
+                            .set(AppearanceKeys.AbsoluteTimestamp, true),
+                ).toUiTimelineTabItem()
         val base =
             TimelineAppearance(
                 showNumbers = true,

@@ -73,7 +73,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.TimelineDisplayMode
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -423,7 +423,7 @@ internal fun HomeTimelineScreen(
 
 @Composable
 internal fun TimelineItemContent(
-    item: TimelineTabItemV2,
+    item: UiTimelineTabItem,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     changeLogState: ChangeLogState? = null,

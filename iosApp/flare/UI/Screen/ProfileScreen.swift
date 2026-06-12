@@ -6,10 +6,12 @@ import Combine
 struct ProfileScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
+    let onProfileInsight: (MicroBlogKey) -> Void
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
     @State private var showToolbarTabPicker = false
@@ -69,11 +71,19 @@ struct ProfileScreen: View {
                     }
                 }
             }
-            if !presenter.state.actions.isEmpty {
-                ToolbarItem(
-                    placement: .primaryAction
-                ) {
-                    StatusActionsView(data: presenter.state.actions, useText: false, allowSpacer: false)
+            if agentEnabled || !presenter.state.actions.isEmpty {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    if agentEnabled, case .success(let userState) = onEnum(of: presenter.state.userState) {
+                        Button {
+                            onProfileInsight(userState.data.key)
+                        } label: {
+                            Image("fa-robot")
+                        }
+                        .accessibilityLabel(Text(String(localized: "profile_insight_title", defaultValue: "Profile insight")))
+                    }
+                    if !presenter.state.actions.isEmpty {
+                        StatusActionsView(data: presenter.state.actions, useText: false, allowSpacer: false)
+                    }
                 }
             }
         }
@@ -633,13 +643,15 @@ extension ProfileScreen {
         accountType: AccountType,
         userKey: MicroBlogKey?,
         onFollowingClick: @escaping (MicroBlogKey) -> Void,
-        onFansClick: @escaping (MicroBlogKey) -> Void
+        onFansClick: @escaping (MicroBlogKey) -> Void,
+        onProfileInsight: @escaping (MicroBlogKey) -> Void = { _ in }
     ) {
         self.init(
             accountType: accountType,
             userKey: userKey,
             onFollowingClick: onFollowingClick,
             onFansClick: onFansClick,
+            onProfileInsight: onProfileInsight,
             presenter: .init(presenter: ProfilePresenter(accountType: accountType, userKey: userKey))
         )
     }
@@ -712,16 +724,31 @@ struct ProfileWithUserNameAndHostScreen: View {
     let accountType: AccountType
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
+    let onProfileInsight: (MicroBlogKey) -> Void
     
-    init(userName: String, host: String, accountType: AccountType, onFollowingClick: @escaping (MicroBlogKey) -> Void, onFansClick: @escaping (MicroBlogKey) -> Void) {
+    init(
+        userName: String,
+        host: String,
+        accountType: AccountType,
+        onFollowingClick: @escaping (MicroBlogKey) -> Void,
+        onFansClick: @escaping (MicroBlogKey) -> Void,
+        onProfileInsight: @escaping (MicroBlogKey) -> Void = { _ in }
+    ) {
         self.accountType = accountType
         self.onFollowingClick = onFollowingClick
         self.onFansClick = onFansClick
+        self.onProfileInsight = onProfileInsight
         self._presenter = .init(wrappedValue: .init(presenter: ProfileWithUserNameAndHostPresenter(userName: userName, host: host, accountType: accountType)))
     }
     var body: some View {
         StateView(state: presenter.state.user) { user in
-            ProfileScreen(accountType: accountType, userKey: user.key, onFollowingClick: onFollowingClick, onFansClick: onFansClick)
+            ProfileScreen(
+                accountType: accountType,
+                userKey: user.key,
+                onFollowingClick: onFollowingClick,
+                onFansClick: onFansClick,
+                onProfileInsight: onProfileInsight
+            )
         } loadingContent: {
             ProgressView()
         }

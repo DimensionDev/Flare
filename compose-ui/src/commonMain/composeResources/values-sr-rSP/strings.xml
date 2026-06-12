@@ -406,4 +406,17 @@
     <string name="settings_appearance_absolute_timestamp">Apsolutno vreme</string>
     <string name="settings_appearance_absolute_timestamp_description">Prikaži tačno vreme na objavama</string>
     <string name="channel_title">Kanal</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="profile_header_button_request_follow">Затражи праћење</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect веза</string>
+    <string name="posts_with_replies_title">Објаве и одговори</string>
+    <string name="pixiv_ranking_week_title">Недељна ранг-листа</string>
+    <string name="pixiv_ranking_month_title">Месечна ранг-листа</string>
+    <string name="pixiv_ranking_day_male_title">Мушка ранг-листа</string>
+    <string name="pixiv_ranking_day_female_title">Женска ранг-листа</string>
+    <string name="pixiv_ranking_week_original_title">Оригинална ранг-листа</string>
+    <string name="pixiv_ranking_week_rookie_title">Ранг-листа новајлија</string>
+    <string name="pixiv_ranking_day_manga_title">Манга ранг-листа</string>
+    <string name="illustrations_title">Илустрације</string>
+    <string name="manga_title">Манга</string>
 </resources>

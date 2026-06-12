@@ -6,7 +6,10 @@ import dev.dimension.flare.data.model.tab.RssTimelineData
 import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
+import dev.dimension.flare.data.model.tab.remoteLoaderFactory
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.repository.AccountMicroblogDataSource
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -19,6 +22,7 @@ import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
@@ -26,6 +30,9 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 
 internal fun testPlatformRegistry(): PlatformRegistry = PlatformRegistry(testPlatformRuntimeData())
@@ -45,6 +52,32 @@ internal fun testPlatformRuntimeData(): PlatformRuntimeData =
     )
 
 internal fun testTimelineSpecs(): List<TimelineSpec<out TimelineSpec.Data>> = testPlatformRuntimeData().timelineSpecs
+
+internal fun unavailableAccountService(): AccountService =
+    object : AccountService {
+        override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
+            error("Account service is not available in this test")
+
+        override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
+            error("Account service is not available in this test")
+
+        override fun <T : Any> addAccount(
+            account: UiAccount,
+            credential: T,
+            serializer: KSerializer<T>,
+        ): Job = error("Account service is not available in this test")
+
+        override fun <T : Any> credentialFlow(
+            accountKey: MicroBlogKey,
+            serializer: KSerializer<T>,
+        ): Flow<T> = error("Account service is not available in this test")
+
+        override fun <T : Any> updateCredential(
+            accountKey: MicroBlogKey,
+            credential: T,
+            serializer: KSerializer<T>,
+        ): Job = error("Account service is not available in this test")
+    }
 
 private val testExtraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>> =
     listOf(
@@ -84,7 +117,7 @@ private fun accountBasedTimelineSpec(
         icon = icon.asType(),
         serializer = TimelineSpec.AccountBasedData.serializer(),
         targetId = { it.accountKey.toString() },
-        presenterFactory = { unavailablePresenter(id) },
+        loaderFactory = remoteLoaderFactory { unavailableLoader(id) },
     )
 
 private fun accountResourceTimelineSpec(
@@ -98,7 +131,7 @@ private fun accountResourceTimelineSpec(
         icon = icon.asType(),
         serializer = TimelineSpec.AccountResourceData.serializer(),
         targetId = { "${it.accountKey}:${it.resourceId}" },
-        presenterFactory = { unavailablePresenter(id) },
+        loaderFactory = remoteLoaderFactory { unavailableLoader(id) },
     )
 
 private fun rssTimelineSpec(): TimelineSpec<RssTimelineData> =
@@ -108,7 +141,7 @@ private fun rssTimelineSpec(): TimelineSpec<RssTimelineData> =
         icon = UiIcon.Rss.asType(),
         serializer = RssTimelineData.serializer(),
         targetId = { it.feedUrl },
-        presenterFactory = { unavailablePresenter(TimelineSpecIds.RSS_FEED) },
+        loaderFactory = remoteLoaderFactory { unavailableLoader(TimelineSpecIds.RSS_FEED) },
     )
 
 private fun allRssTimelineSpec(): TimelineSpec<AllRssTimelineData> =
@@ -118,7 +151,7 @@ private fun allRssTimelineSpec(): TimelineSpec<AllRssTimelineData> =
         icon = UiIcon.Rss.asType(),
         serializer = AllRssTimelineData.serializer(),
         targetId = { "all" },
-        presenterFactory = { unavailablePresenter(TimelineSpecIds.RSS_ALL) },
+        loaderFactory = remoteLoaderFactory { unavailableLoader(TimelineSpecIds.RSS_ALL) },
     )
 
 private fun subscriptionTimelineSpec(): TimelineSpec<SubscriptionTimelineData> =
@@ -128,10 +161,10 @@ private fun subscriptionTimelineSpec(): TimelineSpec<SubscriptionTimelineData> =
         icon = UiIcon.Rss.asType(),
         serializer = SubscriptionTimelineData.serializer(),
         targetId = { "${it.subscriptionType.name}:${it.subscriptionUrl}" },
-        presenterFactory = { unavailablePresenter(TimelineSpecIds.RSS_SUBSCRIPTION) },
+        loaderFactory = remoteLoaderFactory { unavailableLoader(TimelineSpecIds.RSS_SUBSCRIPTION) },
     )
 
-private fun unavailablePresenter(id: String): Nothing = throw UnsupportedOperationException("$id presenter is not available in tests")
+private fun unavailableLoader(id: String): Nothing = throw UnsupportedOperationException("$id loader is not available in tests")
 
 private abstract class TestDeepLinkPlatformSpec(
     final override val type: PlatformType,

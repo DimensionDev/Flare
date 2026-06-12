@@ -13,6 +13,8 @@ import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
 import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.agent.AgentChatScreen
+import dev.dimension.flare.ui.screen.agent.LocalHistoryAgentScreen
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
@@ -65,7 +67,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
                 navigate(Route.Profile.User(accountType, userKey))
             },
             onAskAiClick = { initialMessage ->
-                navigate(Route.AgentChat(initialMessage = initialMessage))
+                navigate(newGenericChatRoute(initialMessage))
             },
         )
     }
@@ -77,6 +79,16 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             conversationId = it.conversationId,
             initialMessage = it.initialMessage,
             onBack = onBack,
+            navigate = navigate,
+        )
+    }
+    entry<Route.LocalHistoryAgent> {
+        LocalHistoryAgentScreen(
+            conversationId = it.conversationId,
+            query = it.query,
+            target = it.target,
+            onBack = onBack,
+            navigate = navigate,
         )
     }
     entry<Route.Search> { args ->
@@ -87,7 +99,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
                 navigate(Route.Profile.User(accountType, userKey))
             },
             onAskAiClick = { initialMessage ->
-                navigate(Route.AgentChat(initialMessage = initialMessage))
+                navigate(newGenericChatRoute(initialMessage))
             },
         )
     }
@@ -150,3 +162,9 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         }
     }
 }
+
+private fun newGenericChatRoute(initialMessage: String?): Route.AgentChat =
+    Route.AgentChat(
+        conversationId = "generic-chat:${Clock.System.now().toEpochMilliseconds()}",
+        initialMessage = initialMessage,
+    )

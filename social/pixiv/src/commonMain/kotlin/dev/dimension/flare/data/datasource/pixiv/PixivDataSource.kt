@@ -19,8 +19,8 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
+import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
 import dev.dimension.flare.data.network.pixiv.PixivRankingMode
 import dev.dimension.flare.data.network.pixiv.PixivService
 import dev.dimension.flare.data.network.pixiv.PixivWorkType
@@ -60,6 +60,7 @@ internal class PixivDataSource(
         PixivLoader(
             accountKey = accountKey,
             service = service,
+            credentialFlow = credentialFlow,
         )
     }
 
@@ -95,51 +96,51 @@ internal class PixivDataSource(
 
     override val pinnableTimelineTabs: List<PinnableTimelineTabSection> = emptyList()
 
-    override val defaultTabs: ImmutableList<TimelineTabItemV2> by lazy {
+    override val defaultTabs: ImmutableList<TimelineCandidate<*>> by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.galleryTabItem(
+            CommonTimelineSpecs.home.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
-                icon = IconType.Material(UiIcon.Pixiv),
+                icon = IconType.FavIcon("https://pixiv.net/"),
                 title = UiText.Raw("pixiv"),
             ),
         )
     }
 
-    override val builtInTimelineTabs: ImmutableList<TimelineTabItemV2> by lazy {
+    override val builtInTimelineTabs: ImmutableList<TimelineCandidate<*>> by lazy {
         persistentListOf(
-            CommonTimelineSpecs.home.galleryTabItem(
+            CommonTimelineSpecs.home.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Pixiv),
             ),
-            CommonTimelineSpecs.discover.galleryTabItem(
+            CommonTimelineSpecs.discover.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.Material(UiIcon.Pixiv),
             ),
-            PixivPlatformSpec.followingTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.followingTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.bookmarkTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.bookmarkTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingWeekTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingWeekTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingMonthTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingMonthTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingDayMaleTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingDayMaleTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingDayFemaleTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingDayFemaleTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingWeekOriginalTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingWeekOriginalTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingWeekRookieTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingWeekRookieTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
-            PixivPlatformSpec.rankingDayMangaTimelineSpec.galleryTabItem(
+            PixivPlatformSpec.rankingDayMangaTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
         )
@@ -152,7 +153,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Home,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        CommonTimelineSpecs.home.galleryTabItem(
+                        CommonTimelineSpecs.home.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                             icon = IconType.Material(UiIcon.Pixiv),
                         ),
@@ -163,7 +164,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Search,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        CommonTimelineSpecs.discover.galleryTabItem(
+                        CommonTimelineSpecs.discover.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                             icon = IconType.Material(UiIcon.Pixiv),
                         ),
@@ -174,7 +175,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Follow,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.followingTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.followingTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -184,7 +185,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.bookmarkTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.bookmarkTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -194,7 +195,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingWeekTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingWeekTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -204,7 +205,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingMonthTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingMonthTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -214,7 +215,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingDayMaleTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingDayMaleTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -224,7 +225,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingDayFemaleTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingDayFemaleTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -234,7 +235,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingWeekOriginalTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingWeekOriginalTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -244,7 +245,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingWeekRookieTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingWeekRookieTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -254,7 +255,7 @@ internal class PixivDataSource(
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
-                        PixivPlatformSpec.rankingDayMangaTimelineSpec.galleryTabItem(
+                        PixivPlatformSpec.rankingDayMangaTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),

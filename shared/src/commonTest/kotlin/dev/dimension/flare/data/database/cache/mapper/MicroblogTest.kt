@@ -2114,6 +2114,120 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(listOf(posts[posts.lastIndex - 1].statusKey), resolved.parents.map { it.statusKey })
         }
 
+    @Test
+    fun cachedTimelineMapperRestoresReplyParentsByReferenceOrder() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-parent-order-cache", host = "test.com")
+            val accountType = AccountType.Specific(accountKey)
+            val user = createUser(MicroBlogKey(id = "user-parent-order-cache", host = "test.com"), "User")
+            val parents =
+                (0 until 5).map { index ->
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = MicroBlogKey(id = "parent-$index", host = "test.com"),
+                        text = "Parent $index",
+                    )
+                }
+            val root =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "leaf", host = "test.com"),
+                    text = "Leaf",
+                    parents = parents,
+                )
+            val rootStatus = TimelinePagingMapper.toDb(root, pagingKey = "home").status.status
+            val cached =
+                DbStatusWithReference(
+                    status = rootStatus,
+                    references =
+                        listOf(4, 0, 1, 2, 3).map { index ->
+                            val parent = parents[index]
+                            val dbPost = TimelinePagingMapper.toDb(parent, pagingKey = "home").status.status
+                            DbStatusReferenceWithStatus(
+                                reference =
+                                    DbStatusReference(
+                                        _id = "${rootStatus.data.id}_${parent.statusKey}",
+                                        referenceType = ReferenceType.Reply,
+                                        statusId = rootStatus.data.id,
+                                        referenceStatusId = DbStatus.createId(accountType, parent.statusKey),
+                                        referenceOrder = index,
+                                    ),
+                                status = dbPost,
+                            )
+                        },
+                )
+
+            val resolved =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = cached,
+                        pagingKey = "home",
+                        translationDisplayOptions = translationDisplayOptions(),
+                    ),
+                )
+
+            assertEquals(
+                listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
+                resolved.parents.map { it.statusKey.id },
+            )
+        }
+
+    @Test
+    fun cachedTimelineMapperKeepsStructuredParentsBeforeDirectReplyReference() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-parent-order-direct-ref", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-parent-order-direct-ref", host = "test.com"), "User")
+            val parents =
+                (0 until 5).map { index ->
+                    createPost(
+                        accountKey = accountKey,
+                        user = user,
+                        statusKey = MicroBlogKey(id = "parent-$index", host = "test.com"),
+                        text = "Parent $index",
+                    )
+                }
+            val leaf =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "leaf", host = "test.com"),
+                    text = "Leaf",
+                    parents = parents,
+                    references =
+                        listOf(
+                            UiTimelineV2.Post.Reference(
+                                statusKey = parents.last().statusKey,
+                                type = ReferenceType.Reply,
+                            ),
+                        ),
+                )
+            val saved = TimelinePagingMapper.toDb(leaf, pagingKey = "home").status
+            val savedRoot = saved.status.data.content as UiTimelineV2.Post
+
+            assertEquals(
+                listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
+                savedRoot.references
+                    .filter { it.type == ReferenceType.Reply }
+                    .map { it.statusKey.id },
+            )
+
+            val resolved =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = saved,
+                        pagingKey = "home",
+                        translationDisplayOptions = translationDisplayOptions(),
+                    ),
+                )
+
+            assertEquals(
+                listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
+                resolved.parents.map { it.statusKey.id },
+            )
+        }
+
     private fun createUser(
         key: MicroBlogKey,
         name: String,

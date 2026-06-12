@@ -344,7 +344,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         if let media = data.media, let url = URL(string: media.url) {
             mediaView.isHidden = false
-            mediaView.kf.setImage(with: url, options: [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode])
+            mediaView.kf.setImage(with: url, options: imageOptions(customHeaders: media.customHeaders))
         } else {
             mediaView.isHidden = true
             mediaView.image = nil
@@ -352,6 +352,20 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    private func imageOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
+        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .cacheOriginalImage, .backgroundDecode]
+        if let customHeaders, !customHeaders.isEmpty {
+            options.append(.requestModifier(AnyModifier { request in
+                var request = request
+                for (key, value) in customHeaders {
+                    request.setValue(value, forHTTPHeaderField: key)
+                }
+                return request
+            }))
+        }
+        return options
     }
 
     @objc private func onTap() {

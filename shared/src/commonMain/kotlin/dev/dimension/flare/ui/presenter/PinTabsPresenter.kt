@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.model.tab.TimelineResolver
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -34,7 +34,7 @@ public abstract class PinTabsPresenter<T> :
 
         public fun unpinTab(item: T)
 
-        public fun timelineTabItem(item: T): TimelineTabItemV2
+        public fun timelineTabItem(item: T): UiTimelineTabItem
     }
 
     @Composable
@@ -77,11 +77,11 @@ public abstract class PinTabsPresenter<T> :
                 }
             }
 
-            override fun timelineTabItem(item: T): TimelineTabItemV2 = getTimelineTabItem(item)
+            override fun timelineTabItem(item: T): UiTimelineTabItem = getTimelineTabItem(item)
         }
     }
 
-    protected abstract fun getTimelineTabItem(item: T): TimelineTabItemV2
+    protected abstract fun getTimelineTabItem(item: T): UiTimelineTabItem
 
     protected open fun getTimelineTabItemId(item: T): String = getTimelineTabItem(item).id
 }

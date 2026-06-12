@@ -115,6 +115,169 @@ class MastodonRenderTest {
     }
 
     @Test
+    fun statusListRenderFlattensReplyParents() {
+        val root =
+            createStatus(
+                id = "root",
+                account = createAccount("root-user"),
+                content = "<p>root</p>",
+            )
+        val child =
+            createStatus(
+                id = "child",
+                account = createAccount("child-user"),
+                content = "<p>child</p>",
+                inReplyToID = "root",
+            )
+        val leaf =
+            createStatus(
+                id = "leaf",
+                account = createAccount("leaf-user"),
+                content = "<p>leaf</p>",
+                inReplyToID = "child",
+            )
+
+        val rendered = listOf(root, child, leaf).render(accountKey).filterIsInstance<UiTimelineV2.Post>()
+
+        assertEquals(listOf("leaf"), rendered.map { it.statusKey.id })
+        assertEquals(listOf("root", "child"), rendered.single().parents.map { it.statusKey.id })
+        assertTrue(rendered.single().parents.all { it.parents.isEmpty() })
+    }
+
+    @Test
+    fun statusContextRenderKeepsReturnedDescendantOrderAcrossChains() {
+        val root =
+            createStatus(
+                id = "root",
+                account = createAccount("root-user"),
+                content = "<p>root</p>",
+            )
+        val current =
+            createStatus(
+                id = "current",
+                account = createAccount("current-user"),
+                content = "<p>current</p>",
+                inReplyToID = "root",
+            )
+        val descendant0 =
+            createStatus(
+                id = "descendant-0",
+                account = createAccount("descendant-user"),
+                content = "<p>descendant 0</p>",
+                inReplyToID = "current",
+            )
+        val descendant1 =
+            createStatus(
+                id = "descendant-1",
+                account = createAccount("descendant-user"),
+                content = "<p>descendant 1</p>",
+                inReplyToID = "descendant-0",
+            )
+        val descendant2 =
+            createStatus(
+                id = "descendant-2",
+                account = createAccount("descendant-user"),
+                content = "<p>descendant 2</p>",
+                inReplyToID = "current",
+            )
+        val descendant3 =
+            createStatus(
+                id = "descendant-3",
+                account = createAccount("descendant-user"),
+                content = "<p>descendant 3</p>",
+                inReplyToID = "descendant-2",
+            )
+        val descendant4 =
+            createStatus(
+                id = "descendant-4",
+                account = createAccount("descendant-user"),
+                content = "<p>descendant 4</p>",
+                inReplyToID = "descendant-3",
+            )
+        val descendant5 =
+            createStatus(
+                id = "descendant-5",
+                account = createAccount("descendant-user"),
+                content = "<p>descendant 5</p>",
+                inReplyToID = "descendant-4",
+            )
+
+        val rendered =
+            renderStatusContext(
+                ancestors = listOf(root),
+                current = current,
+                descendants = listOf(descendant0, descendant1, descendant2, descendant3, descendant4, descendant5),
+                accountKey = accountKey,
+            ).filterIsInstance<UiTimelineV2.Post>()
+
+        assertEquals(
+            listOf("root", "current", "descendant-1", "descendant-5"),
+            rendered.map { it.statusKey.id },
+        )
+        assertEquals(
+            listOf("descendant-0"),
+            rendered.first { it.statusKey.id == "descendant-1" }.parents.map { it.statusKey.id },
+        )
+        assertEquals(
+            listOf("descendant-2", "descendant-3", "descendant-4"),
+            rendered.first { it.statusKey.id == "descendant-5" }.parents.map { it.statusKey.id },
+        )
+        assertEquals(
+            listOf("root", "current", "descendant-0", "descendant-1", "descendant-2", "descendant-3", "descendant-4", "descendant-5"),
+            rendered.flatMap { post ->
+                (post.parents + post).map { it.statusKey.id }
+            },
+        )
+    }
+
+    @Test
+    fun statusContextRenderKeepsFirstDirectChildBeforeItsReplies() {
+        val current =
+            createStatus(
+                id = "116526337257255071",
+                account = createAccount("root-user"),
+                content = "<p>root</p>",
+            )
+        val directChild =
+            createStatus(
+                id = "116526337629636438",
+                account = createAccount("child-user"),
+                content = "<p>direct child</p>",
+                inReplyToID = "116526337257255071",
+            )
+        val replyToChild =
+            createStatus(
+                id = "116528933219506929",
+                account = createAccount("reply-user"),
+                content = "<p>reply to child</p>",
+                inReplyToID = "116526337629636438",
+            )
+
+        val rendered =
+            renderStatusContext(
+                ancestors = emptyList(),
+                current = current,
+                descendants = listOf(directChild, replyToChild),
+                accountKey = accountKey,
+            ).filterIsInstance<UiTimelineV2.Post>()
+
+        assertEquals(
+            listOf(
+                "116526337257255071",
+                "116526337629636438",
+                "116528933219506929",
+            ),
+            rendered.flatMap { post ->
+                (post.parents + post).map { it.statusKey.id }
+            },
+        )
+        assertEquals(
+            listOf("116526337629636438"),
+            rendered.first { it.statusKey.id == "116528933219506929" }.parents.map { it.statusKey.id },
+        )
+    }
+
+    @Test
     fun repostShowsMessageAndUsesRebloggedPostContent() {
         val originalStatus =
             createStatus(

@@ -3,9 +3,10 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -18,12 +19,6 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MissKeyPublicTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.MisskeyLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -69,11 +64,10 @@ public data object MisskeyPlatformSpec :
             icon = UiIcon.Favourite.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MisskeyFavouriteTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MisskeyDataSource, TimelineSpec.AccountBasedData> {
+                    favouriteTimelineLoader()
+                },
         )
 
     internal val hybridTimelineSpec =
@@ -83,11 +77,10 @@ public data object MisskeyPlatformSpec :
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MisskeyHybridTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MisskeyDataSource, TimelineSpec.AccountBasedData> {
+                    hybridTimelineLoader()
+                },
         )
 
     internal val localTimelineSpec =
@@ -97,11 +90,10 @@ public data object MisskeyPlatformSpec :
             icon = UiIcon.Local.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MissKeyLocalTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MisskeyDataSource, TimelineSpec.AccountBasedData> {
+                    localTimelineLoader()
+                },
         )
 
     internal val globalTimelineSpec =
@@ -111,41 +103,36 @@ public data object MisskeyPlatformSpec :
             icon = UiIcon.World.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MissKeyPublicTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MisskeyDataSource, TimelineSpec.AccountBasedData> {
+                    publicTimelineLoader()
+                },
         )
 
-    internal val antennaTimelineSpec =
+    public val antennaTimelineSpec: TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
             id = TimelineSpecIds.MISSKEY_ANTENNA,
             title = UiStrings.Antenna,
             icon = UiIcon.Rss.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
-            presenterFactory = {
-                AntennasTimelinePresenter(
-                    accountType = AccountType.Specific(it.accountKey),
-                    id = it.resourceId,
-                )
-            },
+            loaderFactory =
+                accountLoader<MisskeyDataSource, TimelineSpec.AccountResourceData> {
+                    antennasTimelineLoader(it.resourceId)
+                },
         )
 
-    internal val channelTimelineSpec =
+    public val channelTimelineSpec: TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
             id = TimelineSpecIds.MISSKEY_CHANNEL,
             title = UiStrings.Channel,
             icon = UiIcon.Channel.asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
-            presenterFactory = {
-                ChannelTimelinePresenter(
-                    accountType = AccountType.Specific(it.accountKey),
-                    id = it.resourceId,
-                )
-            },
+            loaderFactory =
+                accountLoader<MisskeyDataSource, TimelineSpec.AccountResourceData> {
+                    channelTimelineLoader(it.resourceId)
+                },
         )
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
@@ -203,17 +190,17 @@ private fun profileRoute(
     )
 }
 
-internal fun UiList.Antenna.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+internal fun UiList.Antenna.toTimelineCandidate(accountKey: MicroBlogKey): TimelineCandidate<*> =
     MisskeyPlatformSpec.antennaTimelineSpec
-        .tabItem(
+        .candidate(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = UiIcon.Rss.asType(),
         )
 
-internal fun UiList.Channel.toTimelineTabItemV2(accountKey: MicroBlogKey): TimelineTabItemV2 =
+internal fun UiList.Channel.toTimelineCandidate(accountKey: MicroBlogKey): TimelineCandidate<*> =
     MisskeyPlatformSpec.channelTimelineSpec
-        .tabItem(
+        .candidate(
             data = TimelineSpec.AccountResourceData(accountKey, id),
             title = UiText.Raw(title),
             icon = banner?.let { IconType.Url(it) } ?: UiIcon.Channel.asType(),

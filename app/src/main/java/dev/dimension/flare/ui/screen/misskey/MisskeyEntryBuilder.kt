@@ -20,13 +20,14 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.List
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -59,17 +60,15 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                SourceTimelineTabItemV2.runtime(
-                    id = "antennas_${args.accountType}_${args.antennaId}",
+                MisskeyPlatformSpec.antennaTimelineSpec.candidate(
+                    data =
+                        TimelineSpec.AccountResourceData(
+                            accountKey = (args.accountType as AccountType.Specific).accountKey,
+                            resourceId = args.antennaId,
+                        ),
                     title = UiText.Raw(args.title),
                     icon = IconType.Material(UiIcon.Rss),
-                    createPresenter = {
-                        AntennasTimelinePresenter(
-                            accountType = args.accountType,
-                            id = args.antennaId,
-                        )
-                    },
-                )
+                ).toUiTimelineTabItem()
             },
             onBack = onBack,
         )
@@ -99,17 +98,15 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                SourceTimelineTabItemV2.runtime(
-                    id = "channel_${args.accountType}_${args.channelId}",
+                MisskeyPlatformSpec.channelTimelineSpec.candidate(
+                    data =
+                        TimelineSpec.AccountResourceData(
+                            accountKey = (args.accountType as AccountType.Specific).accountKey,
+                            resourceId = args.channelId,
+                        ),
                     title = UiText.Raw(args.title),
                     icon = IconType.Material(UiIcon.List),
-                    createPresenter = {
-                        ChannelTimelinePresenter(
-                            accountType = args.accountType,
-                            id = args.channelId,
-                        )
-                    },
-                )
+                ).toUiTimelineTabItem()
             },
             onBack = onBack,
         )

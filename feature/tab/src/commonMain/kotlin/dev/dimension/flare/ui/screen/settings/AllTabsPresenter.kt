@@ -8,7 +8,8 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.AllRssTimelineData
 import dev.dimension.flare.data.model.tab.RssTimelineData
 import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -87,14 +88,15 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
                 (
                     listOfNotNull(
                         if (rssSources.sources.isNotEmpty()) {
-                            RssTimelineSpecs.allRss.tabItem(
-                                data = AllRssTimelineData,
-                            )
+                            RssTimelineSpecs.allRss
+                                .candidate(
+                                    data = AllRssTimelineData,
+                                ).toUiTimelineTabItem()
                         } else {
                             null
                         },
                     ) +
-                        rssSources.sources.map { source -> source.toTimelineTabItemV2() }
+                        rssSources.sources.map { source -> source.toUiTimelineTabItem() }
                 ).toImmutableList()
             }
 
@@ -115,7 +117,7 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
 
     @Immutable
     public interface State {
-        public val rssTabs: ImmutableList<TimelineTabItemV2>
+        public val rssTabs: ImmutableList<UiTimelineTabItem>
         public val accountTabs: UiState<ImmutableList<AccountTabs>>
         public val flattenedAccountTabs: UiState<ImmutableList<FlattenedAccountTabs>>
 
@@ -134,12 +136,12 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
         @Immutable
         public data class FlattenedTabSection(
             val title: UiText,
-            val data: ImmutableList<TimelineTabItemV2>,
+            val data: ImmutableList<UiTimelineTabItem>,
         )
     }
 }
 
-private fun UiRssSource.toTimelineTabItemV2(): TimelineTabItemV2 {
+private fun UiRssSource.toUiTimelineTabItem(): UiTimelineTabItem {
     val title = UiText.Raw(title ?: url)
     val icon =
         favIcon?.let { IconType.Url(it) }
@@ -149,20 +151,22 @@ private fun UiRssSource.toTimelineTabItemV2(): TimelineTabItemV2 {
                 IconType.FavIcon(host)
             }
     return if (type == SubscriptionType.RSS) {
-        RssTimelineSpecs.rss.tabItem(
-            data = RssTimelineData(url),
-            title = title,
-            icon = icon,
-        )
+        RssTimelineSpecs.rss
+            .candidate(
+                data = RssTimelineData(url),
+                title = title,
+                icon = icon,
+            ).toUiTimelineTabItem()
     } else {
-        RssTimelineSpecs.subscription.tabItem(
-            data =
-                SubscriptionTimelineData(
-                    subscriptionUrl = url,
-                    subscriptionType = type,
-                ),
-            title = title,
-            icon = icon,
-        )
+        RssTimelineSpecs.subscription
+            .candidate(
+                data =
+                    SubscriptionTimelineData(
+                        subscriptionUrl = url,
+                        subscriptionType = type,
+                    ),
+                title = title,
+                icon = icon,
+            ).toUiTimelineTabItem()
     }
 }

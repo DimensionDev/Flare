@@ -12,7 +12,6 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
@@ -29,7 +28,7 @@ public fun ktorfit(
         httpClient(
             ktorClient {
                 install(ContentNegotiation) {
-                    json(json)
+                    nullableFallbackJson(json)
                 }
                 config.invoke(this)
             },
@@ -45,7 +44,7 @@ public fun ktorfit(
 public fun ktorClient(
     config: HttpClientConfig<*>.() -> Unit = {
         install(ContentNegotiation) {
-            json(JSON)
+            nullableFallbackJson(JSON)
         }
     },
 ): HttpClient =

@@ -48,7 +48,7 @@ private class RenderRunBuilder {
     ) {
         when (node) {
             is Element -> renderElement(node, style, block)
-            is TextNode -> appendText(node.getWholeText(), style, block)
+            is TextNode -> appendTextNode(node.getWholeText(), style, block)
         }
     }
 
@@ -79,7 +79,14 @@ private class RenderRunBuilder {
             }
 
             "span" -> {
-                renderChildren(element, style, block)
+                if (element.classNames().contains("invisible")) {
+                    Unit
+                } else {
+                    renderChildren(element, style, block)
+                    if (element.classNames().contains("ellipsis")) {
+                        appendText("…", style, block)
+                    }
+                }
             }
 
             "del", "s" -> {
@@ -246,6 +253,15 @@ private class RenderRunBuilder {
         }
     }
 
+    private fun appendTextNode(
+        text: String,
+        style: RenderTextStyle,
+        block: RenderBlockStyle,
+    ) {
+        if (text.isBlank() && currentRuns.isEmpty()) return
+        appendText(text, style, block)
+    }
+
     private fun appendImage(
         url: String,
         alt: String,
@@ -274,6 +290,10 @@ private class RenderRunBuilder {
 
     private fun flushTextContent() {
         if (currentRuns.isEmpty()) return
+        if (currentRuns.all { it is RenderRun.Text && it.text.isBlank() }) {
+            currentRuns.clear()
+            return
+        }
         contents.add(
             RenderContent.Text(
                 runs = currentRuns.toImmutableList(),

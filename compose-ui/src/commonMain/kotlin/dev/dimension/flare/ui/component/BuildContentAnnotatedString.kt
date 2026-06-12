@@ -10,9 +10,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.LineBreak
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.util.fastForEach
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -133,12 +134,6 @@ private class ContentBuilder(
         currentBuilder.append(text)
     }
 
-    fun appendLine() {
-        // Prevent multiple newlines at the start of a block if strict spacing is needed,
-        // but for now mirroring appendLine legacy behavior
-        currentBuilder.append("\n")
-    }
-
     fun appendInlineContent(id: String, alternateText: String = "[image]") {
         currentBuilder.appendInlineContent(id, alternateText)
     }
@@ -222,7 +217,7 @@ private class ContentBuilder(
     }
 
     private fun restoreStyles() {
-        activeStyleOps.forEach { op ->
+        activeStyleOps.fastForEach { op ->
             when (op) {
                 is StyleOp.Span -> currentBuilder.pushStyle(op.style)
                 is StyleOp.Paragraph -> currentBuilder.pushStyle(op.style)
@@ -248,7 +243,7 @@ private fun ContentBuilder.renderContents(
     renderContents: ImmutableList<RenderContent>,
     styleData: StyleData,
 ) {
-    renderContents.forEachIndexed { index, content ->
+    renderContents.fastForEach { content ->
         when (content) {
             is RenderContent.BlockImage -> appendBlockImage(content.url, content.href)
             is RenderContent.Text -> {
@@ -258,10 +253,7 @@ private fun ContentBuilder.renderContents(
                     flushText(content.block)
                 } else {
                     renderTextContent(content, styleData)
-                    appendSeparatorIfNeeded(
-                        current = content,
-                        next = renderContents.getOrNull(index + 1),
-                    )
+                    flushText(content.block)
                 }
             }
         }
@@ -295,7 +287,7 @@ private fun ContentBuilder.renderRuns(
     styleData: StyleData,
     blockTextStyle: TextStyle,
 ) {
-    runs.forEach { run ->
+    runs.fastForEach { run ->
         when (run) {
             is RenderRun.Image -> {
                 val imageId = context.appendImageInlineContent(run.url)
@@ -324,25 +316,6 @@ private fun ContentBuilder.renderTextRun(
         }
     } else {
         withStyle(spanStyle, appendContent)
-    }
-}
-
-private fun ContentBuilder.appendSeparatorIfNeeded(
-    current: RenderContent.Text,
-    next: RenderContent?,
-) {
-    if (next !is RenderContent.Text) return
-    if (next.block.isBlockQuote) return
-    when {
-        current.block.headingLevel != null -> appendLine()
-        current.block.isListItem -> appendLine()
-        current.block.isFigCaption -> appendLine()
-        current.block.isBlockQuote -> Unit
-        current.block.textAlignment == RenderTextAlignment.Center -> Unit
-        else -> {
-            appendLine()
-            appendLine()
-        }
     }
 }
 

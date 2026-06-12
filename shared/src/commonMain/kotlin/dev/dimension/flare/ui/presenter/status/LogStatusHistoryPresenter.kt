@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.repository.STATUS_HISTORY_PAGING_KEY
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -20,7 +21,7 @@ public class LogStatusHistoryPresenter(
 ) : PresenterBase<LogStatusHistoryPresenter.State>(),
     KoinComponent {
     internal companion object {
-        const val PAGING_KEY = "status_history"
+        const val PAGING_KEY = STATUS_HISTORY_PAGING_KEY
     }
 
     private val cacheDatabase: CacheDatabase by inject()

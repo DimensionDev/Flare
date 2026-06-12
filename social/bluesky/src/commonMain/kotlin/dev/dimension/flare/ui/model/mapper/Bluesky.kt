@@ -6,6 +6,7 @@ import app.bsky.actor.ProfileViewDetailed
 import app.bsky.bookmark.BookmarkView
 import app.bsky.bookmark.BookmarkViewItemUnion
 import app.bsky.embed.ExternalView
+import app.bsky.embed.GalleryViewItemUnion
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.embed.RecordWithMediaViewMediaUnion
@@ -43,6 +44,8 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiMedia.Image
+import dev.dimension.flare.ui.model.UiMedia.Video
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -1220,7 +1223,7 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
                 is RecordWithMediaViewMediaUnion.ImagesView -> {
                     media.value.images
                         .map {
-                            UiMedia.Image(
+                            Image(
                                 url = it.fullsize.uri,
                                 previewUrl = it.thumb.uri,
                                 description = it.alt,
@@ -1233,7 +1236,7 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
 
                 is RecordWithMediaViewMediaUnion.VideoView -> {
                     persistentListOf(
-                        UiMedia.Video(
+                        Video(
                             url = media.value.playlist.uri,
                             thumbnailUrl = media.value.thumbnail?.uri ?: "",
                             description = media.value.alt,
@@ -1251,6 +1254,32 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
 
                 is RecordWithMediaViewMediaUnion.Unknown -> {
                     persistentListOf()
+                }
+
+                is RecordWithMediaViewMediaUnion.GalleryView -> {
+                    media.value.items
+                        .mapNotNull { item ->
+                            when (item) {
+                                is GalleryViewItemUnion.Unknown -> {
+                                    null
+                                }
+
+                                is GalleryViewItemUnion.ViewImage -> {
+                                    UiMedia.Image(
+                                        url = item.value.fullsize.uri,
+                                        previewUrl = item.value.thumbnail.uri,
+                                        description = item.value.alt,
+                                        width =
+                                            item.value.aspectRatio.width
+                                                .toFloat(),
+                                        height =
+                                            item.value.aspectRatio.height
+                                                .toFloat(),
+                                        sensitive = false,
+                                    )
+                                }
+                            }
+                        }.toImmutableList()
                 }
             }
         }

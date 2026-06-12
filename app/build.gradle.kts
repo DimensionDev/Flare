@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.webkit)
     implementation(libs.bundles.navigation3)
     implementation(libs.richtext.ui.material3)
+    implementation(libs.richtext.commonmark)
     implementation(libs.androidx.browser)
     implementation("net.java.dev.jna:jna:${libs.versions.jna.get()}@aar")
 

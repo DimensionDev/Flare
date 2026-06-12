@@ -78,6 +78,7 @@ ksp {
             "dev.dimension.flare.ui.presenter.login.WebLoginFlowPresenter",
             "dev.dimension.flare.ui.presenter.HomeTabsPresenter",
             "dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter",
+            "dev.dimension.flare.ui.presenter.WebTimelineItemPresenter",
             "dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter",
             "dev.dimension.flare.ui.screen.settings.AllTabsPresenter",
             "dev.dimension.flare.ui.presenter.home.WebDeepLinkPresenter",

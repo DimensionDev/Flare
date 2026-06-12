@@ -5,19 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
@@ -36,10 +35,10 @@ public class HomeTimelineWithTabsPresenter :
     private val accountRepository by inject<AccountRepository>()
 
     public interface State : UserState {
-        public val tabState: UiState<ImmutableList<TimelineTabItemV2>>
+        public val tabState: UiState<ImmutableList<UiTimelineTabItem>>
 
         public fun resolveAppearance(
-            tab: TimelineTabItemV2,
+            tab: UiTimelineTabItem,
             base: TimelineAppearance,
         ): TimelineAppearance
     }
@@ -71,7 +70,7 @@ public class HomeTimelineWithTabsPresenter :
             override val tabState = tabs
 
             override fun resolveAppearance(
-                tab: TimelineTabItemV2,
+                tab: UiTimelineTabItem,
                 base: TimelineAppearance,
             ): TimelineAppearance = tab.resolveTimelineAppearance(base)
         }
@@ -80,20 +79,18 @@ public class HomeTimelineWithTabsPresenter :
 
 private const val DEFAULT_GUEST_MASTODON_HOST = "mastodon.social"
 
-private fun List<TimelineTabItemV2>.withGuestMastodonHomeFallback(isLoggedIn: Boolean): List<TimelineTabItemV2> =
+private fun List<UiTimelineTabItem>.withGuestMastodonHomeFallback(isLoggedIn: Boolean): List<UiTimelineTabItem> =
     if (!isLoggedIn && isEmpty()) {
         listOf(guestMastodonHomeTimelineTab)
     } else {
         this
     }
 
-internal val guestMastodonHomeTimelineTab: TimelineTabItemV2
+internal val guestMastodonHomeTimelineTab: UiTimelineTabItem
     get() =
-        SourceTimelineTabItemV2.runtime(
-            id = "guest_home_$DEFAULT_GUEST_MASTODON_HOST",
-            title = UiStrings.Home.asText(),
-            icon = IconType.Material(UiIcon.Home),
-            createPresenter = {
-                HomeTimelinePresenter(AccountType.GuestHost(DEFAULT_GUEST_MASTODON_HOST))
-            },
-        )
+        CommonTimelineSpecs.guestHome
+            .candidate(
+                data = CommonTimelineSpecs.GuestHomeData(DEFAULT_GUEST_MASTODON_HOST),
+                title = UiStrings.Home.asText(),
+                icon = IconType.Material(UiIcon.Home),
+            ).toUiTimelineTabItem()

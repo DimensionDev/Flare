@@ -32,12 +32,14 @@ class RichTextStateTest {
     }
 
     @Test
-    fun annotatedString_contains_paragraph_text_and_newlines() {
+    fun paragraphs_render_as_separate_text_contents() {
         val ui = htmlToUiRichText("<p>Hello</p><p>World</p>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val textContent = state.contents.single() as RichTextContent.Text
-        assertEquals("Hello\n\nWorld", textContent.content.text)
+        val textContents = state.contents.filterIsInstance<RichTextContent.Text>()
+        assertEquals(2, textContents.size)
+        assertEquals("Hello", textContents[0].content.text)
+        assertEquals("World", textContents[1].content.text)
     }
 
     @Test
@@ -180,10 +182,10 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<ul><li>Item 1</li><li>Item 2</li></ul>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val textContent = state.contents.single() as RichTextContent.Text
-        val text = textContent.content.text
-        assertTrue(text.contains("• Item 1"))
-        assertTrue(text.contains("• Item 2"))
+        val textContents = state.contents.filterIsInstance<RichTextContent.Text>()
+        assertEquals(2, textContents.size)
+        assertEquals("• Item 1", textContents[0].content.text)
+        assertEquals("• Item 2", textContents[1].content.text)
     }
 
     @Test
@@ -191,12 +193,10 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<h1>Header 1</h1><h2>Header 2</h2>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val textContent = state.contents.single() as RichTextContent.Text
-        val text = textContent.content.text
-        assertTrue(text.contains("Header 1"))
-        assertTrue(text.contains("Header 2"))
-
-        assertTrue(text.contains("\n"))
+        val textContents = state.contents.filterIsInstance<RichTextContent.Text>()
+        assertEquals(2, textContents.size)
+        assertEquals("Header 1", textContents[0].content.text)
+        assertEquals("Header 2", textContents[1].content.text)
     }
 
     @Test

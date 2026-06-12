@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog.datasource
 
 import androidx.paging.PagingData
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.coroutines.flow.Flow
 import kotlin.native.HiddenFromObjC
@@ -14,5 +14,5 @@ public interface PinnableTimelineTabDataSource {
 @HiddenFromObjC
 public data class PinnableTimelineTabSection(
     val title: UiStrings,
-    val data: Flow<PagingData<TimelineTabItemV2>>,
+    val data: Flow<PagingData<TimelineCandidate<*>>>,
 )

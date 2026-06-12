@@ -58,11 +58,26 @@ internal interface UserDao {
     fun getUserHistory(): PagingSource<Int, DbUserHistoryWithUser>
 
     @Transaction
+    @Query("SELECT * FROM DbUserHistory ORDER BY lastVisit DESC LIMIT :limit")
+    suspend fun getUserHistory(limit: Int): List<DbUserHistoryWithUser>
+
+    @Transaction
     @Query(
         "SELECT * FROM DbUser " +
             "WHERE DbUser.name like :query OR DbUser.canonicalHandle like :query",
     )
     fun searchUser(query: String): PagingSource<Int, DbUser>
+
+    @Query(
+        "SELECT * FROM DbUser " +
+            "WHERE DbUser.name LIKE :query ESCAPE '\\' OR DbUser.canonicalHandle LIKE :query ESCAPE '\\' " +
+            "ORDER BY DbUser.name COLLATE NOCASE " +
+            "LIMIT :limit",
+    )
+    suspend fun searchUser(
+        query: String,
+        limit: Int,
+    ): List<DbUser>
 
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
     suspend fun deleteHistoryByAccountType(accountType: DbAccountType)

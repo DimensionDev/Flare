@@ -19,7 +19,6 @@ import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.tab.GroupSource
-import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.SYSTEM_HOME_MIXED_TIMELINE_ID
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
@@ -29,6 +28,7 @@ import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
@@ -36,6 +36,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.unavailableAccountService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -68,7 +69,7 @@ class SettingsImportExportPresenterTest {
             SettingsRepository(
                 fileStorage = fileStorage,
                 appDataStore = AppDataStore(fileStorage),
-                timelineResolver = TimelineResolver(testPlatformRuntimeData()),
+                timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService()),
             )
         startKoin {
             modules(
@@ -270,7 +271,7 @@ class SettingsImportExportPresenterTest {
                 TabSettingsV2(homeSlots = listOf(initialGroup))
             }
 
-            val groupItem = settingsRepository.homeTimelineTab(initialGroup.id).first() as? GroupTimelineTabItemV2
+            val groupItem = settingsRepository.homeTimelineTab(initialGroup.id).first() as? UiGroupTimelineTabItem
             val childItem = settingsRepository.homeTimelineTab(initialChild.id).first()
             assertEquals(TimelineMergePolicy.Staggered, groupItem?.mergePolicy)
             assertEquals(listOf(TimelinePostKind.Quote), groupItem?.filterConfig?.excludedKinds)
@@ -303,7 +304,7 @@ class SettingsImportExportPresenterTest {
                                 ),
                         ),
                 )
-            val nextGroup = async { settingsRepository.homeTimelineTab(initialGroup.id).drop(1).first() as? GroupTimelineTabItemV2 }
+            val nextGroup = async { settingsRepository.homeTimelineTab(initialGroup.id).drop(1).first() as? UiGroupTimelineTabItem }
             val nextChild = async { settingsRepository.homeTimelineTab(initialChild.id).drop(1).first() }
 
             settingsRepository.updateTabSettingsV2 {

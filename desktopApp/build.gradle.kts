@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.systemColor)
     implementation(libs.sentry)
     implementation(libs.richtext.ui)
+    implementation(libs.richtext.commonmark)
 }
 
 val fdroid = rootProject.file("fdroid.properties")

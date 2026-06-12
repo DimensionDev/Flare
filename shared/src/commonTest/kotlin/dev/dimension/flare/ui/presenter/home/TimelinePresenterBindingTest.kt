@@ -16,15 +16,14 @@ import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
+import dev.dimension.flare.unavailableAccountService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import okio.FileSystem
 import okio.Path
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -43,7 +42,7 @@ class TimelinePresenterBindingTest {
             SettingsRepository(
                 fileStorage = fileStorage,
                 appDataStore = AppDataStore(fileStorage),
-                timelineResolver = TimelineResolver(testPlatformRuntimeData()),
+                timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService()),
             )
     }
 
@@ -54,7 +53,7 @@ class TimelinePresenterBindingTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun filterConfigObservationUpdatesWhenIdIsBoundAfterFlowCreation() =
+    fun filterConfigObservationUsesFixedTimelineTabItemId() =
         runTest {
             val firstSlot =
                 homeSlot(
@@ -68,26 +67,40 @@ class TimelinePresenterBindingTest {
                 TabSettingsV2(homeSlots = listOf(firstSlot))
             }
 
-            val timelineTabItemIdFlow = MutableStateFlow<String?>(null)
             val observed = mutableListOf<List<TimelinePostKind>>()
             val job =
                 backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                     observeTimelineFilterConfig(
                         settingsRepository = settingsRepository,
-                        timelineTabItemIdFlow = timelineTabItemIdFlow,
+                        timelineTabItemId = firstSlot.id,
                     ).map { it.excludedKinds }
                         .take(2)
                         .collect(observed::add)
                 }
             advanceUntilIdle()
-            timelineTabItemIdFlow.value = firstSlot.id
+            settingsRepository.updateTabSettingsV2 {
+                copy(
+                    homeSlots =
+                        listOf(
+                            firstSlot.copy(
+                                presentation =
+                                    TimelinePresentation(
+                                        filterConfig =
+                                            TimelineFilterConfig(
+                                                excludedKinds = listOf(TimelinePostKind.Repost),
+                                            ),
+                                    ),
+                            ),
+                        ),
+                )
+            }
             advanceUntilIdle()
             job.join()
 
             assertEquals(
                 listOf(
-                    emptyList(),
                     listOf(TimelinePostKind.Reply),
+                    listOf(TimelinePostKind.Repost),
                 ),
                 observed,
             )

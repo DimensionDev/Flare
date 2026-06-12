@@ -109,7 +109,7 @@ struct EditRssSheet: View {
         "https://rsshub.pseudoyu.com"
     ]
     @StateObject private var presenter: KotlinPresenter<EditRssSourcePresenterState>
-    @State private var url: String = ""
+    @State private var url: String
     @State private var title: String = ""
     @State private var rssHubHost: String = ""
     @State private var displayMode: RssDisplayMode = .fullContent

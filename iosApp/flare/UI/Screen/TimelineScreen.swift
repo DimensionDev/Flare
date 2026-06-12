@@ -2,11 +2,11 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 
 struct TimelineScreen: View {
-    let tabItem: TimelineTabItemV2
+    let tabItem: UiTimelineTabItem
     let allowGalleryMode: Bool
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
-    init(tabItem: TimelineTabItemV2, allowGalleryMode: Bool = false) {
+    init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false) {
         self.tabItem = tabItem
         self.allowGalleryMode = allowGalleryMode
         self._presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
@@ -20,7 +20,7 @@ struct TimelineScreen: View {
 }
 
 struct ListTimelineScreen:  View {
-    let tabItem: TimelineTabItemV2
+    let tabItem: UiTimelineTabItem
     var body: some View {
         TimelineScreen(tabItem: tabItem)
     }

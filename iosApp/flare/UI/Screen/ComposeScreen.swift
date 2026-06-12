@@ -16,6 +16,7 @@ struct ComposeScreen: View {
     @State private var uiTextView: UITextView?
     @State private var pendingCursor: Int?
     @State private var initialTextApplied = false
+    @State private var defaultFocusRequested = false
     @State private var showDraftSheet = false
     @State private var showDraftConfirmation = false
 
@@ -47,9 +48,7 @@ struct ComposeScreen: View {
                     .textFieldStyle(.plain)
                     .focused($keyboardFocused)
                     .onAppear {
-                        if initialTextApplied {
-                            keyboardFocused = true
-                        }
+                        requestDefaultFocus()
                     }
                     Spacer()
                     if viewModel.mediaViewModel.items.count > 0 {
@@ -306,7 +305,7 @@ struct ComposeScreen: View {
                 let prefill = initialText.data.text
                 viewModel.text = prefill
                 pendingCursor = Int(initialText.data.cursorPosition)
-                keyboardFocused = true
+                requestComposerFocus()
                 applyCursorIfPossible()
             }
         }
@@ -525,6 +524,19 @@ struct ComposeScreen: View {
             }
         }
     }
+
+    private func requestDefaultFocus() {
+        guard !defaultFocusRequested else { return }
+        defaultFocusRequested = true
+        requestComposerFocus()
+    }
+
+    private func requestComposerFocus() {
+        DispatchQueue.main.async {
+            keyboardFocused = true
+            applyCursorIfPossible()
+        }
+    }
     
     private func insert(_ s: String) {
         guard let textView = uiTextView else { return }
@@ -597,6 +609,7 @@ struct ComposeScreen: View {
         if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
             visibilityState.data.setVisibility(value: data.visibility)
         }
+        requestComposerFocus()
     }
     
     private func getMedia() -> [ComposeData.Media] {

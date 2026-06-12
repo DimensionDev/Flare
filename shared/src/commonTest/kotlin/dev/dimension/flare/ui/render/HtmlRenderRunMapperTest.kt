@@ -48,6 +48,34 @@ class HtmlRenderRunMapperTest {
     }
 
     @Test
+    fun ignores_formatting_whitespace_between_blocks() {
+        val contents =
+            map(
+                """
+                <p>Hello</p>
+                <p>World</p>
+                """.trimIndent(),
+            )
+
+        assertEquals(2, contents.size)
+        val first = assertIs<RenderContent.Text>(contents[0])
+        assertEquals("Hello", assertIs<RenderRun.Text>(first.runs.single()).text)
+        val second = assertIs<RenderContent.Text>(contents[1])
+        assertEquals("World", assertIs<RenderRun.Text>(second.runs.single()).text)
+    }
+
+    @Test
+    fun ignores_blank_only_blocks() {
+        val contents = map("<p>Hello</p><p><br></p><p>World</p>")
+
+        assertEquals(2, contents.size)
+        val first = assertIs<RenderContent.Text>(contents[0])
+        assertEquals("Hello", assertIs<RenderRun.Text>(first.runs.single()).text)
+        val second = assertIs<RenderContent.Text>(contents[1])
+        assertEquals("World", assertIs<RenderRun.Text>(second.runs.single()).text)
+    }
+
+    @Test
     fun maps_list_items_as_independent_blocks() {
         val contents = map("<ul><li>One</li><li><strong>Two</strong></li></ul>")
 
@@ -115,6 +143,19 @@ class HtmlRenderRunMapperTest {
         val inlineImage = assertIs<RenderRun.Image>(text.runs[5])
         assertEquals("https://example.com/i.png", inlineImage.url)
         assertEquals("[img]", inlineImage.alt)
+    }
+
+    @Test
+    fun skips_invisible_span_and_adds_ellipsis_after_ellipsis_span() {
+        val contents =
+            map(
+                """<p><a href="https://peertube.heise.de/w/wCYxw5CA8SAba92qsSbAqo"><span class="invisible">https://</span><span class="ellipsis">peertube.heise.de/w/wCYxw5CA8S</span><span class="invisible">Aba92qsSbAqo</span></a></p>""",
+            )
+
+        val text = assertIs<RenderContent.Text>(contents.single())
+        val run = assertIs<RenderRun.Text>(text.runs.single())
+        assertEquals("peertube.heise.de/w/wCYxw5CA8S…", run.text)
+        assertEquals("https://peertube.heise.de/w/wCYxw5CA8SAba92qsSbAqo", run.style.link)
     }
 
     @Test

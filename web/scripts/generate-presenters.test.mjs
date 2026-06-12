@@ -315,12 +315,12 @@ test('generates opaque reference return facades', async () => {
 							{
 								name: 'tab',
 								kind: 'ref',
-								tsType: 'TimelineTabItemV2',
+								tsType: 'SampleTab',
 								properties: [],
 								methods: [
 									{
-										name: 'createPresenter',
-										path: 'dev.dimension.flare.data.model.tab.TimelineTabItemV2.createPresenter',
+										name: 'openTimeline',
+										path: 'com.example.shared.SampleTab.openTimeline',
 										args: [],
 											return: {
 												kind: 'ref',
@@ -352,7 +352,7 @@ test('generates opaque reference return facades', async () => {
 
 		assert.match(generated, /export type TimelinePresenter = WebPresenterRef & \{/);
 		assert.match(generated, /function attachTimelinePresenter\(value: TimelinePresenterSnapshot, refs: WebPresenterRefs\): TimelinePresenter/);
-		assert.match(generated, /createPresenter\(\): TimelinePresenter;/);
+		assert.match(generated, /openTimeline\(\): TimelinePresenter;/);
 		assert.doesNotMatch(generated, /leaked: string/);
 		assert.doesNotMatch(generated, /getKoin\(\)/);
 		assert.match(

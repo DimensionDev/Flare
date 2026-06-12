@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -22,17 +24,20 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.isSuccess
+import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.local_history_search_status_title
 import dev.dimension.flare.local_history_search_user_title
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalCacheSearchPresenter
+import dev.dimension.flare.ui.screen.home.AskAiButton
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
@@ -47,12 +52,13 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-internal fun LocalCacheScreen() {
+internal fun LocalCacheScreen(toAskAi: (String?, LocalHistoryAgentTarget) -> Unit = { _, _ -> }) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         presenter()
     }
     val lazyListState = rememberLazyStaggeredGridState()
+    val showAskAi = LocalTimelineAppearance.current.aiConfig.agent
     FlareScrollBar(lazyListState) {
         LazyStatusVerticalStaggeredGrid(
             state = lazyListState,
@@ -69,14 +75,34 @@ internal fun LocalCacheScreen() {
                         Modifier
                             .fillMaxSize(),
                 ) {
-                    TextField(
-                        state = state.searchTextState,
+                    Row(
                         modifier =
                             Modifier
-                                .widthIn(min = 200.dp)
                                 .align(Alignment.CenterEnd),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (showAskAi) {
+                            AskAiButton(
+                                onClick = {
+                                    toAskAi(
+                                        state.searchTextState.text
+                                            .toString()
+                                            .trim()
+                                            .takeIf { it.isNotEmpty() },
+                                        state.selectedSearchType.toLocalHistoryAgentTarget(),
+                                    )
+                                },
+                            )
+                        }
+                        TextField(
+                            state = state.searchTextState,
+                            modifier =
+                                Modifier
+                                    .widthIn(min = 200.dp),
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                        )
+                    }
                 }
             }
             item(
@@ -161,3 +187,9 @@ private enum class SearchType(
     Status(Res.string.local_history_search_status_title),
     User(Res.string.local_history_search_user_title),
 }
+
+private fun SearchType.toLocalHistoryAgentTarget(): LocalHistoryAgentTarget =
+    when (this) {
+        SearchType.Status -> LocalHistoryAgentTarget.Posts
+        SearchType.User -> LocalHistoryAgentTarget.Users
+    }

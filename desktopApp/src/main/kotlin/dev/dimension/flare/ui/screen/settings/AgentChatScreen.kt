@@ -23,7 +23,11 @@ import dev.dimension.flare.agent_chat_title
 import dev.dimension.flare.feature.agent.presenter.chat.GenericChatPresenter
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
+import dev.dimension.flare.ui.component.agent.label
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.status.action.StatusInsightPostPreview
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.SubtleButton
@@ -36,6 +40,7 @@ internal fun AgentChatScreen(
     conversationId: String,
     initialMessage: String?,
     onBack: () -> Unit,
+    navigate: (Route) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val normalizedInitialMessage = initialMessage?.trim()?.takeIf { it.isNotEmpty() }
@@ -46,7 +51,7 @@ internal fun AgentChatScreen(
         ).invoke()
     }
     val fallbackTitle = stringResource(Res.string.agent_chat_title)
-    val title = state.title?.takeIf { it.isNotBlank() } ?: fallbackTitle
+    val title = state.room.title.takeIf { it.isNotBlank() } ?: fallbackTitle
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -77,21 +82,31 @@ internal fun AgentChatScreen(
         AgentChatScaffold(
             messages = state.messages,
             input = state.input,
-            isRunning = state.isRunning,
+            isRunning = state.room.isRunning,
             canSend = state.canSend,
-            error = state.error,
-            runningTrace = stringResource(Res.string.agent_chat_thinking),
+            errorMessage = state.room.errorMessage,
+            runningTrace = state.room.currentTrace?.label() ?: stringResource(Res.string.agent_chat_thinking),
             inputPlaceholder = stringResource(Res.string.agent_chat_input_placeholder),
             sendContentDescription = stringResource(Res.string.agent_chat_send),
-            messageText = GenericChatPresenter.Message::text,
-            isUserMessage = { it is GenericChatPresenter.Message.User },
             onInputChange = state::setInput,
             onSend = state::sendMessage,
+            onInputRequestOptionSelected = state::selectInputRequestOption,
+            onPostClick = { post ->
+                navigate(Route.StatusDetail(accountType = post.accountType, statusKey = post.statusKey))
+            },
+            onUserClick = { user ->
+                user.toRoute()?.let(navigate)
+            },
             leadingContentItemCount = state.statusInsightPosts.size,
             leadingContent = {
                 state.statusInsightPosts.forEach { post ->
                     item {
-                        StatusInsightPostPreview(post = post)
+                        StatusInsightPostPreview(
+                            post = post,
+                            onClick = {
+                                navigate(Route.StatusDetail(accountType = post.accountType, statusKey = post.statusKey))
+                            },
+                        )
                     }
                 }
             },
@@ -99,3 +114,9 @@ internal fun AgentChatScreen(
         )
     }
 }
+
+private fun UiProfile.toRoute(): Route? =
+    when (val event = clickEvent) {
+        is ClickEvent.Deeplink -> Route.parse(event.url)
+        ClickEvent.Noop -> null
+    }

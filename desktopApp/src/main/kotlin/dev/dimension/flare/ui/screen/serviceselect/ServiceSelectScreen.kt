@@ -19,7 +19,6 @@ internal fun ServiceSelectScreen(
         registerDeeplinkCallback = { callback ->
             OnDeepLink {
                 callback(it)
-                true
             }
         },
         onBack = onBack,

@@ -7,10 +7,12 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -58,17 +60,15 @@ internal fun EntryProviderScope<NavKey>.listEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                SourceTimelineTabItemV2.runtime(
-                    id = "list_${args.accountType}_${args.listId}",
+                CommonTimelineSpecs.list.candidate(
+                    data =
+                        TimelineSpec.AccountResourceData(
+                            accountKey = (args.accountType as AccountType.Specific).accountKey,
+                            resourceId = args.listId,
+                        ),
                     title = UiText.Raw(args.title),
                     icon = IconType.Material(UiIcon.List),
-                    createPresenter = {
-                        ListTimelinePresenter(
-                            accountType = args.accountType,
-                            listId = args.listId,
-                        )
-                    },
-                )
+                ).toUiTimelineTabItem()
             },
             onBack = onBack,
         )

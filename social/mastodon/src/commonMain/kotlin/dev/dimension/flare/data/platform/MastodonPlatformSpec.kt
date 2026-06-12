@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
+import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -24,10 +25,6 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.MastodonLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -73,11 +70,10 @@ public data object MastodonPlatformSpec :
             icon = UiIcon.Local.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonLocalTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MastodonDataSource, TimelineSpec.AccountBasedData> {
+                    publicTimelineLoader(local = true)
+                },
         )
 
     internal val publicTimelineSpec =
@@ -87,11 +83,10 @@ public data object MastodonPlatformSpec :
             icon = UiIcon.World.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonPublicTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MastodonDataSource, TimelineSpec.AccountBasedData> {
+                    publicTimelineLoader(local = false)
+                },
         )
 
     internal val bookmarkTimelineSpec =
@@ -101,11 +96,10 @@ public data object MastodonPlatformSpec :
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MastodonDataSource, TimelineSpec.AccountBasedData> {
+                    bookmarkTimelineLoader()
+                },
         )
 
     internal val favouriteTimelineSpec =
@@ -115,16 +109,16 @@ public data object MastodonPlatformSpec :
             icon = UiIcon.Favourite.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                MastodonFavouriteTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<MastodonDataSource, TimelineSpec.AccountBasedData> {
+                    favouriteTimelineLoader()
+                },
         )
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
         persistentListOf(
             CommonTimelineSpecs.home,
+            CommonTimelineSpecs.guestHome,
             CommonTimelineSpecs.discover,
             CommonTimelineSpecs.list,
             localTimelineSpec,

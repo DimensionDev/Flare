@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -51,8 +52,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Robot
+import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
@@ -61,6 +67,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -110,6 +117,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     toStartMessage: (MicroBlogKey) -> Unit,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
+    onProfileInsightClick: (userKey: MicroBlogKey) -> Unit,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
@@ -132,6 +140,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                 toStartMessage = toStartMessage,
                 onFollowListClick = onFollowListClick,
                 onFansListClick = onFansListClick,
+                onProfileInsightClick = onProfileInsightClick,
                 userKey = it.key,
                 onBack = onBack,
                 showBackButton = showBackButton,
@@ -223,6 +232,7 @@ internal fun ProfileScreen(
     toStartMessage: (MicroBlogKey) -> Unit,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
+    onProfileInsightClick: (userKey: MicroBlogKey) -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,
@@ -322,11 +332,25 @@ internal fun ProfileScreen(
                         }
                     },
                     actions = {
-                        if (!bigScreen) {
-                            ProfileMenu(
-                                profileState = state.state,
-                                modifier = Modifier.padding(end = 8.dp),
-                            )
+                        Row(
+                            modifier =
+                                Modifier
+                                    .background(
+                                        MaterialTheme.colorScheme.background,
+                                        MaterialTheme.shapes.medium,
+                                    ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (!bigScreen) {
+                                ProfileInsightAction(
+                                    profileState = state.state,
+                                    onClick = onProfileInsightClick,
+                                )
+                                ProfileMenu(
+                                    profileState = state.state,
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                            }
                         }
                     },
                 )
@@ -349,6 +373,10 @@ internal fun ProfileScreen(
                         ProfileHeader(
                             state = state.state,
                             menu = {
+                                ProfileInsightAction(
+                                    profileState = state.state,
+                                    onClick = onProfileInsightClick,
+                                )
                                 ProfileMenu(
                                     profileState = state.state,
                                     modifier =
@@ -513,6 +541,30 @@ internal fun ProfileScreen(
                         )
                     }
                 },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileInsightAction(
+    profileState: ProfileState,
+    onClick: (MicroBlogKey) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (!LocalTimelineAppearance.current.aiConfig.agent) {
+        return
+    }
+    profileState.userState.onSuccess { profile ->
+        IconButton(
+            onClick = {
+                onClick(profile.key)
+            },
+            modifier = modifier,
+        ) {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Robot,
+                contentDescription = stringResource(id = R.string.profile_insight_title),
             )
         }
     }

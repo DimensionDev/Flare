@@ -2,19 +2,23 @@ package dev.dimension.flare.feature.agent.common
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.prompt.message.Message
-import dev.dimension.flare.common.PlatformDispatchers
+import ai.koog.prompt.message.MessagePart
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.feature.agent.database.AgentDatabase
 import dev.dimension.flare.feature.agent.database.connect
 import dev.dimension.flare.feature.agent.database.model.DbAgentConversation
-import dev.dimension.flare.feature.agent.database.model.DbAgentConversationAttachment
 import dev.dimension.flare.feature.agent.database.model.DbAgentMessage
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.feature.agent.presenter.agentMessageText
+import dev.dimension.flare.feature.agent.presenter.buildAgentMessageParts
+import dev.dimension.flare.feature.agent.presenter.markAgentInputRequestSelected
+import dev.dimension.flare.feature.agent.presenter.toAgentTextParts
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -26,28 +30,22 @@ internal class AgentChatHistoryProvider(
     private val database: AgentDatabase,
     private val titleGenerator: AgentConversationTitleGenerator,
 ) : ChatHistoryProvider {
-    private val titleScope = CoroutineScope(SupervisorJob() + PlatformDispatchers.IO)
-
-    fun observeRecords(): Flow<List<AgentChatHistoryRecord>> =
+    fun observeRooms(): Flow<List<AgentChatRoom>> =
         database
             .conversationDao()
             .observeConversations()
             .map { conversations ->
                 conversations.map { conversation ->
-                    AgentChatHistoryRecord(
-                        conversationId = conversation.conversationId,
-                        title = conversation.title.orEmpty().ifBlank { conversation.conversationId },
-                        updatedAt = conversation.updatedAt,
-                    )
+                    conversation.toChatRoom()
                 }
             }
 
-    fun observeRecord(conversationId: String): Flow<AgentChatHistoryRecord?> =
+    fun observeRoom(conversationId: String): Flow<AgentChatRoom?> =
         database
             .conversationDao()
             .observeConversation(conversationId)
             .map { conversation ->
-                conversation?.toHistoryRecord()
+                conversation?.toChatRoom()
             }
 
     fun observeMessages(conversationId: String): Flow<List<AgentChatHistoryMessage>> =
@@ -55,74 +53,222 @@ internal class AgentChatHistoryProvider(
             .conversationDao()
             .observeMessages(conversationId)
             .map { messages ->
-                messages.mapNotNull { it.toHistoryMessage() }
-            }
-
-    fun observeAttachments(
-        conversationId: String,
-        owner: AgentConversationAttachmentOwner,
-        groupKey: String,
-    ): Flow<List<AgentConversationAttachment>> =
-        database
-            .conversationDao()
-            .observeAttachments(
-                conversationId = conversationId,
-                owner = owner.name,
-                groupKey = groupKey,
-            ).map { attachments ->
-                attachments.mapNotNull { it.toAttachment() }
+                messages.mapNotNull { message ->
+                    message.toHistoryMessage()
+                }
             }
 
     fun observeStatusInsightPosts(conversationId: String): Flow<List<UiTimelineV2.Post>> =
-        observeAttachments(
-            conversationId = conversationId,
-            owner = AgentConversationAttachmentOwner.Context,
-            groupKey = STATUS_INSIGHT_SOURCE_GROUP_KEY,
-        ).map { attachments ->
-            attachments.mapNotNull { (it as? AgentConversationAttachment.Post)?.post }
+        observeMessages(conversationId).map { messages ->
+            messages
+                .flatMap { message -> message.parts }
+                .mapNotNull { part -> (part as? AgentMessagePart.PostCard)?.post }
+                .distinctBy { post -> "${post.platformType}:${post.statusKey}" }
         }
 
-    suspend fun storeAttachments(
+    suspend fun storeUserUiMessage(
         conversationId: String,
-        owner: AgentConversationAttachmentOwner,
-        groupKey: String,
-        attachments: List<AgentConversationAttachment>,
+        text: String,
     ) {
+        val displayText = text.trim()
+        if (displayText.isBlank()) {
+            return
+        }
+        storeUserUiContent(
+            conversationId = conversationId,
+            rawText = displayText,
+            displayTitle = displayText,
+            parts = displayText.toAgentTextParts(),
+        )
+    }
+
+    suspend fun storeUserUiInputRequestOption(
+        conversationId: String,
+        option: AgentInputRequest.Option,
+    ) {
+        val rawText = option.value.trim()
+        if (rawText.isBlank()) {
+            return
+        }
+        val parts =
+            when {
+                option.userPreview != null -> listOf(AgentMessagePart.UserCard(option.userPreview))
+                option.postPreview != null -> listOf(AgentMessagePart.PostCard(option.postPreview))
+                option.label.isNotBlank() -> option.label.toAgentTextParts()
+                else -> emptyList()
+            }
+        if (parts.isEmpty()) {
+            return
+        }
+        storeUserUiContent(
+            conversationId = conversationId,
+            rawText = rawText,
+            displayTitle = option.displayTitle(),
+            parts = parts,
+        )
+    }
+
+    private suspend fun storeUserUiContent(
+        conversationId: String,
+        rawText: String,
+        displayTitle: String,
+        parts: List<AgentMessagePart>,
+    ) {
+        if (rawText.isBlank() || parts.isEmpty()) {
+            return
+        }
         val now = Clock.System.now().toEpochMilliseconds()
+        val existing = database.conversationDao().getConversation(conversationId)
+        val title = displayTitle.trim().takeIf { it.isNotBlank() } ?: rawText
+        val nextPosition =
+            database
+                .conversationDao()
+                .getMessages(conversationId)
+                .maxOfOrNull { it.position }
+                ?.plus(1)
+                ?: 0
         database.connect {
-            database.conversationDao().deleteAttachmentGroup(
-                conversationId = conversationId,
-                owner = owner.name,
-                groupKey = groupKey,
+            database.conversationDao().upsertConversation(
+                DbAgentConversation(
+                    conversationId = conversationId,
+                    title = existing?.title ?: title.fallbackTitle(),
+                    titleGenerated = existing?.titleGenerated ?: false,
+                    createdAt = existing?.createdAt ?: now,
+                    updatedAt = now,
+                    isRunning = existing?.isRunning ?: false,
+                    currentTraceJson = existing?.currentTraceJson,
+                    traceHistoryJson = existing?.traceHistoryJson ?: EMPTY_JSON_ARRAY,
+                    errorMessage = existing?.errorMessage,
+                ),
             )
-            database.conversationDao().insertAttachments(
-                attachments.mapIndexed { index, attachment ->
-                    attachment.toDbAttachment(
+            database.conversationDao().insertMessages(
+                listOf(
+                    DbAgentMessage(
                         conversationId = conversationId,
-                        owner = owner,
-                        groupKey = groupKey,
-                        position = index,
+                        position = nextPosition,
+                        role = Message.Role.User.name,
+                        text = rawText,
+                        contentJson = encodeContent(parts),
+                        messageJson = "",
                         createdAt = now,
-                    )
-                },
+                    ),
+                ),
             )
         }
     }
 
-    suspend fun storeStatusInsightSourcePosts(
+    suspend fun storeAssistantUiContent(
         conversationId: String,
-        posts: List<UiTimelineV2.Post>,
-    ) = storeAttachments(
-        conversationId = conversationId,
-        owner = AgentConversationAttachmentOwner.Context,
-        groupKey = STATUS_INSIGHT_SOURCE_GROUP_KEY,
-        attachments = posts.map { AgentConversationAttachment.Post(it) },
-    )
+        text: String,
+        supportingParts: List<AgentMessagePart>,
+        inputRequest: AgentInputRequest?,
+    ): ImmutableList<AgentMessagePart> {
+        val parts =
+            buildAgentMessageParts(
+                text = text,
+                supportingParts = supportingParts,
+                inputRequest = inputRequest,
+            )
+        val message =
+            database.conversationDao().getLatestMessageByRole(
+                conversationId = conversationId,
+                role = Message.Role.Assistant.name,
+            ) ?: return parts
+        database.connect {
+            database.conversationDao().insertMessages(
+                listOf(
+                    message.copy(
+                        text = text,
+                        contentJson = encodeContent(parts),
+                    ),
+                ),
+            )
+        }
+        return parts
+    }
+
+    suspend fun updateRoomState(
+        conversationId: String,
+        isRunning: Boolean,
+        currentTrace: AgentTrace?,
+        traceHistory: List<AgentTrace>,
+        errorMessage: String?,
+    ) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val existing = database.conversationDao().getConversation(conversationId)
+        val latestMessageAt = database.conversationDao().getLatestVisibleMessageCreatedAt(conversationId)
+        val isEmptyIdleState =
+            !isRunning &&
+                currentTrace == null &&
+                traceHistory.isEmpty() &&
+                errorMessage == null
+        if (existing == null &&
+            isEmptyIdleState &&
+            database.conversationDao().getMessages(conversationId).isEmpty()
+        ) {
+            return
+        }
+        database.connect {
+            database.conversationDao().upsertConversation(
+                DbAgentConversation(
+                    conversationId = conversationId,
+                    title = existing?.title,
+                    titleGenerated = existing?.titleGenerated ?: false,
+                    createdAt = existing?.createdAt ?: now,
+                    updatedAt = latestMessageAt ?: existing?.updatedAt ?: now,
+                    isRunning = isRunning,
+                    currentTraceJson = currentTrace?.let { encodeTrace(it) },
+                    traceHistoryJson = encodeTraceHistory(traceHistory),
+                    errorMessage = errorMessage,
+                ),
+            )
+        }
+    }
+
+    suspend fun markInputRequestSelected(
+        conversationId: String,
+        requestId: String,
+        optionId: String,
+    ) {
+        val messages = database.conversationDao().getMessages(conversationId)
+        val updated =
+            messages.mapNotNull { message ->
+                val content = message.decodeContent()
+                var changed = false
+                val updatedContent =
+                    if (content.any { part ->
+                            part is AgentMessagePart.Actions &&
+                                part.request.requestId == requestId &&
+                                !part.selected
+                        }
+                    ) {
+                        changed = true
+                        content.markAgentInputRequestSelected(
+                            requestId = requestId,
+                            optionId = optionId,
+                        )
+                    } else {
+                        content
+                    }
+                if (!changed) {
+                    null
+                } else {
+                    message.copy(
+                        contentJson = encodeContent(updatedContent),
+                    )
+                }
+            }
+        if (updated.isEmpty()) {
+            return
+        }
+        database.connect {
+            database.conversationDao().insertMessages(updated)
+        }
+    }
 
     suspend fun clear(conversationId: String) {
         database.connect {
             database.conversationDao().deleteMessages(conversationId)
-            database.conversationDao().deleteAttachments(conversationId)
             database.conversationDao().deleteConversation(conversationId)
         }
     }
@@ -132,11 +278,20 @@ internal class AgentChatHistoryProvider(
         messages: List<Message>,
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
+        val latestMessageAt = messages.latestVisibleMessageCreatedAt() ?: now
         val existing = database.conversationDao().getConversation(conversationId)
-        val historyMessages = messages.mapNotNull { it.toHistoryMessage() }
+        val existingUiContent =
+            MessageUiContentIndex(
+                database.conversationDao().getMessages(conversationId),
+            )
+        val historyMessages = messages.mapNotNull { it.toHistoryMessage(conversationId) }
         val fallbackTitle =
             existing?.title
-                ?: historyMessages.firstOrNull { it.role == AgentChatHistoryMessage.Role.User }?.text?.fallbackTitle()
+                ?: historyMessages
+                    .firstOrNull { it.role == AgentChatHistoryMessage.Role.User }
+                    ?.parts
+                    ?.agentMessageText()
+                    ?.fallbackTitle()
                 ?: conversationId
         database.connect {
             database.conversationDao().upsertConversation(
@@ -145,7 +300,11 @@ internal class AgentChatHistoryProvider(
                     title = fallbackTitle,
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
-                    updatedAt = now,
+                    updatedAt = latestMessageAt,
+                    isRunning = existing?.isRunning ?: false,
+                    currentTraceJson = existing?.currentTraceJson,
+                    traceHistoryJson = existing?.traceHistoryJson ?: EMPTY_JSON_ARRAY,
+                    errorMessage = existing?.errorMessage,
                 ),
             )
             database.conversationDao().deleteMessages(conversationId)
@@ -154,15 +313,11 @@ internal class AgentChatHistoryProvider(
                     message.toDbMessage(
                         conversationId = conversationId,
                         position = index,
+                        existingUiContent = existingUiContent,
                     )
                 },
             )
         }
-        maybeGenerateTitle(
-            conversationId = conversationId,
-            messages = historyMessages,
-            existing = existing,
-        )
     }
 
     override suspend fun load(conversationId: String): List<Message> =
@@ -170,142 +325,178 @@ internal class AgentChatHistoryProvider(
             .conversationDao()
             .getMessages(conversationId)
             .mapNotNull { it.toMessage() }
+            .sanitizeForReplay()
 
-    private fun maybeGenerateTitle(
-        conversationId: String,
-        messages: List<AgentChatHistoryMessage>,
-        existing: DbAgentConversation?,
-    ) {
-        if (existing?.titleGenerated == true || messages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
+    suspend fun generateTitleIfNeeded(conversationId: String) {
+        val existing = database.conversationDao().getConversation(conversationId) ?: return
+        if (existing.titleGenerated) {
             return
         }
-        titleScope.launch {
-            val generatedTitle = titleGenerator.generate(messages) ?: return@launch
-            database.conversationDao().updateGeneratedTitle(
-                conversationId = conversationId,
-                title = generatedTitle,
-            )
+        val messages =
+            database
+                .conversationDao()
+                .getMessages(conversationId)
+                .mapNotNull { it.toHistoryMessage() }
+        if (messages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
+            return
         }
+        val generatedTitle = titleGenerator.generate(messages) ?: return
+        if (database.conversationDao().getConversation(conversationId)?.titleGenerated == true) {
+            return
+        }
+        database.conversationDao().updateGeneratedTitle(
+            conversationId = conversationId,
+            title = generatedTitle,
+        )
     }
 
     private fun Message.toDbMessage(
         conversationId: String,
         position: Int,
-    ): DbAgentMessage =
-        DbAgentMessage(
+        existingUiContent: MessageUiContentIndex,
+    ): DbAgentMessage {
+        val text = displayText(conversationId)
+        val roleName = role.name
+        return DbAgentMessage(
             conversationId = conversationId,
             position = position,
-            role = role.name,
-            text = displayText(),
+            role = roleName,
+            text = text,
+            contentJson =
+                existingUiContent.take(roleName, text)
+                    ?: encodeContent(text.toAgentTextParts()),
             messageJson = json.encodeToString<Message>(this),
             createdAt = metaInfo.timestamp.toEpochMilliseconds(),
         )
+    }
+
+    private fun List<Message>.latestVisibleMessageCreatedAt(): Long? =
+        filterNot { it is Message.System }
+            .maxOfOrNull { it.metaInfo.timestamp.toEpochMilliseconds() }
 
     private fun DbAgentMessage.toMessage(): Message? =
         runCatching {
             json.decodeFromString<Message>(messageJson)
         }.getOrNull()
 
-    private fun DbAgentConversation.toHistoryRecord(): AgentChatHistoryRecord =
-        AgentChatHistoryRecord(
-            conversationId = conversationId,
+    private fun List<Message>.sanitizeForReplay(): List<Message> =
+        mapNotNull { message ->
+            when (message) {
+                is Message.System -> {
+                    message
+                }
+
+                is Message.User -> {
+                    val parts = message.parts.filterNot { it is MessagePart.Tool.Result }
+                    parts.takeIf { it.isNotEmpty() }?.let { message.copy(parts = it) }
+                }
+
+                is Message.Assistant -> {
+                    val parts =
+                        message.parts.filterNot { part ->
+                            part is MessagePart.Reasoning || part is MessagePart.Tool.Call
+                        }
+                    parts.takeIf { it.isNotEmpty() }?.let { message.copy(parts = it) }
+                }
+            }
+        }
+
+    private fun DbAgentConversation.toChatRoom(): AgentChatRoom =
+        AgentChatRoom(
+            id = conversationId,
             title = title.orEmpty().ifBlank { conversationId },
+            createdAt = createdAt,
             updatedAt = updatedAt,
+            isRunning = isRunning,
+            currentTrace = currentTraceJson?.decodeTrace(),
+            traceHistory = traceHistoryJson.decodeTraceHistory(),
+            errorMessage = errorMessage,
         )
 
-    private fun Message.toHistoryMessage(): AgentChatHistoryMessage? {
-        val text = displayText()
+    private fun Message.toHistoryMessage(conversationId: String? = null): AgentChatHistoryMessage? {
+        val text = displayText(conversationId)
         if (text.isBlank()) {
             return null
         }
+        val createdAt = metaInfo.timestamp.toEpochMilliseconds()
+        val role =
+            when (this) {
+                is Message.System -> AgentChatHistoryMessage.Role.System
+                is Message.User -> AgentChatHistoryMessage.Role.User
+                is Message.Assistant -> AgentChatHistoryMessage.Role.Assistant
+            }
         return AgentChatHistoryMessage(
-            role =
-                when (this) {
-                    is Message.System -> AgentChatHistoryMessage.Role.System
-                    is Message.User -> AgentChatHistoryMessage.Role.User
-                    is Message.Assistant -> AgentChatHistoryMessage.Role.Assistant
-                },
-            text = text,
-            createdAt = metaInfo.timestamp.toEpochMilliseconds(),
-        )
-    }
-
-    private fun DbAgentMessage.toHistoryMessage(): AgentChatHistoryMessage? {
-        if (text.isBlank()) {
-            return null
-        }
-        return AgentChatHistoryMessage(
-            role =
-                when (role) {
-                    Message.Role.System.name -> AgentChatHistoryMessage.Role.System
-                    Message.Role.User.name -> AgentChatHistoryMessage.Role.User
-                    Message.Role.Assistant.name -> AgentChatHistoryMessage.Role.Assistant
-                    else -> return null
-                },
-            text = text,
+            id = "${conversationId.orEmpty()}:${role.name}:$createdAt:${text.hashCode()}",
+            role = role,
+            parts = text.toAgentTextParts(),
             createdAt = createdAt,
         )
     }
 
-    private fun AgentConversationAttachment.toDbAttachment(
-        conversationId: String,
-        owner: AgentConversationAttachmentOwner,
-        groupKey: String,
-        position: Int,
-        createdAt: Long,
-    ): DbAgentConversationAttachment =
-        when (this) {
-            is AgentConversationAttachment.Post -> {
-                DbAgentConversationAttachment(
-                    conversationId = conversationId,
-                    owner = owner.name,
-                    groupKey = groupKey,
-                    position = position,
-                    type = AgentConversationAttachmentType.Post.name,
-                    contentJson = json.encodeToString<UiTimelineV2.Post>(post),
-                    createdAt = createdAt,
-                )
-            }
-
-            is AgentConversationAttachment.User -> {
-                DbAgentConversationAttachment(
-                    conversationId = conversationId,
-                    owner = owner.name,
-                    groupKey = groupKey,
-                    position = position,
-                    type = AgentConversationAttachmentType.User.name,
-                    contentJson = json.encodeToString<UiProfile>(user),
-                    createdAt = createdAt,
-                )
-            }
+    private fun DbAgentMessage.toHistoryMessage(): AgentChatHistoryMessage? {
+        val content = decodeContent()
+        if (content.isEmpty()) {
+            return null
         }
+        return AgentChatHistoryMessage(
+            id = "$conversationId:$position",
+            role =
+                when (role) {
+                    Message.Role.System.name -> return null
+                    Message.Role.User.name -> AgentChatHistoryMessage.Role.User
+                    Message.Role.Assistant.name -> AgentChatHistoryMessage.Role.Assistant
+                    else -> return null
+                },
+            parts = content,
+            createdAt = createdAt,
+        )
+    }
 
-    private fun DbAgentConversationAttachment.toAttachment(): AgentConversationAttachment? =
-        runCatching {
-            when (type) {
-                AgentConversationAttachmentType.Post.name -> {
-                    AgentConversationAttachment.Post(
-                        post = json.decodeFromString<UiTimelineV2.Post>(contentJson),
-                    )
-                }
-
-                AgentConversationAttachmentType.User.name -> {
-                    AgentConversationAttachment.User(
-                        user = json.decodeFromString<UiProfile>(contentJson),
-                    )
-                }
-
-                else -> {
-                    null
-                }
-            }
-        }.getOrNull()
-
-    private fun Message.displayText(): String =
+    private fun Message.displayText(conversationId: String? = null): String =
         textContent()
             .trim()
             .substringAfter("User message:\n")
             .trim()
+            .let { text ->
+                when (this) {
+                    is Message.Assistant -> text.removeAgentInputRequestUiMetadata().cleanAgentVisibleText()
+                    is Message.User -> text.cleanAgentUserVisibleText(conversationId)
+                    is Message.System -> text
+                }
+            }
+
+    private fun String.cleanAgentUserVisibleText(conversationId: String?): String {
+        extractLatestInsightQuestion()?.let { return it }
+        return when {
+            conversationId?.startsWith(STATUS_INSIGHT_CONVERSATION_PREFIX) == true && isStatusInsightSourcePrompt() -> ""
+            conversationId?.startsWith(PROFILE_INSIGHT_CONVERSATION_PREFIX) == true && isProfileInsightSourcePrompt() -> ""
+            else -> this
+        }
+    }
+
+    private fun String.extractLatestInsightQuestion(): String? {
+        val latestQuestion =
+            substringAfter(LATEST_USER_QUESTION_MARKER, missingDelimiterValue = "")
+                .takeIf { it.isNotBlank() }
+                ?: return null
+        return listOf(
+            CURRENT_POST_SNAPSHOT_MARKER,
+            CURRENT_PROFILE_SNAPSHOT_MARKER,
+        ).fold(latestQuestion) { text, delimiter ->
+            text.substringBefore(delimiter)
+        }.trim()
+            .takeIf { it.isNotBlank() }
+    }
+
+    private fun String.isStatusInsightSourcePrompt(): Boolean =
+        contains("Analyze this social post for the user.") ||
+            contains("Current post snapshot:") ||
+            contains("\nPost:\nplatform:")
+
+    private fun String.isProfileInsightSourcePrompt(): Boolean =
+        contains("Analyze this social profile for the user.") ||
+            contains("Current profile snapshot:") ||
+            contains("\nProfile:\nplatform:")
 
     private fun String.fallbackTitle(): String =
         lineSequence()
@@ -313,51 +504,135 @@ internal class AgentChatHistoryProvider(
             ?.trim()
             ?.take(MAX_FALLBACK_TITLE_CHARS)
             .orEmpty()
-            .ifBlank { "Flare Agent" }
+            .ifBlank { "Flare AI" }
+
+    private fun AgentInputRequest.Option.displayTitle(): String =
+        when {
+            userPreview != null -> {
+                val name = userPreview.name.raw.trim()
+                val handle = userPreview.handle.raw.trim()
+                name.ifBlank { handle }
+            }
+
+            postPreview != null -> {
+                postPreview.content.raw.trim()
+            }
+
+            label.isNotBlank() -> {
+                label.trim()
+            }
+
+            else -> {
+                value.trim()
+            }
+        }
 
     private companion object {
         const val MAX_FALLBACK_TITLE_CHARS = 80
-        const val STATUS_INSIGHT_SOURCE_GROUP_KEY = "status-insight-source"
+        const val STATUS_INSIGHT_CONVERSATION_PREFIX = "status-insight:"
+        const val PROFILE_INSIGHT_CONVERSATION_PREFIX = "profile-insight:"
+        const val LATEST_USER_QUESTION_MARKER = "Latest user question:\n"
+        const val CURRENT_POST_SNAPSHOT_MARKER = "\n\nCurrent post snapshot:"
+        const val CURRENT_PROFILE_SNAPSHOT_MARKER = "\n\nCurrent profile snapshot:"
+        const val EMPTY_JSON_ARRAY = "[]"
+
         val json =
             Json {
                 ignoreUnknownKeys = true
             }
     }
+
+    private fun DbAgentMessage.decodeContent(): ImmutableList<AgentMessagePart> =
+        runCatching {
+            json.decodeFromString<List<AgentMessagePart>>(contentJson).toImmutableList()
+        }.getOrElse {
+            text.toAgentTextParts()
+        }
+
+    private fun encodeContent(content: List<AgentMessagePart>): String = json.encodeToString<List<AgentMessagePart>>(content)
+
+    private fun encodeTrace(trace: AgentTrace): String = json.encodeToString<AgentTrace>(trace)
+
+    private fun encodeTraceHistory(traceHistory: List<AgentTrace>): String = json.encodeToString<List<AgentTrace>>(traceHistory)
+
+    private data class MessageUiContentKey(
+        val role: String,
+        val text: String,
+    )
+
+    private class MessageUiContentIndex(
+        messages: List<DbAgentMessage>,
+    ) {
+        private val contentByKey: Map<MessageUiContentKey, List<String>> =
+            messages.groupBy(
+                keySelector = { message -> MessageUiContentKey(message.role, message.text) },
+                valueTransform = { message -> message.contentJson },
+            )
+        private val nextIndexByKey = mutableMapOf<MessageUiContentKey, Int>()
+
+        fun take(
+            role: String,
+            text: String,
+        ): String? {
+            val key = MessageUiContentKey(role, text)
+            val index = nextIndexByKey[key] ?: 0
+            nextIndexByKey[key] = index + 1
+            return contentByKey[key]?.getOrNull(index)
+        }
+    }
+
+    private fun String.decodeTrace(): AgentTrace? =
+        runCatching {
+            json.decodeFromString<AgentTrace>(this)
+        }.getOrNull()
+
+    private fun String.decodeTraceHistory(): ImmutableList<AgentTrace> =
+        runCatching {
+            json.decodeFromString<List<AgentTrace>>(this).toImmutableList()
+        }.getOrElse {
+            emptyList<AgentTrace>().toImmutableList()
+        }
 }
 
-internal enum class AgentConversationAttachmentOwner {
-    Context,
-    User,
-    Assistant,
-}
-
-private enum class AgentConversationAttachmentType {
-    Post,
-    User,
-}
-
-internal sealed interface AgentConversationAttachment {
-    data class Post(
-        val post: UiTimelineV2.Post,
-    ) : AgentConversationAttachment
-
-    data class User(
-        val user: UiProfile,
-    ) : AgentConversationAttachment
-}
-
-internal data class AgentChatHistoryRecord(
-    val conversationId: String,
+@Immutable
+public data class AgentChatRoom(
+    val id: String,
     val title: String,
+    val createdAt: Long,
     val updatedAt: Long,
-)
+    val isRunning: Boolean,
+    val currentTrace: AgentTrace?,
+    val traceHistory: ImmutableList<AgentTrace>,
+    val errorMessage: String?,
+) {
+    public companion object {
+        public fun empty(id: String): AgentChatRoom =
+            AgentChatRoom(
+                id = id,
+                title = "",
+                createdAt = 0L,
+                updatedAt = 0L,
+                isRunning = false,
+                currentTrace = null,
+                traceHistory = emptyList<AgentTrace>().toImmutableList(),
+                errorMessage = null,
+            )
+    }
+}
 
-internal data class AgentChatHistoryMessage(
+public data class AgentChatHistoryMessage(
+    val id: String,
     val role: Role,
-    val text: String,
+    val parts: ImmutableList<AgentMessagePart>,
     val createdAt: Long,
 ) {
-    enum class Role {
+    public val isUser: Boolean
+        get() = role == Role.User
+
+    public val isAssistant: Boolean
+        get() = role == Role.Assistant
+
+    public enum class Role {
         System,
         User,
         Assistant,

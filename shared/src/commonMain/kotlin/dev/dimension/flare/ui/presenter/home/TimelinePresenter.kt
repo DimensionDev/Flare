@@ -30,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -49,7 +50,6 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -62,11 +62,21 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+public class TimelinePresenterOptions(
+    public val allowLongTextTranslationDisplay: (RemoteLoader<UiTimelineV2>) -> Boolean = { false },
+    public val transform: suspend (UiTimelineV2) -> UiTimelineV2 = { it },
+)
+
 @OptIn(ExperimentalPagingApi::class)
-@WebPresenter("timeline")
-public abstract class TimelinePresenter :
-    PresenterBase<TimelineState>(),
+@WebPresenter(name = "timeline", creatable = false)
+public open class TimelinePresenter :
+    PresenterBase<TimelineState>,
     KoinComponent {
+    private val baseLoader: Flow<RemoteLoader<UiTimelineV2>>
+    public open val loader: Flow<RemoteLoader<UiTimelineV2>>
+        get() = baseLoader
+    private val options: TimelinePresenterOptions
+
     private val database: CacheDatabase by inject()
     private val appDataStore: AppDataStore by inject()
     private val preTranslationService: PreTranslationService by inject()
@@ -79,12 +89,12 @@ public abstract class TimelinePresenter :
         localFilterRepository.getFlow(forTimeline = true)
     }
 
-    private val timelineTabItemIdFlow = MutableStateFlow<String?>(null)
+    private val timelineTabItemId: String?
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
             settingsRepository = settingsRepository,
-            timelineTabItemIdFlow = timelineTabItemIdFlow,
+            timelineTabItemId = timelineTabItemId,
         )
     }
 
@@ -92,7 +102,18 @@ public abstract class TimelinePresenter :
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)
     }
 
-    internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean = false
+    public constructor(
+        tabId: String? = null,
+        loader: Flow<RemoteLoader<UiTimelineV2>> = flowOf(notSupported()),
+        options: TimelinePresenterOptions = TimelinePresenterOptions(),
+    ) : super() {
+        this.baseLoader = loader
+        this.options = options
+        this.timelineTabItemId = tabId
+    }
+
+    internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean =
+        options.allowLongTextTranslationDisplay(loader)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
@@ -169,7 +190,7 @@ public abstract class TimelinePresenter :
             ).flow
         }
 
-    protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = data
+    protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = options.transform(data)
 
     private fun networkPager(loader: RemoteLoader<UiTimelineV2>): Flow<PagingData<UiTimelineV2>> =
         Pager(
@@ -207,12 +228,6 @@ public abstract class TimelinePresenter :
             }
         }
     }
-
-    internal fun bindTimelineTabItemId(id: String) {
-        timelineTabItemIdFlow.value = id
-    }
-
-    public abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
 }
 
 @Immutable
@@ -299,20 +314,15 @@ internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
     )
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal fun observeTimelineFilterConfig(
     settingsRepository: SettingsRepository,
-    timelineTabItemIdFlow: Flow<String?>,
+    timelineTabItemId: String?,
 ): Flow<TimelineFilterConfig> =
-    timelineTabItemIdFlow
-        .distinctUntilChanged()
-        .flatMapLatest { id ->
-            if (id == null) {
-                flowOf(TimelineFilterConfig())
-            } else {
-                settingsRepository
-                    .homeTimelineTab(id)
-                    .map { it?.filterConfig ?: TimelineFilterConfig() }
-                    .distinctUntilChanged()
-            }
-        }.distinctUntilChanged()
+    if (timelineTabItemId == null) {
+        flowOf(TimelineFilterConfig())
+    } else {
+        settingsRepository
+            .homeTimelineTab(timelineTabItemId)
+            .map { it?.filterConfig ?: TimelineFilterConfig() }
+            .distinctUntilChanged()
+    }

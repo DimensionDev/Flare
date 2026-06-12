@@ -3,7 +3,7 @@
 	import { tick } from 'svelte';
 	import type {
 		IconType,
-		TimelineTabItemV2,
+		UiTimelineTabItem,
 		UiText,
 	} from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
@@ -106,7 +106,7 @@
 		return localizedUiString(title.string);
 	}
 
-	function tabIconName(tab: TimelineTabItemV2): string {
+	function tabIconName(tab: UiTimelineTabItem): string {
 		switch (tab.icon.type) {
 			case 'Material':
 				return tab.icon.icon;

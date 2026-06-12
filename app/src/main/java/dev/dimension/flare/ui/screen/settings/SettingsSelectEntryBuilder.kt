@@ -164,7 +164,16 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     ) {
         LocalCacheSearchScreen(
-            onBack = onBack
+            onBack = onBack,
+            onAskAiClick = { query, target ->
+                navigate(
+                    Route.LocalHistoryAgent(
+                        conversationId = "local-history:${Clock.System.now().toEpochMilliseconds()}",
+                        query = query,
+                        target = target,
+                    ),
+                )
+            },
         )
     }
 

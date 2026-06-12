@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
@@ -21,16 +22,16 @@ public class AllListWithTabsPresenter(
 ) : PresenterBase<AllListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
-            override fun getTimelineTabItem(item: UiList): TimelineTabItemV2 =
+            override fun getTimelineTabItem(item: UiList): UiTimelineTabItem =
                 CommonTimelineSpecs.list
-                    .tabItem(
+                    .candidate(
                         data = TimelineSpec.AccountResourceData(specificAccountKey(), item.id),
                         title = UiText.Raw(item.title),
                         icon =
                             (item as? UiList.List)?.avatar?.let {
                                 IconType.Url(it)
                             } ?: IconType.Material(UiIcon.List),
-                    )
+                    ).toUiTimelineTabItem()
         }
     }
 

@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.pixiv.PixivDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
+import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.data.network.pixiv.PixivRankingMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -15,9 +16,6 @@ import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.pixiv.PixivBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.pixiv.PixivFollowingTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.pixiv.PixivRankingTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.PixivLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -44,11 +42,10 @@ public data object PixivPlatformSpec :
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                PixivBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<PixivDataSource, TimelineSpec.AccountBasedData> {
+                    bookmarkTimelineLoader()
+                },
         )
 
     internal val followingTimelineSpec =
@@ -58,11 +55,10 @@ public data object PixivPlatformSpec :
             icon = UiIcon.Follow.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                PixivFollowingTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<PixivDataSource, TimelineSpec.AccountBasedData> {
+                    followingTimelineLoader()
+                },
         )
 
     internal val rankingWeekTimelineSpec =
@@ -202,10 +198,8 @@ private fun pixivRankingTimelineSpec(
         icon = UiIcon.Featured.asType(),
         serializer = TimelineSpec.AccountBasedData.serializer(),
         targetId = { it.accountKey.toString() },
-        presenterFactory = {
-            PixivRankingTimelinePresenter(
-                accountType = AccountType.Specific(it.accountKey),
-                mode = mode,
-            )
-        },
+        loaderFactory =
+            accountLoader<PixivDataSource, TimelineSpec.AccountBasedData> {
+                rankingTimelineLoader(mode)
+            },
     )

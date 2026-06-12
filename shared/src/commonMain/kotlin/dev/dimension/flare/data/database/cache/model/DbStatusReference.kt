@@ -32,4 +32,5 @@ internal data class DbStatusReference(
     val referenceType: ReferenceType,
     val statusId: String,
     val referenceStatusId: String,
+    val referenceOrder: Int = 0,
 )

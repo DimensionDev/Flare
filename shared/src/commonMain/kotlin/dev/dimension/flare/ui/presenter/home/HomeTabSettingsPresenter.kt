@@ -11,10 +11,10 @@ import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
-import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.data.model.tab.withSystemHomeMixedTimelineEnabled
@@ -54,17 +54,17 @@ public class HomeTabSettingsPresenter :
             }
 
         return object : State {
-            override val homeTimelineTabs: UiState<ImmutableList<TimelineTabItemV2>> = tabs
+            override val homeTimelineTabs: UiState<ImmutableList<UiTimelineTabItem>> = tabs
             override val availableIcons: ImmutableList<IconType> = availableIcons
 
-            override fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>) {
+            override fun replaceHomeTimelineTabs(tabs: List<UiTimelineTabItem>) {
                 appScope.launch {
                     settingsRepository.replaceHomeTimelineTabs(tabs)
                 }
             }
 
             override fun replaceHomeTimelineTabsWithSystemHomeMixedTimeline(
-                tabs: List<TimelineTabItemV2>,
+                tabs: List<UiTimelineTabItem>,
                 enabled: Boolean,
                 mergePolicy: TimelineMergePolicy,
             ) {
@@ -79,10 +79,10 @@ public class HomeTabSettingsPresenter :
             }
 
             override fun homeTimelineTabsWithSystemHomeMixedTimeline(
-                tabs: List<TimelineTabItemV2>,
+                tabs: List<UiTimelineTabItem>,
                 enabled: Boolean,
                 mergePolicy: TimelineMergePolicy,
-            ): ImmutableList<TimelineTabItemV2> =
+            ): ImmutableList<UiTimelineTabItem> =
                 tabs
                     .withSystemHomeMixedTimelineEnabled(
                         enabled = enabled,
@@ -90,7 +90,7 @@ public class HomeTabSettingsPresenter :
                     ).toImmutableList()
 
             override fun updateTabPresentation(
-                tab: TimelineTabItemV2,
+                tab: UiTimelineTabItem,
                 title: String,
                 icon: IconType,
                 enabled: Boolean,
@@ -114,7 +114,7 @@ public class HomeTabSettingsPresenter :
                 videoAutoplay: VideoAutoplay,
                 themeEnabled: Boolean,
                 avatarShape: AvatarShape,
-            ): TimelineTabItemV2 =
+            ): UiTimelineTabItem =
                 tab.withPresentationOverrides(
                     title = title,
                     icon = icon,
@@ -148,11 +148,11 @@ public class HomeTabSettingsPresenter :
                 )
 
             override fun buildGroupItem(
-                initialItem: TimelineTabItemV2?,
+                initialItem: UiTimelineTabItem?,
                 name: String,
                 icon: IconType,
                 enabled: Boolean,
-                tabs: List<TimelineTabItemV2>,
+                tabs: List<UiTimelineTabItem>,
                 mergePolicy: TimelineMergePolicy,
                 excludedKinds: String,
                 excludedContents: String,
@@ -175,9 +175,9 @@ public class HomeTabSettingsPresenter :
                 themeEnabled: Boolean,
                 avatarShape: AvatarShape,
                 defaultGroupName: String,
-            ): TimelineTabItemV2? =
+            ): UiTimelineTabItem? =
                 groupConfigState.buildGroupItem(
-                    initialItem = initialItem as? GroupTimelineTabItemV2,
+                    initialItem = initialItem as? UiGroupTimelineTabItem,
                     name = name,
                     icon = icon,
                     appearancePatch =
@@ -212,22 +212,22 @@ public class HomeTabSettingsPresenter :
                     defaultGroupName = defaultGroupName,
                 )
 
-            override fun isSystemHomeMixedTimeline(tab: TimelineTabItemV2): Boolean = tab.isSystemHomeMixedTimeline
+            override fun isSystemHomeMixedTimeline(tab: UiTimelineTabItem): Boolean = tab.isSystemHomeMixedTimeline
 
-            override fun isGroup(tab: TimelineTabItemV2): Boolean = tab is GroupTimelineTabItemV2
+            override fun isGroup(tab: UiTimelineTabItem): Boolean = tab is UiGroupTimelineTabItem
 
-            override fun groupChildren(tab: TimelineTabItemV2): ImmutableList<TimelineTabItemV2> =
-                ((tab as? GroupTimelineTabItemV2)?.children ?: emptyList()).toImmutableList()
+            override fun groupChildren(tab: UiTimelineTabItem): ImmutableList<UiTimelineTabItem> =
+                ((tab as? UiGroupTimelineTabItem)?.children ?: emptyList()).toImmutableList()
 
-            override fun groupMergePolicy(tab: TimelineTabItemV2): TimelineMergePolicy =
-                (tab as? GroupTimelineTabItemV2)?.mergePolicy ?: TimelineMergePolicy.TimePerPage
+            override fun groupMergePolicy(tab: UiTimelineTabItem): TimelineMergePolicy =
+                (tab as? UiGroupTimelineTabItem)?.mergePolicy ?: TimelineMergePolicy.TimePerPage
 
             override fun resolveAppearance(
-                tab: TimelineTabItemV2,
+                tab: UiTimelineTabItem,
                 base: TimelineAppearance,
             ): TimelineAppearance = tab.resolveTimelineAppearance(base)
 
-            override fun hasLayoutAppearanceOverride(tab: TimelineTabItemV2): Boolean =
+            override fun hasLayoutAppearanceOverride(tab: UiTimelineTabItem): Boolean =
                 tab.appearancePatch.hasAny(
                     AppearanceKeys.TimelineDisplayMode,
                     AppearanceKeys.FullWidthPost,
@@ -235,7 +235,7 @@ public class HomeTabSettingsPresenter :
                     AppearanceKeys.ShowNumbers,
                 )
 
-            override fun hasDisplayAppearanceOverride(tab: TimelineTabItemV2): Boolean =
+            override fun hasDisplayAppearanceOverride(tab: UiTimelineTabItem): Boolean =
                 tab.appearancePatch.hasAny(
                     AppearanceKeys.AbsoluteTimestamp,
                     AppearanceKeys.ShowPlatformLogo,
@@ -243,7 +243,7 @@ public class HomeTabSettingsPresenter :
                     AppearanceKeys.CompatLinkPreview,
                 )
 
-            override fun hasMediaAppearanceOverride(tab: TimelineTabItemV2): Boolean =
+            override fun hasMediaAppearanceOverride(tab: UiTimelineTabItem): Boolean =
                 tab.appearancePatch.hasAny(
                     AppearanceKeys.ShowMedia,
                     AppearanceKeys.ShowSensitiveContent,
@@ -252,31 +252,31 @@ public class HomeTabSettingsPresenter :
                     AppearanceKeys.VideoAutoplay,
                 )
 
-            override fun hasThemeAppearanceOverride(tab: TimelineTabItemV2): Boolean =
+            override fun hasThemeAppearanceOverride(tab: UiTimelineTabItem): Boolean =
                 tab.appearancePatch?.contains(AppearanceKeys.AvatarShape) == true
         }
     }
 
     public interface State {
-        public val homeTimelineTabs: UiState<ImmutableList<TimelineTabItemV2>>
+        public val homeTimelineTabs: UiState<ImmutableList<UiTimelineTabItem>>
         public val availableIcons: ImmutableList<IconType>
 
-        public fun replaceHomeTimelineTabs(tabs: List<TimelineTabItemV2>)
+        public fun replaceHomeTimelineTabs(tabs: List<UiTimelineTabItem>)
 
         public fun replaceHomeTimelineTabsWithSystemHomeMixedTimeline(
-            tabs: List<TimelineTabItemV2>,
+            tabs: List<UiTimelineTabItem>,
             enabled: Boolean,
             mergePolicy: TimelineMergePolicy,
         )
 
         public fun homeTimelineTabsWithSystemHomeMixedTimeline(
-            tabs: List<TimelineTabItemV2>,
+            tabs: List<UiTimelineTabItem>,
             enabled: Boolean,
             mergePolicy: TimelineMergePolicy,
-        ): ImmutableList<TimelineTabItemV2>
+        ): ImmutableList<UiTimelineTabItem>
 
         public fun updateTabPresentation(
-            tab: TimelineTabItemV2,
+            tab: UiTimelineTabItem,
             title: String,
             icon: IconType,
             enabled: Boolean,
@@ -300,14 +300,14 @@ public class HomeTabSettingsPresenter :
             videoAutoplay: VideoAutoplay,
             themeEnabled: Boolean,
             avatarShape: AvatarShape,
-        ): TimelineTabItemV2
+        ): UiTimelineTabItem
 
         public fun buildGroupItem(
-            initialItem: TimelineTabItemV2?,
+            initialItem: UiTimelineTabItem?,
             name: String,
             icon: IconType,
             enabled: Boolean,
-            tabs: List<TimelineTabItemV2>,
+            tabs: List<UiTimelineTabItem>,
             mergePolicy: TimelineMergePolicy,
             excludedKinds: String,
             excludedContents: String,
@@ -330,28 +330,28 @@ public class HomeTabSettingsPresenter :
             themeEnabled: Boolean,
             avatarShape: AvatarShape,
             defaultGroupName: String,
-        ): TimelineTabItemV2?
+        ): UiTimelineTabItem?
 
-        public fun isSystemHomeMixedTimeline(tab: TimelineTabItemV2): Boolean
+        public fun isSystemHomeMixedTimeline(tab: UiTimelineTabItem): Boolean
 
-        public fun isGroup(tab: TimelineTabItemV2): Boolean
+        public fun isGroup(tab: UiTimelineTabItem): Boolean
 
-        public fun groupChildren(tab: TimelineTabItemV2): ImmutableList<TimelineTabItemV2>
+        public fun groupChildren(tab: UiTimelineTabItem): ImmutableList<UiTimelineTabItem>
 
-        public fun groupMergePolicy(tab: TimelineTabItemV2): TimelineMergePolicy
+        public fun groupMergePolicy(tab: UiTimelineTabItem): TimelineMergePolicy
 
         public fun resolveAppearance(
-            tab: TimelineTabItemV2,
+            tab: UiTimelineTabItem,
             base: TimelineAppearance,
         ): TimelineAppearance
 
-        public fun hasLayoutAppearanceOverride(tab: TimelineTabItemV2): Boolean
+        public fun hasLayoutAppearanceOverride(tab: UiTimelineTabItem): Boolean
 
-        public fun hasDisplayAppearanceOverride(tab: TimelineTabItemV2): Boolean
+        public fun hasDisplayAppearanceOverride(tab: UiTimelineTabItem): Boolean
 
-        public fun hasMediaAppearanceOverride(tab: TimelineTabItemV2): Boolean
+        public fun hasMediaAppearanceOverride(tab: UiTimelineTabItem): Boolean
 
-        public fun hasThemeAppearanceOverride(tab: TimelineTabItemV2): Boolean
+        public fun hasThemeAppearanceOverride(tab: UiTimelineTabItem): Boolean
     }
 }
 

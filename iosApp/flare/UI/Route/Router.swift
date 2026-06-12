@@ -106,6 +106,7 @@ struct Router<Root: View>: View {
                 .statusShareSheet,
                 .secondaryMenu,
                 .statusInsight,
+                .profileInsight,
                 .statusAddReaction:
             return true
         default:

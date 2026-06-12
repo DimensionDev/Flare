@@ -86,7 +86,12 @@ internal class TimelineRemoteMediator(
                 request = request,
             ).let { result ->
                 result.copy(
-                    data = result.data.collapseReplyChains(),
+                    data =
+                        if (loader.collapseReplyChains) {
+                            result.data.collapseReplyChains()
+                        } else {
+                            result.data
+                        },
                 )
             }
 
@@ -167,6 +172,9 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
         while (true) {
             val currentKey = current.key()
             collapsedPosts[currentKey]?.let {
+                if (path.isNotEmpty()) {
+                    ancestorKeys += currentKey
+                }
                 collapsed = it
                 break
             }
@@ -201,9 +209,9 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
                 post.copy(
                     parents =
                         (
-                            collapsed.parents +
-                                listOf(collapsed) +
-                                post.parents.dropLast(1)
+                            post.parents.dropLast(1) +
+                                collapsed.parents +
+                                listOf(collapsed)
                         ).distinctBy { it.statusKey }
                             .toImmutableList(),
                 )
@@ -212,12 +220,15 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
         return collapsedPosts.getValue(startKey)
     }
 
-    return mapNotNull { item ->
-        if (item !is UiTimelineV2.Post) {
-            item
-        } else {
-            val key = item.key()
-            collapse(item).takeUnless { key in ancestorKeys }
+    val collapsedItems =
+        map { item ->
+            if (item is UiTimelineV2.Post) {
+                item.key() to collapse(item)
+            } else {
+                null to item
+            }
         }
+    return collapsedItems.mapNotNull { (key, item) ->
+        item.takeUnless { key in ancestorKeys }
     }
 }

@@ -407,4 +407,16 @@
     <string name="settings_appearance_absolute_timestamp">חותמת זמן מוחלטת</string>
     <string name="settings_appearance_absolute_timestamp_description">הצג חותמות זמן מדויקות בפוסטים</string>
     <string name="channel_title">ערוץ</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="profile_header_button_request_follow">בקש לעקוב</string>
+    <string name="posts_with_replies_title">פוסטים ותגובות</string>
+    <string name="pixiv_ranking_week_title">דירוג שבועי</string>
+    <string name="pixiv_ranking_month_title">דירוג חודשי</string>
+    <string name="pixiv_ranking_day_male_title">דירוג גברים</string>
+    <string name="pixiv_ranking_day_female_title">דירוג נשים</string>
+    <string name="pixiv_ranking_week_original_title">דירוג מקורי</string>
+    <string name="pixiv_ranking_week_rookie_title">דירוג חדשים</string>
+    <string name="pixiv_ranking_day_manga_title">דירוג מנגה</string>
+    <string name="illustrations_title">איורים</string>
+    <string name="manga_title">מנגה</string>
 </resources>

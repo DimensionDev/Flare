@@ -35,6 +35,7 @@ internal class StatusDetailRemoteMediator(
             append("_")
             append(accountKey.toString())
         }
+    override val collapseReplyChains: Boolean = false
 
     override suspend fun load(
         pageSize: Int,
@@ -120,32 +121,41 @@ internal fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogK
         stack += depth to current
     }
 
-    val visiblePosts = renderedPosts.filter { it.first >= 0L }
-    val descendantParentKeys =
-        visiblePosts
-            .filter { it.first > 0L }
-            .map { it.second }
-            .flatMap { it.collectParentKeys() }
+    val protectedKeys =
+        renderedPosts
+            .filter { it.first <= 0L }
+            .map { it.second.statusKey }
             .toSet()
-
-    val topLevelPosts =
-        visiblePosts
+    val descendantKeys =
+        renderedPosts
+            .filter { it.first > 0L }
+            .map { it.second.statusKey }
+            .toSet()
+    val descendantParentKeys =
+        renderedPosts
+            .filter { it.first > 0L }
+            .flatMap { (_, post) ->
+                post.parents.map { it.statusKey }
+            }.filter { it in descendantKeys }
+            .toSet()
+    val visiblePosts =
+        renderedPosts
             .filterNot { (depth, post) ->
                 depth > 0L && post.statusKey in descendantParentKeys
             }.map { it.second }
-    val topLevelPostKeys = topLevelPosts.map { it.statusKey }.toSet()
+    val visiblePostKeys = visiblePosts.map { it.statusKey }.toSet()
 
-    return topLevelPosts.map { post ->
+    return visiblePosts.map { post ->
         post.copy(
             parents =
                 post.parents
-                    .filterNot { it.statusKey in topLevelPostKeys }
-                    .toPersistentList(),
+                    .filterNot {
+                        it.statusKey in protectedKeys ||
+                            (
+                                it.statusKey in visiblePostKeys &&
+                                    it.statusKey !in descendantParentKeys
+                            )
+                    }.toPersistentList(),
         )
     }
 }
-
-private fun UiTimelineV2.Post.collectParentKeys(): Set<MicroBlogKey> =
-    parents
-        .map { it.statusKey }
-        .toSet()

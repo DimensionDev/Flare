@@ -26,8 +26,15 @@ import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.RssTimelineData
+import dev.dimension.flare.data.model.tab.SubscriptionTimelineData
+import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
+import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.MisskeyPlatformSpec
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiIcon
@@ -37,12 +44,6 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
-import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.rss.SubscriptionTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
-import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import dev.dimension.flare.ui.route.FluentDialogSceneStrategy.Companion.dialog
 import dev.dimension.flare.ui.route.Route.EditRssSource
 import dev.dimension.flare.ui.route.Route.Profile
@@ -66,6 +67,7 @@ import dev.dimension.flare.ui.screen.home.GroupConfigScreen
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.MuteUserDialog
 import dev.dimension.flare.ui.screen.home.NotificationScreen
+import dev.dimension.flare.ui.screen.home.ProfileInsightDialog
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRoute
 import dev.dimension.flare.ui.screen.home.ReportUserDialog
@@ -88,6 +90,7 @@ import dev.dimension.flare.ui.screen.settings.AgentChatScreen
 import dev.dimension.flare.ui.screen.settings.AgentHistoryScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
+import dev.dimension.flare.ui.screen.settings.LocalHistoryAgentScreen
 import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
@@ -344,6 +347,18 @@ internal fun Router(
                         accountType = args.accountType,
                         statusKey = args.statusKey,
                         onBack = onBack,
+                        navigate = navigate,
+                    )
+                }
+
+                entry<Route.ProfileInsight>(
+                    metadata = dialog(),
+                ) { args ->
+                    ProfileInsightDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                        navigate = navigate,
                     )
                 }
 
@@ -468,17 +483,16 @@ internal fun Router(
                         toList = {
                             navigate(
                                 Timeline(
-                                    SourceTimelineTabItemV2.runtime(
-                                        id = "desktop.common.list:${args.accountType}:${it.id}",
-                                        title = UiText.Raw(it.title),
-                                        icon = UiIcon.List.asType(),
-                                        createPresenter = {
-                                            ListTimelinePresenter(
-                                                accountType = args.accountType,
-                                                listId = it.id,
-                                            )
-                                        },
-                                    ),
+                                    CommonTimelineSpecs.list
+                                        .candidate(
+                                            data =
+                                                TimelineSpec.AccountResourceData(
+                                                    accountKey = (args.accountType as Specific).accountKey,
+                                                    resourceId = it.id,
+                                                ),
+                                            title = UiText.Raw(it.title),
+                                            icon = UiIcon.List.asType(),
+                                        ).toUiTimelineTabItem(),
                                 ),
                             )
                         },
@@ -495,17 +509,16 @@ internal fun Router(
                         toFeed = {
                             navigate(
                                 Timeline(
-                                    SourceTimelineTabItemV2.runtime(
-                                        id = "desktop.bluesky.feed:${args.accountType}:${it.id}",
-                                        title = UiText.Raw(it.title),
-                                        icon = UiIcon.Feeds.asType(),
-                                        createPresenter = {
-                                            BlueskyFeedTimelinePresenter(
-                                                accountType = args.accountType,
-                                                uri = it.id,
-                                            )
-                                        },
-                                    ),
+                                    BlueskyPlatformSpec.feedTimelineSpec
+                                        .candidate(
+                                            data =
+                                                TimelineSpec.AccountResourceData(
+                                                    accountKey = (args.accountType as Specific).accountKey,
+                                                    resourceId = it.id,
+                                                ),
+                                            title = UiText.Raw(it.title),
+                                            icon = UiIcon.Feeds.asType(),
+                                        ).toUiTimelineTabItem(),
                                 ),
                             )
                         },
@@ -572,6 +585,14 @@ internal fun Router(
                                 ),
                             )
                         },
+                        onProfileInsightClick = {
+                            navigate(
+                                Route.ProfileInsight(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -614,6 +635,14 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                ),
+                            )
+                        },
+                        onProfileInsightClick = {
+                            navigate(
+                                Route.ProfileInsight(
+                                    accountType = args.accountType,
+                                    userKey = it,
                                 ),
                             )
                         },
@@ -785,6 +814,14 @@ internal fun Router(
                                 ),
                             )
                         },
+                        onProfileInsightClick = {
+                            navigate(
+                                Route.ProfileInsight(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -925,17 +962,16 @@ internal fun Router(
                         toTimeline = {
                             navigate(
                                 Timeline(
-                                    SourceTimelineTabItemV2.runtime(
-                                        id = "desktop.misskey.antenna:${args.accountType}:${it.id}",
-                                        title = UiText.Raw(it.title),
-                                        icon = UiIcon.Rss.asType(),
-                                        createPresenter = {
-                                            AntennasTimelinePresenter(
-                                                accountType = args.accountType,
-                                                id = it.id,
-                                            )
-                                        },
-                                    ),
+                                    MisskeyPlatformSpec.antennaTimelineSpec
+                                        .candidate(
+                                            data =
+                                                TimelineSpec.AccountResourceData(
+                                                    accountKey = (args.accountType as Specific).accountKey,
+                                                    resourceId = it.id,
+                                                ),
+                                            title = UiText.Raw(it.title),
+                                            icon = UiIcon.Rss.asType(),
+                                        ).toUiTimelineTabItem(),
                                 ),
                             )
                         },
@@ -943,7 +979,17 @@ internal fun Router(
                 }
 
                 entry<Route.LocalCache> {
-                    LocalCacheScreen()
+                    LocalCacheScreen(
+                        toAskAi = { query, target ->
+                            navigate(
+                                Route.LocalHistoryAgent(
+                                    conversationId = "local-history:${kotlin.time.Clock.System.now().toEpochMilliseconds()}",
+                                    query = query,
+                                    target = target,
+                                ),
+                            )
+                        },
+                    )
                 }
 
                 entry<Route.AgentHistory> {
@@ -966,6 +1012,17 @@ internal fun Router(
                         conversationId = args.conversationId,
                         initialMessage = args.initialMessage,
                         onBack = onBack,
+                        navigate = navigate,
+                    )
+                }
+
+                entry<Route.LocalHistoryAgent> { args ->
+                    LocalHistoryAgentScreen(
+                        conversationId = args.conversationId,
+                        query = args.query,
+                        target = args.target,
+                        onBack = onBack,
+                        navigate = navigate,
                     )
                 }
 
@@ -1094,17 +1151,16 @@ internal fun Router(
                     TimelineScreen(
                         tabItem =
                             remember(args) {
-                                SourceTimelineTabItemV2.runtime(
-                                    id = "desktop.misskey.channel:${args.accountType}:${args.channelId}",
-                                    title = UiText.Raw(args.title),
-                                    icon = UiIcon.Channel.asType(),
-                                    createPresenter = {
-                                        ChannelTimelinePresenter(
-                                            accountType = args.accountType,
-                                            id = args.channelId,
-                                        )
-                                    },
-                                )
+                                MisskeyPlatformSpec.channelTimelineSpec
+                                    .candidate(
+                                        data =
+                                            TimelineSpec.AccountResourceData(
+                                                accountKey = (args.accountType as Specific).accountKey,
+                                                resourceId = args.channelId,
+                                            ),
+                                        title = UiText.Raw(args.title),
+                                        icon = UiIcon.Channel.asType(),
+                                    ).toUiTimelineTabItem()
                             },
                     )
                 }
@@ -1112,15 +1168,23 @@ internal fun Router(
     )
 }
 
-private fun UiRssSource.toTimelineTabItem(): TimelineTabItemV2 =
-    SourceTimelineTabItemV2.runtime(
-        id = "desktop.rss:${type.name}:$url",
-        title = UiText.Raw(title ?: host),
-        icon = favIcon?.let { IconType.Url(it) } ?: UiIcon.Rss.asType(),
-        createPresenter = {
-            when (type) {
-                SubscriptionType.RSS -> RssTimelinePresenter(url)
-                else -> SubscriptionTimelinePresenter(type, url)
-            }
-        },
-    )
+private fun UiRssSource.toTimelineTabItem(): UiTimelineTabItem =
+    (
+        if (type == SubscriptionType.RSS) {
+            RssTimelineSpecs.rss.candidate(
+                data = RssTimelineData(url),
+                title = UiText.Raw(title ?: host),
+                icon = favIcon?.let { IconType.Url(it) } ?: UiIcon.Rss.asType(),
+            )
+        } else {
+            RssTimelineSpecs.subscription.candidate(
+                data =
+                    SubscriptionTimelineData(
+                        subscriptionUrl = url,
+                        subscriptionType = type,
+                    ),
+                title = UiText.Raw(title ?: host),
+                icon = favIcon?.let { IconType.Url(it) } ?: UiIcon.Rss.asType(),
+            )
+        }
+    ).toUiTimelineTabItem()

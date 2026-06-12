@@ -8,16 +8,14 @@ import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 import dev.dimension.flare.feature.agent.database.dao.AgentConversationDao
 import dev.dimension.flare.feature.agent.database.model.DbAgentConversation
-import dev.dimension.flare.feature.agent.database.model.DbAgentConversationAttachment
 import dev.dimension.flare.feature.agent.database.model.DbAgentMessage
 
 @Database(
     entities = [
         DbAgentConversation::class,
-        DbAgentConversationAttachment::class,
         DbAgentMessage::class,
     ],
-    version = 3,
+    version = 7,
     exportSchema = false,
 )
 @ConstructedBy(AgentDatabaseConstructor::class)

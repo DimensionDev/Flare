@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
+import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -16,9 +17,6 @@ import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.XQTLoginProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -75,11 +73,10 @@ public data object XqtPlatformSpec :
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                XQTFeaturedTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
+                    featuredTimelineLoader()
+                },
         )
 
     internal val bookmarkTimelineSpec =
@@ -89,11 +86,10 @@ public data object XqtPlatformSpec :
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                XQTBookmarkTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
+                    bookmarkTimelineLoader()
+                },
         )
 
     internal val deviceFollowTimelineSpec =
@@ -103,11 +99,10 @@ public data object XqtPlatformSpec :
             icon = UiIcon.List.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                XQTDeviceFollowTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
+                    deviceFollowTimelineLoader()
+                },
         )
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =

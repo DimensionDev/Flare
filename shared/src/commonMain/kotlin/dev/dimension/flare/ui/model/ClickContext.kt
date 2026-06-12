@@ -10,6 +10,11 @@ public data class ClickContext(
     val launcher: UriLauncher,
 )
 
+public data class ClickPostEvent(
+    val accountKey: MicroBlogKey,
+    val postEvent: PostEvent,
+)
+
 @Serializable
 public sealed interface ClickEvent {
     @Serializable
@@ -55,6 +60,26 @@ public sealed interface ClickEvent {
             }
     }
 }
+
+public fun ClickEvent.postEventOrNull(): ClickPostEvent? =
+    when (this) {
+        is ClickEvent.Deeplink -> {
+            DeeplinkEvent
+                .parse(url)
+                ?.let { event ->
+                    event.postEvent?.let { postEvent ->
+                        ClickPostEvent(
+                            accountKey = event.accountKey,
+                            postEvent = postEvent,
+                        )
+                    }
+                }
+        }
+
+        ClickEvent.Noop -> {
+            null
+        }
+    }
 
 public val ClickEvent.onClicked: ClickContext.() -> Unit
     get() {

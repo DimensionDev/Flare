@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
+import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -15,8 +16,6 @@ import dev.dimension.flare.model.vvo
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
-import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.VVOLoginProvider
 import kotlinx.collections.immutable.ImmutableList
@@ -43,11 +42,10 @@ public data object VvoPlatformSpec :
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                VVOFavouriteTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<VVODataSource, TimelineSpec.AccountBasedData> {
+                    favouriteTimeline()
+                },
         )
 
     internal val likedTimelineSpec =
@@ -57,11 +55,10 @@ public data object VvoPlatformSpec :
             icon = UiIcon.Heart.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
-            presenterFactory = {
-                VVOLikeTimelinePresenter(
-                    AccountType.Specific(it.accountKey),
-                )
-            },
+            loaderFactory =
+                accountLoader<VVODataSource, TimelineSpec.AccountBasedData> {
+                    likeRemoteMediator()
+                },
         )
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =

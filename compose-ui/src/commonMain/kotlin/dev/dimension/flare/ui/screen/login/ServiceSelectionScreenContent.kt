@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.screen.login
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +19,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -44,6 +42,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
@@ -109,7 +108,7 @@ public fun ServiceSelectionScreenContent(
     onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
-    registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
+    registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
     contentPadding: PaddingValues,
     listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
@@ -297,7 +296,7 @@ private fun GenericLoginContent(
     host: String,
     openUri: (String) -> Unit,
     onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
-    registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
+    registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
 ) {
     val methods = state.loginMethods(platformType)
     if (methods.isEmpty()) return
@@ -316,7 +315,12 @@ private fun GenericLoginContent(
     }
     var qrContent by remember(handler) { mutableStateOf<String?>(null) }
     registerDeeplinkCallback {
-        loginState.resume(it)
+        if (loginState.canResume(it)) {
+            loginState.resume(it)
+            true
+        } else {
+            false
+        }
     }
     LaunchedEffect(loginState.effects) {
         loginState.effects.collect { effect ->
@@ -374,9 +378,7 @@ private fun LoginMethodPicker(
             .toImmutableList()
     PlatformPicker(
         modifier =
-            Modifier
-                .width(300.dp)
-                .horizontalScroll(rememberScrollState()),
+            Modifier.width(300.dp),
         options = labels,
         onSelected = { index ->
             methods.getOrNull(index)?.let(onSelected)
@@ -398,7 +400,7 @@ private fun LoginFlowContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        flowState.fields.forEach { field ->
+        flowState.fields.fastForEach { field ->
             key(field.id) {
                 LoginFieldInput(
                     field = field,
@@ -418,7 +420,7 @@ private fun LoginFlowContent(
                 onDismiss = onQrDismiss,
             )
         }
-        flowState.actions.forEach { action ->
+        flowState.actions.fastForEach { action ->
             PlatformFilledTonalButton(
                 onClick = {
                     state.perform(action.id)

@@ -8,7 +8,8 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.model.tab.ShortcutSpec
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
@@ -55,7 +56,7 @@ public class SecondaryTabsPresenter :
         val destination: Destination,
     ) {
         public val href: String? = (destination as? Destination.Route)?.route?.toWebPath()
-        public val timelineTabItem: TimelineTabItemV2? = (destination as? Destination.Timeline)?.tabItem
+        public val timelineTabItem: UiTimelineTabItem? = (destination as? Destination.Timeline)?.tabItem
     }
 
     @Immutable
@@ -65,7 +66,7 @@ public class SecondaryTabsPresenter :
         ) : Destination
 
         public data class Timeline(
-            val tabItem: TimelineTabItemV2,
+            val tabItem: UiTimelineTabItem,
         ) : Destination
     }
 
@@ -152,7 +153,7 @@ public class SecondaryTabsPresenter :
                 Tab(
                     title = shortcut.title,
                     icon = shortcut.icon,
-                    destination = Destination.Timeline(target.tabItem),
+                    destination = Destination.Timeline(target.candidate.toUiTimelineTabItem()),
                 )
             }
         }

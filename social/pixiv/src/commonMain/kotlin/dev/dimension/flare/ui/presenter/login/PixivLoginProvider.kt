@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -86,6 +88,8 @@ private class PixivOAuthLoginHandler(
     private val pendingRepository: PlatformOAuthPendingRepository by inject()
     private val _state = MutableStateFlow(oauthState())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
+    private val resumeMutex = Mutex()
+    private var resumeCompleted = false
 
     override val state: StateFlow<LoginFlowState> = _state
     override val effects: Flow<LoginEffect> = _effects
@@ -98,6 +102,9 @@ private class PixivOAuthLoginHandler(
     override suspend fun perform(actionId: String) {
         if (actionId != LOGIN_ACTION) return
         _state.value = oauthState(loading = true)
+        resumeMutex.withLock {
+            resumeCompleted = false
+        }
         runCatching {
             val redirectUri = context.redirectUri ?: PIXIV_ANDROID_REDIRECT_URI
             val request = buildPixivAuthorizationRequest(redirectUri)
@@ -109,39 +116,45 @@ private class PixivOAuthLoginHandler(
     }
 
     override suspend fun resume(value: String) {
-        _state.value = oauthState(loading = true)
-        runCatching {
-            val pending =
-                pendingRepository.latest(PlatformType.Pixiv)
-                    ?: error("No pending Pixiv OAuth")
-            val request = pending.toPixivAuthorizationRequest()
-            val code =
-                parsePixivCallbackCode(
-                    callbackUrl = value,
-                    expectedState = request.state,
+        resumeMutex.withLock {
+            if (resumeCompleted) {
+                return@withLock
+            }
+            _state.value = oauthState(loading = true)
+            runCatching {
+                val pending =
+                    pendingRepository.latest(PlatformType.Pixiv)
+                        ?: error("No pending Pixiv OAuth")
+                val request = pending.toPixivAuthorizationRequest()
+                val code =
+                    parsePixivCallbackCode(
+                        callbackUrl = value,
+                        expectedState = request.state,
+                    )
+                val response =
+                    PixivService().login(
+                        clientId = PIXIV_ANDROID_CLIENT_ID,
+                        clientSecret = PIXIV_ANDROID_CLIENT_SECRET,
+                        code = code,
+                        codeVerifier = request.codeVerifier,
+                        redirectUri = request.redirectUri,
+                    )
+                val credential = response.toCredential()
+                accountService.addAccount(
+                    account =
+                        UiAccount(
+                            accountKey = credential.accountKey(),
+                            platformType = PlatformType.Pixiv,
+                        ),
+                    credential = credential,
+                    serializer = PixivCredential.serializer(),
                 )
-            val response =
-                PixivService().login(
-                    clientId = PIXIV_ANDROID_CLIENT_ID,
-                    clientSecret = PIXIV_ANDROID_CLIENT_SECRET,
-                    code = code,
-                    codeVerifier = request.codeVerifier,
-                    redirectUri = request.redirectUri,
-                )
-            val credential = response.toCredential()
-            accountService.addAccount(
-                account =
-                    UiAccount(
-                        accountKey = credential.accountKey(),
-                        platformType = PlatformType.Pixiv,
-                    ),
-                credential = credential,
-                serializer = PixivCredential.serializer(),
-            )
-            pendingRepository.clear(pending)
-            context.onSuccess()
-        }.onFailure {
-            _state.value = oauthState(error = it.message)
+                pendingRepository.clear(pending)
+                resumeCompleted = true
+                context.onSuccess()
+            }.onFailure {
+                _state.value = oauthState(error = it.message)
+            }
         }
     }
 

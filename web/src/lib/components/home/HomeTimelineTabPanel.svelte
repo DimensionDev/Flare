@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { TimelineTabItemV2 } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
+	import type { UiTimelineTabItem } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
-	import { bindTimelinePresenterController } from '@flare/web-presenters/timeline.svelte';
-	import type { WebPresenterRef as TimelineWebPresenterRef } from '@flare/web-presenters/timeline.svelte';
+	import { createTimelineItemPresenterController } from '@flare/web-presenters/timelineItem.svelte';
 	import TimelineAppearanceProvider from '$lib/components/environment/TimelineAppearanceProvider.svelte';
 	import TimelineList from '$lib/components/UiTimeline/TimelineList.svelte';
 	import { useRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
@@ -13,7 +12,7 @@
 		refreshRequestId = 0,
 		onRefreshingChange = () => {},
 	}: {
-		tab: TimelineTabItemV2;
+		tab: UiTimelineTabItem;
 		appearance?: TimelineAppearance | null;
 		refreshRequestId?: number;
 		onRefreshingChange?: (isRefreshing: boolean) => void;
@@ -24,7 +23,7 @@
 	// svelte-ignore state_referenced_locally -- parent keys this component by tab id.
 	const timeline = useRetainedPresenter(
 		timelinePresenterKey,
-		() => bindTimelinePresenterController(tab.createPresenter() as unknown as TimelineWebPresenterRef),
+		() => createTimelineItemPresenterController(tab.loaderKey),
 		{ ttlMs: Infinity }
 	);
 	const isRefreshing = $derived(
@@ -47,7 +46,7 @@
 		}
 		if (refreshRequestId === handledRefreshRequestId) return;
 		handledRefreshRequestId = refreshRequestId;
-		timeline.refreshAsync();
+		timeline.refreshSync();
 	});
 </script>
 

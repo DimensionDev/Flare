@@ -25,6 +25,7 @@ enum class FlarePlatform {
     MACOS,
     LINUX,
     WEB,
+    MINGW,
 }
 
 class FlareMultiplatformLibraryPlugin : Plugin<Project> {
@@ -172,6 +173,7 @@ class FlareModuleSpec internal constructor(
                             if (FlarePlatform.MACOS in selectedPlatforms) withMacos()
                         }
                         if (FlarePlatform.LINUX in selectedPlatforms) withLinux()
+                        if (FlarePlatform.MINGW in selectedPlatforms) withMingw()
                     }
 
                     if (
@@ -227,6 +229,9 @@ class FlareModuleSpec internal constructor(
             kotlin.wasmJs {
                 browser()
             }
+        }
+        if (FlarePlatform.MINGW in selectedPlatforms && !kotlin.hasTarget("mingwX64")) {
+            kotlin.mingwX64()
         }
 
         kotlin.compilerOptions {

@@ -295,13 +295,13 @@ class WebPresenterRendererTest {
             )
         val tabRef =
             RefModel(
-                type = "dev.dimension.flare.data.model.tab.TimelineTabItemV2",
-                typeName = "TimelineTabItemV2",
+                type = "com.example.shared.SampleTab",
+                typeName = "SampleTab",
                 properties = emptyList(),
                 methods =
                     listOf(
                         RefMethodModel(
-                            name = "createPresenter",
+                            name = "openTimeline",
                             args = emptyList(),
                             returnValue =
                                 ReturnModel(
@@ -327,7 +327,7 @@ class WebPresenterRendererTest {
 
         kotlin.assertContains("private fun encodeDevDimensionFlareUiPresenterHomeTimelinePresenterWebRef(")
         kotlin.assertContains("""put("value", encodeDevDimensionFlareUiPresenterHomeTimelinePresenterWebRef(result, resultRefs))""")
-        kotlin.assertContains(""""dev.dimension.flare.data.model.tab.TimelineTabItemV2.createPresenter" -> {""")
+        kotlin.assertContains(""""com.example.shared.SampleTab.openTimeline" -> {""")
         assertTrue(!kotlin.contains("org.koin"), kotlin)
 
         manifest.assertContains(

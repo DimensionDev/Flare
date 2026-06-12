@@ -23,8 +23,8 @@ struct StatusMediaScreen: View {
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     @State var showData = true
     @State private var protectInitialPagerSelection: Bool = false
-    @State private var shareImage: UIImage?
-    @State private var shareImageURL: String?
+    @State private var shareFileURL: URL?
+    @State private var shareFileSourceURL: String?
     @State private var holdsPlaybackSession: Bool = false
 
     var body: some View {
@@ -98,7 +98,7 @@ struct StatusMediaScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task(id: selectedImageURL) {
-            await loadShareImage(url: selectedImageURL, customHeaders: selectedImageCustomHeaders)
+            await loadShareFile(url: selectedImageURL, customHeaders: selectedImageCustomHeaders)
         }
         .onChange(of: selectedIndex) { oldValue, newValue in
             isPlaying = true
@@ -148,11 +148,8 @@ struct StatusMediaScreen: View {
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        if let shareImage, shareImageURL == selectedMedia.url {
-                            ShareLink(
-                                item: Image(uiImage: shareImage),
-                                preview: SharePreview("Share image", image: Image(uiImage: shareImage))
-                            ) {
+                        if let shareFileURL, shareFileSourceURL == selectedMedia.url {
+                            ShareLink(item: shareFileURL) {
                                 Image("fa-share-nodes")
                             }
                             .accessibilityLabel("Share image")
@@ -244,39 +241,39 @@ struct StatusMediaScreen: View {
         return min(max(index, 0), count - 1)
     }
 
-    private func loadShareImage(url: String?, customHeaders: [String: String]?) async {
-        shareImage = nil
-        shareImageURL = url
+    private func loadShareFile(url: String?, customHeaders: [String: String]?) async {
+        shareFileURL = nil
+        shareFileSourceURL = url
 
-        guard let url, let imageURL = URL(string: url) else {
+        guard let url else {
             return
         }
 
         do {
-            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL, options: kingfisherOptions(customHeaders: customHeaders))
-            guard !Task.isCancelled, shareImageURL == url else {
+            let fileURL = try await OriginalImageShareFile.make(
+                url: url,
+                customHeaders: customHeaders,
+                statusKey: statusKey.description(),
+                userHandle: statusUserHandle
+            )
+            guard !Task.isCancelled, shareFileSourceURL == url else {
                 return
             }
-            shareImage = result.image
+            shareFileURL = fileURL
         } catch {
-            guard !Task.isCancelled, shareImageURL == url else {
+            guard !Task.isCancelled, shareFileSourceURL == url else {
                 return
             }
-            shareImage = nil
+            shareFileURL = nil
         }
     }
 
-    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
-        guard let customHeaders, !customHeaders.isEmpty else {
-            return []
+    private var statusUserHandle: String {
+        if case .success(let success) = onEnum(of: presenter.state.status),
+           let content = success.data as? UiTimelineV2.Post {
+            return content.user?.handle.canonical ?? "unknown"
         }
-        return [.requestModifier(AnyModifier { request in
-            var request = request
-            for (key, value) in customHeaders {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-            return request
-        })]
+        return "unknown"
     }
     
     var statusView: some View {

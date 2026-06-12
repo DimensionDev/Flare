@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.nostr
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.network.nullableFallbackJson
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.HttpClient
@@ -18,7 +19,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.io.encoding.Base64
@@ -28,7 +28,7 @@ internal class NostrBlossomUploader(
     private val httpClient: HttpClient =
         ktorClient {
             install(ContentNegotiation) {
-                json(JSON)
+                nullableFallbackJson(JSON)
             }
             expectSuccess = false
         },

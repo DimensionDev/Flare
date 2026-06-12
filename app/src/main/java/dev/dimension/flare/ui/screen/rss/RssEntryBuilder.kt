@@ -20,13 +20,14 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.tab.SourceTimelineTabItemV2
+import dev.dimension.flare.data.model.tab.RssTimelineData
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
+import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
-import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -73,17 +74,14 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
     ) { args ->
         TimelineScreen(
             tabItem = remember(args) {
-                SourceTimelineTabItemV2.runtime(
-                    id = "rss_${args.url}",
+                RssTimelineSpecs.rss.candidate(
+                    data = RssTimelineData(args.url),
                     title = UiText.Raw(args.title ?: args.url),
                     icon =
                         args.favIcon?.let {
                             IconType.Url(args.favIcon)
                         } ?: IconType.Material(UiIcon.Rss),
-                    createPresenter = {
-                        RssTimelinePresenter(args.url)
-                    },
-                )
+                ).toUiTimelineTabItem()
             },
             onBack = onBack,
         )

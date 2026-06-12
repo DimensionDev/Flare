@@ -31,7 +31,7 @@ internal object DebugRepository {
     internal fun log(message: String) {
         if (_enabled.value) {
             scope.launch {
-                _messages.value = (_messages.value + message).takeLast(messageLimit)
+                _messages.value = (_messages.value + LogSanitizer.sanitize(message)).takeLast(messageLimit)
             }
         }
     }
@@ -49,7 +49,7 @@ internal object DebugRepository {
                     appendLine("Stacktrace:")
                     append(exception.stackTraceToString())
                 }
-            _messages.value = (_messages.value + message).takeLast(messageLimit)
+            _messages.value = (_messages.value + LogSanitizer.sanitize(message)).takeLast(messageLimit)
         }
     }
 
@@ -59,7 +59,7 @@ internal object DebugRepository {
         }
     }
 
-    internal fun printToString(): String = _messages.value.joinToString(separator = "\n")
+    internal fun printToString(): String = LogSanitizer.sanitize(_messages.value.joinToString(separator = "\n"))
 }
 
 /**

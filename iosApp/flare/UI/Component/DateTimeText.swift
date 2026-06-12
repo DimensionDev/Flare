@@ -8,7 +8,7 @@ struct DateTimeText: View {
 
     var body: some View {
         if fullTime {
-            Text(data.platformValue, style: .date) + Text(data.platformValue, style: .time)
+            Text(data.full)
         } else if data.shouldShowFull {
             Text(data.platformValue, style: .date)
         } else if absoluteTimestamp {

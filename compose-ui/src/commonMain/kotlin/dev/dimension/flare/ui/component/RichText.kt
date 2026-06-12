@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.util.fastForEach
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.model.direction
@@ -94,7 +95,6 @@ public fun RichText(
     val h5 = PlatformTheme.typography.h5
     val h6 = PlatformTheme.typography.h6
     val uriHandler = LocalUriHandler.current
-    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection,
     ) {
@@ -130,9 +130,10 @@ public fun RichText(
                             renderInlineContent(value, LocalDensity.current)
                         }.toImmutableMap()
 
-                state.contents.forEach { content ->
+                state.contents.fastForEach { content ->
                     when (content) {
                         is RichTextContent.Text -> {
+                            var layoutResult by remember(content.content) { mutableStateOf<TextLayoutResult?>(null) }
                             val textModifier =
                                 Modifier
                                     .let {

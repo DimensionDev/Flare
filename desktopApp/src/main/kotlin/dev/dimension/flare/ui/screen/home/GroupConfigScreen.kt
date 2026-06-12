@@ -40,10 +40,10 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.model.appearance.withPatch
-import dev.dimension.flare.data.model.tab.GroupTimelineTabItemV2
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
-import dev.dimension.flare.data.model.tab.TimelineTabItemV2
+import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.tab_settings_add
 import dev.dimension.flare.tab_settings_drag
 import dev.dimension.flare.tab_settings_group_default_name
@@ -279,11 +279,11 @@ private fun presenter(
 ) = run {
     val sharedState = remember { SharedGroupConfigPresenter() }.invoke()
     val tabSettingsState = remember { HomeTabSettingsPresenter() }.invoke()
-    var initialItem by remember(groupId) { mutableStateOf<GroupTimelineTabItemV2?>(null) }
+    var initialItem by remember(groupId) { mutableStateOf<UiGroupTimelineTabItem?>(null) }
     tabSettingsState.homeTimelineTabs
         .onSuccess { tabs ->
             LaunchedEffect(groupId, tabs) {
-                initialItem = tabs.filterIsInstance<GroupTimelineTabItemV2>().firstOrNull { it.id == groupId }
+                initialItem = tabs.filterIsInstance<UiGroupTimelineTabItem>().firstOrNull { it.id == groupId }
             }
         }
     val name =
@@ -302,7 +302,7 @@ private fun presenter(
     }
     val tabs =
         remember {
-            mutableStateListOf<TimelineTabItemV2>()
+            mutableStateListOf<UiTimelineTabItem>()
         }
     var initializedGroupId by remember(groupId) { mutableStateOf<String?>(null) }
     LaunchedEffect(initialItem?.id) {
@@ -322,7 +322,7 @@ private fun presenter(
     }
     var showAddTab by remember { mutableStateOf(false) }
     var showIconPicker by remember { mutableStateOf(false) }
-    var selectedEditTab by remember { mutableStateOf<TimelineTabItemV2?>(null) }
+    var selectedEditTab by remember { mutableStateOf<UiTimelineTabItem?>(null) }
     val allTabs = remember { AllTabsPresenter() }.invoke()
 
     object {
@@ -368,17 +368,17 @@ private fun presenter(
             showIconPicker = show
         }
 
-        fun setEditTab(tab: TimelineTabItemV2?) {
+        fun setEditTab(tab: UiTimelineTabItem?) {
             selectedEditTab = tab
         }
 
-        fun addTab(tab: TimelineTabItemV2) {
+        fun addTab(tab: UiTimelineTabItem) {
             if (tabs.none { it.id == tab.id }) {
                 tabs.add(tab)
             }
         }
 
-        fun deleteTab(tab: TimelineTabItemV2) {
+        fun deleteTab(tab: UiTimelineTabItem) {
             tabs.removeIf { it.id == tab.id }
         }
 
@@ -386,7 +386,7 @@ private fun presenter(
             tabs.removeIf { it.id == key }
         }
 
-        fun updateTab(tab: TimelineTabItemV2) {
+        fun updateTab(tab: UiTimelineTabItem) {
             val index = tabs.indexOfFirst { it.id == tab.id }
             if (index != -1) {
                 tabs[index] = tab

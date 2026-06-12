@@ -406,4 +406,17 @@
     <string name="settings_appearance_absolute_timestamp">Abszolút időbélyeg</string>
     <string name="settings_appearance_absolute_timestamp_description">Pontos időbélyeg megjelenítése a bejegyzéseken</string>
     <string name="channel_title">Csatorna</string>
+    <string name="app_name" translatable="false">Flare</string>
+    <string name="profile_header_button_request_follow">Követés kérése</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect-hivatkozás</string>
+    <string name="posts_with_replies_title">Bejegyzések és válaszok</string>
+    <string name="pixiv_ranking_week_title">Heti rangsor</string>
+    <string name="pixiv_ranking_month_title">Havi rangsor</string>
+    <string name="pixiv_ranking_day_male_title">Férfi rangsor</string>
+    <string name="pixiv_ranking_day_female_title">Női rangsor</string>
+    <string name="pixiv_ranking_week_original_title">Eredeti rangsor</string>
+    <string name="pixiv_ranking_week_rookie_title">Újonc rangsor</string>
+    <string name="pixiv_ranking_day_manga_title">Manga rangsor</string>
+    <string name="illustrations_title">Illusztrációk</string>
+    <string name="manga_title">Manga</string>
 </resources>

@@ -1077,7 +1077,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
                 imageView.isHidden = false
                 playBadgeBackground.isHidden = !isVideo(media)
                 if loadsRemoteImages {
-                    imageView.set(url: preview, customHeaders: nil)
+                    imageView.set(url: preview, customHeaders: media.customHeaders)
                 }
                 let ratio = max(media.aspectRatio ?? 1.0, 0.3)
                 imageAspectConstraint = imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor, multiplier: 1 / ratio)

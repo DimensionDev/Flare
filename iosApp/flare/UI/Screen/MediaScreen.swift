@@ -1,15 +1,14 @@
 import SwiftUI
 import KotlinSharedUI
 import LazyPager
-import Kingfisher
 
 struct MediaScreen: View {
     let url: String
     let customHeaders: [String: String]?
     @Environment(\.dismiss) var dismiss
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
-    @State private var shareImage: UIImage?
-    @State private var shareImageURL: String?
+    @State private var shareFileURL: URL?
+    @State private var shareFileSourceURL: String?
 
     var body: some View {
         LazyPager(data: [url]) { item in
@@ -23,7 +22,7 @@ struct MediaScreen: View {
             config.preloadAmount = 99
         }
         .task(id: url) {
-            await loadShareImage(url: url, customHeaders: customHeaders)
+            await loadShareFile(url: url, customHeaders: customHeaders)
         }
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
@@ -44,11 +43,8 @@ struct MediaScreen: View {
                 }
             }
             ToolbarItem(placement: .primaryAction) {
-                if let shareImage, shareImageURL == url {
-                    ShareLink(
-                        item: Image(uiImage: shareImage),
-                        preview: SharePreview("Share image", image: Image(uiImage: shareImage))
-                    ) {
+                if let shareFileURL, shareFileSourceURL == url {
+                    ShareLink(item: shareFileURL) {
                         Image("fa-share-nodes")
                     }
                     .accessibilityLabel("Share image")
@@ -64,38 +60,21 @@ struct MediaScreen: View {
         }
     }
 
-    private func loadShareImage(url: String, customHeaders: [String: String]?) async {
-        shareImage = nil
-        shareImageURL = url
-
-        guard let imageURL = URL(string: url) else {
-            return
-        }
+    private func loadShareFile(url: String, customHeaders: [String: String]?) async {
+        shareFileURL = nil
+        shareFileSourceURL = url
 
         do {
-            let result = try await KingfisherManager.shared.retrieveImage(with: imageURL, options: kingfisherOptions(customHeaders: customHeaders))
-            guard !Task.isCancelled, shareImageURL == url else {
+            let fileURL = try await OriginalImageShareFile.make(url: url, customHeaders: customHeaders)
+            guard !Task.isCancelled, shareFileSourceURL == url else {
                 return
             }
-            shareImage = result.image
+            shareFileURL = fileURL
         } catch {
-            guard !Task.isCancelled, shareImageURL == url else {
+            guard !Task.isCancelled, shareFileSourceURL == url else {
                 return
             }
-            shareImage = nil
+            shareFileURL = nil
         }
-    }
-
-    private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
-        guard let customHeaders, !customHeaders.isEmpty else {
-            return []
-        }
-        return [.requestModifier(AnyModifier { request in
-            var request = request
-            for (key, value) in customHeaders {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-            return request
-        })]
     }
 }

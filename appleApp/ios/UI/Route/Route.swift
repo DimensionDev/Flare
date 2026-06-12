@@ -1,0 +1,532 @@
+import SwiftUI
+import FlareAppleUI
+import KotlinSharedUI
+import FlareAppleCore
+
+enum Route: Hashable, Identifiable {
+    var id: Int {
+        return self.hashValue
+    }
+    
+    static func == (lhs: Route, rhs: Route) -> Bool {
+        switch (lhs, rhs) {
+        case (.timeline(let lhs), .timeline(let rhs)):
+            return lhs.id == rhs.id
+        case (.mediaRaw(let lhsMedias, let lhsIndex, let lhsPreview), .mediaRaw(let rhsMedias, let rhsIndex, let rhsPreview)):
+            return lhsIndex == rhsIndex &&
+                lhsPreview == rhsPreview &&
+                lhsMedias.map { $0.url } == rhsMedias.map { $0.url }
+        default:
+            return lhs.hashValue == rhs.hashValue
+        }
+    }
+
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .timeline(let item):
+            hasher.combine("timeline")
+            hasher.combine(item.id)
+        case .mediaRaw(let medias, let selectedIndex, let preview):
+            hasher.combine("mediaRaw")
+            hasher.combine(medias.map { $0.url })
+            hasher.combine(selectedIndex)
+            hasher.combine(preview)
+        default:
+            hasher.combine(String(describing: self))
+        }
+    }
+
+    @MainActor
+    @ViewBuilder
+    func view(
+        onNavigate: @escaping (Route) -> Void,
+        goBack: @escaping () -> Void
+    ) -> some View {
+        switch self {
+        case .home: HomeTimelineScreen(
+            toServiceSelect: { onNavigate(.serviceSelect) },
+            toCompose: { onNavigate(.composeNew) },
+            toTabSetting: { onNavigate(.tabSettings) },
+            toSecondaryMenu: { onNavigate(.secondaryMenu) },
+            onNavigate: onNavigate
+        )
+        case .timeline(let item):
+            TimelineScreen(tabItem: item)
+                .navigationTitle(item.title.text)
+        case .serviceSelect:
+            ServiceSelectionScreen(toHome: { goBack() })
+        case .statusDetail(let accountType, let statusKey):
+            StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        case .galleryDetail(let accountType, let statusKey):
+            GalleryDetailScreen(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
+        case .galleryComments(let accountType, let statusKey):
+            GalleryCommentsScreen(accountType: accountType, statusKey: statusKey)
+        case .profileUser(let accountType, let userKey):
+            ProfileScreen(
+                accountType: accountType,
+                userKey: userKey,
+                onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) },
+                onFansClick: { key in onNavigate(.userFans(accountType, key)) },
+                onProfileInsight: { key in onNavigate(.profileInsight(accountType, key)) }
+            )
+        case .settings:
+            SettingsScreen()
+        case .notification:
+            NotificationScreen()
+        case .discover:
+            DiscoverScreen { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
+        case .accountManagement:
+            AccountManagementScreen()
+        case .nostrRelays(let accountKey):
+            NostrRelaysScreen(accountKey: accountKey)
+        case .search(let accountType, let query):
+            SearchScreen(accountType: accountType, initialQuery: query) { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
+        case .composeNew:
+            ComposeScreen(accountType: nil)
+        case .composeDraft(let groupId):
+            ComposeScreen(accountType: nil, draftGroupId: groupId)
+        case .composeQuote(let accountType, let statusKey):
+            ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Quote(statusKey: statusKey))
+        case .composeReply(let accountType, let statusKey):
+            ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Reply(statusKey: statusKey))
+        case .composeVVOReplyComment(let accountType, let statueKey, let rootId):
+            ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
+        case .profileUserNameWithHost(let accountType, let userName, let host):
+            ProfileWithUserNameAndHostScreen(
+                userName: userName,
+                host: host,
+                accountType: accountType,
+                onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) },
+                onFansClick: { key in onNavigate(.userFans(accountType, key)) },
+                onProfileInsight: { key in onNavigate(.profileInsight(accountType, key)) }
+            )
+        case .appearanceTheme:
+            AppearanceThemeScreen()
+        case .appearanceLayout:
+            AppearanceLayoutScreen()
+        case .postActionLayout:
+            PostActionLayoutScreen()
+        case .appearanceDisplay:
+            AppearanceDisplayScreen()
+        case .appearanceMedia:
+            AppearanceMediaScreen()
+        case .appIconSettings:
+            AppIconSettingsScreen()
+        case .about:
+            AboutScreen()
+        case .localHostory:
+            LocalHistoryScreen { query, target in
+                onNavigate(.localHistoryAgent(Self.newLocalHistoryAgentConversationId(), query, target))
+            }
+        case .storage:
+            StorageScreen()
+        case .localFilter:
+            LocalFilterScreen()
+        case .aiConfig:
+            AiConfigScreen()
+        case .agentHistory:
+            AgentChatHistoryScreen()
+        case .agentChat(let conversationId, let initialMessage):
+            AgentChatScreen(conversationId: conversationId, initialMessage: initialMessage, onNavigate: onNavigate)
+        case .localHistoryAgent(let conversationId, let query, let target):
+            LocalHistoryAgentScreen(conversationId: conversationId, query: query, target: target, onNavigate: onNavigate)
+        case .translationConfig:
+            TranslationConfigScreen()
+        case .tabSettings:
+            TabSettingsScreen()
+        case .rssDetail(let url, let descriptionHtml, let title):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
+        case .article(let accountType, let articleKey):
+            ArticleScreen(accountType: accountType, articleKey: articleKey, onNavigate: onNavigate)
+        case .statusVVOStatus(let accountType, let statusKey):
+            VVOStatusScreen(accountType: accountType, statusKey: statusKey)
+        case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
+            StatusShareSheet(statusKey: statusKey, accountType: accountType, shareUrl: shareUrl, fxShareUrl: fxShareUrl, fixvxShareUrl: fixvxShareUrl)
+        case .statusVVOComment(let accountType, let statusKey):
+            VVOCommentScreen(accountType: accountType, statusKey: statusKey)
+        case .statusBlueskyReport(let accountType, let statusKey):
+            BlueskyReportSheet(accountType: accountType, statusKey: statusKey)
+        case .statusMisskeyReport(let accountType, let userKey, let statusKey):
+            MisskeyReportSheet(accountType: accountType, userKey: userKey, statusKey: statusKey)
+        case .statusAddReaction(let accountType, let statusKey):
+            StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+        case .statusInsight(let accountType, let statusKey):
+            StatusInsightSheet(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
+        case .profileInsight(let accountType, let userKey):
+            ProfileInsightSheet(accountType: accountType, userKey: userKey, onNavigate: onNavigate)
+        case .userFans(let account, let userKey):
+            UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
+        case .userFollowing(let account, let userKey):
+            UserListScreen(accountType: account, userKey: userKey, isFollowing: true)
+        case .dmConversation(let accountType, let roomKey, let title):
+            DMConversationScreen(accountType: accountType, roomKey: roomKey)
+                .navigationTitle(title)
+        case .mediaImage(let url, let preview, let customHeaders):
+            MediaScreen(url: url, preview: preview, customHeaders: customHeaders)
+        case .mediaRaw(let medias, let selectedIndex, let preview):
+            RawMediaScreen(medias: medias, initialIndex: selectedIndex, preview: preview)
+        case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
+            StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
+        case .appLog:
+            AppLogScreen()
+        case .deepLinkAccountPicker(let originalUrl, let data):
+            DeepLinkAccountPicker(originalUrl: originalUrl, data: data, onNavigate: onNavigate)
+        case .editUserList(let accountType, let userKey):
+            EditUserInListScreen(accountType: accountType, userKey: userKey)
+        case .userDirectMessages(let accountType, let userKey):
+            UserDMConversationScreen(accountType: accountType, userKey: userKey)
+        case .allLists(let accountType):
+            AllListScreen(accountType: accountType)
+        case .allFeeds(let accountType):
+            AllFeedScreen(accountType: accountType)
+        case .allAntennas(let accountType):
+            AntennasListScreen(accountType: accountType)
+        case .allChannels(let accountType):
+            ChannelListScreen(accountType: accountType)
+        case .allDirectMessages(let accountType):
+            DMListScreen(accountType: accountType)
+        case .rssManagement:
+            RssScreen()
+        case .draftBox:
+            DraftBoxScreen { groupId in
+                onNavigate(.composeDraft(groupId))
+            }
+        case .secondaryMenu:
+            SecondaryTabsScreen(onTabSelected: onNavigate)
+        default:
+            Text("Not done yet for \(self)")
+        }
+    }
+
+    case home
+    case timeline(UiTimelineTabItem)
+    case composeNew
+    case composeDraft(String)
+    case composeQuote(AccountType, MicroBlogKey)
+    case composeReply(AccountType, MicroBlogKey)
+    case composeVVOReplyComment(AccountType, MicroBlogKey, String)
+    case mediaImage(String, String?, [String: String]?)
+    case mediaRaw([any UiMedia], Int, String?)
+    case mediaPodcast(AccountType, String)
+    case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
+    case profileUser(AccountType, MicroBlogKey)
+    case profileUserNameWithHost(AccountType, String, String)
+    case profileInsight(AccountType, MicroBlogKey)
+    case rssDetail(String, String?, String?)
+    case article(AccountType, MicroBlogKey)
+    case search(AccountType, String)
+    case statusAddReaction(AccountType, MicroBlogKey)
+    case statusAltText(String)
+    case statusBlueskyReport(AccountType, MicroBlogKey)
+    case statusDeleteConfirm(AccountType, MicroBlogKey)
+    case statusDetail(AccountType, MicroBlogKey)
+    case galleryDetail(AccountType, MicroBlogKey)
+    case galleryComments(AccountType, MicroBlogKey)
+    case statusInsight(AccountType, MicroBlogKey)
+    case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
+    case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
+    case statusVVOComment(AccountType, MicroBlogKey)
+    case statusVVOStatus(AccountType, MicroBlogKey)
+    case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
+    case serviceSelect
+    case accountManagement
+    case nostrRelays(MicroBlogKey)
+    case localFilter
+    case localHostory
+    case moreMenuCustomize
+    case aiConfig
+    case agentHistory
+    case agentChat(String, String?)
+    case localHistoryAgent(String, String?, String)
+    case translationConfig
+    case storage
+    case appearanceTheme
+    case appearanceLayout
+    case postActionLayout
+    case appearanceDisplay
+    case appearanceMedia
+    case appIconSettings
+    case settings
+    case about
+    case notification
+    case discover
+    case tabSettings
+    case userFollowing(AccountType, MicroBlogKey)
+    case userFans(AccountType, MicroBlogKey)
+    case dmConversation(AccountType, MicroBlogKey, String)
+    case appLog
+    case deepLinkAccountPicker(String, [MicroBlogKey: Route])
+    case blockUser(AccountType?, MicroBlogKey)
+    case unblockUser(AccountType?, MicroBlogKey)
+    case muteUser(AccountType?, MicroBlogKey)
+    case unmuteUser(AccountType?, MicroBlogKey)
+    case reportUser(AccountType?, MicroBlogKey)
+    case editUserList(AccountType, MicroBlogKey)
+    case userDirectMessages(AccountType, MicroBlogKey)
+    case allLists(AccountType)
+    case allFeeds(AccountType)
+    case allAntennas(AccountType)
+    case allChannels(AccountType)
+    case allDirectMessages(AccountType)
+    case rssManagement
+    case draftBox
+    case secondaryMenu
+
+    static func newGenericChatConversationId() -> String {
+        "generic-chat:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
+
+    static func newLocalHistoryAgentConversationId() -> String {
+        "local-history:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
+
+    fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
+        switch onEnum(of: compose) {
+        case .new(let data):
+            return Route.composeNew
+        case .quote(let data):
+            return Route.composeQuote(AccountType.Specific(accountKey: data.accountKey), data.statusKey)
+        case .reply(let data):
+            return Route.composeReply(AccountType.Specific(accountKey: data.accountKey), data.statusKey)
+        case .vVOReplyComment(let data):
+            return Route.composeVVOReplyComment(AccountType.Specific(accountKey: data.accountKey), data.replyTo, data.rootId)
+        }
+    }
+    
+    fileprivate static func fromMedia(_ media: DeeplinkRoute.Media) -> Route? {
+        switch onEnum(of: media) {
+        case .image(let data):
+            return Route.mediaImage(data.uri, data.previewUrl, data.customHeaders)
+        case .podcast(let data):
+            return Route.mediaPodcast(data.accountType, data.id)
+        case .statusMedia(let data):
+            return Route.mediaStatusMedia(data.accountType, data.statusKey, Int32(data.index), data.preview)
+        }
+    }
+
+    fileprivate static func fromGallery(_ gallery: DeeplinkRoute.Gallery) -> Route? {
+        switch onEnum(of: gallery) {
+        case .detail(let data):
+            return Route.galleryDetail(data.accountType, data.statusKey)
+        }
+    }
+    
+    fileprivate static func fromProfile(_ profile: DeeplinkRoute.Profile) -> Route? {
+        switch onEnum(of: profile) {
+        case .user(let data):
+            return Route.profileUser(data.accountType, data.userKey)
+        case .userNameWithHost(let data):
+            return Route.profileUserNameWithHost(data.accountType, data.userName, data.host)
+        }
+    }
+    
+    fileprivate static func fromStatus(_ status: DeeplinkRoute.Status) -> Route? {
+        switch onEnum(of: status) {
+        case .addReaction(let data):
+            return Route.statusAddReaction(data.accountType, data.statusKey)
+        case .altText(let data):
+            return Route.statusAltText(data.text)
+        case .blueskyReport(let data):
+            return Route.statusBlueskyReport(data.accountType, data.statusKey)
+        case .deleteConfirm(let data):
+            return Route.statusDeleteConfirm(data.accountType, data.statusKey)
+        case .detail(let data):
+            return Route.statusDetail(data.accountType, data.statusKey)
+        case .insight(let data):
+            return Route.statusInsight(data.accountType, data.statusKey)
+        case .mastodonReport(let data):
+            return Route.statusMastodonReport(data.accountType, data.userKey, data.statusKey)
+        case .misskeyReport(let data):
+            return Route.statusMisskeyReport(data.accountType, data.userKey, data.statusKey)
+        case .vVOComment(let data):
+            return Route.statusVVOComment(data.accountType, data.commentKey)
+        case .vVOStatus(let data):
+            return Route.statusVVOStatus(data.accountType, data.statusKey)
+        case .shareSheet(let data):
+            return Route.statusShareSheet(data.accountType, data.statusKey, data.shareUrl, data.fxShareUrl, data.fixvxShareUrl)
+        }
+    }
+    
+    static func fromDeepLink(url: String) -> Route? {
+        if let deeplinkRoute = DeeplinkRoute.companion.parse(uri: url) {
+            return fromDeepLinkRoute(deeplinkRoute: deeplinkRoute)
+        } else {
+            return nil
+        }
+    }
+    
+    static func fromDeepLinkRoute(deeplinkRoute: DeeplinkRoute) -> Route? {
+        switch onEnum(of: deeplinkRoute) {
+        case .compose(let compose):
+            return fromCompose(compose)
+        case .media(let media):
+            return fromMedia(media)
+        case .gallery(let gallery):
+            return fromGallery(gallery)
+        case .profile(let profile):
+            return fromProfile(profile)
+        case .rss(let rss):
+            switch onEnum(of: rss) {
+            case .detail(let data):
+                return Route.rssDetail(data.url, data.descriptionHtml, data.title)
+            }
+        case .article(let data):
+            return Route.article(data.accountType, data.articleKey)
+        case .search(let search):
+            return Route.search(search.accountType, search.query)
+        case .status(let status):
+            return fromStatus(status)
+        case .login:
+            return Route.serviceSelect
+        case .deepLinkAccountPicker(let picker):
+            return .deepLinkAccountPicker(picker.originalUrl, picker.data.mapValues { route in
+                return fromDeepLinkRoute(deeplinkRoute: route)
+            }.compactMapValues { $0 })
+        case .openLinkDirectly(_):
+            return nil
+        case .blockUser(let data):
+            if let accountKey = data.accountKey {
+                return .blockUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .blockUser(nil, data.userKey)
+            }
+        case .unblockUser(let data):
+            if let accountKey = data.accountKey {
+                return .unblockUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .unblockUser(nil, data.userKey)
+            }
+        case .directMessage(let data):
+            return .userDirectMessages(.Specific(accountKey: data.accountKey), data.userKey)
+        case .editUserList(let data):
+            return .editUserList(.Specific(accountKey: data.accountKey), data.userKey)
+        case .muteUser(let data):
+            if let accountKey = data.accountKey {
+                return .muteUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .muteUser(nil, data.userKey)
+            }
+        case .unmuteUser(let data):
+            if let accountKey = data.accountKey {
+                return .unmuteUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .unmuteUser(nil, data.userKey)
+            }
+        case .reportUser(let data):
+            if let accountKey = data.accountKey {
+                return .reportUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .reportUser(nil, data.userKey)
+            }
+        case .allDirectMessages(let data):
+            return .allDirectMessages(.Specific(accountKey: data.accountKey))
+        case .allLists(let data):
+            return .allLists(.Specific(accountKey: data.accountKey))
+        case .allFeeds(let data):
+            return .allFeeds(.Specific(accountKey: data.accountKey))
+        case .allAntennas(let data):
+            return .allAntennas(.Specific(accountKey: data.accountKey))
+        case .allChannels(let data):
+            return .allChannels(.Specific(accountKey: data.accountKey))
+        case .timeline(let data):
+            switch onEnum(of: data) {
+            case .xQTDeviceFollow(let data):
+                if let tabItem = XQTUiTimelineTabItemHelpers.shared.xqtDeviceFollow(accountType: data.accountType) {
+                    return .timeline(tabItem)
+                } else {
+                    return nil
+                }
+            }
+        }
+    }
+    var alertTitle: LocalizedStringKey? {
+        switch self {
+        case .statusDeleteConfirm:
+            return "delete_alert_title"
+        case .statusMastodonReport, .statusMisskeyReport, .reportUser: // Assuming misskey uses same key for now or similar pattern, adhering to original code for mastodon
+            return "mastodon_report_status_alert_title"
+        case .blockUser:
+            return "block_user_alert_title"
+        case .unblockUser:
+            return "unblock"
+        case .muteUser:
+            return "mute_user_alert_title"
+        case .unmuteUser:
+            return "unmute"
+        default:
+            return nil
+        }
+    }
+
+    @ViewBuilder
+    func alertMessage() -> some View {
+        switch self {
+        case .statusDeleteConfirm:
+             Text("delete_status_alert_message")
+        case .statusMastodonReport, .statusMisskeyReport, .reportUser:
+             Text("mastodon_report_status_alert_message")
+        case .blockUser:
+            Text("block_user_alert_message")
+        case .unblockUser:
+            Text("unblock")
+        case .muteUser:
+            Text("mute_user_alert_message")
+        case .unmuteUser:
+            Text("unmute")
+        default:
+             EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    func alertActions() -> some View {
+        switch self {
+        case .statusDeleteConfirm(let accountType, let statusKey):
+            Button("Cancel", role: .cancel) {}
+            Button("delete", role: .destructive) {
+                DeleteStatusPresenter(accountType: accountType, statusKey: statusKey).models.value.delete()
+            }
+        case .statusMastodonReport(let accountType, let userKey, let statusKey):
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+                MastodonReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
+            }
+        case .statusMisskeyReport(let accountType, let userKey, let statusKey):
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+//                MisskeyReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
+            }
+        case .reportUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+//                UserReportPresenter(accountType: accountType, userKey: userKey).models.value.report()
+            }
+        case .blockUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("block", role: .destructive) {
+                BlockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .unblockUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("unblock", role: .destructive) {
+                UnblockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .muteUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("mute", role: .destructive) {
+                MuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .unmuteUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("unmute", role: .destructive) {
+                UnmuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        default:
+            EmptyView()
+        }
+    }
+}

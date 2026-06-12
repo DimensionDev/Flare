@@ -18,15 +18,15 @@ local.properties
 signing.properties
 
 build/
-iosApp/Podfile.lock
-iosApp/Pods/*
-iosApp/Flare.xcworkspace/*
-iosApp/Flare.xcodeproj/*
+*/Podfile.lock
+*/Pods/*
+*/Flare.xcworkspace/*
+*/Flare.xcodeproj/*
 shared/shared.podspec
 .kotlin
 .history
 .lh
-iosApp/K_D/
+appleApp/K_D/
 *.sh
 !.github/scripts/*.sh
 .env

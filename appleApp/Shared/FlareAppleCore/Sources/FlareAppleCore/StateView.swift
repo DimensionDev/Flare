@@ -1,0 +1,89 @@
+import KotlinSharedUI
+import SwiftUI
+
+public struct StateView<
+    T: AnyObject, SuccessContent: View, ErrorContent: View, LoadingContent: View
+>: View {
+    private let state: UiState<T>
+    private let successContent: (T) -> SuccessContent
+    private let errorContent: (KotlinThrowable) -> ErrorContent
+    private let loadingContent: () -> LoadingContent
+
+    public init(
+        state: UiState<T>,
+        @ViewBuilder successContent: @escaping (T) -> SuccessContent,
+        @ViewBuilder errorContent: @escaping (KotlinThrowable) -> ErrorContent,
+        @ViewBuilder loadingContent: @escaping () -> LoadingContent
+    ) {
+        self.state = state
+        self.successContent = successContent
+        self.errorContent = errorContent
+        self.loadingContent = loadingContent
+    }
+
+    public var body: some View {
+        switch onEnum(of: state) {
+        case .error(let error):
+            errorContent(error.throwable)
+        case .loading:
+            loadingContent()
+        case .success(let data):
+            successContent(data.data)
+        }
+    }
+}
+
+extension StateView {
+    public init(
+        state: UiState<T>,
+        @ViewBuilder successContent: @escaping (T) -> SuccessContent
+    ) where LoadingContent == EmptyView, ErrorContent == EmptyView {
+        self.init(
+            state: state,
+            successContent: successContent,
+            errorContent: { _ in EmptyView() },
+            loadingContent: { EmptyView() }
+        )
+    }
+
+    public init(
+        state: UiState<T>,
+        @ViewBuilder successContent: @escaping (T) -> SuccessContent,
+        @ViewBuilder loadingContent: @escaping () -> LoadingContent
+    ) where ErrorContent == EmptyView {
+        self.init(
+            state: state,
+            successContent: successContent,
+            errorContent: { _ in EmptyView() },
+            loadingContent: loadingContent
+        )
+    }
+
+    public init(
+        state: UiState<T>,
+        @ViewBuilder successContent: @escaping (T) -> SuccessContent,
+        @ViewBuilder errorContent: @escaping (KotlinThrowable) -> ErrorContent
+    ) where LoadingContent == EmptyView {
+        self.init(
+            state: state,
+            successContent: successContent,
+            errorContent: errorContent,
+            loadingContent: { EmptyView() }
+        )
+    }
+}
+
+extension View {
+    public func onSuccessOf<T: AnyObject>(of state: UiState<T>, data: @escaping (T) -> Void)
+        -> some View
+    {
+        onChange(of: state) { _, newValue in
+            switch onEnum(of: newValue) {
+            case .success(let success):
+                data(success.data)
+            default:
+                break
+            }
+        }
+    }
+}

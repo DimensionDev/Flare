@@ -44,11 +44,11 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
-        run: xcodegen generate --spec iosApp/project.yml
+        run: xcodegen generate --spec appleApp/project.yml
       - name: Build
-        working-directory: ./iosApp
+        working-directory: ./appleApp
         env:
-          scheme: Flare
+          scheme: iOS
           platform: ${{ 'iOS Simulator' }}
         run: |
           # xcrun xctrace returns via stderr, not the expected stdout (see https://developer.apple.com/forums/thread/663959)

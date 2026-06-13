@@ -11,8 +11,5 @@ internal data class DbAgentConversation(
     val titleGenerated: Boolean,
     val createdAt: Long,
     val updatedAt: Long,
-    val isRunning: Boolean,
-    val currentTraceJson: String?,
-    val traceHistoryJson: String,
     val errorMessage: String?,
 )

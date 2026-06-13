@@ -4,9 +4,12 @@ import android.app.Activity
 import android.os.Build
 import android.view.Window
 import android.view.WindowInsetsController
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -26,6 +29,7 @@ import androidx.core.view.WindowCompat
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
+import dev.dimension.flare.common.isMiuiOrHyperOs
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
@@ -76,7 +80,7 @@ private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
         outline = MoreColors.Gray500,
     )
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FlareTheme(
     darkTheme: Boolean = isDarkTheme(),
@@ -158,6 +162,10 @@ fun FlareTheme(
         ApplyCaptionBarAppearance((view.context as Activity).window, darkTheme)
     }
     val windowSize by calculateWindowSizeClass()
+    val fadeIndication =
+        remember(colorScheme.onSurface) {
+            FadeIndication(colorScheme.onSurface.copy(alpha = 0.08f))
+        }
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography =
@@ -165,11 +173,22 @@ fun FlareTheme(
                 typography(fontSizeDiff, lineHeightDiff)
             },
         content = {
-            CompositionLocalProvider(
-                LocalIsLightTheme provides !darkTheme,
-                LocalWindowSizeClass provides windowSize,
-            ) {
-                content.invoke()
+            if (isMiuiOrHyperOs) {
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides null,
+                    LocalIndication provides fadeIndication,
+                    LocalIsLightTheme provides !darkTheme,
+                    LocalWindowSizeClass provides windowSize,
+                ) {
+                    content.invoke()
+                }
+            } else {
+                CompositionLocalProvider(
+                    LocalIsLightTheme provides !darkTheme,
+                    LocalWindowSizeClass provides windowSize,
+                ) {
+                    content.invoke()
+                }
             }
         },
     )

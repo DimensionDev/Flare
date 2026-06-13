@@ -18,9 +18,6 @@ internal interface AgentConversationDao {
             conversation.titleGenerated AS titleGenerated,
             conversation.createdAt AS createdAt,
             COALESCE(MAX(message.createdAt), conversation.createdAt) AS updatedAt,
-            conversation.isRunning AS isRunning,
-            conversation.currentTraceJson AS currentTraceJson,
-            conversation.traceHistoryJson AS traceHistoryJson,
             conversation.errorMessage AS errorMessage
         FROM agent_conversations AS conversation
         LEFT JOIN agent_messages AS message

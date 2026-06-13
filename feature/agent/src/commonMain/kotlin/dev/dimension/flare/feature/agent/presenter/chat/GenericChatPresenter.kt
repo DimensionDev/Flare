@@ -94,12 +94,9 @@ public class GenericChatPresenter(
                 onAgentRunCompleted = {
                     historyProvider.generateTitleIfNeeded(conversationId)
                 },
-                onRoomStateChanged = { isRunning, currentTrace, traceHistory, errorMessage ->
+                onRoomStateChanged = { errorMessage ->
                     historyProvider.updateRoomState(
                         conversationId = conversationId,
-                        isRunning = isRunning,
-                        currentTrace = currentTrace,
-                        traceHistory = traceHistory,
                         errorMessage = errorMessage,
                     )
                 },

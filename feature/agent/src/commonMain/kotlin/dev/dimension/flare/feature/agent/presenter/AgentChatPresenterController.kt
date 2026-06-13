@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.agent.presenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,7 +16,6 @@ import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -87,77 +87,66 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
     },
     onInputRequestSelected: suspend (String, String) -> Unit = { _, _ -> },
     onAgentRunCompleted: suspend () -> Unit = {},
-    onRoomStateChanged: suspend (
-        isRunning: Boolean,
-        currentTrace: AgentTrace?,
-        traceHistory: List<AgentTrace>,
-        errorMessage: String?,
-    ) -> Unit,
+    onRoomStateChanged: suspend (errorMessage: String?) -> Unit,
     missingContextError: () -> Throwable,
     autoRunOnContext: Boolean = true,
     initialUserInput: String? = null,
 ): AgentChatPresenterController<Content, Context> {
     val scope = rememberCoroutineScope()
-    val messages = messageRecords.toImmutableList()
-    var input by remember(key) {
+    val runtime =
+        remember(key, conversationId) {
+            AgentChatPresenterRuntime<Context>()
+        }
+    val messages =
+        remember(messageRecords) {
+            messageRecords.toImmutableList()
+        }
+    var input by remember(key, conversationId) {
         mutableStateOf("")
     }
-    var content by remember(key) {
+    var content by remember(key, conversationId) {
         mutableStateOf<Content?>(null)
     }
-    var context by remember(key) {
-        mutableStateOf<Context?>(null)
-    }
-    var contextInitialized by remember(key) {
+    var isRunning by remember(key, conversationId) {
         mutableStateOf(false)
     }
-    var runJob by remember(key) {
-        mutableStateOf<Job?>(null)
-    }
-    var titleGenerationJob by remember(key) {
-        mutableStateOf<Job?>(null)
-    }
-    var runGeneration by remember(key) {
-        mutableStateOf(0)
-    }
-    var initialUserInputConsumed by remember(key) {
-        mutableStateOf(false)
-    }
-    var traceHistoryDraft: ImmutableList<AgentTrace> by remember(key) {
-        mutableStateOf(persistentListOf())
+    var currentTrace by remember(key, conversationId) {
+        mutableStateOf<AgentTrace?>(null)
     }
 
-    suspend fun setRoomState(
-        isRunning: Boolean,
-        currentTrace: AgentTrace?,
-        traceHistory: List<AgentTrace>,
-        errorMessage: String?,
-    ) {
-        onRoomStateChanged(
-            isRunning,
-            currentTrace,
-            traceHistory,
-            errorMessage,
-        )
-    }
-
-    suspend fun appendTrace(trace: AgentTrace) {
-        if (traceHistoryDraft.lastOrNull() != trace) {
-            traceHistoryDraft = (traceHistoryDraft + trace).toImmutableList()
+    DisposableEffect(key, conversationId) {
+        onDispose {
+            runtime.runJob?.cancel()
+            runtime.runJob = null
+            runtime.titleGenerationJob?.cancel()
+            runtime.titleGenerationJob = null
         }
-        setRoomState(
-            isRunning = true,
-            currentTrace = trace,
-            traceHistory = traceHistoryDraft,
-            errorMessage = null,
-        )
+    }
+
+    suspend fun setPersistentError(errorMessage: String?) {
+        onRoomStateChanged(errorMessage)
+    }
+
+    fun setRuntimeState(
+        running: Boolean,
+        trace: AgentTrace?,
+    ) {
+        isRunning = running
+        currentTrace = trace
+    }
+
+    fun appendTrace(trace: AgentTrace) {
+        isRunning = true
+        if (currentTrace != trace) {
+            currentTrace = trace
+        }
     }
 
     fun scheduleAgentRunCompleted() {
-        if (titleGenerationJob?.isActive == true) {
+        if (runtime.titleGenerationJob?.isActive == true) {
             return
         }
-        titleGenerationJob =
+        runtime.titleGenerationJob =
             scope.launch {
                 try {
                     onAgentRunCompleted()
@@ -183,31 +172,22 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
 
     fun runCurrentAgent(userInput: String?) {
         val contextValue =
-            context
+            runtime.context
                 ?: run {
                     val throwable = missingContextError()
                     scope.launch {
-                        setRoomState(
-                            isRunning = false,
-                            currentTrace = null,
-                            traceHistory = traceHistoryDraft,
-                            errorMessage = throwable.message,
-                        )
+                        setRuntimeState(running = false, trace = null)
+                        setPersistentError(throwable.message)
                     }
                     return
                 }
-        runJob?.cancel()
-        val generation = runGeneration + 1
-        runGeneration = generation
-        runJob =
+        runtime.runJob?.cancel()
+        val generation = runtime.runGeneration + 1
+        runtime.runGeneration = generation
+        runtime.runJob =
             scope.launch {
-                traceHistoryDraft = persistentListOf()
-                setRoomState(
-                    isRunning = true,
-                    currentTrace = null,
-                    traceHistory = traceHistoryDraft,
-                    errorMessage = null,
-                )
+                setRuntimeState(running = true, trace = null)
+                setPersistentError(null)
                 var failed = false
                 var cancelled = false
                 try {
@@ -222,38 +202,25 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                             }
 
                             is AgentConversationEvent.Result -> {
-                                setRoomState(
-                                    isRunning = true,
-                                    currentTrace = null,
-                                    traceHistory = traceHistoryDraft,
-                                    errorMessage = null,
-                                )
+                                setRuntimeState(running = true, trace = null)
                             }
                         }
                     }
                 } catch (throwable: Throwable) {
                     if (throwable is CancellationException) {
                         cancelled = true
-                    } else if (runGeneration == generation) {
+                    } else if (runtime.runGeneration == generation) {
                         failed = true
-                        setRoomState(
-                            isRunning = false,
-                            currentTrace = null,
-                            traceHistory = traceHistoryDraft,
-                            errorMessage = throwable.message,
-                        )
+                        setRuntimeState(running = false, trace = null)
+                        setPersistentError(throwable.message)
                     }
                 } finally {
-                    if (runGeneration == generation) {
-                        runJob = null
+                    if (runtime.runGeneration == generation) {
+                        runtime.runJob = null
                         if (!failed) {
                             withContext(NonCancellable) {
-                                setRoomState(
-                                    isRunning = false,
-                                    currentTrace = null,
-                                    traceHistory = traceHistoryDraft,
-                                    errorMessage = null,
-                                )
+                                setRuntimeState(running = false, trace = null)
+                                setPersistentError(null)
                             }
                             if (!cancelled) {
                                 scheduleAgentRunCompleted()
@@ -266,36 +233,41 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
 
     LaunchedEffect(key, conversationId) {
         contextFlow.collectLatest { contextValue ->
-            if (contextInitialized && context == contextValue) {
+            val previousContext = runtime.context
+            if (runtime.contextInitialized && previousContext == contextValue) {
                 return@collectLatest
             }
-            contextInitialized = true
-            runJob?.cancel()
-            runJob = null
-            runGeneration += 1
-            input = ""
-            content = null
-            traceHistoryDraft = persistentListOf()
-            context = contextValue
-            setRoomState(
-                isRunning = false,
-                currentTrace = null,
-                traceHistory = traceHistoryDraft,
-                errorMessage = null,
-            )
+            val wasInitialized = runtime.contextInitialized
+            runtime.contextInitialized = true
+            runtime.context = contextValue
+            if (!wasInitialized) {
+                input = ""
+                content = null
+                setRuntimeState(running = false, trace = null)
+            }
+            if (contextValue != null && (!wasInitialized || previousContext == null)) {
+                setPersistentError(null)
+            }
             val initialText = initialUserInput?.trim()?.takeIf { it.isNotEmpty() }
-            if (!initialUserInputConsumed && initialText != null && contextValue != null) {
-                initialUserInputConsumed = true
+            if (!runtime.initialUserInputConsumed && initialText != null && contextValue != null) {
+                runtime.initialUserInputConsumed = true
                 onUserMessageSubmitted(initialText)
                 runCurrentAgent(userInput = initialText)
-            } else if (autoRunOnContext && contextValue != null) {
+            } else if (autoRunOnContext && !runtime.autoRunOnContextConsumed && contextValue != null) {
+                runtime.autoRunOnContextConsumed = true
                 runCurrentAgent(userInput = null)
             }
         }
     }
 
+    val runtimeRoom =
+        room.copy(
+            isRunning = isRunning,
+            currentTrace = currentTrace,
+        )
+
     return AgentChatPresenterController(
-        room = room,
+        room = runtimeRoom,
         messages = messages,
         input = input,
         content = content,
@@ -304,16 +276,12 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         },
         sendMessage = {
             val text = input.trim()
-            if (text.isNotEmpty() && !room.isRunning) {
-                if (context == null) {
+            if (text.isNotEmpty() && !isRunning) {
+                if (runtime.context == null) {
                     val throwable = missingContextError()
                     scope.launch {
-                        setRoomState(
-                            isRunning = false,
-                            currentTrace = null,
-                            traceHistory = traceHistoryDraft,
-                            errorMessage = throwable.message,
-                        )
+                        setRuntimeState(running = false, trace = null)
+                        setPersistentError(throwable.message)
                     }
                 } else {
                     input = ""
@@ -326,18 +294,14 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         },
         selectInputRequestOption = { option ->
             val text = option.value.trim()
-            if (!option.submit && !room.isRunning) {
+            if (!option.submit && !isRunning) {
                 input = text
-            } else if (text.isNotEmpty() && !room.isRunning) {
-                if (context == null) {
+            } else if (text.isNotEmpty() && !isRunning) {
+                if (runtime.context == null) {
                     val throwable = missingContextError()
                     scope.launch {
-                        setRoomState(
-                            isRunning = false,
-                            currentTrace = null,
-                            traceHistory = traceHistoryDraft,
-                            errorMessage = throwable.message,
-                        )
+                        setRuntimeState(running = false, trace = null)
+                        setPersistentError(throwable.message)
                     }
                 } else {
                     val request = messages.latestOpenInputRequestForOption(option)
@@ -353,4 +317,14 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             }
         },
     )
+}
+
+private class AgentChatPresenterRuntime<Context : Any> {
+    var context: Context? = null
+    var contextInitialized: Boolean = false
+    var runJob: Job? = null
+    var titleGenerationJob: Job? = null
+    var runGeneration: Int = 0
+    var initialUserInputConsumed: Boolean = false
+    var autoRunOnContextConsumed: Boolean = false
 }

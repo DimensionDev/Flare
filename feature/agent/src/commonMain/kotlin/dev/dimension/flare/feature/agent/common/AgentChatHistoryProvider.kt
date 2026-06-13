@@ -135,9 +135,6 @@ internal class AgentChatHistoryProvider(
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = now,
-                    isRunning = existing?.isRunning ?: false,
-                    currentTraceJson = existing?.currentTraceJson,
-                    traceHistoryJson = existing?.traceHistoryJson ?: EMPTY_JSON_ARRAY,
                     errorMessage = existing?.errorMessage,
                 ),
             )
@@ -189,19 +186,13 @@ internal class AgentChatHistoryProvider(
 
     suspend fun updateRoomState(
         conversationId: String,
-        isRunning: Boolean,
-        currentTrace: AgentTrace?,
-        traceHistory: List<AgentTrace>,
         errorMessage: String?,
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
         val existing = database.conversationDao().getConversation(conversationId)
         val latestMessageAt = database.conversationDao().getLatestVisibleMessageCreatedAt(conversationId)
         val isEmptyIdleState =
-            !isRunning &&
-                currentTrace == null &&
-                traceHistory.isEmpty() &&
-                errorMessage == null
+            errorMessage == null
         if (existing == null &&
             isEmptyIdleState &&
             database.conversationDao().getMessages(conversationId).isEmpty()
@@ -216,9 +207,6 @@ internal class AgentChatHistoryProvider(
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = latestMessageAt ?: existing?.updatedAt ?: now,
-                    isRunning = isRunning,
-                    currentTraceJson = currentTrace?.let { encodeTrace(it) },
-                    traceHistoryJson = encodeTraceHistory(traceHistory),
                     errorMessage = errorMessage,
                 ),
             )
@@ -301,9 +289,6 @@ internal class AgentChatHistoryProvider(
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = latestMessageAt,
-                    isRunning = existing?.isRunning ?: false,
-                    currentTraceJson = existing?.currentTraceJson,
-                    traceHistoryJson = existing?.traceHistoryJson ?: EMPTY_JSON_ARRAY,
                     errorMessage = existing?.errorMessage,
                 ),
             )
@@ -407,9 +392,8 @@ internal class AgentChatHistoryProvider(
             title = title.orEmpty().ifBlank { conversationId },
             createdAt = createdAt,
             updatedAt = updatedAt,
-            isRunning = isRunning,
-            currentTrace = currentTraceJson?.decodeTrace(),
-            traceHistory = traceHistoryJson.decodeTraceHistory(),
+            isRunning = false,
+            currentTrace = null,
             errorMessage = errorMessage,
         )
 
@@ -534,7 +518,6 @@ internal class AgentChatHistoryProvider(
         const val LATEST_USER_QUESTION_MARKER = "Latest user question:\n"
         const val CURRENT_POST_SNAPSHOT_MARKER = "\n\nCurrent post snapshot:"
         const val CURRENT_PROFILE_SNAPSHOT_MARKER = "\n\nCurrent profile snapshot:"
-        const val EMPTY_JSON_ARRAY = "[]"
 
         val json =
             Json {
@@ -550,10 +533,6 @@ internal class AgentChatHistoryProvider(
         }
 
     private fun encodeContent(content: List<AgentMessagePart>): String = json.encodeToString<List<AgentMessagePart>>(content)
-
-    private fun encodeTrace(trace: AgentTrace): String = json.encodeToString<AgentTrace>(trace)
-
-    private fun encodeTraceHistory(traceHistory: List<AgentTrace>): String = json.encodeToString<List<AgentTrace>>(traceHistory)
 
     private data class MessageUiContentKey(
         val role: String,
@@ -580,18 +559,6 @@ internal class AgentChatHistoryProvider(
             return contentByKey[key]?.getOrNull(index)
         }
     }
-
-    private fun String.decodeTrace(): AgentTrace? =
-        runCatching {
-            json.decodeFromString<AgentTrace>(this)
-        }.getOrNull()
-
-    private fun String.decodeTraceHistory(): ImmutableList<AgentTrace> =
-        runCatching {
-            json.decodeFromString<List<AgentTrace>>(this).toImmutableList()
-        }.getOrElse {
-            emptyList<AgentTrace>().toImmutableList()
-        }
 }
 
 @Immutable
@@ -602,7 +569,6 @@ public data class AgentChatRoom(
     val updatedAt: Long,
     val isRunning: Boolean,
     val currentTrace: AgentTrace?,
-    val traceHistory: ImmutableList<AgentTrace>,
     val errorMessage: String?,
 ) {
     public companion object {
@@ -614,7 +580,6 @@ public data class AgentChatRoom(
                 updatedAt = 0L,
                 isRunning = false,
                 currentTrace = null,
-                traceHistory = emptyList<AgentTrace>().toImmutableList(),
                 errorMessage = null,
             )
     }

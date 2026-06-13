@@ -16,8 +16,10 @@ struct FlareApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .background(WindowTitleVisibilityConfigurator())
+            FlareTheme {
+                RootView()
+            }
+            .background(WindowTitleVisibilityConfigurator())
         }
 //        .defaultSize(width: 1120, height: 760)
 //        .commands {

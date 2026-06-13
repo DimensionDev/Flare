@@ -8,26 +8,29 @@ struct HomeScreen: View {
     @StateObject private var presenter = KotlinPresenter<HomeTimelineWithTabsPresenterState>(
         presenter: HomeTimelineWithTabsPresenter()
     )
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @State private var selectedTabID: String?
     @Namespace private var actionsNamespace
 
     var body: some View {
-        VStack {
+        StateView(state: presenter.state.tabState) { state in
+            let tabs = state.cast(UiTimelineTabItem.self)
+            content(tabs: tabs)
+        } errorContent: { _ in
+            content(tabs: [])
+        } loadingContent: {
+            content(tabs: [])
+                .redacted(reason: .placeholder)
+        }
+    }
+
+    private func content(tabs: [UiTimelineTabItem]) -> some View {
+        VStack(spacing: 0) {
             HStack {
-                StateView(state: presenter.state.tabState) { state in
-                    let tabs = state.cast(UiTimelineTabItem.self)
-                    HomeTimelineTabPicker(
-                        tabs: tabs,
-                        selectedTabID: $selectedTabID
-                    )
-                } errorContent: { _ in
-                    HomeTimelineTabPicker(
-                        tabs: [],
-                        selectedTabID: $selectedTabID
-                    )
-                } loadingContent: {
-                    HomeTimelineTabLoadingPicker()
-                }
+                HomeTimelineTabPicker(
+                    tabs: tabs,
+                    selectedTabID: $selectedTabID
+                )
                 Spacer()
                 if #available(macOS 26.0, *) {
                     GlassEffectContainer {
@@ -72,10 +75,24 @@ struct HomeScreen: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.vertical, 8)
             
             Divider()
-            Spacer()
+            if let tab = selectedTab(in: tabs) {
+                TimelineScreen(tabItem: tab, allowGalleryMode: true)
+                    .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
+                    .id(tab.id)
+            } else if tabs.isEmpty {
+                PlaceholderPanel(destination: .home)
+            }
         }
+    }
+
+    private func selectedTab(in tabs: [UiTimelineTabItem]) -> UiTimelineTabItem? {
+        if let selectedTabID, let selected = tabs.first(where: { $0.id == selectedTabID }) {
+            return selected
+        }
+        return tabs.first
     }
 }
 

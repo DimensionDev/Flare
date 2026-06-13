@@ -241,22 +241,6 @@ struct ProfileScreen: View {
     }
 }
 
-private struct ProfileTabPicker: View {
-    let tabs: [ProfileState.Tab]
-    @Binding var selectedTab: Int
-
-    var body: some View {
-        Picker(selection: $selectedTab) {
-            ForEach(0..<tabs.count, id: \.self) { index in
-                Text(profileTabTitle(for: tabs[index]))
-                    .tag(index)
-            }
-        } label: {
-            EmptyView()
-        }
-    }
-}
-
 private struct BlockedProfileGate: View {
     let onShow: () -> Void
 
@@ -277,29 +261,6 @@ private struct BlockedProfileGate: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
-
-private func profileTabTitle(for tab: ProfileState.Tab) -> String {
-    tab.name.text
-}
-
-private func profileTimelineID(for tab: ProfileState.Tab) -> String {
-    switch onEnum(of: tab) {
-    case .timeline:
-        "Timeline_\(tab.name.name)"
-    case .media:
-        "Media_\(tab.name.name)"
-    }
-}
-
-private func profileTimelinePresenter(for tab: ProfileState.Tab) -> TimelinePresenter {
-    switch onEnum(of: tab) {
-    case .timeline(let tab):
-        tab.presenter
-    case .media(let tab):
-        tab.presenter.getMediaTimelinePresenter()
-    }
-}
-
 private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     let profileState: ProfileState
     let tabs: [ProfileState.Tab]
@@ -732,68 +693,6 @@ extension ProfileScreen {
             onFansClick: onFansClick,
             onProfileInsight: onProfileInsight,
             presenter: .init(presenter: ProfilePresenter(accountType: accountType, userKey: userKey))
-        )
-    }
-}
-
-struct ProfileHeader: View {
-    let user: UiState<UiProfile>
-    let relation: UiState<UiRelation>
-    let followButtonState: UiState<FollowButtonState>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiProfile, FollowButtonState) -> Void
-    let onFollowingClick: (MicroBlogKey) -> Void
-    let onFansClick: (MicroBlogKey) -> Void
-    var body: some View {
-        switch onEnum(of: user) {
-        case .error:
-            Text("error")
-        case .loading:
-            CommonProfileHeader(
-                user: createSampleUser(),
-                relation: relation,
-                followButtonState: followButtonState,
-                isMe: isMe,
-                onFollowClick: { _ in },
-                onFollowingClick: {},
-                onFansClick: {}
-            )
-                .redacted(reason: .placeholder)
-        case .success(let data):
-            ProfileHeaderSuccess(
-                user: data.data,
-                relation: relation,
-                followButtonState: followButtonState,
-                isMe: isMe,
-                onFollowClick: { followButtonState in onFollowClick(data.data, followButtonState) },
-                onFollowingClick: onFollowingClick,
-                onFansClick: onFansClick
-            )
-        }
-    }
-}
-
-struct ProfileHeaderSuccess: View {
-    let user: UiProfile
-    let relation: UiState<UiRelation>
-    let followButtonState: UiState<FollowButtonState>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (FollowButtonState) -> Void
-    let onFollowingClick: (MicroBlogKey) -> Void
-    let onFansClick: (MicroBlogKey) -> Void
-    var body: some View {
-        CommonProfileHeader(
-            user: user,
-            relation: relation,
-            followButtonState: followButtonState,
-            isMe: isMe,
-            onFollowClick: onFollowClick,
-            onFollowingClick: {
-                onFollowingClick(user.key)
-            },
-            onFansClick: {
-                onFansClick(user.key)
-            }
         )
     }
 }

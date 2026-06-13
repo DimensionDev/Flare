@@ -1,16 +1,21 @@
 import SwiftUI
 import KotlinSharedUI
-import FlareAppleUI
 import FlareAppleCore
 
-struct TimelineView: View {
-    let data: UiTimelineV2
-    let detailStatusKey: MicroBlogKey?
-    var showTranslate: Bool = true
+public struct TimelineView: View {
+    private let data: UiTimelineV2
+    private let detailStatusKey: MicroBlogKey?
+    private let showTranslate: Bool
     @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
-    @ScaledMetric(relativeTo: .caption) var iconSize: CGFloat = 15
+    @ScaledMetric(relativeTo: .caption) private var iconSize: CGFloat = 15
 
-    var body: some View {
+    public init(data: UiTimelineV2, detailStatusKey: MicroBlogKey?, showTranslate: Bool = true) {
+        self.data = data
+        self.detailStatusKey = detailStatusKey
+        self.showTranslate = showTranslate
+    }
+
+    public var body: some View {
         switch onEnum(of: data) {
         case .feed(let feed):
             FeedView(data: feed)
@@ -50,15 +55,16 @@ struct TimelineView: View {
     }
 }
 
-extension TimelineView {
+public extension TimelineView {
     init(data: UiTimelineV2) {
-        self.data = data
-        self.detailStatusKey = nil
+        self.init(data: data, detailStatusKey: nil)
     }
 }
 
-struct TimelinePlaceholderView: View {
-    var body: some View {
+public struct TimelinePlaceholderView: View {
+    public init() {}
+
+    public var body: some View {
         VStack(
             alignment: .leading,
         ) {

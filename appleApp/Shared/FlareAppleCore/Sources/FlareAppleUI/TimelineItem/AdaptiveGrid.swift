@@ -19,9 +19,14 @@ public struct AdaptiveGrid: Layout {
         self.singleViewAspectRatio = singleViewAspectRatio
     }
 
-    public struct Cache {}
+    public struct Cache {
+        var singleAspectRatio: CGFloat?
+    }
+
     public func makeCache(subviews: Subviews) -> Cache { Cache() }
-    public func updateCache(_ cache: inout Cache, subviews: Subviews) {}
+    public func updateCache(_ cache: inout Cache, subviews: Subviews) {
+        cache.singleAspectRatio = nil
+    }
 
     public func sizeThatFits(
         proposal: ProposedViewSize,
@@ -36,7 +41,7 @@ public struct AdaptiveGrid: Layout {
 
         switch count {
         case 1:
-            let ratio = aspectForSingle(subviews: subviews)
+            let ratio = aspectForSingle(subviews: subviews, cache: &cache)
             if let height = proposal.height, proposal.width == nil { width = height * ratio }
             return CGSize(width: width, height: width / ratio)
 
@@ -67,13 +72,9 @@ public struct AdaptiveGrid: Layout {
         let count = subviews.count
         guard count > 0 else { return }
 
-        let size = sizeThatFits(
-            proposal: ProposedViewSize(width: bounds.width, height: bounds.height),
-            subviews: subviews,
-            cache: &cache
-        )
-        let width = size.width
-        let height = size.height
+        let width = max(0, bounds.width)
+        let singleAspectRatio = aspectForSinglePlacement(cache: cache)
+        let height = heightForLayout(width: width, count: count, singleAspectRatio: singleAspectRatio)
         let spacing = spacing
         let origin = CGPoint(x: bounds.minX, y: bounds.minY)
 
@@ -88,8 +89,7 @@ public struct AdaptiveGrid: Layout {
 
         switch count {
         case 1:
-            let ratio = aspectForSingle(subviews: subviews)
-            place(0, x: 0, y: 0, width: width, height: width / ratio)
+            place(0, x: 0, y: 0, width: width, height: width / singleAspectRatio)
 
         case 2:
             let cellW = (width - spacing) / 2
@@ -141,17 +141,53 @@ public struct AdaptiveGrid: Layout {
         }
     }
 
-    private func aspectForSingle(subviews: Subviews) -> CGFloat {
+    private func aspectForSingle(subviews: Subviews, cache: inout Cache) -> CGFloat {
+        if let cached = cache.singleAspectRatio {
+            return cached
+        }
+
+        let ratio: CGFloat
+        if singleFollowsImageAspect {
+            if let providedRatio = singleViewAspectRatio {
+                ratio = max(9.0 / 21.0, providedRatio)
+            } else {
+                let ideal = subviews[0].sizeThatFits(.unspecified)
+                if ideal.width > 0, ideal.height > 0 {
+                    ratio = max(0.01, ideal.width / ideal.height)
+                } else {
+                    ratio = 1
+                }
+            }
+        } else {
+            ratio = 16.0 / 9.0
+        }
+
+        cache.singleAspectRatio = ratio
+        return ratio
+    }
+
+    private func aspectForSinglePlacement(cache: Cache) -> CGFloat {
+        if let cached = cache.singleAspectRatio {
+            return cached
+        }
         if singleFollowsImageAspect {
             if let ratio = singleViewAspectRatio {
                 return max(9.0 / 21.0, ratio)
-            } else {
-                let ideal = subviews[0].sizeThatFits(.unspecified)
-                if ideal.width > 0, ideal.height > 0 { return max(0.01, ideal.width / ideal.height) }
-                return 1
             }
-        } else {
-            return 16.0 / 9.0
+            return 1
+        }
+        return 16.0 / 9.0
+    }
+
+    private func heightForLayout(width: CGFloat, count: Int, singleAspectRatio: CGFloat) -> CGFloat {
+        switch count {
+        case 1:
+            return width / singleAspectRatio
+        case 2, 3, 4:
+            return width / (16.0 / 9.0)
+        default:
+            let cols = min(maxColumns, 3)
+            return heightForGridFillLastRow(width: width, count: count, cols: cols, spacing: spacing)
         }
     }
 

@@ -1,7 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import FlareAppleUI
 
 public struct UserCompatView<TrailingContent: View>: View {
     private let data: UiProfile

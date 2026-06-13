@@ -36,7 +36,9 @@ struct SidebarView: View {
                             badge: notificationBadge(for: tab),
                             isSelected: isSelected(tab)
                         ) {
-                            selection = tab
+                            withAnimation {
+                                selection = tab
+                            }
                         }
                     }
                 } loadingContent: {

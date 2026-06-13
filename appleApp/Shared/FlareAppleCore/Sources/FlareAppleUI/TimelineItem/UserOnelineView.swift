@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import FlareAppleUI
 
 public struct UserOnelineView<TrailingContent: View>: View {
     private let data: UiProfile

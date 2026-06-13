@@ -148,7 +148,7 @@ struct AltTextOverlay: View {
     }
 }
 
-extension UiMedia {
+public extension UiMedia {
     var aspectRatio: CGFloat? {
         switch onEnum(of: self) {
         case .image(let image): return CGFloat(image.aspectRatio)

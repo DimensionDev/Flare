@@ -63,8 +63,7 @@ public struct StatusActionsView: View {
                     )
                 }
             }
-            .backport
-            .labelIconToTitleSpacing(4)
+            .labelIconToTitleSpacingIfAvailable(4)
         }
     }
 
@@ -160,6 +159,7 @@ public struct StatusActionView: View {
                 }
                 .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
+                .macOSStatusActionHoverStyle(isEnabled: true)
             }
         case .divider:
             Divider()
@@ -228,12 +228,44 @@ public struct StatusActionItemView: View {
         }
         .optionalForegroundStyle(data.color?.swiftColor)
         .buttonStyle(.plain)
+        .macOSStatusActionHoverStyle(isEnabled: !useText)
     }
 }
 
 // MARK: - Helpers
 
+#if os(macOS)
+private struct StatusActionHoverModifier: ViewModifier {
+    let isEnabled: Bool
+    @State private var isHovered = false
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content
+                .contentShape(Rectangle())
+                .background {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.primary.opacity(isHovered ? 0.08 : 0))
+                        .padding(.horizontal, -6)
+                        .padding(.vertical, -4)
+                }
+                .animation(.easeOut(duration: 0.12), value: isHovered)
+                .onHover { hovering in
+                    isHovered = hovering
+                }
+        } else {
+            content
+        }
+    }
+}
+#endif
+
 private extension View {
+    @ViewBuilder
+    func labelIconToTitleSpacingIfAvailable(_ spacing: CGFloat) -> some View {
+        self.backport.flareLabelIconToTitleSpacing(spacing)
+    }
+
     @ViewBuilder
     func optionalForegroundStyle(_ color: Color?) -> some View {
         if let color {
@@ -241,6 +273,15 @@ private extension View {
         } else {
             self
         }
+    }
+
+    @ViewBuilder
+    func macOSStatusActionHoverStyle(isEnabled: Bool) -> some View {
+        #if os(macOS)
+        modifier(StatusActionHoverModifier(isEnabled: isEnabled))
+        #else
+        self
+        #endif
     }
 }
 
@@ -250,7 +291,6 @@ public extension ActionMenu.ItemColor {
         case .red: return .red
         case .contentColor: return .primary
         case .primaryColor: return .accentColor
-        default: return nil
         }
     }
 

@@ -1,11 +1,10 @@
 import SwiftUI
-import FlareAppleUI
 import KotlinSharedUI
 import SwiftUIBackports
 import FlareAppleCore
 import AppleFontAwesome
 
-struct StatusView: View {
+public struct StatusView: View {
     @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
     @Environment(\.timelineAppearance.showLinkPreview) private var showLinkPreview
     @Environment(\.timelineAppearance.compatLinkPreview) private var compatLinkPreview
@@ -14,27 +13,78 @@ struct StatusView: View {
     @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @Environment(\.openURL) private var openURL
-    let data: UiTimelineV2.Post
-    var isDetail: Bool = false
-    var isQuote: Bool = false
-    var withLeadingPadding: Bool = false
-    var showMedia: Bool = true
-    var maxLine: Int = 5
-    var showExpandTextButton: Bool = true
-    var forceHideActions: Bool = false
-    var showTranslate: Bool = true
-    var showParents: Bool = true
+    private let data: UiTimelineV2.Post
+    private let isDetail: Bool
+    private let isQuote: Bool
+    private let withLeadingPadding: Bool
+    private let showMedia: Bool
+    private let maxLine: Int
+    private let showExpandTextButton: Bool
+    private let forceHideActions: Bool
+    private let showTranslate: Bool
+    private let showParents: Bool
     @State private var expand = false
+
+    public init(
+        data: UiTimelineV2.Post,
+        isDetail: Bool = false,
+        isQuote: Bool = false,
+        withLeadingPadding: Bool = false,
+        showMedia: Bool = true,
+        maxLine: Int = 5,
+        showExpandTextButton: Bool = true,
+        forceHideActions: Bool = false,
+        showTranslate: Bool = true,
+        showParents: Bool = true
+    ) {
+        self.data = data
+        self.isDetail = isDetail
+        self.isQuote = isQuote
+        self.withLeadingPadding = withLeadingPadding
+        self.showMedia = showMedia
+        self.maxLine = maxLine
+        self.showExpandTextButton = showExpandTextButton
+        self.forceHideActions = forceHideActions
+        self.showTranslate = showTranslate
+        self.showParents = showParents
+    }
+
     private var showAsFullWidth: Bool {
         (!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
     }
-    var body: some View {
+    public var body: some View {
+        let parents = Array(data.parents)
+        let user = data.user
+        let replyToHandle = data.replyToHandle
+        let contentWarning = data.contentWarning
+        let contentWarningIsEmpty = contentWarning?.isEmpty ?? true
+        let content = data.content
+        let contentIsEmpty = content.isEmpty
+        let shouldExpandTextByDefault = data.shouldExpandTextByDefault
+        let poll = data.poll
+        let images = Array(data.images)
+        let hasImages = !images.isEmpty
+        let sensitive = data.sensitive
+        let card = data.card
+        let quotes = Array(data.quote)
+        let hasQuotes = !quotes.isEmpty
+        let sourceChannelName = data.sourceChannel?.name
+        let emojiReactions = Array(data.emojiReactions)
+        let hasEmojiReactions = !emojiReactions.isEmpty
+        let visibility = data.visibility
+        let translationDisplayState = data.translationDisplayState
+        let platformType = data.platformType
+        let createdAt = data.createdAt
+        let actions = Array(data.actions)
+        let accountType = data.accountType
+        let statusKey = data.statusKey
+
         VStack(
             alignment: .leading,
             spacing: 0
         ) {
-            if !data.parents.isEmpty, showParents {
-                ForEach(data.parents, id: \.itemKey) { parent in
+            if !parents.isEmpty, showParents {
+                ForEach(parents, id: \.itemKey) { parent in
                     VStack(
                         spacing: nil
                     ) {
@@ -44,7 +94,7 @@ struct StatusView: View {
                     }
                     .overlay(alignment: .leading) {
                         Rectangle()
-                            .fill(.separator)
+                            .fill(Color.flareSeparator)
                             .frame(minWidth: 1, maxWidth: 1, alignment: .leading)
                             .padding(.leading, 22)
                             .padding(.top, 44)
@@ -55,7 +105,7 @@ struct StatusView: View {
                 alignment: .top,
                 spacing: 8,
             ) {
-                if showAsFullWidth, let user = data.user {
+                if showAsFullWidth, let user {
                     AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                         .frame(width: 44, height: 44)
                         .onTapGesture {
@@ -66,22 +116,43 @@ struct StatusView: View {
                     alignment: .leading,
                     spacing: nil,
                 ) {
-                    if let user = data.user {
+                    if let user {
                         if showAsFullWidth {
                             UserOnelineView(data: user, showAvatar: false) {
-                                topEndContent
+                                topEndContent(
+                                    visibility: visibility,
+                                    translationDisplayState: translationDisplayState,
+                                    platformType: platformType,
+                                    createdAt: createdAt,
+                                    accountType: accountType,
+                                    statusKey: statusKey
+                                )
                             } onClicked: {
                                 user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             }
                         } else if isQuote {
                             UserOnelineView(data: user, showAvatar: true) {
-                                topEndContent
+                                topEndContent(
+                                    visibility: visibility,
+                                    translationDisplayState: translationDisplayState,
+                                    platformType: platformType,
+                                    createdAt: createdAt,
+                                    accountType: accountType,
+                                    statusKey: statusKey
+                                )
                             } onClicked: {
                                 user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             }
                         } else {
                             UserCompatView(data: user) {
-                                topEndContent
+                                topEndContent(
+                                    visibility: visibility,
+                                    translationDisplayState: translationDisplayState,
+                                    platformType: platformType,
+                                    createdAt: createdAt,
+                                    accountType: accountType,
+                                    statusKey: statusKey
+                                )
                             } onClicked: {
                                 user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             }
@@ -91,7 +162,7 @@ struct StatusView: View {
                         alignment: .leading,
                         spacing: 8,
                     ) {
-                        if let replyToHandle = data.replyToHandle {
+                        if let replyToHandle {
                             HStack {
                                 Image(fontAwesome: .reply)
                                 Text("Reply to \(replyToHandle)")
@@ -99,7 +170,7 @@ struct StatusView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         }
-                        if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
+                        if let contentWarning, !contentWarningIsEmpty {
                             RichText(text: contentWarning)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .if(isDetail) { view in
@@ -123,23 +194,23 @@ struct StatusView: View {
                             }
                         }
 
-                        if expand || expandContentWarning || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
-                            if !data.content.isEmpty {
-                                RichText(text: data.content)
+                        if expand || expandContentWarning || contentWarningIsEmpty {
+                            if !contentIsEmpty {
+                                RichText(text: content)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .if(isDetail) { richText in
                                         richText
                                             .textSelection(.enabled)
                                     } else: { richText in
                                         richText
-                                            .if((data.shouldExpandTextByDefault || expand) && maxLine >= 5, if: { view in
+                                            .if((shouldExpandTextByDefault || expand) && maxLine >= 5, if: { view in
                                                 view.lineLimit(nil)
                                             }, else: { view in
                                                 view.lineLimit(maxLine)
                                             })
                                     }
                                     .fixedSize(horizontal: false, vertical: true)
-                                if !data.shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
+                                if !shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
                                     Button {
                                         withAnimation {
                                             expand = true
@@ -153,15 +224,15 @@ struct StatusView: View {
                         }
                         
                         if isDetail, showTranslate {
-                            StatusTranslateView(content: data.content, contentWarning: data.contentWarning)
+                            StatusTranslateView(content: content, contentWarning: contentWarning)
                         }
                         
-                        if let poll = data.poll, showMedia {
+                        if let poll, showMedia {
                             StatusPollView(data: poll)
                         }
                         
-                        if !data.images.isEmpty, showMedia {
-                            StatusMediaContent(data: data.images, sensitive: data.sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
+                        if hasImages, showMedia {
+                            StatusMediaContent(data: images, sensitive: sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
                                 let preview: String? = switch onEnum(of: media) {
                                 case .image(let image):
                                     image.previewUrl
@@ -173,8 +244,8 @@ struct StatusView: View {
                                     nil
                                 }
                                 let route = DeeplinkRoute.MediaStatusMedia(
-                                    statusKey: data.statusKey,
-                                    accountType: data.accountType,
+                                    statusKey: statusKey,
+                                    accountType: accountType,
                                     index: Int32(index),
                                     preview: preview
                                 )
@@ -184,7 +255,7 @@ struct StatusView: View {
                             }
                         }
 
-                        if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, showLinkPreview {
+                        if let card, showMedia, !hasImages, !hasQuotes, showLinkPreview {
                             if compatLinkPreview {
                                 StatusCompatCardView(data: card, cornerRadius: isQuote ? 12 : 16)
                             } else {
@@ -192,12 +263,11 @@ struct StatusView: View {
                             }
                         }
 
-                        if !data.quote.isEmpty, !isQuote {
+                        if hasQuotes, !isQuote {
                             VStack {
-                                ForEach(0..<data.quote.count, id: \.self) { index in
-                                    let quote = data.quote[index]
+                                ForEach(quotes, id: \.itemKey) { quote in
                                     StatusView(data: quote, isQuote: true, forceHideActions: true)
-                                    if data.quote.last != quote {
+                                    if quotes.last != quote {
                                         Divider()
                                     }
                                 }
@@ -205,32 +275,32 @@ struct StatusView: View {
                             .padding(8)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color(.separator), lineWidth: 1)
+                                    .stroke(Color.flareSeparator, lineWidth: 1)
                             )
                         }
 
                         if showMedia, !isQuote {
-                            if let channel = data.sourceChannel {
+                            if let sourceChannelName {
                                 HStack {
                                     Image(fontAwesome: .tv)
-                                    Text(channel.name)
+                                    Text(sourceChannelName)
                                 }
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                             }
-                            if !data.emojiReactions.isEmpty {
-                                StatusReactionView(data: Array(data.emojiReactions), isDetail: isDetail)
+                            if hasEmojiReactions {
+                                StatusReactionView(data: emojiReactions, isDetail: isDetail)
                             }
                         }
 
                         if isDetail {
-                            DateTimeText(data: data.createdAt, fullTime: true)
+                            DateTimeText(data: createdAt, fullTime: true)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
 
                         if (postActionStyle != .hidden || isDetail) && !forceHideActions {
-                            StatusActionsView(data: data.actions, useText: false)
+                            StatusActionsView(data: actions, useText: false)
                                 .font(isDetail ? .body : .footnote)
                                 .foregroundStyle(isDetail ? .primary : .secondary)
                                 .padding(.top, 4)
@@ -251,20 +321,27 @@ struct StatusView: View {
         }
     }
     
-    var topEndContent: some View {
+    private func topEndContent(
+        visibility: UiTimelineV2.PostVisibility?,
+        translationDisplayState: TranslationDisplayState,
+        platformType: PlatformType,
+        createdAt: UiDateTime,
+        accountType: AccountType,
+        statusKey: MicroBlogKey
+    ) -> some View {
         HStack {
-            if let visibility = data.visibility {
+            if let visibility {
                 StatusVisibilityView(data: visibility)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            if data.translationDisplayState != .hidden {
-                TranslateStatusComponent(data: data.translationDisplayState)
+            if translationDisplayState != .hidden {
+                TranslateStatusComponent(data: translationDisplayState)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             if showPlatformLogo {
-                switch data.platformType {
+                switch platformType {
                 case .mastodon:
                     Image(fontAwesome: .mastodon)
                         .font(.caption)
@@ -300,15 +377,15 @@ struct StatusView: View {
                 }
             }
             if !isDetail {
-                DateTimeText(data: data.createdAt)
+                DateTimeText(data: createdAt)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             if agentEnabled, !isQuote {
                 Button {
                     let route = DeeplinkRoute.StatusInsight(
-                        accountType: data.accountType,
-                        statusKey: data.statusKey
+                        accountType: accountType,
+                        statusKey: statusKey
                     )
                     if let url = URL(string: route.toUri()) {
                         openURL(url)

@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import FlareAppleUI
 
 public struct AvatarView: View {
     @Environment(\.timelineAppearance.avatarShape) private var avatarShape

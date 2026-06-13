@@ -2,64 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleUI
 
-struct TimelinePagingView: View {
-    let data: PagingState<UiTimelineV2>
-    let detailStatusKey: MicroBlogKey?
-    var body: some View {
-        PagingView(data: data) {
-            ListEmptyView()
-        } errorContent: { error, retry in
-            ListErrorView(error: error) {
-                retry()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        } loadingContent: { index, totalCount in
-            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
-                TimelinePlaceholderView()
-                    .padding(.horizontal)
-                    .padding(.vertical, 12)
-            }
-        } successContent: { item, index, totalCount in
-            AdaptiveTimelineCard(index: index, totalCount: totalCount) {
-                TimelineView(data: item, detailStatusKey: detailStatusKey)
-                    .padding(.horizontal)
-                    .padding(.vertical, 12)
-            }
-        }
-    }
-}
-
-extension TimelinePagingView {
-    init(data: PagingState<UiTimelineV2>) {
-        self.data = data
-        self.detailStatusKey = nil
-    }
-}
-
-struct TimelineData: Identifiable, Hashable {
-    let id: String
-    let data: UiTimelineV2?
-    let index: Int
-}
-
-struct TimelineCollection: @MainActor RandomAccessCollection {
-    let data: PagingStateSuccess<UiTimelineV2>
-    public var startIndex: Int { 0 }
-    public var endIndex: Int { Int(data.itemCount) }
-
-    public func index(after index: Int) -> Int { index + 1 }
-    public func index(before index: Int) -> Int { index - 1 }
-    public func index(_ index: Int, offsetBy distance: Int) -> Int { index + distance }
-    public func distance(from start: Int, to end: Int) -> Int { end - start }
-
-    public subscript(position: Int) -> TimelineData {
-        let item = data.peek(index: Int32(position))
-        return TimelineData(id: item?.itemKey ?? "\(position)", data: item, index: position)
-    }
-
-    public var count: Int { Int(data.itemCount) }
-}
-
 struct TimelinePagingContent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode

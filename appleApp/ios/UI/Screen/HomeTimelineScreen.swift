@@ -91,52 +91,44 @@ struct HomeTimelineScreen: View {
                         })
                         .toolbar {
                             leadingToolbarContent
-                            ToolbarItem(placement: horizontalSizeClass == .regular ? .automatic : .title) {
-                                Menu {
-                                    ForEach(0..<tabs.count, id: \.self) { index in
-                                        let item = tabs[index]
-                                        Toggle(isOn: Binding(get: {
-                                            selectedTabIndex == index
-                                        }, set: { value in
-                                            if value {
-                                                selectedTabIndex = index
-                                            }
-                                        })) {
-                                            Label {
-                                                TimelineTabTitle(title: item.title)
-                                            } icon: {
-                                                TabIcon(tabItem: item)
-                                                    .frame(width: 24)
-                                                    .scaledToFit()
-                                            }
+                            ToolbarTitleMenu {
+                                ForEach(0..<tabs.count, id: \.self) { index in
+                                    let item = tabs[index]
+                                    Toggle(isOn: Binding(get: {
+                                        selectedTabIndex == index
+                                    }, set: { value in
+                                        if value {
+                                            selectedTabIndex = index
                                         }
-                                    }
-                                    Divider()
-                                    Button {
-                                        toTabSetting()
-                                    } label: {
+                                    })) {
                                         Label {
-                                            Text("tab_settings_add_tab")
+                                            TimelineTabTitle(title: item.title)
                                         } icon: {
-                                            Image(fontAwesome: .plus)
+                                            TabIcon(tabItem: item)
+                                                .frame(width: 24)
+                                                .scaledToFit()
                                         }
-                                    }
-                                } label: {
-                                    HStack(spacing: 0) {
-                                        TimelineTabTitle(title: tab.title)
-                                        Image(fontAwesome: .chevronDown)
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                            .scaledToFit()
-                                            .frame(width: 8, height: 8)
-                                            .padding(8)
-                                            .background(
-                                                Circle()
-                                                    .fill(Color.secondary.opacity(0.2))
-                                            )
-                                            .scaleEffect(0.66)
+                                        .labelStyle(.titleAndIcon)
                                     }
                                 }
+                                Divider()
+                                Button {
+                                    toTabSetting()
+                                } label: {
+                                    Label {
+                                        Text("tab_settings_add_tab")
+                                    } icon: {
+                                        Image(fontAwesome: .plus)
+                                    }
+                                }
+                            }
+                            ToolbarItem(placement: horizontalSizeClass == .regular ? .automatic : .title) {
+                                Label {
+                                    TimelineTabTitle(title: tab.title)
+                                } icon: {
+                                    TabIcon(tabItem: tab)
+                                }
+                                .labelStyle(.titleAndIcon)
                             }
                             ToolbarItem(placement: .primaryAction) {
                                 composeToolbarButton

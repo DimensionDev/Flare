@@ -1,7 +1,7 @@
 import AppKit
-import SwiftUI
-import KotlinSharedUI
 import FlareAppleCore
+import KotlinSharedUI
+import SwiftUI
 
 @main
 struct FlareApp: App {
@@ -19,31 +19,16 @@ struct FlareApp: App {
             FlareTheme {
                 RootView()
             }
-            .background(WindowTitleVisibilityConfigurator())
+        }
+        .windowToolbarStyle(.unifiedCompact(showsTitle: false))
+        Settings {
+            FlareTheme {
+                MacSettingsScreen()
+            }
         }
 //        .defaultSize(width: 1120, height: 760)
 //        .commands {
 //            SidebarCommands()
 //        }
-    }
-}
-
-private struct WindowTitleVisibilityConfigurator: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        DispatchQueue.main.async {
-            configure(window: view.window)
-        }
-        return view
-    }
-
-    func updateNSView(_ nsView: NSView, context: Context) {
-        DispatchQueue.main.async {
-            configure(window: nsView.window)
-        }
-    }
-
-    private func configure(window: NSWindow?) {
-        window?.titleVisibility = .hidden
     }
 }

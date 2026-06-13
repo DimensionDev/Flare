@@ -1,7 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import FlareAppleUI
 
 public struct StatusTopMessageView: View {
     @Environment(\.openURL) private var openURL

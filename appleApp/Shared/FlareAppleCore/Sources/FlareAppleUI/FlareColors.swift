@@ -27,7 +27,7 @@ public extension Color {
         #if os(iOS)
         Color(.secondarySystemBackground)
         #elseif os(macOS)
-        Color(nsColor: .controlBackgroundColor)
+        Color(nsColor: .alternatingContentBackgroundColors[1])
         #endif
     }
 

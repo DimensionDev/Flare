@@ -2,18 +2,7 @@ import AppleFontAwesome
 import KotlinSharedUI
 
 extension HomeTabsPresenterStateHomeTabs {
-    static func macOSHomeTab(named name: String) -> HomeTabsPresenterStateHomeTabs {
-        switch name {
-        case HomeTabsPresenterStateHomeTabs.notifications.name:
-            .notifications
-        case HomeTabsPresenterStateHomeTabs.discover.name:
-            .discover
-        default:
-            .home
-        }
-    }
-
-    var macOSInitialRoute: MacRoute {
+    var macOSInitialRoute: Route {
         switch self {
         case .home:
             .home

@@ -6,7 +6,6 @@ import AVKit
 import Photos
 import Kingfisher
 import SwiftUIBackports
-import VideoPlayer
 import Combine
 import FlareAppleCore
 import AppleFontAwesome
@@ -433,68 +432,6 @@ extension StatusMediaScreen {
         self._selectedIndex = .init(initialValue: max(0, initialIndex))
         self._protectInitialPagerSelection = .init(initialValue: initialIndex > 0)
         self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
-    }
-}
-
-enum VideoState {
-    case idle
-    case loading
-    case playing(Double)
-    case paused(Double)
-    case error(Error)
-}
-
-struct StatusMediaVideoView: View {
-    @Binding var play: Bool
-    @Binding var videoState: VideoState
-    @Binding var time: CMTime
-    @State private var isAppeared: Bool = false
-    let data: UiMediaVideo
-    
-    init(data: UiMediaVideo, play: Binding<Bool>, videoState: Binding<VideoState>, time: Binding<CMTime>) {
-        self.data = data
-        self._play = play
-        self._videoState = videoState
-        self._time = time
-    }
-    
-    var body: some View {
-        Color.clear
-//            .opacity(0.2)
-            .overlay {
-                if case .idle = videoState {
-                    NetworkImage(data: data.thumbnailUrl, customHeader: data.customHeaders)
-                        .scaledToFit()
-                        .allowsHitTesting(false)
-                } else {
-                    EmptyView()
-                }
-            }
-            .clipped()
-        .overlay {
-            if let videoURL = URL(string: data.url) {
-                VideoPlayer(url: videoURL, play: $play, time: $time)
-                    .mute(false)
-                    .autoReplay(true)
-                    .onStateChanged { state in
-                        switch state {
-                        case .playing(let duration): videoState = .playing(duration)
-                        case .loading: videoState = .loading
-                        case .paused:
-                            if case .playing(let duration) = videoState {
-                                videoState = .paused(duration)
-                            } else if case .paused(let duration) = videoState {
-                                videoState = .paused(duration)
-                            } else {
-                                videoState = .idle
-                            }
-                        case .error(let error): videoState = .error(error)
-                        }
-                    }
-                    .contentMode(.scaleAspectFit)
-                    .allowsHitTesting(false)
-            }
-        }
     }
 }
 

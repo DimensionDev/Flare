@@ -22,15 +22,19 @@ settingGroups:
     CODE_SIGN_STYLE: Automatic
     ENABLE_PREVIEWS: YES
     ENABLE_USER_SCRIPT_SANDBOXING: NO
-    FRAMEWORK_SEARCH_PATHS:
-      - "$(inherited)"
-      - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+    # FRAMEWORK_SEARCH_PATHS:
+    #   - "$(inherited)"
+    #   - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
     PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare
     PRODUCT_NAME: Flare
 
 settings:
   base:
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    DEAD_CODE_STRIPPING: YES
     DEVELOPMENT_TEAM: 7LFDZ96332
+    "EXCLUDED_ARCHS[sdk=macosx*]": x86_64
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     STRING_CATALOG_GENERATE_SYMBOLS: YES
     SWIFT_APPROACHABLE_CONCURRENCY: YES
@@ -75,7 +79,7 @@ packages:
     exactVersion: 3.1.1
   swiftui-introspect:
     url: https://github.com/siteline/swiftui-introspect
-    exactVersion: 26.0.1
+    exactVersion: 27.0.0-beta.1
   VideoPlayer:
     url: https://github.com/wxxsw/VideoPlayer
     exactVersion: 1.2.5
@@ -137,6 +141,9 @@ targets:
     dependencies:
       - package: AppleFontAwesome
       - package: CHTCollectionViewWaterfallLayout
+      - package: Kingfisher
+      - package: swiftui-introspect
+        product: SwiftUIIntrospect
       - target: FlareAppleCore
         embed: true
         destinationFilters: [macOS]
@@ -181,9 +188,11 @@ targets:
           ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
     settings:
       base:
-        FRAMEWORK_SEARCH_PATHS:
-          - "$(inherited)"
-          - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        CLANG_ENABLE_MODULE_VERIFIER: YES
+        DEAD_CODE_STRIPPING: YES
+        # FRAMEWORK_SEARCH_PATHS:
+        #   - "$(inherited)"
+        #   - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
         GENERATE_INFOPLIST_FILE: YES
         OTHER_LDFLAGS: "$(inherited) -lsqlite3"
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.applecore
@@ -199,6 +208,8 @@ targets:
       - package: Kingfisher
       - package: iOS-Backports
         product: SwiftUIBackports
+      - package: VideoPlayer
+        destinationFilters: [iOS]
       - target: FlareAppleCore
     preBuildScripts:
       - name: Compile Kotlin
@@ -208,9 +219,11 @@ targets:
           ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
     settings:
       base:
-        FRAMEWORK_SEARCH_PATHS:
-          - "$(inherited)"
-          - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        CLANG_ENABLE_MODULE_VERIFIER: YES
+        DEAD_CODE_STRIPPING: YES
+        # FRAMEWORK_SEARCH_PATHS:
+        #   - "$(inherited)"
+        #   - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
         GENERATE_INFOPLIST_FILE: YES
         OTHER_LDFLAGS: "$(inherited) -lsqlite3"
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleui

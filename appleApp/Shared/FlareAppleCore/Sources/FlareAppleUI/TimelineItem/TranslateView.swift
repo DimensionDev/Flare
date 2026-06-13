@@ -1,5 +1,4 @@
 import SwiftUI
-import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 
@@ -105,16 +104,16 @@ struct TranslateTextView: View {
 }
 
 
-struct TLDRTextView: View {
+public struct TLDRTextView: View {
     @StateObject private var presenter: KotlinPresenter<UiState<NSString>>
     
-    init(
+    public init(
         text: String
     ) {
         self._presenter = .init(wrappedValue: .init(presenter: AiTLDRPresenter(source: text, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en")))
     }
     
-    var body: some View {
+    public var body: some View {
         StateView(state: presenter.state) { text in
             Text(String(text))
                 .lineLimit(nil)

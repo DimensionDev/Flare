@@ -1,12 +1,12 @@
-import SwiftUI
-import KotlinSharedUI
-import FlareAppleUI
-import SwiftUIBackports
 import AppleFontAwesome
+import FlareAppleCore
+import KotlinSharedUI
+import SwiftUI
+import SwiftUIBackports
 
 public enum CommonProfileHeaderConstants {
-    static let headerHeight: CGFloat = 200
-    static let avatarSize: CGFloat = 96
+    public static let headerHeight: CGFloat = 200
+    public static let avatarSize: CGFloat = 96
 }
 
 private extension FollowButtonState {
@@ -28,8 +28,11 @@ private extension FollowButtonState {
 
 public struct CommonProfileHeader: View {
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
+
     private let user: UiProfile
     private let relation: UiState<UiRelation>
     private let followButtonState: UiState<FollowButtonState>
@@ -63,7 +66,13 @@ public struct CommonProfileHeader: View {
                     NetworkImage(data: banner.url, customHeader: banner.customHeaders)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .onTapGesture {
-                            if let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: banner.url, previewUrl: nil, customHeaders: banner.customHeaders).toUri()) {
+                            if let url = URL(
+                                string: DeeplinkRoute.Media.MediaImage(
+                                    uri: banner.url,
+                                    previewUrl: nil,
+                                    customHeaders: banner.customHeaders
+                                ).toUri()
+                            ) {
                                 openURL.callAsFunction(url)
                             }
                         }
@@ -82,13 +91,19 @@ public struct CommonProfileHeader: View {
                         Spacer()
                             .frame(
                                 height: CommonProfileHeaderConstants.headerHeight -
-                                CommonProfileHeaderConstants.avatarSize / 2
+                                    CommonProfileHeaderConstants.avatarSize / 2
                             )
                         AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
                             .onTapGesture {
                                 if let avatar = user.avatar,
-                                   let url = URL(string: DeeplinkRoute.Media.MediaImage(uri: avatar.url, previewUrl: nil, customHeaders: avatar.customHeaders).toUri()) {
+                                   let url = URL(
+                                       string: DeeplinkRoute.Media.MediaImage(
+                                           uri: avatar.url,
+                                           previewUrl: nil,
+                                           customHeaders: avatar.customHeaders
+                                       ).toUri()
+                                   ) {
                                     openURL.callAsFunction(url)
                                 }
                             }
@@ -115,19 +130,21 @@ public struct CommonProfileHeader: View {
                                     }
                                 }
                                 .animation(.spring(response: 0.25, dampingFraction: 0.86), value: buttonState.data.id)
-                            case .loading: Button(action: {}, label: {
-                                Text("#loading")
-                            })
-                            .backport
-                            .glassProminentButtonStyle()
-                            .redacted(reason: .placeholder)
-                            case .error: EmptyView()
+                            case .loading:
+                                Button(action: {}, label: {
+                                    Text("#loading")
+                                })
+                                .backport
+                                .glassProminentButtonStyle()
+                                .redacted(reason: .placeholder)
+                            case .error:
+                                EmptyView()
                             }
                         }
                     }
                 }
 
-                if horizontalSizeClass == .compact, timelineDisplayMode != .plain {
+                if shouldWrapContentInCard {
                     ListCardView {
                         content
                             .padding()
@@ -138,6 +155,14 @@ public struct CommonProfileHeader: View {
             }
             .padding(.horizontal)
         }
+    }
+
+    private var shouldWrapContentInCard: Bool {
+        #if os(iOS)
+        horizontalSizeClass == .compact && timelineDisplayMode != .plain
+        #else
+        false
+        #endif
     }
 
     @ViewBuilder
@@ -163,7 +188,7 @@ public struct CommonProfileHeader: View {
             .glassProminentButtonStyle()
         }
     }
-    
+
     private var content: some View {
         VStack(
             alignment: .leading,
@@ -181,10 +206,10 @@ public struct CommonProfileHeader: View {
                 ForEach(0..<user.mark.count, id: \.self) { index in
                     let mark = user.mark[index]
                     switch mark {
-                    case .cat:      Image(fontAwesome: .cat)
+                    case .cat: Image(fontAwesome: .cat)
                     case .verified: Image(fontAwesome: .circleCheck)
-                    case .locked:   Image(fontAwesome: .lock)
-                    case .bot:      Image(fontAwesome: .robot)
+                    case .locked: Image(fontAwesome: .lock)
+                    case .bot: Image(fontAwesome: .robot)
                     }
                 }
                 if user.translationDisplayState != .hidden {
@@ -217,12 +242,125 @@ public struct CommonProfileHeader: View {
     }
 }
 
-struct MatrixView: View {
-    let followCount: String
-    let fansCount: String
-    let onFollowingClick: () -> Void
-    let onFansClick: () -> Void
-    var body: some View {
+public struct ProfileHeader: View {
+    private let user: UiState<UiProfile>
+    private let relation: UiState<UiRelation>
+    private let followButtonState: UiState<FollowButtonState>
+    private let isMe: UiState<KotlinBoolean>
+    private let onFollowClick: (UiProfile, FollowButtonState) -> Void
+    private let onFollowingClick: (MicroBlogKey) -> Void
+    private let onFansClick: (MicroBlogKey) -> Void
+
+    public init(
+        user: UiState<UiProfile>,
+        relation: UiState<UiRelation>,
+        followButtonState: UiState<FollowButtonState>,
+        isMe: UiState<KotlinBoolean>,
+        onFollowClick: @escaping (UiProfile, FollowButtonState) -> Void,
+        onFollowingClick: @escaping (MicroBlogKey) -> Void,
+        onFansClick: @escaping (MicroBlogKey) -> Void
+    ) {
+        self.user = user
+        self.relation = relation
+        self.followButtonState = followButtonState
+        self.isMe = isMe
+        self.onFollowClick = onFollowClick
+        self.onFollowingClick = onFollowingClick
+        self.onFansClick = onFansClick
+    }
+
+    public var body: some View {
+        switch onEnum(of: user) {
+        case .error:
+            Text("error")
+        case .loading:
+            CommonProfileHeader(
+                user: createSampleUser(),
+                relation: relation,
+                followButtonState: followButtonState,
+                isMe: isMe,
+                onFollowClick: { _ in },
+                onFollowingClick: {},
+                onFansClick: {}
+            )
+            .redacted(reason: .placeholder)
+        case .success(let data):
+            ProfileHeaderSuccess(
+                user: data.data,
+                relation: relation,
+                followButtonState: followButtonState,
+                isMe: isMe,
+                onFollowClick: { followButtonState in onFollowClick(data.data, followButtonState) },
+                onFollowingClick: onFollowingClick,
+                onFansClick: onFansClick
+            )
+        }
+    }
+}
+
+public struct ProfileHeaderSuccess: View {
+    private let user: UiProfile
+    private let relation: UiState<UiRelation>
+    private let followButtonState: UiState<FollowButtonState>
+    private let isMe: UiState<KotlinBoolean>
+    private let onFollowClick: (FollowButtonState) -> Void
+    private let onFollowingClick: (MicroBlogKey) -> Void
+    private let onFansClick: (MicroBlogKey) -> Void
+
+    public init(
+        user: UiProfile,
+        relation: UiState<UiRelation>,
+        followButtonState: UiState<FollowButtonState>,
+        isMe: UiState<KotlinBoolean>,
+        onFollowClick: @escaping (FollowButtonState) -> Void,
+        onFollowingClick: @escaping (MicroBlogKey) -> Void,
+        onFansClick: @escaping (MicroBlogKey) -> Void
+    ) {
+        self.user = user
+        self.relation = relation
+        self.followButtonState = followButtonState
+        self.isMe = isMe
+        self.onFollowClick = onFollowClick
+        self.onFollowingClick = onFollowingClick
+        self.onFansClick = onFansClick
+    }
+
+    public var body: some View {
+        CommonProfileHeader(
+            user: user,
+            relation: relation,
+            followButtonState: followButtonState,
+            isMe: isMe,
+            onFollowClick: onFollowClick,
+            onFollowingClick: {
+                onFollowingClick(user.key)
+            },
+            onFansClick: {
+                onFansClick(user.key)
+            }
+        )
+    }
+}
+
+public struct MatrixView: View {
+    private let followCount: String
+    private let fansCount: String
+    private let onFollowingClick: () -> Void
+    private let onFansClick: () -> Void
+
+    public init(
+        followCount: String,
+        fansCount: String,
+        onFollowingClick: @escaping () -> Void,
+        onFansClick: @escaping () -> Void
+    ) {
+        self.followCount = followCount
+        self.fansCount = fansCount
+        self.onFollowingClick = onFollowingClick
+        self.onFansClick = onFansClick
+    }
+
+    public var body: some View {
         HStack {
             HStack {
                 Text(followCount)
@@ -244,9 +382,14 @@ struct MatrixView: View {
     }
 }
 
-struct IconFieldView: View {
-    let data: UiProfileBottomContentIconify
-    var body: some View {
+public struct IconFieldView: View {
+    private let data: UiProfileBottomContentIconify
+
+    public init(data: UiProfileBottomContentIconify) {
+        self.data = data
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(Array(data.items.keys), id: \.name) { key in
                 let value = data.items[key]
@@ -260,8 +403,8 @@ struct IconFieldView: View {
                     icon: {
                         switch key {
                         case .location: Image(fontAwesome: .locationDot)
-                        case .url:      Image(fontAwesome: .globe)
-                        case .verify:   Image(fontAwesome: .circleCheck)
+                        case .url: Image(fontAwesome: .globe)
+                        case .verify: Image(fontAwesome: .circleCheck)
                         }
                     }
                 )
@@ -270,9 +413,14 @@ struct IconFieldView: View {
     }
 }
 
-struct FieldsView: View {
-    let fields: [String: UiRichText]
-    var body: some View {
+public struct FieldsView: View {
+    private let fields: [String: UiRichText]
+
+    public init(fields: [String: UiRichText]) {
+        self.fields = fields
+    }
+
+    public var body: some View {
         if fields.count > 0 {
             VStack(alignment: .leading, spacing: 8) {
                 let keys = fields.map {

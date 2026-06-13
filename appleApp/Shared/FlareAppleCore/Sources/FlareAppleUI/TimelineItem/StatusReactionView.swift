@@ -1,8 +1,5 @@
 import SwiftUI
-import FlareAppleUI
 import KotlinSharedUI
-import Flow
-import Kingfisher
 import FlareAppleCore
 
 struct StatusReactionView: View {
@@ -38,7 +35,7 @@ struct StatusReactionView: View {
                             .fixedSize(horizontal: true, vertical: false)
                     }
                     Text(item.count.humanized)
-                        .foregroundStyle(item.me ? Color.white : Color(.label))
+                        .foregroundStyle(item.me ? Color.white : Color.flareLabel)
                 }
             }
             .if(item.me, if: { button in

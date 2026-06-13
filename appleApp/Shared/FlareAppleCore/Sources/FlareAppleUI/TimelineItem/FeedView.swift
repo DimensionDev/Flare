@@ -1,5 +1,4 @@
 import SwiftUI
-import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 

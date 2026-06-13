@@ -24156,6 +24156,7 @@
       }
     },
     "bluesky_notification_like" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -25110,6 +25111,7 @@
       }
     },
     "bluesky_notification_starterpackJoined" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -33097,6 +33099,7 @@
       }
     },
     "deep_link_account_picker_open_in_browser" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -33287,6 +33290,7 @@
       }
     },
     "deep_link_account_picker_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -39940,6 +39944,7 @@
       }
     },
     "error" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -55540,6 +55545,7 @@
       }
     },
     "mastodon_item_pinned" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -56300,6 +56306,7 @@
       }
     },
     "mastodon_notification_favourite" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -56490,6 +56497,7 @@
       }
     },
     "mastodon_notification_follow" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -56680,6 +56688,7 @@
       }
     },
     "mastodon_notification_follow_request" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -56870,6 +56879,7 @@
       }
     },
     "mastodon_notification_mention" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57060,6 +57070,7 @@
       }
     },
     "mastodon_notification_poll" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57250,6 +57261,7 @@
       }
     },
     "mastodon_notification_reblog" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57440,6 +57452,7 @@
       }
     },
     "mastodon_notification_status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57630,6 +57643,7 @@
       }
     },
     "mastodon_notification_update" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -58772,6 +58786,7 @@
       }
     },
     "matrix_followers" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -58962,6 +58977,7 @@
       }
     },
     "matrix_following" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -93715,6 +93731,7 @@
       }
     },
     "misskey_notification_achievement_earned" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -93905,6 +93922,7 @@
       }
     },
     "misskey_notification_achievement_earned %@ %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -94095,6 +94113,7 @@
       }
     },
     "misskey_notification_app" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -94285,6 +94304,7 @@
       }
     },
     "misskey_notification_chat_room_invitation_received" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -94475,6 +94495,7 @@
       }
     },
     "misskey_notification_create_token" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -94665,6 +94686,7 @@
       }
     },
     "misskey_notification_export_completed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -95046,6 +95068,7 @@
       }
     },
     "misskey_notification_follow_request_accepted" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -95236,6 +95259,7 @@
       }
     },
     "misskey_notification_login" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -95808,6 +95832,7 @@
       }
     },
     "misskey_notification_quote" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -95998,6 +96023,7 @@
       }
     },
     "misskey_notification_reaction" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -96570,6 +96596,7 @@
       }
     },
     "misskey_notification_reply" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -96760,6 +96787,7 @@
       }
     },
     "misskey_notification_role_assigned" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -96950,6 +96978,7 @@
       }
     },
     "misskey_notification_scheduled_note_post_failed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -97140,6 +97169,7 @@
       }
     },
     "misskey_notification_scheduled_note_posted" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -97330,6 +97360,7 @@
       }
     },
     "misskey_notification_test" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -110672,6 +110703,7 @@
       }
     },
     "relation_blocked" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -110862,6 +110894,7 @@
       }
     },
     "relation_follow" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -111052,6 +111085,7 @@
       }
     },
     "relation_following" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -111242,6 +111276,7 @@
       }
     },
     "relation_is_fans" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -111432,6 +111467,7 @@
       }
     },
     "relation_request_follow" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -111622,6 +111658,7 @@
       }
     },
     "relation_requested" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -144167,7 +144204,6 @@
       }
     },
     "tab_settings_merge_policy" : {
-      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -144358,7 +144394,6 @@
       }
     },
     "tab_settings_merge_policy_desc" : {
-      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -144549,7 +144584,6 @@
       }
     },
     "tab_settings_merge_policy_staggered" : {
-      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -144740,7 +144774,6 @@
       }
     },
     "tab_settings_merge_policy_time" : {
-      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -144931,7 +144964,6 @@
       }
     },
     "tab_settings_merge_policy_time_per_page" : {
-      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -148168,6 +148200,7 @@
       }
     },
     "user_list_title_fans" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -148358,6 +148391,7 @@
       }
     },
     "user_list_title_following" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

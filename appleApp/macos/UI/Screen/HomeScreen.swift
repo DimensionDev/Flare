@@ -1,5 +1,6 @@
 import AppleFontAwesome
 import FlareAppleCore
+import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
@@ -25,65 +26,35 @@ struct HomeScreen: View {
     }
 
     private func content(tabs: [UiTimelineTabItem]) -> some View {
-        VStack(spacing: 0) {
-            HStack {
-                HomeTimelineTabPicker(
-                    tabs: tabs,
-                    selectedTabID: $selectedTabID
-                )
-                Spacer()
-                if #available(macOS 26.0, *) {
-                    GlassEffectContainer {
-                        HStack {
-                            Button {
-                            } label: {
-                                Label {
-                                    Text(LocalizedStrings.string("settings_title", fallback: "Settings"))
-                                } icon: {
-                                    Image(fontAwesome: .sliders)
-                                }
-                                .labelStyle(.iconOnly)
-                            }
-                            .help(LocalizedStrings.string("settings_title", fallback: "Settings"))
-                            .buttonStyle(.glass)
-                            .glassEffectUnion(id: "top-actions", namespace: actionsNamespace)
-                            Button {
-                            } label: {
-                                Label {
-                                    Text(LocalizedStrings.string("refresh", fallback: "Refresh"))
-                                } icon: {
-                                    Image(fontAwesome: .arrowsRotate)
-                                }
-                                .labelStyle(.iconOnly)
-                            }
-                            .help(LocalizedStrings.string("refresh", fallback: "Refresh"))
-                            .buttonStyle(.glass)
-                            .glassEffectUnion(id: "top-actions", namespace: actionsNamespace)
-                        }
-                    }
-                } else {
-                    Button {
-                    } label: {
-                        Image(fontAwesome: .sliders)
-                    }
-                    .help(LocalizedStrings.string("settings_title", fallback: "Settings"))
-                    Button {
-                    } label: {
-                        Image(fontAwesome: .arrowsRotate)
-                    }
-                    .help(LocalizedStrings.string("refresh", fallback: "Refresh"))
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            
-            Divider()
+        ZStack {
             if let tab = selectedTab(in: tabs) {
                 TimelineScreen(tabItem: tab, allowGalleryMode: true)
                     .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
                     .id(tab.id)
             } else if tabs.isEmpty {
                 PlaceholderPanel(destination: .home)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                HomeTimelineTabPicker(
+                    tabs: tabs,
+                    selectedTabID: $selectedTabID
+                )
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                } label: {
+                    Image(fontAwesome: .sliders)
+                }
+                .help(LocalizedStrings.string("settings_title", fallback: "Settings"))
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                } label: {
+                    Image(fontAwesome: .arrowsRotate)
+                }
+                .help(LocalizedStrings.string("refresh", fallback: "Refresh"))
             }
         }
     }

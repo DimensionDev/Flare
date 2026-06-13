@@ -33,6 +33,15 @@ struct PlaceholderPanel: View {
             }
             .padding(32)
         }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                } label: {
+                    Image(fontAwesome: .arrowsRotate)
+                }
+                .help(LocalizedStrings.string("refresh", fallback: "Refresh"))
+            }
+        }
     }
 }
 

@@ -76,7 +76,6 @@
 "macos_settings_section_content" = "Content";
 "macos_settings_section_intelligence" = "AI & Translation";
 "macos_settings_section_app" = "App";
-"macos_settings_preview" = "Preview";
 "macos_action_clear" = "Clear";
 "macos_action_open" = "Open";
 "macos_action_export" = "Export";
@@ -88,8 +87,9 @@
 "macos_action_move_down" = "Move Down";
 "account_management_title" = "Accounts";
 "account_management_description" = "Manage signed-in accounts, active account, and account order.";
+"appearance_description" = "Theme, layout, display, and media settings.";
 "appearance_theme_group_title" = "Theme";
-"appearance_theme_group_subtitle" = "Adjust app theme, avatar shape, and text size.";
+"appearance_theme_group_subtitle" = "Adjust app theme and avatar shape.";
 "appearance_layout_group_title" = "Layout";
 "appearance_layout_group_subtitle" = "Control timeline layout and post action placement.";
 "appearance_display_group_title" = "Display";

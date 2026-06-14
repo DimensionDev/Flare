@@ -76,7 +76,6 @@
 "macos_settings_section_content" = "内容";
 "macos_settings_section_intelligence" = "AI 与翻译";
 "macos_settings_section_app" = "应用";
-"macos_settings_preview" = "预览";
 "macos_action_clear" = "清理";
 "macos_action_open" = "打开";
 "macos_action_export" = "导出";
@@ -88,8 +87,9 @@
 "macos_action_move_down" = "下移";
 "account_management_title" = "账号";
 "account_management_description" = "管理已登录账号、当前账号和账号排序。";
+"appearance_description" = "主题、布局、显示和媒体设置。";
 "appearance_theme_group_title" = "主题";
-"appearance_theme_group_subtitle" = "调整应用主题、头像形状和文字大小。";
+"appearance_theme_group_subtitle" = "调整应用主题和头像形状。";
 "appearance_layout_group_title" = "布局";
 "appearance_layout_group_subtitle" = "控制时间线布局和帖子操作位置。";
 "appearance_display_group_title" = "显示";

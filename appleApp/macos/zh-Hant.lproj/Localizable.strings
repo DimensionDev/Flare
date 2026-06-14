@@ -76,7 +76,6 @@
 "macos_settings_section_content" = "內容";
 "macos_settings_section_intelligence" = "AI 與翻譯";
 "macos_settings_section_app" = "應用程式";
-"macos_settings_preview" = "預覽";
 "macos_action_clear" = "清理";
 "macos_action_open" = "開啟";
 "macos_action_export" = "匯出";
@@ -88,8 +87,9 @@
 "macos_action_move_down" = "下移";
 "account_management_title" = "帳號";
 "account_management_description" = "管理已登入帳號、目前帳號和帳號排序。";
+"appearance_description" = "主題、版面、顯示和媒體設定。";
 "appearance_theme_group_title" = "主題";
-"appearance_theme_group_subtitle" = "調整應用程式主題、頭像形狀和文字大小。";
+"appearance_theme_group_subtitle" = "調整應用程式主題和頭像形狀。";
 "appearance_layout_group_title" = "版面";
 "appearance_layout_group_subtitle" = "控制時間軸版面和貼文操作位置。";
 "appearance_display_group_title" = "顯示";

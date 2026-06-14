@@ -38,7 +38,7 @@ struct Router: View {
     }
 
     var body: some View {
-        NavigationStack(path: $backStack) {
+        NavigationStack(path: $backStack.animation()) {
             initialRoute.view(
                 onNavigate: handle(route:),
                 goBack: {}
@@ -48,6 +48,7 @@ struct Router: View {
                     onNavigate: handle(route:),
                     goBack: goBack
                 )
+                .background(Color(nsColor: .windowBackgroundColor))
             }
             .backport
             .navigationTransitionAutomatic()

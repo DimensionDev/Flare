@@ -5,106 +5,40 @@ import FlareAppleUI
 import Kingfisher
 @preconcurrency import KotlinSharedUI
 import SwiftUI
-import SwiftUIIntrospect
 import UniformTypeIdentifiers
 import WebKit
 
 struct MacSettingsScreen: View {
-    @State private var selectedPane: MacSettingsPane? = .accountManagement
+    @State private var selectedPane: MacSettingsPane = .accountManagement
 
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
-            List(selection: $selectedPane) {
-                Section("macos_settings_section_account") {
-                    MacSettingsSidebarRow(pane: .accountManagement)
+        TabView(selection: $selectedPane) {
+            ForEach(MacSettingsPane.allCases) { pane in
+                NavigationStack {
+                    pane.detail
                 }
-
-                Section("macos_settings_section_appearance") {
-                    ForEach(MacSettingsPane.appearancePanes) { pane in
-                        MacSettingsSidebarRow(pane: pane)
+                    .tabItem {
+                        Label {
+                            Text(pane.title)
+                        } icon: {
+                            Image(fontAwesome: pane.icon)
+                        }
                     }
-                }
-
-                Section("macos_settings_section_content") {
-                    MacSettingsSidebarRow(pane: .localFilter)
-                    MacSettingsSidebarRow(pane: .storage)
-                }
-
-                Section("macos_settings_section_intelligence") {
-                    MacSettingsSidebarRow(pane: .aiConfig)
-                    MacSettingsSidebarRow(pane: .translationConfig)
-                }
-
-                Section("macos_settings_section_app") {
-                    MacSettingsSidebarRow(pane: .about)
-                }
-            }
-            .navigationTitle("settings_title")
-            .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 300)
-            .toolbar(removing: .sidebarToggle)
-        } detail: {
-            if let selectedPane {
-                selectedPane.detail
-                    .id(selectedPane.id)
-            } else {
-                ContentUnavailableView(
-                    "settings_title",
-                    systemImage: "gearshape",
-                    description: Text("macos_placeholder_settings")
-                )
+                    .tag(pane)
             }
         }
-        .toolbar(removing: .sidebarToggle)
         .frame(minWidth: 880, minHeight: 620)
-        .introspect(.window, on: .macOS(.v15, .v26, .v27)) { window in
-            removeSidebarToggle(from: window)
-        }
-    }
-
-    private func removeSidebarToggle(from window: NSWindow) {
-        for delay in [0.0, 0.1, 0.4] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                guard let toolbar = window.toolbar else {
-                    return
-                }
-                for index in toolbar.items.indices.reversed() {
-                    let item = toolbar.items[index]
-                    let rawValue = item.itemIdentifier.rawValue.lowercased()
-                    guard item.itemIdentifier == .toggleSidebar ||
-                        (rawValue.contains("sidebar") && rawValue.contains("toggle")) else {
-                        continue
-                    }
-
-                    if let view = item.view {
-                        view.isHidden = true
-                        view.widthAnchor.constraint(equalToConstant: 0).isActive = true
-                    } else {
-                        toolbar.removeItem(at: index)
-                    }
-                }
-            }
-        }
     }
 }
 
-private enum MacSettingsPane: String, CaseIterable, Identifiable {
+private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case accountManagement
-    case appearanceTheme
-    case appearanceLayout
-    case appearanceDisplay
-    case appearanceMedia
+    case appearance
     case localFilter
     case storage
     case aiConfig
     case translationConfig
     case about
-
-    static let appearancePanes: [MacSettingsPane] = [
-        .appearanceTheme,
-        .appearanceLayout,
-        .appearanceDisplay,
-        .appearanceMedia
-    ]
 
     var id: String { rawValue }
 
@@ -112,14 +46,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .accountManagement:
             "account_management_title"
-        case .appearanceTheme:
-            "appearance_theme_group_title"
-        case .appearanceLayout:
-            "appearance_layout_group_title"
-        case .appearanceDisplay:
-            "appearance_display_group_title"
-        case .appearanceMedia:
-            "appearance_media_group_title"
+        case .appearance:
+            "macos_settings_section_appearance"
         case .localFilter:
             "local_filter_title"
         case .storage:
@@ -137,14 +65,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .accountManagement:
             "account_management_description"
-        case .appearanceTheme:
-            "appearance_theme_group_subtitle"
-        case .appearanceLayout:
-            "appearance_layout_group_subtitle"
-        case .appearanceDisplay:
-            "appearance_display_group_subtitle"
-        case .appearanceMedia:
-            "appearance_media_group_subtitle"
+        case .appearance:
+            "appearance_description"
         case .localFilter:
             "local_filter_description"
         case .storage:
@@ -162,14 +84,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .accountManagement:
             .circleUser
-        case .appearanceTheme:
+        case .appearance:
             .palette
-        case .appearanceLayout:
-            .tableList
-        case .appearanceDisplay:
-            .newspaper
-        case .appearanceMedia:
-            .photoFilm
         case .localFilter:
             .filter
         case .storage:
@@ -188,14 +104,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .accountManagement:
             MacAccountManagementSettingsPane()
-        case .appearanceTheme:
-            MacAppearanceThemeSettingsPane()
-        case .appearanceLayout:
-            MacAppearanceLayoutSettingsPane()
-        case .appearanceDisplay:
-            MacAppearanceDisplaySettingsPane()
-        case .appearanceMedia:
-            MacAppearanceMediaSettingsPane()
+        case .appearance:
+            MacAppearanceSettingsPane()
         case .localFilter:
             MacLocalFilterSettingsPane()
         case .storage:
@@ -207,28 +117,6 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable {
         case .about:
             MacAboutSettingsPane()
         }
-    }
-}
-
-private struct MacSettingsSidebarRow: View {
-    let pane: MacSettingsPane
-
-    var body: some View {
-        Label {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(pane.title)
-                Text(pane.subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-        } icon: {
-            Image(fontAwesome: pane.icon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 18)
-        }
-        .tag(pane)
     }
 }
 
@@ -244,7 +132,6 @@ private struct MacSettingsForm<Content: View>: View {
         .formStyle(.grouped)
         .navigationTitle(title)
         .navigationSubtitle(Text(subtitle))
-        .toolbar(removing: .sidebarToggle)
     }
 }
 
@@ -279,13 +166,11 @@ private struct MacSettingsEmptyState: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle(pageTitle)
             .navigationSubtitle(Text(pageSubtitle))
-            .toolbar(removing: .sidebarToggle)
         } else {
             ContentUnavailableView(title, systemImage: systemImage)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .navigationTitle(pageTitle)
                 .navigationSubtitle(Text(pageSubtitle))
-                .toolbar(removing: .sidebarToggle)
         }
     }
 }
@@ -299,7 +184,6 @@ private struct MacSettingsLoadingState: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle(title)
             .navigationSubtitle(Text(subtitle))
-            .toolbar(removing: .sidebarToggle)
     }
 }
 
@@ -421,32 +305,7 @@ private struct MacAccountManagementSettingsPane: View {
 
     var body: some View {
         StateView(state: presenter.state.accounts) { data in
-            let currentAccounts = accounts.isEmpty ? data.cast(AccountsStateAccountItem.self) : accounts
-            if currentAccounts.isEmpty {
-                MacSettingsEmptyState(
-                    pageTitle: "account_management_title",
-                    pageSubtitle: "account_management_description",
-                    title: "macos_account_unavailable",
-                    systemImage: "person.crop.circle.badge.exclamationmark",
-                    description: "macos_account_add"
-                )
-            } else {
-                MacSettingsForm(
-                    title: "account_management_title",
-                    subtitle: "account_management_description"
-                ) {
-                    Section {
-                        ForEach(Array(currentAccounts.enumerated()), id: \.element.account.accountKey) { index, item in
-                            accountRow(item: item, index: index, count: currentAccounts.count)
-                        }
-                    }
-                }
-            }
-        } loadingContent: {
-            MacSettingsLoadingState(title: "account_management_title", subtitle: "account_management_description")
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+            VStack {
                 Button {
                     isLoginSheetPresented = true
                 } label: {
@@ -456,7 +315,34 @@ private struct MacAccountManagementSettingsPane: View {
                         Image(fontAwesome: .plus)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding()
+                let currentAccounts = accounts.isEmpty ? data.cast(AccountsStateAccountItem.self) : accounts
+                if currentAccounts.isEmpty {
+                    MacSettingsEmptyState(
+                        pageTitle: "account_management_title",
+                        pageSubtitle: "account_management_description",
+                        title: "macos_account_unavailable",
+                        systemImage: "person.crop.circle.badge.exclamationmark",
+                        description: "macos_account_add"
+                    ).onTapGesture {
+                        isLoginSheetPresented = true
+                    }
+                } else {
+                    MacSettingsForm(
+                        title: "account_management_title",
+                        subtitle: "account_management_description"
+                    ) {
+                        Section {
+                            ForEach(Array(currentAccounts.enumerated()), id: \.element.account.accountKey) { index, item in
+                                accountRow(item: item, index: index, count: currentAccounts.count)
+                            }
+                        }
+                    }
+                }
             }
+        } loadingContent: {
+            MacSettingsLoadingState(title: "account_management_title", subtitle: "account_management_description")
         }
         .onSuccessOf(of: presenter.state.accounts) { data in
             accounts = data.cast(AccountsStateAccountItem.self)
@@ -633,17 +519,17 @@ private struct MacAccountOrderButtons: View {
     }
 }
 
-private struct MacAppearanceThemeSettingsPane: View {
+private struct MacAppearanceSettingsPane: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.timelineAppearance) private var timelineAppearance
 
     var body: some View {
         MacSettingsForm(
-            title: "appearance_theme_group_title",
-            subtitle: "appearance_theme_group_subtitle"
+            title: "macos_settings_section_appearance",
+            subtitle: "appearance_description"
         ) {
-            Section {
+            Section("appearance_theme_group_title") {
                 Picker(selection: Binding(get: {
                     globalAppearance.theme
                 }, set: { newValue in
@@ -667,24 +553,10 @@ private struct MacAppearanceThemeSettingsPane: View {
                     MacSettingLabel("appearance_avatar_shape", subtitle: "appearance_avatar_shape_description")
                 }
             }
-        }
-    }
-}
 
-private struct MacAppearanceLayoutSettingsPane: View {
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
-    @Environment(\.globalAppearance) private var globalAppearance
-    @Environment(\.timelineAppearance) private var appearance
-
-    var body: some View {
-        MacSettingsForm(
-            title: "appearance_layout_group_title",
-            subtitle: "appearance_layout_group_subtitle"
-        ) {
-            Section {
+            Section("appearance_layout_group_title") {
                 Picker(selection: Binding(get: {
-                    appearance.timelineDisplayMode
+                    timelineAppearance.timelineDisplayMode
                 }, set: { newValue in
                     presenter.state.updateTimelineDisplayMode(value: newValue)
                 })) {
@@ -716,18 +588,9 @@ private struct MacAppearanceLayoutSettingsPane: View {
                 })) {
                     MacSettingLabel("appearance_deck_mode", subtitle: "appearance_deck_mode_description")
                 }
-            }
-
-            Section("macos_settings_preview") {
-                StateView(state: statusPresenter.state.sampleStatus) { status in
-                    TimelineView(data: status)
-                        .padding(.vertical, 4)
-                } loadingContent: {
-                    TimelinePlaceholderView()
-                }
 
                 Toggle(isOn: Binding(get: {
-                    appearance.fullWidthPost
+                    timelineAppearance.fullWidthPost
                 }, set: { newValue in
                     presenter.state.updateFullWidthPost(value: newValue)
                 })) {
@@ -735,7 +598,7 @@ private struct MacAppearanceLayoutSettingsPane: View {
                 }
 
                 Picker(selection: Binding(get: {
-                    appearance.postActionStyle
+                    timelineAppearance.postActionStyle
                 }, set: { newValue in
                     presenter.state.updatePostActionStyle(value: newValue)
                 })) {
@@ -750,9 +613,9 @@ private struct MacAppearanceLayoutSettingsPane: View {
                     )
                 }
 
-                if appearance.postActionStyle != .hidden {
+                if timelineAppearance.postActionStyle != .hidden {
                     Toggle(isOn: Binding(get: {
-                        appearance.showNumbers
+                        timelineAppearance.showNumbers
                     }, set: { newValue in
                         presenter.state.updateShowNumbers(value: newValue)
                     })) {
@@ -760,29 +623,8 @@ private struct MacAppearanceLayoutSettingsPane: View {
                     }
                 }
             }
-        }
-    }
-}
 
-private struct MacAppearanceDisplaySettingsPane: View {
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
-    @Environment(\.globalAppearance) private var globalAppearance
-    @Environment(\.timelineAppearance) private var timelineAppearance
-
-    var body: some View {
-        MacSettingsForm(
-            title: "appearance_display_group_title",
-            subtitle: "appearance_display_group_subtitle"
-        ) {
-            Section("macos_settings_preview") {
-                StateView(state: statusPresenter.state.sampleStatus) { status in
-                    TimelineView(data: status)
-                        .padding(.vertical, 4)
-                } loadingContent: {
-                    TimelinePlaceholderView()
-                }
-
+            Section("appearance_display_group_title") {
                 Toggle(isOn: Binding(get: {
                     timelineAppearance.absoluteTimestamp
                 }, set: { newValue in
@@ -837,39 +679,19 @@ private struct MacAppearanceDisplaySettingsPane: View {
                     MacSettingLabel("appearance_in_app_browser", subtitle: "appearance_in_app_browser_description")
                 }
             }
-        }
-    }
-}
 
-private struct MacAppearanceMediaSettingsPane: View {
-    @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
-    @Environment(\.timelineAppearance) private var appearance
-
-    var body: some View {
-        MacSettingsForm(
-            title: "appearance_media_group_title",
-            subtitle: "appearance_media_group_subtitle"
-        ) {
-            Section("macos_settings_preview") {
-                StateView(state: statusPresenter.state.sampleStatus) { status in
-                    TimelineView(data: status)
-                        .padding(.vertical, 4)
-                } loadingContent: {
-                    TimelinePlaceholderView()
-                }
-
+            Section("appearance_media_group_title") {
                 Toggle(isOn: Binding(get: {
-                    appearance.showMedia
+                    timelineAppearance.showMedia
                 }, set: { newValue in
                     presenter.state.updateShowMedia(value: newValue)
                 })) {
                     MacSettingLabel("appearance_show_media", subtitle: "appearance_show_media_description")
                 }
 
-                if appearance.showMedia {
+                if timelineAppearance.showMedia {
                     Toggle(isOn: Binding(get: {
-                        appearance.expandMediaSize
+                        timelineAppearance.expandMediaSize
                     }, set: { newValue in
                         presenter.state.updateExpandMediaSize(value: newValue)
                     })) {
@@ -880,7 +702,7 @@ private struct MacAppearanceMediaSettingsPane: View {
                     }
 
                     Toggle(isOn: Binding(get: {
-                        appearance.showSensitiveContent
+                        timelineAppearance.showSensitiveContent
                     }, set: { newValue in
                         presenter.state.updateShowSensitiveContent(value: newValue)
                     })) {
@@ -891,7 +713,7 @@ private struct MacAppearanceMediaSettingsPane: View {
                     }
 
                     Toggle(isOn: Binding(get: {
-                        appearance.expandContentWarning
+                        timelineAppearance.expandContentWarning
                     }, set: { newValue in
                         presenter.state.updateExpandContentWarning(value: newValue)
                     })) {
@@ -902,7 +724,7 @@ private struct MacAppearanceMediaSettingsPane: View {
                     }
 
                     Picker(selection: Binding(get: {
-                        appearance.videoAutoplay
+                        timelineAppearance.videoAutoplay
                     }, set: { newValue in
                         presenter.state.updateVideoAutoplay(value: newValue)
                     })) {
@@ -925,52 +747,7 @@ private struct MacLocalFilterSettingsPane: View {
 
     var body: some View {
         StateView(state: presenter.state.items) { filters in
-            let list = filters.cast(UiKeywordFilter.self)
-            if list.isEmpty {
-                MacSettingsEmptyState(
-                    pageTitle: "local_filter_title",
-                    pageSubtitle: "local_filter_description",
-                    title: "list_empty_title",
-                    systemImage: "line.3.horizontal.decrease.circle"
-                )
-            } else {
-                MacSettingsForm(
-                    title: "local_filter_title",
-                    subtitle: "local_filter_description"
-                ) {
-                    Section {
-                        ForEach(list, id: \.keyword) { item in
-                            MacLocalFilterRow(item: item)
-                                .contextMenu {
-                                    Button {
-                                        selectedFilter = item
-                                        showingEditor = true
-                                    } label: {
-                                        Label {
-                                            Text("local_filter_edit")
-                                        } icon: {
-                                            Image(fontAwesome: .pen)
-                                        }
-                                    }
-                                    Button(role: .destructive) {
-                                        presenter.state.delete(keyword: item.keyword)
-                                    } label: {
-                                        Label {
-                                            Text("local_filter_delete")
-                                        } icon: {
-                                            Image(fontAwesome: .trash)
-                                        }
-                                    }
-                                }
-                        }
-                    }
-                }
-            }
-        } loadingContent: {
-            MacSettingsLoadingState(title: "local_filter_title", subtitle: "local_filter_description")
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+            VStack {
                 Button {
                     selectedFilter = nil
                     showingEditor = true
@@ -981,7 +758,52 @@ private struct MacLocalFilterSettingsPane: View {
                         Image(fontAwesome: .plus)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding()
+                let list = filters.cast(UiKeywordFilter.self)
+                if list.isEmpty {
+                    MacSettingsEmptyState(
+                        pageTitle: "local_filter_title",
+                        pageSubtitle: "local_filter_description",
+                        title: "list_empty_title",
+                        systemImage: "line.3.horizontal.decrease.circle"
+                    )
+                } else {
+                    MacSettingsForm(
+                        title: "local_filter_title",
+                        subtitle: "local_filter_description"
+                    ) {
+                        Section {
+                            ForEach(list, id: \.keyword) { item in
+                                MacLocalFilterRow(item: item)
+                                    .contextMenu {
+                                        Button {
+                                            selectedFilter = item
+                                            showingEditor = true
+                                        } label: {
+                                            Label {
+                                                Text("local_filter_edit")
+                                            } icon: {
+                                                Image(fontAwesome: .pen)
+                                            }
+                                        }
+                                        Button(role: .destructive) {
+                                            presenter.state.delete(keyword: item.keyword)
+                                        } label: {
+                                            Label {
+                                                Text("local_filter_delete")
+                                            } icon: {
+                                                Image(fontAwesome: .trash)
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
             }
+        } loadingContent: {
+            MacSettingsLoadingState(title: "local_filter_title", subtitle: "local_filter_description")
         }
         .sheet(isPresented: $showingEditor, onDismiss: {
             selectedFilter = nil

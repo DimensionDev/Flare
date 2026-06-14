@@ -10,43 +10,60 @@ struct SidebarView: View {
     @StateObject private var notificationBadgePresenter = KotlinPresenter(
         presenter: AllNotificationBadgePresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
+    @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
+    
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 8) {
-                if shouldShowLogin {
-                    SidebarIconButton(
-                        title: LocalizedStrings.string("login_button", fallback: "Log in"),
-                        icon: .userPlus,
-                        isSelected: isLoginSheetPresented
-                    ) {
-                        isLoginSheetPresented = true
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 8) {
+                    if shouldShowLogin {
+                        SidebarIconButton(
+                            title: LocalizedStrings.string("login_button", fallback: "Log in"),
+                            icon: .userPlus,
+                            isSelected: isLoginSheetPresented
+                        ) {
+                            isLoginSheetPresented = true
+                        }
+
+                        Divider()
+                            .frame(width: 32)
+                            .padding(.vertical, 2)
                     }
 
-                    Divider()
-                        .frame(width: 32)
-                        .padding(.vertical, 2)
-                }
-
-                StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                    ForEach(tabs.cast(HomeTabsPresenterStateHomeTabs.self), id: \.name) { tab in
-                        SidebarIconButton(
-                            title: tab.macOSTitle,
-                            icon: tab.macOSIcon,
-                            badge: notificationBadge(for: tab),
-                            isSelected: isSelected(tab)
-                        ) {
-                            withAnimation {
-                                selection = tab
+                    StateView(state: homeTabsPresenter.state.tabs) { tabs in
+                        ForEach(tabs.cast(HomeTabsPresenterStateHomeTabs.self), id: \.name) { tab in
+                            SidebarIconButton(
+                                title: tab.macOSTitle,
+                                icon: tab.macOSIcon,
+                                badge: notificationBadge(for: tab),
+                                isSelected: isSelected(tab)
+                            ) {
+                                withAnimation {
+                                    selection = tab
+                                }
                             }
                         }
+                    } loadingContent: {
+                        SidebarLoadingItems()
                     }
-                } loadingContent: {
-                    SidebarLoadingItems()
+
+                    if canCompose {
+                        SidebarIconButton(
+                            title: LocalizedStrings.string("home_compose", fallback: "Compose"),
+                            icon: .pen,
+                            isSelected: false,
+                            isAccent: true
+                        ) {
+                        }
+                        .padding(.top, 4)
+                    }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
         }
         .frame(width: 72)
         .frame(maxHeight: .infinity, alignment: .top)
@@ -96,6 +113,14 @@ struct SidebarView: View {
         Int(notificationBadgePresenter.state.count)
     }
 
+    private var canCompose: Bool {
+        if case .success(let state) = onEnum(of: canComposePresenter.state.canCompose) {
+            state.data.boolValue
+        } else {
+            false
+        }
+    }
+
     private func isSelected(_ tab: HomeTabsPresenterStateHomeTabs) -> Bool {
         selection?.name == tab.name
     }
@@ -141,6 +166,7 @@ private struct SidebarIconButton: View {
                 }
             }
             .frame(width: 44, height: 44)
+            .shadow(color: shadowColor, radius: isAccent ? 8 : 0, y: isAccent ? 3 : 0)
             .contentShape(Circle())
         }
         .buttonStyle(.plain)

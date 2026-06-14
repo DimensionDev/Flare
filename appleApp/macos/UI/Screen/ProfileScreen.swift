@@ -66,14 +66,14 @@ struct ProfileScreen: View {
             .padding(.bottom, 16)
         }
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                switch onEnum(of: presenter.state.userState) {
-                case .success(let user):
-                    RichText(text: user.data.name)
-                case .loading, .error:
-                    Text(LocalizedStrings.string("profile_title", fallback: "Profile"))
-                }
-            }
+//            ToolbarItem(placement: .automatic) {
+//                switch onEnum(of: presenter.state.userState) {
+//                case .success(let user):
+//                    RichText(text: user.data.name)
+//                case .loading, .error:
+//                    Text(LocalizedStrings.string("profile_title", fallback: "Profile"))
+//                }
+//            }
             if !presenter.state.actions.isEmpty {
                 ToolbarItemGroup(placement: .primaryAction) {
                     StatusActionsView(

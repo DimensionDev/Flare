@@ -92,10 +92,13 @@
     <string name="status_share_via_fxembed">Del via FxEmbed</string>
     <string name="status_share_via_fixvx">Del via Fixvx</string>
     <string name="status_insight_title">Post innsikt</string>
+    <string name="profile_insight_title">Profilinnsikt</string>
     <string name="agent_chat_title">AI chat</string>
+    <string name="agent_chat_input_placeholder">Spør noe...</string>
     <string name="agent_chat_send">Sende</string>
     <string name="agent_chat_thinking">Tenker…</string>
     <string name="status_insight_analyzing">Analyserer dette innlegget…</string>
+    <string name="profile_insight_analyzing">Analyserer denne profilen…</string>
     <string name="status_insight_error">Kunne ikke analysere innlegget.</string>
     <string name="status_insight_trace_loading_post_context">Henter post kontekst…</string>
     <string name="status_insight_trace_post_context_loaded">Post sammenheng lastet</string>
@@ -107,6 +110,7 @@
     <string name="status_insight_trace_subgraph_started">Legger til analysestase…</string>
     <string name="status_insight_trace_subgraph_completed">Analyseringsstadium er fullført</string>
     <string name="status_insight_trace_subgraph_failed">Analyseringsfasen mislyktes</string>
+    <string name="status_insight_trace_asking_model">Spør %1$s...</string>
     <string name="status_insight_trace_model_response_received">Leser modelrespons…</string>
     <string name="status_insight_trace_streaming_started">Strømmer fra %1$s…</string>
     <string name="status_insight_trace_streaming_response">Mottar svar…</string>
@@ -119,6 +123,7 @@
     <string name="status_insight_trace_tool_load_status_context_completed">Post sammenheng lastet</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Inndata i postkonteksten ble avvist</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Kan ikke laste innlegg kontekst</string>
+    <string name="status_insight_trace_tool_search_status_started">Søker...</string>
     <string name="status_insight_trace_tool_search_status_completed">Søk fullført</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Søkeinndata ble avvist</string>
     <string name="status_insight_trace_tool_search_status_failed">Søket mislyktes</string>
@@ -497,25 +502,14 @@
     <string name="misskey_channel_tab_featured">Fremhevet</string>
     <string name="media_save_success">Lagret i Nedlastinger</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilinnsikt</string>
-    <string name="agent_chat_input_placeholder">Spør noe...</string>
-    <string name="profile_insight_analyzing">Analyserer denne profilen…</string>
-    <string name="status_insight_trace_asking_model">Spør %1$s...</string>
-    <string name="status_insight_trace_tool_call_started">%1$s</string>
-    <string name="status_insight_trace_tool_call_completed">%1$s</string>
-    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
-    <string name="status_insight_trace_tool_call_failed">%1$s</string>
-    <string name="status_insight_trace_tool_search_status_started">Søker...</string>
-    <string name="settings_about_discord" translatable="false">Splid</string>
     <string name="agent_compose_confirmation_prompt">Send innlegg?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Avbryt</string>
+    <string name="agent_ui_confirm_execute">Bekreft</string>
+    <string name="agent_ui_confirm_save_subscription">Lagre</string>
     <string name="agent_ui_cancel_save_subscription">Avbryt: lagre</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Slett</string>
     <string name="agent_ui_cancel_delete_subscription">Avbryt: slett</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Sende</string>
     <string name="agent_ui_cancel_send_post">Avbryt: send</string>
     <string name="agent_ui_select_load_subscription_source">Velg: abonnementskilde (last)</string>
     <string name="agent_ui_select_delete_subscription_source">Velg: abonnementskilde (slett)</string>
@@ -536,7 +530,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Send innhold - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden innlegg - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren innlegg - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlattform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Velg: innlegg (bewerken)</string>
     <string name="agent_ui_select_post_action">Velg: actie (innlegg)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Angi: doelbericht attachmentRef / statusKey…</string>

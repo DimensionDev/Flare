@@ -94,11 +94,13 @@
     <string name="status_share_via_fxembed">Udostępnij przez FxEmbed</string>
     <string name="status_share_via_fixvx">Udostępnij przez Fixvx</string>
     <string name="status_insight_title">Wgląd postów</string>
+    <string name="profile_insight_title">Wgląd w profil</string>
     <string name="agent_chat_title">Czat SI</string>
     <string name="agent_chat_input_placeholder">Pytaj cokolwiek…</string>
     <string name="agent_chat_send">Wyślij</string>
     <string name="agent_chat_thinking">Myślenie…</string>
     <string name="status_insight_analyzing">Analizowanie tego posta…</string>
+    <string name="profile_insight_analyzing">Analizowanie tego profilu…</string>
     <string name="status_insight_error">Nie można przeanalizować tego posta.</string>
     <string name="status_insight_trace_loading_post_context">Wczytywanie kontekstu postu…</string>
     <string name="status_insight_trace_post_context_loaded">Kontekst postu załadowany</string>
@@ -110,6 +112,7 @@
     <string name="status_insight_trace_subgraph_started">Wejście do etapu analizy…</string>
     <string name="status_insight_trace_subgraph_completed">Etap analizy zakończony</string>
     <string name="status_insight_trace_subgraph_failed">Etap analizy nie powiódł się</string>
+    <string name="status_insight_trace_asking_model">Pytanie %1$s...</string>
     <string name="status_insight_trace_model_response_received">Czytanie odpowiedzi modelu…</string>
     <string name="status_insight_trace_streaming_started">Strumieniowanie z %1$s…</string>
     <string name="status_insight_trace_streaming_response">Otrzymywanie odpowiedzi…</string>
@@ -505,19 +508,14 @@
     <string name="misskey_channel_tab_featured">Polecane</string>
     <string name="media_save_success">Zapisano w Pobranych</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Wgląd w profil</string>
-    <string name="profile_insight_analyzing">Analizowanie tego profilu…</string>
-    <string name="status_insight_trace_asking_model">Pytanie %1$s...</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="agent_compose_confirmation_prompt">Wysłanie wpis?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Anuluj</string>
+    <string name="agent_ui_confirm_execute">Potwierdź</string>
+    <string name="agent_ui_confirm_save_subscription">Zapisz</string>
     <string name="agent_ui_cancel_save_subscription">Anuluj: zapis</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Usuń</string>
     <string name="agent_ui_cancel_delete_subscription">Anuluj: usunięcie</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Wyślij</string>
     <string name="agent_ui_cancel_send_post">Anuluj: wysłanie</string>
     <string name="agent_ui_select_load_subscription_source">Wybierz: źródło subskrypcji (wczytać)</string>
     <string name="agent_ui_select_delete_subscription_source">Wybierz: źródło subskrypcji (usunięcie)</string>
@@ -538,7 +536,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Wysłanie treść - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Ответить wpis - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Цитировать wpis - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlatform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Wybierz: wpis (выполнить действие)</string>
     <string name="agent_ui_select_post_action">Wybierz: действие (wpis)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Wpisz: целевой пост attachmentRef / statusKey…</string>

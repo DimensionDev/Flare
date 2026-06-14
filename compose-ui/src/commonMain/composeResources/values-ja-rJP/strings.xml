@@ -404,6 +404,7 @@
     <string name="liked_title">いいねした投稿</string>
     <string name="all_rss_feeds_title">すべての購読</string>
     <string name="posts_title">投稿</string>
+    <string name="posts_with_replies_title">投稿と返信</string>
     <string name="media_title">メディア</string>
     <string name="settings_appearance_absolute_timestamp">絶対時刻表示</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に正確な日時を表示します</string>
@@ -417,6 +418,4 @@
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="posts_with_replies_title">投稿と返信</string>
 </resources>

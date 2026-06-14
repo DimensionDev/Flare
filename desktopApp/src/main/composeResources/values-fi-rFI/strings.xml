@@ -92,10 +92,17 @@
     <string name="status_share_via_fxembed">Jaa FxEmbedin kautta</string>
     <string name="status_share_via_fixvx">Jaa Fixvx:n kautta</string>
     <string name="status_insight_title">Viestin käsitys</string>
+    <string name="profile_insight_title">Profiilinäkymä</string>
     <string name="agent_chat_title">Ai Keskustelu</string>
+    <string name="agent_chat_input_placeholder">Kysy mitään...</string>
     <string name="agent_chat_send">Lähetä</string>
+    <string name="agent_chat_thinking">Ajatellaan...</string>
+    <string name="status_insight_analyzing">Analysoidaan viestiä...</string>
+    <string name="profile_insight_analyzing">Analysoidaan tätä profiilia…</string>
     <string name="status_insight_error">Tätä viestiä ei voi analysoida.</string>
+    <string name="status_insight_trace_loading_post_context">Ladataan sisältöä...</string>
     <string name="status_insight_trace_post_context_loaded">Viestin konteksti ladattu</string>
+    <string name="status_insight_trace_preparing_images">Valmistellaan kuvia...</string>
     <string name="status_insight_trace_images_unsupported_fallback">Kuvia ei tueta. Yritä uudelleen tekstillä…</string>
     <string name="status_insight_trace_agent_started">Aloitetaan analyysiä…</string>
     <string name="status_insight_trace_strategy_started">Suunnitteluanalyysi…</string>
@@ -116,6 +123,7 @@
     <string name="status_insight_trace_tool_call_completed">%1$s</string>
     <string name="status_insight_trace_tool_validation_failed">%1$s</string>
     <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Ladataan sisältöä...</string>
     <string name="status_insight_trace_tool_load_status_context_completed">Viestin konteksti ladattu</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Viestin kontekstin syöte hylättiin</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Viestin kontekstin lataaminen epäonnistui</string>
@@ -123,6 +131,7 @@
     <string name="status_insight_trace_tool_search_status_completed">Haku suoritettu</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Hakusyöte hylättiin</string>
     <string name="status_insight_trace_tool_search_status_failed">Haku epäonnistui</string>
+    <string name="status_insight_trace_agent_completed">Viimeistellään analyysiä...</string>
     <string name="status_insight_trace_agent_failed">Analyysi epäonnistui</string>
     <string name="status_insight_trace_agent_closing">Loppuanalyysi…</string>
     <string name="ask_ai">Kysy AI</string>
@@ -497,25 +506,14 @@
     <string name="misskey_channel_tab_featured">Suositellut</string>
     <string name="media_save_success">Tallennettu ladattuihin tiedostoihin</string>
     <string name="media_save_fail">Tallentaminen epäonnistui</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profiilinäkymä</string>
-    <string name="agent_chat_input_placeholder">Kysy mitään...</string>
-    <string name="agent_chat_thinking">Ajatellaan...</string>
-    <string name="status_insight_analyzing">Analysoidaan viestiä...</string>
-    <string name="profile_insight_analyzing">Analysoidaan tätä profiilia…</string>
-    <string name="status_insight_trace_loading_post_context">Ladataan sisältöä...</string>
-    <string name="status_insight_trace_preparing_images">Valmistellaan kuvia...</string>
-    <string name="status_insight_trace_tool_load_status_context_started">Ladataan sisältöä...</string>
-    <string name="status_insight_trace_agent_completed">Viimeistellään analyysiä...</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="agent_compose_confirmation_prompt">Lähetä julkaisu?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Peruuta</string>
+    <string name="agent_ui_confirm_execute">Vahvista</string>
+    <string name="agent_ui_confirm_save_subscription">Tallenna</string>
     <string name="agent_ui_cancel_save_subscription">Peruuta: tallenna</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Poista</string>
     <string name="agent_ui_cancel_delete_subscription">Peruuta: poista</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Lähetä</string>
     <string name="agent_ui_cancel_send_post">Peruuta: lähetä</string>
     <string name="agent_ui_select_load_subscription_source">Valitse: tilauslähde (lataa)</string>
     <string name="agent_ui_select_delete_subscription_source">Valitse: tilauslähde (poista)</string>
@@ -536,7 +534,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Lähetä sisältö - tili?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden julkaisu - tili?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren julkaisu - tili?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nTili: %2$s\nAlusta: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Valitse: julkaisu (bewerken)</string>
     <string name="agent_ui_select_post_action">Valitse: actie (julkaisu)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Syötä: doelbericht attachmentRef / statusKey…</string>

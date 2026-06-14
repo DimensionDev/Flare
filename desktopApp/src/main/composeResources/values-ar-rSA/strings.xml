@@ -96,11 +96,13 @@
     <string name="status_share_via_fxembed">مشاركة عبر FxEmbed</string>
     <string name="status_share_via_fixvx">مشاركة عبر Fixvx</string>
     <string name="status_insight_title">نشر التبصر</string>
+    <string name="profile_insight_title">رؤى الملف الشخصي</string>
     <string name="agent_chat_title">دردشة AI</string>
     <string name="agent_chat_input_placeholder">اسأل عن أي شيء…</string>
     <string name="agent_chat_send">إرسال</string>
     <string name="agent_chat_thinking">التفكير…</string>
     <string name="status_insight_analyzing">تحليل هذا المنشور…</string>
+    <string name="profile_insight_analyzing">جارٍ تحليل هذا الملف الشخصي…</string>
     <string name="status_insight_error">غير قادر على تحليل هذه المشاركة.</string>
     <string name="status_insight_trace_loading_post_context">تحميل سياق المشاركة…</string>
     <string name="status_insight_trace_post_context_loaded">تم تحميل سياق المشاركة</string>
@@ -508,18 +510,14 @@
     <string name="misskey_channel_tab_featured">المميزة</string>
     <string name="media_save_success">تم الحفظ في التنزيلات</string>
     <string name="media_save_fail">فشل الحفظ</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">رؤى الملف الشخصي</string>
-    <string name="profile_insight_analyzing">جارٍ تحليل هذا الملف الشخصي…</string>
-    <string name="settings_about_discord" translatable="false">ديسكورد</string>
     <string name="agent_compose_confirmation_prompt">إرسال منشور?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">إلغاء</string>
+    <string name="agent_ui_confirm_execute">تأكيد</string>
+    <string name="agent_ui_confirm_save_subscription">حفظ</string>
     <string name="agent_ui_cancel_save_subscription">إلغاء: حفظ</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">حذف</string>
     <string name="agent_ui_cancel_delete_subscription">إلغاء: حذف</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">إرسال</string>
     <string name="agent_ui_cancel_send_post">إلغاء: إرسال</string>
     <string name="agent_ui_select_load_subscription_source">اختر: مصدر الاشتراك (تحميل)</string>
     <string name="agent_ui_select_delete_subscription_source">اختر: مصدر الاشتراك (حذف)</string>
@@ -540,7 +538,7 @@
     <string name="agent_ui_compose_send_confirmation_title">إرسال محتوى - حساب?</string>
     <string name="agent_ui_compose_reply_confirmation_title">رد منشور - حساب?</string>
     <string name="agent_ui_compose_quote_confirmation_title">اقتباس منشور - حساب?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nالحساب: %2$s\nالمنصة: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">اختر: منشور (تنفيذ)</string>
     <string name="agent_ui_select_post_action">اختر: إجراء (منشور)</string>
     <string name="agent_ui_post_action_target_post_placeholder">أدخل: المنشور الهدف attachmentRef / statusKey…</string>

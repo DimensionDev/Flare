@@ -42,10 +42,13 @@
     <string name="compose_save_draft">Gem</string>
     <string name="compose_close_discard">Kassér</string>
     <string name="status_insight_title">Indsend indsigt</string>
+    <string name="profile_insight_title">Profilindsigt</string>
     <string name="status_insight_input_placeholder">Spørg en opfølgning…</string>
     <string name="status_insight_send">Send</string>
     <string name="status_insight_analyzing">Analyserer dette indlæg…</string>
+    <string name="profile_insight_analyzing">Analyserer denne profil…</string>
     <string name="status_insight_error">Kan ikke analysere dette indlæg.</string>
+    <string name="profile_insight_error">Denne profil kan ikke analyseres.</string>
     <string name="status_insight_trace_loading_post_context">Indlæser post kontekst…</string>
     <string name="status_insight_trace_post_context_loaded">Indlæg kontekst indlæst</string>
     <string name="status_insight_trace_preparing_images">Forbereder billeder…</string>
@@ -87,6 +90,7 @@
     <string name="agent_chat_input_placeholder">Spørg noget…</string>
     <string name="agent_chat_send">Send</string>
     <string name="agent_chat_thinking">Tænker…</string>
+    <string name="agent_compose_confirmation_prompt">Send opslag?</string>
     <string name="draft_box_title">Klader</string>
     <string name="draft_box_empty">Ingen klader endnu</string>
     <string name="draft_box_edit">Redigér</string>
@@ -552,18 +556,11 @@
     <string name="channel_item_unfollow">Følg ikke længere</string>
     <string name="channel_item_favourite">Favorit</string>
     <string name="channel_item_unfavourite">Fjern fra favoritter</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilindsigt</string>
-    <string name="profile_insight_analyzing">Analyserer denne profil…</string>
-    <string name="profile_insight_error">Denne profil kan ikke analyseres.</string>
-    <string name="agent_compose_confirmation_prompt">Send opslag?</string>
-    <string name="settings_about_discord" translatable="false">Uenighed</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Annuller</string>
+    <string name="agent_ui_confirm_execute">Bekræft</string>
+    <string name="agent_ui_confirm_save_subscription">Gem</string>
     <string name="agent_ui_cancel_save_subscription">Annuller: gem</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Slet</string>
     <string name="agent_ui_cancel_delete_subscription">Annuller: slet</string>
     <string name="agent_ui_confirm_send_post">Send</string>
     <string name="agent_ui_cancel_send_post">Annuller: send</string>
@@ -586,7 +583,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Send indhold - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden opslag - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren opslag - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlatform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Vælg: opslag (bewerken)</string>
     <string name="agent_ui_select_post_action">Vælg: actie (opslag)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Indtast: doelbericht attachmentRef / statusKey…</string>

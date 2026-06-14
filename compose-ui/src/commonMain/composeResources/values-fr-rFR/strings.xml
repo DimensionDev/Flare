@@ -404,6 +404,7 @@
     <string name="liked_title">Aimé</string>
     <string name="all_rss_feeds_title">Tous les abonnements</string>
     <string name="posts_title">Publications</string>
+    <string name="posts_with_replies_title">Publications &amp; Réponses</string>
     <string name="media_title">Médias</string>
     <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
     <string name="settings_appearance_absolute_timestamp_description">Afficher l\'heure exacte sur les publications</string>
@@ -417,6 +418,4 @@
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="posts_with_replies_title">Publications &amp; Réponses</string>
 </resources>

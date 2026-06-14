@@ -91,11 +91,17 @@
     <string name="status_share_via_fxembed">通过 FxEmbed 分享</string>
     <string name="status_share_via_fixvx">通过 Fixvx 分享</string>
     <string name="status_insight_title">帖子视图</string>
+    <string name="profile_insight_title">个人资料洞察</string>
     <string name="agent_chat_title">AI 聊天</string>
     <string name="agent_chat_input_placeholder">询问任何…</string>
     <string name="agent_chat_send">发送</string>
+    <string name="agent_chat_thinking">正在思考…</string>
+    <string name="status_insight_analyzing">正在分析此帖子...</string>
+    <string name="profile_insight_analyzing">正在分析此个人资料…</string>
     <string name="status_insight_error">无法分析此帖子。</string>
+    <string name="status_insight_trace_loading_post_context">正在加载帖子上下文...</string>
     <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>
+    <string name="status_insight_trace_preparing_images">正在准备图像...</string>
     <string name="status_insight_trace_images_unsupported_fallback">图像不被支持；重试文本…</string>
     <string name="status_insight_trace_agent_started">开始分析…</string>
     <string name="status_insight_trace_strategy_started">规划分析…</string>
@@ -103,7 +109,10 @@
     <string name="status_insight_trace_subgraph_started">进入分析阶段…</string>
     <string name="status_insight_trace_subgraph_completed">分析阶段已完成</string>
     <string name="status_insight_trace_subgraph_failed">分析阶段失败</string>
+    <string name="status_insight_trace_asking_model">正在询问 %1$s...</string>
     <string name="status_insight_trace_model_response_received">正在读取模型响应…</string>
+    <string name="status_insight_trace_streaming_started">从 %1$s 串流...</string>
+    <string name="status_insight_trace_streaming_response">正在接收响应...</string>
     <string name="status_insight_trace_streaming_completed">响应流完成</string>
     <string name="status_insight_trace_streaming_failed">响应流失败</string>
     <string name="status_insight_trace_running_step">运行分析步骤…</string>
@@ -113,6 +122,7 @@
     <string name="status_insight_trace_tool_call_completed">%1$s</string>
     <string name="status_insight_trace_tool_validation_failed">%1$s</string>
     <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">正在加载帖子上下文...</string>
     <string name="status_insight_trace_tool_load_status_context_completed">帖子上下文已加载</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">帖子上下文输入被拒绝</string>
     <string name="status_insight_trace_tool_load_status_context_failed">加载帖子上下文失败</string>
@@ -495,26 +505,14 @@
     <string name="misskey_channel_tab_featured">精选</string>
     <string name="media_save_success">已保存到下载目录</string>
     <string name="media_save_fail">保存失败</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">个人资料洞察</string>
-    <string name="agent_chat_thinking">正在思考…</string>
-    <string name="status_insight_analyzing">正在分析此帖子...</string>
-    <string name="profile_insight_analyzing">正在分析此个人资料…</string>
-    <string name="status_insight_trace_loading_post_context">正在加载帖子上下文...</string>
-    <string name="status_insight_trace_preparing_images">正在准备图像...</string>
-    <string name="status_insight_trace_asking_model">正在询问 %1$s...</string>
-    <string name="status_insight_trace_streaming_started">从 %1$s 串流...</string>
-    <string name="status_insight_trace_streaming_response">正在接收响应...</string>
-    <string name="status_insight_trace_tool_load_status_context_started">正在加载帖子上下文...</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="agent_compose_confirmation_prompt">发送 帖子?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">取消</string>
+    <string name="agent_ui_confirm_execute">确认</string>
+    <string name="agent_ui_confirm_save_subscription">保存</string>
     <string name="agent_ui_cancel_save_subscription">取消: 保存</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">删除</string>
     <string name="agent_ui_cancel_delete_subscription">取消: 删除</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">发送</string>
     <string name="agent_ui_cancel_send_post">取消: 发送</string>
     <string name="agent_ui_select_load_subscription_source">选择: 订阅源 (加载)</string>
     <string name="agent_ui_select_delete_subscription_source">选择: 订阅源 (删除)</string>
@@ -535,7 +533,7 @@
     <string name="agent_ui_compose_send_confirmation_title">发送 内容 - 账号?</string>
     <string name="agent_ui_compose_reply_confirmation_title">回复 帖子 - 账号?</string>
     <string name="agent_ui_compose_quote_confirmation_title">引用 帖子 - 账号?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\n账户： %2$s\n平台： %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">选择: 帖子 (操作)</string>
     <string name="agent_ui_select_post_action">选择: 操作 (帖子)</string>
     <string name="agent_ui_post_action_target_post_placeholder">输入: 目标帖子 attachmentRef / statusKey…</string>

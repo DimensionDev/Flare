@@ -42,10 +42,13 @@
     <string name="compose_save_draft">Guardar</string>
     <string name="compose_close_discard">Descartar</string>
     <string name="status_insight_title">Información del post</string>
+    <string name="profile_insight_title">Información del perfil</string>
     <string name="status_insight_input_placeholder">Preguntar un seguimiento…</string>
     <string name="status_insight_send">Enviar</string>
     <string name="status_insight_analyzing">Analizando esta publicación…</string>
+    <string name="profile_insight_analyzing">Analizando este perfil…</string>
     <string name="status_insight_error">No se puede analizar esta publicación.</string>
+    <string name="profile_insight_error">No se puede analizar este perfil.</string>
     <string name="status_insight_trace_loading_post_context">Cargando contexto de post…</string>
     <string name="status_insight_trace_post_context_loaded">Contexto de publicación cargado</string>
     <string name="status_insight_trace_preparing_images">Preparando imágenes…</string>
@@ -87,6 +90,7 @@
     <string name="agent_chat_input_placeholder">Preguntar algo…</string>
     <string name="agent_chat_send">Enviar</string>
     <string name="agent_chat_thinking">Piensando…</string>
+    <string name="agent_compose_confirmation_prompt">Enviar publicación?</string>
     <string name="draft_box_title">Borradores</string>
     <string name="draft_box_empty">No hay borradores</string>
     <string name="draft_box_edit">Editar</string>
@@ -552,20 +556,13 @@
     <string name="channel_item_unfollow">Dejar de seguir</string>
     <string name="channel_item_favourite">Añadir a favoritos</string>
     <string name="channel_item_unfavourite">Quitar de favoritos</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Información del perfil</string>
-    <string name="profile_insight_analyzing">Analizando este perfil…</string>
-    <string name="profile_insight_error">No se puede analizar este perfil.</string>
-    <string name="agent_compose_confirmation_prompt">Enviar publicación?</string>
-    <string name="settings_about_discord" translatable="false">Discordia</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Cancelar</string>
+    <string name="agent_ui_confirm_execute">Confirmar</string>
+    <string name="agent_ui_confirm_save_subscription">Guardar</string>
     <string name="agent_ui_cancel_save_subscription">Cancelar: guardar</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Eliminar</string>
     <string name="agent_ui_cancel_delete_subscription">Cancelar: eliminar</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Enviar</string>
     <string name="agent_ui_cancel_send_post">Cancelar: enviar</string>
     <string name="agent_ui_select_load_subscription_source">Seleccionar: fuente de suscripción (cargar)</string>
     <string name="agent_ui_select_delete_subscription_source">Seleccionar: fuente de suscripción (eliminar)</string>
@@ -586,7 +583,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Enviar contenido - cuenta?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Responder publicación - cuenta?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citar publicación - cuenta?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nCuenta: %2$s\nPlataforma: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Seleccionar: publicación (operar sobre)</string>
     <string name="agent_ui_select_post_action">Seleccionar: acción (publicación)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Introducir: publicación de destino attachmentRef / statusKey…</string>

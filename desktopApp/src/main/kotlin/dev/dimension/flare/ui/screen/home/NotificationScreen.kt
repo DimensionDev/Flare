@@ -149,16 +149,21 @@ internal fun NotificationScreen() {
                                                     maxLines = 1,
                                                     modifier = Modifier.padding(start = 8.dp),
                                                 )
-                                                if (badge > 0) {
-                                                    Badge(
-                                                        status = BadgeStatus.Informational,
-                                                        content = {
-                                                            Text(badge.toString())
-                                                        },
-                                                        modifier = Modifier.padding(start = 8.dp),
-                                                    )
-                                                }
                                             },
+                                            trailing =
+                                                if (badge > 0) {
+                                                    {
+                                                        Badge(
+                                                            status = BadgeStatus.Informational,
+                                                            content = {
+                                                                Text(badge.toString())
+                                                            },
+                                                            modifier = Modifier.padding(start = 8.dp),
+                                                        )
+                                                    }
+                                                } else {
+                                                    null
+                                                }
                                         )
                                     }
                                 },
@@ -182,7 +187,8 @@ internal fun NotificationScreen() {
                                         size = AvatarComponentDefaults.compatSize,
                                     )
                                     Text(
-                                        state.selectedAccount?.handle?.canonical ?: "Select Account",
+                                        state.selectedAccount?.handle?.canonical
+                                            ?: "Select Account",
                                         maxLines = 1,
                                         modifier = Modifier.padding(start = 8.dp),
                                     )

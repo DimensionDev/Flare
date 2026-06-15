@@ -166,7 +166,8 @@ private struct SidebarIconButton: View {
                 }
             }
             .frame(width: 44, height: 44)
-            .shadow(color: shadowColor, radius: isAccent ? 8 : 0, y: isAccent ? 3 : 0)
+            .background(backgroundColor, in: .circle)
+            .shadow(color: shadowColor, radius: isAccent ? 4 : 0, y: isAccent ? 2 : 0)
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -178,7 +179,7 @@ private struct SidebarIconButton: View {
         if isAccent {
             .accentColor
         } else if isSelected {
-            .accentColor.opacity(0.14)
+            .clear
         } else {
             .clear
         }

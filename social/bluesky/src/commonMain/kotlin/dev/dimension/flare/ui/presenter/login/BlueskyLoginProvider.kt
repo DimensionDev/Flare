@@ -222,9 +222,12 @@ private class BlueskyPasswordLoginHandler(
             } else {
                 val server = service.describeServer()
                 val actualUserName =
-                    server.maybeResponse()?.availableUserDomains?.firstOrNull()?.let {
-                        "$username$it"
-                    } ?: username
+                    server
+                        .maybeResponse()
+                        ?.availableUserDomains
+                        ?.firstOrNull()
+                        ?.let { username.withBlueskyUserDomain(it) }
+                        ?: username
                 service.createSession(
                     CreateSessionRequest(
                         identifier = actualUserName,
@@ -449,6 +452,13 @@ private fun createOAuthApi(host: String): OAuthApi =
         },
         { OAuthCodeChallengeMethodS256 },
     )
+
+internal fun String.withBlueskyUserDomain(domain: String): String =
+    when {
+        domain.isBlank() -> this
+        domain.startsWith(".") -> "$this$domain"
+        else -> "$this.$domain"
+    }
 
 private fun OAuthAuthorizationRequest.toPlatformOAuthPending(
     host: String,

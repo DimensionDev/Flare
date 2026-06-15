@@ -408,6 +408,9 @@
     <string name="dm_sending">发送中</string>
     <string name="dm_leave">退出对话</string>
     <string name="dm_to_profile">查看资料</string>
+    <string name="dm_pin_code_title">输入 XChat PIN</string>
+    <string name="dm_pin_code_message">此 XChat 身份需要先输入 PIN 才能加载私信。</string>
+    <string name="dm_pin_code_label">PIN 码</string>
     <string name="tab_settings_mixed_timeline">启用混合时间轴标签页</string>
     <string name="tab_settings_mixed_timeline_desc">将所有标签页的动态合并到一个“主页”标签页中。</string>
     <string name="tab_settings_add_group">添加分组</string>

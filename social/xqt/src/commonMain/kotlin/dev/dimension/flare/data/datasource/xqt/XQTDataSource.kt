@@ -99,6 +99,7 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 internal class XQTDataSource(
     override val accountKey: MicroBlogKey,
     sourceCredentialFlow: Flow<XQTCredential>,
+    private val updateCredential: suspend (XQTCredential) -> Unit,
 ) : AuthenticatedMicroblogDataSource,
     NotificationTimelineDataSource,
     ComposeDataSource,
@@ -141,6 +142,7 @@ internal class XQTDataSource(
             service = service,
             accountKey = accountKey,
             credentialFlow = credentialFlow,
+            updateCredential = updateCredential,
         )
     }
 

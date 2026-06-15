@@ -18,6 +18,7 @@ import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageDelta
 import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageLoader
+import dev.dimension.flare.data.datasource.microblog.loader.DirectMessagePinCodeStatus
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.DirectMessageItemDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.DirectMessageTimelineDbPageLoader
@@ -54,6 +55,11 @@ public class DirectMessageHandler(
     private val database: CacheDatabase by inject()
     private val accountType = AccountType.Specific(accountKey)
     private val inMemoryBadgeCount = MutableStateFlow<Int?>(null)
+
+    public val pinCodeStatus: Flow<DirectMessagePinCodeStatus>
+        get() = loader.pinCodeStatus
+
+    public suspend fun submitPinCode(pinCode: String): DirectMessagePinCodeStatus = loader.submitPinCode(pinCode)
 
     public fun list(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(
@@ -249,7 +255,12 @@ public class DirectMessageHandler(
     public val badgeCount: CacheData<Int> by lazy {
         Cacheable(
             fetchSource = {
-                inMemoryBadgeCount.value = loader.loadBadgeCount()
+                inMemoryBadgeCount.value =
+                    if (loader.pinCodeStatus.first().canLoadDirectMessage) {
+                        loader.loadBadgeCount()
+                    } else {
+                        0
+                    }
             },
             cacheSource = {
                 inMemoryBadgeCount.filterNotNull()
@@ -427,6 +438,11 @@ public class DirectMessageHandler(
         }
     }
 }
+
+private val DirectMessagePinCodeStatus.canLoadDirectMessage: Boolean
+    get() =
+        this == DirectMessagePinCodeStatus.NotRequired ||
+            this == DirectMessagePinCodeStatus.Verified
 
 private fun UiDMItem.toDbMessageItem(roomKey: MicroBlogKey): DbMessageItem =
     DbMessageItem(

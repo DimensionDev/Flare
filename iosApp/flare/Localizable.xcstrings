@@ -36848,6 +36848,54 @@
         }
       }
     },
+    "dm_pin_code_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIN code"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIN 码"
+          }
+        }
+      }
+    },
+    "dm_pin_code_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This XChat identity requires a PIN before direct messages can be loaded."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 XChat 身份需要先输入 PIN 才能加载私信。"
+          }
+        }
+      }
+    },
+    "dm_pin_code_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter XChat PIN"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入 XChat PIN"
+          }
+        }
+      }
+    },
     "dm_list_title" : {
       "localizations" : {
         "af" : {

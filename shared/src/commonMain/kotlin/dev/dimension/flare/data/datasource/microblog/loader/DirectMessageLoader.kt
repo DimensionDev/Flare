@@ -18,6 +18,11 @@ public interface DirectMessageLoader {
     public val runtimeTransformer: Flow<DirectMessageRuntimeTransformer>
         get() = flowOf(DirectMessageRuntimeTransformer())
 
+    public val pinCodeStatus: Flow<DirectMessagePinCodeStatus>
+        get() = flowOf(DirectMessagePinCodeStatus.NotRequired)
+
+    public suspend fun submitPinCode(pinCode: String): DirectMessagePinCodeStatus = DirectMessagePinCodeStatus.NotRequired
+
     public suspend fun loadRooms(
         pageSize: Int,
         request: PagingRequest,
@@ -66,3 +71,18 @@ public data class DirectMessageRuntimeTransformer(
     val room: (UiDMRoom) -> UiDMRoom = { it },
     val item: (UiDMItem) -> UiDMItem = { it },
 )
+
+@HiddenFromObjC
+public sealed interface DirectMessagePinCodeStatus {
+    public data object NotRequired : DirectMessagePinCodeStatus
+
+    public data object Required : DirectMessagePinCodeStatus
+
+    public data object Verifying : DirectMessagePinCodeStatus
+
+    public data object Verified : DirectMessagePinCodeStatus
+
+    public data class Error(
+        val message: String?,
+    ) : DirectMessagePinCodeStatus
+}

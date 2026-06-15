@@ -489,6 +489,9 @@
     <string name="dm_sending">Sending</string>
     <string name="dm_leave">Leave conversation</string>
     <string name="dm_to_profile">Show profile</string>
+    <string name="dm_pin_code_title">Enter XChat PIN</string>
+    <string name="dm_pin_code_message">This XChat identity requires a PIN before direct messages can be loaded.</string>
+    <string name="dm_pin_code_label">PIN code</string>
 
 
     <string name="notification_login_expired">Login expired for %1$s</string>

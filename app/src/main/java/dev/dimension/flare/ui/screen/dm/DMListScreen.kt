@@ -85,28 +85,37 @@ internal fun DMListScreen(
             )
         },
     ) { contentPadding ->
-        RefreshContainer(
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-            indicatorPadding = contentPadding,
-            isRefreshing = state.isRefreshing,
-            onRefresh = state::refresh,
-            content = {
-                LazyColumn(
-                    contentPadding = contentPadding,
-                    modifier =
-                        Modifier
-                            .padding(horizontal = screenHorizontalPadding),
-                    verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-                ) {
-                    dmList(
-                        data = state.items,
-                        onItemClicked = onItemClicked,
-                    )
-                }
-            },
-        )
+        if (state.pinCodePromptVisible) {
+            DirectMessagePinCodeGate(
+                isVerifying = state.pinCodeVerifying,
+                errorMessage = state.pinCodeErrorMessage,
+                onSubmit = state::submitPinCode,
+                modifier = Modifier.padding(contentPadding),
+            )
+        } else {
+            RefreshContainer(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                indicatorPadding = contentPadding,
+                isRefreshing = state.isRefreshing,
+                onRefresh = state::refresh,
+                content = {
+                    LazyColumn(
+                        contentPadding = contentPadding,
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding),
+                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                    ) {
+                        dmList(
+                            data = state.items,
+                            onItemClicked = onItemClicked,
+                        )
+                    }
+                },
+            )
+        }
     }
 }
 

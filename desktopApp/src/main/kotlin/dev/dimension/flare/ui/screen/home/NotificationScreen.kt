@@ -163,7 +163,7 @@ internal fun NotificationScreen() {
                                                     }
                                                 } else {
                                                     null
-                                                }
+                                                },
                                         )
                                     }
                                 },

@@ -107,9 +107,12 @@ internal class BlueskyLoginPresenter(
             } else {
                 val server = service.describeServer()
                 val actualUserName =
-                    server.maybeResponse()?.availableUserDomains?.firstOrNull()?.let {
-                        "$username$it"
-                    } ?: username
+                    server
+                        .maybeResponse()
+                        ?.availableUserDomains
+                        ?.firstOrNull()
+                        ?.let { username.withBlueskyUserDomain(it) }
+                        ?: username
                 service.createSession(
                     CreateSessionRequest(
                         identifier = actualUserName,

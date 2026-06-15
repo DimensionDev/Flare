@@ -34,6 +34,9 @@ import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.elonmusk114514.ElonMusk1145141919810
+import dev.dimension.flare.data.network.xqt.emusks.EmusksRawClient
+import dev.dimension.flare.data.network.xqt.emusks.EmusksTransactionIdProvider
+import dev.dimension.flare.data.network.xqt.xchat.XChatService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -140,6 +143,34 @@ internal class XQTService(
         accountKey = accountKey,
         chocolateFlow = chocolateFlow,
     ).createVDmPostJsonPostApi() {
+    private val emusks by lazy {
+        EmusksRawClient(
+            cookieProvider = { chocolateFlow?.firstOrNull() },
+            transactionIdProvider =
+                EmusksTransactionIdProvider { method, path ->
+                    runCatching {
+                        ElonMusk1145141919810.senpaiSukissu(
+                            method = method,
+                            path = path,
+                        )
+                    }.getOrDefault("")
+                },
+            loginExpiredException =
+                accountKey?.let { key ->
+                    {
+                        LoginExpiredException(
+                            key,
+                            PlatformType.xQt,
+                        )
+                    }
+                },
+        )
+    }
+
+    internal val xchat: XChatService by lazy {
+        XChatService(emusks)
+    }
+
     companion object {
         fun checkChocolate(value: String) =
 //            value.contains("gt=") &&

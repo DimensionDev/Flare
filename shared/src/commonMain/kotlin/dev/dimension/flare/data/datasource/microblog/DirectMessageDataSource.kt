@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.datasource.microblog.handler.DirectMessageHandler
+import dev.dimension.flare.data.datasource.microblog.loader.DirectMessagePinCodeStatus
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
@@ -24,6 +25,11 @@ import kotlin.uuid.Uuid
 @HiddenFromObjC
 public interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
     public val directMessageHandler: DirectMessageHandler
+
+    public val directMessagePinCodeStatus: Flow<DirectMessagePinCodeStatus>
+        get() = directMessageHandler.pinCodeStatus
+
+    public suspend fun submitDirectMessagePinCode(pinCode: String): DirectMessagePinCodeStatus = directMessageHandler.submitPinCode(pinCode)
 
     public fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> = directMessageHandler.list(scope)
 

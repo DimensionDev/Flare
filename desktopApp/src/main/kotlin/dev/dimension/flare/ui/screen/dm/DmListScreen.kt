@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.dm
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,23 +41,34 @@ internal fun DmListScreen(
 
     RegisterTabCallback(listState, onRefresh = state::refresh)
 
-    Box {
-        FlareScrollBar(listState) {
-            LazyColumn(
-                contentPadding = LocalWindowPadding.current,
-                modifier =
-                    Modifier
-                        .padding(horizontal = screenHorizontalPadding),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                state = listState,
-            ) {
-                dmList(
-                    data = state.items,
-                    onItemClicked = onItemClicked,
-                )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        if (state.pinCodePromptVisible) {
+            DirectMessagePinCodeGate(
+                isVerifying = state.pinCodeVerifying,
+                errorMessage = state.pinCodeErrorMessage,
+                onSubmit = state::submitPinCode,
+                modifier = Modifier.padding(LocalWindowPadding.current),
+            )
+        } else {
+            FlareScrollBar(listState) {
+                LazyColumn(
+                    contentPadding = LocalWindowPadding.current,
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    state = listState,
+                ) {
+                    dmList(
+                        data = state.items,
+                        onItemClicked = onItemClicked,
+                    )
+                }
             }
         }
-        if (state.isRefreshing) {
+        if (!state.pinCodePromptVisible && state.isRefreshing) {
             ProgressBar(
                 modifier =
                     Modifier

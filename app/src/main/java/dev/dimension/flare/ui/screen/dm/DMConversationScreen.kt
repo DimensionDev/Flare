@@ -83,9 +83,6 @@ internal fun DMConversationScreen(
     toProfile: (MicroBlogKey) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
     val state by producePresenter(
         key = "dm_conversation_${accountType}_$roomKey",
     ) {
@@ -93,6 +90,11 @@ internal fun DMConversationScreen(
             accountType = accountType,
             roomKey = roomKey,
         )
+    }
+    LaunchedEffect(state.pinCodePromptVisible) {
+        if (!state.pinCodePromptVisible) {
+            focusRequester.requestFocus()
+        }
     }
 
     FlareScaffold(
@@ -184,59 +186,61 @@ internal fun DMConversationScreen(
             )
         },
         bottomBar = {
-            Surface {
-                Box {
-                    HorizontalDivider(
-                        modifier =
-                            Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth(),
-                        color = FlareDividerDefaults.color,
-                        thickness = FlareDividerDefaults.thickness,
-                    )
-                    OutlinedTextField(
-                        modifier =
-                            Modifier
-                                .padding(
-                                    bottom = LocalBottomBarHeight.current,
-                                ).windowInsetsPadding(
-                                    WindowInsets.systemBars.only(
-                                        WindowInsetsSides.Horizontal,
-                                    ),
-                                ).consumeWindowInsets(
-                                    PaddingValues(
+            if (!state.pinCodePromptVisible) {
+                Surface {
+                    Box {
+                        HorizontalDivider(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopCenter)
+                                    .fillMaxWidth(),
+                            color = FlareDividerDefaults.color,
+                            thickness = FlareDividerDefaults.thickness,
+                        )
+                        OutlinedTextField(
+                            modifier =
+                                Modifier
+                                    .padding(
                                         bottom = LocalBottomBarHeight.current,
+                                    ).windowInsetsPadding(
+                                        WindowInsets.systemBars.only(
+                                            WindowInsetsSides.Horizontal,
+                                        ),
+                                    ).consumeWindowInsets(
+                                        PaddingValues(
+                                            bottom = LocalBottomBarHeight.current,
+                                        ),
+                                    ).imePadding()
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = screenHorizontalPadding,
+                                        vertical = 8.dp,
+                                    ).focusRequester(
+                                        focusRequester = focusRequester,
                                     ),
-                                ).imePadding()
-                                .fillMaxWidth()
-                                .padding(
-                                    horizontal = screenHorizontalPadding,
-                                    vertical = 8.dp,
-                                ).focusRequester(
-                                    focusRequester = focusRequester,
-                                ),
-                        state = state.text,
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    state.send()
-                                },
-                                enabled = state.canSend,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.PaperPlane,
-                                    contentDescription = stringResource(id = R.string.send),
+                            state = state.text,
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        state.send()
+                                    },
+                                    enabled = state.canSend,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.PaperPlane,
+                                        contentDescription = stringResource(id = R.string.send),
+                                    )
+                                }
+                            },
+                            shape = RoundedCornerShape(100),
+                            placeholder = {
+                                Text(
+                                    text = stringResource(id = R.string.dm_send_placeholder),
                                 )
-                            }
-                        },
-                        shape = RoundedCornerShape(100),
-                        placeholder = {
-                            Text(
-                                text = stringResource(id = R.string.dm_send_placeholder),
-                            )
-                        },
-                    )
+                            },
+                        )
+                    }
                 }
             }
         },
@@ -249,50 +253,59 @@ internal fun DMConversationScreen(
                 }
             }
         }
-        LazyColumn(
-            state = listState,
-            reverseLayout = true,
-            contentPadding = contentPadding,
-            modifier =
-                Modifier
-                    .consumeWindowInsets(contentPadding)
-                    .fillMaxSize()
-                    .imePadding()
-                    .imeNestedScroll(),
-            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Bottom),
-        ) {
-            items(
-                state.items,
-                key = {
-                    it.id
-                },
+        if (state.pinCodePromptVisible) {
+            DirectMessagePinCodeGate(
+                isVerifying = state.pinCodeVerifying,
+                errorMessage = state.pinCodeErrorMessage,
+                onSubmit = state::submitPinCode,
+                modifier = Modifier.padding(contentPadding),
+            )
+        } else {
+            LazyColumn(
+                state = listState,
+                reverseLayout = true,
+                contentPadding = contentPadding,
+                modifier =
+                    Modifier
+                        .consumeWindowInsets(contentPadding)
+                        .fillMaxSize()
+                        .imePadding()
+                        .imeNestedScroll(),
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Bottom),
+            ) {
+                items(
+                    state.items,
+                    key = {
+                        it.id
+                    },
 //                emptyContent = {
 //
 //                },
 //                errorContent = {
 //
 //                },
-                loadingContent = {
-                    DMLoadingItem()
-                },
-                itemContent = { item ->
-                    DMItem(
-                        item = item,
-                        onRetry = {
-                            state.retry(item.key)
-                        },
-                        modifier =
-                            Modifier
-                                .animateItem()
-                                .padding(
-                                    horizontal = screenHorizontalPadding,
-                                ),
-                        onUserClicked = {
-                            toProfile.invoke(it.key)
-                        },
-                    )
-                },
-            )
+                    loadingContent = {
+                        DMLoadingItem()
+                    },
+                    itemContent = { item ->
+                        DMItem(
+                            item = item,
+                            onRetry = {
+                                state.retry(item.key)
+                            },
+                            modifier =
+                                Modifier
+                                    .animateItem()
+                                    .padding(
+                                        horizontal = screenHorizontalPadding,
+                                    ),
+                            onUserClicked = {
+                                toProfile.invoke(it.key)
+                            },
+                        )
+                    },
+                )
+            }
         }
     }
 }

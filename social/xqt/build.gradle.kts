@@ -51,6 +51,7 @@ kotlin {
                 implementation(libs.paging.common)
                 implementation(libs.paging.compose)
                 implementation(libs.cryptography.provider.optimal)
+                implementation(libs.juicebox.sdk)
             }
         }
         val commonTest by getting {

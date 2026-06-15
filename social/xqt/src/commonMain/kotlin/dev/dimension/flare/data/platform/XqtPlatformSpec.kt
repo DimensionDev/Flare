@@ -118,6 +118,12 @@ public data object XqtPlatformSpec :
         XQTDataSource(
             accountKey = context.accountKey,
             sourceCredentialFlow = context.credentialFlow(XQTCredential.serializer()),
+            updateCredential = {
+                context.updateCredential(
+                    serializer = XQTCredential.serializer(),
+                    credential = it,
+                )
+            },
         )
 
     override fun guestDataSource(

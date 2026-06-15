@@ -79,8 +79,10 @@ fun DmConversationScreen(
         )
     }
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+    LaunchedEffect(state.pinCodePromptVisible) {
+        if (!state.pinCodePromptVisible) {
+            focusRequester.requestFocus()
+        }
     }
     val listState = rememberLazyListState()
     state.items.onSuccess {
@@ -174,84 +176,96 @@ fun DmConversationScreen(
                 }
             }
         }
-        FlareScrollBar(
-            state = listState,
-            reverseLayout = true,
-        ) {
-            LazyColumn(
-                state = listState,
-                reverseLayout = true,
-                contentPadding = PaddingValues(top = 8.dp),
+        if (state.pinCodePromptVisible) {
+            DirectMessagePinCodeGate(
+                isVerifying = state.pinCodeVerifying,
+                errorMessage = state.pinCodeErrorMessage,
+                onSubmit = state::submitPinCode,
                 modifier =
                     Modifier
-                        .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Bottom),
+                        .weight(1f)
+                        .padding(LocalWindowPadding.current),
+            )
+        } else {
+            FlareScrollBar(
+                state = listState,
+                reverseLayout = true,
             ) {
-                stickyHeader {
-                    TextField(
-                        state = state.text,
-                        modifier =
-                            Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        trailing = {
-                            SubtleButton(
-                                onClick = {
-                                    state.send()
-                                },
-                                disabled = !state.canSend,
-                                iconOnly = true,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.PaperPlane,
-                                    contentDescription = stringResource(Res.string.send),
+                LazyColumn(
+                    state = listState,
+                    reverseLayout = true,
+                    contentPadding = PaddingValues(top = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Bottom),
+                ) {
+                    stickyHeader {
+                        TextField(
+                            state = state.text,
+                            modifier =
+                                Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            trailing = {
+                                SubtleButton(
+                                    onClick = {
+                                        state.send()
+                                    },
+                                    disabled = !state.canSend,
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.PaperPlane,
+                                        contentDescription = stringResource(Res.string.send),
+                                    )
+                                }
+                            },
+                            placeholder = {
+                                Text(
+                                    text = stringResource(Res.string.dm_send_placeholder),
                                 )
-                            }
+                            },
+                            keyboardOptions =
+                                KeyboardOptions(
+                                    imeAction = ImeAction.Send,
+                                ),
+                            onKeyboardAction = {
+                                if (state.canSend) {
+                                    state.send()
+                                }
+                            },
+                        )
+                    }
+                    items(
+                        state.items,
+                        key = {
+                            it.id
                         },
-                        placeholder = {
-                            Text(
-                                text = stringResource(Res.string.dm_send_placeholder),
+                        loadingContent = {
+                            DMLoadingItem()
+                        },
+                        itemContent = { item ->
+                            DMItem(
+                                item = item,
+                                onRetry = {
+                                    state.retry(item.key)
+                                },
+                                modifier =
+                                    Modifier
+                                        .animateItem()
+                                        .padding(
+                                            horizontal = screenHorizontalPadding,
+                                        ),
+                                onUserClicked = {
+                                    toProfile.invoke(it.key)
+                                },
                             )
-                        },
-                        keyboardOptions =
-                            KeyboardOptions(
-                                imeAction = ImeAction.Send,
-                            ),
-                        onKeyboardAction = {
-                            if (state.canSend) {
-                                state.send()
-                            }
                         },
                     )
                 }
-                items(
-                    state.items,
-                    key = {
-                        it.id
-                    },
-                    loadingContent = {
-                        DMLoadingItem()
-                    },
-                    itemContent = { item ->
-                        DMItem(
-                            item = item,
-                            onRetry = {
-                                state.retry(item.key)
-                            },
-                            modifier =
-                                Modifier
-                                    .animateItem()
-                                    .padding(
-                                        horizontal = screenHorizontalPadding,
-                                    ),
-                            onUserClicked = {
-                                toProfile.invoke(it.key)
-                            },
-                        )
-                    },
-                )
             }
         }
     }

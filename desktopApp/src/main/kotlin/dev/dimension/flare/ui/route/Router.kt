@@ -57,6 +57,8 @@ import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
+import dev.dimension.flare.ui.screen.gallery.GalleryCommentsScreen
+import dev.dimension.flare.ui.screen.gallery.GalleryDetailScreen
 import dev.dimension.flare.ui.screen.home.BlockUserDialog
 import dev.dimension.flare.ui.screen.home.DeckTimelineScreen
 import dev.dimension.flare.ui.screen.home.DeepLinkAccountPicker
@@ -755,6 +757,21 @@ internal fun Router(
 
                 entry<Route.StatusDetail> { args ->
                     StatusScreen(
+                        statusKey = args.statusKey,
+                        accountType = args.accountType,
+                    )
+                }
+
+                entry<Route.Gallery.Detail> { args ->
+                    GalleryDetailScreen(
+                        statusKey = args.statusKey,
+                        accountType = args.accountType,
+                        navigate = navigate,
+                    )
+                }
+
+                entry<Route.Gallery.Comments> { args ->
+                    GalleryCommentsScreen(
                         statusKey = args.statusKey,
                         accountType = args.accountType,
                     )

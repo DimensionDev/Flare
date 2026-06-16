@@ -279,6 +279,21 @@ internal sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
+    sealed interface Gallery : Route {
+        @Serializable
+        data class Detail(
+            val statusKey: MicroBlogKey,
+            val accountType: AccountType,
+        ) : Gallery
+
+        @Serializable
+        data class Comments(
+            val statusKey: MicroBlogKey,
+            val accountType: AccountType,
+        ) : Gallery
+    }
+
+    @Serializable
     sealed interface Lists : Route {
         @Serializable
         data class List(
@@ -612,6 +627,13 @@ internal sealed interface Route : NavKey {
 
                 is DeeplinkRoute.Status.AddReaction -> {
                     Status.AddReaction(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                }
+
+                is DeeplinkRoute.Gallery.Detail -> {
+                    Gallery.Detail(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )

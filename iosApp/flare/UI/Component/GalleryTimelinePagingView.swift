@@ -54,6 +54,17 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
     private static let footerErrorID = "__g_fe__"
     private static let footerEndID = "__g_fend__"
 
+    private static func itemIdentityKey(for item: UiTimelineV2) -> String {
+        if let itemKey = item.itemKey, !itemKey.isEmpty {
+            return itemKey
+        }
+        return [
+            item.itemType,
+            String(describing: item.accountType),
+            String(describing: item.statusKey),
+        ].joined(separator: ":")
+    }
+
     private var currentData: PagingState<UiTimelineV2>?
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
     private var itemIndexMap: [String: Int] = [:]
@@ -322,11 +333,10 @@ final class GalleryTimelineController: UIViewController, UICollectionViewDelegat
         var loadedItemIDs = Set<String>()
 
         for i in 0..<itemCount {
-            guard let peeked = success.peek(index: Int32(i)),
-                  let itemKey = peeked.itemKey,
-                  !itemKey.isEmpty else {
+            guard let peeked = success.peek(index: Int32(i)) else {
                 continue
             }
+            let itemKey = Self.itemIdentityKey(for: peeked)
             let id = "\(Self.itemPrefix)\(itemKey)"
             loadedIDsByIndex[i] = id
             loadedRenderHashByItemID[id] = peeked.renderHash
@@ -1120,6 +1130,10 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
 
     @objc private func onImageTapped() {
         guard let post, let mediaPreviewURL else { return }
+        if post.mediaClickPolicy == .openPostClickEvent {
+            post.onClicked(ClickContext(launcher: makeLauncher()))
+            return
+        }
         let route = DeeplinkRoute.MediaStatusMedia(
             statusKey: post.statusKey,
             accountType: post.accountType,

@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.pixiv
 
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -7,6 +8,7 @@ import dev.dimension.flare.data.network.pixiv.PixivRankingMode
 import dev.dimension.flare.data.network.pixiv.PixivSearchSort
 import dev.dimension.flare.data.network.pixiv.PixivService
 import dev.dimension.flare.data.network.pixiv.PixivWorkType
+import dev.dimension.flare.data.network.pixiv.model.PixivCommentListResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivIllustListResponse
 import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.model.MicroBlogKey
@@ -151,6 +153,93 @@ internal class PixivStatusDetailLoader(
         return PagingResult(
             data = listOf(response.illust.toUiTimeline(accountKey)),
             endOfPaginationReached = true,
+        )
+    }
+}
+
+internal class PixivGalleryDetailLoader(
+    private val service: PixivService,
+    private val accountKey: MicroBlogKey,
+    private val statusKey: MicroBlogKey,
+) : CacheableRemoteLoader<GalleryDetail> {
+    override val pagingKey: String = "pixiv_gallery_detail_${statusKey}_$accountKey"
+
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<GalleryDetail> {
+        if (request != PagingRequest.Refresh) {
+            return PagingResult(endOfPaginationReached = true)
+        }
+
+        val illustId = statusKey.id.toLongOrNull() ?: return PagingResult(endOfPaginationReached = true)
+        val response =
+            service.illustDetail(
+                illustId = illustId,
+            )
+
+        return PagingResult(
+            data = listOf(response.illust.toGalleryDetail(accountKey)),
+            endOfPaginationReached = true,
+        )
+    }
+}
+
+internal class PixivGalleryCommentsLoader(
+    private val service: PixivService,
+    private val accountKey: MicroBlogKey,
+    private val statusKey: MicroBlogKey,
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "pixiv_gallery_comments_${statusKey}_$accountKey"
+
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> {
+        if (request is PagingRequest.Prepend) {
+            return PagingResult(endOfPaginationReached = true)
+        }
+
+        val response =
+            when (request) {
+                PagingRequest.Refresh -> loadFirstPage()
+                is PagingRequest.Append -> loadNextPage(request.nextKey)
+                is PagingRequest.Prepend -> error("Handled above")
+            }
+
+        return PagingResult(
+            data = response.comments.map { it.toUiTimeline(accountKey, statusKey) },
+            nextKey = response.nextUrl,
+            endOfPaginationReached = response.nextUrl == null,
+        )
+    }
+
+    private suspend fun loadFirstPage(): PixivCommentListResponse {
+        val illustId = statusKey.id.toLongOrNull() ?: return PixivCommentListResponse()
+        return service.illustComments(
+            illustId = illustId,
+        )
+    }
+
+    private suspend fun loadNextPage(nextUrl: String?): PixivCommentListResponse =
+        if (nextUrl == null) {
+            PixivCommentListResponse()
+        } else {
+            service.nextComments(nextUrl)
+        }
+}
+
+internal class PixivGalleryRecommendationsLoader(
+    service: PixivService,
+    accountKey: MicroBlogKey,
+    private val statusKey: MicroBlogKey,
+) : PixivTimelineLoader(service, accountKey) {
+    override val pagingKey: String = "pixiv_gallery_recommendations_${statusKey}_$accountKey"
+
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse {
+        val illustId = statusKey.id.toLongOrNull() ?: return PixivIllustListResponse()
+        return service.relatedIllusts(
+            illustId = illustId,
         )
     }
 }

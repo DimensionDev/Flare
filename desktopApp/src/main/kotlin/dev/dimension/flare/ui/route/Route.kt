@@ -146,6 +146,18 @@ internal sealed interface Route : NavKey {
         val keyword: String,
     ) : ScreenRoute
 
+    data object Gallery {
+        data class Detail(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : ScreenRoute
+
+        data class Comments(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : ScreenRoute
+    }
+
     data class StatusMedia(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
@@ -428,6 +440,13 @@ internal sealed interface Route : NavKey {
 
                 is DeeplinkRoute.Status.AddReaction -> {
                     AddReaction(
+                        accountType = deeplinkRoute.accountType,
+                        statusKey = deeplinkRoute.statusKey,
+                    )
+                }
+
+                is DeeplinkRoute.Gallery.Detail -> {
+                    Gallery.Detail(
                         accountType = deeplinkRoute.accountType,
                         statusKey = deeplinkRoute.statusKey,
                     )

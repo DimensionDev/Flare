@@ -9,6 +9,7 @@ import dev.dimension.flare.data.network.pixiv.api.PixivAuthResources
 import dev.dimension.flare.data.network.pixiv.api.createPixivAppResources
 import dev.dimension.flare.data.network.pixiv.api.createPixivAuthResources
 import dev.dimension.flare.data.network.pixiv.model.PixivBookmarkDetailResponse
+import dev.dimension.flare.data.network.pixiv.model.PixivCommentListResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivIllustDetailResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivIllustListResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivNullResponse
@@ -195,6 +196,11 @@ internal class PixivService private constructor(
             illustId = illustId,
         )
 
+    suspend fun illustComments(illustId: Long): PixivCommentListResponse =
+        appResources.illustComments(
+            illustId = illustId,
+        )
+
     suspend fun relatedIllusts(illustId: Long): PixivIllustListResponse =
         appResources.relatedIllusts(
             illustId = illustId,
@@ -278,6 +284,8 @@ internal class PixivService private constructor(
         )
 
     suspend fun nextIllusts(nextUrl: String): PixivIllustListResponse = appClient.get(nextUrl).body()
+
+    suspend fun nextComments(nextUrl: String): PixivCommentListResponse = appClient.get(nextUrl).body()
 
     suspend fun nextUsers(nextUrl: String): PixivUserListResponse = appClient.get(nextUrl).body()
 }

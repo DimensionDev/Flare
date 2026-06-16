@@ -1,7 +1,11 @@
 package dev.dimension.flare.data.datasource.pixiv
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.network.pixiv.PIXIV_IMAGE_REFERER
+import dev.dimension.flare.data.network.pixiv.model.PixivComment
+import dev.dimension.flare.data.network.pixiv.model.PixivCommentStamp
 import dev.dimension.flare.data.network.pixiv.model.PixivIllust
 import dev.dimension.flare.data.network.pixiv.model.PixivTrendTag
 import dev.dimension.flare.data.network.pixiv.model.PixivUser
@@ -16,6 +20,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.pixivBookmark
@@ -56,6 +61,11 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
             },
         actions =
             persistentListOf(
+                ActionMenu.Item(
+                    icon = UiIcon.Info,
+                    count = UiNumber(totalView),
+                    clickEvent = ClickEvent.Noop,
+                ),
                 ActionMenu.pixivBookmark(
                     statusKey = statusKey,
                     bookmarked = isBookmarked,
@@ -83,14 +93,60 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
         visibility = null,
         clickEvent =
             ClickEvent.Deeplink(
-                DeeplinkRoute.Status.Detail(
+                DeeplinkRoute.Gallery.Detail(
                     statusKey = statusKey,
                     accountType = AccountType.Specific(accountKey),
                 ),
             ),
+        mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
         accountType = AccountType.Specific(accountKey),
     )
 }
+
+internal fun PixivIllust.toGalleryDetail(accountKey: MicroBlogKey): GalleryDetail =
+    GalleryDetail(
+        post = toUiTimeline(accountKey),
+        orientation =
+            if (width >= height) {
+                GalleryOrientation.Horizontal
+            } else {
+                GalleryOrientation.Vertical
+            },
+    )
+
+internal fun PixivComment.toUiTimeline(
+    accountKey: MicroBlogKey,
+    illustKey: MicroBlogKey,
+): UiTimelineV2.Post =
+    UiTimelineV2.Post(
+        platformType = PlatformType.Pixiv,
+        images =
+            stamp
+                ?.toUiMedia()
+                ?.let { persistentListOf<UiMedia>(it) }
+                ?: persistentListOf(),
+        sensitive = false,
+        contentWarning = null,
+        user = user.toUiProfile(accountKey),
+        content = comment.stripPixivHtml().toUiPlainText(),
+        actions = persistentListOf(),
+        poll = null,
+        statusKey = pixivCommentKey(illustKey, id),
+        card = null,
+        createdAt = parsePixivDate(date).toUi(),
+        visibility = null,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile.User(
+                    accountType = AccountType.Specific(accountKey),
+                    userKey = pixivUserKey(user.id),
+                ),
+            ),
+        mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
+        accountType = AccountType.Specific(accountKey),
+    )
+
+private fun PixivCommentStamp.toUiMedia(): UiMedia.Image? = stampUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER))
 
 internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile =
     UiProfile(
@@ -192,6 +248,11 @@ internal fun PixivTrendTag.toUiHashtag(): UiHashtag =
     )
 
 internal fun pixivIllustKey(id: Long): MicroBlogKey = MicroBlogKey(id.toString(), PIXIV_HOST)
+
+private fun pixivCommentKey(
+    illustKey: MicroBlogKey,
+    commentId: Long,
+): MicroBlogKey = MicroBlogKey("${illustKey.id}:comment:$commentId", PIXIV_HOST)
 
 internal fun pixivUserKey(id: Long): MicroBlogKey = MicroBlogKey(id.toString(), PIXIV_HOST)
 

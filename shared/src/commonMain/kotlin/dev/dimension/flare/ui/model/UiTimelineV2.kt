@@ -235,6 +235,7 @@ public sealed class UiTimelineV2 {
         @Transient
         public val internalRepost: Post? = null,
         public val clickEvent: ClickEvent,
+        public val mediaClickPolicy: MediaClickPolicy = MediaClickPolicy.OpenStatusMedia,
         public override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
@@ -297,8 +298,16 @@ public sealed class UiTimelineV2 {
                 .add(references.renderSummaryHash { it.renderSummaryHash() })
                 .add(parents.renderSummaryHash { it.renderSummaryHash() })
                 .add(internalRepost?.renderSummaryHash())
+                .add(mediaClickPolicy)
                 .add(accountType)
                 .build()
+        }
+
+        @Serializable
+        @Immutable
+        public enum class MediaClickPolicy {
+            OpenStatusMedia,
+            OpenPostClickEvent,
         }
 
         @Serializable

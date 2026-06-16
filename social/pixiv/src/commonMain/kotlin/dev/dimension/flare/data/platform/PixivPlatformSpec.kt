@@ -131,7 +131,7 @@ public data object PixivPlatformSpec :
                 uriPattern = "https://www.pixiv.net/artworks/{id}",
                 serializer = PixivIllustDeepLink.serializer(),
                 callback = { data ->
-                    DeeplinkRoute.Status.Detail(
+                    DeeplinkRoute.Gallery.Detail(
                         accountType = AccountType.Specific(accountKey),
                         statusKey = MicroBlogKey(data.id, PIXIV_HOST),
                     )

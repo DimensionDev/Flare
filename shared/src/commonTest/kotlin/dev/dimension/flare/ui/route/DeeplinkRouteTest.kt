@@ -34,6 +34,18 @@ class DeeplinkRouteTest {
     }
 
     @Test
+    fun testGalleryDetail() {
+        val route =
+            DeeplinkRoute.Gallery.Detail(
+                statusKey = MicroBlogKey("status123", "example.com"),
+                accountType = activeAccountType,
+            )
+        val uri = route.toUri()
+        val parsed = DeeplinkRoute.parse(uri)
+        assertEquals(route, parsed)
+    }
+
+    @Test
     fun testStatusVVOComment() {
         val route =
             DeeplinkRoute.Status.VVOComment(

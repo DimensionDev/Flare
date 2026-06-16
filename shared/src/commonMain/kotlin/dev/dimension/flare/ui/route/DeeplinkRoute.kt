@@ -97,6 +97,15 @@ public sealed class DeeplinkRoute {
     }
 
     @Serializable
+    public sealed class Gallery : DeeplinkRoute() {
+        @Serializable
+        public data class Detail(
+            val statusKey: MicroBlogKey,
+            val accountType: AccountType,
+        ) : Gallery()
+    }
+
+    @Serializable
     public sealed class Rss : DeeplinkRoute() {
         @Serializable
         public data class Detail(

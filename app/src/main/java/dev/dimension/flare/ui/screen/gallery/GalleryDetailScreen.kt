@@ -594,9 +594,9 @@ private fun GalleryAuthorCard(
     post: UiTimelineV2.Post,
     navigate: (Route) -> Unit,
     onAction: (ActionMenu.Item) -> Unit,
+    modifier: Modifier = Modifier,
     index: Int = 0,
     totalCount: Int = 0,
-    modifier: Modifier = Modifier,
 ) {
     val user = post.user
     AdaptiveCard(
@@ -654,9 +654,9 @@ private fun GalleryAuthorCard(
 private fun GalleryDetailInfoCard(
     post: UiTimelineV2.Post,
     onAction: (ActionMenu.Item) -> Unit,
+    modifier: Modifier = Modifier,
     index: Int = 0,
     totalCount: Int = 0,
-    modifier: Modifier = Modifier,
 ) {
     AdaptiveCard(
         modifier = modifier.fillMaxWidth(),

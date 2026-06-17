@@ -46,6 +46,8 @@ internal sealed interface Route : NavKey {
 
     data object Settings : ScreenRoute
 
+    data object PostActionLayout : ScreenRoute
+
     data object DraftBox : ScreenRoute
 
     data class Profile(

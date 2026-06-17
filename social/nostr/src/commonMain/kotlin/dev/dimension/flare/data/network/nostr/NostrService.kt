@@ -4,6 +4,7 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.platform.NostrCredential
@@ -1792,6 +1793,7 @@ internal class NostrService(
                                         ),
                                     ),
                                 count = UiNumber(0L),
+                                actionFamily = PostActionFamily.Reply,
                             ),
                         )
                         add(
@@ -1821,6 +1823,7 @@ internal class NostrService(
                                                         statusKey = statusKey,
                                                     ),
                                                 ),
+                                            actionFamily = PostActionFamily.Quote,
                                         ),
                                     ).toImmutableList(),
                             ),
@@ -1855,6 +1858,7 @@ internal class NostrService(
                                                         shareUrl = statusShareUrl(statusKey.id),
                                                     ),
                                                 ),
+                                            actionFamily = PostActionFamily.Share,
                                         ),
                                     )
                                     if (canSign && pubKey == accountKey.id) {
@@ -1873,6 +1877,7 @@ internal class NostrService(
                                                             statusKey = statusKey,
                                                         ),
                                                     ),
+                                                actionFamily = PostActionFamily.Delete,
                                             ),
                                         )
                                     } else {
@@ -1897,6 +1902,7 @@ internal class NostrService(
                                                             accountKey = accountKey,
                                                         )
                                                     },
+                                                actionFamily = PostActionFamily.Report,
                                             ),
                                         )
                                     }

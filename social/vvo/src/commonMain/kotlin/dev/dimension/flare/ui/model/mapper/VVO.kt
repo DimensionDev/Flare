@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -207,6 +208,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     statusKey = statusKey,
                                 ),
                             ),
+                        actionFamily = PostActionFamily.Quote,
                     )
                 } else {
                     null
@@ -222,6 +224,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                 statusKey = statusKey,
                             ),
                         ),
+                    actionFamily = PostActionFamily.Comment,
                 ),
                 ActionMenu.vvoLike(
                     statusKey = statusKey,
@@ -253,6 +256,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                             shareUrl = url,
                                         ),
                                     ),
+                                actionFamily = PostActionFamily.Share,
                             ),
                             if (isFromMe) {
                                 ActionMenu.Item(
@@ -266,6 +270,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                 statusKey = statusKey,
                                             ),
                                         ),
+                                    actionFamily = PostActionFamily.Delete,
                                 )
                             } else {
                                 ActionMenu.Item(
@@ -273,6 +278,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                     color = ActionMenu.Item.Color.Red,
                                     clickEvent = ClickEvent.Noop,
+                                    actionFamily = PostActionFamily.Report,
                                 )
                             },
                         ).toImmutableList(),
@@ -372,6 +378,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
                                     rootId = statusMid,
                                 ),
                             ),
+                        actionFamily = PostActionFamily.Comment,
                     )
                 },
                 ActionMenu.vvoLikeComment(
@@ -399,6 +406,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
                                             shareUrl = url,
                                         ),
                                     ),
+                                actionFamily = PostActionFamily.Share,
                             ),
                             if (isFromMe) {
                                 ActionMenu.Item(
@@ -412,6 +420,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
                                                 statusKey = statusKey,
                                             ),
                                         ),
+                                    actionFamily = PostActionFamily.Delete,
                                 )
                             } else {
                                 null

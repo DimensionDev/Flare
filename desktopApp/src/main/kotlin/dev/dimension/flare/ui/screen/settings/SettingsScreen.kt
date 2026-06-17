@@ -158,6 +158,8 @@ import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
+import dev.dimension.flare.settings_appearance_post_action_layout
+import dev.dimension.flare.settings_appearance_post_action_layout_description
 import dev.dimension.flare.settings_appearance_post_action_style
 import dev.dimension.flare.settings_appearance_post_action_style_description
 import dev.dimension.flare.settings_appearance_post_action_style_hidden
@@ -304,6 +306,7 @@ internal fun SettingsScreen(
     toAppLog: () -> Unit,
     toRSSManagement: () -> Unit,
     toNostrRelays: (MicroBlogKey) -> Unit,
+    toPostActionLayout: () -> Unit,
 ) {
     val window = LocalComposeWindow.current
     val state by producePresenter {
@@ -883,6 +886,22 @@ internal fun SettingsScreen(
                             placement = FlyoutPlacement.BottomAlignedEnd,
                         )
                     },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_post_action_layout))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_post_action_layout_description))
+                    },
+                    trailing = {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.AngleRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable(onClick = toPostActionLayout),
                 )
                 AnimatedVisibility(LocalTimelineAppearance.current.postActionStyle != PostActionStyle.Hidden) {
                     Column {

@@ -32,6 +32,7 @@ import chat.bsky.convo.DeletedMessageView
 import chat.bsky.convo.MessageView
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -846,6 +847,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     statusKey = statusKey,
                                 ),
                         ),
+                    actionFamily = PostActionFamily.Reply,
                 ),
                 ActionMenu.Group(
                     displayItem =
@@ -886,6 +888,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                 statusKey = statusKey,
                                             ),
                                     ),
+                                actionFamily = PostActionFamily.Quote,
                             ),
                         ).toImmutableList(),
                 ),
@@ -929,6 +932,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                     fxShareUrl = fxUrl,
                                                 ),
                                         ),
+                                    actionFamily = PostActionFamily.Share,
                                 ),
                             )
 
@@ -949,6 +953,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                         statusKey = statusKey,
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Delete,
                                     ),
                                 )
                             } else {
@@ -977,6 +982,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                             ),
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Report,
                                     ),
                                 )
                             }
@@ -1501,6 +1507,7 @@ private fun render(
                                             statusKey = statusKey,
                                         ),
                                 ),
+                            actionFamily = PostActionFamily.Reply,
                         ),
                         ActionMenu.Group(
                             displayItem =
@@ -1531,6 +1538,7 @@ private fun render(
                                                         statusKey = statusKey,
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Quote,
                                     ),
                                 ).toImmutableList(),
                         ),
@@ -1563,6 +1571,7 @@ private fun render(
                                                         fxShareUrl = fxUrl,
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Share,
                                     ),
                                     if (isFromMe) {
                                         ActionMenu.Item(
@@ -1579,6 +1588,7 @@ private fun render(
                                                             statusKey = statusKey,
                                                         ),
                                                 ),
+                                            actionFamily = PostActionFamily.Delete,
                                         )
                                     } else {
                                         ActionMenu.Item(
@@ -1595,6 +1605,7 @@ private fun render(
                                                                 ),
                                                         ),
                                                 ),
+                                            actionFamily = PostActionFamily.Report,
                                         )
                                     },
                                 ).toImmutableList(),

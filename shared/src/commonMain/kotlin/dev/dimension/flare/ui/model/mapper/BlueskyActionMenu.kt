@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -41,6 +42,7 @@ public fun ActionMenu.Companion.blueskyReblog(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Repost,
     )
 
 public fun ActionMenu.Companion.blueskyLike(
@@ -77,6 +79,7 @@ public fun ActionMenu.Companion.blueskyLike(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Like,
     )
 
 public fun ActionMenu.Companion.blueskyBookmark(
@@ -112,4 +115,5 @@ public fun ActionMenu.Companion.blueskyBookmark(
                     count = count,
                 )
             },
+        actionFamily = PostActionFamily.Bookmark,
     )

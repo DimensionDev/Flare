@@ -73,6 +73,12 @@ struct AppearanceLayoutScreen: View {
                         Text("appearance_show_numbers_description")
                     }
                 }
+                NavigationLink(value: Route.postActionLayout) {
+                    VStack(alignment: .leading) {
+                        Text("Customize actions")
+                        Text("Choose the order and visibility of post action buttons")
+                    }
+                }
             }
         }
         .navigationTitle("appearance_layout_group_title")

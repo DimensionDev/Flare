@@ -16,6 +16,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
     private var useText: Bool = false
     private var allowSpacer: Bool = true
     private var postActionStyle: PostActionStyle = .leftAligned
+    private var postActionLayout: PostActionLayoutConfig = PostActionLayoutConfig.companion.Default
     private var showNumbers: Bool = true
     private var fontSize: CGFloat = 13
     private var textStyle: UIFont.TextStyle = .footnote
@@ -40,13 +41,18 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         useText: Bool,
         allowSpacer: Bool = true,
         postActionStyle: PostActionStyle,
+        postActionLayout: PostActionLayoutConfig = PostActionLayoutConfig.companion.Default,
+        applyPostActionLayout: Bool = true,
         showNumbers: Bool,
         isDetail: Bool
     ) {
-        self.data = data
+        self.data = applyPostActionLayout
+            ? castActionMenus(PostActionLayoutHelpers.shared.apply(actions: data, config: postActionLayout))
+            : data
         self.useText = useText
         self.allowSpacer = allowSpacer
         self.postActionStyle = postActionStyle
+        self.postActionLayout = postActionLayout
         self.showNumbers = showNumbers
         self.fontSize = UIFontMetrics(forTextStyle: .footnote).scaledValue(for: 13)
         self.textStyle = isDetail ? .body : .footnote
@@ -450,6 +456,7 @@ private final class ActionGroupColumnView: UIView, ManualLayoutMeasurable, Timel
             useText: true,
             allowSpacer: false,
             postActionStyle: postActionStyle,
+            applyPostActionLayout: false,
             showNumbers: showNumbers,
             isDetail: false
         )
@@ -672,6 +679,16 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
 }
 
 import SwiftUI // for OpenURLAction
+
+private func castActionMenus(_ value: Any) -> [ActionMenu] {
+    if let actions = value as? [ActionMenu] {
+        return actions
+    }
+    if let actions = value as? NSArray {
+        return actions.cast(ActionMenu.self)
+    }
+    return []
+}
 
 // MARK: - Color mapping
 extension ActionMenu.ItemColor {

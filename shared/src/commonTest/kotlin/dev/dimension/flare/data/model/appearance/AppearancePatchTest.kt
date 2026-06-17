@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.model.appearance
 
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior
@@ -169,6 +171,7 @@ class AppearancePatchTest {
                 AppearanceKeys.ShowBottomBarLabels,
                 AppearanceKeys.DeckMode,
                 AppearanceKeys.ExpandContentWarning,
+                AppearanceKeys.PostActionLayout,
             )
         val activeFields =
             AppearanceSettings
@@ -226,6 +229,15 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)
+                .set(
+                    AppearanceKeys.PostActionLayout,
+                    PostActionLayoutConfig(
+                        enabled = true,
+                        primary = kotlinx.collections.immutable.persistentListOf(PostActionFamily.Like),
+                        overflow = kotlinx.collections.immutable.persistentListOf(PostActionFamily.Share),
+                        hidden = kotlinx.collections.immutable.persistentListOf(PostActionFamily.Report),
+                    ),
+                )
 
         assertEquals(patch, patch.toBag().toPatch())
     }

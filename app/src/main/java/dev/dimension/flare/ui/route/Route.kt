@@ -102,6 +102,9 @@ internal sealed interface Route : NavKey {
         data object AppearanceLayout : Settings
 
         @Serializable
+        data object PostActionLayout : Settings
+
+        @Serializable
         data object AppearanceDisplay : Settings
 
         @Serializable

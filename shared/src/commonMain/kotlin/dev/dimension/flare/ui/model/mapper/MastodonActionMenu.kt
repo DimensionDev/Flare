@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -37,6 +38,7 @@ public fun ActionMenu.Companion.mastodonLike(
                     count = favouritesCount,
                 )
             },
+        actionFamily = PostActionFamily.Like,
     )
 
 public fun ActionMenu.Companion.mastodonRepost(
@@ -69,6 +71,7 @@ public fun ActionMenu.Companion.mastodonRepost(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Repost,
     )
 
 public fun ActionMenu.Companion.mastodonBookmark(
@@ -103,4 +106,5 @@ public fun ActionMenu.Companion.mastodonBookmark(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Bookmark,
     )

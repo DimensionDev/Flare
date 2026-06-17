@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -29,6 +30,7 @@ public fun ActionMenu.Companion.misskeyRenote(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Repost,
     )
 
 public fun ActionMenu.Companion.misskeyReact(
@@ -75,6 +77,7 @@ public fun ActionMenu.Companion.misskeyReact(
                     )
                 }
             },
+        actionFamily = PostActionFamily.React,
     )
 
 public fun ActionMenu.Companion.misskeyFavourite(
@@ -105,4 +108,5 @@ public fun ActionMenu.Companion.misskeyFavourite(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Favorite,
     )

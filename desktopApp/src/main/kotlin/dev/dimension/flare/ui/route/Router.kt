@@ -94,6 +94,7 @@ import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.LocalHistoryAgentScreen
 import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
+import dev.dimension.flare.ui.screen.settings.PostActionLayoutScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
@@ -688,7 +689,14 @@ internal fun Router(
                         toNostrRelays = {
                             navigate(Route.NostrRelays(it))
                         },
+                        toPostActionLayout = {
+                            navigate(Route.PostActionLayout)
+                        },
                     )
+                }
+
+                entry<Route.PostActionLayout> {
+                    PostActionLayoutScreen()
                 }
 
                 entry<Route.DraftBox> {

@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.model.appearance
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
@@ -41,6 +42,7 @@ public data class TimelineAppearance(
     val compatLinkPreview: Boolean = AppearanceKeys.CompatLinkPreview.default,
     val showNumbers: Boolean = AppearanceKeys.ShowNumbers.default,
     val postActionStyle: PostActionStyle = AppearanceKeys.PostActionStyle.default,
+    val postActionLayout: PostActionLayoutConfig = AppearanceKeys.PostActionLayout.default,
     val fullWidthPost: Boolean = AppearanceKeys.FullWidthPost.default,
     val absoluteTimestamp: Boolean = AppearanceKeys.AbsoluteTimestamp.default,
     val showPlatformLogo: Boolean = AppearanceKeys.ShowPlatformLogo.default,
@@ -90,6 +92,7 @@ public fun AppearancePatch.toTimelineAppearance(override: AppearancePatch?): Tim
         compatLinkPreview = getTimelineValue(AppearanceKeys.CompatLinkPreview, override),
         showNumbers = getTimelineValue(AppearanceKeys.ShowNumbers, override),
         postActionStyle = getTimelineValue(AppearanceKeys.PostActionStyle, override),
+        postActionLayout = getTimelineValue(AppearanceKeys.PostActionLayout, override),
         fullWidthPost = getTimelineValue(AppearanceKeys.FullWidthPost, override),
         absoluteTimestamp = getTimelineValue(AppearanceKeys.AbsoluteTimestamp, override),
         showPlatformLogo = getTimelineValue(AppearanceKeys.ShowPlatformLogo, override),
@@ -109,6 +112,7 @@ public fun TimelineAppearance.withPatch(patch: AppearancePatch?): TimelineAppear
         compatLinkPreview = patch.getTimelineValue(AppearanceKeys.CompatLinkPreview, compatLinkPreview),
         showNumbers = patch.getTimelineValue(AppearanceKeys.ShowNumbers, showNumbers),
         postActionStyle = patch.getTimelineValue(AppearanceKeys.PostActionStyle, postActionStyle),
+        postActionLayout = patch.getTimelineValue(AppearanceKeys.PostActionLayout, postActionLayout),
         fullWidthPost = patch.getTimelineValue(AppearanceKeys.FullWidthPost, fullWidthPost),
         absoluteTimestamp = patch.getTimelineValue(AppearanceKeys.AbsoluteTimestamp, absoluteTimestamp),
         showPlatformLogo = patch.getTimelineValue(AppearanceKeys.ShowPlatformLogo, showPlatformLogo),

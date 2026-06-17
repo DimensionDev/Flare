@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model.appearance
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlin.native.HiddenFromObjC
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig as AppearancePostActionLayoutConfig
 import dev.dimension.flare.data.model.AvatarShape as AppearanceAvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior as AppearanceBottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle as AppearanceBottomBarStyle
@@ -77,6 +78,12 @@ public object AppearanceKeys {
         AppearancePostActionStyle.serializer(),
     )
 
+    public object PostActionLayout : PerTimeline<AppearancePostActionLayoutConfig>(
+        "timeline.post_action_layout",
+        AppearancePostActionLayoutConfig.Default,
+        AppearancePostActionLayoutConfig.serializer(),
+    )
+
     public object FullWidthPost : PerTimeline<Boolean>("timeline.full_width_post", false, Boolean.serializer())
 
     public object AbsoluteTimestamp : PerTimeline<Boolean>("timeline.absolute_timestamp", false, Boolean.serializer())
@@ -113,6 +120,7 @@ public object AppearanceKeys {
             CompatLinkPreview,
             ShowNumbers,
             PostActionStyle,
+            PostActionLayout,
             FullWidthPost,
             AbsoluteTimestamp,
             ShowPlatformLogo,

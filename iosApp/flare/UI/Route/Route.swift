@@ -97,6 +97,8 @@ enum Route: Hashable, Identifiable {
             AppearanceThemeScreen()
         case .appearanceLayout:
             AppearanceLayoutScreen()
+        case .postActionLayout:
+            PostActionLayoutScreen()
         case .appearanceDisplay:
             AppearanceDisplayScreen()
         case .appearanceMedia:
@@ -230,6 +232,7 @@ enum Route: Hashable, Identifiable {
     case storage
     case appearanceTheme
     case appearanceLayout
+    case postActionLayout
     case appearanceDisplay
     case appearanceMedia
     case appIconSettings

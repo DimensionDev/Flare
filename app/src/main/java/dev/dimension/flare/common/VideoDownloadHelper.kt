@@ -9,6 +9,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Stable
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
@@ -211,6 +212,7 @@ internal class VideoDownloadHelper(
             saveToPublicDownloads(fileName = fileName, writer = writer)
         }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun saveToMediaStoreDownloads(
         fileName: String,
         mimeType: String,

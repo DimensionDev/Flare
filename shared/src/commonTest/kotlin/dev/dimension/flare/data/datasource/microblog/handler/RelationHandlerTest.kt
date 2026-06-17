@@ -4,15 +4,22 @@ import androidx.paging.LoadState
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.createSampleStatus
+import dev.dimension.flare.ui.model.createSampleUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -183,6 +190,123 @@ class RelationHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun blockWithoutCachedRelationStillCallsRemote() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                    },
+                )
+            }
+
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
+            val job = handler.block(userKey)
+            advanceUntilIdle()
+
+            assertTrue(job.isCompleted)
+            assertEquals(1, loader.blockCallCount)
+            val saved = assertNotNull(db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first())
+            assertTrue(saved.relation.blocking)
+        }
+
+    @Test
+    fun blockFailureKeepsLocalDeletionAndRevertsRelation() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val accountType = AccountType.Specific(accountKey)
+            val (_, otherStatusId) = saveTargetAndOtherPosts(pagingKey = "home")
+            db.userDao().insertHistory(
+                DbUserHistory(
+                    accountType = accountType,
+                    userKey = userKey,
+                    lastVisit = 1L,
+                ),
+            )
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = accountType,
+                    userKey = userKey,
+                    relation = UiRelation(blocking = false),
+                ),
+            )
+            loader.failBlock = true
+            var cacheDeletedBeforeRemote = false
+            loader.onBlock = {
+                cacheDeletedBeforeRemote =
+                    db
+                        .pagingTimelineDao()
+                        .getByPagingKey("home")
+                        .map { it.statusId } == listOf(otherStatusId) &&
+                    db.userDao().getUserHistory(limit = 10).none { it.data.userKey == userKey }
+            }
+
+            handler = RelationHandler(accountType = accountType, dataSource = loader)
+            handler.block(userKey)
+            advanceUntilIdle()
+
+            assertEquals(1, loader.blockCallCount)
+            assertTrue(cacheDeletedBeforeRemote)
+            assertEquals(listOf(otherStatusId), db.pagingTimelineDao().getByPagingKey("home").map { it.statusId })
+            assertTrue(db.userDao().getUserHistory(limit = 10).none { it.data.userKey == userKey })
+            val saved = assertNotNull(db.userDao().getUserRelation(accountType, userKey).first())
+            assertTrue(saved.relation.blocking == false)
+        }
+
+    @Test
+    fun muteFailureKeepsLocalDeletionAndRevertsRelation() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val accountType = AccountType.Specific(accountKey)
+            val (_, otherStatusId) = saveTargetAndOtherPosts(pagingKey = "home")
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = accountType,
+                    userKey = userKey,
+                    relation = UiRelation(muted = false),
+                ),
+            )
+            loader.failMute = true
+            var cacheDeletedBeforeRemote = false
+            loader.onMute = {
+                cacheDeletedBeforeRemote =
+                    db
+                        .pagingTimelineDao()
+                        .getByPagingKey("home")
+                        .map { it.statusId } == listOf(otherStatusId)
+            }
+
+            handler = RelationHandler(accountType = accountType, dataSource = loader)
+            handler.mute(userKey)
+            advanceUntilIdle()
+
+            assertEquals(1, loader.muteCallCount)
+            assertTrue(cacheDeletedBeforeRemote)
+            assertEquals(listOf(otherStatusId), db.pagingTimelineDao().getByPagingKey("home").map { it.statusId })
+            val saved = assertNotNull(db.userDao().getUserRelation(accountType, userKey).first())
+            assertTrue(saved.relation.muted == false)
+        }
+
+    @Test
     fun unfollowSuccessClearsPendingRequest() =
         runTest {
             startKoin {
@@ -252,13 +376,39 @@ class RelationHandlerTest : RobolectricTest() {
             assertTrue(afterReject.relation.isFans == false)
         }
 
+    private suspend fun saveTargetAndOtherPosts(pagingKey: String): Pair<String, String> {
+        val accountType = AccountType.Specific(accountKey)
+        val targetUser = createSampleUser().copy(key = userKey)
+        val otherUser = createSampleUser().copy(key = MicroBlogKey(id = "other-user", host = "test.social"))
+        val targetPost =
+            createSampleStatus(targetUser).copy(
+                accountType = accountType,
+                statusKey = MicroBlogKey(id = "target-status", host = "test.social"),
+            )
+        val otherPost =
+            createSampleStatus(otherUser).copy(
+                accountType = accountType,
+                statusKey = MicroBlogKey(id = "other-status", host = "test.social"),
+            )
+        val targetTimeline = TimelinePagingMapper.toDb(targetPost, pagingKey = pagingKey, sortId = 1L)
+        val otherTimeline = TimelinePagingMapper.toDb(otherPost, pagingKey = pagingKey, sortId = 2L)
+        saveToDatabase(db, listOf(targetTimeline, otherTimeline))
+        return targetTimeline.timeline.statusId to otherTimeline.timeline.statusId
+    }
+
     private class FakeRelationLoader(
         override val supportedTypes: Set<RelationActionType>,
     ) : RelationLoader {
         var nextRelation: UiRelation = UiRelation()
         var relationCallCount: Int = 0
         var followCallCount: Int = 0
+        var blockCallCount: Int = 0
+        var muteCallCount: Int = 0
         var failFollow: Boolean = false
+        var failBlock: Boolean = false
+        var failMute: Boolean = false
+        var onBlock: (suspend () -> Unit)? = null
+        var onMute: (suspend () -> Unit)? = null
 
         override suspend fun relation(userKey: MicroBlogKey): UiRelation {
             relationCallCount++
@@ -274,11 +424,23 @@ class RelationHandlerTest : RobolectricTest() {
 
         override suspend fun unfollow(userKey: MicroBlogKey) = Unit
 
-        override suspend fun block(userKey: MicroBlogKey) = Unit
+        override suspend fun block(userKey: MicroBlogKey) {
+            blockCallCount++
+            onBlock?.invoke()
+            if (failBlock) {
+                error("block failed")
+            }
+        }
 
         override suspend fun unblock(userKey: MicroBlogKey) = Unit
 
-        override suspend fun mute(userKey: MicroBlogKey) = Unit
+        override suspend fun mute(userKey: MicroBlogKey) {
+            muteCallCount++
+            onMute?.invoke()
+            if (failMute) {
+                error("mute failed")
+            }
+        }
 
         override suspend fun unmute(userKey: MicroBlogKey) = Unit
     }

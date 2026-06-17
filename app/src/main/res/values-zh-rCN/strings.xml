@@ -41,6 +41,9 @@
     <string name="compose_save_draft">保存</string>
     <string name="compose_close_discard">舍弃</string>
     <string name="status_insight_title">帖子视图</string>
+    <string name="profile_blocked_gate_title">已拉黑该用户</string>
+    <string name="profile_blocked_gate_description">你已拉黑该用户。个人资料标签和时间线会先隐藏，选择显示后才会展开。</string>
+    <string name="profile_blocked_gate_show">显示</string>
     <string name="status_insight_send">发送</string>
     <string name="status_insight_error">无法分析此帖子。</string>
     <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>

@@ -108544,6 +108544,72 @@
         }
       }
     },
+    "profile_blocked_gate_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You blocked this user. Their tabs and timeline are hidden until you choose to show them."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已拉黑此用户。其标签页和时间线会被隐藏，直到你手动选择显示。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已封鎖此使用者。其分頁和時間軸會被隱藏，直到你手動選擇顯示。"
+          }
+        }
+      }
+    },
+    "profile_blocked_gate_show" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示"
+          }
+        }
+      }
+    },
+    "profile_blocked_gate_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blocked profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已拉黑的用户"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已封鎖的使用者"
+          }
+        }
+      }
+    },
     "profile_insight_analyzing" : {
       "extractionState" : "extracted_with_value",
       "localizations" : {

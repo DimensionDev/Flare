@@ -34,6 +34,9 @@
     <string name="profile_tab_timeline_with_reply">貼文與回覆</string>
     <string name="profile_tab_likes">喜歡</string>
     <string name="profile_tab_media">媒體</string>
+    <string name="profile_blocked_gate_title">已封鎖的使用者</string>
+    <string name="profile_blocked_gate_description">你已封鎖此使用者。其分頁和時間軸會被隱藏，直到你手動選擇顯示。</string>
+    <string name="profile_blocked_gate_show">顯示</string>
     <string name="report_title">舉報</string>
     <string name="report_description">這則貼文有什麼問題？</string>
     <string name="report_reason_spam_title">垃圾訊息</string>

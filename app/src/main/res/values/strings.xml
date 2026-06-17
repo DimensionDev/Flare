@@ -48,6 +48,9 @@
     <string name="compose_close_discard">Discard</string>
     <string name="status_insight_title">Post insight</string>
     <string name="profile_insight_title">Profile insight</string>
+    <string name="profile_blocked_gate_title">Blocked profile</string>
+    <string name="profile_blocked_gate_description">You blocked this profile. Their tabs and timeline are hidden until you choose to show them.</string>
+    <string name="profile_blocked_gate_show">Show</string>
     <string name="status_insight_input_placeholder">Ask a follow-up…</string>
     <string name="status_insight_send">Send</string>
     <string name="status_insight_analyzing">Analyzing this post…</string>

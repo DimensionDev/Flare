@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import CHTCollectionViewWaterfallLayout
 import GSPlayer
+import AVFoundation
 
 // MARK: - SwiftUI Wrapper
 
@@ -1370,6 +1371,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         currentAutoplayID = candidate.id
         currentAutoplayHostView = candidate.hostView
         autoplayPlayerView.play(for: candidate.url)
+        autoplayPlayerView.player?.preventsDisplaySleepDuringVideoPlayback = false
         autoplayPlayerView.isMuted = true
         autoplayPlayerView.isAutoReplay = true
         startAutoplayCountdownUpdates()

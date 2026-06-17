@@ -12,6 +12,7 @@ import androidx.room3.Transaction
 import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
@@ -131,6 +132,14 @@ internal interface PagingTimelineDao {
             "WHERE pagingKey = :pagingKey ORDER BY sortId",
     )
     suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
+
+    @Transaction
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline " +
+            "INNER JOIN DbStatus ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbStatus.accountType = :accountType",
+    )
+    suspend fun getByAccountTypeWithStatus(accountType: DbAccountType): List<DbPagingTimelineWithStatus>
 
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)

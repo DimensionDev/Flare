@@ -17,6 +17,7 @@ struct ProfileScreen: View {
     @State private var showToolbarTabPicker = false
     @State private var isProfileHeaderVisible = true
     @State private var isInlineTabPickerVisible = true
+    @State private var showBlockedProfileContent = false
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     
     var body: some View {
@@ -33,14 +34,19 @@ struct ProfileScreen: View {
             horizontalSizeClass == .compact && isProfileHeaderVisible ? Visibility.hidden : Visibility.automatic,
             for: .navigationBar
         )
+        .onChange(of: isBlockedProfile) { _, isBlocked in
+            if !isBlocked {
+                showBlockedProfileContent = false
+            }
+        }
         .toolbar {
-            if horizontalSizeClass == .compact && showToolbarTabPicker, case .success(let userState) = onEnum(of: presenter.state.userState) {
+            if horizontalSizeClass == .compact && showToolbarTabPicker && !shouldGateBlockedProfile, case .success(let userState) = onEnum(of: presenter.state.userState) {
                 ToolbarItem(placement: .principal) {
                     RichText(text: userState.data.name)
                 }
             }
             
-            if horizontalSizeClass == .regular, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
+            if !shouldGateBlockedProfile && horizontalSizeClass == .regular, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
                 let tabs = tabState.data.cast(ProfileState.Tab.self)
                 if tabs.count > 1 {
                     ToolbarItemGroup {
@@ -61,7 +67,7 @@ struct ProfileScreen: View {
                 if #available(iOS 26.0, *) {
                     ToolbarSpacer()
                 }
-            } else if horizontalSizeClass == .compact, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
+            } else if !shouldGateBlockedProfile && horizontalSizeClass == .compact, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
                 let tabs = tabState.data.cast(ProfileState.Tab.self)
                 if tabs.count > 1 && showToolbarTabPicker {
                     ToolbarItem(placement: .primaryAction) {
@@ -90,9 +96,7 @@ struct ProfileScreen: View {
     }
     
     var regularBody: some View {
-        HStack(
-            spacing: nil,
-        ) {
+        HStack(spacing: nil) {
             ScrollView {
                 ListCardView {
                     ProfileHeader(
@@ -111,45 +115,85 @@ struct ProfileScreen: View {
             }
             .padding(.leading)
             .frame(width: 400)
-            StateView(state: presenter.state.tabs) { tabsArray in
-                let tabs = tabsArray.cast(ProfileState.Tab.self)
-                let selectedTabItem = tabs[selectedTab]
-                ProfileTimelineWaterFallView(presenter: profileTimelinePresenter(for: selectedTabItem))
-                    .id(profileTimelineID(for: selectedTabItem))
+
+            if shouldGateBlockedProfile {
+                BlockedProfileGate {
+                    showBlockedProfileContent = true
+                }
+                .padding(.horizontal)
+                .padding(.top, 24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            } else {
+                StateView(state: presenter.state.tabs) { tabsArray in
+                    let tabs = tabsArray.cast(ProfileState.Tab.self)
+                    let selectedTabItem = tabs[selectedTab]
+                    ProfileTimelineWaterFallView(presenter: profileTimelinePresenter(for: selectedTabItem))
+                        .id(profileTimelineID(for: selectedTabItem))
+                }
             }
         }
     }
     
+    @ViewBuilder
     var compatBody: some View {
-        StateView(state: presenter.state.tabs) { tabsArray in
-            let tabs = tabsArray.cast(ProfileState.Tab.self)
-            ProfileCompatTimelineView(
-                profileState: presenter.state,
-                tabs: tabs,
-                selectedTab: $selectedTab,
-                onFollowClick: { user, followButtonState in
-                    handleFollowAction(user: user, followButtonState: followButtonState)
-                },
-                onFollowingClick: onFollowingClick,
-                onFansClick: onFansClick,
-                onHeaderVisibilityChanged: { visible in
-                    DispatchQueue.main.async {
-                        guard isProfileHeaderVisible != visible else { return }
-                        isProfileHeaderVisible = visible
-                        updateToolbarTabPickerVisibility()
-                    }
-                },
-                onPickerVisibilityChanged: { visible in
-                    DispatchQueue.main.async {
-                        guard isInlineTabPickerVisible != visible else { return }
-                        isInlineTabPickerVisible = visible
-                        updateToolbarTabPickerVisibility()
-                    }
+        if shouldGateBlockedProfile {
+            ScrollView {
+                ProfileHeader(
+                    user: presenter.state.userState,
+                    relation: presenter.state.relationState,
+                    followButtonState: presenter.state.followButtonState,
+                    isMe: presenter.state.isMe,
+                    onFollowClick: { user, followButtonState in
+                        handleFollowAction(user: user, followButtonState: followButtonState)
+                    },
+                    onFollowingClick: onFollowingClick,
+                    onFansClick: onFansClick
+                )
+                .padding(.bottom)
+                BlockedProfileGate {
+                    showBlockedProfileContent = true
                 }
-            )
+                .padding(.horizontal)
+                .padding(.bottom, 24)
+            }
+            .detectScrolling()
+            .ignoresSafeArea(edges: .vertical)
+            .onAppear {
+                isProfileHeaderVisible = true
+                isInlineTabPickerVisible = false
+                updateToolbarTabPickerVisibility()
+            }
+        } else {
+            StateView(state: presenter.state.tabs) { tabsArray in
+                let tabs = tabsArray.cast(ProfileState.Tab.self)
+                ProfileCompatTimelineView(
+                    profileState: presenter.state,
+                    tabs: tabs,
+                    selectedTab: $selectedTab,
+                    onFollowClick: { user, followButtonState in
+                        handleFollowAction(user: user, followButtonState: followButtonState)
+                    },
+                    onFollowingClick: onFollowingClick,
+                    onFansClick: onFansClick,
+                    onHeaderVisibilityChanged: { visible in
+                        DispatchQueue.main.async {
+                            guard isProfileHeaderVisible != visible else { return }
+                            isProfileHeaderVisible = visible
+                            updateToolbarTabPickerVisibility()
+                        }
+                    },
+                    onPickerVisibilityChanged: { visible in
+                        DispatchQueue.main.async {
+                            guard isInlineTabPickerVisible != visible else { return }
+                            isInlineTabPickerVisible = visible
+                            updateToolbarTabPickerVisibility()
+                        }
+                    }
+                )
+            }
+            .detectScrolling()
+            .ignoresSafeArea(edges: .vertical)
         }
-        .detectScrolling()
-        .ignoresSafeArea(edges: .vertical)
     }
 
     @ViewBuilder
@@ -181,6 +225,17 @@ struct ProfileScreen: View {
             presenter.state.follow(userKey: user.key)
         }
     }
+
+    private var isBlockedProfile: Bool {
+        if case .success(let relationState) = onEnum(of: presenter.state.relationState) {
+            return relationState.data.blocking
+        }
+        return false
+    }
+
+    private var shouldGateBlockedProfile: Bool {
+        isBlockedProfile && !showBlockedProfileContent
+    }
 }
 
 private struct ProfileTabPicker: View {
@@ -196,6 +251,27 @@ private struct ProfileTabPicker: View {
         } label: {
             EmptyView()
         }
+    }
+}
+
+private struct BlockedProfileGate: View {
+    let onShow: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(localized: "profile_blocked_gate_title", defaultValue: "Blocked profile"))
+                .font(.headline)
+            Text(String(localized: "profile_blocked_gate_description", defaultValue: "You blocked this user. Their tabs and timeline are hidden until you choose to show them."))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Button {
+                onShow()
+            } label: {
+                Text(String(localized: "profile_blocked_gate_show", defaultValue: "Show"))
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

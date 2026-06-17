@@ -82,6 +82,12 @@ internal interface UserDao {
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
     suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
 
+    @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType AND userKey = :userKey")
+    suspend fun deleteHistory(
+        accountType: DbAccountType,
+        userKey: MicroBlogKey,
+    )
+
     @Query("SELECT * FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
     fun getUserRelation(
         accountType: DbAccountType,

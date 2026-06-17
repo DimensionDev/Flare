@@ -40,6 +40,9 @@
     <string name="compose_close_confirm_message">您有未儲存的變更。是否在關閉前將其儲存為草稿？</string>
     <string name="compose_save_draft">儲存</string>
     <string name="compose_close_discard">捨棄</string>
+    <string name="profile_blocked_gate_title">已封鎖此使用者</string>
+    <string name="profile_blocked_gate_description">你已封鎖此使用者。個人資料分頁與時間軸會先隱藏，選擇顯示後才會展開。</string>
+    <string name="profile_blocked_gate_show">顯示</string>
     <string name="status_insight_send">發送</string>
     <string name="ask_ai">問問AI</string>
     <string name="agent_chat_title">AI 聊天</string>

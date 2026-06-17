@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
@@ -37,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +88,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asText
@@ -93,6 +96,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMedia
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
@@ -242,6 +246,17 @@ internal fun ProfileScreen(
         profilePresenter(userKey = userKey, accountType = accountType)
     }
     val nestedScrollState = rememberNestedScrollViewState()
+    var showBlockedProfileContent by remember(accountType, userKey) { mutableStateOf(false) }
+    val isBlockedProfile =
+        state.state
+            .relationState
+            .takeSuccessOr(UiRelation())
+            .blocking
+    LaunchedEffect(isBlockedProfile) {
+        if (!isBlockedProfile) {
+            showBlockedProfileContent = false
+        }
+    }
     val windowSize =
         with(LocalDensity.current) {
             LocalWindowInfo.current.containerSize
@@ -409,85 +424,93 @@ internal fun ProfileScreen(
                 indicatorPadding = it,
                 content = {
                     val content = @Composable {
-                        state.pagerState.onSuccess { pagerState ->
-                            state.tabs.onSuccess { tabs ->
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    if (tabs.size > 1) {
-                                        SecondaryScrollableTabRow(
-                                            containerColor = Color.Transparent,
-                                            selectedTabIndex = pagerState.currentPage,
-                                            modifier = Modifier.fillMaxWidth(),
-                                            edgePadding = screenHorizontalPadding,
-                                            divider = {},
-                                            indicator = {
-                                                TabRowIndicator(
-                                                    selectedIndex =
-                                                        minOf(
-                                                            pagerState.currentPage,
-                                                            tabs.size - 1,
-                                                        ),
-                                                )
-                                            },
-                                        ) {
-                                            tabs
-                                                .toImmutableList()
-                                                .forEachIndexed { index, profileTab ->
-                                                    Tab(
-                                                        modifier = Modifier.clip(CircleShape),
-                                                        selected = pagerState.currentPage == index,
-                                                        onClick = {
-                                                            scope.launch {
-                                                                pagerState.animateScrollToPage(index)
-                                                            }
-                                                        },
-                                                    ) {
-                                                        dev.dimension.flare.ui.component.Text(
-                                                            text = profileTab.name.asText(),
-                                                            modifier =
-                                                                Modifier
-                                                                    .padding(8.dp),
-                                                        )
+                        if (isBlockedProfile && !showBlockedProfileContent) {
+                            BlockedProfileGate(
+                                onShow = {
+                                    showBlockedProfileContent = true
+                                },
+                            )
+                        } else {
+                            state.pagerState.onSuccess { pagerState ->
+                                state.tabs.onSuccess { tabs ->
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        if (tabs.size > 1) {
+                                            SecondaryScrollableTabRow(
+                                                containerColor = Color.Transparent,
+                                                selectedTabIndex = pagerState.currentPage,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                edgePadding = screenHorizontalPadding,
+                                                divider = {},
+                                                indicator = {
+                                                    TabRowIndicator(
+                                                        selectedIndex =
+                                                            minOf(
+                                                                pagerState.currentPage,
+                                                                tabs.size - 1,
+                                                            ),
+                                                    )
+                                                },
+                                            ) {
+                                                tabs
+                                                    .toImmutableList()
+                                                    .forEachIndexed { index, profileTab ->
+                                                        Tab(
+                                                            modifier = Modifier.clip(CircleShape),
+                                                            selected = pagerState.currentPage == index,
+                                                            onClick = {
+                                                                scope.launch {
+                                                                    pagerState.animateScrollToPage(index)
+                                                                }
+                                                            },
+                                                        ) {
+                                                            dev.dimension.flare.ui.component.Text(
+                                                                text = profileTab.name.asText(),
+                                                                modifier =
+                                                                    Modifier
+                                                                        .padding(8.dp),
+                                                            )
+                                                        }
                                                     }
-                                                }
-                                        }
-                                    }
-                                    HorizontalPager(
-                                        state = pagerState,
-                                    ) { index ->
-                                        val tab = tabs[index]
-                                        when (tab) {
-                                            is ProfileTabItem.Media -> {
-                                                ProfileMediaTab(
-                                                    mediaState = tab.data,
-                                                    onItemClicked = { statusKey, index, preview ->
-                                                        onMediaClick(statusKey, index, preview)
-                                                    },
-                                                    modifier = Modifier.fillMaxSize(),
-                                                )
                                             }
-
-                                            is ProfileTabItem.Timeline -> {
-                                                val listState = rememberLazyStaggeredGridState()
-                                                if (index == pagerState.currentPage) {
-                                                    RegisterTabCallback(
-                                                        lazyListState = listState,
-                                                        onRefresh = {
-                                                            state.refresh()
+                                        }
+                                        HorizontalPager(
+                                            state = pagerState,
+                                        ) { index ->
+                                            val tab = tabs[index]
+                                            when (tab) {
+                                                is ProfileTabItem.Media -> {
+                                                    ProfileMediaTab(
+                                                        mediaState = tab.data,
+                                                        onItemClicked = { statusKey, index, preview ->
+                                                            onMediaClick(statusKey, index, preview)
                                                         },
+                                                        modifier = Modifier.fillMaxSize(),
                                                     )
                                                 }
-                                                LazyStatusVerticalStaggeredGrid(
-                                                    state = listState,
-                                                    contentPadding =
-                                                        PaddingValues(
-                                                            top = 8.dp,
-                                                            bottom = 8.dp + it.calculateBottomPadding(),
-                                                        ),
-                                                    modifier = Modifier.fillMaxSize(),
-                                                ) {
-                                                    status(tab.data)
+
+                                                is ProfileTabItem.Timeline -> {
+                                                    val listState = rememberLazyStaggeredGridState()
+                                                    if (index == pagerState.currentPage) {
+                                                        RegisterTabCallback(
+                                                            lazyListState = listState,
+                                                            onRefresh = {
+                                                                state.refresh()
+                                                            },
+                                                        )
+                                                    }
+                                                    LazyStatusVerticalStaggeredGrid(
+                                                        state = listState,
+                                                        contentPadding =
+                                                            PaddingValues(
+                                                                top = 8.dp,
+                                                                bottom = 8.dp + it.calculateBottomPadding(),
+                                                            ),
+                                                        modifier = Modifier.fillMaxSize(),
+                                                    ) {
+                                                        status(tab.data)
+                                                    }
                                                 }
                                             }
                                         }
@@ -542,6 +565,34 @@ internal fun ProfileScreen(
                     }
                 },
             )
+        }
+    }
+}
+
+@Composable
+private fun BlockedProfileGate(
+    onShow: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = screenHorizontalPadding, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.profile_blocked_gate_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = stringResource(id = R.string.profile_blocked_gate_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FilledTonalButton(onClick = onShow) {
+            Text(text = stringResource(id = R.string.profile_blocked_gate_show))
         }
     }
 }

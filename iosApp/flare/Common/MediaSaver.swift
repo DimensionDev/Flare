@@ -1,4 +1,5 @@
 import Foundation
+import GSPlayer
 import Kingfisher
 import Photos
 import UIKit
@@ -16,6 +17,22 @@ class MediaSaver: NSObject {
         }
     }
 
+    func saveVideo(url: String, customHeaders: [String: String]? = nil) {
+        guard let remoteUrl = URL(string: url),
+              remoteUrl.pathExtension.lowercased() != "m3u8" else {
+            showSaveResult(success: false, mediaType: .video)
+            return
+        }
+
+        if let cachedFileURL = completeCachedVideoFileURL(for: remoteUrl) {
+            saveVideoFileToPhotos(cachedFileURL)
+            return
+        }
+
+        showDownloadStarted(mediaType: .video)
+        downloadRemoteVideoToPhotos(from: remoteUrl, customHeaders: customHeaders)
+    }
+
     private func saveRemoteOriginalDataToPhotos(from url: URL, customHeaders: [String: String]?) {
         KingfisherManager.shared.downloader.downloadImage(with: url, options: kingfisherOptions(customHeaders: customHeaders), progressBlock: nil) { result in
             switch result {
@@ -27,12 +44,77 @@ class MediaSaver: NSObject {
         }
     }
 
+    private func completeCachedVideoFileURL(for url: URL) -> URL? {
+        let filePath = VideoCacheManager.cachedFilePath(for: url)
+        guard FileManager.default.fileExists(atPath: filePath),
+              CachedVideoConfiguration.load(forVideoFilePath: filePath)?.isComplete == true else {
+            return nil
+        }
+        return URL(fileURLWithPath: filePath)
+    }
+
+    private func downloadRemoteVideoToPhotos(from url: URL, customHeaders: [String: String]?) {
+        var request = URLRequest(url: url)
+        customHeaders?.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        URLSession.shared.downloadTask(with: request) { temporaryURL, response, error in
+            guard error == nil, let temporaryURL else {
+                self.showSaveResult(success: false, mediaType: .video)
+                return
+            }
+
+            let fileExtension = Self.videoFileExtension(from: url, response: response)
+            let targetURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("flare-video-\(UUID().uuidString)")
+                .appendingPathExtension(fileExtension)
+
+            do {
+                try FileManager.default.copyItem(at: temporaryURL, to: targetURL)
+                self.saveVideoFileToPhotos(targetURL, removeWhenDone: true)
+            } catch {
+                self.showSaveResult(success: false, mediaType: .video)
+            }
+        }.resume()
+    }
+
     nonisolated private func saveOriginalDataToPhotos(_ data: Data) {
         PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
             request.addResource(with: .photo, data: data, options: nil)
         } completionHandler: { success, error in
             self.showSaveResult(success: success && error == nil)
+        }
+    }
+
+    nonisolated private func saveVideoFileToPhotos(_ fileURL: URL, removeWhenDone: Bool = false) {
+        PHPhotoLibrary.shared().performChanges {
+            let request = PHAssetCreationRequest.forAsset()
+            request.addResource(with: .video, fileURL: fileURL, options: nil)
+        } completionHandler: { success, error in
+            if removeWhenDone {
+                try? FileManager.default.removeItem(at: fileURL)
+            }
+            self.showSaveResult(success: success && error == nil, mediaType: .video)
+        }
+    }
+
+    nonisolated private static func videoFileExtension(from url: URL, response: URLResponse?) -> String {
+        let pathExtension = url.pathExtension.lowercased()
+        if !pathExtension.isEmpty, pathExtension != "m3u8" {
+            return pathExtension
+        }
+
+        switch response?.mimeType?.lowercased() {
+        case "video/quicktime":
+            return "mov"
+        case "video/webm":
+            return "webm"
+        case "video/x-m4v":
+            return "m4v"
+        default:
+            return "mp4"
         }
     }
 
@@ -49,14 +131,91 @@ class MediaSaver: NSObject {
         })]
     }
     
-    nonisolated private func showSaveResult(success: Bool) {
+    nonisolated private func showSaveResult(success: Bool, mediaType: MediaSaveType = .image) {
         DispatchQueue.main.async {
             Drops.show(
                 .init(
-                    title: .init(localized: success ? "notification_save_image_success" : "notification_save_image_error"),
+                    title: mediaType.title(success: success),
                     icon: success ? .faCircleCheck : .faCircleExclamation
                 )
             )
         }
     }
+
+    nonisolated private func showDownloadStarted(mediaType: MediaSaveType) {
+        DispatchQueue.main.async {
+            Drops.show(
+                .init(
+                    title: mediaType.downloadStartedTitle,
+                    icon: .faPhotoFilm
+                )
+            )
+        }
+    }
+}
+
+private enum MediaSaveType {
+    case image
+    case video
+
+    func title(success: Bool) -> String {
+        switch self {
+        case .image:
+            return .init(localized: success ? "notification_save_image_success" : "notification_save_image_error")
+        case .video:
+            return .init(localized: success ? "notification_save_video_success" : "notification_save_video_error")
+        }
+    }
+
+    var downloadStartedTitle: String {
+        switch self {
+        case .image:
+            return .init(localized: "notification_download_started")
+        case .video:
+            return .init(localized: "notification_download_video_started")
+        }
+    }
+}
+
+private struct CachedVideoConfiguration: Decodable {
+    let info: CachedVideoInfo?
+    let fragments: [CachedVideoFragment]
+
+    static func load(forVideoFilePath filePath: String) -> CachedVideoConfiguration? {
+        let configurationURL = URL(fileURLWithPath: filePath).appendingPathExtension("cfg")
+        guard let data = try? Data(contentsOf: configurationURL) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(CachedVideoConfiguration.self, from: data)
+    }
+
+    var isComplete: Bool {
+        guard let contentLength = info?.contentLength, contentLength > 0 else {
+            return false
+        }
+
+        let sortedFragments = fragments.sorted { $0.location < $1.location }
+        var coveredUpperBound = 0
+
+        for fragment in sortedFragments {
+            if fragment.location > coveredUpperBound {
+                return false
+            }
+            coveredUpperBound = max(coveredUpperBound, fragment.location + fragment.length)
+            if coveredUpperBound >= contentLength {
+                return true
+            }
+        }
+
+        return false
+    }
+}
+
+private struct CachedVideoInfo: Decodable {
+    let contentLength: Int
+}
+
+private struct CachedVideoFragment: Decodable {
+    let location: Int
+    let length: Int
 }

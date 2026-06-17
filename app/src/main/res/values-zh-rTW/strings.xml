@@ -295,6 +295,7 @@
     <string name="status_menu_share_via_fixvx">透過 Fixvx 分享</string>
     <string name="media_save_success">已儲存至下載</string>
     <string name="media_save_fail">儲存失敗</string>
+    <string name="media_download_started">快取尚未準備好，已開始下載。</string>
     <string name="media_alt_text">替代文字</string>
     <string name="media_is_downloading">媒體仍在下載中。請稍後再試。</string>
     <string name="settings_side_panel_empty">預設情況下，側邊欄會遵循目前帳號的平台。</string>

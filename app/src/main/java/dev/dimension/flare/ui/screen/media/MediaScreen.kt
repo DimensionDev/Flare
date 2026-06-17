@@ -58,7 +58,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Compress
 import compose.icons.fontawesomeicons.solid.Download
+import compose.icons.fontawesomeicons.solid.Expand
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
@@ -103,6 +105,11 @@ internal fun MediaScreen(
     val state by producePresenter(uri) {
         mediaPresenter(uri, context)
     }
+    MediaLandscapeEffect(
+        enabled = state.isLandscapeViewing,
+        originalOrientation = state.originalOrientation,
+        setOriginalOrientation = state::setOriginalOrientation,
+    )
     FlareTheme(
         darkTheme = true,
     ) {
@@ -193,6 +200,23 @@ internal fun MediaScreen(
                         )
                     }
                     Spacer(Modifier.weight(1f))
+                    Glassify(
+                        onClick = {
+                            state.setLandscapeViewing(!state.isLandscapeViewing)
+                        },
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                    ) {
+                        FAIcon(
+                            if (state.isLandscapeViewing) {
+                                FontAwesomeIcons.Solid.Compress
+                            } else {
+                                FontAwesomeIcons.Solid.Expand
+                            },
+                            contentDescription = if (state.isLandscapeViewing) "Exit landscape view" else "Landscape view",
+                        )
+                    }
                     Glassify(
                         onClick = {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -307,10 +331,18 @@ private fun mediaPresenter(
     var showSheet by remember {
         mutableStateOf(false)
     }
+    var isLandscapeViewing by remember {
+        mutableStateOf(false)
+    }
+    var originalOrientation: Int? by remember {
+        mutableStateOf<Int?>(null)
+    }
     object {
         val showUi = showUi
 
         val showSheet = showSheet
+        val isLandscapeViewing = isLandscapeViewing
+        val originalOrientation = originalOrientation
 
         fun setShowSheet(value: Boolean) {
             showSheet = value
@@ -318,6 +350,14 @@ private fun mediaPresenter(
 
         fun setShowUi(value: Boolean) {
             showUi = value
+        }
+
+        fun setLandscapeViewing(value: Boolean) {
+            isLandscapeViewing = value
+        }
+
+        fun setOriginalOrientation(value: Int?) {
+            originalOrientation = value
         }
 
         fun save() {

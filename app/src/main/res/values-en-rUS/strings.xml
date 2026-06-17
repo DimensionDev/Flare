@@ -315,6 +315,7 @@
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved to Downloads</string>
     <string name="media_save_fail">Failed to save</string>
+    <string name="media_download_started">Cache is not ready. Download started.</string>
     <string name="media_alt_text">Alt text</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 

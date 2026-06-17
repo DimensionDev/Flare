@@ -278,6 +278,7 @@ public fun MediaItem(
                 PlatformVideoPlayer(
                     contentScale = contentScale,
                     uri = media.url,
+                    customHeaders = media.customHeaders,
                     muted = true,
                     previewUri = media.thumbnailUrl,
                     contentDescription = media.description,
@@ -304,6 +305,7 @@ public fun MediaItem(
                             NetworkImage(
                                 contentScale = contentScale,
                                 model = media.thumbnailUrl,
+                                customHeaders = media.customHeaders,
                                 contentDescription = media.description,
                                 modifier =
                                     Modifier
@@ -340,6 +342,7 @@ public fun MediaItem(
                             NetworkImage(
                                 contentScale = contentScale,
                                 model = media.thumbnailUrl,
+                                customHeaders = media.customHeaders,
                                 contentDescription = media.description,
                                 modifier =
                                     Modifier

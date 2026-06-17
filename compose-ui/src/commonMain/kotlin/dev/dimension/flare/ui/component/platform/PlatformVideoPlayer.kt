@@ -14,12 +14,14 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FaceFrown
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
+import kotlinx.collections.immutable.ImmutableMap
 
 @Composable
 internal expect fun PlatformVideoPlayer(
     uri: String,
     previewUri: String?,
     contentDescription: String?,
+    customHeaders: ImmutableMap<String, String>? = null,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
     showControls: Boolean = false,
@@ -55,6 +57,7 @@ internal expect fun PlatformVideoPlayer(
             ) {
                 NetworkImage(
                     model = previewUri,
+                    customHeaders = customHeaders,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =

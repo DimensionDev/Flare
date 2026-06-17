@@ -9,6 +9,7 @@ struct MediaScreen: View {
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     @State private var shareFileURL: URL?
     @State private var shareFileSourceURL: String?
+    @State private var isLandscapeViewing: Bool = false
 
     var body: some View {
         LazyPager(data: [url]) { item in
@@ -24,6 +25,14 @@ struct MediaScreen: View {
         .task(id: url) {
             await loadShareFile(url: url, customHeaders: customHeaders)
         }
+        .onChange(of: isLandscapeViewing) { _, newValue in
+            MediaOrientationController.setLandscape(newValue)
+        }
+        .onDisappear {
+            if isLandscapeViewing {
+                MediaOrientationController.setLandscape(false)
+            }
+        }
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
         .ignoresSafeArea()
@@ -34,6 +43,16 @@ struct MediaScreen: View {
                 } label: {
                     Image("fa-xmark")
                 }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isLandscapeViewing.toggle()
+                    }
+                } label: {
+                    Image(systemName: isLandscapeViewing ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                }
+                .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {

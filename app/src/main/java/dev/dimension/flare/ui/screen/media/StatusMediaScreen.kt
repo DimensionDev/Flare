@@ -794,8 +794,8 @@ internal fun StatusMediaScreen(
 @Composable
 private fun PlayerControl(
     player: ExoPlayer,
-    playbackSpeed: Float = NORMAL_PLAYBACK_SPEED,
     modifier: Modifier = Modifier,
+    playbackSpeed: Float = NORMAL_PLAYBACK_SPEED,
 ) {
     val playPauseButtonState = rememberPlayPauseButtonState(player)
     var isLoaded by remember { mutableStateOf(false) }

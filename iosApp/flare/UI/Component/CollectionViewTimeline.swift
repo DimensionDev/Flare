@@ -257,6 +257,17 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private static let footerErrorID = "__fe__"
     private static let footerEndID = "__fend__"
 
+    private static func itemIdentityKey(for item: UiTimelineV2) -> String {
+        if let itemKey = item.itemKey, !itemKey.isEmpty {
+            return itemKey
+        }
+        return [
+            item.itemType,
+            String(describing: item.accountType),
+            String(describing: item.statusKey),
+        ].joined(separator: ":")
+    }
+
     init(detailStatusKey: MicroBlogKey?) {
         self.detailStatusKey = detailStatusKey
         super.init(nibName: nil, bundle: nil)
@@ -943,11 +954,10 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             var loadedTimelineItemIDs = Set<String>()
 
             for i in 0..<itemCount {
-                guard let peeked = success.peek(index: Int32(i)),
-                      let itemKey = peeked.itemKey,
-                      !itemKey.isEmpty else {
+                guard let peeked = success.peek(index: Int32(i)) else {
                     continue
                 }
+                let itemKey = Self.itemIdentityKey(for: peeked)
                 let id = "\(Self.timelinePrefix)\(itemKey)"
                 loadedIDsByIndex[i] = id
                 loadedRenderHashByItemID[id] = peeked.renderHash

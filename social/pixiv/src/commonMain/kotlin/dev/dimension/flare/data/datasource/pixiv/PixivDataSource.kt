@@ -4,6 +4,8 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -47,6 +49,7 @@ internal class PixivDataSource(
     PinnableTimelineTabDataSource,
     TimelineTabConfigurationDataSource,
     UserDataSource,
+    GalleryDataSource,
     PostDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
@@ -282,6 +285,27 @@ internal class PixivDataSource(
 
     override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         PixivStatusDetailLoader(
+            service = service,
+            accountKey = accountKey,
+            statusKey = statusKey,
+        )
+
+    override fun galleryDetail(statusKey: MicroBlogKey): RemoteLoader<GalleryDetail> =
+        PixivGalleryDetailLoader(
+            service = service,
+            accountKey = accountKey,
+            statusKey = statusKey,
+        )
+
+    override fun galleryComments(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        PixivGalleryCommentsLoader(
+            service = service,
+            accountKey = accountKey,
+            statusKey = statusKey,
+        )
+
+    override fun galleryRecommendations(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        PixivGalleryRecommendationsLoader(
             service = service,
             accountKey = accountKey,
             statusKey = statusKey,

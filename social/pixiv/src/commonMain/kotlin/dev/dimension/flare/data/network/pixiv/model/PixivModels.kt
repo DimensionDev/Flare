@@ -30,6 +30,15 @@ internal data class PixivIllustDetailResponse(
 )
 
 @Serializable
+internal data class PixivCommentListResponse(
+    val comments: List<PixivComment> = emptyList(),
+    @SerialName("next_url")
+    val nextUrl: String? = null,
+    @SerialName("total_comments")
+    val totalComments: Long = 0,
+)
+
+@Serializable
 internal data class PixivUserListResponse(
     @SerialName("user_previews")
     val userPreviews: List<PixivUserPreview> = emptyList(),
@@ -161,6 +170,25 @@ internal data class PixivUser(
     val isPremium: Boolean = false,
     @SerialName("x_restrict")
     val xRestrict: Int = 0,
+)
+
+@Serializable
+internal data class PixivComment(
+    val id: Long,
+    val comment: String = "",
+    val date: String = "",
+    val user: PixivUser,
+    val stamp: PixivCommentStamp? = null,
+    @SerialName("has_replies")
+    val hasReplies: Boolean = false,
+)
+
+@Serializable
+internal data class PixivCommentStamp(
+    @SerialName("stamp_id")
+    val stampId: Long = 0,
+    @SerialName("stamp_url")
+    val stampUrl: String? = null,
 )
 
 @Serializable

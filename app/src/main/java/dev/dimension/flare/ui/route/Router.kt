@@ -21,6 +21,7 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
 import dev.dimension.flare.ui.screen.compose.composeEntryBuilder
 import dev.dimension.flare.ui.screen.dm.dmEntryBuilder
+import dev.dimension.flare.ui.screen.gallery.galleryEntryBuilder
 import dev.dimension.flare.ui.screen.home.homeEntryBuilder
 import dev.dimension.flare.ui.screen.list.listEntryBuilder
 import dev.dimension.flare.ui.screen.media.mediaEntryBuilder
@@ -98,6 +99,7 @@ internal fun Router(
                 blueskyEntryBuilder(navigate, onBack)
                 composeEntryBuilder(navigate, onBack)
                 dmEntryBuilder(navigate, onBack)
+                galleryEntryBuilder(navigate, onBack)
                 listEntryBuilder(navigate, onBack)
                 mediaEntryBuilder(navigate, onBack, uriHandler = uriHandler)
                 profileEntryBuilder(navigate, onBack)

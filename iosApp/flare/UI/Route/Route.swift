@@ -46,6 +46,10 @@ enum Route: Hashable, Identifiable {
             ServiceSelectionScreen(toHome: { goBack() })
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        case .galleryDetail(let accountType, let statusKey):
+            GalleryDetailScreen(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
+        case .galleryComments(let accountType, let statusKey):
+            GalleryCommentsScreen(accountType: accountType, statusKey: statusKey)
         case .profileUser(let accountType, let userKey):
             ProfileScreen(
                 accountType: accountType,
@@ -204,6 +208,8 @@ enum Route: Hashable, Identifiable {
     case statusBlueskyReport(AccountType, MicroBlogKey)
     case statusDeleteConfirm(AccountType, MicroBlogKey)
     case statusDetail(AccountType, MicroBlogKey)
+    case galleryDetail(AccountType, MicroBlogKey)
+    case galleryComments(AccountType, MicroBlogKey)
     case statusInsight(AccountType, MicroBlogKey)
     case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
@@ -284,6 +290,13 @@ enum Route: Hashable, Identifiable {
             return Route.mediaStatusMedia(data.accountType, data.statusKey, Int32(data.index), data.preview)
         }
     }
+
+    fileprivate static func fromGallery(_ gallery: DeeplinkRoute.Gallery) -> Route? {
+        switch onEnum(of: gallery) {
+        case .detail(let data):
+            return Route.galleryDetail(data.accountType, data.statusKey)
+        }
+    }
     
     fileprivate static func fromProfile(_ profile: DeeplinkRoute.Profile) -> Route? {
         switch onEnum(of: profile) {
@@ -335,6 +348,8 @@ enum Route: Hashable, Identifiable {
             return fromCompose(compose)
         case .media(let media):
             return fromMedia(media)
+        case .gallery(let gallery):
+            return fromGallery(gallery)
         case .profile(let profile):
             return fromProfile(profile)
         case .rss(let rss):

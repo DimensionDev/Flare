@@ -7,6 +7,7 @@ import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.pixiv.model.PixivBookmarkDetailResponse
+import dev.dimension.flare.data.network.pixiv.model.PixivCommentListResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivIllustDetailResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivIllustListResponse
 import dev.dimension.flare.data.network.pixiv.model.PixivNullResponse
@@ -70,6 +71,12 @@ internal interface PixivAppResources {
         @Query("filter") filter: String = "for_android",
         @Query("illust_id") illustId: Long,
     ): PixivIllustDetailResponse
+
+    @GET("v3/illust/comments")
+    suspend fun illustComments(
+        @Query("illust_id") illustId: Long,
+        @Query("include_total_comments") includeTotalComments: Boolean = true,
+    ): PixivCommentListResponse
 
     @GET("v2/illust/related")
     suspend fun relatedIllusts(

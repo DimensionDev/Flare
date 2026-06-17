@@ -364,21 +364,10 @@ public fun CommonStatusComponent(
                     item,
                     isQuote = isQuote,
                     onMediaClick = { media ->
-                        val index = item.images.indexOf(media)
-                        val link =
-                            DeeplinkRoute.Media.StatusMedia(
-                                statusKey = item.statusKey,
-                                accountType = item.accountType,
-                                index = index,
-                                preview =
-                                    when (media) {
-                                        is UiMedia.Image -> media.previewUrl
-                                        is UiMedia.Video -> media.thumbnailUrl
-                                        is UiMedia.Gif -> media.previewUrl
-                                        is UiMedia.Audio -> null
-                                    },
-                            )
-                        uriHandler.openUri(link.toUri())
+                        item.openMedia(
+                            media = media,
+                            launcher = uriHandler::openUri,
+                        )
                     },
                 )
             }

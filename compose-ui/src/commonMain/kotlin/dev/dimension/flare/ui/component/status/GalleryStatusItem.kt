@@ -33,8 +33,6 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.toUiImage
-import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 private val GalleryTileShape = RoundedCornerShape(12.dp)
@@ -44,7 +42,7 @@ private const val GALLERY_FEED_DESC_MAX_LINES = 3
 private val GalleryAvatarSize = 24.dp
 
 @Composable
-internal fun GalleryTimelineItem(
+public fun GalleryTimelineItem(
     item: UiTimelineV2?,
     modifier: Modifier = Modifier,
 ) {
@@ -107,20 +105,10 @@ private fun GalleryPostTile(
                         Modifier
                             .fillMaxWidth()
                             .clickable {
-                                val link =
-                                    DeeplinkRoute.Media.StatusMedia(
-                                        statusKey = post.statusKey,
-                                        accountType = post.accountType,
-                                        index = 0,
-                                        preview =
-                                            when (val m = firstMedia) {
-                                                is UiMedia.Image -> m.previewUrl
-                                                is UiMedia.Video -> m.thumbnailUrl
-                                                is UiMedia.Gif -> m.previewUrl
-                                                is UiMedia.Audio -> null
-                                            },
-                                    )
-                                uriHandler.openUri(link.toUri())
+                                post.openMedia(
+                                    media = firstMedia,
+                                    launcher = uriHandler::openUri,
+                                )
                             },
                     keepAspectRatio = true,
                 )

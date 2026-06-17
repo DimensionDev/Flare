@@ -298,6 +298,7 @@ internal fun StatusMediaScreen(
                                             } else if (media is UiMedia.Video) {
                                                 VideoPlayer(
                                                     uri = media.url,
+                                                    customHeaders = media.customHeaders,
                                                     previewUri = media.thumbnailUrl,
                                                     contentDescription = media.description,
                                                     aspectRatio = media.aspectRatio,
@@ -319,6 +320,7 @@ internal fun StatusMediaScreen(
                                             } else if (media is UiMedia.Audio) {
                                                 VideoPlayer(
                                                     uri = media.url,
+                                                    customHeaders = media.customHeaders,
                                                     previewUri = null,
                                                     contentDescription = media.description,
                                                     autoPlay = false,
@@ -981,10 +983,10 @@ private fun statusMediaPresenter(
                 val fileName = data.getFileName(statusKeyString, userHandle)
 
                 when (data) {
-                    is UiMedia.Audio -> download(data.url, fileName)
-                    is UiMedia.Gif -> download(data.url, fileName)
+                    is UiMedia.Audio -> download(data.url, fileName, data.customHeaders)
+                    is UiMedia.Gif -> download(data.url, fileName, data.customHeaders)
                     is UiMedia.Image -> save(data.url, fileName)
-                    is UiMedia.Video -> download(data.url, fileName)
+                    is UiMedia.Video -> download(data.url, fileName, data.customHeaders)
                 }
             }
         }
@@ -1056,13 +1058,28 @@ private fun statusMediaPresenter(
         fun download(
             uri: String,
             fileName: String,
+            customHeaders: Map<String, String>?,
         ) {
             scope.launch {
                 videoDownloadHelper.downloadVideo(
                     uri = uri,
                     fileName = fileName,
+                    customHeaders = customHeaders,
                     callback =
                         object : VideoDownloadHelper.DownloadCallback {
+                            override fun onDownloadStarted(downloadId: Long) {
+                                scope.launch {
+                                    withContext(Dispatchers.Main) {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                context.getString(R.string.media_download_started),
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                    }
+                                }
+                            }
+
                             override fun onDownloadSuccess(downloadId: Long) {
                                 scope.launch {
                                     withContext(Dispatchers.Main) {

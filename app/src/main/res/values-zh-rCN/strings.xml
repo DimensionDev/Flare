@@ -334,6 +334,7 @@
     <string name="status_menu_share_via_fixvx">通过 Fixvx 分享</string>
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
+    <string name="media_download_started">缓存尚未准备好，已开始下载。</string>
     <string name="media_alt_text">替代文本</string>
     <string name="media_is_downloading">媒体仍在下载中。请稍后再试。</string>
     <string name="settings_side_panel_empty">默认情况下，侧边栏遵循当前账户的平台。</string>

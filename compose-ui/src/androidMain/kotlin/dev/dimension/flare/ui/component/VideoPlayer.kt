@@ -56,6 +56,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.android.awaitFrame
 import org.koin.compose.koinInject
 import org.koin.core.annotation.Provided
@@ -73,6 +74,7 @@ private val audioAttributes by lazy {
 @Composable
 public fun VideoPlayer(
     uri: String,
+    customHeaders: ImmutableMap<String, String>? = null,
     previewUri: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
@@ -95,6 +97,7 @@ public fun VideoPlayer(
             ) {
                 NetworkImage(
                     model = previewUri,
+                    customHeaders = customHeaders,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
@@ -129,6 +132,7 @@ public fun VideoPlayer(
             ) {
                 NetworkImage(
                     model = previewUri,
+                    customHeaders = customHeaders,
                     contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
@@ -171,7 +175,11 @@ public fun VideoPlayer(
     var isLoaded by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
     var currentRect by remember { mutableStateOf(IntRect.Zero) }
-    val binding = rememberSurfaceBinding(uri)
+    val request =
+        remember(uri, customHeaders) {
+            VideoRequest(uri = uri, customHeaders = customHeaders?.toMap().orEmpty())
+        }
+    val binding = rememberSurfaceBinding(request)
     val player = binding.first
 
     LaunchedEffect(binding.second, currentRect, visible) {
@@ -284,12 +292,12 @@ public fun VideoPlayer(
 }
 
 @Composable
-private fun rememberSurfaceBinding(uri: String): Pair<ExoPlayer?, SurfaceBindingManager.Binding> {
+private fun rememberSurfaceBinding(request: VideoRequest): Pair<ExoPlayer?, SurfaceBindingManager.Binding> {
     val manager: SurfaceBindingManager = koinInject()
     var player by remember { mutableStateOf<ExoPlayer?>(null) }
     val binding =
-        remember(uri, manager) {
-            manager.register(uri) { exoPlayer ->
+        remember(request, manager) {
+            manager.register(request) { exoPlayer ->
                 player = exoPlayer
             }
         }
@@ -303,14 +311,21 @@ private fun rememberSurfaceBinding(uri: String): Pair<ExoPlayer?, SurfaceBinding
     return player to binding
 }
 
+internal data class VideoRequest(
+    val uri: String,
+    val customHeaders: Map<String, String> = emptyMap(),
+)
+
 @Stable
 @Single
 public class SurfaceBindingManager(
     @Provided private val context: Context,
+    private val media3VideoCacheManager: Media3VideoCacheManager,
 ) {
     public val player: ExoPlayer by lazy {
         ExoPlayer
             .Builder(context.applicationContext)
+            .setMediaSourceFactory(media3VideoCacheManager.mediaSourceFactory())
             .build()
             .apply {
                 playWhenReady = true
@@ -330,7 +345,7 @@ public class SurfaceBindingManager(
 
     private data class Candidate(
         val binding: Binding,
-        val uri: String,
+        val request: VideoRequest,
         val rect: IntRect,
         val isVisible: Boolean,
         val callback: (ExoPlayer?) -> Unit,
@@ -338,9 +353,10 @@ public class SurfaceBindingManager(
 
     private val candidates = mutableMapOf<Binding, Candidate>()
     private var activeBinding: Binding? = null
+    private var activeRequest: VideoRequest? = null
 
     internal fun register(
-        uri: String,
+        request: VideoRequest,
         onActiveChanged: (ExoPlayer?) -> Unit,
     ): Binding =
         object : Binding {
@@ -348,7 +364,7 @@ public class SurfaceBindingManager(
                 rect: IntRect,
                 isVisible: Boolean,
             ) {
-                candidates[this] = Candidate(this, uri, rect, isVisible, onActiveChanged)
+                candidates[this] = Candidate(this, request, rect, isVisible, onActiveChanged)
                 recalculateActiveItem()
             }
 
@@ -389,30 +405,21 @@ public class SurfaceBindingManager(
             activeBinding = newBinding
 
             if (best != null) {
-                // Check if we are switching to a candidate with the SAME URI
                 val oldCandidate = candidates[oldBinding]
-                val sameUri = oldCandidate?.uri == best.uri
-
-                if (!sameUri) {
-                    // Different URI: Prepare player
-                    val currentUri =
-                        player.currentMediaItem
-                            ?.localConfiguration
-                            ?.uri
-                            ?.toString()
-                    if (currentUri != best.uri) {
-                        player.setMediaItem(MediaItem.fromUri(best.uri))
-                        player.prepare()
-                        player.play()
-                    } else {
-                        if (!player.isPlaying) {
-                            player.play()
-                        }
-                    }
-                    // Notify bindings
+                if (activeRequest != best.request) {
+                    val mediaItem = MediaItem.fromUri(best.request.uri)
+                    val mediaSource =
+                        media3VideoCacheManager
+                            .mediaSourceFactory(best.request.customHeaders)
+                            .createMediaSource(mediaItem)
+                    player.setMediaSource(mediaSource)
+                    player.prepare()
+                    player.play()
+                    activeRequest = best.request
                 } else {
-                    // Same URI: Seamless handover
-                    // Do nothing to the player state (it keeps playing)
+                    if (!player.isPlaying) {
+                        player.play()
+                    }
                 }
 
                 oldCandidate?.callback?.invoke(null)

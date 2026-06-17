@@ -162,6 +162,14 @@ struct StatusMediaScreen: View {
                             .accessibilityLabel("Share image")
                         }
                     }
+                } else if let selectedMedia, case .video(let video) = onEnum(of: selectedMedia) {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            MediaSaver.shared.saveVideo(url: video.url, customHeaders: video.customHeaders)
+                        } label: {
+                            Image("fa-download")
+                        }
+                    }
                 }
             }
         }

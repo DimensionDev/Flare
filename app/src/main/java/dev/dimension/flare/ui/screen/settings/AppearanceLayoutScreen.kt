@@ -45,7 +45,10 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
+internal fun AppearanceLayoutScreen(
+    onBack: () -> Unit,
+    toPostActionLayout: () -> Unit,
+) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
     val globalAppearance = LocalGlobalAppearance.current
@@ -231,26 +234,40 @@ internal fun AppearanceLayoutScreen(onBack: () -> Unit) {
                         },
                 )
                 AnimatedVisibility(timelineAppearance.postActionStyle != PostActionStyle.Hidden) {
-                    SegmentedListItem(
-                        onClick = {
-                            state.update(AppearanceKeys.ShowNumbers, !timelineAppearance.showNumbers)
-                        },
-                        shapes = ListItemDefaults.last(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_appearance_show_numbers))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_show_numbers_description))
-                        },
-                        trailingContent = {
-                            Switch(
-                                checked = timelineAppearance.showNumbers,
-                                onCheckedChange = {
-                                    state.update(AppearanceKeys.ShowNumbers, it)
-                                },
-                            )
-                        },
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                    ) {
+                        SegmentedListItem(
+                            onClick = {
+                                state.update(AppearanceKeys.ShowNumbers, !timelineAppearance.showNumbers)
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_appearance_show_numbers))
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_appearance_show_numbers_description))
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = timelineAppearance.showNumbers,
+                                    onCheckedChange = {
+                                        state.update(AppearanceKeys.ShowNumbers, it)
+                                    },
+                                )
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = toPostActionLayout,
+                            shapes = ListItemDefaults.last(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_appearance_post_action_layout))
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_appearance_post_action_layout_description))
+                            },
+                        )
+                    }
                 }
             }
         }

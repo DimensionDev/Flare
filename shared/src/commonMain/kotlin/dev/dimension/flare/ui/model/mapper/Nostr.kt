@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -35,6 +36,7 @@ public fun ActionMenu.Companion.nostrRepost(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Repost,
     )
 
 public fun ActionMenu.Companion.nostrLike(
@@ -65,4 +67,5 @@ public fun ActionMenu.Companion.nostrLike(
                     accountKey = accountKey,
                 )
             },
+        actionFamily = PostActionFamily.Like,
     )

@@ -188,6 +188,7 @@ private extension TimelineAppearance {
             compatLinkPreview: compatLinkPreview,
             showNumbers: showNumbers,
             postActionStyle: .hidden,
+            postActionLayout: postActionLayout,
             fullWidthPost: fullWidthPost,
             absoluteTimestamp: absoluteTimestamp,
             showPlatformLogo: showPlatformLogo,

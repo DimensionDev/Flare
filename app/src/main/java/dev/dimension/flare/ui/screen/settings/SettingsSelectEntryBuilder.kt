@@ -95,6 +95,19 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     ) {
         AppearanceLayoutScreen(
+            onBack = onBack,
+            toPostActionLayout = {
+                navigate(Route.Settings.PostActionLayout)
+            }
+        )
+    }
+
+    entry<Route.Settings.PostActionLayout>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        PostActionLayoutScreen(
             onBack = onBack
         )
     }

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
@@ -549,6 +550,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     statusKey = statusKey,
                                 ),
                         ),
+                    actionFamily = PostActionFamily.Reply,
                 ),
                 if (canReblog) {
                     ActionMenu.Group(
@@ -577,6 +579,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                     statusKey = statusKey,
                                                 ),
                                         ),
+                                    actionFamily = PostActionFamily.Quote,
                                 ),
                             ).toImmutableList(),
                     )
@@ -618,6 +621,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                     shareUrl = postUrl,
                                                 ),
                                         ),
+                                    actionFamily = PostActionFamily.Share,
                                 ),
                             )
                             if (isFromMe) {
@@ -637,6 +641,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                         statusKey = statusKey,
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Delete,
                                     ),
                                 )
                             } else {
@@ -666,6 +671,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                             ),
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Report,
                                     ),
                                 )
                             }

@@ -10,17 +10,20 @@ import UIKit
 struct StatusActionsView: View {
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.timelineAppearance.showNumbers) private var showNumbers
+    @Environment(\.timelineAppearance.postActionLayout) private var postActionLayout
     @Environment(\.openURL) private var openURL
     @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: [ActionMenu]
     let useText: Bool
     var allowSpacer: Bool = true
+    var applyPostActionLayout: Bool = true
 
     var body: some View {
+        let actions = resolvedData
         if useText {
-            ForEach(0..<data.count, id: \.self) { index in
+            ForEach(0..<actions.count, id: \.self) { index in
                 StatusActionView(
-                    data: data[index],
+                    data: actions[index],
                     useText: true,
                     isFixedWidth: false,
                     fontSize: fontSize,
@@ -30,9 +33,9 @@ struct StatusActionsView: View {
             }
         } else {
             HStack {
-                ForEach(0..<data.count, id: \.self) { index in
-                    let item = data[index]
-                    if (index == data.count - 1 && postActionStyle == .leftAligned) ||
+                ForEach(0..<actions.count, id: \.self) { index in
+                    let item = actions[index]
+                    if (index == actions.count - 1 && postActionStyle == .leftAligned) ||
                         (postActionStyle == .rightAligned && index == 0) ||
                         (postActionStyle == .stretch && index != 0) {
                         if allowSpacer {
@@ -42,7 +45,7 @@ struct StatusActionsView: View {
                     StatusActionView(
                         data: item,
                         useText: useText,
-                        isFixedWidth: index != data.count - 1,
+                        isFixedWidth: index != actions.count - 1,
                         fontSize: fontSize,
                         showNumbers: showNumbers,
                         openURL: openURL
@@ -52,6 +55,16 @@ struct StatusActionsView: View {
             .backport
             .labelIconToTitleSpacing(4)
         }
+    }
+
+    private var resolvedData: [ActionMenu] {
+        guard applyPostActionLayout else { return data }
+        return castActionMenus(
+            PostActionLayoutHelpers.shared.apply(
+                actions: data,
+                config: postActionLayout
+            )
+        )
     }
 }
 
@@ -263,6 +276,16 @@ struct StatusActionIcon: View {
             icon.image
         }
     }
+}
+
+private func castActionMenus(_ value: Any) -> [ActionMenu] {
+    if let actions = value as? [ActionMenu] {
+        return actions
+    }
+    if let actions = value as? NSArray {
+        return actions.cast(ActionMenu.self)
+    }
+    return []
 }
 
 extension UiIcon {

@@ -30,6 +30,8 @@ struct StatusUIKitAppearance: Equatable {
     let absoluteTimestamp: Bool
     let postActionStyle: PostActionStyle
     let postActionStyleID: String
+    let postActionLayout: PostActionLayoutConfig
+    let postActionLayoutID: String
     let showNumbers: Bool
     let showMedia: Bool
     let showSensitiveContent: Bool
@@ -49,6 +51,8 @@ struct StatusUIKitAppearance: Equatable {
         absoluteTimestamp = timeline.absoluteTimestamp
         postActionStyle = timeline.postActionStyle
         postActionStyleID = timeline.postActionStyle.name
+        postActionLayout = timeline.postActionLayout
+        postActionLayoutID = PostActionLayoutHelpers.shared.signature(config: timeline.postActionLayout)
         showNumbers = timeline.showNumbers
         showMedia = timeline.showMedia
         showSensitiveContent = timeline.showSensitiveContent
@@ -66,6 +70,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.showPlatformLogo == rhs.showPlatformLogo &&
             lhs.absoluteTimestamp == rhs.absoluteTimestamp &&
             lhs.postActionStyleID == rhs.postActionStyleID &&
+            lhs.postActionLayoutID == rhs.postActionLayoutID &&
             lhs.showNumbers == rhs.showNumbers &&
             lhs.showMedia == rhs.showMedia &&
             lhs.showSensitiveContent == rhs.showSensitiveContent &&

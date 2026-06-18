@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.mastodon.api.model.Account
@@ -468,6 +469,7 @@ private fun Status.renderStatus(
                                         ),
                                 )
                             },
+                        actionFamily = PostActionFamily.Reply,
                     ),
                 )
                 if (canReblog && canQuote && accountKey != null) {
@@ -496,6 +498,7 @@ private fun Status.renderStatus(
                                                                 statusKey = statusKey,
                                                             ),
                                                     ),
+                                                actionFamily = PostActionFamily.Quote,
                                             ),
                                         )
                                     }
@@ -528,6 +531,7 @@ private fun Status.renderStatus(
                                             ),
                                     )
                                 },
+                            actionFamily = PostActionFamily.Quote,
                         ),
                     )
                 } else if (canReblog) {
@@ -574,6 +578,7 @@ private fun Status.renderStatus(
                                             ),
                                     )
                                 },
+                            actionFamily = PostActionFamily.React,
                         ),
                     )
                 }
@@ -628,6 +633,7 @@ private fun Status.renderStatus(
                                                         shareUrl = postUrl,
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Share,
                                     ),
                                 )
 
@@ -648,6 +654,7 @@ private fun Status.renderStatus(
                                                             statusKey = statusKey,
                                                         ),
                                                 ),
+                                            actionFamily = PostActionFamily.Delete,
                                         ),
                                     )
                                 } else {
@@ -679,6 +686,7 @@ private fun Status.renderStatus(
                                                                 },
                                                         ),
                                                 ),
+                                            actionFamily = PostActionFamily.Report,
                                         ),
                                     )
                                 }

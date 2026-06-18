@@ -6,6 +6,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
@@ -669,6 +670,7 @@ internal fun Tweet.renderStatus(
                                     statusKey = statusKey,
                                 ),
                         ),
+                    actionFamily = PostActionFamily.Reply,
                 ),
                 ActionMenu.Group(
                     displayItem =
@@ -698,6 +700,7 @@ internal fun Tweet.renderStatus(
                                                 statusKey = statusKey,
                                             ),
                                     ),
+                                actionFamily = PostActionFamily.Quote,
                             ),
                         ).toImmutableList(),
                 ),
@@ -738,6 +741,7 @@ internal fun Tweet.renderStatus(
                                                     fixvxShareUrl = fixvxUrl,
                                                 ),
                                         ),
+                                    actionFamily = PostActionFamily.Share,
                                 ),
                             )
 
@@ -757,6 +761,7 @@ internal fun Tweet.renderStatus(
                                                                 .Specific(accountKey),
                                                     ),
                                             ),
+                                        actionFamily = PostActionFamily.Delete,
                                     ),
                                 )
                             } else {
@@ -777,6 +782,7 @@ internal fun Tweet.renderStatus(
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                         color = ActionMenu.Item.Color.Red,
                                         clickEvent = ClickEvent.Noop,
+                                        actionFamily = PostActionFamily.Report,
                                     ),
                                 )
                             }

@@ -105,6 +105,7 @@ import dev.dimension.flare.compose.ui.user_unblock
 import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -899,6 +900,10 @@ internal fun StatusActions(
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
+    val displayItems =
+        remember(items, appearanceSettings.postActionLayout) {
+            items.applyPostActionLayout(appearanceSettings.postActionLayout)
+        }
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(
@@ -913,8 +918,8 @@ internal fun StatusActions(
             },
 //        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        items.fastForEachIndexed { index, action ->
-            if (index == items.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
+        displayItems.fastForEachIndexed { index, action ->
+            if (index == displayItems.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
                 Spacer(modifier = Modifier.weight(1f))
             }
             when (action) {
@@ -927,7 +932,7 @@ internal fun StatusActions(
                         color =
                             action.displayItem.color?.toComposeColor()
                                 ?: PlatformContentColor.current,
-                        withTextMinWidth = index != items.lastIndex,
+                        withTextMinWidth = action.displayItem.count != null && index != displayItems.lastIndex,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
@@ -956,7 +961,7 @@ internal fun StatusActions(
                         // Fallback or handle null
                         number = action.count,
                         color = action.color?.toComposeColor() ?: PlatformContentColor.current,
-                        withTextMinWidth = index != items.lastIndex,
+                        withTextMinWidth = action.count != null && index != displayItems.lastIndex,
                         onClicked = {
                             action.onClicked.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)

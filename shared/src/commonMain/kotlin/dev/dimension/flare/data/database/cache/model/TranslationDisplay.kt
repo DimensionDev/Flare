@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database.cache.model
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.ClickEvent
@@ -227,6 +228,7 @@ private fun ActionMenu.prependTranslationAction(
                                 ),
                             ),
                         icon = UiIcon.Translate,
+                        actionFamily = PostActionFamily.Translate,
                     )
                 copy(
                     actions =

@@ -866,6 +866,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 useText: false,
                 allowSpacer: true,
                 postActionStyle: appearance.postActionStyle,
+                postActionLayout: appearance.postActionLayout,
                 showNumbers: appearance.showNumbers,
                 isDetail: isDetail
             )

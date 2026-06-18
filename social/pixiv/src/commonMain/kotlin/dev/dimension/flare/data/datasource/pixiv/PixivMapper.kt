@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.pixiv
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.network.pixiv.PIXIV_IMAGE_REFERER
@@ -84,6 +85,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
                                     shareUrl = "https://www.pixiv.net/artworks/$id",
                                 ),
                         ),
+                    actionFamily = PostActionFamily.Share,
                 ),
             ),
         poll = null,

@@ -13,6 +13,7 @@ struct HomeTimelineScreen: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
     @State private var selectedTabIndex = 0
+    @Namespace private var selectedTabIndicatorNamespace
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
@@ -88,8 +89,16 @@ struct HomeTimelineScreen: View {
                         })
                         .toolbar {
                             leadingToolbarContent
-                            ToolbarItem(placement: horizontalSizeClass == .regular ? .automatic : .title) {
-                                Menu {
+                            if horizontalSizeClass == .compact {
+                                ToolbarItem(placement: .title) {
+                                    Label {
+                                        TimelineTabTitle(title: tab.title)
+                                    } icon: {
+                                        TabIcon(tabItem: tab)
+                                    }
+                                    .labelStyle(.titleAndIcon)
+                                }
+                                ToolbarTitleMenu {
                                     ForEach(0..<tabs.count, id: \.self) { index in
                                         let item = tabs[index]
                                         Toggle(isOn: Binding(get: {
@@ -106,6 +115,7 @@ struct HomeTimelineScreen: View {
                                                     .frame(width: 24)
                                                     .scaledToFit()
                                             }
+                                            .labelStyle(.titleAndIcon)
                                         }
                                     }
                                     Divider()
@@ -118,20 +128,52 @@ struct HomeTimelineScreen: View {
                                             Image("fa-plus")
                                         }
                                     }
-                                } label: {
-                                    HStack(spacing: 0) {
-                                        TimelineTabTitle(title: tab.title)
-                                        Image("fa-chevron-down")
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                            .scaledToFit()
-                                            .frame(width: 8, height: 8)
-                                            .padding(8)
-                                            .background(
-                                                Circle()
-                                                    .fill(Color.secondary.opacity(0.2))
-                                            )
-                                            .scaleEffect(0.66)
+                                }
+                            } else {
+                                ToolbarItem(placement: .automatic) {
+                                    ScrollView(.horizontal) {
+                                        HStack {
+                                            ForEach(0..<tabs.count, id: \.self) { index in
+                                                let item = tabs[index]
+                                                Button {
+                                                    selectedTabIndex = index
+                                                } label: {
+                                                    Label {
+                                                        TimelineTabTitle(title: item.title)
+                                                    } icon: {
+                                                        TabIcon(tabItem: item)
+                                                            .frame(width: 24)
+                                                            .scaledToFit()
+                                                    }
+                                                    .labelStyle(.titleAndIcon)
+                                                }
+                                                .padding(.bottom, 9)
+                                                .ignoresSafeArea(edges: .bottom)
+                                                .safeAreaInset(edge: .bottom) {
+                                                    if selectedTabIndex == index {
+                                                        Capsule()
+                                                            .fill(Color.accentColor)
+                                                            .frame(width: 18, height: 3)
+                                                            .matchedGeometryEffect(id: "selectedTabIndicator", in: selectedTabIndicatorNamespace)
+                                                    } else {
+                                                        Capsule()
+                                                            .frame(width: 0, height: 3)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selectedTabIndex)
+                                    }
+                                }
+                                if #available(iOS 26.0, *) {
+                                    ToolbarSpacer()
+                                }
+                                ToolbarItem(placement: .primaryAction) {
+                                    Button {
+                                        toTabSetting()
+                                    } label: {
+                                        Image("fa-sliders")
                                     }
                                 }
                             }

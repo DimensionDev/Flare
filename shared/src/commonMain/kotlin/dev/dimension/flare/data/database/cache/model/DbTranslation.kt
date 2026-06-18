@@ -1,10 +1,10 @@
 package dev.dimension.flare.data.database.cache.model
 
 import androidx.room3.ColumnInfo
+import androidx.room3.ColumnTypeConverter
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
-import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.AccountType
@@ -68,28 +68,28 @@ internal data class TranslationPayload(
 )
 
 internal class TranslationConverters {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromEntityType(value: TranslationEntityType): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toEntityType(value: String): TranslationEntityType = TranslationEntityType.valueOf(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromStatus(value: TranslationStatus): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toStatus(value: String): TranslationStatus = TranslationStatus.valueOf(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromDisplayMode(value: TranslationDisplayMode): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toDisplayMode(value: String): TranslationDisplayMode = TranslationDisplayMode.valueOf(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromPayload(value: TranslationPayload?): String? = value?.encodeJson(TranslationPayload.serializer())
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toPayload(value: String?): TranslationPayload? = value?.decodeJson(TranslationPayload.serializer())
 }
 

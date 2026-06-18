@@ -15,9 +15,9 @@ core-ktx = "1.19.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
-lifecycle-runtime-ktx = "2.10.0"
+lifecycle-runtime-ktx = "2.11.0"
 activity-compose = "1.13.0"
-compose-bom = "2026.05.01"
+compose-bom = "2026.06.00"
 ksp = "2.3.9"
 koog = "1.0.0"
 nucleus = "1.15.7"
@@ -35,7 +35,7 @@ prettytime = "5.0.9.Final"
 readability = "1.0.0"
 reorderable = "3.1.0"
 richtextUiMaterial3 = "1.0.0-alpha05"
-sentry = "8.43.2"
+sentry = "8.44.0"
 twitter-parser = "0.5.9"
 molecule = "2.2.0"
 accompanist = "0.37.3"
@@ -49,18 +49,18 @@ ksoup = "0.2.6"
 versionUpdate = "0.54.0"
 bluesky = "0.3.4-SNAPSHOT"
 kotlinx-coroutines = "1.11.0"
-koin = "4.2.1"
+koin = "4.2.2"
 koin-plugin = "1.0.1"
 composeIcons = "1.3.0"
 media3 = "1.10.1"
 desugar_jdk_libs = "2.1.5"
 datastore = "1.3.0-alpha09"
-firebase-bom = "34.14.1"
-google-services = "4.4.4"
+firebase-bom = "34.15.0"
+google-services = "4.5.0"
 firebase-crashlytics = "3.0.7"
 materialKolor = "4.1.1"
-room = "3.0.0-alpha06"
-sqlite = "2.7.0-alpha06"
+room = "3.0.0-rc01"
+sqlite = "2.7.0-rc01"
 compose-multiplatform = "1.11.1"
 navigation3 = "1.2.0-alpha04"
 zoomable = "0.19.0"
@@ -112,7 +112,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha21" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha22" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -230,8 +230,8 @@ qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.3.0-beta02" }
-androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.3.0-rc01" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.11.0" }
 
 cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }

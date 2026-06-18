@@ -1,12 +1,12 @@
 package dev.dimension.flare.data.database.app.model
 
+import androidx.room3.ColumnTypeConverter
 import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
-import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.MicroBlogKey
@@ -166,21 +166,21 @@ internal data class DbDraftGroupWithRelations(
 )
 
 internal class DraftConverters {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromDraftContent(value: DraftContent): String = value.encodeJson()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toDraftContent(value: String): DraftContent = value.decodeJson()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromDraftTargetStatus(value: DraftTargetStatus): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toDraftTargetStatus(value: String): DraftTargetStatus = DraftTargetStatus.valueOf(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromDraftMediaType(value: DraftMediaType): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toDraftMediaType(value: String): DraftMediaType = DraftMediaType.valueOf(value)
 }

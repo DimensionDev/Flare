@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.database.cache.model
 
 import androidx.room3.ColumnInfo
+import androidx.room3.ColumnTypeConverter
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.DbAccountType
@@ -18,10 +18,10 @@ internal data class DbEmoji(
 )
 
 internal class EmojiContentConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toEmojiContent(data: ByteArray): EmojiContent =
         if (data.isEmpty()) {
             EmojiContent()

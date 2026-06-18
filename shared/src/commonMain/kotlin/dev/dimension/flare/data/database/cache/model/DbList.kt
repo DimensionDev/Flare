@@ -1,12 +1,12 @@
 package dev.dimension.flare.data.database.cache.model
 
 import androidx.room3.ColumnInfo
+import androidx.room3.ColumnTypeConverter
 import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
-import androidx.room3.TypeConverter
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.data.database.cache.model.DbList.ListContent
@@ -34,10 +34,10 @@ internal data class DbList(
 }
 
 internal class ListContentConverters {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromMessageContent(content: ListContent): ByteArray = content.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toMessageContent(value: ByteArray): ListContent = value.decodeProtobuf()
 }
 

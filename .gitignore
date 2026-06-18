@@ -22,7 +22,6 @@ iosApp/Podfile.lock
 iosApp/Pods/*
 iosApp/Flare.xcworkspace/*
 iosApp/Flare.xcodeproj/*
-!iosApp/Flare.xcodeproj/project.pbxproj
 shared/shared.podspec
 .kotlin
 .history

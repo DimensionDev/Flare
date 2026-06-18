@@ -26,6 +26,7 @@ private data class ThemedIconTheme(
     val light: ThemedIconColors,
 )
 
+@ConsistentCopyVisibility
 internal data class ThemeIconData private constructor(
     private val theme: ThemedIconTheme,
 ) {

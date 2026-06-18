@@ -4,7 +4,7 @@ set -euo pipefail
 icon_dir="iosApp/flare"
 asset_catalog="iosApp/flare/Assets.xcassets"
 swift_output="iosApp/flare/Common/AppIconOption.swift"
-project_file="iosApp/Flare.xcodeproj/project.pbxproj"
+project_file="iosApp/project.yml"
 prefix="app_icon_preview"
 size="256"
 platform="iOS"
@@ -27,7 +27,7 @@ Options:
   --icon-dir <path>        Directory containing AppIcon*.icon bundles. Default: iosApp/flare
   --asset-catalog <path>   Output .xcassets directory. Default: iosApp/flare/Assets.xcassets
   --swift-output <path>    Output AppIconOption.swift path. Default: iosApp/flare/Common/AppIconOption.swift
-  --project-file <path>    Xcode project.pbxproj to update. Default: iosApp/Flare.xcodeproj/project.pbxproj
+  --project-file <path>    XcodeGen project spec to update. Default: iosApp/project.yml
   --prefix <name>          Output image asset prefix. Default: app_icon_preview
   --size <px>              PNG width/height. Default: 256
   --platform <name>        ictool platform. Default: iOS
@@ -37,7 +37,7 @@ Options:
   --skip-appiconsets       Do not generate alternate .appiconset assets.
   --skip-previews          Only generate the Swift icon list.
   --skip-swift             Only generate preview image assets.
-  --skip-project           Do not update alternate app icon names in the Xcode project.
+  --skip-project           Do not update alternate app icon names in the XcodeGen spec.
   -h, --help               Show this help.
 EOF
 }
@@ -249,7 +249,7 @@ fi
 
 if [[ "$update_project" == "true" ]]; then
   if [[ ! -f "$project_file" ]]; then
-    echo "error: Xcode project file does not exist: $project_file" >&2
+    echo "error: Xcode project spec does not exist: $project_file" >&2
     exit 1
   fi
 
@@ -262,26 +262,32 @@ if [[ "$update_project" == "true" ]]; then
   done
 
   alternate_names_string="${alternate_names[*]}"
-  if ! grep -q "ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES" "$project_file"; then
-    echo "warning: ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES was not found in $project_file" >&2
-  else
+  if grep -q "ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES:" "$project_file"; then
+    perl -0pi -e "s/ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: \"[^\"]*\"/ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: \"$alternate_names_string\"/g" "$project_file"
+    echo "Updated alternate app icon names in $project_file"
+  elif grep -q "ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES" "$project_file"; then
     perl -0pi -e "s/ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = \"[^\"]*\";/ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = \"$alternate_names_string\";/g" "$project_file"
     echo "Updated alternate app icon names in $project_file"
+  else
+    echo "warning: ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES was not found in $project_file" >&2
   fi
 
+  perl -0pi -e 's/ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES/ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO/g' "$project_file"
   perl -0pi -e 's/ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;/ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;/g' "$project_file"
   echo "Disabled include-all app icon assets in $project_file"
 
-  exception_lines=$'\t\t\t\tInfo.plist,\n'
-  for icon_name in "${alternate_names[@]}"; do
-    exception_lines+=$'\t\t\t\t'"$icon_name.icon"$',\n'
-  done
+  if grep -q "membershipExceptions = (" "$project_file"; then
+    exception_lines=$'\t\t\t\tInfo.plist,\n'
+    for icon_name in "${alternate_names[@]}"; do
+      exception_lines+=$'\t\t\t\t'"$icon_name.icon"$',\n'
+    done
 
-  EXCEPTION_LINES="$exception_lines" perl -0pi -e '
-    my $lines = $ENV{"EXCEPTION_LINES"};
-    s/membershipExceptions = \(\n.*?\t\t\t\);/membershipExceptions = (\n$lines\t\t\t);/s;
-  ' "$project_file"
-  echo "Excluded alternate .icon sources from the Flare target in $project_file"
+    EXCEPTION_LINES="$exception_lines" perl -0pi -e '
+      my $lines = $ENV{"EXCEPTION_LINES"};
+      s/membershipExceptions = \(\n.*?\t\t\t\);/membershipExceptions = (\n$lines\t\t\t);/s;
+    ' "$project_file"
+    echo "Excluded alternate .icon sources from the Flare target in $project_file"
+  fi
 fi
 
 if [[ "$generate_previews" != "true" && "$generate_appiconsets" != "true" ]]; then

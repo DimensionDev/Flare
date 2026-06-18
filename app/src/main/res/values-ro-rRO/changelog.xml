@@ -2,9 +2,13 @@
 <resources>
     <string name="changelog_title">Bine ai revenit!</string>
     <string name="changelog_message">Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:</string>
-    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
+    <string name="changelog_current"><![CDATA[
+            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Îmbunătățiri de performanță și remedieri de erori.</li>
+                <li>A fost adăugat Flare AI Agent cu chat, informații despre postări și informații despre profiluri.</li>
+                <li>A fost adăugat suport Pixiv și o nouă vizualizare a detaliilor galeriei.</li>
+                <li>Au fost adăugate acțiuni de postare personalizabile și opțiuni de afișare pentru avertismente de conținut.</li>
+                <li>Au fost îmbunătățite notificările, cronologiile RSS, redarea video și stabilitatea cronologiilor.</li>
             </ul>
         ]]></string>
 </resources>

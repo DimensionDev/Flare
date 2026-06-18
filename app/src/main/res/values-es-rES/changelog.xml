@@ -2,9 +2,13 @@
 <resources>
     <string name="changelog_title">¡Bienvenido de nuevo!</string>
     <string name="changelog_message">Hemos realizado algunos cambios desde la última vez que iniciaste sesión. Estos son los detalles:</string>
-    <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
+    <string name="changelog_current"><![CDATA[
+            <span>Versión %1$s:</span>
             <ul>
-                <li>Mejoras de rendimiento y correcciones de errores.</li>
+                <li>Añadido Flare AI Agent con chat, análisis de publicaciones y análisis de perfiles.</li>
+                <li>Añadido soporte para Pixiv y una nueva vista de detalles de galería.</li>
+                <li>Añadidas acciones de publicación personalizables y opciones de visualización de advertencias de contenido.</li>
+                <li>Mejoradas las notificaciones, las cronologías RSS, la reproducción de vídeo y la estabilidad de las cronologías.</li>
             </ul>
         ]]></string>
 </resources>

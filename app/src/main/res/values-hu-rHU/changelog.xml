@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[            <span>%1$s verzió:</span>
+    <string name="changelog_current"><![CDATA[
+            <span>%1$s verzió:</span>
             <ul>
-                <li>Teljesítményjavítások és hibajavítások.</li>
+                <li>Hozzáadva a Flare AI Agent csevegéssel, bejegyzés- és profilbetekintésekkel.</li>
+                <li>Hozzáadva a Pixiv-támogatás és egy új galéria-részletek nézet.</li>
+                <li>Hozzáadva a testreszabható bejegyzésműveletek és tartalomfigyelmeztetés-megjelenítési beállítások.</li>
+                <li>Javultak az értesítések, az RSS-idővonalak, a videólejátszás és az idővonalak stabilitása.</li>
             </ul>
         ]]></string>
 </resources>

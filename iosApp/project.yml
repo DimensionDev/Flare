@@ -1,0 +1,138 @@
+name: Flare
+
+options:
+  minimumXcodeGenVersion: 2.45.4
+  xcodeVersion: "26.0"
+  developmentLanguage: en
+  defaultConfig: Release
+  deploymentTarget:
+    iOS: "17.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+settingGroups:
+  appVersion:
+    CURRENT_PROJECT_VERSION: 1600
+    MARKETING_VERSION: 1.6.0
+  iosApp:
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_PREVIEWS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare
+    PRODUCT_NAME: "$(TARGET_NAME)"
+    TARGETED_DEVICE_FAMILY: "1,2"
+
+settings:
+  base:
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    DEVELOPMENT_TEAM: 7LFDZ96332
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    STRING_CATALOG_GENERATE_SYMBOLS: YES
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_EMIT_LOC_STRINGS: YES
+    SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+    SWIFT_VERSION: "6.0"
+  configs:
+    Release:
+      VALIDATE_PRODUCT: YES
+
+packages:
+  ChatLayout:
+    url: https://github.com/ekazaev/ChatLayout
+    exactVersion: 2.4.2
+  CHTCollectionViewWaterfallLayout:
+    url: https://github.com/chiahsien/CHTCollectionViewWaterfallLayout
+    from: 1.0.1
+  Drops:
+    url: https://github.com/omaralbeik/Drops.git
+    exactVersion: 1.7.0
+  GSPlayer:
+    url: https://github.com/wxxsw/GSPlayer
+    from: 0.2.30
+  iOS-Backports:
+    url: https://github.com/superwall/iOS-Backports
+    exactVersion: 1.0.5
+  Kingfisher:
+    url: https://github.com/onevcat/Kingfisher.git
+    exactVersion: 8.8.1
+  LazyPager:
+    url: https://github.com/gh123man/LazyPager
+    exactVersion: 1.2.1
+  SwiftLintPlugins:
+    url: https://github.com/SimplyDanny/SwiftLintPlugins
+    exactVersion: 0.62.2
+  SwiftUI-Flow:
+    url: https://github.com/tevelee/SwiftUI-Flow
+    exactVersion: 3.1.1
+  swiftui-introspect:
+    url: https://github.com/siteline/swiftui-introspect
+    exactVersion: 26.0.1
+  VideoPlayer:
+    url: https://github.com/wxxsw/VideoPlayer
+    exactVersion: 1.2.5
+
+targets:
+  Flare:
+    type: application
+    platform: iOS
+    sources:
+      - path: flare
+        excludes:
+          - .DS_Store
+          - Assets.xcassets/.DS_Store
+          - Info.plist
+          - AppIcon_*.icon
+    dependencies:
+      - package: Kingfisher
+      - package: LazyPager
+      - package: SwiftUI-Flow
+        product: Flow
+      - package: swiftui-introspect
+        product: SwiftUIIntrospect
+      - package: Drops
+      - package: iOS-Backports
+        product: SwiftUIBackports
+      - package: VideoPlayer
+      - package: CHTCollectionViewWaterfallLayout
+      - package: GSPlayer
+      - package: ChatLayout
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :ios-shared:embedAndSignAppleFrameworkForXcode
+    settings:
+      groups:
+        - appVersion
+        - iosApp
+      base:
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow"
+        INFOPLIST_FILE: flare/Info.plist
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+schemes:
+  Flare:
+    build:
+      targets:
+        Flare: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

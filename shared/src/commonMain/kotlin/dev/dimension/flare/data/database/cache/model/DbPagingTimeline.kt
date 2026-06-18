@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.database.cache.model
 
+import androidx.room3.ColumnTypeConverter
 import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import androidx.room3.Relation
-import androidx.room3.TypeConverter
 import dev.dimension.flare.model.ReferenceType
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -82,15 +82,15 @@ internal data class DbStatusWithReference(
 )
 
 internal class StatusConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromReferenceType(value: ReferenceType): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toReferenceType(value: String): ReferenceType = ReferenceType.valueOf(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromTimestamp(value: Instant): Long = value.toEpochMilliseconds()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toTimestamp(value: Long): Instant = Instant.fromEpochMilliseconds(value)
 }

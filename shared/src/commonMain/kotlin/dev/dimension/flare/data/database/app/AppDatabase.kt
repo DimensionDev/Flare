@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.database.app
 
 import androidx.room3.AutoMigration
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
-import androidx.room3.TypeConverters
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.async.executeSQL
@@ -50,7 +50,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
     ],
     exportSchema = true,
 )
-@TypeConverters(
+@ColumnTypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
     dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
     dev.dimension.flare.data.database.app.model.DraftConverters::class,

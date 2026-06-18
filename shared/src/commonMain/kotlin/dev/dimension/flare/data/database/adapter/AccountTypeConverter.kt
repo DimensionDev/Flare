@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.database.adapter
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeJson
@@ -13,39 +13,39 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal class AccountTypeConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromString(value: String): DbAccountType = value.decodeJson()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromEnum(value: DbAccountType): String = value.encodeJson()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUiProfile(value: UiProfile): ByteArray = value.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUiProfile(value: ByteArray): UiProfile = value.decodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUiTimelineV2(value: UiTimelineV2): ByteArray = value.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUiTimelineV2(value: ByteArray): UiTimelineV2 = value.decodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUiDMRoom(value: UiDMRoom): ByteArray = value.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUiDMRoom(value: ByteArray): UiDMRoom = value.decodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUiDMItem(value: UiDMItem): ByteArray = value.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUiDMItem(value: ByteArray): UiDMItem = value.decodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUiRelation(value: UiRelation): ByteArray = value.encodeProtobuf()
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUiRelation(value: ByteArray): UiRelation = value.decodeProtobuf()
 }

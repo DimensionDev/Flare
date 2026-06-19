@@ -210,6 +210,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedTimelineItemIDs: Set<String> = []
     private let autoplayPlayerView = VideoPlayerView()
+    private var autoplayPlayerObservation: NSKeyValueObservation?
     private var autoplaySelectionTask: Task<Void, Never>?
     private var autoplayCountdownTask: Task<Void, Never>?
     private var postRefreshPoolCleanupTask: Task<Void, Never>?
@@ -321,6 +322,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         autoplayCountdownTask?.cancel()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
+        autoplayPlayerObservation?.invalidate()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -554,6 +556,10 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
                 self?.handleAutoplayPlayerStateChanged(state)
             }
         }
+        autoplayPlayerObservation =
+            autoplayPlayerView.playerLayer.observe(\.player, options: [.initial, .new]) { [weak self] _, _ in
+                self?.configureTimelineAutoplayPlayer()
+            }
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleTimelineVideoAutoplayNeedsUpdate),
@@ -1371,10 +1377,14 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
         currentAutoplayID = candidate.id
         currentAutoplayHostView = candidate.hostView
         autoplayPlayerView.play(for: candidate.url)
-        autoplayPlayerView.player?.preventsDisplaySleepDuringVideoPlayback = false
+        configureTimelineAutoplayPlayer()
         autoplayPlayerView.isMuted = true
         autoplayPlayerView.isAutoReplay = true
         startAutoplayCountdownUpdates()
+    }
+
+    private func configureTimelineAutoplayPlayer() {
+        autoplayPlayerView.player?.preventsDisplaySleepDuringVideoPlayback = false
     }
 
     private func handleAutoplayPlayerStateChanged(_ state: VideoPlayerView.State) {

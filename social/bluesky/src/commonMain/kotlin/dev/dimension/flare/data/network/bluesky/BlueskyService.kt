@@ -91,7 +91,7 @@ internal data class BlueskyService private constructor(
     fun newBaseUrlService(baseUrl: String): BlueskyService = copy(baseUrlFlow = flowOf(baseUrl))
 }
 
-private class AtprotoProxyPlugin {
+internal class AtprotoProxyPlugin {
     companion object : HttpClientPlugin<Unit, AtprotoProxyPlugin> {
         override val key = AttributeKey<AtprotoProxyPlugin>("AtprotoProxyPlugin")
 
@@ -102,11 +102,15 @@ private class AtprotoProxyPlugin {
             scope: HttpClient,
         ) {
             scope.requestPipeline.intercept(HttpRequestPipeline.State) {
-                if (context.url.pathSegments
-                        .lastOrNull()
-                        ?.startsWith("chat.bsky.convo.") == true
-                ) {
-                    context.headers["Atproto-Proxy"] = "did:web:api.bsky.chat#bsky_chat"
+                val method = context.url.pathSegments.lastOrNull()
+                when {
+                    method?.startsWith("app.bsky.") == true -> {
+                        context.headers["Atproto-Proxy"] = "did:web:api.bsky.app#bsky_appview"
+                    }
+
+                    method?.startsWith("chat.bsky.convo.") == true -> {
+                        context.headers["Atproto-Proxy"] = "did:web:api.bsky.chat#bsky_chat"
+                    }
                 }
             }
         }

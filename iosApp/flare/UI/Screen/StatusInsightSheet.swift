@@ -10,7 +10,6 @@ struct StatusInsightSheet: View {
     var body: some View {
         AgentChatView(
             messages: Array(presenter.state.messages),
-            input: presenter.state.input,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,

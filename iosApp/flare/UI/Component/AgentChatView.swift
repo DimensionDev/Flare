@@ -5,7 +5,6 @@ import KotlinSharedUI
 
 struct AgentChatView: View {
     let messages: [AgentChatHistoryMessage]
-    let input: String
     let isRunning: Bool
     let canSend: Bool
     let errorMessage: String?
@@ -23,7 +22,6 @@ struct AgentChatView: View {
 
     init(
         messages: [AgentChatHistoryMessage],
-        input: String,
         isRunning: Bool,
         canSend: Bool,
         errorMessage: String?,
@@ -37,7 +35,6 @@ struct AgentChatView: View {
         leadingContent: @escaping () -> AnyView = { AnyView(EmptyView()) }
     ) {
         self.messages = messages
-        self.input = input
         self.isRunning = isRunning
         self.canSend = canSend
         self.errorMessage = errorMessage
@@ -95,14 +92,6 @@ struct AgentChatView: View {
         }
         .onPreferenceChange(AgentChatInputBarHeightPreferenceKey.self) { height in
             inputBarHeight = height
-        }
-        .onAppear {
-            draft = input
-        }
-        .onChange(of: input) { _, value in
-            if draft != value {
-                draft = value
-            }
         }
         .onChange(of: draft) { _, value in
             onInputChange(value)

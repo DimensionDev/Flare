@@ -170,10 +170,9 @@ struct GalleryDetailScreen: View {
     }
 
     private func navigateToMedia(post: UiTimelineV2.Post, media: UiMedia) {
-        let route = post.statusMediaRoute(media: media)
-        if let url = URL(string: route.toUri()) {
-            openURL(url)
-        }
+        let medias = post.galleryImages.map { $0 as any UiMedia }
+        let index = medias.firstIndex { $0.url == media.url } ?? 0
+        onNavigate(.mediaRaw(medias, index, media.mediaPreviewURL))
     }
 }
 

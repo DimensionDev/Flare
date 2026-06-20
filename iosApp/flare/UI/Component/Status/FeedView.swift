@@ -6,10 +6,13 @@ struct FeedView: View {
     let data: UiTimelineV2.Feed
 //    @State private var showDetail = false
     private var descriptionText: String? {
-        let description = data.description_ ?? data.description
-        return description.isEmpty ? nil : description
+        guard let description = data.description_, !description.isEmpty else {
+            return nil
+        }
+        return description
     }
     var body: some View {
+        let desc = descriptionText
         VStack(
             alignment: .leading
         ) {
@@ -36,19 +39,28 @@ struct FeedView: View {
             if let title = data.title {
                 Text(title)
             }
-            HStack {
-                if let desc = descriptionText {
-                    Text(desc)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                if let image = data.media {
-                    NetworkImage(data: image.url, customHeader: image.customHeaders)
-                        .frame(width: 72, height: 72)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+            if desc != nil || data.media != nil {
+                HStack(alignment: .top, spacing: 8) {
+                    if let desc {
+                        Text(desc)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if let image = data.media {
+                        NetworkImage(data: image.url, customHeader: image.customHeaders)
+                            .if(desc != nil, transform: { view in
+                                view.frame(width: 80, height: 80)
+                            })
+                            .if(desc == nil, transform: { view in
+                                view
+                                    .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                                    .frame(maxWidth: .infinity)
+                            })
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
                 }
             }
         }

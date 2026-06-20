@@ -10,6 +10,10 @@ enum Route: Hashable, Identifiable {
         switch (lhs, rhs) {
         case (.timeline(let lhs), .timeline(let rhs)):
             return lhs.id == rhs.id
+        case (.mediaRaw(let lhsMedias, let lhsIndex, let lhsPreview), .mediaRaw(let rhsMedias, let rhsIndex, let rhsPreview)):
+            return lhsIndex == rhsIndex &&
+                lhsPreview == rhsPreview &&
+                lhsMedias.map { $0.url } == rhsMedias.map { $0.url }
         default:
             return lhs.hashValue == rhs.hashValue
         }
@@ -20,6 +24,11 @@ enum Route: Hashable, Identifiable {
         case .timeline(let item):
             hasher.combine("timeline")
             hasher.combine(item.id)
+        case .mediaRaw(let medias, let selectedIndex, let preview):
+            hasher.combine("mediaRaw")
+            hasher.combine(medias.map { $0.url })
+            hasher.combine(selectedIndex)
+            hasher.combine(preview)
         default:
             hasher.combine(String(describing: self))
         }
@@ -131,6 +140,8 @@ enum Route: Hashable, Identifiable {
             RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
         case .twitterArticle(let accountType, let tweetId, let articleId):
             TwitterArticleScreen(accountType: accountType, tweetId: tweetId, articleId: articleId)
+        case .article(let accountType, let articleKey):
+            ArticleScreen(accountType: accountType, articleKey: articleKey, onNavigate: onNavigate)
         case .statusVVOStatus(let accountType, let statusKey):
             VVOStatusScreen(accountType: accountType, statusKey: statusKey)
         case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
@@ -155,7 +166,9 @@ enum Route: Hashable, Identifiable {
             DMConversationScreen(accountType: accountType, roomKey: roomKey)
                 .navigationTitle(title)
         case .mediaImage(let url, let preview, let customHeaders):
-            MediaScreen(url: url, customHeaders: customHeaders)
+            MediaScreen(url: url, preview: preview, customHeaders: customHeaders)
+        case .mediaRaw(let medias, let selectedIndex, let preview):
+            RawMediaScreen(medias: medias, initialIndex: selectedIndex, preview: preview)
         case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
             StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
         case .appLog:
@@ -197,6 +210,7 @@ enum Route: Hashable, Identifiable {
     case composeReply(AccountType, MicroBlogKey)
     case composeVVOReplyComment(AccountType, MicroBlogKey, String)
     case mediaImage(String, String?, [String: String]?)
+    case mediaRaw([any UiMedia], Int, String?)
     case mediaPodcast(AccountType, String)
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case profileUser(AccountType, MicroBlogKey)
@@ -204,6 +218,7 @@ enum Route: Hashable, Identifiable {
     case profileInsight(AccountType, MicroBlogKey)
     case rssDetail(String, String?, String?)
     case twitterArticle(AccountType, String, String?)
+    case article(AccountType, MicroBlogKey)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
     case statusAltText(String)
@@ -362,6 +377,8 @@ enum Route: Hashable, Identifiable {
             }
         case .twitterArticle(let data):
             return Route.twitterArticle(data.accountType, data.tweetId, data.articleId)
+        case .article(let data):
+            return Route.article(data.accountType, data.articleKey)
         case .search(let search):
             return Route.search(search.accountType, search.query)
         case .status(let status):

@@ -184,7 +184,8 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
             let descriptionHeight = descriptionLabel.isHidden
                 ? 0
                 : estimatedLabelHeight(descriptionLabel, width: descriptionWidth)
-            let bodyHeight = max(descriptionHeight, mediaView.isHidden ? 0 : Self.mediaSize)
+            let mediaSize = bodyMediaSize(for: width)
+            let bodyHeight = max(descriptionHeight, mediaView.isHidden ? 0 : mediaSize.height)
 
             if assignFrames {
                 if !descriptionLabel.isHidden {
@@ -196,11 +197,12 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
                     )
                 }
                 if !mediaView.isHidden {
+                    let mediaX = descriptionLabel.isHidden ? 0 : max(width - mediaSize.width, 0)
                     mediaView.frame = CGRect(
-                        x: max(width - Self.mediaSize, 0),
+                        x: mediaX,
                         y: y,
-                        width: Self.mediaSize,
-                        height: Self.mediaSize
+                        width: mediaSize.width,
+                        height: mediaSize.height
                     )
                 }
             }
@@ -283,7 +285,18 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         if mediaView.isHidden {
             return width
         }
-        return max(width - Self.mediaSize - Self.spacing, 1)
+        if descriptionLabel.isHidden {
+            return width
+        }
+        return max(width - bodyMediaSize(for: width).width - Self.spacing, 1)
+    }
+
+    private func bodyMediaSize(for width: CGFloat) -> CGSize {
+        guard !mediaView.isHidden else { return .zero }
+        if descriptionLabel.isHidden {
+            return CGSize(width: width, height: width * 9 / 16)
+        }
+        return CGSize(width: Self.mediaSize, height: Self.mediaSize)
     }
 
     private func estimatedLabelHeight(_ label: UILabel, width: CGFloat) -> CGFloat {
@@ -333,8 +346,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
             titleLabel.text = nil
         }
 
-        let description = data.description_ ?? data.description
-        if !description.isEmpty {
+        if let description = data.description_, !description.isEmpty {
             descriptionLabel.isHidden = false
             descriptionLabel.text = description
         } else {

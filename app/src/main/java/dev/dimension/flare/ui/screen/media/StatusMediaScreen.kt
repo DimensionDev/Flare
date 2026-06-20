@@ -160,6 +160,7 @@ import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
@@ -606,34 +607,61 @@ internal fun MediaViewerScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
                                     if (state.showUi && !state.isLandscapeViewing && pagerState.pageCount > 1) {
-                                        Row(
-                                            modifier =
-                                                Modifier.let {
-                                                    if (isBigScreen) {
-                                                        it
-                                                    } else {
-                                                        it.padding(top = 8.dp)
+                                        if (status == null && pagerState.pageCount > 10) {
+                                            MediaPageSlider(
+                                                pageCount = pagerState.pageCount,
+                                                currentPage = pagerState.currentPage,
+                                                onPageSelected = { page ->
+                                                    scope.launch {
+                                                        if (pagerState.currentPage != page) {
+                                                            pagerState.scrollToPage(page)
+                                                        }
                                                     }
                                                 },
-                                            horizontalArrangement = Arrangement.Center,
-                                        ) {
-                                            repeat(pagerState.pageCount) { iteration ->
-                                                val color =
-                                                    if (pagerState.currentPage == iteration) {
-                                                        MaterialTheme.colorScheme.primary
-                                                    } else {
-                                                        MaterialTheme.colorScheme.onBackground.copy(
-                                                            alpha = 0.5f,
-                                                        )
-                                                    }
-                                                Box(
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(2.dp)
-                                                            .clip(CircleShape)
-                                                            .background(color)
-                                                            .size(8.dp),
-                                                )
+                                                modifier =
+                                                    Modifier
+                                                        .let {
+                                                            if (isBigScreen) {
+                                                                it
+                                                            } else {
+                                                                it.padding(
+                                                                    start = 16.dp,
+                                                                    top = 8.dp,
+                                                                    end = 16.dp,
+                                                                )
+                                                            }
+                                                        }.widthIn(max = 480.dp),
+                                            )
+                                        } else {
+                                            Row(
+                                                modifier =
+                                                    Modifier.let {
+                                                        if (isBigScreen) {
+                                                            it
+                                                        } else {
+                                                            it.padding(top = 8.dp)
+                                                        }
+                                                    },
+                                                horizontalArrangement = Arrangement.Center,
+                                            ) {
+                                                repeat(pagerState.pageCount) { iteration ->
+                                                    val color =
+                                                        if (pagerState.currentPage == iteration) {
+                                                            MaterialTheme.colorScheme.primary
+                                                        } else {
+                                                            MaterialTheme.colorScheme.onBackground.copy(
+                                                                alpha = 0.5f,
+                                                            )
+                                                        }
+                                                    Box(
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(2.dp)
+                                                                .clip(CircleShape)
+                                                                .background(color)
+                                                                .size(8.dp),
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -837,6 +865,62 @@ internal fun MediaViewerScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MediaPageSlider(
+    pageCount: Int,
+    currentPage: Int,
+    onPageSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val maxPage = (pageCount - 1).coerceAtLeast(0)
+    var isDragging by remember { mutableStateOf(false) }
+    var sliderValue by remember(pageCount) {
+        mutableFloatStateOf(currentPage.coerceIn(0, maxPage).toFloat())
+    }
+    LaunchedEffect(currentPage, maxPage, isDragging) {
+        if (!isDragging) {
+            sliderValue = currentPage.coerceIn(0, maxPage).toFloat()
+        }
+    }
+
+    val sliderPage = sliderValue.roundToInt().coerceIn(0, maxPage)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = (sliderPage + 1).toString(),
+            style = MaterialTheme.typography.labelMedium,
+        )
+        Slider(
+            value = sliderValue.coerceIn(0f, maxPage.toFloat()),
+            onValueChange = { value ->
+                val page = value.roundToInt().coerceIn(0, maxPage)
+                isDragging = true
+                sliderValue = page.toFloat()
+                if (page != currentPage) {
+                    onPageSelected(page)
+                }
+            },
+            onValueChangeFinished = {
+                val page = sliderValue.roundToInt().coerceIn(0, maxPage)
+                isDragging = false
+                if (page != currentPage) {
+                    onPageSelected(page)
+                }
+            },
+            valueRange = 0f..maxPage.toFloat(),
+            steps = (pageCount - 2).coerceAtLeast(0),
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = pageCount.toString(),
+            style = MaterialTheme.typography.labelMedium,
+        )
     }
 }
 

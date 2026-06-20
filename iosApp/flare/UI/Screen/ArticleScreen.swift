@@ -28,7 +28,8 @@ struct ArticleScreen: View {
                 article: article,
                 accountType: accountType,
                 onNavigate: onNavigate,
-                onOpenURL: openArticleURL
+                onOpenURL: openArticleURL,
+                onDownloadFile: downloadArticleFile
             )
         } errorContent: { error in
             ContentUnavailableView(
@@ -79,6 +80,14 @@ struct ArticleScreen: View {
         guard let url = URL(string: value) else { return }
         openURL(url)
     }
+
+    private func downloadArticleFile(_ block: UiArticleBlockFile) {
+        MediaSaver.shared.saveFile(
+            url: block.url,
+            fileName: block.downloadFileName,
+            customHeaders: block.customHeaders
+        )
+    }
 }
 
 private struct ArticleContentView: View {
@@ -86,6 +95,7 @@ private struct ArticleContentView: View {
     let accountType: AccountType
     let onNavigate: (Route) -> Void
     let onOpenURL: (String) -> Void
+    let onDownloadFile: (UiArticleBlockFile) -> Void
     
     private var blocks: [any UiArticleBlock] {
         Array(article.content.blocks)
@@ -115,7 +125,8 @@ private struct ArticleContentView: View {
                         ArticleBlockView(
                             block: block,
                             onOpenURL: onOpenURL,
-                            onOpenMedia: openMedia
+                            onOpenMedia: openMedia,
+                            onDownloadFile: onDownloadFile
                         )
                     }
                 }
@@ -277,6 +288,7 @@ private struct ArticleBlockView: View {
     let block: any UiArticleBlock
     let onOpenURL: (String) -> Void
     let onOpenMedia: (any UiMedia) -> Void
+    let onDownloadFile: (UiArticleBlockFile) -> Void
     
     var body: some View {
         switch onEnum(of: block) {
@@ -294,7 +306,7 @@ private struct ArticleBlockView: View {
                 onOpenMedia: onOpenMedia
             )
         case .file(let file):
-            ArticleFileBlockView(block: file, onOpenURL: onOpenURL)
+            ArticleFileBlockView(block: file, onDownloadFile: onDownloadFile)
         case .embed(let embed):
             ArticleEmbedBlockView(block: embed, onOpenURL: onOpenURL)
         case .contentGate(let gate):
@@ -370,16 +382,16 @@ private struct ArticleMediaFrame<Content: View>: View {
 
 private struct ArticleFileBlockView: View {
     let block: UiArticleBlockFile
-    let onOpenURL: (String) -> Void
+    let onDownloadFile: (UiArticleBlockFile) -> Void
     
     private var extensionName: String? {
-        let extensionName = URL(string: block.url)?.pathExtension
-        return extensionName?.isEmpty == false ? extensionName?.uppercased() : nil
+        let extensionName = block.extension?.trimmedNonEmpty ?? URL(string: block.url)?.pathExtension.trimmedNonEmpty
+        return extensionName?.uppercased()
     }
     
     var body: some View {
         Button {
-            onOpenURL(block.url)
+            onDownloadFile(block)
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "doc.fill")
@@ -559,6 +571,56 @@ private struct ArticleLoadingView: View {
             }
             .frame(maxWidth: .infinity)
         }
+    }
+}
+
+private extension UiArticleBlockFile {
+    var downloadFileName: String {
+        let sourceName = name.trimmedNonEmpty ?? url.fileNameFromPath ?? "file"
+        let rawExtension = self.extension?.trimmedNonEmpty
+        let extensionName = rawExtension.map { String($0.drop(while: { $0 == "." })) }?.trimmedNonEmpty
+        let fileName = if let extensionName, !sourceName.hasFileExtension {
+            "\(sourceName).\(extensionName)"
+        } else {
+            sourceName
+        }
+        return fileName.safeDownloadFileName
+    }
+}
+
+private extension String {
+    var trimmedNonEmpty: String? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
+    }
+
+    var fileNameFromPath: String? {
+        let path = components(separatedBy: CharacterSet(charactersIn: "?#")).first ?? self
+        return path
+            .split { $0 == "/" || $0 == "\\" }
+            .last
+            .map(String.init)?
+            .trimmedNonEmpty
+    }
+
+    var hasFileExtension: Bool {
+        let name = fileNameFromPath ?? self
+        guard let lastDotIndex = name.lastIndex(of: ".") else {
+            return false
+        }
+        return lastDotIndex > name.startIndex && name.index(after: lastDotIndex) < name.endIndex
+    }
+
+    var safeDownloadFileName: String {
+        let safeName = trimmingCharacters(in: .whitespacesAndNewlines).map { character -> Character in
+            if character == "/" ||
+                character == "\\" ||
+                character.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }) {
+                return "_"
+            }
+            return character
+        }
+        return String(safeName).trimmedNonEmpty ?? "file"
     }
 }
 

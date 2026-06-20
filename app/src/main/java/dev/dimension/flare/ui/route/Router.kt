@@ -18,6 +18,7 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.screen.article.articleEntryBuilder
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
 import dev.dimension.flare.ui.screen.compose.composeEntryBuilder
 import dev.dimension.flare.ui.screen.dm.dmEntryBuilder
@@ -96,6 +97,7 @@ internal fun Router(
         entryProvider =
             entryProvider {
                 homeEntryBuilder(navigate, onBack, openDrawer, uriHandler = uriHandler)
+                articleEntryBuilder(onBack)
                 blueskyEntryBuilder(navigate, onBack)
                 composeEntryBuilder(navigate, onBack)
                 dmEntryBuilder(navigate, onBack)

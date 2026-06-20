@@ -23,6 +23,7 @@ public val PlatformType.brandIcon: ImageVector
             PlatformType.Misskey -> FontAwesomeIcons.Brands.Misskey
             PlatformType.Bluesky -> FontAwesomeIcons.Brands.Bluesky
             PlatformType.Pixiv -> FontAwesomeIcons.Brands.Pixiv
+            PlatformType.Fanbox -> FontAwesomeIcons.Brands.Pixiv
             PlatformType.xQt -> FontAwesomeIcons.Brands.XTwitter
             PlatformType.VVo -> FontAwesomeIcons.Brands.Weibo
         }

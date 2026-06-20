@@ -450,6 +450,9 @@
     <string name="rss_detail_tldr_loading">正在摘要…</string>
     <string name="rss_detail_translate">翻譯</string>
     <string name="rss_detail_translate_error">翻譯失敗</string>
+    <string name="article_content_gate_subscription_title">需要支持後閱讀</string>
+    <string name="article_content_gate_subscription_description">這篇文章僅對支持者開放。請在瀏覽器中開啟原頁面，支持創作者後閱讀全文。</string>
+    <string name="article_content_gate_subscription_description_with_fee">這篇文章僅對 ¥%1$d 起的支持者開放。請在瀏覽器中開啟原頁面，支持創作者後閱讀全文。</string>
     <string name="emoji_picker_recent">最近使用</string>
     <string name="emoji_picker_search">搜尋</string>
     <string name="podcast_host">主持人</string>

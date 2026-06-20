@@ -102,6 +102,7 @@ public fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
         UiIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky
         UiIcon.Pixiv -> FontAwesomeIcons.Brands.Pixiv
+        UiIcon.Fanbox -> FontAwesomeIcons.Brands.Pixiv
         UiIcon.Nostr -> FontAwesomeIcons.Brands.Nostr
         UiIcon.Twitter -> FontAwesomeIcons.Brands.Twitter
         UiIcon.X -> FontAwesomeIcons.Brands.XTwitter

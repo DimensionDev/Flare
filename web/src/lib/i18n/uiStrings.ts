@@ -97,6 +97,10 @@ export function localizedUiString(value: UiStrings): string {
 			return 'Illustrations';
 		case 'Manga':
 			return 'Manga';
+		case 'FanboxSupported':
+			return 'Supported posts';
+		case 'FanboxRecommendedCreators':
+			return 'Recommended creators';
 		default:
 			return m.loginCredentialImport();
 	}

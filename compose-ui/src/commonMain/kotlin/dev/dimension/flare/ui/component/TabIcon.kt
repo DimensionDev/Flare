@@ -27,6 +27,8 @@ import dev.dimension.flare.compose.ui.bluesky_login_username_hint
 import dev.dimension.flare.compose.ui.cancel_button
 import dev.dimension.flare.compose.ui.channel_title
 import dev.dimension.flare.compose.ui.dm_list_title
+import dev.dimension.flare.compose.ui.fanbox_recommended_creators_title
+import dev.dimension.flare.compose.ui.fanbox_supported_title
 import dev.dimension.flare.compose.ui.home_tab_bookmarks_title
 import dev.dimension.flare.compose.ui.home_tab_discover_title
 import dev.dimension.flare.compose.ui.home_tab_favorite_title
@@ -318,4 +320,6 @@ internal val UiStrings.res: StringResource
             UiStrings.PixivRankingDayManga -> Res.string.pixiv_ranking_day_manga_title
             UiStrings.Illustrations -> Res.string.illustrations_title
             UiStrings.Manga -> Res.string.manga_title
+            UiStrings.FanboxSupported -> Res.string.fanbox_supported_title
+            UiStrings.FanboxRecommendedCreators -> Res.string.fanbox_recommended_creators_title
         }

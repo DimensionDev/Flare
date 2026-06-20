@@ -33,6 +33,8 @@ import dev.dimension.flare.dm_list_title
 import dev.dimension.flare.edit_tab_name
 import dev.dimension.flare.edit_tab_name_placeholder
 import dev.dimension.flare.edit_tab_title
+import dev.dimension.flare.fanbox_recommended_creators_title
+import dev.dimension.flare.fanbox_supported_title
 import dev.dimension.flare.home_tab_bookmarks_title
 import dev.dimension.flare.home_tab_discover_title
 import dev.dimension.flare.home_tab_favorite_title
@@ -263,4 +265,6 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.PixivRankingDayManga -> Res.string.pixiv_ranking_day_manga_title
             UiStrings.Illustrations -> Res.string.illustrations_title
             UiStrings.Manga -> Res.string.manga_title
+            UiStrings.FanboxSupported -> Res.string.fanbox_supported_title
+            UiStrings.FanboxRecommendedCreators -> Res.string.fanbox_recommended_creators_title
         }

@@ -77,6 +77,8 @@ extension UiStrings {
         case .pixivRankingDayManga: String(localized: "pixiv_ranking_day_manga_title", defaultValue: "Manga Ranking")
         case .illustrations: String(localized: "illustrations_title", defaultValue: "Illustrations")
         case .manga: String(localized: "manga_title", defaultValue: "Manga")
+        case .fanboxSupported: String(localized: "fanbox_supported_title", defaultValue: "Supported posts")
+        case .fanboxRecommendedCreators: String(localized: "fanbox_recommended_creators_title", defaultValue: "Recommended creators")
         }
     }
 }

@@ -63,6 +63,7 @@ public enum class UiIcon {
     Translate,
     UnFavourite,
     Pixiv,
+    Fanbox,
 }
 
 /**

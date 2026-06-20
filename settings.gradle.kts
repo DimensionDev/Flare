@@ -25,6 +25,7 @@ rootProject.name = "Flare"
 include(":app")
 include(":shared")
 include(":social:bluesky")
+include(":social:fanbox")
 include(":social:mastodon")
 include(":social:misskey")
 include(":social:nostr")

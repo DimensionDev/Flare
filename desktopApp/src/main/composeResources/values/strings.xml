@@ -639,4 +639,6 @@
     <string name="agent_ui_select_followers_user">Select a user to view their followers.</string>
     <string name="agent_ui_select_profile_tabs_user">Select a user to view profile tabs.</string>
     <string name="agent_ui_status_insight_user_placeholder">You can also enter a user link, handle, or userKey…</string>
+    <string name="fanbox_supported_title">Supported posts</string>
+    <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

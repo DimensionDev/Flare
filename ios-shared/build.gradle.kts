@@ -27,6 +27,7 @@ kotlin {
                 isStatic = true
                 export(projects.shared)
                 export(projects.social.bluesky)
+                export(projects.social.fanbox)
                 export(projects.social.mastodon)
                 export(projects.social.misskey)
                 export(projects.social.nostr)
@@ -46,6 +47,7 @@ kotlin {
             dependencies {
                 api(projects.shared)
                 api(projects.social.bluesky)
+                api(projects.social.fanbox)
                 api(projects.social.mastodon)
                 api(projects.social.misskey)
                 api(projects.social.nostr)

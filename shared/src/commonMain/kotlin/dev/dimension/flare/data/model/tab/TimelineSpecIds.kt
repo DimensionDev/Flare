@@ -38,6 +38,8 @@ public object TimelineSpecIds {
     public const val PIXIV_FOLLOWING: String = "pixiv.following"
     public const val PIXIV_BOOKMARK: String = "pixiv.bookmark"
 
+    public const val FANBOX_SUPPORTED: String = "fanbox.supported"
+
     public val legacyMigrationIds: Set<String> =
         setOf(
             COMMON_HOME,
@@ -65,5 +67,6 @@ public object TimelineSpecIds {
             VVO_LIKED,
             PIXIV_FOLLOWING,
             PIXIV_BOOKMARK,
+            FANBOX_SUPPORTED,
         )
 }

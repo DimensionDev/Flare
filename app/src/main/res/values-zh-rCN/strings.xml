@@ -498,6 +498,9 @@
     <string name="rss_detail_tldr_loading">正在总结…</string>
     <string name="rss_detail_translate">翻译</string>
     <string name="rss_detail_translate_error">翻译失败</string>
+    <string name="article_content_gate_subscription_title">需要支持后阅读</string>
+    <string name="article_content_gate_subscription_description">这篇文章仅对支持者开放。请在浏览器中打开原页面，支持创作者后阅读全文。</string>
+    <string name="article_content_gate_subscription_description_with_fee">这篇文章仅对 ¥%1$d 起的支持者开放。请在浏览器中打开原页面，支持创作者后阅读全文。</string>
     <string name="emoji_picker_recent">最近</string>
     <string name="emoji_picker_search">搜索</string>
     <string name="podcast_host">主持人</string>

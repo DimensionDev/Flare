@@ -4,9 +4,11 @@ import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
@@ -78,7 +80,12 @@ internal fun Feed.Atom.Entry.render(
                         ),
                 )
             },
-        displayMode = displayMode,
+        clickEvent =
+            displayMode.toFeedClickEvent(
+                url = link,
+                descriptionHtml = rawHtml,
+                title = title?.value,
+            ),
         createdAt =
             (published ?: updated)
                 ?.let { input -> parseRssDateToInstant(input) }
@@ -93,6 +100,7 @@ internal fun Feed.Rss20.Item.render(
     displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
+    val url = link.replace("http://", "https://")
     val descHtml =
         description?.let {
             Ksoup.parse(it)
@@ -107,7 +115,7 @@ internal fun Feed.Rss20.Item.render(
         title = title,
         description = descHtml?.text(),
         descriptionHtml = description,
-        url = link.replace("http://", "https://"),
+        url = url,
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
             UiTimelineV2.Feed.Source(
@@ -129,7 +137,12 @@ internal fun Feed.Rss20.Item.render(
                         ),
                 )
             },
-        displayMode = displayMode,
+        clickEvent =
+            displayMode.toFeedClickEvent(
+                url = url,
+                descriptionHtml = description,
+                title = title,
+            ),
         createdAt =
             (pubDate ?: dcDate)
                 ?.let { input -> parseRssDateToInstant(input) }
@@ -144,6 +157,7 @@ internal fun Feed.RDF.Item.render(
     displayMode: RssDisplayMode,
     sourceLanguage: String? = null,
 ): UiTimelineV2 {
+    val url = link.replace("http://", "https://")
     val descHtml =
         description?.let {
             Ksoup.parse(it)
@@ -153,7 +167,7 @@ internal fun Feed.RDF.Item.render(
         title = title,
         description = descHtml?.text(),
         descriptionHtml = description,
-        url = link.replace("http://", "https://"),
+        url = url,
         sourceLanguages = listOfNotNull(sourceLanguage).toPersistentList(),
         source =
             UiTimelineV2.Feed.Source(
@@ -175,7 +189,12 @@ internal fun Feed.RDF.Item.render(
                         ),
                 )
             },
-        displayMode = displayMode,
+        clickEvent =
+            displayMode.toFeedClickEvent(
+                url = url,
+                descriptionHtml = description,
+                title = title,
+            ),
         createdAt =
             date
                 ?.let { input -> parseRssDateToInstant(input) }
@@ -183,6 +202,27 @@ internal fun Feed.RDF.Item.render(
         accountType = AccountType.Guest,
     )
 }
+
+private fun RssDisplayMode.toFeedClickEvent(
+    url: String,
+    descriptionHtml: String?,
+    title: String?,
+): ClickEvent =
+    ClickEvent.Deeplink(
+        when (this) {
+            RssDisplayMode.OPEN_IN_BROWSER -> {
+                DeeplinkRoute.OpenLinkDirectly(url)
+            }
+
+            RssDisplayMode.FULL_CONTENT -> {
+                DeeplinkRoute.Rss.Detail(url)
+            }
+
+            RssDisplayMode.DESCRIPTION_ONLY -> {
+                DeeplinkRoute.Rss.Detail(url, descriptionHtml, title)
+            }
+        },
+    )
 
 internal fun parseRssDateToInstant(input: String): Instant? =
     runCatching {

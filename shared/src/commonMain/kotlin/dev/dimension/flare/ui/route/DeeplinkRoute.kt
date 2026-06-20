@@ -123,6 +123,12 @@ public sealed class DeeplinkRoute {
     ) : DeeplinkRoute()
 
     @Serializable
+    public data class Article(
+        val accountType: AccountType,
+        val articleKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
     public data class Search(
         val accountType: AccountType,
         val query: String,

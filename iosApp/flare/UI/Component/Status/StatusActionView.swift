@@ -348,6 +348,7 @@ extension UiIcon {
         case .weibo: return "fa-weibo"
         case .translate: return "fa-language"
         case .pixiv: return "fa-pixiv"
+        case .fanbox: return "fa-pixiv"
         }
     }
 }

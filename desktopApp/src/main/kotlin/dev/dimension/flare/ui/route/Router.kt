@@ -51,6 +51,7 @@ import dev.dimension.flare.ui.route.Route.RssTimeline
 import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
+import dev.dimension.flare.ui.screen.article.ArticleScreen
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.screen.compose.DraftBoxScreen
 import dev.dimension.flare.ui.screen.dm.DmConversationScreen
@@ -253,6 +254,13 @@ internal fun Router(
                         tweetId = args.tweetId,
                         articleId = args.articleId,
                         onBack = onBack,
+                    )
+                }
+                entry<Route.Article> { args ->
+                    ArticleScreen(
+                        accountType = args.accountType,
+                        articleKey = args.articleKey,
+                        navigate = navigate,
                     )
                 }
                 entry<Route.RssDetail> { args ->

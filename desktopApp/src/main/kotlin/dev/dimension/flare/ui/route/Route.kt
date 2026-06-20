@@ -224,6 +224,11 @@ internal sealed interface Route : NavKey {
         val articleId: String? = null,
     ) : ScreenRoute
 
+    data class Article(
+        val accountType: AccountType,
+        val articleKey: MicroBlogKey,
+    ) : ScreenRoute
+
     data class DmList(
         val accountType: AccountType,
     ) : ScreenRoute
@@ -430,6 +435,13 @@ internal sealed interface Route : NavKey {
                         accountType = deeplinkRoute.accountType,
                         tweetId = deeplinkRoute.tweetId,
                         articleId = deeplinkRoute.articleId,
+                    )
+                }
+
+                is DeeplinkRoute.Article -> {
+                    Article(
+                        accountType = deeplinkRoute.accountType,
+                        articleKey = deeplinkRoute.articleKey,
                     )
                 }
 

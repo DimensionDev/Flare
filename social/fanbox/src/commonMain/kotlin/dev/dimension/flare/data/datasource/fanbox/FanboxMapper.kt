@@ -463,7 +463,7 @@ private fun FanboxPostDetailBody.FileItem.toArticleFileBlocks(
         if (isArticleVideoFile()) {
             add(toArticleVideoBlock(key = "$key:video", imageHeaders = imageHeaders))
         }
-        add(toArticleFileBlock(key = key))
+        add(toArticleFileBlock(key = key, imageHeaders = imageHeaders))
     }
 
 private fun FanboxPostDetailBody.FileItem.toArticleVideoBlock(
@@ -483,13 +483,17 @@ private fun FanboxPostDetailBody.FileItem.toArticleVideoBlock(
             ),
     )
 
-private fun FanboxPostDetailBody.FileItem.toArticleFileBlock(key: String): UiArticleBlock.File =
+private fun FanboxPostDetailBody.FileItem.toArticleFileBlock(
+    key: String,
+    imageHeaders: ImmutableMap<String, String>? = null,
+): UiArticleBlock.File =
     UiArticleBlock.File(
         key = key,
         name = name,
         url = url,
         sizeBytes = size,
         extension = extension.takeIf { it.isNotBlank() },
+        customHeaders = imageHeaders,
     )
 
 private fun FanboxPostDetailBody.FileItem.isArticleVideoFile(): Boolean = articleFileExtension() in FANBOX_ARTICLE_VIDEO_EXTENSIONS

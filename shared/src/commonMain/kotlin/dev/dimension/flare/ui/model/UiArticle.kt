@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.common.SerializableImmutableMap
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.UiDateTime
@@ -97,6 +98,7 @@ public sealed interface UiArticleBlock {
         val url: String,
         val sizeBytes: Long? = null,
         val extension: String? = null,
+        val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiArticleBlock
 
     @Serializable

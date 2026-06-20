@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.article
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,11 +58,13 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Chrome
+import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
+import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -95,7 +98,12 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 private val ArticleCoverHeight = 260.dp
 private const val ARTICLE_COVER_KEY = "cover"
@@ -121,6 +129,8 @@ internal fun ArticleScreen(
     val listState = rememberLazyListState()
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val downloadScope = koinInject<CoroutineScope>()
+    val videoDownloadHelper = koinInject<VideoDownloadHelper>()
     val article = state.article.takeSuccess()
     val articleTitle = article?.title
     var titleHeightPx by remember(article?.key) { mutableIntStateOf(0) }
@@ -279,6 +289,14 @@ internal fun ArticleScreen(
                         titleHeightPx = it
                     },
                     onOpenUrl = uriHandler::openUri,
+                    onDownloadFile = { file ->
+                        downloadArticleFile(
+                            block = file,
+                            context = context,
+                            scope = downloadScope,
+                            videoDownloadHelper = videoDownloadHelper,
+                        )
+                    },
                     onOpenMedia = { media ->
                         val articleMedias = articleState.data.articleMedias()
                         val index =
@@ -331,6 +349,7 @@ private fun ArticleSuccessContent(
     onProfileClick: (UiProfile) -> Unit,
     onTitleMeasured: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
+    onDownloadFile: (UiArticleBlock.File) -> Unit,
     onOpenMedia: (UiMedia) -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -384,6 +403,7 @@ private fun ArticleSuccessContent(
                     ArticleBlock(
                         block = block,
                         onOpenUrl = onOpenUrl,
+                        onDownloadFile = onDownloadFile,
                         onOpenMedia = onOpenMedia,
                     )
                 }
@@ -547,6 +567,7 @@ private fun ArticleRssAuthor(
 private fun ArticleBlock(
     block: UiArticleBlock,
     onOpenUrl: (String) -> Unit,
+    onDownloadFile: (UiArticleBlock.File) -> Unit,
     onOpenMedia: (UiMedia) -> Unit,
 ) {
     when (block) {
@@ -574,7 +595,7 @@ private fun ArticleBlock(
         is UiArticleBlock.File -> {
             ArticleFileBlock(
                 block = block,
-                onOpenUrl = onOpenUrl,
+                onDownloadFile = onDownloadFile,
             )
         }
 
@@ -655,11 +676,11 @@ private fun ArticleVideoBlock(
 @Composable
 private fun ArticleFileBlock(
     block: UiArticleBlock.File,
-    onOpenUrl: (String) -> Unit,
+    onDownloadFile: (UiArticleBlock.File) -> Unit,
 ) {
     ElevatedCard(
         onClick = {
-            onOpenUrl(block.url)
+            onDownloadFile(block)
         },
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -691,6 +712,12 @@ private fun ArticleFileBlock(
                     )
                 }
             }
+            FAIcon(
+                FontAwesomeIcons.Solid.Download,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
@@ -946,6 +973,86 @@ private fun ArticleBodyContainer(content: @Composable () -> Unit) {
             content()
         }
     }
+}
+
+private fun downloadArticleFile(
+    block: UiArticleBlock.File,
+    context: Context,
+    scope: CoroutineScope,
+    videoDownloadHelper: VideoDownloadHelper,
+) {
+    scope.launch {
+        runCatching {
+            videoDownloadHelper.downloadVideo(
+                uri = block.url,
+                fileName = block.downloadFileName(),
+                customHeaders = block.customHeaders,
+                callback =
+                    object : VideoDownloadHelper.DownloadCallback {
+                        override fun onDownloadStarted(downloadId: Long) {
+                            context.showArticleDownloadToast(R.string.media_download_started)
+                        }
+
+                        override fun onDownloadSuccess(downloadId: Long) {
+                            context.showArticleDownloadToast(R.string.media_save_success)
+                        }
+
+                        override fun onDownloadFailed(downloadId: Long) {
+                            context.showArticleDownloadToast(R.string.media_save_fail)
+                        }
+                    },
+            )
+        }.onFailure {
+            withContext(Dispatchers.Main) {
+                context.showArticleDownloadToast(R.string.media_save_fail)
+            }
+        }
+    }
+}
+
+private fun UiArticleBlock.File.downloadFileName(): String {
+    val sourceName =
+        name.trim().takeIf { it.isNotBlank() }
+            ?: url
+                .substringBefore("?")
+                .substringBefore("#")
+                .substringAfterLast("/")
+                .trim()
+                .takeIf { it.isNotBlank() }
+            ?: "file"
+    val extension = extension?.trim()?.trimStart('.')?.takeIf { it.isNotBlank() }
+    val fileName =
+        if (extension != null && !sourceName.hasFileExtension()) {
+            "$sourceName.$extension"
+        } else {
+            sourceName
+        }
+    return fileName.toSafeDownloadFileName()
+}
+
+private fun String.hasFileExtension(): Boolean {
+    val name = substringAfterLast('/').substringAfterLast('\\')
+    val lastDotIndex = name.lastIndexOf('.')
+    return lastDotIndex > 0 && lastDotIndex < name.length - 1
+}
+
+private fun String.toSafeDownloadFileName(): String {
+    val safeName =
+        trim()
+            .map { char ->
+                if (char == '/' || char == '\\' || char.code < 32 || char.code == 127) {
+                    '_'
+                } else {
+                    char
+                }
+            }.joinToString(separator = "")
+    return safeName.ifBlank { "file" }
+}
+
+private fun Context.showArticleDownloadToast(messageRes: Int) {
+    Toast
+        .makeText(this, getString(messageRes), Toast.LENGTH_SHORT)
+        .show()
 }
 
 private fun shareArticle(

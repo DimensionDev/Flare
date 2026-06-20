@@ -99,6 +99,7 @@ import dev.dimension.flare.ui.presenter.gallery.GalleryDetailPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -304,7 +305,7 @@ private fun CompactGalleryContent(
             GalleryImages(
                 detail = detail,
                 onMediaClick = { media ->
-                    navigate(detail.post.statusMediaRoute(media))
+                    navigate(detail.post.galleryMediaRoute(media))
                 },
                 modifier =
                     Modifier
@@ -367,7 +368,7 @@ private fun BigScreenGalleryContent(
                         GalleryImage(
                             image = image,
                             onClick = {
-                                navigate(detail.post.statusMediaRoute(image))
+                                navigate(detail.post.galleryMediaRoute(image))
                             },
                         )
                     }
@@ -376,7 +377,7 @@ private fun BigScreenGalleryContent(
                 GalleryImages(
                     detail = detail,
                     onMediaClick = { media ->
-                        navigate(detail.post.statusMediaRoute(media))
+                        navigate(detail.post.galleryMediaRoute(media))
                     },
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -1101,19 +1102,14 @@ private fun UiTimelineV2.Post.countedActions(): List<ActionMenu.Item> =
 
 private fun UiTimelineV2.Post.galleryImages(): List<UiMedia.Image> = images.filterIsInstance<UiMedia.Image>()
 
-private fun UiTimelineV2.Post.statusMediaRoute(media: UiMedia): Route.Media.StatusMedia =
-    Route.Media.StatusMedia(
-        statusKey = statusKey,
-        accountType = accountType,
-        index = images.indexOfFirst { it.url == media.url }.coerceAtLeast(0),
-        preview =
-            when (media) {
-                is UiMedia.Image -> media.previewUrl
-                is UiMedia.Video -> media.thumbnailUrl
-                is UiMedia.Gif -> media.previewUrl
-                is UiMedia.Audio -> null
-            },
+private fun UiTimelineV2.Post.galleryMediaRoute(media: UiMedia.Image): Route.Media.RawMedia {
+    val medias = galleryImages().map { it as UiMedia }.toImmutableList()
+    return Route.Media.RawMedia(
+        medias = medias,
+        index = medias.indexOfFirst { it.url == media.url }.coerceAtLeast(0),
+        preview = media.previewUrl,
     )
+}
 
 @Composable
 private fun ActionMenu.Item.Color?.toComposeColor(): Color =

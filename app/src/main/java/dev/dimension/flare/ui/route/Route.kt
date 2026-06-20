@@ -2,12 +2,14 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
@@ -439,6 +441,13 @@ internal sealed interface Route : NavKey {
             val uri: String,
             val previewUrl: String?,
             val customHeaders: Map<String, String>? = null,
+        ) : Media
+
+        @Serializable
+        data class RawMedia(
+            val medias: SerializableImmutableList<UiMedia>,
+            val index: Int = 0,
+            val preview: String? = null,
         ) : Media
 
         @Serializable

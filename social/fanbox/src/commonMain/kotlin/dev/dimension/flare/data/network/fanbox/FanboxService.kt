@@ -74,13 +74,13 @@ internal class FanboxService(
     private val webResources: FanboxWebResources =
         fanboxWebResources(credentialFlow)
 
-    suspend fun metadata(): FanboxMetaDataEntity = webResources.metadata().toFanboxMetadata()
+    suspend fun metadata(): FanboxMetaDataEntity = webResources.metadata(FANBOX_WEB_URL).toFanboxMetadata()
 
     suspend fun metadata(sessionId: String): FanboxMetaDataEntity {
         val html =
             fanboxWebResources(
                 flowOf(FanboxCredential(sessionId = sessionId, userId = "")),
-            ).metadata()
+            ).metadata(FANBOX_WEB_URL)
         return html.toFanboxMetadata()
     }
 

@@ -177,6 +177,47 @@ internal fun StatusMediaScreen(
     uriHandler: UriHandler,
     surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
+    val state by producePresenter {
+        statusMediaPresenter(
+            statusKey = statusKey,
+            accountType = accountType,
+        )
+    }
+    val status = state.status.takeSuccess() as? UiTimelineV2.Post
+    MediaViewerScreen(
+        medias = state.medias,
+        initialIndex = index,
+        preview = preview,
+        onDismiss = onDismiss,
+        toAltText = toAltText,
+        uriHandler = uriHandler,
+        fileName = { media ->
+            media.getFileName(
+                statusKey = statusKey.toString(),
+                userHandle = status?.user?.handle?.canonical ?: "unknown",
+            )
+        },
+        status = status,
+        surfaceBindingManager = surfaceBindingManager,
+    )
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalPermissionsApi::class,
+)
+@Composable
+internal fun MediaViewerScreen(
+    medias: UiState<ImmutableList<UiMedia>>,
+    initialIndex: Int,
+    preview: String?,
+    onDismiss: () -> Unit,
+    toAltText: (UiMedia) -> Unit,
+    uriHandler: UriHandler,
+    fileName: (UiMedia) -> String,
+    status: UiTimelineV2.Post? = null,
+    surfaceBindingManager: SurfaceBindingManager = koinInject(),
+) {
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboard.current
     val isBigScreen = currentWindowAdaptiveInfoV2().windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
@@ -186,22 +227,21 @@ internal fun StatusMediaScreen(
         rememberPermissionState(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
         )
-    val state by producePresenter {
-        statusMediaPresenter(
-            statusKey = statusKey,
-            initialIndex = index,
+    val state =
+        mediaViewerPresenter(
+            medias = medias,
+            initialIndex = initialIndex,
             context = context,
-            accountType = accountType,
+            fileName = fileName,
         )
-    }
     val pagerState =
         rememberPagerState(
-            initialPage = index,
+            initialPage = initialIndex,
             pageCount = {
                 when (val medias = state.medias) {
                     is UiState.Error -> 1
                     is UiState.Loading -> 1
-                    is UiState.Success -> medias.data.size
+                    is UiState.Success -> medias.data.size.coerceAtLeast(1)
                 }
             },
         )
@@ -254,12 +294,7 @@ internal fun StatusMediaScreen(
                                         }
 
                                         is UiState.Success -> {
-                                            when (val item = medias.data[it]) {
-                                                is UiMedia.Audio -> item.previewUrl
-                                                is UiMedia.Gif -> item.previewUrl
-                                                is UiMedia.Image -> item.previewUrl
-                                                is UiMedia.Video -> item.thumbnailUrl
-                                            }
+                                            medias.data.getOrNull(it)?.previewKey()
                                         }
                                     } ?: it
                                 },
@@ -272,7 +307,17 @@ internal fun StatusMediaScreen(
                                 ) {
                                     it
                                         .onSuccess { medias ->
-                                            val media = medias[index]
+                                            val media = medias.getOrNull(index)
+                                            if (media == null) {
+                                                Box(
+                                                    modifier =
+                                                        Modifier
+                                                            .aspectRatio(1f)
+                                                            .fillMaxSize()
+                                                            .placeholder(true),
+                                                )
+                                                return@onSuccess
+                                            }
                                             val imageUrl =
                                                 when (media) {
                                                     is UiMedia.Audio -> media.previewUrl ?: media.url
@@ -428,7 +473,7 @@ internal fun StatusMediaScreen(
                                 }
                                 Spacer(modifier = Modifier.weight(1f))
                                 state.medias.onSuccess { medias ->
-                                    val current = medias[state.currentPage]
+                                    val current = medias.getOrNull(state.currentPage) ?: return@onSuccess
                                     Glassify(
                                         onClick = {
                                             state.setLandscapeViewing(!state.isLandscapeViewing)
@@ -501,139 +546,148 @@ internal fun StatusMediaScreen(
                             }
                         }
 
-                        state.status.onSuccess { status ->
-                            val content = status as? UiTimelineV2.Post
-                            if (content is UiTimelineV2.Post) {
-                                val currentMedia = state.medias.takeSuccess()?.getOrNull(state.currentPage)
-                                val isCurrentVideo = currentMedia is UiMedia.Video
-                                val shouldShowBottomUi =
-                                    when {
-                                        state.isLandscapeViewing -> {
-                                            isCurrentVideo &&
-                                                (state.showUi || playbackSpeed > NORMAL_PLAYBACK_SPEED)
-                                        }
+                        val currentMedia = state.medias.takeSuccess()?.getOrNull(state.currentPage)
+                        val isCurrentVideo = currentMedia is UiMedia.Video
+                        val shouldShowBottomUi =
+                            when {
+                                state.isLandscapeViewing -> {
+                                    isCurrentVideo &&
+                                        (state.showUi || playbackSpeed > NORMAL_PLAYBACK_SPEED)
+                                }
 
-                                        isCurrentVideo -> {
-                                            state.showUi || playbackSpeed > NORMAL_PLAYBACK_SPEED
-                                        }
+                                isCurrentVideo -> {
+                                    state.showUi || playbackSpeed > NORMAL_PLAYBACK_SPEED
+                                }
 
-                                        else -> {
-                                            state.showUi
-                                        }
-                                    }
-                                androidx.compose.animation.AnimatedVisibility(
-                                    visible = shouldShowBottomUi,
+                                else -> {
+                                    state.showUi &&
+                                        (pagerState.pageCount > 1 || status != null)
+                                }
+                            }
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = shouldShowBottomUi,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter),
+                            enter = slideInVertically { it },
+                            exit = slideOutVertically { it },
+                        ) {
+                            Glassify(
+                                modifier =
+                                    Modifier
+                                        .let {
+                                            if (isBigScreen) {
+                                                it
+                                                    .safeContentPadding()
+                                                    .clip(
+                                                        MaterialTheme.shapes.medium,
+                                                    )
+                                            } else {
+                                                it
+                                                    .fillMaxWidth()
+                                            }
+                                        },
+                                color = MaterialTheme.colorScheme.surfaceContainer,
+                                contentColor = MaterialTheme.colorScheme.onBackground,
+                            ) {
+                                Column(
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.BottomCenter),
-                                    enter = slideInVertically { it },
-                                    exit = slideOutVertically { it },
+                                        Modifier.let {
+                                            if (status == null && !isBigScreen) {
+                                                it.windowInsetsPadding(
+                                                    WindowInsets.systemBars.only(
+                                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                    ),
+                                                )
+                                            } else {
+                                                it
+                                            }
+                                        },
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
-                                    Glassify(
-                                        modifier =
-                                            Modifier
-                                                .let {
+                                    if (state.showUi && !state.isLandscapeViewing && pagerState.pageCount > 1) {
+                                        Row(
+                                            modifier =
+                                                Modifier.let {
                                                     if (isBigScreen) {
                                                         it
-                                                            .safeContentPadding()
-                                                            .clip(
-                                                                MaterialTheme.shapes.medium,
-                                                            )
                                                     } else {
-                                                        it.fillMaxWidth()
+                                                        it.padding(top = 8.dp)
                                                     }
                                                 },
-                                        color = MaterialTheme.colorScheme.surfaceContainer,
-                                        contentColor = MaterialTheme.colorScheme.onBackground,
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            horizontalArrangement = Arrangement.Center,
                                         ) {
-                                            if (state.showUi && !state.isLandscapeViewing && pagerState.pageCount > 1) {
-                                                Row(
-                                                    modifier =
-                                                        Modifier.let {
-                                                            if (isBigScreen) {
-                                                                it
-                                                            } else {
-                                                                it.padding(top = 8.dp)
-                                                            }
-                                                        },
-                                                    horizontalArrangement = Arrangement.Center,
-                                                ) {
-                                                    repeat(pagerState.pageCount) { iteration ->
-                                                        val color =
-                                                            if (pagerState.currentPage == iteration) {
-                                                                MaterialTheme.colorScheme.primary
-                                                            } else {
-                                                                MaterialTheme.colorScheme.onBackground.copy(
-                                                                    alpha = 0.5f,
-                                                                )
-                                                            }
-                                                        Box(
-                                                            modifier =
-                                                                Modifier
-                                                                    .padding(2.dp)
-                                                                    .clip(CircleShape)
-                                                                    .background(color)
-                                                                    .size(8.dp),
+                                            repeat(pagerState.pageCount) { iteration ->
+                                                val color =
+                                                    if (pagerState.currentPage == iteration) {
+                                                        MaterialTheme.colorScheme.primary
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onBackground.copy(
+                                                            alpha = 0.5f,
                                                         )
                                                     }
-                                                }
+                                                Box(
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(2.dp)
+                                                            .clip(CircleShape)
+                                                            .background(color)
+                                                            .size(8.dp),
+                                                )
                                             }
-                                            state.medias.onSuccess { medias ->
-                                                val current =
-                                                    remember(
-                                                        medias,
-                                                        state.currentPage,
-                                                    ) {
-                                                        medias[state.currentPage]
-                                                    }
-                                                if (current is UiMedia.Video) {
-                                                    PlayerControl(
-                                                        surfaceBindingManager.player,
-                                                        playbackSpeed = playbackSpeed,
-                                                        modifier =
-                                                            Modifier
-                                                                .widthIn(max = 480.dp),
-                                                    )
-                                                }
+                                        }
+                                    }
+                                    state.medias.onSuccess { medias ->
+                                        val current =
+                                            remember(
+                                                medias,
+                                                state.currentPage,
+                                            ) {
+                                                medias.getOrNull(state.currentPage)
                                             }
-                                            if (!isBigScreen && state.showUi && !state.isLandscapeViewing) {
-                                                CompositionLocalProvider(
-                                                    LocalTimelineAppearance provides
-                                                        LocalTimelineAppearance.current.copy(
-                                                            showMedia = false,
-                                                            showLinkPreview = false,
+                                        if (current is UiMedia.Video) {
+                                            PlayerControl(
+                                                surfaceBindingManager.player,
+                                                playbackSpeed = playbackSpeed,
+                                                modifier =
+                                                    Modifier
+                                                        .widthIn(max = 480.dp),
+                                            )
+                                        }
+                                    }
+                                    if (status != null && !isBigScreen && state.showUi && !state.isLandscapeViewing) {
+                                        CompositionLocalProvider(
+                                            LocalTimelineAppearance provides
+                                                LocalTimelineAppearance.current.copy(
+                                                    showMedia = false,
+                                                    showLinkPreview = false,
+                                                ),
+                                            LocalUriHandler provides uriHandler,
+                                        ) {
+                                            CommonStatusComponent(
+                                                item = status,
+                                                showMedia = false,
+                                                modifier =
+                                                    Modifier
+                                                        .padding(
+                                                            horizontal = screenHorizontalPadding,
+                                                            vertical = 8.dp,
+                                                        ).windowInsetsPadding(
+                                                            WindowInsets.systemBars.only(
+                                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                            ),
                                                         ),
-                                                    LocalUriHandler provides uriHandler,
-                                                ) {
-                                                    CommonStatusComponent(
-                                                        item = content,
-                                                        showMedia = false,
-                                                        modifier =
-                                                            Modifier
-                                                                .padding(
-                                                                    horizontal = screenHorizontalPadding,
-                                                                    vertical = 8.dp,
-                                                                ).windowInsetsPadding(
-                                                                    WindowInsets.systemBars.only(
-                                                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                                                    ),
-                                                                ),
-                                                        maxLines = 3,
-                                                        showExpandButton = false,
-                                                        isQuote = true,
-                                                    )
-                                                }
-                                            }
+                                                maxLines = 3,
+                                                showExpandButton = false,
+                                                isQuote = true,
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    if (isBigScreen) {
+                    if (isBigScreen && status != null) {
                         AnimatedVisibility(state.showUi && !state.isLandscapeViewing) {
                             Surface(
                                 modifier =
@@ -644,37 +698,32 @@ internal fun StatusMediaScreen(
                                 color = MaterialTheme.colorScheme.surface,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
                             ) {
-                                state.status.onSuccess {
-                                    val content = it as? UiTimelineV2.Post
-                                    if (content is UiTimelineV2.Post) {
-                                        CompositionLocalProvider(
-                                            LocalTimelineAppearance provides
-                                                LocalTimelineAppearance.current.copy(
-                                                    showMedia = false,
-                                                    showLinkPreview = false,
+                                CompositionLocalProvider(
+                                    LocalTimelineAppearance provides
+                                        LocalTimelineAppearance.current.copy(
+                                            showMedia = false,
+                                            showLinkPreview = false,
+                                        ),
+                                    LocalUriHandler provides uriHandler,
+                                ) {
+                                    CommonStatusComponent(
+                                        item = status,
+                                        showMedia = false,
+                                        modifier =
+                                            Modifier
+                                                .padding(
+                                                    horizontal = screenHorizontalPadding,
+                                                    vertical = 8.dp,
+                                                ).windowInsetsPadding(
+                                                    WindowInsets.systemBars.only(
+                                                        WindowInsetsSides.End + WindowInsetsSides.Vertical,
+                                                    ),
                                                 ),
-                                            LocalUriHandler provides uriHandler,
-                                        ) {
-                                            CommonStatusComponent(
-                                                item = content,
-                                                showMedia = false,
-                                                modifier =
-                                                    Modifier
-                                                        .padding(
-                                                            horizontal = screenHorizontalPadding,
-                                                            vertical = 8.dp,
-                                                        ).windowInsetsPadding(
-                                                            WindowInsets.systemBars.only(
-                                                                WindowInsetsSides.End + WindowInsetsSides.Vertical,
-                                                            ),
-                                                        ),
-                                                maxLines = Int.MAX_VALUE,
-                                                showExpandButton = false,
-                                                isQuote = false,
-                                                isDetail = true,
-                                            )
-                                        }
-                                    }
+                                        maxLines = Int.MAX_VALUE,
+                                        showExpandButton = false,
+                                        isQuote = false,
+                                        isDetail = true,
+                                    )
                                 }
                             }
                         }
@@ -707,12 +756,12 @@ internal fun StatusMediaScreen(
                                         permissionState.launchPermissionRequest()
                                     } else {
                                         state.medias.onSuccess { medias ->
-                                            state.save(medias[state.currentPage])
+                                            medias.getOrNull(state.currentPage)?.let(state::save)
                                         }
                                     }
                                 } else {
                                     state.medias.onSuccess { medias ->
-                                        state.save(medias[state.currentPage])
+                                        medias.getOrNull(state.currentPage)?.let(state::save)
                                     }
                                 }
                                 state.setShowSheet(false)
@@ -723,7 +772,8 @@ internal fun StatusMediaScreen(
                         ),
                 )
                 state.medias.onSuccess { medias ->
-                    if (medias[state.currentPage] is UiMedia.Image) {
+                    val current = medias.getOrNull(state.currentPage)
+                    if (current is UiMedia.Image) {
                         ListItem(
                             headlineContent = {
                                 Text(stringResource(id = R.string.media_menu_share_image))
@@ -738,7 +788,7 @@ internal fun StatusMediaScreen(
                             modifier =
                                 Modifier
                                     .clickable {
-                                        state.shareMedia(medias[state.currentPage])
+                                        state.shareMedia(current)
                                         state.setShowSheet(false)
                                     },
                             colors =
@@ -751,6 +801,7 @@ internal fun StatusMediaScreen(
 
                 state.medias.onSuccess { medias ->
                     val label = stringResource(R.string.media_menu_media_link)
+                    val current = medias.getOrNull(state.currentPage) ?: return@onSuccess
                     ListItem(
                         headlineContent = {
                             Text(stringResource(id = R.string.media_menu_copy_link))
@@ -766,7 +817,7 @@ internal fun StatusMediaScreen(
                             Modifier
                                 .clickable {
                                     scope.launch {
-                                        val url = medias[state.currentPage].url
+                                        val url = current.url
                                         clipboard.setClipEntry(
                                             ClipEntry(
                                                 ClipData.newRawUri(
@@ -1110,13 +1161,16 @@ private fun ImageItem(
     setLockPager: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongClick by rememberUpdatedState(onLongClick)
+    val currentSetLockPager by rememberUpdatedState(setLockPager)
     val scope = rememberCoroutineScope()
     val zoomableState =
         rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
     LaunchedEffect(zoomableState.zoomFraction) {
         zoomableState.zoomFraction?.let {
-            setLockPager(it > 0.01f)
-        } ?: setLockPager(false)
+            currentSetLockPager(it > 0.01f)
+        } ?: currentSetLockPager(false)
     }
     BackHandler(
         enabled = (zoomableState.zoomFraction ?: 0f) > 0.01f,
@@ -1177,22 +1231,63 @@ private fun ImageItem(
         contentScale = contentScale,
         alignment = alignment,
         onClick = {
-            onClick.invoke()
+            currentOnClick()
         },
         onLongClick = {
-            onLongClick.invoke()
+            currentOnLongClick()
         },
         onDoubleClick = DoubleClickToZoomListener.cycle(2f),
     )
 }
 
-@OptIn(ExperimentalCoilApi::class)
+private fun UiMedia.previewKey(): String? =
+    when (this) {
+        is UiMedia.Audio -> previewUrl
+        is UiMedia.Gif -> previewUrl
+        is UiMedia.Image -> previewUrl
+        is UiMedia.Video -> thumbnailUrl
+    }
+
 @Composable
 private fun statusMediaPresenter(
     statusKey: MicroBlogKey,
+    accountType: AccountType,
+) = run {
+    val state =
+        remember(accountType, statusKey) {
+            StatusPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
+    var medias: UiState<ImmutableList<UiMedia>> by remember(accountType, statusKey) {
+        mutableStateOf(UiState.Loading())
+    }
+    // Prevent media changes after the first successful load so the visible page stays stable.
+    if (!medias.isSuccess) {
+        LaunchedEffect(state) {
+            state.status
+                .onSuccess {
+                    medias =
+                        UiState.Success(
+                            (it as? UiTimelineV2.Post)
+                                ?.images
+                                .orEmpty()
+                                .toImmutableList(),
+                        )
+                }
+        }
+    }
+    object {
+        val status = state.status
+        val medias = medias
+    }
+}
+
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+private fun mediaViewerPresenter(
+    medias: UiState<ImmutableList<UiMedia>>,
     initialIndex: Int,
     context: Context,
-    accountType: AccountType,
+    fileName: (UiMedia) -> String,
     scope: CoroutineScope = koinInject(),
     videoDownloadHelper: VideoDownloadHelper = koinInject(),
 ) = run {
@@ -1211,33 +1306,10 @@ private fun statusMediaPresenter(
     var originalOrientation: Int? by remember {
         mutableStateOf<Int?>(null)
     }
-    val state =
-        remember(statusKey) {
-            StatusPresenter(accountType = accountType, statusKey = statusKey)
-        }.invoke()
-    var medias: UiState<ImmutableList<UiMedia>> by remember {
-        mutableStateOf(UiState.Loading())
-    }
-    // prevent media change when medias is loaded
-    if (!medias.isSuccess) {
-        LaunchedEffect(state) {
-            state.status
-                .onSuccess {
-                    medias =
-                        UiState.Success(
-                            (it as? UiTimelineV2.Post)
-                                ?.images
-                                .orEmpty()
-                                .toImmutableList(),
-                        )
-                }
-        }
-    }
     var currentPage by remember {
         mutableIntStateOf(initialIndex)
     }
     object {
-        val status = state.status
         val medias = medias
         val showUi = showUi
         val currentPage = currentPage
@@ -1273,18 +1345,12 @@ private fun statusMediaPresenter(
         }
 
         fun save(data: UiMedia) {
-            val status = (state.status.takeSuccess() as? UiTimelineV2.Post)
-            if (status != null) {
-                val statusKeyString = statusKey.toString()
-                val userHandle = status.user?.handle?.canonical ?: "unknown"
-                val fileName = data.getFileName(statusKeyString, userHandle)
-
-                when (data) {
-                    is UiMedia.Audio -> download(data.url, fileName, data.customHeaders)
-                    is UiMedia.Gif -> download(data.url, fileName, data.customHeaders)
-                    is UiMedia.Image -> save(data.url, fileName)
-                    is UiMedia.Video -> download(data.url, fileName, data.customHeaders)
-                }
+            val targetFileName = fileName(data)
+            when (data) {
+                is UiMedia.Audio -> download(data.url, targetFileName, data.customHeaders)
+                is UiMedia.Gif -> download(data.url, targetFileName, data.customHeaders)
+                is UiMedia.Image -> save(data.url, targetFileName)
+                is UiMedia.Video -> download(data.url, targetFileName, data.customHeaders)
             }
         }
 
@@ -1302,13 +1368,10 @@ private fun statusMediaPresenter(
                     scope.launch {
                         context.imageLoader.diskCache?.openSnapshot(data.url)?.use {
                             val originFile = it.data.toFile()
-                            val status = state.status.takeSuccess() as? UiTimelineV2.Post
-                            val statusKeyString = statusKey.toString()
-                            val userHandle = status?.user?.handle?.canonical ?: "unknown"
                             val targetFile =
                                 File(
                                     context.cacheDir,
-                                    data.getFileName(statusKeyString, userHandle),
+                                    fileName(data),
                                 )
                             originFile.copyTo(targetFile, overwrite = true)
                             val uri =

@@ -5,6 +5,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
+import de.jensklingenberg.ktorfit.http.Url
 import dev.dimension.flare.data.network.fanbox.FanboxCommentListResponse
 import dev.dimension.flare.data.network.fanbox.FanboxCreatorDetailResponse
 import dev.dimension.flare.data.network.fanbox.FanboxCreatorListResponse
@@ -18,8 +19,10 @@ import dev.dimension.flare.data.network.fanbox.FanboxPostListResponse
 import dev.dimension.flare.data.network.fanbox.FanboxPostSearchResponse
 
 internal interface FanboxWebResources {
-    @GET("/")
-    suspend fun metadata(): String
+    @GET
+    suspend fun metadata(
+        @Url url: String,
+    ): String
 }
 
 internal interface FanboxResources {

@@ -97,7 +97,7 @@ internal fun Router(
         entryProvider =
             entryProvider {
                 homeEntryBuilder(navigate, onBack, openDrawer, uriHandler = uriHandler)
-                articleEntryBuilder(onBack)
+                articleEntryBuilder(navigate, onBack)
                 blueskyEntryBuilder(navigate, onBack)
                 composeEntryBuilder(navigate, onBack)
                 dmEntryBuilder(navigate, onBack)

@@ -89,11 +89,12 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.render.UiDateTime
-import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.toUri
+import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 
 private val ArticleCoverHeight = 260.dp
@@ -105,6 +106,7 @@ private const val ARTICLE_HEADER_KEY = "header"
 internal fun ArticleScreen(
     accountType: AccountType,
     articleKey: MicroBlogKey,
+    navigate: (Route) -> Unit,
     onBack: () -> Unit,
 ) {
     var refreshKey by remember(accountType, articleKey) { mutableIntStateOf(0) }
@@ -277,6 +279,19 @@ internal fun ArticleScreen(
                         titleHeightPx = it
                     },
                     onOpenUrl = uriHandler::openUri,
+                    onOpenMedia = { media ->
+                        val articleMedias = articleState.data.articleMedias()
+                        val index =
+                            articleMedias.indexOf(media).takeIf { it >= 0 }
+                                ?: articleMedias.indexOfFirst { it.url == media.url }.coerceAtLeast(0)
+                        navigate(
+                            Route.Media.RawMedia(
+                                medias = articleMedias,
+                                index = index,
+                                preview = media.previewUrl(),
+                            ),
+                        )
+                    },
                 )
             }
 
@@ -316,6 +331,7 @@ private fun ArticleSuccessContent(
     onProfileClick: (UiProfile) -> Unit,
     onTitleMeasured: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
+    onOpenMedia: (UiMedia) -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val listContentPadding =
@@ -342,6 +358,7 @@ private fun ArticleSuccessContent(
                     ArticleCover(
                         cover = cover,
                         title = article.title,
+                        onOpenMedia = onOpenMedia,
                     )
                 }
             }
@@ -367,6 +384,7 @@ private fun ArticleSuccessContent(
                     ArticleBlock(
                         block = block,
                         onOpenUrl = onOpenUrl,
+                        onOpenMedia = onOpenMedia,
                     )
                 }
             }
@@ -378,6 +396,7 @@ private fun ArticleSuccessContent(
 private fun ArticleCover(
     cover: UiMedia.Image,
     title: String,
+    onOpenMedia: (UiMedia) -> Unit,
 ) {
     NetworkImage(
         model = cover.url,
@@ -387,7 +406,10 @@ private fun ArticleCover(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .height(ArticleCoverHeight),
+                .height(ArticleCoverHeight)
+                .clickable {
+                    onOpenMedia(cover)
+                },
     )
 }
 
@@ -525,6 +547,7 @@ private fun ArticleRssAuthor(
 private fun ArticleBlock(
     block: UiArticleBlock,
     onOpenUrl: (String) -> Unit,
+    onOpenMedia: (UiMedia) -> Unit,
 ) {
     when (block) {
         is UiArticleBlock.Text -> {
@@ -537,12 +560,15 @@ private fun ArticleBlock(
         is UiArticleBlock.Image -> {
             ArticleImageBlock(
                 media = block.media,
-                onOpenUrl = onOpenUrl,
+                onOpenMedia = onOpenMedia,
             )
         }
 
         is UiArticleBlock.Video -> {
-            ArticleVideoBlock(media = block.media)
+            ArticleVideoBlock(
+                media = block.media,
+                onOpenMedia = onOpenMedia,
+            )
         }
 
         is UiArticleBlock.File -> {
@@ -571,7 +597,7 @@ private fun ArticleBlock(
 @Composable
 private fun ArticleImageBlock(
     media: UiMedia.Image,
-    onOpenUrl: (String) -> Unit,
+    onOpenMedia: (UiMedia) -> Unit,
 ) {
     NetworkImage(
         model = media.url,
@@ -583,22 +609,20 @@ private fun ArticleImageBlock(
                 .aspectRatio(media.aspectRatio.coerceIn(0.2f, 4f))
                 .clip(MaterialTheme.shapes.medium)
                 .clickable {
-                    onOpenUrl(
-                        DeeplinkRoute
-                            .Media
-                            .Image(
-                                uri = media.url,
-                                previewUrl = media.previewUrl,
-                                customHeaders = media.customHeaders,
-                            ).toUri(),
-                    )
+                    onOpenMedia(media)
                 },
     )
 }
 
 @Composable
-private fun ArticleVideoBlock(media: UiMedia.Video) {
+private fun ArticleVideoBlock(
+    media: UiMedia.Video,
+    onOpenMedia: (UiMedia) -> Unit,
+) {
     ElevatedCard(
+        onClick = {
+            onOpenMedia(media)
+        },
         modifier = Modifier.fillMaxWidth(),
     ) {
         Box(
@@ -611,7 +635,7 @@ private fun ArticleVideoBlock(media: UiMedia.Video) {
             VideoPlayer(
                 uri = media.url,
                 customHeaders = media.customHeaders,
-                previewUri = media.url,
+                previewUri = media.thumbnailUrl,
                 contentDescription = media.description,
                 modifier = Modifier.fillMaxSize(),
                 muted = false,
@@ -619,6 +643,9 @@ private fun ArticleVideoBlock(media: UiMedia.Video) {
                 keepScreenOn = false,
                 aspectRatio = media.aspectRatio.coerceIn(0.2f, 4f),
                 contentScale = ContentScale.Fit,
+                onClick = {
+                    onOpenMedia(media)
+                },
                 autoPlay = false,
             )
         }
@@ -744,6 +771,26 @@ private fun ArticleEmbedBlockContent(block: UiArticleBlock.Embed) {
         }
     }
 }
+
+private fun UiArticle.articleMedias(): ImmutableList<UiMedia> =
+    buildList {
+        cover?.let(::add)
+        content.blocks.forEach { block ->
+            when (block) {
+                is UiArticleBlock.Image -> add(block.media)
+                is UiArticleBlock.Video -> add(block.media)
+                else -> Unit
+            }
+        }
+    }.toImmutableList()
+
+private fun UiMedia.previewUrl(): String? =
+    when (this) {
+        is UiMedia.Audio -> previewUrl
+        is UiMedia.Gif -> previewUrl
+        is UiMedia.Image -> previewUrl
+        is UiMedia.Video -> thumbnailUrl
+    }
 
 @Composable
 private fun ArticleContentGateBlock(

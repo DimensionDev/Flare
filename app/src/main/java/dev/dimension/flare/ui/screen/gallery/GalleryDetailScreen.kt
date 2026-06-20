@@ -22,13 +22,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SecondaryTabRow
@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,7 +64,6 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.model.TimelineDisplayMode
@@ -88,7 +88,8 @@ import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.component.toImageVector
-import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -99,7 +100,6 @@ import dev.dimension.flare.ui.presenter.gallery.GalleryDetailPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -116,16 +116,14 @@ internal fun GalleryDetailScreen(
     onBack: () -> Unit,
 ) {
     val state by producePresenter("gallery_detail_$accountType-$statusKey") {
-        GalleryDetailPresenter(accountType = accountType, statusKey = statusKey).invoke()
+        remember(accountType, statusKey) {
+            GalleryDetailPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
     }
     val isBigScreen =
         dev.dimension.flare.ui.component.platform
             .isBigScreen()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val shareRoute =
-        remember(state.detail) {
-            state.detail.takePost()?.shareRoute()
-        }
     var showCompactInfoSheet by remember { mutableStateOf(false) }
     GalleryCardTimeline {
         FlareScaffold(
@@ -133,11 +131,13 @@ internal fun GalleryDetailScreen(
                 if (!isBigScreen) {
                     GalleryTopAppBar(
                         isBigScreen = false,
-                        post = state.detail.takePost(),
+                        detailState = state.detail,
                         navigate = navigate,
                         onBack = onBack,
                         onShare = {
-                            shareRoute?.let(navigate)
+                            state.detail.onSuccess { detail ->
+                                navigate(detail.shareRoute())
+                            }
                         },
                         onExpand = {
                             showCompactInfoSheet = true
@@ -165,10 +165,11 @@ internal fun GalleryDetailScreen(
                             navigate = navigate,
                             onBack = onBack,
                             onShare = {
-                                shareRoute?.let(navigate)
+                                state.detail.onSuccess { detail ->
+                                    navigate(detail.shareRoute())
+                                }
                             },
                             scrollBehavior = topAppBarScrollBehavior,
-                            onAction = state::performAction,
                         )
                     } else {
                         CompactGalleryContent(
@@ -176,7 +177,6 @@ internal fun GalleryDetailScreen(
                             comments = state.comments,
                             recommendations = state.recommendations,
                             navigate = navigate,
-                            onAction = state::performAction,
                             contentPadding = contentPadding,
                             showInfoSheet = showCompactInfoSheet,
                             onDismissInfoSheet = {
@@ -189,7 +189,7 @@ internal fun GalleryDetailScreen(
                 }.onError { error ->
                     ErrorContent(
                         error = error,
-                        onRetry = state::refresh,
+                        onRetry = {},
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -205,7 +205,9 @@ internal fun GalleryCommentsScreen(
     onBack: () -> Unit,
 ) {
     val state by producePresenter("gallery_comments_$accountType-$statusKey") {
-        GalleryDetailPresenter(accountType = accountType, statusKey = statusKey).invoke()
+        remember(accountType, statusKey) {
+            GalleryDetailPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
     }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     GalleryCardTimeline {
@@ -251,7 +253,6 @@ private fun CompactGalleryContent(
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
     contentPadding: PaddingValues,
     showInfoSheet: Boolean,
     onDismissInfoSheet: () -> Unit,
@@ -281,7 +282,6 @@ private fun CompactGalleryContent(
                         onDismissInfoSheet()
                         navigate(route)
                     },
-                    onAction = onAction,
                 )
             }
         }
@@ -300,25 +300,62 @@ private fun CompactGalleryContent(
         verticalItemSpacing = CompactTimelineSpacing,
         modifier = Modifier.fillMaxSize(),
     ) {
-        item(span = StaggeredGridItemSpan.FullLine) {
-            val configuration = LocalConfiguration.current
-            GalleryImages(
-                detail = detail,
-                onMediaClick = { media ->
-                    navigate(detail.post.galleryMediaRoute(media))
-                },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .ignoreHorizontalParentPadding(screenHorizontalPadding)
-                        .let {
-                            if (detail.orientation == GalleryOrientation.Horizontal) {
-                                it.height(configuration.screenHeightDp.dp)
-                            } else {
-                                it
-                            }
+        val images = detail.images
+        when (detail.orientation) {
+            GalleryOrientation.Vertical -> {
+                items(
+                    images,
+                    span = {
+                        StaggeredGridItemSpan.FullLine
+                    },
+                ) { image ->
+                    GalleryImage(
+                        image = image,
+                        onClick = {
+                            navigate(detail.galleryMediaRoute(image))
                         },
-            )
+                        modifier =
+                            Modifier
+                                .ignoreHorizontalParentPadding(screenHorizontalPadding),
+                    )
+                }
+            }
+
+            GalleryOrientation.Horizontal -> {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    val configuration = LocalConfiguration.current
+                    val pagerState =
+                        rememberPagerState(
+                            pageCount = { images.size },
+                        )
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .ignoreHorizontalParentPadding(screenHorizontalPadding)
+                                .height(configuration.screenHeightDp.dp),
+                    ) { index ->
+                        val image = images[index]
+                        Box(Modifier.fillMaxSize()) {
+                            NetworkImage(
+                                model = image.url,
+                                contentDescription = image.description,
+                                customHeaders = image.customHeaders,
+                                contentScale = ContentScale.Fit,
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .clickable {
+                                            navigate(detail.galleryMediaRoute(image))
+                                        },
+                            )
+                        }
+                    }
+                }
+            }
         }
         item(span = StaggeredGridItemSpan.FullLine) {
             Spacer(Modifier.height(12.dp))
@@ -328,7 +365,6 @@ private fun CompactGalleryContent(
             comments = comments,
             recommendations = recommendations,
             navigate = navigate,
-            onAction = onAction,
         )
     }
 }
@@ -343,8 +379,8 @@ private fun BigScreenGalleryContent(
     onBack: () -> Unit,
     onShare: () -> Unit,
     scrollBehavior: androidx.compose.material3.TopAppBarScrollBehavior,
-    onAction: (ActionMenu.Item) -> Unit,
 ) {
+    val images = detail.images
     Row(Modifier.fillMaxSize()) {
         Box(
             modifier =
@@ -354,7 +390,6 @@ private fun BigScreenGalleryContent(
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
         ) {
             if (detail.orientation == GalleryOrientation.Vertical) {
-                val images = detail.post.galleryImages()
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement =
@@ -368,23 +403,40 @@ private fun BigScreenGalleryContent(
                         GalleryImage(
                             image = image,
                             onClick = {
-                                navigate(detail.post.galleryMediaRoute(image))
+                                navigate(detail.galleryMediaRoute(image))
                             },
                         )
                     }
                 }
             } else {
-                GalleryImages(
-                    detail = detail,
-                    onMediaClick = { media ->
-                        navigate(detail.post.galleryMediaRoute(media))
-                    },
+                val pagerState =
+                    rememberPagerState(
+                        pageCount = { images.size },
+                    )
+                HorizontalPager(
+                    state = pagerState,
                     modifier = Modifier.fillMaxSize(),
-                )
+                ) { index ->
+                    val image = images[index]
+                    Box(Modifier.fillMaxSize()) {
+                        NetworkImage(
+                            model = image.url,
+                            contentDescription = image.description,
+                            customHeaders = image.customHeaders,
+                            contentScale = ContentScale.Fit,
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .clickable {
+                                        navigate(detail.galleryMediaRoute(image))
+                                    },
+                        )
+                    }
+                }
             }
             GalleryTopAppBar(
                 isBigScreen = true,
-                post = detail.post,
+                detailState = UiState.Success(detail),
                 navigate = navigate,
                 onBack = onBack,
                 onShare = onShare,
@@ -393,11 +445,10 @@ private fun BigScreenGalleryContent(
             )
         }
         GallerySideBar(
-            post = detail.post,
+            detail = detail,
             comments = comments,
             recommendations = recommendations,
             navigate = navigate,
-            onAction = onAction,
             modifier =
                 Modifier
                     .width(380.dp)
@@ -408,64 +459,10 @@ private fun BigScreenGalleryContent(
 }
 
 @Composable
-private fun GalleryImages(
-    detail: GalleryDetail,
-    onMediaClick: (UiMedia.Image) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val images = detail.post.galleryImages()
-    if (images.isEmpty()) {
-        Box(
-            modifier =
-                modifier
-                    .height(320.dp)
-                    .placeholder(true),
-        )
-        return
-    }
-    when (detail.orientation) {
-        GalleryOrientation.Vertical -> {
-            Column(modifier = modifier) {
-                images.forEach { image ->
-                    GalleryImage(
-                        image = image,
-                        onClick = { onMediaClick(image) },
-                    )
-                }
-            }
-        }
-
-        GalleryOrientation.Horizontal -> {
-            val pagerState =
-                rememberPagerState(
-                    pageCount = { images.size },
-                )
-            HorizontalPager(
-                state = pagerState,
-                modifier = modifier,
-            ) { index ->
-                val image = images[index]
-                Box(Modifier.fillMaxSize()) {
-                    NetworkImage(
-                        model = image.url,
-                        contentDescription = image.description,
-                        customHeaders = image.customHeaders,
-                        contentScale = ContentScale.Fit,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .clickable { onMediaClick(image) },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun GalleryImage(
     image: UiMedia.Image,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     NetworkImage(
         model = image.url,
@@ -473,20 +470,19 @@ private fun GalleryImage(
         customHeaders = image.customHeaders,
         contentScale = ContentScale.FillWidth,
         modifier =
-            Modifier
-                .aspectRatio(image.aspectRatio)
+            modifier
                 .fillMaxWidth()
+                .aspectRatio(image.aspectRatio)
                 .clickable(onClick = onClick),
     )
 }
 
 @Composable
 private fun GallerySideBar(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
@@ -524,9 +520,8 @@ private fun GallerySideBar(
                 when (page) {
                     0 -> {
                         GalleryInfoTab(
-                            post = post,
+                            detail = detail,
                             navigate = navigate,
-                            onAction = onAction,
                         )
                     }
 
@@ -560,9 +555,8 @@ private fun GallerySideBar(
 
 @Composable
 private fun GalleryInfoTab(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -570,9 +564,8 @@ private fun GalleryInfoTab(
     ) {
         item {
             GalleryAuthorCard(
-                post = post,
+                detail = detail,
                 navigate = navigate,
-                onAction = onAction,
                 index = 0,
                 totalCount = 2,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -580,8 +573,7 @@ private fun GalleryInfoTab(
         }
         item {
             GalleryDetailInfoCard(
-                post = post,
-                onAction = onAction,
+                detail = detail,
                 index = 1,
                 totalCount = 2,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -592,14 +584,14 @@ private fun GalleryInfoTab(
 
 @Composable
 private fun GalleryAuthorCard(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
     modifier: Modifier = Modifier,
     index: Int = 0,
     totalCount: Int = 0,
 ) {
-    val user = post.user
+    val user = detail.author
+    val uriHandler = LocalUriHandler.current
     AdaptiveCard(
         modifier = modifier.fillMaxWidth(),
         index = index,
@@ -618,7 +610,7 @@ private fun GalleryAuthorCard(
                 modifier =
                     Modifier.clickable(enabled = user != null) {
                         if (user != null) {
-                            navigate(Route.Profile.User(post.accountType, user.key))
+                            navigate(Route.Profile.User(detail.accountType, user.key))
                         }
                     },
             )
@@ -627,34 +619,45 @@ private fun GalleryAuthorCard(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = post.contentWarning?.raw ?: "",
+                    text = detail.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
-                Text(
-                    text = user?.handleWithoutAtAndHost.orEmpty(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                user?.let {
+                    RichText(
+                        text = it.name,
+                        textStyle = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
-            post.bookmarkAction()?.let { action ->
-                StatusActionButton(
-                    icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.EllipsisVertical,
-                    number = null,
-                    color = action.color.toComposeColor(),
-                    onClicked = { onAction(action) },
-                )
-            }
+            StatusActionButton(
+                icon =
+                    if (detail.isBookmarked) {
+                        UiIcon.Unbookmark.toImageVector()
+                    } else {
+                        UiIcon.Bookmark.toImageVector()
+                    },
+                number = null,
+                color =
+                    if (detail.isBookmarked) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                onClicked = {
+                    detail.onBookmark.invoke(ClickContext(uriHandler::openUri))
+                },
+            )
         }
     }
 }
 
 @Composable
 private fun GalleryDetailInfoCard(
-    post: UiTimelineV2.Post,
-    onAction: (ActionMenu.Item) -> Unit,
+    detail: GalleryDetail,
     modifier: Modifier = Modifier,
     index: Int = 0,
     totalCount: Int = 0,
@@ -667,19 +670,15 @@ private fun GalleryDetailInfoCard(
         Column(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
-            GalleryMetadata(
-                post = post,
-                onAction = onAction,
-            )
-            GalleryBody(post = post)
+            GalleryMetadata(detail = detail)
+            GalleryBody(detail = detail)
         }
     }
 }
 
 @Composable
 private fun GalleryMetadata(
-    post: UiTimelineV2.Post,
-    onAction: (ActionMenu.Item) -> Unit,
+    detail: GalleryDetail,
     modifier: Modifier = Modifier,
 ) {
     val metadataTextStyle = MaterialTheme.typography.bodySmall
@@ -692,16 +691,15 @@ private fun GalleryMetadata(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         DateTimeText(
-            data = post.createdAt,
+            data = detail.createdAt,
             fullTime = true,
             style = metadataTextStyle,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f, fill = false),
         )
-        post.countedActions().forEach { action ->
-            GalleryMetadataActionButton(
-                action = action,
-                onAction = onAction,
+        detail.matrix.forEach { matrix ->
+            GalleryMetadataItem(
+                matrix = matrix,
                 textStyle = metadataTextStyle,
             )
         }
@@ -709,28 +707,26 @@ private fun GalleryMetadata(
 }
 
 @Composable
-private fun GalleryMetadataActionButton(
-    action: ActionMenu.Item,
-    onAction: (ActionMenu.Item) -> Unit,
+private fun GalleryMetadataItem(
+    matrix: GalleryDetail.Matrix,
     textStyle: androidx.compose.ui.text.TextStyle,
     modifier: Modifier = Modifier,
 ) {
-    val color = action.color.toComposeColor()
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         modifier =
             modifier
-                .clickable { onAction(action) }
                 .padding(horizontal = 4.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         FAIcon(
-            imageVector = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.EllipsisVertical,
+            imageVector = matrix.icon.toImageVector(),
             contentDescription = null,
             tint = color,
             modifier = Modifier.height(textStyle.fontSize.value.dp + 2.dp),
         )
-        action.count?.humanized?.takeIf { it.isNotEmpty() }?.let {
+        matrix.humanizedCount.takeIf { it.isNotEmpty() }?.let {
             Text(
                 text = it,
                 style = textStyle,
@@ -743,12 +739,12 @@ private fun GalleryMetadataActionButton(
 
 @Composable
 private fun GalleryBody(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     modifier: Modifier = Modifier,
 ) {
-    if (post.content.isEmpty) return
+    val content = detail.content ?: return
     RichText(
-        text = post.content,
+        text = content,
         modifier =
             modifier
                 .fillMaxWidth()
@@ -761,13 +757,11 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
 ) {
     item(span = StaggeredGridItemSpan.FullLine) {
         GalleryAuthorCard(
-            post = detail.post,
+            detail = detail,
             navigate = navigate,
-            onAction = onAction,
             index = 0,
             totalCount = 2,
             modifier =
@@ -777,8 +771,7 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
     }
     item(span = StaggeredGridItemSpan.FullLine) {
         GalleryDetailInfoCard(
-            post = detail.post,
-            onAction = onAction,
+            detail = detail,
             index = 1,
             totalCount = 2,
             modifier =
@@ -787,8 +780,8 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
         )
     }
     compactCommentsPreviewItems(
-        statusKey = detail.post.statusKey,
-        accountType = detail.post.accountType,
+        statusKey = detail.statusKey,
+        accountType = detail.accountType,
         comments = comments,
         navigate = navigate,
     )
@@ -929,7 +922,7 @@ private fun SectionTitle(
 @Composable
 private fun GalleryTopAppBar(
     isBigScreen: Boolean,
-    post: UiTimelineV2.Post?,
+    detailState: UiState<GalleryDetail>,
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
     onShare: () -> Unit,
@@ -940,7 +933,7 @@ private fun GalleryTopAppBar(
         title = {
             if (!isBigScreen) {
                 CompactAppBarTitle(
-                    post = post,
+                    detailState = detailState,
                     navigate = navigate,
                 )
             }
@@ -950,7 +943,18 @@ private fun GalleryTopAppBar(
         },
         actions = {
             if (isBigScreen) {
-                IconButton(onClick = onShare) {
+                val shareEnabled =
+                    when (detailState) {
+                        is UiState.Success -> true
+
+                        is UiState.Loading,
+                        is UiState.Error,
+                        -> false
+                    }
+                IconButton(
+                    enabled = shareEnabled,
+                    onClick = onShare,
+                ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.ShareNodes,
                         contentDescription = "Share",
@@ -963,8 +967,16 @@ private fun GalleryTopAppBar(
                     )
                 }
             } else {
+                val expandEnabled =
+                    when (detailState) {
+                        is UiState.Success -> true
+
+                        is UiState.Loading,
+                        is UiState.Error,
+                        -> false
+                    }
                 IconButton(
-                    enabled = post != null,
+                    enabled = expandEnabled,
                     onClick = onExpand,
                 ) {
                     FAIcon(
@@ -986,10 +998,33 @@ private fun GalleryTopAppBar(
 
 @Composable
 private fun CompactAppBarTitle(
-    post: UiTimelineV2.Post?,
+    detailState: UiState<GalleryDetail>,
     navigate: (Route) -> Unit,
 ) {
-    val user = post?.user
+    when (detailState) {
+        is UiState.Success -> {
+            CompactAppBarTitleContent(
+                detail = detailState.data,
+                navigate = navigate,
+            )
+        }
+
+        is UiState.Loading -> {
+            CompactAppBarTitleLoading()
+        }
+
+        is UiState.Error -> {
+            Spacer(Modifier.fillMaxWidth())
+        }
+    }
+}
+
+@Composable
+private fun CompactAppBarTitleContent(
+    detail: GalleryDetail,
+    navigate: (Route) -> Unit,
+) {
+    val user = detail.author
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -999,26 +1034,61 @@ private fun CompactAppBarTitle(
             data = user?.avatar,
             size = 36.dp,
             modifier =
-                Modifier.clickable(enabled = post != null && user != null) {
-                    if (post != null && user != null) {
-                        navigate(Route.Profile.User(post.accountType, user.key))
+                Modifier.clickable(enabled = user != null) {
+                    if (user != null) {
+                        navigate(Route.Profile.User(detail.accountType, user.key))
                     }
                 },
         )
         Column(Modifier.weight(1f)) {
             Text(
-                text = post?.contentWarning?.raw.orEmpty(),
+                text = detail.title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Text(
-                text = user?.handleWithoutAtAndHost.orEmpty(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            user?.let {
+                RichText(
+                    text = it.name,
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompactAppBarTitleLoading() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        AvatarComponent(
+            data = null,
+            size = 36.dp,
+        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.55f)
+                        .height(16.dp)
+                        .placeholder(true),
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.38f)
+                        .height(12.dp)
+                        .placeholder(true),
             )
         }
     }
@@ -1070,52 +1140,16 @@ private fun GalleryLoading() {
     }
 }
 
-private fun UiState<GalleryDetail>.takePost(): UiTimelineV2.Post? = (this as? UiState.Success)?.data?.post
+private fun GalleryDetail.shareRoute(): Route.Status.ShareSheet =
+    Route.Status.ShareSheet(
+        statusKey = statusKey,
+        accountType = accountType,
+        shareUrl = url,
+    )
 
-private fun UiTimelineV2.Post.shareRoute(): Route.Status.ShareSheet? =
-    actions
-        .asSequence()
-        .filterIsInstance<ActionMenu.Item>()
-        .firstNotNullOfOrNull { action ->
-            val text = action.text as? ActionMenu.Item.Text.Localized
-            if (text?.type != ActionMenu.Item.Text.Localized.Type.Share) return@firstNotNullOfOrNull null
-            val url = (action.clickEvent as? ClickEvent.Deeplink)?.url ?: return@firstNotNullOfOrNull null
-            Route.parse(url) as? Route.Status.ShareSheet
-        }
-
-private fun UiTimelineV2.Post.bookmarkAction(): ActionMenu.Item? =
-    actions
-        .asSequence()
-        .filterIsInstance<ActionMenu.Item>()
-        .firstOrNull { action ->
-            val text = action.text as? ActionMenu.Item.Text.Localized
-            text?.type == ActionMenu.Item.Text.Localized.Type.Bookmark ||
-                text?.type == ActionMenu.Item.Text.Localized.Type.Unbookmark
-        }
-
-private fun UiTimelineV2.Post.countedActions(): List<ActionMenu.Item> =
-    actions
-        .asSequence()
-        .filterIsInstance<ActionMenu.Item>()
-        .filter { it.count != null }
-        .toList()
-
-private fun UiTimelineV2.Post.galleryImages(): List<UiMedia.Image> = images.filterIsInstance<UiMedia.Image>()
-
-private fun UiTimelineV2.Post.galleryMediaRoute(media: UiMedia.Image): Route.Media.RawMedia {
-    val medias = galleryImages().map { it as UiMedia }.toImmutableList()
-    return Route.Media.RawMedia(
-        medias = medias,
-        index = medias.indexOfFirst { it.url == media.url }.coerceAtLeast(0),
+private fun GalleryDetail.galleryMediaRoute(media: UiMedia.Image): Route.Media.RawMedia =
+    Route.Media.RawMedia(
+        medias = images,
+        index = images.indexOfFirst { it.url == media.url }.coerceAtLeast(0),
         preview = media.previewUrl,
     )
-}
-
-@Composable
-private fun ActionMenu.Item.Color?.toComposeColor(): Color =
-    when (this) {
-        ActionMenu.Item.Color.Red -> MaterialTheme.colorScheme.error
-        ActionMenu.Item.Color.PrimaryColor -> MaterialTheme.colorScheme.primary
-        ActionMenu.Item.Color.ContentColor -> LocalContentColor.current
-        null -> LocalContentColor.current
-    }

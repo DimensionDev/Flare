@@ -2,8 +2,6 @@ package dev.dimension.flare.data.datasource.pixiv
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
-import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
-import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.network.pixiv.PIXIV_IMAGE_REFERER
 import dev.dimension.flare.data.network.pixiv.model.PixivComment
 import dev.dimension.flare.data.network.pixiv.model.PixivCommentStamp
@@ -104,17 +102,6 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
         accountType = AccountType.Specific(accountKey),
     )
 }
-
-internal fun PixivIllust.toGalleryDetail(accountKey: MicroBlogKey): GalleryDetail =
-    GalleryDetail(
-        post = toUiTimeline(accountKey),
-        orientation =
-            if (width >= height) {
-                GalleryOrientation.Horizontal
-            } else {
-                GalleryOrientation.Vertical
-            },
-    )
 
 internal fun PixivComment.toUiTimeline(
     accountKey: MicroBlogKey,

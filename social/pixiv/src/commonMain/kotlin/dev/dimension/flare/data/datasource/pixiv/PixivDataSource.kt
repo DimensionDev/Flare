@@ -1,11 +1,14 @@
 package dev.dimension.flare.data.datasource.pixiv
 
+import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -31,14 +34,17 @@ import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.data.platform.PixivPlatformSpec
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
 internal class PixivDataSource(
@@ -290,12 +296,52 @@ internal class PixivDataSource(
             statusKey = statusKey,
         )
 
-    override fun galleryDetail(statusKey: MicroBlogKey): RemoteLoader<GalleryDetail> =
-        PixivGalleryDetailLoader(
-            service = service,
-            accountKey = accountKey,
-            statusKey = statusKey,
-        )
+    @Suppress("UNCHECKED_CAST")
+    override fun galleryDetail(statusKey: MicroBlogKey): Cacheable<GalleryDetail> =
+        postHandler.post(statusKey).map {
+            val post = it as? UiTimelineV2.Post ?: error("Gallery detail should be a post")
+            val actionItems = post.actions.filterIsInstance<ActionMenu.Item>()
+            val bookmarkAction =
+                actionItems.firstOrNull { action ->
+                    val text = action.text as? ActionMenu.Item.Text.Localized
+                    text?.type == ActionMenu.Item.Text.Localized.Type.Bookmark ||
+                        text?.type == ActionMenu.Item.Text.Localized.Type.Unbookmark
+                }
+            val bookmarkText = bookmarkAction?.text as? ActionMenu.Item.Text.Localized
+            val bookmarked = bookmarkText?.type == ActionMenu.Item.Text.Localized.Type.Unbookmark
+            val bookmarkCount = bookmarkAction?.count?.value ?: 0L
+            GalleryDetail(
+                orientation = GalleryOrientation.Vertical,
+                statusKey = post.statusKey,
+                accountType = post.accountType,
+                url = "https://www.pixiv.net/artworks/${post.statusKey.id}",
+                images = post.images.filterIsInstance<UiMedia.Image>().toImmutableList(),
+                title = post.contentWarning?.raw.orEmpty(),
+                author = post.user,
+                createdAt = post.createdAt,
+                content = post.content.takeUnless { content -> content.isEmpty },
+                isBookmarked = bookmarked,
+                bookmarkAction =
+                    ClickEvent.event(
+                        accountKey = accountKey,
+                        postEvent =
+                            PostEvent.Pixiv.Bookmark(
+                                postKey = post.statusKey,
+                                bookmarked = bookmarked,
+                                count = bookmarkCount,
+                                accountKey = accountKey,
+                            ),
+                    ),
+                matrix =
+                    actionItems
+                        .mapNotNull { action ->
+                            GalleryDetail.Matrix(
+                                icon = action.icon ?: return@mapNotNull null,
+                                count = action.count?.value ?: return@mapNotNull null,
+                            )
+                        }.toImmutableList(),
+            )
+        } as Cacheable<GalleryDetail>
 
     override fun galleryComments(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         PixivGalleryCommentsLoader(

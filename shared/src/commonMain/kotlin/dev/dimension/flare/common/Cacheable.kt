@@ -107,6 +107,16 @@ public sealed class CacheData<T>(
     public fun refresh() {
         refreshFlow.value++
     }
+
+    public fun <R> map(transform: (T) -> R): CacheData<R> =
+        Cacheable(
+            fetchSource = fetchSource,
+            cacheSource = {
+                cacheSource.invoke().map {
+                    transform.invoke(it)
+                }
+            },
+        )
 }
 
 @HiddenFromObjC

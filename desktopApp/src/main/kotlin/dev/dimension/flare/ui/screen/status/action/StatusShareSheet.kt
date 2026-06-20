@@ -100,7 +100,9 @@ internal fun StatusShareSheet(
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
 
     val state by producePresenter("DesktopStatusShareSheet_${accountType}_$statusKey") {
-        StatusPresenter(accountType = accountType, statusKey = statusKey).invoke()
+        remember(accountType, statusKey) {
+            StatusPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
     }
     FluentDialog(
         visible = true,

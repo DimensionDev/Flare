@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -52,7 +53,9 @@ internal fun TwitterArticleScreen(
     val scrollState = rememberScrollState()
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter(key = "$accountType-$tweetId-$articleId") {
-        TwitterArticlePresenter(accountType, tweetId, articleId).invoke()
+        remember(accountType, tweetId, articleId) {
+            TwitterArticlePresenter(accountType, tweetId, articleId)
+        }.invoke()
     }
     val color =
         if (isLightTheme()) {

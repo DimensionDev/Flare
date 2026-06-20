@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -44,7 +45,9 @@ internal fun TwitterArticleScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter(key = "$accountType-$tweetId-$articleId") {
-        TwitterArticlePresenter(accountType, tweetId, articleId).invoke()
+        remember(accountType, tweetId, articleId) {
+            TwitterArticlePresenter(accountType, tweetId, articleId)
+        }.invoke()
     }
     val scrollState = rememberScrollState()
     Box(

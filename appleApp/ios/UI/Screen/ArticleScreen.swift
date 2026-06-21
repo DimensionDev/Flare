@@ -2,6 +2,7 @@ import SwiftUI
 import FlareAppleUI
 import KotlinSharedUI
 import AppleFontAwesome
+import FlareAppleCore
 
 struct ArticleScreen: View {
     @StateObject private var presenter: KotlinPresenter<ArticlePresenterState>

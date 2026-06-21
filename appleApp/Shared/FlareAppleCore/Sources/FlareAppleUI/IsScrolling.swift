@@ -1,7 +1,7 @@
 import SwiftUI
 
 private struct IsScrollingKey: EnvironmentKey {
-    static let defaultValue: Bool = false
+    static let defaultValue = false
 }
 
 @Observable
@@ -35,12 +35,14 @@ private struct DetectScrollingModifier: ViewModifier {
 
     @State private var rawIsScrolling = false
     @State private var isScrolling = false
-    @State private var debounceTask: Task<Void, Never>? = nil
+    @State private var isScrollingState = IsScrollingState()
+    @State private var debounceTask: Task<Void, Never>?
 
     func body(content: Content) -> some View {
         if #available(iOS 18.0, macOS 15.0, *) {
             content
                 .environment(\.isScrolling, isScrolling)
+                .environment(\.isScrollingState, isScrollingState)
                 .onScrollPhaseChange { _, phase in
                     rawIsScrolling = (phase != .idle)
                 }
@@ -48,6 +50,7 @@ private struct DetectScrollingModifier: ViewModifier {
                     if newValue {
                         debounceTask?.cancel()
                         isScrolling = true
+                        isScrollingState.isScrolling = true
                     } else {
                         debounceTask?.cancel()
                         debounceTask = Task {
@@ -55,17 +58,20 @@ private struct DetectScrollingModifier: ViewModifier {
                             try? await Task.sleep(nanoseconds: ns)
                             if !Task.isCancelled && !rawIsScrolling {
                                 isScrolling = false
+                                isScrollingState.isScrolling = false
                             }
                         }
                     }
                 }
                 .onDisappear {
                     debounceTask?.cancel()
+                    rawIsScrolling = false
+                    isScrolling = false
+                    isScrollingState.isScrolling = false
                 }
         } else {
             content
                 .environment(\.isScrolling, false)
-            // Fallback on earlier versions
         }
     }
 }

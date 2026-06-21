@@ -23,22 +23,6 @@ public struct AdaptiveTimelineCard<Content: View>: View {
     }
 
     public var body: some View {
-        #if os(macOS)
-        if isMultipleColumn || timelineDisplayMode == .card {
-            content()
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 18))
-                .padding(.horizontal, isMultipleColumn ? 6 : 12)
-                .padding(.vertical, 6)
-        } else {
-            VStack(spacing: 0) {
-                content()
-                if index < totalCount - 1 {
-                    Divider()
-                }
-            }
-        }
-        #else
         if isMultipleColumn || !(timelineDisplayMode == .plain) {
             ListCardView(index: index, totalCount: totalCount) {
                 content()
@@ -52,6 +36,5 @@ public struct AdaptiveTimelineCard<Content: View>: View {
                 }
             }
         }
-        #endif
     }
 }

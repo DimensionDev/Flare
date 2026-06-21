@@ -5,7 +5,6 @@ import FlareAppleUI
 
 enum Route: Hashable, Identifiable {
     case empty
-    case home
     case notification
     case discover
     case serviceSelect
@@ -50,8 +49,6 @@ enum Route: Hashable, Identifiable {
         switch self {
         case .empty:
             EmptyView()
-        case .home:
-            HomeScreen()
         case .notification:
             PlaceholderPanel(destination: .notifications)
         case .discover:

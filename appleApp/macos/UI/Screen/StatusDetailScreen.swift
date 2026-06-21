@@ -31,6 +31,7 @@ struct StatusDetailScreen: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.bottom, 12)
         }
+        .detectScrolling()
         .id(presenter.key)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(detailBackground)

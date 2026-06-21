@@ -213,7 +213,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             Drops.show(
                 .init(
                     title: mediaType.downloadStartedTitle,
-                    icon: .faPhotoFilm
+                    icon: .init(fontAwesome: FontAwesomeIcon.photoFilm)
                 )
             )
         }

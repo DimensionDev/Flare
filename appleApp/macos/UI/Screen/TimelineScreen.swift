@@ -1,11 +1,14 @@
 import FlareAppleCore
 @preconcurrency import KotlinSharedUI
 import SwiftUI
+import AppleFontAwesome
+import FlareAppleUI
 
 struct TimelineScreen: View {
     let tabItem: UiTimelineTabItem
     let allowGalleryMode: Bool
     @StateObject private var presenter: KotlinPresenter<TimelineItemPresenterState>
+    @Environment(\.timelineAppearance) private var timelineAppearance
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false) {
         self.tabItem = tabItem
@@ -20,8 +23,41 @@ struct TimelineScreen: View {
             key: presenter.key,
             allowGalleryMode: allowGalleryMode
         )
+        .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
+        .overlay(alignment: .top) {
+            if presenter.state.isRefreshing {
+                ProgressView()
+                    .progressViewStyle(.linear)
+                    .ignoresSafeArea()
+                    .padding(.horizontal)
+            }
+        }
         .refreshable {
             try? await presenter.state.refreshSuspend()
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    presenter.state.refreshSync()
+                } label: {
+                    Label {
+                        Text("Refresh")
+                    } icon: {
+                        Image(fontAwesome: .arrowsRotate)
+                    }
+
+                }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                } label: {
+                    Label {
+                        Text("home_compose")
+                    } icon: {
+                        Image(fontAwesome: .penToSquare)
+                    }
+                }
+            }
         }
     }
 }

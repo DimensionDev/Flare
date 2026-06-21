@@ -4,6 +4,7 @@ import SwiftUI
 
 struct TimelinePagingContent: View {
     @Environment(\.refresh) private var refreshAction: RefreshAction?
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
@@ -34,6 +35,8 @@ struct TimelinePagingContent: View {
                 .padding(.top, topContentInset)
                 .padding(.bottom, 12)
         }
+        .background(timelineDisplayMode == .card ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
+        .detectScrolling()
         .id(key)
         .refreshable {
             if let refreshAction {

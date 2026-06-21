@@ -2,6 +2,7 @@ import SwiftUI
 import FlareAppleUI
 import AppleFontAwesome
 @preconcurrency import KotlinSharedUI
+import FlareAppleCore
 
 struct GalleryDetailScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass

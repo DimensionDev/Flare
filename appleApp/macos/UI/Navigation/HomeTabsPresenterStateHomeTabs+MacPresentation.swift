@@ -5,7 +5,7 @@ extension HomeTabsPresenterStateHomeTabs {
     var macOSInitialRoute: Route {
         switch self {
         case .home:
-            .home
+            .empty
         case .notifications:
             .notification
         case .discover:

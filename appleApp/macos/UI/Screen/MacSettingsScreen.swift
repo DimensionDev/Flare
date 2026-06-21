@@ -21,7 +21,7 @@ struct MacSettingsScreen: View {
                     Label {
                         Text(pane.title)
                     } icon: {
-//                        Image(fontAwesome: pane.icon)
+                        Image(fontAwesome: pane.icon)
                     }
                 }
                 .tag(pane)

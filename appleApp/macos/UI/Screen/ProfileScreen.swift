@@ -9,6 +9,7 @@ struct ProfileScreen: View {
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
     let goBack: () -> Void
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab = 0
@@ -65,6 +66,8 @@ struct ProfileScreen: View {
             }
             .padding(.bottom, 16)
         }
+        .background(timelineDisplayMode == .card ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
+        .detectScrolling()
         .toolbar {
 //            ToolbarItem(placement: .automatic) {
 //                switch onEnum(of: presenter.state.userState) {

@@ -3,18 +3,6 @@ import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 
-public struct TabTitle: View {
-    private let title: Any
-
-    public init(title: Any) {
-        self.title = title
-    }
-
-    public var body: some View {
-        Text(String(describing: title))
-    }
-}
-
 public struct TimelineTabTitle: View {
     private let title: UiText
 

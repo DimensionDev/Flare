@@ -21,7 +21,7 @@ public struct TimelinePagingView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         case .loading:
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 2) {
                 ForEach(0..<loadingCount, id: \.self) { index in
                     loadingRow(index: index, totalCount: loadingCount)
                 }
@@ -35,7 +35,7 @@ public struct TimelinePagingView: View {
     private func successContent(_ success: PagingStateSuccess<UiTimelineV2>) -> some View {
         let count = Int(success.itemCount)
         let rows = TimelinePagingRows(success: success, count: count)
-        LazyVStack(spacing: 0) {
+        LazyVStack(spacing: 2) {
             ForEach(rows) { row in
                 TimelinePagingRowView(
                     row: row,

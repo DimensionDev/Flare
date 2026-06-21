@@ -7,26 +7,87 @@ import SwiftUI
 struct RootView: View {
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
-    @State private var selectedTab: String?
+    @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
+    @StateObject private var notificationPresenter = KotlinPresenter(presenter: AllNotificationPresenter())
+    @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @State private var selectedTab: Route?
+    @State private var homeExpanded: Bool = true
 
     var body: some View {
-        StateView(state: homeTabsPresenter.state.tabs) { tabs in
-            TabView(selection: $selectedTab) {
-                let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
-                ForEach(homeTabs, id: \.name) { tab in
-                    homeTab(tab)
+        NavigationSplitView {
+            List(selection: $selectedTab) {
+                StateView(state: homeTabsPresenter.state.tabs) { tabs in
+                    let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
+                    ForEach(homeTabs, id: \.name) { tab in
+                        if tab == .home, case .success(let data) = onEnum(of: homeTimelineWithTabsPresenter.state.tabState) {
+                            let tabs: [UiTimelineTabItem] = data.data.cast(UiTimelineTabItem.self)
+                            DisclosureGroup(isExpanded: $homeExpanded) {
+                                ForEach(tabs, id: \.id) { tab in
+                                    Label {
+                                        Text(tab.title.text)
+                                    } icon: {
+                                        TabIcon(tabItem: tab)
+                                    }
+                                    .tag(Route.timeline(tab))
+                                }
+                            } label: {
+                                Label {
+                                    Text(tab.macOSTitle)
+                                } icon: {
+                                    Image(fontAwesome: tab.macOSIcon)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .overlay(alignment: .trailing) {
+                                    Button {
+                                        
+                                    } label: {
+                                        Image(fontAwesome: .sliders)
+                                    }
+                                }
+                            }
+                            .onAppear {
+                                selectedTab = .timeline(tabs.first!)
+                            }
+                        } else if tab == .notifications {
+                            DisclosureGroup {
+                                ForEach(notificationPresenter.state.notifications, id: \.profile.key) { item in
+                                    UserOnelineView(data: item.profile)
+                                        .badge(Int(item.badge))
+                                }
+                            } label: {
+                                Label {
+                                    Text(tab.macOSTitle)
+                                } icon: {
+                                    Image(fontAwesome: tab.macOSIcon)
+                                }
+                                .badge(Int(allNotificationBadgePresenter.state.count))
+                            }
+                        } else {
+                            Label {
+                                Text(tab.macOSTitle)
+                            } icon: {
+                                Image(fontAwesome: tab.macOSIcon)
+                            }
+                            .tag(tab.macOSInitialRoute)
+                        }
+                    }
                 }
-
+                
                 if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
                     let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                        TabSection {
+                        DisclosureGroup {
                             ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
                                 if let route = route(for: tab) {
-                                    secondaryTab(tab, route: route)
+                                    Label {
+                                        Text(tab.title.text)
+                                    } icon: {
+                                        Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                                    }
+                                    .tag(route)
                                 }
                             }
-                        } header: {
+                        } label: {
                             StateView(state: item.user) { user in
                                 UserOnelineView(data: user)
                             }
@@ -34,9 +95,13 @@ struct RootView: View {
                     }
                 }
             }
-            .tabViewStyle(.sidebarAdaptable)
-//            .toolbar(removing: .title)
+            .listStyle(.sidebar)
             .toolbar(removing: .sidebarToggle)
+        } detail: {
+            if let selectedTab {
+                Router(initialRoute: selectedTab)
+                    .id(selectedTab)
+            }
         }
     }
 
@@ -51,6 +116,7 @@ struct RootView: View {
                 Image(fontAwesome: tab.macOSIcon)
             }
         }
+        .tabPlacement(.sidebarOnly)
     }
 
     @TabContentBuilder<String?>

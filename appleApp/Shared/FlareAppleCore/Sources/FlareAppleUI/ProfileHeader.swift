@@ -161,7 +161,7 @@ public struct CommonProfileHeader: View {
         #if os(iOS)
         horizontalSizeClass == .compact && timelineDisplayMode != .plain
         #else
-        false
+        timelineDisplayMode != .plain
         #endif
     }
 

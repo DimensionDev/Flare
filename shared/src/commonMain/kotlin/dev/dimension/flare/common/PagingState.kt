@@ -99,7 +99,12 @@ public sealed class PagingState<T> {
 
             override operator fun get(index: Int): T? = data[index]
 
-            override fun peek(index: Int): T? = data.peek(index)
+            override fun peek(index: Int): T? =
+                if (index < 0 || index >= data.itemCount) {
+                    null
+                } else {
+                    data.peek(index)
+                }
 
             override suspend fun refreshSuspend() {
                 data.refreshSuspend()

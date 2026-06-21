@@ -1,6 +1,8 @@
 import SwiftUI
+import FlareAppleUI
 import KotlinSharedUI
 import AppleFontAwesome
+import FlareAppleCore
 
 struct PostActionLayoutScreen: View {
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())

@@ -94,9 +94,13 @@ export function localizedUiString(value: UiStrings): string {
 		case 'PixivRankingDayManga':
 			return 'Manga Ranking';
 		case 'Illustrations':
-			return 'Illustrations';
+			return m.illustrationsTitle();
 		case 'Manga':
-			return 'Manga';
+			return m.mangaTitle();
+		case 'FanboxSupported':
+			return 'Supported posts';
+		case 'FanboxRecommendedCreators':
+			return 'Recommended creators';
 		default:
 			return m.loginCredentialImport();
 	}

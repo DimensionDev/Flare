@@ -3,7 +3,6 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.pixiv.PixivDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.data.network.pixiv.PixivRankingMode
 import dev.dimension.flare.model.AccountType
@@ -37,7 +36,7 @@ public data object PixivPlatformSpec :
 
     internal val bookmarkTimelineSpec =
         TimelineSpec(
-            id = TimelineSpecIds.PIXIV_BOOKMARK,
+            id = PIXIV_BOOKMARK,
             title = UiStrings.Bookmark,
             icon = UiIcon.Bookmark.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -50,7 +49,7 @@ public data object PixivPlatformSpec :
 
     internal val followingTimelineSpec =
         TimelineSpec(
-            id = TimelineSpecIds.PIXIV_FOLLOWING,
+            id = PIXIV_FOLLOWING,
             title = UiStrings.Following,
             icon = UiIcon.Follow.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
@@ -179,6 +178,8 @@ private data class PixivUserDeepLink(
 
 public const val PIXIV_HOST: String = "pixiv.net"
 
+private const val PIXIV_FOLLOWING: String = "pixiv.following"
+private const val PIXIV_BOOKMARK: String = "pixiv.bookmark"
 private const val PIXIV_RANKING_WEEK: String = "pixiv.ranking.week"
 private const val PIXIV_RANKING_MONTH: String = "pixiv.ranking.month"
 private const val PIXIV_RANKING_DAY_MALE: String = "pixiv.ranking.day_male"

@@ -1265,11 +1265,11 @@ private final class GalleryFeedTileUIView: UIView {
             imageAspectConstraint?.isActive = true
         } else {
             let title = feed.title
-            let description = feed.description_ ?? feed.description
+            let description = feed.description_
             titleLabel.text = title
             titleLabel.isHidden = title?.isEmpty ?? true
             descriptionLabel.text = description
-            descriptionLabel.isHidden = description.isEmpty
+            descriptionLabel.isHidden = description?.isEmpty ?? true
             textStack.isHidden = titleLabel.isHidden && descriptionLabel.isHidden
         }
 

@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
@@ -65,6 +66,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiPodcast
@@ -72,6 +74,7 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.mapper.renderArticle
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
@@ -105,6 +108,7 @@ internal class XQTDataSource(
     NotificationDataSource,
     UserDataSource,
     PostDataSource,
+    ArticleDataSource,
     KoinComponent,
     ListDataSource,
     PinnableTimelineTabDataSource,
@@ -171,6 +175,11 @@ internal class XQTDataSource(
             ?.data
             ?.tweetResult
             ?.result
+
+    override suspend fun article(articleKey: MicroBlogKey): UiArticle =
+        getTweetResultByRestId(articleKey.id)
+            ?.renderArticle(accountKey = accountKey)
+            ?: error("Twitter article not found")
 
     override val notificationHandler by lazy {
         NotificationHandler(

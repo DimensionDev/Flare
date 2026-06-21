@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,7 @@ internal fun AgentHistoryScreen(
     onNewConversationClick: () -> Unit,
 ) {
     val state by producePresenter {
-        AgentChatHistoryPresenter().invoke()
+        remember { AgentChatHistoryPresenter() }.invoke()
     }
     val listState = rememberLazyListState()
     Column(

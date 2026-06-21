@@ -116,10 +116,9 @@ public sealed class DeeplinkRoute {
     }
 
     @Serializable
-    public data class TwitterArticle(
+    public data class Article(
         val accountType: AccountType,
-        val tweetId: String,
-        val articleId: String? = null,
+        val articleKey: MicroBlogKey,
     ) : DeeplinkRoute()
 
     @Serializable

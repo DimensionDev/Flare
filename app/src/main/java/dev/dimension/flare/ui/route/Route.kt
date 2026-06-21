@@ -2,12 +2,14 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
@@ -442,6 +444,13 @@ internal sealed interface Route : NavKey {
         ) : Media
 
         @Serializable
+        data class RawMedia(
+            val medias: SerializableImmutableList<UiMedia>,
+            val index: Int = 0,
+            val preview: String? = null,
+        ) : Media
+
+        @Serializable
         data class StatusMedia(
             val statusKey: MicroBlogKey,
             val accountType: AccountType,
@@ -466,10 +475,9 @@ internal sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data class TwitterArticle(
+    data class Article(
         val accountType: AccountType,
-        val tweetId: String,
-        val articleId: String? = null,
+        val articleKey: MicroBlogKey,
     ) : Route
 
     @Serializable
@@ -613,11 +621,10 @@ internal sealed interface Route : NavKey {
                     )
                 }
 
-                is DeeplinkRoute.TwitterArticle -> {
-                    TwitterArticle(
+                is DeeplinkRoute.Article -> {
+                    Article(
                         accountType = deeplinkRoute.accountType,
-                        tweetId = deeplinkRoute.tweetId,
-                        articleId = deeplinkRoute.articleId,
+                        articleKey = deeplinkRoute.articleKey,
                     )
                 }
 

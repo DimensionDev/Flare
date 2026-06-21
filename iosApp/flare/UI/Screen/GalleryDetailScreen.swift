@@ -34,7 +34,6 @@ struct GalleryDetailScreen: View {
             }
         } errorContent: { error in
             ListErrorView(error: error) {
-                presenter.state.refresh()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } loadingContent: {
@@ -47,27 +46,49 @@ struct GalleryDetailScreen: View {
         .toolbar {
             if !isBigScreen {
                 ToolbarItem(placement: .principal) {
-                    GalleryCompactToolbarTitle(post: presenter.state.detail.galleryPost) {
+                    GalleryCompactToolbarTitle(detailState: presenter.state.detail) {
                         navigateToProfile($0)
                     }
                 }
 
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button {
-                        presenter.state.detail.galleryPost?.shareAction?.onClicked(
-                            ClickContext(launcher: AppleUriLauncher(openUrl: openURL))
-                        )
+                        switch onEnum(of: presenter.state.detail) {
+                        case .success(let success):
+                            navigateToShare(success.data)
+                        case .loading, .error:
+                            break
+                        }
                     } label: {
                         Image("fa-share-nodes")
                     }
-                    .disabled(presenter.state.detail.galleryPost?.shareAction == nil)
+                    .disabled({
+                        switch onEnum(of: presenter.state.detail) {
+                        case .success:
+                            return false
+                        case .loading, .error:
+                            return true
+                        }
+                    }())
 
                     Button {
-                        showInfoSheet = true
+                        switch onEnum(of: presenter.state.detail) {
+                        case .success:
+                            showInfoSheet = true
+                        case .loading, .error:
+                            break
+                        }
                     } label: {
                         Image("fa-chevron-down")
                     }
-                    .disabled(presenter.state.detail.galleryPost == nil)
+                    .disabled({
+                        switch onEnum(of: presenter.state.detail) {
+                        case .success:
+                            return false
+                        case .loading, .error:
+                            return true
+                        }
+                    }())
                 }
             }
         }
@@ -78,17 +99,16 @@ struct GalleryDetailScreen: View {
             LazyVStack(spacing: 2) {
                 GalleryImagesView(
                     detail: detail,
-                    openMedia: { image in navigateToMedia(post: detail.post, media: image) }
+                    openMedia: { image in navigateToMedia(detail: detail, media: image) }
                 )
                 .padding(.bottom, 10)
 
                 GalleryAfterImagesContent(
-                    post: detail.post,
+                    detail: detail,
                     comments: presenter.state.comments,
                     recommendations: presenter.state.recommendations,
                     commentLimit: 3,
                     onProfile: navigateToProfile,
-                    onAction: { presenter.state.performAction(action: $0) },
                     onViewMoreComments: {
                         onNavigate(.galleryComments(accountType, statusKey))
                     },
@@ -98,20 +118,16 @@ struct GalleryDetailScreen: View {
             }
             .padding(.bottom, 24)
         }
-        .refreshable {
-            presenter.state.refresh()
-        }
         .sheet(isPresented: $showInfoSheet) {
             NavigationStack {
                 ScrollView {
                     LazyVStack(spacing: 2) {
                         GalleryAfterImagesContent(
-                            post: detail.post,
+                            detail: detail,
                             comments: presenter.state.comments,
                             recommendations: presenter.state.recommendations,
                             commentLimit: 3,
                             onProfile: navigateToProfile,
-                            onAction: { presenter.state.performAction(action: $0) },
                             onViewMoreComments: {
                                 showInfoSheet = false
                                 onNavigate(.galleryComments(accountType, statusKey))
@@ -134,7 +150,7 @@ struct GalleryDetailScreen: View {
             HStack(spacing: 0) {
                 GalleryBigScreenImagePane(
                     detail: detail,
-                    onOpenMedia: { image in navigateToMedia(post: detail.post, media: image) }
+                    onOpenMedia: { image in navigateToMedia(detail: detail, media: image) }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -142,19 +158,15 @@ struct GalleryDetailScreen: View {
 
                 GallerySideBar(
                     selectedTab: $selectedTab,
-                    post: detail.post,
+                    detail: detail,
                     comments: presenter.state.comments,
                     recommendations: presenter.state.recommendations,
                     onProfile: navigateToProfile,
-                    onAction: { presenter.state.performAction(action: $0) }
                 )
                 .frame(width: sidebarWidth(for: proxy.size.width))
                 .frame(maxHeight: .infinity)
                 .background(Color(.systemGroupedBackground))
             }
-        }
-        .refreshable {
-            presenter.state.refresh()
         }
     }
 
@@ -169,11 +181,20 @@ struct GalleryDetailScreen: View {
         }
     }
 
+    private func navigateToShare(_ detail: GalleryDetail) {
+        onNavigate(.statusShareSheet(detail.accountType, detail.statusKey, detail.url, nil, nil))
+    }
+
+    private func navigateToMedia(detail: GalleryDetail, media: UiMedia) {
+        let medias = detail.images.map { $0 as any UiMedia }
+        let index = medias.firstIndex { $0.url == media.url } ?? 0
+        onNavigate(.mediaRaw(medias, index, media.mediaPreviewURL))
+    }
+
     private func navigateToMedia(post: UiTimelineV2.Post, media: UiMedia) {
-        let route = post.statusMediaRoute(media: media)
-        if let url = URL(string: route.toUri()) {
-            openURL(url)
-        }
+        let medias = post.galleryImagesForRawMedia.map { $0 as any UiMedia }
+        let index = medias.firstIndex { $0.url == media.url } ?? 0
+        onNavigate(.mediaRaw(medias, index, media.mediaPreviewURL))
     }
 }
 
@@ -198,7 +219,7 @@ private struct GalleryImagesView: View {
     let openMedia: (UiMediaImage) -> Void
 
     private var images: [UiMediaImage] {
-        detail.post.galleryImages
+        detail.images.map { $0 }
     }
 
     var body: some View {
@@ -226,11 +247,9 @@ private struct GalleryImagesView: View {
             LazyVStack(spacing: 0) {
                 ForEach(0..<images.count, id: \.self) { index in
                     let image = images[index]
-                    NetworkImage(data: image.url, customHeader: image.customHeaders)
-                        .scaledToFill()
+                    NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
                         .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
                         .frame(maxWidth: .infinity)
-                        .clipped()
                         .contentShape(Rectangle())
                         .onTapGesture {
                             openMedia(image)
@@ -246,7 +265,7 @@ private struct GalleryBigScreenImagePane: View {
     let onOpenMedia: (UiMediaImage) -> Void
 
     private var images: [UiMediaImage] {
-        detail.post.galleryImages
+        detail.images.map { $0 }
     }
 
     var body: some View {
@@ -278,11 +297,9 @@ private struct GalleryBigScreenImagePane: View {
                         LazyVStack(spacing: 0) {
                             ForEach(0..<images.count, id: \.self) { index in
                                 let image = images[index]
-                                NetworkImage(data: image.url, customHeader: image.customHeaders)
-                                    .scaledToFill()
+                                NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
                                     .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
                                     .frame(maxWidth: .infinity)
-                                    .clipped()
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         onOpenMedia(image)
@@ -300,19 +317,18 @@ private struct GalleryBigScreenImagePane: View {
 }
 
 private struct GalleryAfterImagesContent: View {
-    let post: UiTimelineV2.Post
+    let detail: GalleryDetail
     let comments: PagingState<UiTimelineV2>
     let recommendations: PagingState<UiTimelineV2>
     let commentLimit: Int?
     let onProfile: (UiProfile) -> Void
-    let onAction: (ActionMenu.Item) -> Void
     let onViewMoreComments: () -> Void
     let onOpenMedia: (UiTimelineV2.Post, UiMedia) -> Void
 
     var body: some View {
         VStack(spacing: 2) {
-            GalleryAuthorCard(post: post, onProfile: onProfile, onAction: onAction)
-            GalleryInfoCard(post: post, onAction: onAction)
+            GalleryAuthorCard(detail: detail, onProfile: onProfile)
+            GalleryInfoCard(detail: detail)
         }
 
         GalleryCommentsPreview(
@@ -331,14 +347,14 @@ private struct GalleryAfterImagesContent: View {
 }
 
 private struct GalleryAuthorCard: View {
-    let post: UiTimelineV2.Post
+    @Environment(\.openURL) private var openURL
+    let detail: GalleryDetail
     let onProfile: (UiProfile) -> Void
-    let onAction: (ActionMenu.Item) -> Void
 
     var body: some View {
         ListCardView(index: 0, totalCount: 2) {
             HStack(spacing: 12) {
-                if let user = post.user {
+                if let user = detail.author {
                     AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                         .frame(width: 44, height: 44)
                         .onTapGesture {
@@ -351,27 +367,25 @@ private struct GalleryAuthorCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(post.galleryTitle)
+                    Text(detail.title)
                         .font(.headline)
                         .fontWeight(.semibold)
                         .fixedSize(horizontal: false, vertical: true)
-                    if let user = post.user {
-                        Text(user.handle.canonical)
+                    if let user = detail.author {
+                        RichText(text: user.name)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                 }
                 Spacer(minLength: 8)
-                if let action = post.bookmarkAction {
-                    Button {
-                        onAction(action)
-                    } label: {
-                        StatusActionIcon(icon: action.icon)
-                    }
-                    .foregroundStyle(action.color?.swiftColor ?? .primary)
-                    .buttonStyle(.plain)
+                Button {
+                    detail.onBookmark(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                } label: {
+                    Image(detail.isBookmarked ? "fa-bookmark.fill" : "fa-bookmark")
                 }
+                .foregroundStyle(detail.isBookmarked ? Color.accentColor : Color.secondary)
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
@@ -380,15 +394,14 @@ private struct GalleryAuthorCard: View {
 }
 
 private struct GalleryInfoCard: View {
-    let post: UiTimelineV2.Post
-    let onAction: (ActionMenu.Item) -> Void
+    let detail: GalleryDetail
 
     var body: some View {
         ListCardView(index: 1, totalCount: 2) {
             VStack(alignment: .leading, spacing: 8) {
-                GalleryMetadataRow(post: post, onAction: onAction)
-                if !post.content.isEmpty {
-                    RichText(text: post.content)
+                GalleryMetadataRow(detail: detail)
+                if let content = detail.content {
+                    RichText(text: content)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -400,29 +413,23 @@ private struct GalleryInfoCard: View {
 }
 
 private struct GalleryMetadataRow: View {
-    let post: UiTimelineV2.Post
-    let onAction: (ActionMenu.Item) -> Void
+    let detail: GalleryDetail
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            DateTimeText(data: post.createdAt, fullTime: true)
+            DateTimeText(data: detail.createdAt, fullTime: true)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
-            ForEach(Array(post.countedActions.enumerated()), id: \.offset) { _, action in
-                Button {
-                    onAction(action)
-                } label: {
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        StatusActionIcon(icon: action.icon)
-                        if let count = action.count?.humanized, !count.isEmpty {
-                            Text(count)
-                        }
+            ForEach(Array(detail.matrix.enumerated()), id: \.offset) { _, item in
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    StatusActionIcon(icon: item.icon)
+                    if !item.humanizedCount.isEmpty {
+                        Text(item.humanizedCount)
                     }
-                    .font(.caption)
                 }
-                .foregroundStyle(action.color?.swiftColor ?? .secondary)
-                .buttonStyle(.plain)
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
         }
@@ -594,7 +601,7 @@ private struct GalleryRecommendationTile: View {
                         AvatarView(data: avatar.url, customHeader: avatar.customHeaders)
                             .frame(width: 24, height: 24)
                     }
-                    Text(post.user?.name.raw ?? post.galleryTitle)
+                    Text(post.user?.name.raw ?? post.contentWarning?.raw ?? "")
                         .font(.caption)
                         .lineLimit(1)
                 }
@@ -626,11 +633,10 @@ private struct GalleryRecommendationTile: View {
 
 private struct GallerySideBar: View {
     @Binding var selectedTab: GallerySideTab
-    let post: UiTimelineV2.Post
+    let detail: GalleryDetail
     let comments: PagingState<UiTimelineV2>
     let recommendations: PagingState<UiTimelineV2>
     let onProfile: (UiProfile) -> Void
-    let onAction: (ActionMenu.Item) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -647,8 +653,8 @@ private struct GallerySideBar: View {
             case .info:
                 ScrollView {
                     LazyVStack(spacing: 2) {
-                        GalleryAuthorCard(post: post, onProfile: onProfile, onAction: onAction)
-                        GalleryInfoCard(post: post, onAction: onAction)
+                        GalleryAuthorCard(detail: detail, onProfile: onProfile)
+                        GalleryInfoCard(detail: detail)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
@@ -657,7 +663,7 @@ private struct GallerySideBar: View {
                 TimelinePagingContent(
                     data: comments,
                     detailStatusKey: nil,
-                    key: "gallery_comments_\(post.statusKey.description())",
+                    key: "gallery_comments_\(detail.statusKey.description())",
                     suppressInitialRefreshIndicator: true
                 )
             case .recommend:
@@ -668,30 +674,61 @@ private struct GallerySideBar: View {
 }
 
 private struct GalleryCompactToolbarTitle: View {
-    let post: UiTimelineV2.Post?
+    let detailState: UiState<GalleryDetail>
     let onProfile: (UiProfile) -> Void
 
     var body: some View {
-        HStack(spacing: 10) {
-            if let user = post?.user {
-                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                    .frame(width: 32, height: 32)
-                    .onTapGesture {
-                        onProfile(user)
+        switch onEnum(of: detailState) {
+        case .success(let success):
+            let detail = success.data
+            let user = detail.author
+            HStack(spacing: 10) {
+                if let user {
+                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                        .frame(width: 32, height: 32)
+                        .onTapGesture {
+                            onProfile(user)
+                        }
+                }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(detail.title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
+                    if let user {
+                        RichText(text: user.name)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
+                }
+                .frame(maxWidth: 220, alignment: .leading)
             }
+        case .loading:
+            GalleryCompactToolbarTitleLoading()
+        case .error:
+            EmptyView()
+        }
+    }
+}
+
+private struct GalleryCompactToolbarTitleLoading: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(.placeholder)
+                .frame(width: 32, height: 32)
             VStack(alignment: .leading, spacing: 1) {
-                Text(post?.galleryTitle ?? "")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .lineLimit(1)
-                Text(post?.user?.handle.canonical ?? "")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(.placeholder)
+                    .frame(width: 140, height: 14)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(.placeholder)
+                    .frame(width: 84, height: 10)
             }
             .frame(maxWidth: 220, alignment: .leading)
         }
+        .redacted(reason: .placeholder)
     }
 }
 
@@ -756,86 +793,14 @@ struct GalleryCommentsScreen: View {
     }
 }
 
-private extension UiState where T == GalleryDetail {
-    var galleryPost: UiTimelineV2.Post? {
-        if case .success(let success) = onEnum(of: self) {
-            return success.data.post
-        }
-        return nil
-    }
-}
-
 private extension UiTimelineV2.Post {
-    var galleryImages: [UiMediaImage] {
+    var galleryImagesForRawMedia: [UiMediaImage] {
         images.compactMap { media in
             if case .image(let image) = onEnum(of: media) {
                 return image
             }
             return nil
         }
-    }
-
-    var galleryTitle: String {
-        contentWarning?.raw ?? ""
-    }
-
-    var bookmarkAction: ActionMenu.Item? {
-        for action in actions {
-            if case .item(let item) = onEnum(of: action), item.isBookmarkAction {
-                return item
-            }
-        }
-        return nil
-    }
-
-    var shareAction: ActionMenu.Item? {
-        for action in actions {
-            if case .item(let item) = onEnum(of: action), item.isShareAction {
-                return item
-            }
-        }
-        return nil
-    }
-
-    var countedActions: [ActionMenu.Item] {
-        actions.compactMap { action in
-            guard case .item(let item) = onEnum(of: action), item.count != nil else {
-                return nil
-            }
-            return item
-        }
-    }
-
-    func statusMediaRoute(media: UiMedia) -> DeeplinkRoute.MediaStatusMedia {
-        let mediaIndex = images.firstIndex { $0.url == media.url } ?? 0
-        let preview: String? = switch onEnum(of: media) {
-        case .image(let image): image.previewUrl
-        case .video(let video): video.thumbnailUrl
-        case .gif(let gif): gif.previewUrl
-        case .audio: nil
-        }
-        return DeeplinkRoute.MediaStatusMedia(
-            statusKey: statusKey,
-            accountType: accountType,
-            index: Int32(mediaIndex),
-            preview: preview
-        )
-    }
-}
-
-private extension ActionMenu.Item {
-    var isBookmarkAction: Bool {
-        guard let text, case .localized(let localized) = onEnum(of: text) else {
-            return false
-        }
-        return localized.type == .bookmark || localized.type == .unbookmark
-    }
-
-    var isShareAction: Bool {
-        guard let text, case .localized(let localized) = onEnum(of: text) else {
-            return false
-        }
-        return localized.type == .share
     }
 }
 

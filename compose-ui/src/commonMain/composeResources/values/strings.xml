@@ -529,4 +529,6 @@
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
+    <string name="fanbox_supported_title">Supported posts</string>
+    <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

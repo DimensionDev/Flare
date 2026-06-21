@@ -54,6 +54,8 @@ public enum class UiStrings {
     Following,
     PostsWithReplies,
     Media,
+    FanboxSupported,
+    FanboxRecommendedCreators,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

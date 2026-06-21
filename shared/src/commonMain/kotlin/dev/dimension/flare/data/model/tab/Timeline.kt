@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.presenter.home.SystemHomeMixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -721,10 +722,14 @@ internal class TimelinePresenterFactory(
     private val timelineResolver: TimelineResolver,
 ) {
     fun create(item: UiTimelineTabItem): TimelinePresenter =
-        TimelinePresenter(
-            tabId = item.id,
-            loader = timelineResolver.resolveLoader(item),
-        )
+        if (item.isSystemHomeMixedTimeline) {
+            SystemHomeMixedTimelinePresenter(item.id)
+        } else {
+            TimelinePresenter(
+                tabId = item.id,
+                loader = timelineResolver.resolveLoader(item),
+            )
+        }
 }
 
 internal object MixedTimelineLoaderFactory : KoinComponent {

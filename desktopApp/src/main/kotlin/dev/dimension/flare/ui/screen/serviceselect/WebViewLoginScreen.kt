@@ -6,14 +6,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import io.github.kdroidfilter.webview.web.WebView
 import io.github.kdroidfilter.webview.web.rememberWebViewState
-import io.ktor.http.Url
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun WebViewLoginScreen(
     url: String,
-    callback: (String) -> Boolean,
+    callback: (String?) -> Boolean,
     onBack: () -> Unit,
 ) {
     val state =
@@ -21,16 +20,18 @@ internal fun WebViewLoginScreen(
             desktopWebSettings.incognito = true
         }
     LaunchedEffect(Unit) {
-        val urlData = Url(url)
-        val actualUrl =
-            urlData.protocol.name
-                .plus("://")
-                .plus(urlData.host.removePrefix("m."))
-                .plus("/")
         while (true) {
             delay(2.seconds)
-            val cookies = state.webView?.nativeWebView?.getCookiesForUrl(actualUrl) ?: continue
-            if (callback.invoke(cookies.joinToString("; ") { "${it.name}=${it.value}" })) {
+            val webView = state.webView?.nativeWebView ?: continue
+            val cookies =
+                listOfNotNull(state.lastLoadedUrl, url)
+                    .distinct()
+                    .flatMap { webView.getCookiesForUrl(it) }
+                    .plus(webView.getCookies())
+                    .distinctBy { listOf(it.domain, it.path, it.name) }
+                    .joinToString("; ") { "${it.name}=${it.value}" }
+                    .takeIf { it.isNotBlank() }
+            if (callback.invoke(cookies)) {
                 onBack.invoke()
                 break
             }

@@ -10,8 +10,10 @@ import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
 import dev.dimension.flare.data.datasource.subscription.SubscriptionSourceDetection
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
@@ -335,7 +337,7 @@ internal class LoadRssArticleTool(
         val document =
             dataSource.loadRssArticle(
                 url = url,
-                descriptionHtml = feed?.descriptionHtml?.takeIf { feed.displayMode == RssDisplayMode.DESCRIPTION_ONLY },
+                descriptionHtml = feed?.descriptionHtml?.takeIf { feed.agentRssDisplayMode() == RssDisplayMode.DESCRIPTION_ONLY },
                 descriptionTitle = feed?.title,
             )
         return document.toRssArticleToolText(
@@ -767,7 +769,7 @@ private fun UiTimelineV2.Feed.toSubscriptionFeedToolText(): String =
         appendLine("sourceName: ${source.name}")
         appendLine("sourceIcon: ${source.icon.orEmpty()}")
         appendLine("createdAt: ${createdAt.value}")
-        appendLine("displayMode: ${displayMode.name}")
+        appendLine("displayMode: ${agentRssDisplayMode().name}")
         appendLine("description: ${description.orEmpty().take(MAX_SUBSCRIPTION_ITEM_TEXT_LENGTH)}")
         media?.let { image ->
             appendLine("imageUrl: ${image.url}")
@@ -871,6 +873,33 @@ private fun StringBuilder.appendSubscriptionSaveArgs(
 private fun UiTimelineV2.Feed.agentRssArticleRef(): String = url
 
 private fun UiTimelineV2.Feed.agentRssArticleMarker(): String = "[[rss:${agentRssArticleRef()}]]"
+
+private fun UiTimelineV2.Feed.agentRssDisplayMode(): RssDisplayMode =
+    when (val event = clickEvent) {
+        is ClickEvent.Deeplink -> {
+            when (val route = DeeplinkRoute.parse(event.url)) {
+                is DeeplinkRoute.OpenLinkDirectly -> {
+                    RssDisplayMode.OPEN_IN_BROWSER
+                }
+
+                is DeeplinkRoute.Rss.Detail -> {
+                    if (route.descriptionHtml != null || route.title != null) {
+                        RssDisplayMode.DESCRIPTION_ONLY
+                    } else {
+                        RssDisplayMode.FULL_CONTENT
+                    }
+                }
+
+                else -> {
+                    RssDisplayMode.FULL_CONTENT
+                }
+            }
+        }
+
+        ClickEvent.Noop -> {
+            RssDisplayMode.FULL_CONTENT
+        }
+    }
 
 private fun String.normalizedSubscriptionRef(): String =
     trim()

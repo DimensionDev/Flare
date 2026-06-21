@@ -424,8 +424,8 @@
     <string name="profile_tab_timeline_with_reply">投稿と返信</string>
     <string name="profile_tab_likes">いいね</string>
     <string name="profile_tab_media">メディア</string>
-    <string name="illustrations_title">Illustrations</string>
-    <string name="manga_title">Manga</string>
+    <string name="illustrations_title">イラスト</string>
+    <string name="manga_title">マンガ</string>
     <string name="pixiv_ranking_week_title">今週のランキング</string>
     <string name="pixiv_ranking_month_title">毎月のランキング</string>
     <string name="pixiv_ranking_day_male_title">男性ランキング</string>

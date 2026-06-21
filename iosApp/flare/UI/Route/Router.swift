@@ -116,7 +116,7 @@ struct Router<Root: View>: View {
     
     func isFullScreenCover(route: Route) -> Bool {
         switch route {
-        case .mediaStatusMedia, .mediaImage:
+        case .mediaStatusMedia, .mediaImage, .mediaRaw:
             return true
         default:
             return false

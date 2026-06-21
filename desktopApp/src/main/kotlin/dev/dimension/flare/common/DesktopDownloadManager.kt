@@ -7,6 +7,7 @@ import dev.dimension.flare.media_save_success
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
@@ -30,6 +31,7 @@ internal class DesktopDownloadManager(
         url: String,
         targetFile: File,
         overwrite: Boolean = true,
+        customHeaders: Map<String, String>? = null,
         onProgress: (DownloadProgress) -> Unit = {},
     ) = withContext(Dispatchers.IO) {
         require(url.isNotBlank()) { "url must not be blank" }
@@ -46,13 +48,18 @@ internal class DesktopDownloadManager(
         }
 
         try {
-            client.prepareGet(url).execute { response ->
-                writeResponseToFile(
-                    response = response,
-                    outputFile = tempFile,
-                    onProgress = onProgress,
-                )
-            }
+            client
+                .prepareGet(url) {
+                    customHeaders?.forEach { (key, value) ->
+                        header(key, value)
+                    }
+                }.execute { response ->
+                    writeResponseToFile(
+                        response = response,
+                        outputFile = tempFile,
+                        onProgress = onProgress,
+                    )
+                }
             moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
             inAppNotification.message(Res.string.media_save_success)
         } catch (t: Exception) {

@@ -5,6 +5,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.mapper.blueskyBookmark
 import dev.dimension.flare.ui.model.mapper.blueskyLike
 import dev.dimension.flare.ui.model.mapper.blueskyReblog
+import dev.dimension.flare.ui.model.mapper.fanboxLike
 import dev.dimension.flare.ui.model.mapper.mastodonBookmark
 import dev.dimension.flare.ui.model.mapper.mastodonLike
 import dev.dimension.flare.ui.model.mapper.mastodonRepost
@@ -448,6 +449,26 @@ public sealed interface PostEvent {
                     statusKey = postKey,
                     bookmarked = !bookmarked,
                     count = (count + if (!bookmarked) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
+    }
+
+    @Serializable
+    public sealed interface Fanbox : PostEvent {
+        @Serializable
+        public data class Like(
+            public override val postKey: MicroBlogKey,
+            public val liked: Boolean,
+            public val count: Long = 0,
+            public val accountKey: MicroBlogKey,
+        ) : Fanbox,
+            UpdatePostActionMenuEvent {
+            public override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.fanboxLike(
+                    statusKey = postKey,
+                    liked = true,
+                    count = (count + if (!liked) 1 else 0).coerceAtLeast(0),
                     accountKey = accountKey,
                 )
         }

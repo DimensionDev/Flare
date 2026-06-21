@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.datasource.pixiv
 
-import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -152,34 +151,6 @@ internal class PixivStatusDetailLoader(
 
         return PagingResult(
             data = listOf(response.illust.toUiTimeline(accountKey)),
-            endOfPaginationReached = true,
-        )
-    }
-}
-
-internal class PixivGalleryDetailLoader(
-    private val service: PixivService,
-    private val accountKey: MicroBlogKey,
-    private val statusKey: MicroBlogKey,
-) : CacheableRemoteLoader<GalleryDetail> {
-    override val pagingKey: String = "pixiv_gallery_detail_${statusKey}_$accountKey"
-
-    override suspend fun load(
-        pageSize: Int,
-        request: PagingRequest,
-    ): PagingResult<GalleryDetail> {
-        if (request != PagingRequest.Refresh) {
-            return PagingResult(endOfPaginationReached = true)
-        }
-
-        val illustId = statusKey.id.toLongOrNull() ?: return PagingResult(endOfPaginationReached = true)
-        val response =
-            service.illustDetail(
-                illustId = illustId,
-            )
-
-        return PagingResult(
-            data = listOf(response.illust.toGalleryDetail(accountKey)),
             endOfPaginationReached = true,
         )
     }

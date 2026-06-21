@@ -51,6 +51,7 @@ import dev.dimension.flare.ui.route.Route.RssTimeline
 import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
+import dev.dimension.flare.ui.screen.article.ArticleScreen
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.screen.compose.DraftBoxScreen
 import dev.dimension.flare.ui.screen.dm.DmConversationScreen
@@ -106,7 +107,6 @@ import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 import dev.dimension.flare.ui.screen.status.action.StatusInsightDialog
 import dev.dimension.flare.ui.screen.status.action.StatusShareSheet
-import dev.dimension.flare.ui.screen.xqt.TwitterArticleScreen
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
@@ -247,12 +247,11 @@ internal fun Router(
                         onDismissRequest = onBack,
                     )
                 }
-                entry<Route.TwitterArticle> { args ->
-                    TwitterArticleScreen(
+                entry<Route.Article> { args ->
+                    ArticleScreen(
                         accountType = args.accountType,
-                        tweetId = args.tweetId,
-                        articleId = args.articleId,
-                        onBack = onBack,
+                        articleKey = args.articleKey,
+                        navigate = navigate,
                     )
                 }
                 entry<Route.RssDetail> { args ->

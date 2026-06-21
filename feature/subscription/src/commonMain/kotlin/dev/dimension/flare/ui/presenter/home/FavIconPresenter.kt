@@ -19,10 +19,17 @@ public class FavIconPresenter(
 
     private val flow by lazy {
         MemCacheable(cacheKey) {
-            FaviconService.fetchIcon("https://$host") ?: throw IllegalStateException("Favicon not found")
+            FaviconService.fetchIcon(host.toFavIconFetchUrl()) ?: throw IllegalStateException("Favicon not found")
         }
     }
 
     @Composable
     override fun body(): UiState<String> = flow.collectAsState().toUi()
 }
+
+internal fun String.toFavIconFetchUrl(): String =
+    if (startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true)) {
+        this
+    } else {
+        "https://$this"
+    }

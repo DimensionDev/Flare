@@ -10,308 +10,56 @@ import Combine
 import UIKit
 
 struct StatusMediaScreen: View {
-    @Environment(\.dismiss) var dismiss
     let accountType: AccountType
     let statusKey: MicroBlogKey
     let initialIndex: Int
     let preview: String?
     @StateObject private var presenter: KotlinPresenter<StatusState>
     @State private var medias: [any UiMedia] = []
-    @State private var selectedIndex: Int = 0
-    @State private var isPlaying: Bool = true
-    @State private var videoState: VideoState = .idle
-    @State private var currentTime: CMTime = .zero
-    @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
-    @State var showData = true
-    @State private var protectInitialPagerSelection: Bool = false
-    @State private var shareFileURL: URL?
-    @State private var shareFileSourceURL: String?
-    @State private var holdsPlaybackSession: Bool = false
-    @State private var playbackRate: Float = 1
-    @State private var isLandscapeViewing: Bool = false
 
     var body: some View {
-        ZStack {
-            if medias.isEmpty {
-                if let preview {
-                    AdaptiveKFImage(data: preview, placeholder: nil)
-                } else {
-                    ProgressView()
-                }
-            } else {
-                LazyPager(data: medias, page: pagerSelectedIndex) { media in
-                    switch onEnum(of: media) {
-                    case .image(let image):
-                        AdaptiveKFImage(data: image.url, placeholder: image.previewUrl, customHeader: image.customHeaders)
-                    case .video(let video):
-                        if selectedIndex == medias.firstIndex(where: { $0.url == video.url }) {
-                            StatusMediaVideoView(
-                                data: video,
-                                play: $isPlaying,
-                                videoState: $videoState,
-                                time: $currentTime,
-                                playbackRate: $playbackRate
-                            )
-                        } else {
-                            NetworkImage(data: video.thumbnailUrl, customHeader: video.customHeaders)
-                                .scaledToFit()
-                        }
-                    case .gif(let gif):
-                        NetworkImage(data: gif.url, placeholder: gif.previewUrl, customHeader: gif.customHeaders)
-                            .scaledToFit()
-                    case .audio:
-                        EmptyView()
-                    }
-                }
-                .onDismiss(backgroundOpacity: $opacity) {
-                    dismiss()
-                }
-                .onTap {
-                    withAnimation {
-                        showData = !showData
-                    }
-                }
-                .onDoubleTap {}
-                .onDrag {
-                    protectInitialPagerSelection = false
-                }
-                .zoomable { item in
-                    if isVideoMedia(item) {
-                        return .disabled
-                    } else {
-                        return .custom(min: 1, max: 5, doubleTap: .scale(2))
-                    }
-                }
-                .settings { config in
-                    config.preloadAmount = 99
-                }
-                .overlay(alignment: .bottom) {
-                    if shouldShowStatusOverlay {
-                        if #available(iOS 26.0, *) {
-                            statusView
-                                .padding()
-                                .backport
-                                .glassEffect(.tinted(.init(.systemGroupedBackground).opacity(0.5)), in: .rect(corners: .concentric, isUniform: true), fallbackBackground: .regularMaterial)
-                                .padding()
-                                .transition(.move(edge: .bottom).combined(with: .opacity))
-                        } else {
-                            statusView
-                                .padding()
-                                .safeAreaPadding(.bottom)
-                                .backport
-                                .glassEffect(.regular, in: .rect(), fallbackBackground: .regularMaterial)
-                                .transition(.move(edge: .bottom).combined(with: .opacity))
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task(id: selectedImageURL) {
-            await loadShareFile(url: selectedImageURL, customHeaders: selectedImageCustomHeaders)
-        }
-        .onChange(of: selectedIndex) { oldValue, newValue in
-            isPlaying = true
-            videoState = .idle
-            currentTime = .zero
-            playbackRate = 1
-        }
-        .onChange(of: isVideoActivelyPlaying) { _, newValue in
-            updatePlaybackSession(playing: newValue)
-        }
-        .onChange(of: isLandscapeViewing) { _, newValue in
-            MediaOrientationController.setLandscape(newValue)
-        }
-        .onDisappear {
-            if holdsPlaybackSession {
-                AudioSessionManager.shared.endPlayback()
-                holdsPlaybackSession = false
-            }
-            if isLandscapeViewing {
-                MediaOrientationController.setLandscape(false)
-            }
-        }
-        .onChange(of: presenter.state.status) { oldValue, newValue in
-            if medias.isEmpty,
-               case .success(let success) = onEnum(of: newValue),
-               let content = success.data as? UiTimelineV2.Post {
-                let contentMedias = Array(content.images)
-                let initialSelection = clampedIndex(initialIndex, count: contentMedias.count)
-                selectedIndex = initialSelection
-                protectInitialPagerSelection = initialSelection > 0
-                withAnimation {
-                    medias = contentMedias
-                }
-            }
-        }
-        .background(.black.opacity(opacity))
-        .background(ClearFullScreenBackground())
-        .ignoresSafeArea()
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image("fa-xmark")
-                }
-            }
-            if !medias.isEmpty {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isLandscapeViewing.toggle()
-                        }
-                    } label: {
-                        Image(systemName: isLandscapeViewing ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
-                    }
-                    .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
-                }
-                if let selectedMedia, case .image = onEnum(of: selectedMedia) {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            MediaSaver.shared.saveImage(url: selectedMedia.url, customHeaders: selectedMedia.customHeaders)
-                        } label: {
-                            Image("fa-download")
-                        }
-                    }
-                    ToolbarItem(placement: .primaryAction) {
-                        if let shareFileURL, shareFileSourceURL == selectedMedia.url {
-                            ShareLink(item: shareFileURL) {
-                                Image("fa-share-nodes")
-                            }
-                            .accessibilityLabel("Share image")
-                        } else {
-                            Button {
-                            } label: {
-                                Image("fa-share-nodes")
-                            }
-                            .disabled(true)
-                            .accessibilityLabel("Share image")
-                        }
-                    }
-                } else if let selectedMedia, case .video(let video) = onEnum(of: selectedMedia) {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            MediaSaver.shared.saveVideo(url: video.url, customHeaders: video.customHeaders)
-                        } label: {
-                            Image("fa-download")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private var pagerSelectedIndex: Binding<Int> {
-        Binding(
-            get: {
-                selectedIndex
-            },
-            set: { newValue in
-                let nextIndex = clampedIndex(newValue, count: medias.count)
-                if protectInitialPagerSelection,
-                   selectedIndex > 0,
-                   nextIndex < selectedIndex {
-                    return
-                }
-                protectInitialPagerSelection = false
-                selectedIndex = nextIndex
-            }
-        )
-    }
-
-    private var selectedMedia: (any UiMedia)? {
-        guard medias.indices.contains(selectedIndex) else {
-            return nil
-        }
-        return medias[selectedIndex]
-    }
-
-    private var selectedImageURL: String? {
-        guard let selectedMedia else {
-            return nil
-        }
-
-        switch onEnum(of: selectedMedia) {
-        case .image(let image):
-            return image.url
-        case .video, .gif, .audio:
-            return nil
-        }
-    }
-
-    private var selectedImageCustomHeaders: [String: String]? {
-        guard let selectedMedia else {
-            return nil
-        }
-        return selectedMedia.customHeaders
-    }
-
-    private var isVideoActivelyPlaying: Bool {
-        if case .playing = videoState { return true }
-        return false
-    }
-
-    private var selectedMediaIsVideo: Bool {
-        guard let selectedMedia else { return false }
-        return isVideoMedia(selectedMedia)
-    }
-
-    private var shouldShowStatusOverlay: Bool {
-        if selectedMediaIsVideo {
-            return showData || playbackRate > 1
-        }
-        return showData && !isLandscapeViewing
-    }
-
-    private func isVideoMedia(_ media: any UiMedia) -> Bool {
-        if case .video = onEnum(of: media) {
-            return true
-        }
-        return false
-    }
-
-    private func updatePlaybackSession(playing: Bool) {
-        if playing, !holdsPlaybackSession {
-            AudioSessionManager.shared.beginPlayback()
-            holdsPlaybackSession = true
-        } else if !playing, holdsPlaybackSession {
-            AudioSessionManager.shared.endPlayback()
-            holdsPlaybackSession = false
-        }
-    }
-
-    private func clampedIndex(_ index: Int, count: Int) -> Int {
-        guard count > 0 else {
-            return 0
-        }
-        return min(max(index, 0), count - 1)
-    }
-
-    private func loadShareFile(url: String?, customHeaders: [String: String]?) async {
-        shareFileURL = nil
-        shareFileSourceURL = url
-
-        guard let url else {
-            return
-        }
-
-        do {
-            let fileURL = try await OriginalImageShareFile.make(
-                url: url,
-                customHeaders: customHeaders,
+        MediaViewerScreen(
+            medias: medias,
+            initialIndex: initialIndex,
+            preview: preview,
+            shareContext: MediaViewerShareContext(
                 statusKey: statusKey.description(),
                 userHandle: statusUserHandle
-            )
-            guard !Task.isCancelled, shareFileSourceURL == url else {
-                return
+            ),
+            showsSupplementaryOverlay: true
+        ) { _ in
+            StateView(state: presenter.state.status) { timeline in
+                if let content = timeline as? UiTimelineV2.Post {
+                    StatusView(
+                        data: content,
+                        isQuote: true,
+                        showMedia: false,
+                        maxLine: 3,
+                        showExpandTextButton: false,
+                        showParents: false
+                    )
+                }
             }
-            shareFileURL = fileURL
-        } catch {
-            guard !Task.isCancelled, shareFileSourceURL == url else {
-                return
+        }
+        .onAppear {
+            syncMediasIfNeeded(animated: false)
+        }
+        .onChange(of: presenter.state.status) { oldValue, newValue in
+            syncMediasIfNeeded(animated: true)
+        }
+    }
+
+    private func syncMediasIfNeeded(animated: Bool) {
+        if medias.isEmpty,
+           case .success(let success) = onEnum(of: presenter.state.status),
+           let content = success.data as? UiTimelineV2.Post {
+            if animated {
+                withAnimation {
+                    medias = Array(content.images)
+                }
+            } else {
+                medias = Array(content.images)
             }
-            shareFileURL = nil
         }
     }
 
@@ -321,35 +69,6 @@ struct StatusMediaScreen: View {
             return content.user?.handle.canonical ?? "unknown"
         }
         return "unknown"
-    }
-    
-    var statusView: some View {
-        VStack(
-            spacing: 8,
-        ) {
-            if showData, !isLandscapeViewing, medias.count > 1 {
-                LazyPagerIndicator(count: medias.count, page: $selectedIndex)
-            }
-            
-            if let selectedMedia {
-                if case .video = onEnum(of: selectedMedia) {
-                    VideoControlView(
-                        isPlaying: $isPlaying,
-                        currentTime: $currentTime,
-                        videoState: videoState,
-                        playbackRate: playbackRate
-                    )
-                }
-            }
-            
-            if showData, !isLandscapeViewing {
-                StateView(state: presenter.state.status) { timeline in
-                    if let content = timeline as? UiTimelineV2.Post {
-                        StatusView(data: content, isQuote: true, showMedia: false, maxLine: 3, showExpandTextButton: false, showParents: false)
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -507,8 +226,6 @@ extension StatusMediaScreen {
         self.statusKey = statusKey
         self.initialIndex = initialIndex
         self.preview = preview
-        self._selectedIndex = .init(initialValue: max(0, initialIndex))
-        self._protectInitialPagerSelection = .init(initialValue: initialIndex > 0)
         self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
     }
 }

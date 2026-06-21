@@ -144,7 +144,9 @@ internal fun StatusShareSheet(
     var previewContentHeightPx by remember { mutableIntStateOf(0) }
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
     val state by producePresenter("status_share_sheet_${statusKey}_$shareUrl") {
-        StatusPresenter(accountType = accountType, statusKey = statusKey).invoke()
+        remember(accountType, statusKey) {
+            StatusPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
     }
     val status = state.status.takeSuccess()
     val shareCaptureWidthPx = with(density) { ShareCaptureWidth.roundToPx() }

@@ -290,6 +290,10 @@ struct StatusView: View {
                     Image("fa-pixiv")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                case .fanbox:
+                    Image("fa-pixiv")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             if !isDetail {

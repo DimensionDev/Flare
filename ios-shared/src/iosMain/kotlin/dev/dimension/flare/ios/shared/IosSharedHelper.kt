@@ -5,6 +5,7 @@ import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.SwiftOnDeviceAI
 import dev.dimension.flare.data.platform.AllRssTimelineLoaderFactory
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
+import dev.dimension.flare.data.platform.FanboxPlatformSpec
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
@@ -63,6 +64,7 @@ internal fun runtimeData(allRssTimelineLoaderFactory: AllRssTimelineLoaderFactor
                 MastodonPlatformSpec,
                 MisskeyPlatformSpec,
                 BlueskyPlatformSpec,
+                FanboxPlatformSpec,
                 PixivPlatformSpec,
                 XqtPlatformSpec,
                 VvoPlatformSpec,

@@ -37,7 +37,9 @@ fun AppContainer(afterInit: () -> Unit) {
 @Composable
 fun FlareApp(content: @Composable () -> Unit) {
     BindAmberSignerLauncher()
-    val state by producePresenter("env") { EnvironmentSettingsPresenter().invoke() }
+    val state by producePresenter("env") {
+        remember { EnvironmentSettingsPresenter() }.invoke()
+    }
     val globalAppearance = state.globalAppearance.takeSuccessOr(GlobalAppearance.Default)
     val timelineAppearance = state.timelineAppearance.takeSuccessOr(TimelineAppearance.Default)
     val originalUriHandler = LocalUriHandler.current

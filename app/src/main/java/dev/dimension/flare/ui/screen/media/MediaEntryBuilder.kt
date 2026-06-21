@@ -28,6 +28,29 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
             previewUrl = args.previewUrl,
             customHeaders = args.customHeaders,
             onDismiss = onBack,
+            toAltText = { media ->
+                media.description?.let { navigate(Route.Status.AltText(it)) }
+            },
+        )
+    }
+
+    entry<Route.Media.RawMedia>(
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false,
+            )
+        )
+    ) { args ->
+        RawMediaScreen(
+            medias = args.medias,
+            index = args.index,
+            preview = args.preview,
+            onDismiss = onBack,
+            toAltText = { media ->
+                media.description?.let { navigate(Route.Status.AltText(it)) }
+            },
+            uriHandler = uriHandler,
         )
     }
 

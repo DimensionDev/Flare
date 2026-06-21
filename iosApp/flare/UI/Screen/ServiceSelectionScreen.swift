@@ -280,6 +280,8 @@ struct ServiceSelectionScreen: View {
             return "Weibo"
         case .pixiv:
             return "Pixiv"
+        case .fanbox:
+            return "FANBOX"
         }
     }
 }

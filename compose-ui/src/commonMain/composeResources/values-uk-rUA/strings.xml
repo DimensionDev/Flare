@@ -417,6 +417,6 @@
     <string name="pixiv_ranking_week_rookie_title">Рейтинг Нових Очків</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="illustrations_title">Ілюстрації</string>
-    <string name="manga_title">Manga</string>
+    <string name="manga_title">Манґа</string>
     <string name="app_name" translatable="false">Flare</string>
 </resources>

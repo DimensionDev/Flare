@@ -45,6 +45,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
@@ -989,7 +990,6 @@ internal class AgentToolsTest {
                     url = "https://example.com/article",
                     title = "Article title",
                     descriptionHtml = "<p>RSS description</p>",
-                    displayMode = RssDisplayMode.DESCRIPTION_ONLY,
                 )
             val dataSource =
                 StubSubscriptionDataSource(
@@ -1356,7 +1356,6 @@ private fun createFeed(
     url: String,
     title: String,
     descriptionHtml: String?,
-    displayMode: RssDisplayMode,
 ): UiTimelineV2.Feed =
     UiTimelineV2.Feed(
         title = title,
@@ -1365,9 +1364,15 @@ private fun createFeed(
         url = url,
         createdAt = Clock.System.now().toUi(),
         source = UiTimelineV2.Feed.Source(name = "Example RSS", icon = null),
-        displayMode = displayMode,
         media = null,
-        clickEvent = ClickEvent.Noop,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Rss.Detail(
+                    url = url,
+                    descriptionHtml = descriptionHtml,
+                    title = title,
+                ),
+            ),
         accountType = AccountType.Guest,
     )
 

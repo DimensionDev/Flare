@@ -129,13 +129,4 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
             navigate = navigate,
         )
     }
-
-    entry<Route.TwitterArticle> { args ->
-        TwitterArticleScreen(
-            accountType = args.accountType,
-            tweetId = args.tweetId,
-            articleId = args.articleId,
-            onBack = onBack
-        )
-    }
 }

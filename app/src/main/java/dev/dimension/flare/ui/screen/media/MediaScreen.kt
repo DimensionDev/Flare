@@ -1,451 +1,92 @@
 package dev.dimension.flare.ui.screen.media
 
-import android.Manifest
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
-import coil3.annotation.ExperimentalCoilApi
-import coil3.imageLoader
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Compress
-import compose.icons.fontawesomeicons.solid.Download
-import compose.icons.fontawesomeicons.solid.Expand
-import compose.icons.fontawesomeicons.solid.ShareNodes
-import compose.icons.fontawesomeicons.solid.Xmark
-import dev.dimension.flare.R
-import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.Glassify
-import dev.dimension.flare.ui.theme.FlareTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
-import me.saket.telephoto.zoomable.rememberZoomableImageState
-import me.saket.telephoto.zoomable.rememberZoomableState
-import moe.tlaster.precompose.molecule.producePresenter
-import moe.tlaster.swiper.Swiper
-import moe.tlaster.swiper.rememberSwiperState
-import org.koin.compose.koinInject
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableMap
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalPermissionsApi::class,
-    ExperimentalFoundationApi::class,
-)
 @Composable
 internal fun MediaScreen(
     uri: String,
     previewUrl: String?,
     customHeaders: Map<String, String>?,
     onDismiss: () -> Unit,
+    toAltText: (UiMedia) -> Unit = {},
 ) {
-    val hapticFeedback = LocalHapticFeedback.current
-    val context = LocalContext.current
-    val permissionState =
-        rememberPermissionState(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        )
-
-    val state by producePresenter(uri) {
-        mediaPresenter(uri, context)
-    }
-    MediaLandscapeEffect(
-        enabled = state.isLandscapeViewing,
-        originalOrientation = state.originalOrientation,
-        setOriginalOrientation = state::setOriginalOrientation,
+    RawMediaScreen(
+        medias =
+            persistentListOf(
+                UiMedia.Image(
+                    url = uri,
+                    previewUrl = previewUrl ?: uri,
+                    description = null,
+                    height = 0f,
+                    width = 0f,
+                    sensitive = false,
+                    customHeaders = customHeaders?.toImmutableMap(),
+                ),
+            ),
+        index = 0,
+        preview = previewUrl,
+        onDismiss = onDismiss,
+        toAltText = toAltText,
+        uriHandler = LocalUriHandler.current,
     )
-    FlareTheme(
-        darkTheme = true,
-    ) {
-        val swiperState =
-            rememberSwiperState(
-                onDismiss = onDismiss,
-            )
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
-                    .alpha(1 - swiperState.progress),
-        ) {
-            Swiper(
-                state = swiperState,
-            ) {
-                val zoomableState =
-                    rememberZoomableImageState(rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f)))
-                ZoomableAsyncImage(
-                    model =
-                        ImageRequest
-                            .Builder(LocalContext.current)
-                            .data(uri)
-                            .placeholderMemoryCacheKey(previewUrl)
-                            .crossfade(1_000)
-                            .let { builder ->
-                                if (customHeaders.isNullOrEmpty()) {
-                                    builder
-                                } else {
-                                    builder.httpHeaders(
-                                        NetworkHeaders
-                                            .Builder()
-                                            .apply {
-                                                customHeaders.forEach { (key, value) ->
-                                                    set(key, value)
-                                                }
-                                            }.build(),
-                                    )
-                                }
-                            }.build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    alignment = Alignment.Center,
-                    state = zoomableState,
-                    onClick = {
-                        state.setShowUi(!state.showUi)
-                    },
-                    onLongClick = {
-                        hapticFeedback.performHapticFeedback(
-                            HapticFeedbackType.LongPress,
-                        )
-                        state.setShowSheet(true)
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxSize(),
-                )
-            }
-            AnimatedVisibility(
-                visible = state.showUi,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .systemBarsPadding()
-                        .align(Alignment.TopCenter),
-                enter = slideInVertically { -it },
-                exit = slideOutVertically { -it },
-            ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .systemBarsPadding()
-                            .padding(horizontal = 4.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Glassify(
-                        onClick = {
-                            onDismiss.invoke()
-                        },
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                    ) {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.Xmark,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
-                    }
-                    Spacer(Modifier.weight(1f))
-                    Glassify(
-                        onClick = {
-                            state.setLandscapeViewing(!state.isLandscapeViewing)
-                        },
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                    ) {
-                        FAIcon(
-                            if (state.isLandscapeViewing) {
-                                FontAwesomeIcons.Solid.Compress
-                            } else {
-                                FontAwesomeIcons.Solid.Expand
-                            },
-                            contentDescription = if (state.isLandscapeViewing) "Exit landscape view" else "Landscape view",
-                        )
-                    }
-                    Glassify(
-                        onClick = {
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                                if (!permissionState.status.isGranted) {
-                                    permissionState.launchPermissionRequest()
-                                } else {
-                                    state.save()
-                                }
-                            } else {
-                                state.save()
-                            }
-                        },
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                    ) {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.Download,
-                            contentDescription = stringResource(id = R.string.media_menu_save),
-                        )
-                    }
-                    Glassify(
-                        onClick = {
-                            state.share()
-                        },
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                    ) {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.ShareNodes,
-                            contentDescription = stringResource(id = R.string.media_menu_share_image),
-                        )
-                    }
-                }
-            }
-        }
-
-        if (state.showSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    state.setShowSheet(false)
-                },
-            ) {
-                ListItem(
-                    headlineContent = {
-                        Text(stringResource(id = R.string.media_menu_save))
-                    },
-                    leadingContent = {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.Download,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .clickable {
-                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                                    if (!permissionState.status.isGranted) {
-                                        permissionState.launchPermissionRequest()
-                                    } else {
-                                        state.save()
-                                    }
-                                } else {
-                                    state.save()
-                                }
-                                state.setShowSheet(false)
-                            },
-                    colors =
-                        ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                        ),
-                )
-                ListItem(
-                    headlineContent = {
-                        Text(stringResource(id = R.string.media_menu_share_image))
-                    },
-                    leadingContent = {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.ShareNodes,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .clickable {
-                                state.share()
-                                state.setShowSheet(false)
-                            },
-                    colors =
-                        ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                        ),
-                )
-            }
-        }
-    }
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
-private fun mediaPresenter(
-    uri: String,
-    context: Context,
-    scope: CoroutineScope = koinInject(),
-) = run {
-    var showUi by remember {
-        mutableStateOf(true)
+internal fun RawMediaScreen(
+    medias: ImmutableList<UiMedia>,
+    index: Int,
+    preview: String?,
+    onDismiss: () -> Unit,
+    toAltText: (UiMedia) -> Unit,
+    uriHandler: UriHandler,
+) {
+    MediaViewerScreen(
+        medias = UiState.Success(medias),
+        initialIndex = index.coerceIn(0, (medias.size - 1).coerceAtLeast(0)),
+        preview = preview,
+        onDismiss = onDismiss,
+        toAltText = toAltText,
+        uriHandler = uriHandler,
+        fileName = { it.rawMediaFileName() },
+    )
+}
+
+private fun UiMedia.rawMediaFileName(): String {
+    val fallbackExtension =
+        when (this) {
+            is UiMedia.Audio -> "mp3"
+            is UiMedia.Gif -> "gif"
+            is UiMedia.Image -> "jpg"
+            is UiMedia.Video -> "mp4"
+        }
+    val path = url.substringBefore("?").substringBefore("#")
+    var fileName = path.substringAfterLast("/").substringAfterLast("\\")
+    val lastAtIndex = fileName.lastIndexOf('@')
+    val lastDotIndex = fileName.lastIndexOf('.')
+    if (lastAtIndex > lastDotIndex && lastAtIndex < fileName.length - 1) {
+        fileName = fileName.substring(0, lastAtIndex) + "." + fileName.substring(lastAtIndex + 1)
     }
-    var showSheet by remember {
-        mutableStateOf(false)
-    }
-    var isLandscapeViewing by remember {
-        mutableStateOf(false)
-    }
-    var originalOrientation: Int? by remember {
-        mutableStateOf<Int?>(null)
-    }
-    object {
-        val showUi = showUi
-
-        val showSheet = showSheet
-        val isLandscapeViewing = isLandscapeViewing
-        val originalOrientation = originalOrientation
-
-        fun setShowSheet(value: Boolean) {
-            showSheet = value
-        }
-
-        fun setShowUi(value: Boolean) {
-            showUi = value
-        }
-
-        fun setLandscapeViewing(value: Boolean) {
-            isLandscapeViewing = value
-        }
-
-        fun setOriginalOrientation(value: Int?) {
-            originalOrientation = value
-        }
-
-        fun save() {
-            scope.launch {
-                context.imageLoader.diskCache?.openSnapshot(uri)?.use {
-                    val byteArray = it.data.toFile().readBytes()
-                    var fileName = uri.substringBefore("?").substringBefore("#").substringAfterLast("/")
-                    val lastAt = fileName.lastIndexOf('@')
-                    val lastDot = fileName.lastIndexOf('.')
-                    if (lastAt > lastDot && lastAt < fileName.length - 1) {
-                        fileName = fileName.substring(0, lastAt) + "." + fileName.substring(lastAt + 1)
-                    }
-                    if (fileName.isEmpty()) {
-                        fileName = "image"
-                    }
-                    if (!fileName.contains(".")) {
-                        val extension =
-                            android.webkit.MimeTypeMap
-                                .getSingleton()
-                                .getExtensionFromMimeType(getMimeType(byteArray)) ?: "jpg"
-                        fileName = "$fileName.$extension"
-                    }
-                    saveByteArrayToDownloads(context, byteArray, fileName)
-                }
-                withContext(Dispatchers.Main) {
-                    Toast
-                        .makeText(
-                            context,
-                            context.getString(R.string.media_save_success),
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                }
-            }
-        }
-
-        fun share() {
-            scope.launch {
-                context.imageLoader.diskCache?.openSnapshot(uri)?.use {
-                    val originFile = it.data.toFile()
-                    var fileName = uri.substringBefore("?").substringBefore("#").substringAfterLast("/")
-                    val lastAt = fileName.lastIndexOf('@')
-                    val lastDot = fileName.lastIndexOf('.')
-                    if (lastAt > lastDot && lastAt < fileName.length - 1) {
-                        fileName = fileName.substring(0, lastAt) + "." + fileName.substring(lastAt + 1)
-                    }
-                    if (fileName.isEmpty()) {
-                        fileName = "image"
-                    }
-                    if (!fileName.contains(".")) {
-                        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                        BitmapFactory.decodeFile(originFile.absolutePath, options)
-                        val extension =
-                            android.webkit.MimeTypeMap
-                                .getSingleton()
-                                .getExtensionFromMimeType(options.outMimeType) ?: "jpg"
-                        fileName = "$fileName.$extension"
-                    }
-                    val targetFile =
-                        File(
-                            context.cacheDir,
-                            fileName,
-                        )
-                    originFile.copyTo(targetFile, overwrite = true)
-                    val uri =
-                        FileProvider.getUriForFile(
-                            context,
-                            context.packageName + ".provider",
-                            targetFile,
-                        )
-                    val intent =
-                        Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            setDataAndType(
-                                uri,
-                                "image/*",
-                            )
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                    context.startActivity(
-                        Intent.createChooser(
-                            intent,
-                            context.getString(R.string.media_menu_share_image),
-                        ),
-                    )
-                }
-            }
-        }
+    fileName = fileName.ifBlank { "media" }.replace(Regex("[^A-Za-z0-9._-]"), "_")
+    return if (fileName.contains(".")) {
+        fileName
+    } else {
+        "$fileName.$fallbackExtension"
     }
 }
 

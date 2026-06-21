@@ -956,6 +956,8 @@ private extension UiProfile {
             return .nostr
         case .pixiv:
             return .pixiv
+        case .fanbox:
+            return .fanbox
         case .xQt:
             return .x
         case .vvo:

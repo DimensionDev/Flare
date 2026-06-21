@@ -460,6 +460,9 @@
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_error">Failed to summarize</string>
     <string name="rss_detail_copy_link">Copy link</string>
+    <string name="article_content_gate_subscription_title">Support required</string>
+    <string name="article_content_gate_subscription_description">This article is only available to supporters. Open it in the browser to support the creator and read the full content.</string>
+    <string name="article_content_gate_subscription_description_with_fee">This article is only available to supporters from ¥%1$d. Open it in the browser to support the creator and read the full content.</string>
     <string name="mastodon_available_timelines">Available timelines</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>
@@ -639,4 +642,6 @@
     <string name="agent_ui_select_followers_user">Select a user to view their followers.</string>
     <string name="agent_ui_select_profile_tabs_user">Select a user to view profile tabs.</string>
     <string name="agent_ui_status_insight_user_placeholder">You can also enter a user link, handle, or userKey…</string>
+    <string name="fanbox_supported_title">Supported posts</string>
+    <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

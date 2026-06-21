@@ -218,10 +218,9 @@ internal sealed interface Route : NavKey {
         val title: String? = null,
     ) : ScreenRoute
 
-    data class TwitterArticle(
+    data class Article(
         val accountType: AccountType,
-        val tweetId: String,
-        val articleId: String? = null,
+        val articleKey: MicroBlogKey,
     ) : ScreenRoute
 
     data class DmList(
@@ -425,11 +424,10 @@ internal sealed interface Route : NavKey {
                     RssDetail(url = deeplinkRoute.url, descriptionHtml = deeplinkRoute.descriptionHtml, title = deeplinkRoute.title)
                 }
 
-                is DeeplinkRoute.TwitterArticle -> {
-                    TwitterArticle(
+                is DeeplinkRoute.Article -> {
+                    Article(
                         accountType = deeplinkRoute.accountType,
-                        tweetId = deeplinkRoute.tweetId,
-                        articleId = deeplinkRoute.articleId,
+                        articleKey = deeplinkRoute.articleKey,
                     )
                 }
 

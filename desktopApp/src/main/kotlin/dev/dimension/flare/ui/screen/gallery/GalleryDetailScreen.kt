@@ -36,23 +36,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import dev.dimension.flare.LocalWindowPadding
-import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.model.TimelineDisplayMode
@@ -66,14 +61,18 @@ import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.GalleryTimelineItem
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.component.status.appendStateUI
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.component.toImageVector
+import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.onError
@@ -94,6 +93,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 private val GalleryGridSpacing = 8.dp
 private val CompactTimelineSpacing = 2.dp
+private val CompactRecommendationBottomSpacing = GalleryGridSpacing - CompactTimelineSpacing
 private val SideBarWidth = 380.dp
 
 @Composable
@@ -103,7 +103,9 @@ internal fun GalleryDetailScreen(
     navigate: (Route) -> Unit,
 ) {
     val state by producePresenter("desktop_gallery_detail_$accountType-$statusKey") {
-        GalleryDetailPresenter(accountType = accountType, statusKey = statusKey).invoke()
+        remember(accountType, statusKey) {
+            GalleryDetailPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
     }
     GalleryCardTimeline {
         state.detail
@@ -115,7 +117,6 @@ internal fun GalleryDetailScreen(
                             comments = state.comments,
                             recommendations = state.recommendations,
                             navigate = navigate,
-                            onAction = state::performAction,
                         )
                     } else {
                         BigScreenGalleryContent(
@@ -123,7 +124,6 @@ internal fun GalleryDetailScreen(
                             comments = state.comments,
                             recommendations = state.recommendations,
                             navigate = navigate,
-                            onAction = state::performAction,
                         )
                     }
                 }
@@ -132,7 +132,7 @@ internal fun GalleryDetailScreen(
             }.onError { error ->
                 ErrorContent(
                     error = error,
-                    onRetry = state::refresh,
+                    onRetry = {},
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -145,10 +145,11 @@ internal fun GalleryCommentsScreen(
     accountType: AccountType,
 ) {
     val state by producePresenter("desktop_gallery_comments_$accountType-$statusKey") {
-        GalleryDetailPresenter(accountType = accountType, statusKey = statusKey).invoke()
+        remember(accountType, statusKey) {
+            GalleryDetailPresenter(accountType = accountType, statusKey = statusKey)
+        }.invoke()
     }
     val listState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(listState, onRefresh = state::refresh)
     GalleryCardTimeline {
         Box(Modifier.fillMaxSize()) {
             FlareScrollBar(listState) {
@@ -190,7 +191,6 @@ private fun CompactGalleryContent(
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
 ) {
     val gridState = rememberLazyStaggeredGridState()
     FlareScrollBar(gridState) {
@@ -208,24 +208,12 @@ private fun CompactGalleryContent(
             verticalItemSpacing = CompactTimelineSpacing,
             modifier = Modifier.fillMaxSize(),
         ) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                GalleryImages(
-                    detail = detail,
-                    onMediaClick = { media ->
-                        navigate(detail.post.statusMediaRoute(media))
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .let {
-                                if (detail.orientation == GalleryOrientation.Horizontal) {
-                                    it.height(520.dp)
-                                } else {
-                                    it
-                                }
-                            },
-                )
-            }
+            galleryImageItems(
+                detail = detail,
+                onMediaClick = { media ->
+                    navigate(detail.statusMediaRoute(media))
+                },
+            )
             item(span = StaggeredGridItemSpan.FullLine) {
                 Spacer(Modifier.height(12.dp))
             }
@@ -234,7 +222,6 @@ private fun CompactGalleryContent(
                 comments = comments,
                 recommendations = recommendations,
                 navigate = navigate,
-                onAction = onAction,
             )
         }
     }
@@ -246,13 +233,12 @@ private fun BigScreenGalleryContent(
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
 ) {
     Row(Modifier.fillMaxSize()) {
         GalleryImagePane(
             detail = detail,
             onMediaClick = { media ->
-                navigate(detail.post.statusMediaRoute(media))
+                navigate(detail.statusMediaRoute(media))
             },
             modifier =
                 Modifier
@@ -260,11 +246,10 @@ private fun BigScreenGalleryContent(
                     .fillMaxHeight(),
         )
         GallerySideBar(
-            post = detail.post,
+            detail = detail,
             comments = comments,
             recommendations = recommendations,
             navigate = navigate,
-            onAction = onAction,
             modifier =
                 Modifier
                     .width(SideBarWidth)
@@ -279,7 +264,7 @@ private fun GalleryImagePane(
     onMediaClick: (UiMedia.Image) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val images = detail.post.galleryImages()
+    val images = detail.images
     Box(
         modifier =
             modifier
@@ -308,7 +293,10 @@ private fun GalleryImagePane(
                             Arrangement.Top
                         },
                 ) {
-                    items(images) { image ->
+                    items(
+                        items = images,
+                        key = { it.url },
+                    ) { image ->
                         GalleryImage(
                             image = image,
                             onClick = { onMediaClick(image) },
@@ -343,56 +331,79 @@ private fun GalleryImagePane(
     }
 }
 
-@Composable
-private fun GalleryImages(
+private fun LazyStaggeredGridScope.galleryImageItems(
     detail: GalleryDetail,
     onMediaClick: (UiMedia.Image) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    val images = detail.post.galleryImages()
+    val images = detail.images
     if (images.isEmpty()) {
-        Box(
-            modifier =
-                modifier
-                    .height(320.dp)
-                    .placeholder(true),
-        )
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(320.dp)
+                        .placeholder(true),
+            )
+        }
         return
     }
     when (detail.orientation) {
         GalleryOrientation.Vertical -> {
-            Column(modifier = modifier) {
-                images.forEach { image ->
-                    GalleryImage(
-                        image = image,
-                        onClick = { onMediaClick(image) },
-                    )
-                }
+            items(
+                items = images,
+                key = { it.url },
+                span = { StaggeredGridItemSpan.FullLine },
+            ) { image ->
+                GalleryImage(
+                    image = image,
+                    onClick = { onMediaClick(image) },
+                    modifier = Modifier.ignoreHorizontalParentPadding(screenHorizontalPadding),
+                )
             }
         }
 
         GalleryOrientation.Horizontal -> {
-            val pagerState =
-                rememberPagerState(
-                    pageCount = { images.size },
-                )
-            HorizontalFlipView(
-                state = pagerState,
-                modifier = modifier,
-            ) { index ->
-                val image = images[index]
-                NetworkImage(
-                    model = image.url,
-                    contentDescription = image.description,
-                    customHeaders = image.customHeaders,
-                    contentScale = ContentScale.Fit,
+            item(span = StaggeredGridItemSpan.FullLine) {
+                GalleryHorizontalImages(
+                    images = images,
+                    onMediaClick = onMediaClick,
                     modifier =
                         Modifier
-                            .fillMaxSize()
-                            .clickable { onMediaClick(image) },
+                            .fillMaxWidth()
+                            .height(520.dp)
+                            .ignoreHorizontalParentPadding(screenHorizontalPadding),
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun GalleryHorizontalImages(
+    images: List<UiMedia.Image>,
+    onMediaClick: (UiMedia.Image) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val pagerState =
+        rememberPagerState(
+            pageCount = { images.size },
+        )
+    HorizontalFlipView(
+        state = pagerState,
+        modifier = modifier,
+    ) { index ->
+        val image = images[index]
+        NetworkImage(
+            model = image.url,
+            contentDescription = image.description,
+            customHeaders = image.customHeaders,
+            contentScale = ContentScale.Fit,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clickable { onMediaClick(image) },
+        )
     }
 }
 
@@ -400,6 +411,7 @@ private fun GalleryImages(
 private fun GalleryImage(
     image: UiMedia.Image,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     NetworkImage(
         model = image.url,
@@ -407,20 +419,19 @@ private fun GalleryImage(
         customHeaders = image.customHeaders,
         contentScale = ContentScale.FillWidth,
         modifier =
-            Modifier
-                .aspectRatio(image.aspectRatio)
+            modifier
                 .fillMaxWidth()
+                .aspectRatio(image.aspectRatio)
                 .clickable(onClick = onClick),
     )
 }
 
 @Composable
 private fun GallerySideBar(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -458,9 +469,8 @@ private fun GallerySideBar(
         when (selectedTab) {
             0 -> {
                 GalleryInfoTab(
-                    post = post,
+                    detail = detail,
                     navigate = navigate,
-                    onAction = onAction,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -519,9 +529,8 @@ private fun GallerySideBarTab(
 
 @Composable
 private fun GalleryInfoTab(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
@@ -533,9 +542,8 @@ private fun GalleryInfoTab(
         ) {
             item {
                 GalleryAuthorCard(
-                    post = post,
+                    detail = detail,
                     navigate = navigate,
-                    onAction = onAction,
                     index = 0,
                     totalCount = 2,
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -543,8 +551,7 @@ private fun GalleryInfoTab(
             }
             item {
                 GalleryDetailInfoCard(
-                    post = post,
-                    onAction = onAction,
+                    detail = detail,
                     index = 1,
                     totalCount = 2,
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -556,14 +563,14 @@ private fun GalleryInfoTab(
 
 @Composable
 private fun GalleryAuthorCard(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
     index: Int = 0,
     totalCount: Int = 0,
     modifier: Modifier = Modifier,
 ) {
-    val user = post.user
+    val user = detail.author
+    val uriHandler = LocalUriHandler.current
     AdaptiveCard(
         modifier = modifier.fillMaxWidth(),
         index = index,
@@ -582,7 +589,7 @@ private fun GalleryAuthorCard(
                 modifier =
                     Modifier.clickable(enabled = user != null) {
                         if (user != null) {
-                            navigate(Route.Profile(post.accountType, user.key))
+                            navigate(Route.Profile(detail.accountType, user.key))
                         }
                     },
             )
@@ -591,35 +598,46 @@ private fun GalleryAuthorCard(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = post.contentWarning?.raw.orEmpty(),
+                    text = detail.title,
                     style = FluentTheme.typography.bodyStrong,
                     maxLines = Int.MAX_VALUE,
                     overflow = TextOverflow.Clip,
                 )
-                Text(
-                    text = user?.handleWithoutAtAndHost.orEmpty(),
-                    style = FluentTheme.typography.caption,
-                    color = FluentTheme.colors.text.text.secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                user?.let {
+                    RichText(
+                        text = it.name,
+                        textStyle = FluentTheme.typography.caption,
+                        color = FluentTheme.colors.text.text.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
-            post.bookmarkAction()?.let { action ->
-                StatusActionButton(
-                    icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.EllipsisVertical,
-                    number = null,
-                    color = action.color.toComposeColor(),
-                    onClicked = { onAction(action) },
-                )
-            }
+            StatusActionButton(
+                icon =
+                    if (detail.isBookmarked) {
+                        UiIcon.Unbookmark.toImageVector()
+                    } else {
+                        UiIcon.Bookmark.toImageVector()
+                    },
+                number = null,
+                color =
+                    if (detail.isBookmarked) {
+                        FluentTheme.colors.text.accent.primary
+                    } else {
+                        FluentTheme.colors.text.text.secondary
+                    },
+                onClicked = {
+                    detail.onBookmark.invoke(ClickContext(uriHandler::openUri))
+                },
+            )
         }
     }
 }
 
 @Composable
 private fun GalleryDetailInfoCard(
-    post: UiTimelineV2.Post,
-    onAction: (ActionMenu.Item) -> Unit,
+    detail: GalleryDetail,
     index: Int = 0,
     totalCount: Int = 0,
     modifier: Modifier = Modifier,
@@ -632,19 +650,15 @@ private fun GalleryDetailInfoCard(
         Column(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
-            GalleryMetadata(
-                post = post,
-                onAction = onAction,
-            )
-            GalleryBody(post = post)
+            GalleryMetadata(detail = detail)
+            GalleryBody(detail = detail)
         }
     }
 }
 
 @Composable
 private fun GalleryMetadata(
-    post: UiTimelineV2.Post,
-    onAction: (ActionMenu.Item) -> Unit,
+    detail: GalleryDetail,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -656,43 +670,38 @@ private fun GalleryMetadata(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         DateTimeText(
-            data = post.createdAt,
+            data = detail.createdAt,
             fullTime = true,
             style = FluentTheme.typography.caption,
             color = FluentTheme.colors.text.text.secondary,
             modifier = Modifier.weight(1f, fill = false),
         )
-        post.countedActions().forEach { action ->
-            GalleryMetadataActionButton(
-                action = action,
-                onAction = onAction,
-            )
+        detail.matrix.forEach { matrix ->
+            GalleryMetadataItem(matrix = matrix)
         }
     }
 }
 
 @Composable
-private fun GalleryMetadataActionButton(
-    action: ActionMenu.Item,
-    onAction: (ActionMenu.Item) -> Unit,
+private fun GalleryMetadataItem(
+    matrix: GalleryDetail.Matrix,
     modifier: Modifier = Modifier,
 ) {
-    val color = action.color.toComposeColor()
+    val color = FluentTheme.colors.text.text.secondary
     Row(
         modifier =
             modifier
-                .clickable { onAction(action) }
                 .padding(horizontal = 4.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         FAIcon(
-            imageVector = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.EllipsisVertical,
+            imageVector = matrix.icon.toImageVector(),
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(FluentTheme.typography.caption.fontSize.value.dp + 2.dp),
         )
-        action.count?.humanized?.takeIf { it.isNotEmpty() }?.let {
+        matrix.humanizedCount.takeIf { it.isNotEmpty() }?.let {
             Text(
                 text = it,
                 style = FluentTheme.typography.caption,
@@ -705,12 +714,12 @@ private fun GalleryMetadataActionButton(
 
 @Composable
 private fun GalleryBody(
-    post: UiTimelineV2.Post,
+    detail: GalleryDetail,
     modifier: Modifier = Modifier,
 ) {
-    if (post.content.isEmpty) return
+    val content = detail.content ?: return
     RichText(
-        text = post.content,
+        text = content,
         textStyle = FluentTheme.typography.body,
         modifier =
             modifier
@@ -724,13 +733,11 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
     comments: PagingState<UiTimelineV2>,
     recommendations: PagingState<UiTimelineV2>,
     navigate: (Route) -> Unit,
-    onAction: (ActionMenu.Item) -> Unit,
 ) {
     item(span = StaggeredGridItemSpan.FullLine) {
         GalleryAuthorCard(
-            post = detail.post,
+            detail = detail,
             navigate = navigate,
-            onAction = onAction,
             index = 0,
             totalCount = 2,
             modifier = Modifier.fillMaxWidth(),
@@ -738,23 +745,25 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
     }
     item(span = StaggeredGridItemSpan.FullLine) {
         GalleryDetailInfoCard(
-            post = detail.post,
-            onAction = onAction,
+            detail = detail,
             index = 1,
             totalCount = 2,
             modifier = Modifier.fillMaxWidth(),
         )
     }
     compactCommentsPreviewItems(
-        statusKey = detail.post.statusKey,
-        accountType = detail.post.accountType,
+        statusKey = detail.statusKey,
+        accountType = detail.accountType,
         comments = comments,
         navigate = navigate,
     )
     item(span = StaggeredGridItemSpan.FullLine) {
         SectionTitle("Recommendations")
     }
-    recommendationItems(recommendations)
+    recommendationItems(
+        recommendations = recommendations,
+        itemModifier = Modifier.padding(bottom = CompactRecommendationBottomSpacing),
+    )
 }
 
 private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
@@ -777,7 +786,7 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
                             totalCount = visibleCount,
                             respectTimelineMode = true,
                         ) {
-                            StatusItem(peek(index))
+                            StatusItem(get(index))
                         }
                     }
                 }
@@ -833,21 +842,30 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
     }
 }
 
-private fun LazyStaggeredGridScope.recommendationItems(recommendations: PagingState<UiTimelineV2>) {
+private fun LazyStaggeredGridScope.recommendationItems(
+    recommendations: PagingState<UiTimelineV2>,
+    itemModifier: Modifier = Modifier,
+) {
     with(recommendations) {
         onSuccess {
             items(
                 count = itemCount,
                 key = itemKey { it.itemKey ?: it.hashCode() },
+                contentType = itemContentType { it.itemType },
             ) { index ->
                 GalleryTimelineItem(
-                    item = peek(index),
+                    item = get(index),
+                    modifier = itemModifier,
                 )
             }
+            appendStateUI(this)
         }
         onLoading {
             items(8) {
-                GalleryTimelineItem(item = null)
+                GalleryTimelineItem(
+                    item = null,
+                    modifier = itemModifier,
+                )
             }
         }
         onError {
@@ -896,26 +914,7 @@ private fun GalleryLoading() {
     }
 }
 
-private fun UiTimelineV2.Post.bookmarkAction(): ActionMenu.Item? =
-    actions
-        .asSequence()
-        .filterIsInstance<ActionMenu.Item>()
-        .firstOrNull { action ->
-            val text = action.text as? ActionMenu.Item.Text.Localized
-            text?.type == ActionMenu.Item.Text.Localized.Type.Bookmark ||
-                text?.type == ActionMenu.Item.Text.Localized.Type.Unbookmark
-        }
-
-private fun UiTimelineV2.Post.countedActions(): List<ActionMenu.Item> =
-    actions
-        .asSequence()
-        .filterIsInstance<ActionMenu.Item>()
-        .filter { it.count != null }
-        .toList()
-
-private fun UiTimelineV2.Post.galleryImages(): List<UiMedia.Image> = images.filterIsInstance<UiMedia.Image>()
-
-private fun UiTimelineV2.Post.statusMediaRoute(media: UiMedia): Route.StatusMedia =
+private fun GalleryDetail.statusMediaRoute(media: UiMedia): Route.StatusMedia =
     Route.StatusMedia(
         statusKey = statusKey,
         accountType = accountType,
@@ -928,12 +927,3 @@ private fun UiTimelineV2.Post.statusMediaRoute(media: UiMedia): Route.StatusMedi
                 is UiMedia.Audio -> null
             },
     )
-
-@Composable
-private fun ActionMenu.Item.Color?.toComposeColor(): Color =
-    when (this) {
-        ActionMenu.Item.Color.Red -> FluentTheme.colors.system.critical
-        ActionMenu.Item.Color.PrimaryColor -> FluentTheme.colors.text.accent.primary
-        ActionMenu.Item.Color.ContentColor -> FluentTheme.colors.text.text.primary
-        null -> FluentTheme.colors.text.text.primary
-    }

@@ -827,12 +827,12 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
             if (
                 visibleCount > 0 &&
                 (
-                        itemCount > 3 ||
-                                (
-                                        appendState is LoadState.NotLoading &&
-                                                !(appendState as LoadState.NotLoading).endOfPaginationReached
-                                        )
+                    itemCount > 3 ||
+                        (
+                            appendState is LoadState.NotLoading &&
+                                !(appendState as LoadState.NotLoading).endOfPaginationReached
                         )
+                )
             ) {
                 item(span = StaggeredGridItemSpan.FullLine) {
                     Button(
@@ -840,8 +840,8 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
                             navigate(
                                 Route.Gallery.Comments(
                                     statusKey = statusKey,
-                                    accountType = accountType
-                                )
+                                    accountType = accountType,
+                                ),
                             )
                         },
                         modifier =
@@ -901,9 +901,9 @@ private fun LazyStaggeredGridScope.recommendationItems(
                     recommendations.onError {
                         onRetry.invoke()
                     }
-                }
+                },
             )
-        }
+        },
     ) {
         GalleryTimelineItem(
             item = it,
@@ -956,7 +956,7 @@ private fun GalleryTopAppBar(
 
                         is UiState.Loading,
                         is UiState.Error,
-                            -> false
+                        -> false
                     }
                 IconButton(
                     enabled = shareEnabled,
@@ -980,7 +980,7 @@ private fun GalleryTopAppBar(
 
                         is UiState.Loading,
                         is UiState.Error,
-                            -> false
+                        -> false
                     }
                 IconButton(
                     enabled = expandEnabled,

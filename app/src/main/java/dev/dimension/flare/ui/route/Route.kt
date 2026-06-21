@@ -475,13 +475,6 @@ internal sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data class TwitterArticle(
-        val accountType: AccountType,
-        val tweetId: String,
-        val articleId: String? = null,
-    ) : Route
-
-    @Serializable
     data class Article(
         val accountType: AccountType,
         val articleKey: MicroBlogKey,
@@ -625,14 +618,6 @@ internal sealed interface Route : NavKey {
                         url = deeplinkRoute.url,
                         descriptionHtml = deeplinkRoute.descriptionHtml,
                         title = deeplinkRoute.title,
-                    )
-                }
-
-                is DeeplinkRoute.TwitterArticle -> {
-                    TwitterArticle(
-                        accountType = deeplinkRoute.accountType,
-                        tweetId = deeplinkRoute.tweetId,
-                        articleId = deeplinkRoute.articleId,
                     )
                 }
 

@@ -41,6 +41,9 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiArticle
+import dev.dimension.flare.ui.model.UiArticleAuthor
+import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiHandle
@@ -53,8 +56,8 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.UiTwitterArticle
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -447,16 +450,16 @@ internal fun Tweet.renderStatus(
                             ?.takeIf { it.isNotBlank() }
                 val tweetId = legacy?.idStr ?: restId
                 title?.let {
+                    val statusKey = MicroBlogKey(id = tweetId, host = accountKey.host)
                     UiCard(
                         title = it,
                         media = article.coverMedia.toUiCardImage(),
                         description = article.previewText?.trim()?.takeIf { preview -> preview.isNotEmpty() },
                         url =
                             DeeplinkRoute
-                                .TwitterArticle(
+                                .Article(
                                     accountType = AccountType.Specific(accountKey),
-                                    tweetId = tweetId,
-                                    articleId = article.restId,
+                                    articleKey = statusKey,
                                 ).toUri(),
                     )
                 }
@@ -1277,14 +1280,18 @@ private val Tweet.articleResult: TwitterArticleResult?
 
 private fun TwitterArticleMedia?.toUiCardImage(): UiMedia.Image? {
     val media = this ?: return null
-    val imageUrl = media.displayImageUrl() ?: return null
+    return media.toUiArticleImage(description = null)
+}
+
+private fun TwitterArticleMedia.toUiArticleImage(description: String?): UiMedia.Image? {
+    val imageUrl = displayImageUrl() ?: return null
     return UiMedia.Image(
         url = imageUrl,
         previewUrl = imageUrl,
-        height = media.mediaInfo?.displayHeight()?.toFloat() ?: 0f,
-        width = media.mediaInfo?.displayWidth()?.toFloat() ?: 0f,
+        height = mediaInfo?.displayHeight()?.toFloat() ?: 0f,
+        width = mediaInfo?.displayWidth()?.toFloat() ?: 0f,
         sensitive = false,
-        description = null,
+        description = description?.takeIf { it.isNotBlank() },
     )
 }
 
@@ -1299,33 +1306,10 @@ private fun dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaInfo.d
 private fun dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaInfo.displayHeight(): Int? =
     originalImgHeight ?: previewImage?.originalImgHeight
 
-private fun TwitterArticleMedia.href(): String? =
-    mediaInfo
-        ?.variants
-        ?.filter { it.contentType?.startsWith("video/") == true }
-        ?.maxByOrNull { it.bitRate ?: 0 }
-        ?.url
-        ?: displayImageUrl()?.let {
-            DeeplinkRoute.Media
-                .Image(
-                    uri = it,
-                    previewUrl = it,
-                ).toUri()
-        }
+internal fun TweetUnion.renderArticle(accountKey: MicroBlogKey): UiArticle? = toTweetOrNull()?.renderArticle(accountKey)
 
-internal fun TweetUnion.renderArticle(
-    accountKey: MicroBlogKey,
-    expectedArticleId: String? = null,
-): UiTwitterArticle? = toTweetOrNull()?.renderArticle(accountKey, expectedArticleId)
-
-internal fun Tweet.renderArticle(
-    accountKey: MicroBlogKey,
-    expectedArticleId: String? = null,
-): UiTwitterArticle? {
+internal fun Tweet.renderArticle(accountKey: MicroBlogKey): UiArticle? {
     val article = articleResult ?: return null
-    if (expectedArticleId != null && article.restId != expectedArticleId) {
-        return null
-    }
     val profile =
         core
             ?.userResults
@@ -1336,6 +1320,8 @@ internal fun Tweet.renderArticle(
                     is UserUnavailable -> null
                 }
             } ?: return null
+    val tweetId = legacy?.idStr ?: restId
+    val statusKey = MicroBlogKey(id = tweetId, host = accountKey.host)
     val title =
         article.title
             ?.takeIf { it.isNotBlank() }
@@ -1345,11 +1331,14 @@ internal fun Tweet.renderArticle(
                 ?.trim()
                 ?.takeIf { it.isNotBlank() }
             ?: return null
-    return UiTwitterArticle(
-        profile = profile,
-        image = article.coverMedia?.displayImageUrl(),
+    return UiArticle(
+        key = statusKey.toString(),
         title = title,
-        content = article.renderContent(accountKey),
+        content = article.renderArticleContent(accountKey),
+        cover = article.coverMedia.toUiCardImage(),
+        publishDate = legacy?.createdAt?.let { parseXQTCustomDateTime(it)?.toUi() },
+        author = UiArticleAuthor.Profile(profile),
+        sourceUrl = "https://${accountKey.host}/${profile.handleWithoutAtAndHost}/status/$tweetId",
     )
 }
 
@@ -1729,19 +1718,35 @@ private fun renderRichText(
             }
         }.toUiRichText(accountKey, sourceLanguages)
 
-private fun TwitterArticleResult.renderContent(accountKey: MicroBlogKey): UiRichText {
+private fun TwitterArticleResult.renderArticleContent(accountKey: MicroBlogKey) =
+    uiArticleContentOf(
+        blocks = renderArticleBlocks(accountKey),
+    )
+
+private fun TwitterArticleResult.renderArticleBlocks(accountKey: MicroBlogKey): List<UiArticleBlock> {
     val blocks = contentState?.blocks.orEmpty()
     if (blocks.isEmpty()) {
         val fallback = previewText?.trim().orEmpty()
-        return fallback.toUiPlainText()
+        return if (fallback.isBlank()) {
+            emptyList()
+        } else {
+            listOf(
+                UiArticleBlock.Text(
+                    key = "preview",
+                    content =
+                        RenderContent.Text(
+                            runs = persistentListOf(RenderRun.Text(fallback)),
+                        ),
+                ),
+            )
+        }
     }
     val entities = contentState?.entityMap.orEmpty()
     val mediaMap = mediaEntities.associateBy { it.mediaId }
-    val contents = mutableListOf<RenderContent>()
-    val rawBlocks = mutableListOf<String>()
+    val articleBlocks = mutableListOf<UiArticleBlock>()
     var orderedListIndex = 0
 
-    blocks.forEach { block ->
+    blocks.forEachIndexed { index, block ->
         val normalizedType = block.type.lowercase()
         if (normalizedType == "ordered-list-item") {
             orderedListIndex += 1
@@ -1749,49 +1754,42 @@ private fun TwitterArticleResult.renderContent(accountKey: MicroBlogKey): UiRich
             orderedListIndex = 0
         }
         val renderContents =
-            block.toRenderContents(
+            block.toArticleBlocks(
                 entities = entities,
                 mediaMap = mediaMap,
                 accountKey = accountKey,
                 orderedListIndex = orderedListIndex,
+                blockIndex = index,
             )
         if (renderContents.isNotEmpty()) {
-            contents += renderContents
-        }
-        if (block.text.isNotBlank()) {
-            rawBlocks += block.text
+            articleBlocks += renderContents
         }
     }
-    val innerText = rawBlocks.joinToString("\n")
-    return uiRichTextOf(
-        renderRuns = contents,
-        raw = innerText,
-        innerText = innerText,
-    )
+    return articleBlocks
 }
 
-private fun TwitterArticleBlock.toRenderContents(
+private fun TwitterArticleBlock.toArticleBlocks(
     entities: List<dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityEntry>,
     mediaMap: Map<String?, TwitterArticleMedia>,
     accountKey: MicroBlogKey,
     orderedListIndex: Int,
-): List<RenderContent> {
+    blockIndex: Int,
+): List<UiArticleBlock> {
+    val blockKey = key ?: "block-$blockIndex"
     if (type.equals("atomic", ignoreCase = true)) {
         val entityKey = entityRanges.firstOrNull()?.key ?: return emptyList()
         val entity = entities.entityValue(entityKey) ?: return emptyList()
         if (entity.type.equals("MEDIA", ignoreCase = true)) {
-            val media =
-                entity.data.mediaItems
-                    .firstNotNullOfOrNull { mediaItem ->
-                        mediaMap[mediaItem.mediaId]
-                    } ?: return emptyList()
-            val imageUrl = media.displayImageUrl() ?: return emptyList()
-            return listOf(
-                RenderContent.BlockImage(
-                    url = imageUrl,
-                    href = media.href(),
-                ),
-            )
+            return entity.data.mediaItems.mapIndexedNotNull { mediaIndex, mediaItem ->
+                mediaMap[mediaItem.mediaId]
+                    ?.toUiArticleImage(description = entity.data.caption)
+                    ?.let { media ->
+                        UiArticleBlock.Image(
+                            key = "$blockKey:image:$mediaIndex",
+                            media = media,
+                        )
+                    }
+            }
         }
         return emptyList()
     }
@@ -1877,9 +1875,13 @@ private fun TwitterArticleBlock.toRenderContents(
         emptyList()
     } else {
         listOf(
-            RenderContent.Text(
-                runs = runs.toImmutableList(),
-                block = blockStyle,
+            UiArticleBlock.Text(
+                key = blockKey,
+                content =
+                    RenderContent.Text(
+                        runs = runs.toImmutableList(),
+                        block = blockStyle,
+                    ),
             ),
         )
     }

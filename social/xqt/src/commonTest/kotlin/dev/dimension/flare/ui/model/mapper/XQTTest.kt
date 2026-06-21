@@ -10,12 +10,32 @@ import dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichText
 import dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetLegacy
+import dev.dimension.flare.data.network.xqt.model.TwitterArticle
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleBlock
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleContentState
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleEntity
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityData
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityEntry
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityRange
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleInlineStyleRange
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleMedia
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaInfo
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleMediaItem
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleResult
+import dev.dimension.flare.data.network.xqt.model.TwitterArticleResults
+import dev.dimension.flare.data.network.xqt.model.User
+import dev.dimension.flare.data.network.xqt.model.UserLegacy
 import dev.dimension.flare.data.network.xqt.model.UserMention
+import dev.dimension.flare.data.network.xqt.model.UserResultCore
+import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.XqtUrl
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.model.UiArticleAuthor
+import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -23,6 +43,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -59,6 +80,151 @@ class XQTTest {
         val parsed = parseXQTCustomDateTime("Wed Mar  4 14:17:49 +0000 2026")
 
         assertEquals(Instant.parse("2026-03-04T14:17:49Z"), parsed)
+    }
+
+    @Test
+    fun renderStatus_articleCard_usesGenericArticleRouteWithStatusKey() {
+        val tweet =
+            createArticleTweet(
+                id = "tweet-123",
+                article =
+                    TwitterArticleResult(
+                        title = "Article title",
+                        previewText = "Article preview",
+                    ),
+            )
+
+        val card = tweet.renderStatus(accountKey).card
+        val route = DeeplinkRoute.parse(card?.url.orEmpty())
+
+        val articleRoute = assertIs<DeeplinkRoute.Article>(route)
+        assertEquals(MicroBlogKey("tweet-123", accountKey.host), articleRoute.articleKey)
+        assertEquals("Article title", card?.title)
+    }
+
+    @Test
+    fun renderArticle_outputsGenericArticleBlocksAndImageBlocks() {
+        val articleImageUrl = "https://pbs.twimg.com/article/image.jpg"
+        val tweet =
+            createArticleTweet(
+                id = "tweet-456",
+                user = createUser(id = "user-456", screenName = "flare_dev"),
+                article =
+                    TwitterArticleResult(
+                        title = "Longform title",
+                        previewText = "Longform preview",
+                        coverMedia =
+                            TwitterArticleMedia(
+                                mediaId = "cover",
+                                mediaInfo =
+                                    TwitterArticleMediaInfo(
+                                        originalImgUrl = "https://pbs.twimg.com/article/cover.jpg",
+                                        originalImgWidth = 1200,
+                                        originalImgHeight = 630,
+                                    ),
+                            ),
+                        mediaEntities =
+                            listOf(
+                                TwitterArticleMedia(
+                                    mediaId = "media-1",
+                                    mediaInfo =
+                                        TwitterArticleMediaInfo(
+                                            originalImgUrl = articleImageUrl,
+                                            originalImgWidth = 800,
+                                            originalImgHeight = 600,
+                                        ),
+                                ),
+                            ),
+                        contentState =
+                            TwitterArticleContentState(
+                                blocks =
+                                    listOf(
+                                        TwitterArticleBlock(
+                                            key = "text-block",
+                                            text = "Hello link",
+                                            type = "header-one",
+                                            entityRanges =
+                                                listOf(
+                                                    TwitterArticleEntityRange(
+                                                        key = 0,
+                                                        offset = 6,
+                                                        length = 4,
+                                                    ),
+                                                ),
+                                            inlineStyleRanges =
+                                                listOf(
+                                                    TwitterArticleInlineStyleRange(
+                                                        offset = 0,
+                                                        length = 5,
+                                                        style = "bold",
+                                                    ),
+                                                ),
+                                        ),
+                                        TwitterArticleBlock(
+                                            key = "media-block",
+                                            type = "atomic",
+                                            entityRanges =
+                                                listOf(
+                                                    TwitterArticleEntityRange(
+                                                        key = 1,
+                                                        offset = 0,
+                                                        length = 1,
+                                                    ),
+                                                ),
+                                        ),
+                                    ),
+                                entityMap =
+                                    listOf(
+                                        TwitterArticleEntityEntry(
+                                            key = "0",
+                                            value =
+                                                TwitterArticleEntity(
+                                                    type = "LINK",
+                                                    data = TwitterArticleEntityData(url = "https://example.com/link"),
+                                                ),
+                                        ),
+                                        TwitterArticleEntityEntry(
+                                            key = "1",
+                                            value =
+                                                TwitterArticleEntity(
+                                                    type = "MEDIA",
+                                                    data =
+                                                        TwitterArticleEntityData(
+                                                            caption = "Image caption",
+                                                            mediaItems =
+                                                                listOf(
+                                                                    TwitterArticleMediaItem(mediaId = "media-1"),
+                                                                ),
+                                                        ),
+                                                ),
+                                        ),
+                                    ),
+                            ),
+                    ),
+            )
+
+        val article = tweet.renderArticle(accountKey) ?: error("Expected article")
+
+        assertEquals("tweet-456@example.com", article.key)
+        assertEquals("Longform title", article.title)
+        assertEquals("https://example.com/flare_dev/status/tweet-456", article.sourceUrl)
+        assertEquals(Instant.parse("2018-10-10T20:19:24Z"), article.publishDate?.value)
+        assertEquals("https://pbs.twimg.com/article/cover.jpg", article.cover?.url)
+        val author = assertIs<UiArticleAuthor.Profile>(article.author)
+        assertEquals("flare_dev", author.profile.handle.raw)
+
+        val textBlock = assertIs<UiArticleBlock.Text>(article.content.blocks[0])
+        assertEquals(1, textBlock.content.block.headingLevel)
+        val textRuns = textBlock.content.runs.filterIsInstance<RenderRun.Text>()
+        assertTrue(textRuns.any { it.text == "Hello" && it.style.bold })
+        assertTrue(textRuns.any { it.text == "link" && it.style.link == "https://example.com/link" })
+        assertTrue(textBlock.richText.renderRuns.none { it is RenderContent.BlockImage })
+
+        val imageBlock = assertIs<UiArticleBlock.Image>(article.content.blocks[1])
+        assertEquals(articleImageUrl, imageBlock.media.url)
+        assertEquals(800f, imageBlock.media.width)
+        assertEquals(600f, imageBlock.media.height)
+        assertEquals("Image caption", imageBlock.media.description)
     }
 
     @Test
@@ -637,6 +803,48 @@ class XQTTest {
         assertTrue(result.renderRuns.any { it is RenderContent.BlockImage && it.url == mediaUrl }, "Media figure present")
         assertTrue(textRuns.any { it.text == "End" && it.style.italic }, "End should be italic")
     }
+
+    private fun createArticleTweet(
+        id: String,
+        article: TwitterArticleResult,
+        user: User = createUser(),
+    ): Tweet =
+        Tweet(
+            restId = id,
+            core = UserResultCore(UserResults(user)),
+            article = TwitterArticle(TwitterArticleResults(article)),
+            legacy =
+                TweetLegacy(
+                    idStr = id,
+                    fullText = "",
+                    displayTextRange = listOf(0, 0),
+                    entities = Entities(),
+                    createdAt = "Wed Oct 10 20:19:24 +0000 2018",
+                    favoriteCount = 0,
+                    favorited = false,
+                    isQuoteStatus = false,
+                    lang = "en",
+                    quoteCount = 0,
+                    replyCount = 0,
+                    retweetCount = 0,
+                    retweeted = false,
+                    userIdStr = user.restId,
+                ),
+        )
+
+    private fun createUser(
+        id: String = "user-123",
+        screenName: String = "article_author",
+    ): User =
+        User(
+            restId = id,
+            legacy =
+                UserLegacy(
+                    name = screenName,
+                    screenName = screenName,
+                    profileImageUrlHttps = "https://pbs.twimg.com/profile_images/$screenName.jpg",
+                ),
+        )
 
     private fun dev.dimension.flare.ui.render.UiRichText.allTextRuns(): List<RenderRun.Text> =
         renderRuns

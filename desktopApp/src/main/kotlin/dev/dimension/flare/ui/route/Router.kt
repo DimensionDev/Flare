@@ -107,7 +107,6 @@ import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 import dev.dimension.flare.ui.screen.status.action.StatusInsightDialog
 import dev.dimension.flare.ui.screen.status.action.StatusShareSheet
-import dev.dimension.flare.ui.screen.xqt.TwitterArticleScreen
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
@@ -246,14 +245,6 @@ internal fun Router(
                         data = args.data,
                         onNavigate = navigate,
                         onDismissRequest = onBack,
-                    )
-                }
-                entry<Route.TwitterArticle> { args ->
-                    TwitterArticleScreen(
-                        accountType = args.accountType,
-                        tweetId = args.tweetId,
-                        articleId = args.articleId,
-                        onBack = onBack,
                     )
                 }
                 entry<Route.Article> { args ->

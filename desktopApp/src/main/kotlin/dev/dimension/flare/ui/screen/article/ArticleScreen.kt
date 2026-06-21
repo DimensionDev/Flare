@@ -52,13 +52,11 @@ import dev.dimension.flare.article_content_gate_subscription_description
 import dev.dimension.flare.article_content_gate_subscription_description_with_fee
 import dev.dimension.flare.article_content_gate_subscription_title
 import dev.dimension.flare.common.DesktopDownloadManager
-import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.rss_detail_open_in_browser
 import dev.dimension.flare.status_share
-import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
@@ -96,8 +94,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import java.awt.FileDialog
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
 import java.io.File
 
 private val ArticleCoverHeight = 260.dp
@@ -125,7 +121,6 @@ internal fun ArticleScreen(
     val scope = rememberCoroutineScope()
     val window = LocalComposeWindow.current
     val downloadManager: DesktopDownloadManager = koinInject()
-    val inAppNotification: ComposeInAppNotification = koinInject()
     val article = state.article.takeSuccess()
     val windowPadding = LocalWindowPadding.current
     val contentPadding =
@@ -160,8 +155,13 @@ internal fun ArticleScreen(
                                         article = currentArticle,
                                         onOpenUrl = uriHandler::openUri,
                                         onShare = {
-                                            shareArticleText(it)
-                                            inAppNotification.message(Res.string.copied_to_clipboard)
+                                            navigate(
+                                                Route.StatusShareSheet(
+                                                    accountType = accountType,
+                                                    statusKey = articleKey,
+                                                    shareUrl = sourceUrl,
+                                                ),
+                                            )
                                         },
                                     )
                                 }
@@ -881,14 +881,3 @@ private fun UiMedia.Image.rawImageRoute(): Route.RawImage =
         rawImage = url,
         customHeaders = customHeaders,
     )
-
-private fun shareArticleText(article: UiArticle) {
-    val url = article.sourceUrl?.takeIf { it.isNotBlank() } ?: return
-    val text =
-        if (article.title.isBlank()) {
-            url
-        } else {
-            "${article.title}\n$url"
-        }
-    Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
-}

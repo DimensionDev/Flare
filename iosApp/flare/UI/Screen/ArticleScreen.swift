@@ -53,12 +53,9 @@ struct ArticleScreen: View {
                     .accessibilityLabel(Text("Open in Browser"))
                 }
                 ToolbarItem {
-                    ShareLink(
-                        item: sourceURL,
-                        subject: Text(article.title),
-                        message: Text(article.title),
-                        preview: SharePreview(article.title)
-                    ) {
+                    Button {
+                        onNavigate(.statusShareSheet(accountType, articleKey, sourceURL.absoluteString, nil, nil))
+                    } label: {
                         Image(.faShareNodes)
                     }
                     .accessibilityLabel(Text("Share"))

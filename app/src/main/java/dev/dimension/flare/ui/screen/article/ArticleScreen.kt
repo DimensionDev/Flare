@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.article
 
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -257,8 +256,14 @@ internal fun ArticleScreen(
                         IconButton(
                             enabled = sourceUrl != null,
                             onClick = {
-                                article?.let {
-                                    shareArticle(context, it)
+                                sourceUrl?.let {
+                                    navigate(
+                                        Route.Status.ShareSheet(
+                                            statusKey = articleKey,
+                                            accountType = accountType,
+                                            shareUrl = it,
+                                        ),
+                                    )
                                 }
                             },
                         ) {
@@ -1053,23 +1058,4 @@ private fun Context.showArticleDownloadToast(messageRes: Int) {
     Toast
         .makeText(this, getString(messageRes), Toast.LENGTH_SHORT)
         .show()
-}
-
-private fun shareArticle(
-    context: Context,
-    article: UiArticle,
-) {
-    val url = article.sourceUrl?.takeIf { it.isNotBlank() } ?: return
-    val title = article.title.takeIf { it.isNotBlank() }
-    val sendIntent =
-        Intent().apply {
-            action = Intent.ACTION_SEND
-            title?.let {
-                putExtra(Intent.EXTRA_TITLE, it)
-                putExtra(Intent.EXTRA_SUBJECT, it)
-            }
-            putExtra(Intent.EXTRA_TEXT, url)
-            type = "text/plain"
-        }
-    context.startActivity(Intent.createChooser(sendIntent, title))
 }

@@ -40,66 +40,74 @@ public extension UiTimelineV2.MessageType {
         if let data = self as? UiTimelineV2.MessageTypeLocalized {
             return switch data.data {
             case .mention:
-                String(localized: "mastodon_notification_mention")
+                FlareAppleUILocalization.string("mastodon_notification_mention")
             case .newPost:
-                String(localized: "mastodon_notification_status")
+                FlareAppleUILocalization.string("mastodon_notification_status")
             case .repost:
-                String(localized: "mastodon_notification_reblog")
+                FlareAppleUILocalization.string("mastodon_notification_reblog")
             case .follow:
-                String(localized: "mastodon_notification_follow")
+                FlareAppleUILocalization.string("mastodon_notification_follow")
             case .followRequest:
-                String(localized: "mastodon_notification_follow_request")
+                FlareAppleUILocalization.string("mastodon_notification_follow_request")
             case .favourite:
-                String(localized: "mastodon_notification_favourite")
+                FlareAppleUILocalization.string("mastodon_notification_favourite")
             case .pollEnded:
-                String(localized: "mastodon_notification_poll")
+                FlareAppleUILocalization.string("mastodon_notification_poll")
             case .postUpdated:
-                String(localized: "mastodon_notification_update")
+                FlareAppleUILocalization.string("mastodon_notification_update")
             case .reply:
-                String(localized: "misskey_notification_reply")
+                FlareAppleUILocalization.string("misskey_notification_reply")
             case .quote:
-                String(localized: "misskey_notification_quote")
+                FlareAppleUILocalization.string("misskey_notification_quote")
             case .reaction:
-                String(localized: "misskey_notification_reaction")
+                FlareAppleUILocalization.string("misskey_notification_reaction")
             case .followRequestAccepted:
-                String(localized: "misskey_notification_follow_request_accepted")
+                FlareAppleUILocalization.string("misskey_notification_follow_request_accepted")
             case .scheduledNotePosted:
-                String(localized: "misskey_notification_scheduled_note_posted")
+                FlareAppleUILocalization.string("misskey_notification_scheduled_note_posted")
             case .scheduledNotePostFailed:
-                String(localized: "misskey_notification_scheduled_note_post_failed")
+                FlareAppleUILocalization.string("misskey_notification_scheduled_note_post_failed")
             case .roleAssigned:
-                String(localized: "misskey_notification_role_assigned")
+                FlareAppleUILocalization.string("misskey_notification_role_assigned")
             case .chatRoomInvitationReceived:
-                String(localized: "misskey_notification_chat_room_invitation_received")
+                FlareAppleUILocalization.string("misskey_notification_chat_room_invitation_received")
             case .achievementEarned:
                 if let rawAchievement = data.args.first,
                    let achievement = MisskeyAchievement.from(rawAchievement) {
-                    String(
-                        localized: "misskey_notification_achievement_earned \(String(localized: achievement.titleKey)) \(String(localized: achievement.descriptionKey))"
+                    FlareAppleUILocalization.string(
+                        "misskey_notification_achievement_earned",
+                        fallback: "You've earned an achievement %@ %@ ",
+                        arguments: [
+                            FlareAppleUILocalization.string(achievement.titleKey),
+                            FlareAppleUILocalization.string(achievement.descriptionKey),
+                        ]
                     )
                 } else {
                     String(
-                        format: NSLocalizedString("misskey_notification_achievement_earned", comment: ""),
+                        format: FlareAppleUILocalization.string(
+                            "misskey_notification_achievement_earned",
+                            fallback: "You've earned an achievement %@ %@ "
+                        ),
                         data.args.first ?? "",
                         ""
                     )
                 }
             case .app:
-                String(localized: "misskey_notification_app")
+                FlareAppleUILocalization.string("misskey_notification_app")
             case .exportCompleted:
-                String(localized: "misskey_notification_export_completed")
+                FlareAppleUILocalization.string("misskey_notification_export_completed")
             case .test:
-                String(localized: "misskey_notification_test")
+                FlareAppleUILocalization.string("misskey_notification_test")
             case .login:
-                String(localized: "misskey_notification_login")
+                FlareAppleUILocalization.string("misskey_notification_login")
             case .createToken:
-                String(localized: "misskey_notification_create_token")
+                FlareAppleUILocalization.string("misskey_notification_create_token")
             case .starterpackJoined:
-                String(localized: "bluesky_notification_starterpackJoined")
+                FlareAppleUILocalization.string("bluesky_notification_starterpackJoined")
             case .pinned:
-                String(localized: "mastodon_item_pinned")
+                FlareAppleUILocalization.string("mastodon_item_pinned")
             case .like:
-                String(localized: "bluesky_notification_like")
+                FlareAppleUILocalization.string("bluesky_notification_like")
             }
         }
         return nil
@@ -191,7 +199,7 @@ extension MisskeyAchievement {
         }
     }
 
-    var titleKey: LocalizedStringResource {
+    var titleKey: String {
         switch self {
         case .notes1:      return "misskey_achievement_notes1_title"
         case .notes10:     return "misskey_achievement_notes10_title"
@@ -277,7 +285,7 @@ extension MisskeyAchievement {
         }
     }
 
-    var descriptionKey: LocalizedStringResource {
+    var descriptionKey: String {
         switch self {
         case .notes1:      return "misskey_achievement_notes1_description"
         case .notes10:     return "misskey_achievement_notes10_description"

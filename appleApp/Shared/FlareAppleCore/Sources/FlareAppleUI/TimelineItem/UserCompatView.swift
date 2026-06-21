@@ -68,8 +68,8 @@ public struct UserLoadingView: View {
             VStack(
                 alignment: .leading
             ) {
-                Text("#loading")
-                Text("#loading")
+                Text("#loading", bundle: FlareAppleUILocalization.bundle)
+                Text("#loading", bundle: FlareAppleUILocalization.bundle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -95,8 +95,8 @@ public struct UserErrorView: View {
                 VStack(
                     alignment: .leading
                 ) {
-                    Text("notification_login_expired")
-                    Text("error_login_expired \(expiredError.accountKey)")
+                    Text("notification_login_expired", bundle: FlareAppleUILocalization.bundle)
+                    Text("error_login_expired \(expiredError.accountKey)", bundle: FlareAppleUILocalization.bundle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -110,7 +110,7 @@ public struct UserErrorView: View {
                 VStack(
                     alignment: .leading
                 ) {
-                    Text("error_generic")
+                    Text("error_generic", bundle: FlareAppleUILocalization.bundle)
                     Text(error.message ?? "Unknown error")
                         .font(.caption)
                         .foregroundStyle(.secondary)

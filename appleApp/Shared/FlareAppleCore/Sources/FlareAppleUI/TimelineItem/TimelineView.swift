@@ -69,10 +69,12 @@ public struct TimelinePlaceholderView: View {
             alignment: .leading,
         ) {
             UserLoadingView()
-            Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit." +
-                 "Pellentesque eget eros justo. Duis feugiat tortor sed lectus euismod iaculis. " +
-                 "Donec aliquam sem dui, id facilisis velit luctus eget. Nam ac mattis sapien. " +
-                 "Morbi ultrices diam at accumsan hendrerit. Donec vitae venenatis nulla. Nullam condimentum pharetra venenatis.")
+            Text(
+                verbatim: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                    "Pellentesque eget eros justo. Duis feugiat tortor sed lectus euismod iaculis. " +
+                    "Donec aliquam sem dui, id facilisis velit luctus eget. Nam ac mattis sapien. " +
+                    "Morbi ultrices diam at accumsan hendrerit. Donec vitae venenatis nulla. Nullam condimentum pharetra venenatis."
+            )
         }
         .redacted(reason: .placeholder)
     }

@@ -43,6 +43,7 @@ struct RootView: View {
                                     } label: {
                                         Image(fontAwesome: .sliders)
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .onAppear {

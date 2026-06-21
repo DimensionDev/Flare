@@ -614,7 +614,7 @@ private struct MacOSWebLoginScreen: View {
                     Image(systemName: "xmark")
                 }
                 .buttonStyle(.plain)
-                .help(LocalizedStrings.string("compose_button_cancel", fallback: "Cancel"))
+                .help(String(localized: "compose_button_cancel", defaultValue: "Cancel", bundle: .main))
             }
             .padding(12)
 

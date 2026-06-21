@@ -123,7 +123,7 @@ public struct CommonProfileHeader: View {
                                     .transition(.opacity.combined(with: .scale(scale: 0.92)))
 
                                     if case .success(let relationState) = onEnum(of: relation), relationState.data.isFans {
-                                        Text("relation_is_fans")
+                                        Text("relation_is_fans", bundle: FlareAppleUILocalization.bundle)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                             .multilineTextAlignment(.center)
@@ -132,7 +132,7 @@ public struct CommonProfileHeader: View {
                                 .animation(.spring(response: 0.25, dampingFraction: 0.86), value: buttonState.data.id)
                             case .loading:
                                 Button(action: {}, label: {
-                                    Text("#loading")
+                                    Text("#loading", bundle: FlareAppleUILocalization.bundle)
                                 })
                                 .backport
                                 .glassProminentButtonStyle()
@@ -170,19 +170,19 @@ public struct CommonProfileHeader: View {
         switch onEnum(of: state) {
         case .blocked:
             Button(action: action) {
-                Text(state.titleKey)
+                Text(state.titleKey, bundle: FlareAppleUILocalization.bundle)
             }
             .tint(.red)
             .buttonStyle(.borderedProminent)
         case .following, .requested:
             Button(action: action) {
-                Text(state.titleKey)
+                Text(state.titleKey, bundle: FlareAppleUILocalization.bundle)
             }
             .backport
             .glassButtonStyle(fallbackStyle: .bordered)
         case .follow, .requestFollow:
             Button(action: action) {
-                Text(state.titleKey)
+                Text(state.titleKey, bundle: FlareAppleUILocalization.bundle)
             }
             .backport
             .glassProminentButtonStyle()
@@ -272,7 +272,7 @@ public struct ProfileHeader: View {
     public var body: some View {
         switch onEnum(of: user) {
         case .error:
-            Text("error")
+            Text("error", bundle: FlareAppleUILocalization.bundle)
         case .loading:
             CommonProfileHeader(
                 user: createSampleUser(),
@@ -364,14 +364,14 @@ public struct MatrixView: View {
         HStack {
             HStack {
                 Text(followCount)
-                Text("matrix_following")
+                Text("matrix_following", bundle: FlareAppleUILocalization.bundle)
             }
             .onTapGesture {
                 onFollowingClick()
             }
             HStack {
                 Text(fansCount)
-                Text("matrix_followers")
+                Text("matrix_followers", bundle: FlareAppleUILocalization.bundle)
             }
             .onTapGesture {
                 onFansClick()

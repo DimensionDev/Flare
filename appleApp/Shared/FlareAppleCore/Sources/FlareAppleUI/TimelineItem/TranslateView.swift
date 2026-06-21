@@ -19,14 +19,14 @@ struct StatusTranslateView: View {
                     Button {
                         enableTranslate.toggle()
                     } label: {
-                        Text("status_translate")
+                        Text("status_translate", bundle: FlareAppleUILocalization.bundle)
                     }
                     .buttonStyle(.borderless)
                     if content.isLongText, aiConfig.tldr {
                         Button {
                             enableTLDR.toggle()
                         } label: {
-                            Text("status_tldr")
+                            Text("status_tldr", bundle: FlareAppleUILocalization.bundle)
                         }
                         .buttonStyle(.borderless)
                     }

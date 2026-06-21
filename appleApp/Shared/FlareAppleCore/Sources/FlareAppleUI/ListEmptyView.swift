@@ -6,7 +6,7 @@ public struct ListEmptyView: View {
     public var body: some View {
         ContentUnavailableView {
             Label {
-                Text("list_empty_title")
+                Text("list_empty_title", bundle: FlareAppleUILocalization.bundle)
             } icon: {
                 Image(systemName: "questionmark.text.page")
             }

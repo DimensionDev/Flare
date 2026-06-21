@@ -92,7 +92,7 @@ public struct RichText: View {
     }
 
     private func render(textContent: PlatformTextTextContent) -> Text {
-        textContent.runs.reduce(Text("")) { partial, run in
+        textContent.runs.reduce(Text(verbatim: "")) { partial, run in
             switch run {
             case let attributedRun as PlatformTextAttributedRun:
                 partial + Text(attributedRun.text)

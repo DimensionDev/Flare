@@ -1,4 +1,5 @@
 import AppleFontAwesome
+import Foundation
 import KotlinSharedUI
 
 extension HomeTabsPresenterStateHomeTabs {
@@ -16,11 +17,11 @@ extension HomeTabsPresenterStateHomeTabs {
     var macOSTitle: String {
         switch self {
         case .home:
-            LocalizedStrings.string("home_tab_home_title", fallback: "Home")
+            String(localized: "home_tab_home_title", defaultValue: "Home", bundle: .main)
         case .notifications:
-            LocalizedStrings.string("home_tab_notifications_title", fallback: "Notifications")
+            String(localized: "home_tab_notifications_title", defaultValue: "Notifications", bundle: .main)
         case .discover:
-            LocalizedStrings.string("home_tab_discover_title", fallback: "Discover")
+            String(localized: "home_tab_discover_title", defaultValue: "Discover", bundle: .main)
         }
     }
 
@@ -38,11 +39,11 @@ extension HomeTabsPresenterStateHomeTabs {
     var macOSPlaceholder: String {
         switch self {
         case .home:
-            LocalizedStrings.string("macos_placeholder_home", fallback: "Timeline content will render here.")
+            String(localized: "macos_placeholder_home", defaultValue: "Timeline content will render here.", bundle: .main)
         case .notifications:
-            LocalizedStrings.string("macos_placeholder_notifications", fallback: "Notification content will render here.")
+            String(localized: "macos_placeholder_notifications", defaultValue: "Notification content will render here.", bundle: .main)
         case .discover:
-            LocalizedStrings.string("macos_placeholder_discover", fallback: "Search and discovery content will render here.")
+            String(localized: "macos_placeholder_discover", defaultValue: "Search and discovery content will render here.", bundle: .main)
         }
     }
 

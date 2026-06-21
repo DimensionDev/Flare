@@ -42,14 +42,14 @@ public struct DeepLinkAccountPickerView<Route>: View {
                 dismiss()
             } label: {
                 Label {
-                    Text("deep_link_account_picker_open_in_browser")
+                    Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle)
                 } icon: {
                     Image(systemName: "globe")
                 }
             }
             .buttonStyle(.plain)
         }
-        .navigationTitle("deep_link_account_picker_title")
+        .navigationTitle(Text("deep_link_account_picker_title", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button(
@@ -58,7 +58,7 @@ public struct DeepLinkAccountPickerView<Route>: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Cancel")
+                        Text("Cancel", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(systemName: "xmark")
                     }

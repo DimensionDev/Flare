@@ -21,4 +21,14 @@ files:
       "translation": "appleApp/ios/Localizable.xcstrings",
       "multilingual": true,
     },
+    {
+      "source": "appleApp/Shared/FlareAppleCore/Sources/FlareAppleCore/Resources/Localizable.xcstrings",
+      "translation": "appleApp/Shared/FlareAppleCore/Sources/FlareAppleCore/Resources/Localizable.xcstrings",
+      "multilingual": true,
+    },
+    {
+      "source": "appleApp/Shared/FlareAppleCore/Sources/FlareAppleUI/Resources/Localizable.xcstrings",
+      "translation": "appleApp/Shared/FlareAppleCore/Sources/FlareAppleUI/Resources/Localizable.xcstrings",
+      "multilingual": true,
+    },
   ]

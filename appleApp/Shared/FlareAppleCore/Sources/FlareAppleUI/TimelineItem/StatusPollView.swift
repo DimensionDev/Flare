@@ -75,11 +75,11 @@ public struct StatusPollView: View {
             }
             
             if data.expired {
-                Text("poll_expired")
+                Text("poll_expired", bundle: FlareAppleUILocalization.bundle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else if let expiredAt = data.expiredAt {
-                Text("poll_expires_at")
+                Text("poll_expires_at", bundle: FlareAppleUILocalization.bundle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 DateTimeText(data: expiredAt, fullTime: true)
@@ -94,7 +94,7 @@ public struct StatusPollView: View {
                         selectedOption.map { KotlinInt(value: Int32($0)) }
                     )
                 } label: {
-                    Text("poll_vote")
+                    Text("poll_vote", bundle: FlareAppleUILocalization.bundle)
                 }
                 .backport
                 .glassProminentButtonStyle()

@@ -165,7 +165,7 @@ public struct StatusView: View {
                         if let replyToHandle {
                             HStack {
                                 Image(fontAwesome: .reply)
-                                Text("Reply to \(replyToHandle)")
+                                Text("Reply to \(replyToHandle)", bundle: FlareAppleUILocalization.bundle)
                             }
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -184,9 +184,9 @@ public struct StatusView: View {
                                     }
                                 } label: {
                                     if expand {
-                                        Text("mastodon_item_show_less")
+                                        Text("mastodon_item_show_less", bundle: FlareAppleUILocalization.bundle)
                                     } else {
-                                        Text("mastodon_item_show_more")
+                                        Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
                                     }
                                 }
                                 .backport
@@ -216,7 +216,7 @@ public struct StatusView: View {
                                             expand = true
                                         }
                                     } label: {
-                                        Text("mastodon_item_show_more")
+                                        Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
                                     }
                                     .buttonStyle(.borderless)
                                 }
@@ -396,7 +396,7 @@ public struct StatusView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("status_insight_title"))
+                .accessibilityLabel(Text("status_insight_title", bundle: FlareAppleUILocalization.bundle))
             }
         }
     }
@@ -420,7 +420,11 @@ struct StatusMediaContent: View {
                 }
             } label: {
                 Label {
-                    Text("show_media_button", comment: "Button to show media attachments" )
+                    Text(
+                        "show_media_button",
+                        bundle: FlareAppleUILocalization.bundle,
+                        comment: "Button to show media attachments"
+                    )
                 } icon: {
                     Image(fontAwesome: .image)
                 }

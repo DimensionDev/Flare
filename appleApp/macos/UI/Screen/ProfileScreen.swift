@@ -74,7 +74,7 @@ struct ProfileScreen: View {
 //                case .success(let user):
 //                    RichText(text: user.data.name)
 //                case .loading, .error:
-//                    Text(LocalizedStrings.string("profile_title", fallback: "Profile"))
+//                    Text(String(localized: "profile_title", defaultValue: "Profile", bundle: .main))
 //                }
 //            }
             if !presenter.state.actions.isEmpty {
@@ -207,7 +207,7 @@ struct ProfileWithUserNameAndHostScreen: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .navigationTitle(LocalizedStrings.string("profile_title", fallback: "Profile"))
+        .navigationTitle(String(localized: "profile_title", defaultValue: "Profile", bundle: .main))
     }
 }
 

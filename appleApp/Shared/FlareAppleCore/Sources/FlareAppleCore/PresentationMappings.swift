@@ -8,9 +8,7 @@ public func localizedPresentationString(
     fallback: String,
     arguments: [String] = []
 ) -> String {
-    let value = Bundle.main.localizedString(forKey: key, value: fallback, table: nil)
-    guard !arguments.isEmpty else { return value }
-    return String(format: value, arguments: arguments.map { $0 as CVarArg })
+    FlareAppleCoreLocalization.string(key, fallback: fallback, arguments: arguments)
 }
 
 public extension UiText {

@@ -77,7 +77,11 @@ struct StatusMediaView: View {
                         }
                     } label: {
                         Label {
-                            Text("sensitive_button_show", comment: "Button to show sensitive media")
+                            Text(
+                                "sensitive_button_show",
+                                bundle: FlareAppleUILocalization.bundle,
+                                comment: "Button to show sensitive media"
+                            )
                         } icon: {
                             Image(fontAwesome: .eye)
                                 .foregroundStyle(.white)
@@ -134,7 +138,7 @@ struct AltTextOverlay: View {
         Button {
             showAltText = true
         } label: {
-            Text("ALT")
+            Text("ALT", bundle: FlareAppleUILocalization.bundle)
         }
         .padding()
         .backport

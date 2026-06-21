@@ -19,7 +19,7 @@ public struct ListErrorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                Text("error_login_expired \(expiredError.accountKey)")
+                Text("error_login_expired \(expiredError.accountKey)", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
@@ -27,7 +27,7 @@ public struct ListErrorView: View {
                         openURL(url)
                     }
                 } label: {
-                    Text("error_login_expired_action")
+                    Text("error_login_expired_action", bundle: FlareAppleUILocalization.bundle)
                 }
                 .backport
                 .glassProminentButtonStyle()
@@ -36,16 +36,16 @@ public struct ListErrorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                Text("permission_denied_title")
+                Text("permission_denied_title", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
                     .font(.headline)
-                Text("permission_denied_message")
+                Text("permission_denied_message", bundle: FlareAppleUILocalization.bundle)
                 Button {
                     if let url = URL(string: DeeplinkRoute.Login.shared.toUri()) {
                         openURL(url)
                     }
                 } label: {
-                    Text("error_login_expired_action")
+                    Text("error_login_expired_action", bundle: FlareAppleUILocalization.bundle)
                 }
                 .backport
                 .glassProminentButtonStyle()
@@ -54,13 +54,13 @@ public struct ListErrorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                Text("error_generic")
+                Text("error_generic", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
                     onRetry()
                 } label: {
-                    Text("action_retry")
+                    Text("action_retry", bundle: FlareAppleUILocalization.bundle)
                 }
                 .backport
                 .glassProminentButtonStyle()

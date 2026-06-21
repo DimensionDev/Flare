@@ -37,8 +37,8 @@
     <string name="profile_blocked_gate_title">已拉黑的用户</string>
     <string name="profile_blocked_gate_description">你已拉黑此用户。其标签页和时间线会被隐藏，直到你手动选择显示。</string>
     <string name="profile_blocked_gate_show">显示</string>
-    <string name="illustrations_title">说明</string>
-    <string name="manga_title">Manga</string>
+    <string name="illustrations_title">插画</string>
+    <string name="manga_title">漫画</string>
     <string name="pixiv_ranking_week_title">每周排名</string>
     <string name="pixiv_ranking_month_title">每月排名</string>
     <string name="pixiv_ranking_day_male_title">男性排名</string>

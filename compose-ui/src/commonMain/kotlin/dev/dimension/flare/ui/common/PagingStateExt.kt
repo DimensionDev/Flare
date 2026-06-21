@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onEmpty
@@ -149,7 +150,7 @@ public fun <T : Any> LazyStaggeredGridScope.items(
                 loadingContent()
             }
         }.onError {
-            item {
+            item(span = StaggeredGridItemSpan.FullLine) {
                 errorContent(it)
             }
         }.onEmpty {

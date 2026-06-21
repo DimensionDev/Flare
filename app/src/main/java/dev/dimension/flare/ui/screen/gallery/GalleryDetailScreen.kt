@@ -48,8 +48,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,6 +61,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CaretUp
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.ShareNodes
+import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
@@ -69,6 +72,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientati
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.DateTimeText
@@ -325,7 +329,8 @@ private fun CompactGalleryContent(
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    val configuration = LocalConfiguration.current
+                    val containerSize = LocalWindowInfo.current.containerSize
+                    val screenHeightDp = with(LocalDensity.current) { containerSize.height.toDp() }
                     val pagerState =
                         rememberPagerState(
                             pageCount = { images.size },
@@ -336,7 +341,7 @@ private fun CompactGalleryContent(
                             Modifier
                                 .fillMaxWidth()
                                 .ignoreHorizontalParentPadding(screenHorizontalPadding)
-                                .height(configuration.screenHeightDp.dp),
+                                .height(screenHeightDp),
                     ) { index ->
                         val image = images[index]
                         Box(Modifier.fillMaxSize()) {
@@ -500,17 +505,17 @@ private fun GallerySideBar(
                 Tab(
                     selected = pagerState.currentPage == 0,
                     onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-                    text = { Text("Info") },
+                    text = { Text(stringResource(R.string.gallery_detail_tab_info)) },
                 )
                 Tab(
                     selected = pagerState.currentPage == 1,
                     onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-                    text = { Text("Comments") },
+                    text = { Text(stringResource(R.string.gallery_detail_tab_comments)) },
                 )
                 Tab(
                     selected = pagerState.currentPage == 2,
                     onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-                    text = { Text("Recommend") },
+                    text = { Text(stringResource(R.string.gallery_detail_tab_recommend)) },
                 )
             }
             HorizontalPager(
@@ -786,7 +791,7 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
         navigate = navigate,
     )
     item(span = StaggeredGridItemSpan.FullLine) {
-        SectionTitle("Recommendations")
+        SectionTitle(stringResource(R.string.gallery_detail_recommendations_title))
     }
     recommendationItems(
         recommendations = recommendations,
@@ -805,7 +810,7 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
             val visibleCount = minOf(itemCount, 3)
             if (visibleCount > 0) {
                 item(span = StaggeredGridItemSpan.FullLine) {
-                    SectionTitle("Comments")
+                    SectionTitle(stringResource(R.string.gallery_detail_comments_title))
                 }
                 repeat(visibleCount) { index ->
                     item(span = StaggeredGridItemSpan.FullLine) {
@@ -822,30 +827,35 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
             if (
                 visibleCount > 0 &&
                 (
-                    itemCount > 3 ||
-                        (
-                            appendState is LoadState.NotLoading &&
-                                !(appendState as LoadState.NotLoading).endOfPaginationReached
+                        itemCount > 3 ||
+                                (
+                                        appendState is LoadState.NotLoading &&
+                                                !(appendState as LoadState.NotLoading).endOfPaginationReached
+                                        )
                         )
-                )
             ) {
                 item(span = StaggeredGridItemSpan.FullLine) {
                     Button(
                         onClick = {
-                            navigate(Route.Gallery.Comments(statusKey = statusKey, accountType = accountType))
+                            navigate(
+                                Route.Gallery.Comments(
+                                    statusKey = statusKey,
+                                    accountType = accountType
+                                )
+                            )
                         },
                         modifier =
                             Modifier
                                 .fillMaxWidth(),
                     ) {
-                        Text("View more")
+                        Text(stringResource(R.string.gallery_detail_view_more))
                     }
                 }
             }
         }
         onLoading {
             item(span = StaggeredGridItemSpan.FullLine) {
-                SectionTitle("Comments")
+                SectionTitle(stringResource(R.string.gallery_detail_comments_title))
             }
             repeat(3) { index ->
                 item(span = StaggeredGridItemSpan.FullLine) {
@@ -860,11 +870,10 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
             }
         }
         onEmpty {
-            Unit
         }
         onError { error ->
             item(span = StaggeredGridItemSpan.FullLine) {
-                SectionTitle("Comments")
+                SectionTitle(stringResource(R.string.gallery_detail_comments_title))
             }
             item(span = StaggeredGridItemSpan.FullLine) {
                 ErrorContent(error = error, onRetry = onRetry)
@@ -873,35 +882,33 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
     }
 }
 
-private fun androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope.recommendationItems(
+private fun LazyStaggeredGridScope.recommendationItems(
     recommendations: PagingState<UiTimelineV2>,
     itemModifier: Modifier = Modifier,
 ) {
-    with(recommendations) {
-        onSuccess {
-            items(
-                count = itemCount,
-                key = itemKey { it.itemKey ?: it.hashCode() },
-            ) { index ->
-                GalleryTimelineItem(
-                    item = peek(index),
-                    modifier = itemModifier,
-                )
-            }
+    items(
+        recommendations,
+        loadingContent = {
+            GalleryTimelineItem(
+                item = null,
+                modifier = itemModifier,
+            )
+        },
+        errorContent = {
+            ErrorContent(
+                error = it,
+                onRetry = {
+                    recommendations.onError {
+                        onRetry.invoke()
+                    }
+                }
+            )
         }
-        onLoading {
-            items(8) {
-                GalleryTimelineItem(
-                    item = null,
-                    modifier = itemModifier,
-                )
-            }
-        }
-        onError {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                ErrorContent(error = it, onRetry = onRetry)
-            }
-        }
+    ) {
+        GalleryTimelineItem(
+            item = it,
+            modifier = itemModifier,
+        )
     }
 }
 
@@ -949,7 +956,7 @@ private fun GalleryTopAppBar(
 
                         is UiState.Loading,
                         is UiState.Error,
-                        -> false
+                            -> false
                     }
                 IconButton(
                     enabled = shareEnabled,
@@ -957,13 +964,13 @@ private fun GalleryTopAppBar(
                 ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.ShareNodes,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.gallery_detail_share_content_description),
                     )
                 }
                 IconButton(onClick = {}) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                        contentDescription = "More",
+                        contentDescription = stringResource(R.string.more),
                     )
                 }
             } else {
@@ -973,7 +980,7 @@ private fun GalleryTopAppBar(
 
                         is UiState.Loading,
                         is UiState.Error,
-                        -> false
+                            -> false
                     }
                 IconButton(
                     enabled = expandEnabled,
@@ -981,7 +988,7 @@ private fun GalleryTopAppBar(
                 ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.CaretUp,
-                        contentDescription = "Expand",
+                        contentDescription = stringResource(R.string.gallery_detail_expand_content_description),
                     )
                 }
             }

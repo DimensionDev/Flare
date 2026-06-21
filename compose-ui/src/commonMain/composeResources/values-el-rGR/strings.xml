@@ -417,6 +417,6 @@
     <string name="pixiv_ranking_week_rookie_title">Κατάταξη Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="illustrations_title">Εικονογραφήσεις</string>
-    <string name="manga_title">Manga</string>
+    <string name="manga_title">Μάνγκα</string>
     <string name="app_name" translatable="false">Flare</string>
 </resources>

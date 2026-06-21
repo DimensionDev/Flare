@@ -416,7 +416,7 @@
     <string name="pixiv_ranking_week_original_title">الترتيب الأصلي</string>
     <string name="pixiv_ranking_week_rookie_title">تصنيف الروكيه</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
-    <string name="illustrations_title">التوضيحات</string>
-    <string name="manga_title">Manga</string>
+    <string name="illustrations_title">الرسوم التوضيحية</string>
+    <string name="manga_title">مانغا</string>
     <string name="app_name" translatable="false">Flare</string>
 </resources>

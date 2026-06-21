@@ -61,12 +61,14 @@ import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.GalleryTimelineItem
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.component.status.appendStateUI
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.ClickContext
@@ -91,6 +93,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 private val GalleryGridSpacing = 8.dp
 private val CompactTimelineSpacing = 2.dp
+private val CompactRecommendationBottomSpacing = GalleryGridSpacing - CompactTimelineSpacing
 private val SideBarWidth = 380.dp
 
 @Composable
@@ -205,24 +208,12 @@ private fun CompactGalleryContent(
             verticalItemSpacing = CompactTimelineSpacing,
             modifier = Modifier.fillMaxSize(),
         ) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                GalleryImages(
-                    detail = detail,
-                    onMediaClick = { media ->
-                        navigate(detail.statusMediaRoute(media))
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .let {
-                                if (detail.orientation == GalleryOrientation.Horizontal) {
-                                    it.height(520.dp)
-                                } else {
-                                    it
-                                }
-                            },
-                )
-            }
+            galleryImageItems(
+                detail = detail,
+                onMediaClick = { media ->
+                    navigate(detail.statusMediaRoute(media))
+                },
+            )
             item(span = StaggeredGridItemSpan.FullLine) {
                 Spacer(Modifier.height(12.dp))
             }
@@ -302,7 +293,10 @@ private fun GalleryImagePane(
                             Arrangement.Top
                         },
                 ) {
-                    items(images) { image ->
+                    items(
+                        items = images,
+                        key = { it.url },
+                    ) { image ->
                         GalleryImage(
                             image = image,
                             onClick = { onMediaClick(image) },
@@ -337,53 +331,48 @@ private fun GalleryImagePane(
     }
 }
 
-@Composable
-private fun GalleryImages(
+private fun LazyStaggeredGridScope.galleryImageItems(
     detail: GalleryDetail,
     onMediaClick: (UiMedia.Image) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val images = detail.images
     if (images.isEmpty()) {
-        Box(
-            modifier =
-                modifier
-                    .height(320.dp)
-                    .placeholder(true),
-        )
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(320.dp)
+                        .placeholder(true),
+            )
+        }
         return
     }
     when (detail.orientation) {
         GalleryOrientation.Vertical -> {
-            Column(modifier = modifier) {
-                images.forEach { image ->
-                    GalleryImage(
-                        image = image,
-                        onClick = { onMediaClick(image) },
-                    )
-                }
+            items(
+                items = images,
+                key = { it.url },
+                span = { StaggeredGridItemSpan.FullLine },
+            ) { image ->
+                GalleryImage(
+                    image = image,
+                    onClick = { onMediaClick(image) },
+                    modifier = Modifier.ignoreHorizontalParentPadding(screenHorizontalPadding),
+                )
             }
         }
 
         GalleryOrientation.Horizontal -> {
-            val pagerState =
-                rememberPagerState(
-                    pageCount = { images.size },
-                )
-            HorizontalFlipView(
-                state = pagerState,
-                modifier = modifier,
-            ) { index ->
-                val image = images[index]
-                NetworkImage(
-                    model = image.url,
-                    contentDescription = image.description,
-                    customHeaders = image.customHeaders,
-                    contentScale = ContentScale.Fit,
+            item(span = StaggeredGridItemSpan.FullLine) {
+                GalleryHorizontalImages(
+                    images = images,
+                    onMediaClick = onMediaClick,
                     modifier =
                         Modifier
-                            .fillMaxSize()
-                            .clickable { onMediaClick(image) },
+                            .fillMaxWidth()
+                            .height(520.dp)
+                            .ignoreHorizontalParentPadding(screenHorizontalPadding),
                 )
             }
         }
@@ -391,9 +380,38 @@ private fun GalleryImages(
 }
 
 @Composable
+private fun GalleryHorizontalImages(
+    images: List<UiMedia.Image>,
+    onMediaClick: (UiMedia.Image) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val pagerState =
+        rememberPagerState(
+            pageCount = { images.size },
+        )
+    HorizontalFlipView(
+        state = pagerState,
+        modifier = modifier,
+    ) { index ->
+        val image = images[index]
+        NetworkImage(
+            model = image.url,
+            contentDescription = image.description,
+            customHeaders = image.customHeaders,
+            contentScale = ContentScale.Fit,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clickable { onMediaClick(image) },
+        )
+    }
+}
+
+@Composable
 private fun GalleryImage(
     image: UiMedia.Image,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     NetworkImage(
         model = image.url,
@@ -401,9 +419,9 @@ private fun GalleryImage(
         customHeaders = image.customHeaders,
         contentScale = ContentScale.FillWidth,
         modifier =
-            Modifier
-                .aspectRatio(image.aspectRatio)
+            modifier
                 .fillMaxWidth()
+                .aspectRatio(image.aspectRatio)
                 .clickable(onClick = onClick),
     )
 }
@@ -742,7 +760,10 @@ private fun LazyStaggeredGridScope.galleryAfterImagesItems(
     item(span = StaggeredGridItemSpan.FullLine) {
         SectionTitle("Recommendations")
     }
-    recommendationItems(recommendations)
+    recommendationItems(
+        recommendations = recommendations,
+        itemModifier = Modifier.padding(bottom = CompactRecommendationBottomSpacing),
+    )
 }
 
 private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
@@ -765,7 +786,7 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
                             totalCount = visibleCount,
                             respectTimelineMode = true,
                         ) {
-                            StatusItem(peek(index))
+                            StatusItem(get(index))
                         }
                     }
                 }
@@ -821,21 +842,30 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
     }
 }
 
-private fun LazyStaggeredGridScope.recommendationItems(recommendations: PagingState<UiTimelineV2>) {
+private fun LazyStaggeredGridScope.recommendationItems(
+    recommendations: PagingState<UiTimelineV2>,
+    itemModifier: Modifier = Modifier,
+) {
     with(recommendations) {
         onSuccess {
             items(
                 count = itemCount,
                 key = itemKey { it.itemKey ?: it.hashCode() },
+                contentType = itemContentType { it.itemType },
             ) { index ->
                 GalleryTimelineItem(
-                    item = peek(index),
+                    item = get(index),
+                    modifier = itemModifier,
                 )
             }
+            appendStateUI(this)
         }
         onLoading {
             items(8) {
-                GalleryTimelineItem(item = null)
+                GalleryTimelineItem(
+                    item = null,
+                    modifier = itemModifier,
+                )
             }
         }
         onError {

@@ -331,6 +331,14 @@
     <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
     <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
+    <string name="gallery_detail_tab_info">Info</string>
+    <string name="gallery_detail_tab_comments">Comments</string>
+    <string name="gallery_detail_tab_recommend">Recommend</string>
+    <string name="gallery_detail_comments_title">Comments</string>
+    <string name="gallery_detail_recommendations_title">Recommendations</string>
+    <string name="gallery_detail_view_more">View more</string>
+    <string name="gallery_detail_share_content_description">Share</string>
+    <string name="gallery_detail_expand_content_description">Expand</string>
     <string name="settings_appearance_video_autoplay">Video autoplay</string>
     <string name="settings_appearance_video_autoplay_description">Automatically play videos in posts</string>
     <string name="settings_appearance_video_autoplay_wifi">Wi-Fi only</string>

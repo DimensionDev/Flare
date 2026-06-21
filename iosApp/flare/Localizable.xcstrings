@@ -47012,7 +47012,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "التوضيحات"
+            "value" : "الرسوم التوضيحية"
           }
         },
         "bg" : {
@@ -47096,7 +47096,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Illustrations"
+            "value" : "イラスト"
           }
         },
         "ko" : {
@@ -57089,7 +57089,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manga"
+            "value" : "مانغا"
           }
         },
         "bg" : {
@@ -57125,7 +57125,7 @@
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manga"
+            "value" : "Μάνγκα"
           }
         },
         "en" : {
@@ -57173,7 +57173,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manga"
+            "value" : "マンガ"
           }
         },
         "ko" : {
@@ -57221,7 +57221,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manga"
+            "value" : "Манга"
           }
         },
         "sr" : {
@@ -57245,7 +57245,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manga"
+            "value" : "Манґа"
           }
         },
         "vi" : {

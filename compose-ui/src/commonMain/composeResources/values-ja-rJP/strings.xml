@@ -415,8 +415,8 @@
     <string name="pixiv_ranking_week_original_title">元のランキング</string>
     <string name="pixiv_ranking_week_rookie_title">ルーキーランキング</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
-    <string name="illustrations_title">Illustrations</string>
-    <string name="manga_title">Manga</string>
+    <string name="illustrations_title">イラスト</string>
+    <string name="manga_title">マンガ</string>
     <string name="app_name" translatable="false">Flare</string>
     <string name="posts_with_replies_title">投稿と返信</string>
 </resources>

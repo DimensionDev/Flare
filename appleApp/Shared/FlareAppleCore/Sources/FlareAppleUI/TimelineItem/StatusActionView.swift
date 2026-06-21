@@ -143,19 +143,22 @@ public struct StatusActionView: View {
                         )
                     }
                 } label: {
-                    if let text = group.displayItem.count?.humanized, showNumbers {
-                        Label {
-                            Text(text)
-                                .lineLimit(1)
-                                .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                        } icon: {
+                    Group {
+                        if let text = group.displayItem.count?.humanized, showNumbers {
+                            Label {
+                                Text(text)
+                                    .lineLimit(1)
+                                    .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                            } icon: {
+                                StatusActionIcon(icon: group.displayItem.icon)
+                            }
+                        } else {
                             StatusActionIcon(icon: group.displayItem.icon)
+                                .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
+                                .contentShape(Rectangle())
                         }
-                    } else {
-                        StatusActionIcon(icon: group.displayItem.icon)
-                            .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
-                            .contentShape(Rectangle())
                     }
+                    .statusActionContentPadding(isExpanded: true)
                 }
                 .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
@@ -216,15 +219,18 @@ public struct StatusActionItemView: View {
             triggerHapticFeedback()
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         } label: {
-            if let text = resolvedText {
-                Label {
-                    text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                } icon: {
+            Group {
+                if let text = resolvedText {
+                    Label {
+                        text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                    } icon: {
+                        StatusActionIcon(icon: data.icon)
+                    }
+                } else {
                     StatusActionIcon(icon: data.icon)
                 }
-            } else {
-                StatusActionIcon(icon: data.icon)
             }
+            .statusActionContentPadding(isExpanded: !useText)
         }
         .optionalForegroundStyle(data.color?.swiftColor)
         .buttonStyle(.plain)
@@ -234,6 +240,11 @@ public struct StatusActionItemView: View {
 
 // MARK: - Helpers
 
+private enum StatusActionHitArea {
+    static let horizontalInset: CGFloat = 6
+    static let verticalInset: CGFloat = 4
+}
+
 #if os(macOS)
 private struct StatusActionHoverModifier: ViewModifier {
     let isEnabled: Bool
@@ -242,12 +253,9 @@ private struct StatusActionHoverModifier: ViewModifier {
     func body(content: Content) -> some View {
         if isEnabled {
             content
-                .contentShape(Rectangle())
                 .background {
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
                         .fill(Color.primary.opacity(isHovered ? 0.08 : 0))
-                        .padding(.horizontal, -6)
-                        .padding(.vertical, -4)
                 }
                 .animation(.easeOut(duration: 0.12), value: isHovered)
                 .onHover { hovering in
@@ -272,6 +280,18 @@ private extension View {
             self.foregroundStyle(color)
         } else {
             self
+        }
+    }
+
+    @ViewBuilder
+    func statusActionContentPadding(isExpanded: Bool) -> some View {
+        if isExpanded {
+            self
+                .padding(.horizontal, StatusActionHitArea.horizontalInset)
+                .padding(.vertical, StatusActionHitArea.verticalInset)
+                .contentShape(Rectangle())
+        } else {
+            self.contentShape(Rectangle())
         }
     }
 

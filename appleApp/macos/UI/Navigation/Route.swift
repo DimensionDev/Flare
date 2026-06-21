@@ -107,44 +107,12 @@ extension Route {
             fromStatus(status)
         case .profile(let profile):
             fromProfile(profile)
-        case .search:
-            .empty
-        case .media:
-            .empty
-        case .rss:
-            .empty
-        case .twitterArticle:
-            .empty
-        case .compose:
-            .empty
         case .deepLinkAccountPicker(let picker):
             fromAccountPicker(picker)
         case .openLinkDirectly(let data):
             .externalLink(data.url)
-        case .directMessage:
-            .empty
-        case .editUserList:
-            .empty
-        case .blockUser:
-            .empty
-        case .unblockUser:
-            .empty
-        case .muteUser:
-            .empty
-        case .unmuteUser:
-            .empty
-        case .reportUser:
-            .empty
-        case .allDirectMessages:
-            .empty
-        case .allLists:
-            .empty
-        case .allFeeds:
-            .empty
-        case .allAntennas:
-            .empty
-        case .allChannels:
-            .empty
+        default:
+                .empty
         }
     }
 

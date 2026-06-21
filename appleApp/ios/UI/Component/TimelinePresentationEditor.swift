@@ -1,4 +1,5 @@
 import SwiftUI
+import FlareAppleUI
 import KotlinSharedUI
 import AppleFontAwesome
 

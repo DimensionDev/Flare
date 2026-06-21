@@ -57,7 +57,7 @@ struct FlareApp: App {
                 }
             }
         }
-//        .windowToolbarStyle(.unifiedCompact(showsTitle: false))
+//        .windowToolbarStyle(.unified(showsTitle: false))
         Settings {
             FlareTheme {
                 MacSettingsScreen()

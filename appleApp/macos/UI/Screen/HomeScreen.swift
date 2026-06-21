@@ -36,7 +36,7 @@ struct HomeScreen: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .navigation) {
+            ToolbarItem(placement: .principal) {
                 HomeTimelineTabPicker(
                     tabs: tabs,
                     selectedTabID: $selectedTabID
@@ -74,20 +74,34 @@ private struct HomeTimelineTabPicker: View {
     var body: some View {
         Picker(selection: selectedTabSelection) {
             if tabs.isEmpty {
-                Text(selectedTabTitle)
+                HomeTimelineTabLoadingPicker()
                     .tag("")
             } else {
                 ForEach(tabs, id: \.id) { tab in
-                    Text(tab.title.text)
-                        .tag(tab.id)
+                    Label {
+                        Text(tab.title.text)
+                    } icon: {
+                        TabIcon(tabItem: tab, size: 18, iconOnly: true)
+                            .frame(width: 18, height: 18)
+                    }
+                    .tag(tab.id)
                 }
             }
         } label: {
-            Text(selectedTabTitle)
+            if let selectedTab {
+                HStack(spacing: 6) {
+                    TabIcon(tabItem: selectedTab, size: 18, iconOnly: true)
+                        .frame(width: 18, height: 18)
+                    Text(selectedTab.title.text)
+                    Image(fontAwesome: .chevronDown)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                HomeTimelineTabLoadingPicker()
+            }
         }
         .pickerStyle(.menu)
-        .labelsHidden()
-        .font(.headline)
         .fixedSize()
         .disabled(tabs.isEmpty)
         .onChange(of: tabIDs) { _, ids in
@@ -104,12 +118,6 @@ private struct HomeTimelineTabPicker: View {
         } set: { id in
             selectedTabID = id.isEmpty ? nil : id
         }
-    }
-
-    private var selectedTabTitle: String {
-        selectedTab?.title.text
-            ?? tabs.first?.title.text
-            ?? LocalizedStrings.string("home_tab_home_title", fallback: "Home")
     }
 
     private var selectedTab: UiTimelineTabItem? {

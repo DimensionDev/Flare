@@ -17,14 +17,14 @@ struct MacSettingsScreen: View {
                 NavigationStack {
                     pane.detail
                 }
-                    .tabItem {
-                        Label {
-                            Text(pane.title)
-                        } icon: {
-                            Image(fontAwesome: pane.icon)
-                        }
+                .tabItem {
+                    Label {
+                        Text(pane.title)
+                    } icon: {
+//                        Image(fontAwesome: pane.icon)
                     }
-                    .tag(pane)
+                }
+                .tag(pane)
             }
         }
         .frame(minWidth: 880, minHeight: 620)

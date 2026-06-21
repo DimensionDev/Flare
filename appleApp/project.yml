@@ -6,7 +6,7 @@ options:
   defaultConfig: Release
   deploymentTarget:
     iOS: "17.0"
-    macOS: "14.0"
+    macOS: "15.0"
 
 configs:
   Debug: debug

@@ -1,4 +1,5 @@
 import AppleFontAwesome
+import FlareAppleUI
 import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
@@ -7,98 +8,138 @@ struct SidebarView: View {
     @Binding var selection: HomeTabsPresenterStateHomeTabs?
     @ObservedObject var homeTabsPresenter: KotlinPresenter<HomeTabsPresenterState>
     @State private var isLoginSheetPresented = false
-    @StateObject private var notificationBadgePresenter = KotlinPresenter(
-        presenter: AllNotificationBadgePresenter())
+    @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @StateObject private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
     
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: 8) {
-                    if shouldShowLogin {
-                        SidebarIconButton(
-                            title: LocalizedStrings.string("login_button", fallback: "Log in"),
-                            icon: .userPlus,
-                            isSelected: isLoginSheetPresented
-                        ) {
-                            isLoginSheetPresented = true
-                        }
-
-                        Divider()
-                            .frame(width: 32)
-                            .padding(.vertical, 2)
+        List(selection: $selection) {
+            StateView(state: homeTabsPresenter.state.tabs) { tabs in
+                ForEach(tabs.cast(HomeTabsPresenterStateHomeTabs.self), id: \.name) { tab in
+                    Label {
+                        Text(tab.macOSTitle)
+                    } icon: {
+                        Image(fontAwesome: tab.macOSIcon)
                     }
-
-                    StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                        ForEach(tabs.cast(HomeTabsPresenterStateHomeTabs.self), id: \.name) { tab in
-                            SidebarIconButton(
-                                title: tab.macOSTitle,
-                                icon: tab.macOSIcon,
-                                badge: notificationBadge(for: tab),
-                                isSelected: isSelected(tab)
-                            ) {
-                                withAnimation {
-                                    selection = tab
-                                }
-                            }
-                        }
-                    } loadingContent: {
-                        SidebarLoadingItems()
-                    }
-
-                    if canCompose {
-                        SidebarIconButton(
-                            title: LocalizedStrings.string("home_compose", fallback: "Compose"),
-                            icon: .pen,
-                            isSelected: false,
-                            isAccent: true
-                        ) {
-                        }
-                        .padding(.top, 4)
-                    }
+                    .tag(tab)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+            } loadingContent: {
+                SidebarLoadingItems()
             }
-        }
-        .frame(width: 72)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .background {
-            SidebarMaterialBackground()
-                .ignoresSafeArea(.container, edges: [.top, .bottom])
-        }
-        .overlay(alignment: .trailing) {
-            Divider()
-                .ignoresSafeArea(.container, edges: [.top, .bottom])
-        }
-        .sheet(isPresented: $isLoginSheetPresented) {
-            NavigationStack {
-                ServiceSelectionScreen {
-                    isLoginSheetPresented = false
-                    selection = .home
-                }
-                .navigationTitle(LocalizedStrings.string("login_button", fallback: "Log in"))
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button {
-                            isLoginSheetPresented = false
-                        } label: {
+            StateView(state: secondaryTabPresenter.state.items) { items in
+                let tabs = items.cast(SecondaryTabsPresenter.Item.self)
+                ForEach(tabs, id: \.description) { item in
+                    DisclosureGroup {
+                        ForEach(item.tabs, id: \.self) { tab in
                             Label {
-                                Text(LocalizedStrings.string("compose_button_cancel", fallback: "Cancel"))
+                                Text(tab.title.text)
                             } icon: {
-                                Image(systemName: "xmark")
+                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
                             }
                         }
-                        .help(LocalizedStrings.string("compose_button_cancel", fallback: "Cancel"))
+                    } label: {
+                        StateView(state: item.user) { user in
+                            UserOnelineView(data: user)
+                        }
                     }
                 }
             }
-            .frame(width: 380, height: 480)
+            Label {
+                Text("settings_title")
+            } icon: {
+                Image(fontAwesome: .gear)
+            }
+            .onTapGesture {
+                openSettings()
+            }
         }
+//        VStack(spacing: 0) {
+//            ScrollView {
+//                VStack(spacing: 8) {
+//                    if shouldShowLogin {
+//                        SidebarIconButton(
+//                            title: LocalizedStrings.string("login_button", fallback: "Log in"),
+//                            icon: .userPlus,
+//                            isSelected: isLoginSheetPresented
+//                        ) {
+//                            isLoginSheetPresented = true
+//                        }
+//
+//                        Divider()
+//                            .frame(width: 32)
+//                            .padding(.vertical, 2)
+//                    }
+//
+//                    StateView(state: homeTabsPresenter.state.tabs) { tabs in
+//                        ForEach(tabs.cast(HomeTabsPresenterStateHomeTabs.self), id: \.name) { tab in
+//                            SidebarIconButton(
+//                                title: tab.macOSTitle,
+//                                icon: tab.macOSIcon,
+//                                badge: notificationBadge(for: tab),
+//                                isSelected: isSelected(tab)
+//                            ) {
+//                                withAnimation {
+//                                    selection = tab
+//                                }
+//                            }
+//                        }
+//                    } loadingContent: {
+//                        SidebarLoadingItems()
+//                    }
+//
+//                    if canCompose {
+//                        SidebarIconButton(
+//                            title: LocalizedStrings.string("home_compose", fallback: "Compose"),
+//                            icon: .pen,
+//                            isSelected: false,
+//                            isAccent: true
+//                        ) {
+//                        }
+//                        .padding(.top, 4)
+//                    }
+//                }
+//                .frame(maxWidth: .infinity)
+//                .padding(.top, 12)
+//                .padding(.bottom, 8)
+//            }
+//        }
+//        .frame(width: 72)
+//        .frame(maxHeight: .infinity, alignment: .top)
+//        .background {
+//            SidebarMaterialBackground()
+//                .ignoresSafeArea(.container, edges: [.top, .bottom])
+//        }
+//        .overlay(alignment: .trailing) {
+//            Divider()
+//                .ignoresSafeArea(.container, edges: [.top, .bottom])
+//        }
+//        .sheet(isPresented: $isLoginSheetPresented) {
+//            NavigationStack {
+//                ServiceSelectionScreen {
+//                    isLoginSheetPresented = false
+//                    selection = .home
+//                }
+//                .navigationTitle(LocalizedStrings.string("login_button", fallback: "Log in"))
+//                .toolbar {
+//                    ToolbarItem(placement: .cancellationAction) {
+//                        Button {
+//                            isLoginSheetPresented = false
+//                        } label: {
+//                            Label {
+//                                Text(LocalizedStrings.string("compose_button_cancel", fallback: "Cancel"))
+//                            } icon: {
+//                                Image(systemName: "xmark")
+//                            }
+//                        }
+//                        .help(LocalizedStrings.string("compose_button_cancel", fallback: "Cancel"))
+//                    }
+//                }
+//            }
+//            .frame(width: 380, height: 480)
+//        }
     }
 
     private var shouldShowLogin: Bool {

@@ -11,6 +11,12 @@ struct DetailShell: View {
     @ObservedObject var homeTabsPresenter: KotlinPresenter<HomeTabsPresenterState>
 
     var body: some View {
+//        if let selection {
+//            Router(
+//                initialRoute: selection.macOSInitialRoute,
+//                isActive: true
+//            )
+//        }
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
             TabView(selection: $selection) {
                 ForEach(tabs.cast(HomeTabsPresenterStateHomeTabs.self), id: \.name) { tab in

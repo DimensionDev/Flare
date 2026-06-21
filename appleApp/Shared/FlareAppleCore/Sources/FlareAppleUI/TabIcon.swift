@@ -1,8 +1,7 @@
-import SwiftUI
-import KotlinSharedUI
-import FlareAppleCore
-import FlareAppleUI
 import AppleFontAwesome
+import FlareAppleCore
+import KotlinSharedUI
+import SwiftUI
 
 public struct TabTitle: View {
     private let title: Any

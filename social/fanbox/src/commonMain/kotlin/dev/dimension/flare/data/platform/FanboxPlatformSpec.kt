@@ -5,7 +5,6 @@ import dev.dimension.flare.data.datasource.fanbox.fanboxCreatorKey
 import dev.dimension.flare.data.datasource.fanbox.fanboxPostKey
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -25,6 +24,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
+private const val FANBOX_SUPPORTED_TIMELINE_SPEC_ID: String = "fanbox.supported"
+
 @HiddenFromObjC
 public data object FanboxPlatformSpec :
     PlatformSpec,
@@ -38,7 +39,7 @@ public data object FanboxPlatformSpec :
 
     internal val supportedTimelineSpec =
         TimelineSpec(
-            id = TimelineSpecIds.FANBOX_SUPPORTED,
+            id = FANBOX_SUPPORTED_TIMELINE_SPEC_ID,
             title = UiStrings.FanboxSupported,
             icon = UiIcon.Heart.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),

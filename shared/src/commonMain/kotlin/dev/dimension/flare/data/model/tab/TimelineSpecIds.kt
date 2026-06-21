@@ -2,6 +2,9 @@ package dev.dimension.flare.data.model.tab
 
 import kotlin.native.HiddenFromObjC
 
+// This file is limited to shared/common timeline specs and IDs emitted by the
+// v1 TabSettings migration. Platform-only timeline IDs belong in their owning
+// platform module, not here.
 @HiddenFromObjC
 public object TimelineSpecIds {
     public const val COMMON_HOME: String = "common.home"
@@ -35,11 +38,8 @@ public object TimelineSpecIds {
     public const val VVO_FAVORITE: String = "vvo.favorite"
     public const val VVO_LIKED: String = "vvo.liked"
 
-    public const val PIXIV_FOLLOWING: String = "pixiv.following"
-    public const val PIXIV_BOOKMARK: String = "pixiv.bookmark"
-
-    public const val FANBOX_SUPPORTED: String = "fanbox.supported"
-
+    // Keep this set in sync with TabSettingsMigration.toTimelineSlotOrNull.
+    // It is not a registry for every platform timeline spec.
     public val legacyMigrationIds: Set<String> =
         setOf(
             COMMON_HOME,
@@ -65,8 +65,5 @@ public object TimelineSpecIds {
             XQT_DEVICE_FOLLOW,
             VVO_FAVORITE,
             VVO_LIKED,
-            PIXIV_FOLLOWING,
-            PIXIV_BOOKMARK,
-            FANBOX_SUPPORTED,
         )
 }

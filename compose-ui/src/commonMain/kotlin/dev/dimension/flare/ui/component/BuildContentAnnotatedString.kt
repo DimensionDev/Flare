@@ -324,10 +324,10 @@ private fun StyleData.blockTextStyle(block: RenderBlockStyle): TextStyle =
         block.headingLevel != null ->
             when (block.headingLevel) {
                 1 -> h1
-                2 -> h2
+                2 -> h2.copy(color = color.copy(alpha = 0.7f))
                 3 -> h3
-                4 -> h4
-                5 -> h5
+                4 -> h4.copy(color = color.copy(alpha = 0.7f))
+                5 -> h5.copy(color = color.copy(alpha = 0.5f))
                 else -> h6
             }
         block.isFigCaption ->

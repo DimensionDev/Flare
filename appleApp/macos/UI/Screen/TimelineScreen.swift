@@ -9,6 +9,7 @@ struct TimelineScreen: View {
     let allowGalleryMode: Bool
     @StateObject private var presenter: KotlinPresenter<TimelineItemPresenterState>
     @Environment(\.timelineAppearance) private var timelineAppearance
+    @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
     init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false) {
         self.tabItem = tabItem
@@ -48,13 +49,15 @@ struct TimelineScreen: View {
 
                 }
             }
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                } label: {
-                    Label {
-                        Text("home_compose")
-                    } icon: {
-                        Image(fontAwesome: .penToSquare)
+            if case .success(let value) = onEnum(of: canComposePresenter.state.canCompose), value.data.boolValue {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                    } label: {
+                        Label {
+                            Text("home_compose")
+                        } icon: {
+                            Image(fontAwesome: .penToSquare)
+                        }
                     }
                 }
             }

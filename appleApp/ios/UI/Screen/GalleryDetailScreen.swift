@@ -580,57 +580,11 @@ private struct GalleryRecommendationsGrid: View {
 }
 
 private struct GalleryRecommendationTile: View {
-    @Environment(\.openURL) private var openURL
     let item: UiTimelineV2?
     let onOpenMedia: (UiTimelineV2.Post, UiMedia) -> Void
 
     var body: some View {
-        if let post = item as? UiTimelineV2.Post {
-            VStack(alignment: .leading, spacing: 8) {
-                if let media = post.images.first {
-                    MediaView(data: media)
-                        .aspectRatio(CGFloat(media.aspectRatio ?? 1), contentMode: .fit)
-                        .clipShape(.rect(cornerRadius: 12))
-                        .onTapGesture {
-                            handleMediaTap(post: post, media: media)
-                        }
-                } else if !post.content.isEmpty {
-                    RichText(text: post.content)
-                        .lineLimit(5)
-                        .padding(8)
-                }
-                HStack(spacing: 6) {
-                    if let avatar = post.user?.avatar {
-                        AvatarView(data: avatar.url, customHeader: avatar.customHeaders)
-                            .frame(width: 24, height: 24)
-                    }
-                    Text(post.user?.name.raw ?? post.contentWarning?.raw ?? "")
-                        .font(.caption)
-                        .lineLimit(1)
-                }
-                .padding(.horizontal, 8)
-                .padding(.bottom, 8)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 12))
-            .contentShape(Rectangle())
-            .onTapGesture {
-                post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-            }
-        } else {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.placeholder)
-                .aspectRatio(0.75, contentMode: .fit)
-                .redacted(reason: .placeholder)
-        }
-    }
-
-    private func handleMediaTap(post: UiTimelineV2.Post, media: UiMedia) {
-        if post.mediaClickPolicy == .openPostClickEvent {
-            post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-        } else {
-            onOpenMedia(post, media)
-        }
+        TimelineGalleryItemView(item: item, onOpenMedia: onOpenMedia)
     }
 }
 

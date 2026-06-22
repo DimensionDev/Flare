@@ -51,9 +51,9 @@ public struct MediaVideoView: View {
     @State private var time: CMTime = .zero
     @State private var isAppeared = false
     #if os(macOS)
-    @State private var macPlayer = AVPlayer()
+    @State private var macPlayer = AVQueuePlayer()
     @State private var macPlayerURL: URL?
-    @State private var macEndObserver: NSObjectProtocol?
+    @State private var macPlayerLooper: AVPlayerLooper?
     #endif
     private let data: UiMediaVideo
 
@@ -179,42 +179,29 @@ public struct MediaVideoView: View {
                 isAppeared = false
                 play = false
                 macPlayer.pause()
-                removeMacEndObserver()
             }
     }
 
     private func configureMacPlayerIfNeeded() {
         guard let videoURL = URL(string: data.url) else {
-            removeMacEndObserver()
-            macPlayer.pause()
-            macPlayer.replaceCurrentItem(with: nil)
-            macPlayerURL = nil
+            resetMacPlayer()
             videoState = .error(URLError(.badURL))
             return
         }
 
         macPlayer.isMuted = true
-        macPlayer.actionAtItemEnd = .none
+        macPlayer.actionAtItemEnd = .advance
 
         guard macPlayerURL != videoURL else {
             return
         }
 
-        removeMacEndObserver()
+        resetMacPlayer()
         let item = AVPlayerItem(url: videoURL)
-        macPlayer.replaceCurrentItem(with: item)
+        macPlayerLooper = AVPlayerLooper(player: macPlayer, templateItem: item)
         macPlayerURL = videoURL
         time = .zero
         videoState = .loading
-
-        let player = macPlayer
-        macEndObserver = NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: item,
-            queue: .main
-        ) { _ in
-            MacAVPlayerPlayback.replay(player, rate: 1)
-        }
     }
 
     private func updateMacPlayback() {
@@ -248,12 +235,17 @@ public struct MediaVideoView: View {
         let duration = item.duration.seconds
         switch item.status {
         case .readyToPlay:
-            if macPlayer.rate != 0, duration.isFinite {
+            switch macPlayer.timeControlStatus {
+            case .playing where macPlayer.rate != 0 && duration.isFinite:
                 videoState = .playing(duration)
-            } else if play {
+            case .playing:
+                videoState = play ? .loading : .idle
+            case .waitingToPlayAtSpecifiedRate:
                 videoState = .loading
-            } else {
-                videoState = .idle
+            case .paused:
+                videoState = play ? .loading : .idle
+            @unknown default:
+                videoState = play ? .loading : .idle
             }
         case .failed:
             videoState = .error(item.error ?? URLError(.cannotDecodeContentData))
@@ -264,11 +256,20 @@ public struct MediaVideoView: View {
         }
     }
 
-    private func removeMacEndObserver() {
-        if let macEndObserver {
-            NotificationCenter.default.removeObserver(macEndObserver)
-            self.macEndObserver = nil
+    private func resetMacPlayer() {
+        macPlayer.pause()
+        macPlayerLooper = nil
+        macPlayer.removeAllItems()
+        macPlayerURL = nil
+    }
+
+    private func formatMacRemainingTime(duration: Double) -> String {
+        guard duration.isFinite, duration > 0 else {
+            return "0:00"
         }
+        let currentSeconds = time.seconds.isFinite ? time.seconds : 0
+        let remainingSeconds = max(Int((duration - currentSeconds).rounded(.down)), 0)
+        return String(format: "%d:%02d", remainingSeconds / 60, remainingSeconds % 60)
     }
     #endif
 
@@ -283,10 +284,17 @@ public struct MediaVideoView: View {
                 .tint(.white)
                 .mediaVideoBadgeStyle()
         case .playing(let duration):
+            #if os(macOS)
+            Text(formatMacRemainingTime(duration: duration))
+                .font(.caption)
+                .foregroundStyle(.white)
+                .mediaVideoBadgeStyle()
+            #else
             Text(Date(timeIntervalSinceNow: duration - time.seconds), style: .timer)
                 .font(.caption)
                 .foregroundStyle(.white)
                 .mediaVideoBadgeStyle()
+            #endif
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
                 .mediaVideoBadgeStyle()

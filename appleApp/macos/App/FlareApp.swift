@@ -4,6 +4,10 @@ import KotlinSharedUI
 import SwiftUI
 import AppleFontAwesome
 
+enum MacWindowID {
+    static let rssManagement = "rss-management"
+}
+
 @main
 struct FlareApp: App {
     init() {
@@ -22,42 +26,17 @@ struct FlareApp: App {
             }
         }
         .commands {
-            CommandGroup(replacing: .newItem) {
-                Button {
-                } label: {
-                    Label {
-                        Text("draft_box_title")
-                    } icon: {
-                        Image(fontAwesome: .penToSquare)
-                    }
-                }
-                Button {
-                } label: {
-                    Label {
-                        Text("settings_rss_management_title")
-                    } icon: {
-                        Image(fontAwesome: .squareRss)
-                    }
-                }
-                Button {
-                } label: {
-                    Label {
-                        Text("local_history_title")
-                    } icon: {
-                        Image(fontAwesome: .clockRotateLeft)
-                    }
-                }
-                Button {
-                } label: {
-                    Label {
-                        Text("settings_agent_history_title")
-                    } icon: {
-                        Image(fontAwesome: .robot)
-                    }
-                }
-            }
+            MacAppCommands()
         }
 //        .windowToolbarStyle(.unified(showsTitle: false))
+        WindowGroup("settings_rss_management_title", id: MacWindowID.rssManagement) {
+            FlareTheme {
+                RssScreen()
+            }
+        }
+        .defaultSize(width: 1120, height: 760)
+        .windowToolbarStyle(.unified)
+
         Settings {
             FlareTheme {
                 MacSettingsScreen()
@@ -68,5 +47,50 @@ struct FlareApp: App {
 //        .commands {
 //            SidebarCommands()
 //        }
+    }
+}
+
+private struct MacAppCommands: Commands {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some Commands {
+        CommandGroup(replacing: .newItem) {
+            Button {
+            } label: {
+                Label {
+                    Text("draft_box_title")
+                } icon: {
+                    Image(fontAwesome: .penToSquare)
+                }
+            }
+
+            Button {
+                openWindow(id: MacWindowID.rssManagement)
+            } label: {
+                Label {
+                    Text("settings_rss_management_title")
+                } icon: {
+                    Image(fontAwesome: .squareRss)
+                }
+            }
+
+            Button {
+            } label: {
+                Label {
+                    Text("local_history_title")
+                } icon: {
+                    Image(fontAwesome: .clockRotateLeft)
+                }
+            }
+
+            Button {
+            } label: {
+                Label {
+                    Text("settings_agent_history_title")
+                } icon: {
+                    Image(fontAwesome: .robot)
+                }
+            }
+        }
     }
 }

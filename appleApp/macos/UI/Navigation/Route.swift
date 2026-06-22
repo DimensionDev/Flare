@@ -15,6 +15,7 @@ enum Route: Hashable, Identifiable {
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
+    case rssDetail(String, String?, String?)
     case externalLink(String)
 
     var id: Int {
@@ -87,6 +88,8 @@ enum Route: Hashable, Identifiable {
                 data: data,
                 onNavigate: onNavigate
             )
+        case .rssDetail(let url, let descriptionHtml, let title):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
         case .externalLink:
             EmptyView()
         }
@@ -104,6 +107,8 @@ extension Route {
             fromStatus(status)
         case .profile(let profile):
             fromProfile(profile)
+        case .rss(let rss):
+            fromRss(rss)
         case .deepLinkAccountPicker(let picker):
             fromAccountPicker(picker)
         case .openLinkDirectly(let data):
@@ -139,6 +144,13 @@ extension Route {
             .statusDetail(data.accountType, data.statusKey)
         default:
             .empty
+        }
+    }
+
+    private static func fromRss(_ rss: DeeplinkRoute.Rss) -> Route? {
+        switch onEnum(of: rss) {
+        case .detail(let data):
+            .rssDetail(data.url, data.descriptionHtml, data.title)
         }
     }
 

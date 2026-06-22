@@ -27,16 +27,4 @@ struct MacAVPlayerView: NSViewRepresentable {
     }
 }
 
-enum MacAVPlayerPlayback {
-    nonisolated static func replay(_ player: AVPlayer, rate: Float) {
-        player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { finished in
-            guard finished else {
-                return
-            }
-            DispatchQueue.main.async {
-                player.playImmediately(atRate: rate)
-            }
-        }
-    }
-}
 #endif

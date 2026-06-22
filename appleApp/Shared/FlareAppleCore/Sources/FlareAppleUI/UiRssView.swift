@@ -1,7 +1,6 @@
-import SwiftUI
-import KotlinSharedUI
-import FlareAppleUI
 import AppleFontAwesome
+import KotlinSharedUI
+import SwiftUI
 
 public struct UiRssView: View {
     private let data: UiRssSource
@@ -11,12 +10,9 @@ public struct UiRssView: View {
     }
 
     public var body: some View {
-        VStack(
-            alignment: .leading,
-            spacing: 8
-        ) {
+        VStack(alignment: .leading, spacing: 8) {
             Label {
-                if let title = data.title {
+                if let title = data.title, !title.isEmpty {
                     Text(title)
                 } else {
                     Text(data.host)
@@ -29,10 +25,14 @@ public struct UiRssView: View {
                     Image(fontAwesome: .squareRss)
                 }
             }
+
             Text(data.url)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+                .truncationMode(.middle)
         }
     }
 }
+
+extension UiRssSource: @retroactive Identifiable {}

@@ -5,6 +5,8 @@ import KotlinSharedUI
 import SwiftUI
 
 struct RootView: View {
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
@@ -73,26 +75,53 @@ struct RootView: View {
                         }
                     }
                 }
+
+                Section {
+                    Button {
+                        openWindow(id: MacWindowID.rssManagement)
+                    } label: {
+                        Label {
+                            Text("settings_rss_management_title")
+                        } icon: {
+                            Image(fontAwesome: .squareRss)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    Button {
+                        openSettings()
+                    } label: {
+                        Label {
+                            Text("settings_title")
+                        } icon: {
+                            Image(fontAwesome: .gear)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
                 
                 if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
                     let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
-                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                        DisclosureGroup {
-                            ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
-                                if let route = route(for: tab) {
-                                    Label {
-                                        Text(tab.title.text)
-                                    } icon: {
-                                        Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                    Section {
+                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                            DisclosureGroup {
+                                ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
+                                    if let route = route(for: tab) {
+                                        Label {
+                                            Text(tab.title.text)
+                                        } icon: {
+                                            Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                                        }
+                                        .tag(route)
                                     }
-                                    .tag(route)
+                                }
+                            } label: {
+                                StateView(state: item.user) { user in
+                                    UserOnelineView(data: user)
                                 }
                             }
-                        } label: {
-                            StateView(state: item.user) { user in
-                                UserOnelineView(data: user)
-                            }
                         }
+                    } header: {
+                        Text("macos_sidebar_accounts")
                     }
                 }
             }

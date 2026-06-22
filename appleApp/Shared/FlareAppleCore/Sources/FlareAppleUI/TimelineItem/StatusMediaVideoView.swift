@@ -183,9 +183,9 @@ public struct StatusMediaVideoView: View {
     @State private var seekFeedbackOpacity: Double = 0
     @State private var seekFeedbackTask: Task<Void, Never>?
     #if os(macOS)
-    @State private var macPlayer = AVPlayer()
+    @State private var macPlayer = AVQueuePlayer()
     @State private var macPlayerURL: URL?
-    @State private var macEndObserver: NSObjectProtocol?
+    @State private var macPlayerLooper: AVPlayerLooper?
     #endif
     private let data: UiMediaVideo
     private let seekInterval: Double = 5
@@ -356,46 +356,29 @@ public struct StatusMediaVideoView: View {
             }
             .onDisappear {
                 endFastPlayback()
-                macPlayer.pause()
-                removeMacEndObserver()
+                resetMacPlayer()
             }
     }
 
     private func configureMacPlayerIfNeeded() {
         guard let videoURL = URL(string: data.url) else {
-            removeMacEndObserver()
-            macPlayer.pause()
-            macPlayer.replaceCurrentItem(with: nil)
-            macPlayerURL = nil
+            resetMacPlayer()
             videoState = .error(URLError(.badURL))
             return
         }
 
         macPlayer.isMuted = false
-        macPlayer.actionAtItemEnd = .none
+        macPlayer.actionAtItemEnd = .advance
 
         guard macPlayerURL != videoURL else {
             return
         }
 
-        removeMacEndObserver()
+        resetMacPlayer()
         let item = AVPlayerItem(url: videoURL)
-        macPlayer.replaceCurrentItem(with: item)
+        macPlayerLooper = AVPlayerLooper(player: macPlayer, templateItem: item)
         macPlayerURL = videoURL
         videoState = .loading
-
-        let player = macPlayer
-        let playBinding = $play
-        let playbackRateBinding = $playbackRate
-        macEndObserver = NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: item,
-            queue: .main
-        ) { _ in
-            if playBinding.wrappedValue {
-                MacAVPlayerPlayback.replay(player, rate: playbackRateBinding.wrappedValue)
-            }
-        }
     }
 
     private func updateMacPlayback() {
@@ -438,14 +421,23 @@ public struct StatusMediaVideoView: View {
 
         switch item.status {
         case .readyToPlay:
-            if macPlayer.rate != 0 {
+            switch macPlayer.timeControlStatus {
+            case .playing where macPlayer.rate != 0:
                 videoState = .playing(duration)
-            } else if wasPlayingOrPaused {
-                videoState = .paused(duration)
-            } else if play {
+            case .playing:
+                videoState = play ? .loading : .idle
+            case .waitingToPlayAtSpecifiedRate:
                 videoState = .loading
-            } else {
-                videoState = .idle
+            case .paused:
+                if wasPlayingOrPaused {
+                    videoState = .paused(duration)
+                } else if play {
+                    videoState = .loading
+                } else {
+                    videoState = .idle
+                }
+            @unknown default:
+                videoState = play ? .loading : .idle
             }
         case .failed:
             videoState = .error(item.error ?? URLError(.cannotDecodeContentData))
@@ -465,11 +457,11 @@ public struct StatusMediaVideoView: View {
         }
     }
 
-    private func removeMacEndObserver() {
-        if let macEndObserver {
-            NotificationCenter.default.removeObserver(macEndObserver)
-            self.macEndObserver = nil
-        }
+    private func resetMacPlayer() {
+        macPlayer.pause()
+        macPlayerLooper = nil
+        macPlayer.removeAllItems()
+        macPlayerURL = nil
     }
     #endif
 

@@ -63,13 +63,10 @@ struct SearchScreen: View {
                 .listRowBackground(Color.clear)
             }
             Section {
-                TimelinePagingView(data: searchPresenter.state.status)
+                TimelinePagingListContent(data: searchPresenter.state.status)
             } header: {
                 Text("search_status")
             }
-            .listRowSeparator(.hidden)
-            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowBackground(Color.clear)
         }
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)

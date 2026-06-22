@@ -57,9 +57,9 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     @ViewBuilder
     private var statusContent: some View {
         if normalizedSearchText.isEmpty {
-            LocalHistoryTimelinePagingView(data: presenter.state.history)
+            TimelinePagingListContent(data: presenter.state.history)
         } else if !presenter.state.data.isError {
-            LocalHistoryTimelinePagingView(data: presenter.state.data)
+            TimelinePagingListContent(data: presenter.state.data)
         }
     }
 
@@ -109,17 +109,6 @@ private enum LocalHistorySelection {
         case .user:
             return "users"
         }
-    }
-}
-
-private struct LocalHistoryTimelinePagingView: View {
-    let data: PagingState<UiTimelineV2>
-
-    var body: some View {
-        TimelinePagingView(data: data)
-            .listRowSeparator(.hidden)
-            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowBackground(Color.clear)
     }
 }
 

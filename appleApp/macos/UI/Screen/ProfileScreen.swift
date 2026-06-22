@@ -219,7 +219,7 @@ private struct ProfileTimelineTabContent: View {
     }
 
     var body: some View {
-        TimelinePagingView(data: presenter.state.listState)
+        TimelinePagingContent(data: presenter.state.listState)
     }
 }
 

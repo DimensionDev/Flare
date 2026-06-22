@@ -617,14 +617,14 @@ private struct GallerySideBar: View {
                     .padding(.top, 8)
                 }
             case .comments:
-                TimelinePagingContent(
+                UITimelinePagingView(
                     data: comments,
                     detailStatusKey: nil,
                     key: "gallery_comments_\(detail.statusKey.description())",
                     suppressInitialRefreshIndicator: true
                 )
             case .recommend:
-                GalleryTimelinePagingView(data: recommendations)
+                UIGalleryTimelinePagingView(data: recommendations)
             }
         }
     }
@@ -737,7 +737,7 @@ struct GalleryCommentsScreen: View {
     }
 
     var body: some View {
-        TimelinePagingContent(
+        UITimelinePagingView(
             data: presenter.state.comments,
             detailStatusKey: nil,
             key: "gallery_comments_\(statusKey.description())",

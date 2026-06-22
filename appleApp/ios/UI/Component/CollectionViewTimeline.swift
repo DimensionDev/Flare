@@ -7,12 +7,12 @@ import AVFoundation
 
 // MARK: - SwiftUI Wrapper
 
-struct CollectionViewTimelineView: UIViewControllerRepresentable {
+struct UITimelineCollectionView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
     let columnCount: Int
-    let accessoryItems: [CollectionViewTimelineAccessoryItem]
+    let accessoryItems: [UITimelineCollectionViewAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.globalAppearance) private var globalAppearance
@@ -26,7 +26,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         detailStatusKey: MicroBlogKey?,
         topContentInset: CGFloat = 0,
         columnCount: Int = 1,
-        accessoryItems: [CollectionViewTimelineAccessoryItem] = [],
+        accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
         suppressInitialRefreshIndicator: Bool = false
     ) {
         self.data = data
@@ -37,8 +37,8 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
 
-    func makeUIViewController(context: Context) -> CollectionViewTimelineController {
-        let controller = CollectionViewTimelineController(detailStatusKey: detailStatusKey)
+    func makeUIViewController(context: Context) -> UITimelineCollectionViewController {
+        let controller = UITimelineCollectionViewController(detailStatusKey: detailStatusKey)
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
@@ -59,7 +59,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
         return controller
     }
 
-    func updateUIViewController(_ controller: CollectionViewTimelineController, context: Context) {
+    func updateUIViewController(_ controller: UITimelineCollectionViewController, context: Context) {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
@@ -80,7 +80,7 @@ struct CollectionViewTimelineView: UIViewControllerRepresentable {
     }
 }
 
-struct CollectionViewTimelineAccessoryItem {
+struct UITimelineCollectionViewAccessoryItem {
     let id: String
     let view: UIView
     let onVisibilityChanged: ((Bool) -> Void)?
@@ -94,7 +94,7 @@ struct CollectionViewTimelineAccessoryItem {
 
 // MARK: - Controller
 
-final class CollectionViewTimelineController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
+final class UITimelineCollectionViewController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
 
     // Use Int for section and String for item to avoid Sendable issues
     private static let sectionAccessories = 0
@@ -160,7 +160,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
             updateBackgroundColors()
         }
     }
-    var accessoryItems: [CollectionViewTimelineAccessoryItem] = [] {
+    var accessoryItems: [UITimelineCollectionViewAccessoryItem] = [] {
         didSet {
             let oldIDs = oldValue.map { "\(Self.accessoryPrefix)\($0.id)" }
             let newIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
@@ -219,7 +219,7 @@ final class CollectionViewTimelineController: UIViewController, UICollectionView
     private let deferredPoolCleanupCells = NSHashTable<TimelineUIKitCollectionViewCell>.weakObjects()
     private weak var currentAutoplayHostView: UIView?
     private var currentAutoplayID: String?
-    private var accessoryItemMap: [String: CollectionViewTimelineAccessoryItem] = [:]
+    private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
     private var pendingScrollAnchor: ScrollAnchor?
     private var isRestoringScrollAnchor = false
     private var snapshotPreparationGeneration = 0

@@ -13,7 +13,7 @@ struct TimelineScreen: View {
         self._presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
-        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil, key: presenter.key, allowGalleryMode: allowGalleryMode)
+        UITimelinePagingView(data: presenter.state.listState, detailStatusKey: nil, key: presenter.key, allowGalleryMode: allowGalleryMode)
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }

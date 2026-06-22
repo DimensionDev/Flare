@@ -9,20 +9,20 @@ import AppleFontAwesome
 
 // MARK: - SwiftUI Wrapper
 
-struct GalleryTimelinePagingView: UIViewControllerRepresentable {
+struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
 
-    func makeUIViewController(context: Context) -> GalleryTimelineController {
-        let controller = GalleryTimelineController()
+    func makeUIViewController(context: Context) -> UIGalleryTimelineController {
+        let controller = UIGalleryTimelineController()
         apply(to: controller)
         controller.update(data: data)
         return controller
     }
 
-    func updateUIViewController(_ controller: GalleryTimelineController, context: Context) {
+    func updateUIViewController(_ controller: UIGalleryTimelineController, context: Context) {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
@@ -33,7 +33,7 @@ struct GalleryTimelinePagingView: UIViewControllerRepresentable {
         controller.appearance = GalleryUIKitAppearance(timeline: timelineAppearance)
     }
 
-    private func apply(to controller: GalleryTimelineController) {
+    private func apply(to controller: UIGalleryTimelineController) {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
@@ -44,7 +44,7 @@ struct GalleryTimelinePagingView: UIViewControllerRepresentable {
 
 // MARK: - Controller
 
-final class GalleryTimelineController: UIViewController, UICollectionViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
+final class UIGalleryTimelineController: UIViewController, UICollectionViewDelegate, CHTCollectionViewDelegateWaterfallLayout {
 
     private static let sectionMain = 0
     private static let sectionFooter = 1

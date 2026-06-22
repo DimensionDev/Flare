@@ -48,6 +48,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         }
         .background(Color.flareSystemGroupedBackground)
         .toolbar {
+            #if os(macOS)
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     refresh()
@@ -59,6 +60,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                     }
                 }
             }
+            #endif
 
             #if os(iOS)
             accountToolbarItem
@@ -434,11 +436,10 @@ private struct DiscoverTimelineSection: View {
 
     var body: some View {
         Section {
-            TimelinePagingView(data: data)
+            TimelinePagingListContent(data: data, usesDefaultHorizontalPadding: true)
         } header: {
             Text(FlareAppleUILocalization.string(titleKey))
         }
-        .modifier(DiscoverSectionRowStyle())
     }
 }
 

@@ -2,14 +2,19 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 
-public struct TimelinePagingView: View {
+public struct TimelinePagingContent: View {
     private let data: PagingState<UiTimelineV2>
     private let detailStatusKey: MicroBlogKey?
-    private let loadingCount = 5
+    private let loadingCount: Int
 
-    public init(data: PagingState<UiTimelineV2>, detailStatusKey: MicroBlogKey? = nil) {
+    public init(
+        data: PagingState<UiTimelineV2>,
+        detailStatusKey: MicroBlogKey? = nil,
+        loadingCount: Int = 5
+    ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
+        self.loadingCount = loadingCount
     }
 
     public var body: some View {
@@ -22,10 +27,8 @@ public struct TimelinePagingView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         case .loading:
-            LazyVStack(spacing: 2) {
-                ForEach(0..<loadingCount, id: \.self) { index in
-                    loadingRow(index: index, totalCount: loadingCount)
-                }
+            ForEach(0..<loadingCount, id: \.self) { index in
+                loadingRow(index: index, totalCount: loadingCount)
             }
         case .success(let success):
             successContent(success)
@@ -36,31 +39,29 @@ public struct TimelinePagingView: View {
     private func successContent(_ success: PagingStateSuccess<UiTimelineV2>) -> some View {
         let count = Int(success.itemCount)
         let rows = TimelinePagingRows(success: success, count: count)
-        LazyVStack(spacing: 2) {
-            ForEach(rows) { row in
-                TimelinePagingRowView(
-                    row: row,
-                    totalCount: count,
-                    detailStatusKey: detailStatusKey,
-                    onDisplay: { index in
-                        _ = success.get(index: Int32(index))
-                    }
-                )
-            }
-
-            switch onEnum(of: success.appendState) {
-            case .error(let error):
-                ListErrorView(error: error.error) {
-                    success.retry()
+        ForEach(rows) { row in
+            TimelinePagingRowView(
+                row: row,
+                totalCount: count,
+                detailStatusKey: detailStatusKey,
+                onDisplay: { index in
+                    _ = success.get(index: Int32(index))
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
-            case .loading:
-                ProgressView()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
-            case .notLoading:
-                EmptyView()
+            )
+        }
+
+        switch onEnum(of: success.appendState) {
+        case .error(let error):
+            ListErrorView(error: error.error) {
+                success.retry()
             }
+            .frame(maxWidth: .infinity, alignment: .center)
+        case .loading:
+            ProgressView()
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .center)
+        case .notLoading:
+            EmptyView()
         }
     }
 
@@ -69,6 +70,54 @@ public struct TimelinePagingView: View {
             TimelinePlaceholderView()
                 .padding(.horizontal)
                 .padding(.vertical, 12)
+        }
+    }
+}
+
+public struct TimelinePagingListContent: View {
+    private let data: PagingState<UiTimelineV2>
+    private let detailStatusKey: MicroBlogKey?
+    private let loadingCount: Int
+    private let usesDefaultHorizontalPadding: Bool
+
+    public init(
+        data: PagingState<UiTimelineV2>,
+        detailStatusKey: MicroBlogKey? = nil,
+        loadingCount: Int = 5,
+        usesDefaultHorizontalPadding: Bool = false
+    ) {
+        self.data = data
+        self.detailStatusKey = detailStatusKey
+        self.loadingCount = loadingCount
+        self.usesDefaultHorizontalPadding = usesDefaultHorizontalPadding
+    }
+
+    public var body: some View {
+        TimelinePagingContent(
+            data: data,
+            detailStatusKey: detailStatusKey,
+            loadingCount: loadingCount
+        )
+        .modifier(TimelinePagingListRowStyle(usesDefaultHorizontalPadding: usesDefaultHorizontalPadding))
+    }
+}
+
+private struct TimelinePagingListRowStyle: ViewModifier {
+    let usesDefaultHorizontalPadding: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if usesDefaultHorizontalPadding {
+            content
+                .listRowSeparator(.hidden)
+                .padding(.horizontal)
+                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .listRowBackground(Color.clear)
+        } else {
+            content
+                .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .listRowBackground(Color.clear)
         }
     }
 }

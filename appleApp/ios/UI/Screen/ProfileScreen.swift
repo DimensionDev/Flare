@@ -281,23 +281,23 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
         Coordinator()
     }
 
-    func makeUIViewController(context: Context) -> CollectionViewTimelineController {
-        let controller = CollectionViewTimelineController(detailStatusKey: nil)
+    func makeUIViewController(context: Context) -> UITimelineCollectionViewController {
+        let controller = UITimelineCollectionViewController(detailStatusKey: nil)
         context.coordinator.controller = controller
         apply(to: controller, context: context)
         return controller
     }
 
-    func updateUIViewController(_ controller: CollectionViewTimelineController, context: Context) {
+    func updateUIViewController(_ controller: UITimelineCollectionViewController, context: Context) {
         context.coordinator.controller = controller
         apply(to: controller, context: context)
     }
 
-    static func dismantleUIViewController(_ controller: CollectionViewTimelineController, coordinator: Coordinator) {
+    static func dismantleUIViewController(_ controller: UITimelineCollectionViewController, coordinator: Coordinator) {
         coordinator.close()
     }
 
-    private func apply(to controller: CollectionViewTimelineController, context: Context) {
+    private func apply(to controller: UITimelineCollectionViewController, context: Context) {
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff
@@ -343,16 +343,16 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     }
 
     final class Coordinator {
-        fileprivate weak var controller: CollectionViewTimelineController?
-        fileprivate var accessoryItems: [CollectionViewTimelineAccessoryItem] = []
+        fileprivate weak var controller: UITimelineCollectionViewController?
+        fileprivate var accessoryItems: [UITimelineCollectionViewAccessoryItem] = []
 
         private let headerView = ProfileHostedAccessoryView()
         private let pickerView = ProfileHostedAccessoryView()
         private var presenters: [String: KotlinPresenter<TimelineState>] = [:]
         private var cancellable: AnyCancellable?
         private var currentTabID: String?
-        private weak var boundController: CollectionViewTimelineController?
-        private weak var installedAccessoryController: CollectionViewTimelineController?
+        private weak var boundController: UITimelineCollectionViewController?
+        private weak var installedAccessoryController: UITimelineCollectionViewController?
         private var headerSignature: ProfileHeaderAccessorySignature?
         private var pickerSignature: ProfilePickerAccessorySignature?
 
@@ -398,7 +398,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             }
 
             var newAccessoryItems = [
-                CollectionViewTimelineAccessoryItem(
+                UITimelineCollectionViewAccessoryItem(
                     id: "profile_header",
                     view: headerView,
                     onVisibilityChanged: onHeaderVisibilityChanged
@@ -427,7 +427,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                     )
                 }
                 newAccessoryItems.append(
-                    CollectionViewTimelineAccessoryItem(
+                    UITimelineCollectionViewAccessoryItem(
                         id: "profile_picker",
                         view: pickerView,
                         onVisibilityChanged: onPickerVisibilityChanged
@@ -444,13 +444,13 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             return changed
         }
 
-        func installAccessoriesIfNeeded(on controller: CollectionViewTimelineController, changed: Bool) {
+        func installAccessoriesIfNeeded(on controller: UITimelineCollectionViewController, changed: Bool) {
             guard changed || installedAccessoryController !== controller else { return }
             controller.accessoryItems = accessoryItems
             installedAccessoryController = controller
         }
 
-        func show(tab: ProfileState.Tab, in controller: CollectionViewTimelineController, openURL: OpenURLAction) {
+        func show(tab: ProfileState.Tab, in controller: UITimelineCollectionViewController, openURL: OpenURLAction) {
             let tabID = profileTimelineID(for: tab)
             let switchedTabs = currentTabID != nil && currentTabID != tabID
             let offsetBeforeSwitch = controller.currentContentOffset
@@ -741,10 +741,7 @@ struct ProfileTimelineView: View {
     }
     
     var body: some View {
-        TimelinePagingView(data: presenter.state.listState)
-            .listRowSeparator(.hidden)
-            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowBackground(Color.clear)
+        TimelinePagingListContent(data: presenter.state.listState)
 //            .refreshable {
 //                try? await presenter.state.refresh()
 //            }
@@ -759,7 +756,7 @@ struct ProfileTimelineWaterFallView: View {
     }
     
     var body: some View {
-        TimelinePagingContent(
+        UITimelinePagingView(
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: presenter.key,

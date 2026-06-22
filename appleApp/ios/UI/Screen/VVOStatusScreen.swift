@@ -62,14 +62,8 @@ struct VVOStatusScreen: View {
                 .listRowBackground(Color.clear)
                 
                 switch selectedType {
-                case .comment: TimelinePagingView(data: presenter.state.comment)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .listRowBackground(Color.clear)
-                case .repost: TimelinePagingView(data: presenter.state.repost)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .listRowBackground(Color.clear)
+                case .comment: TimelinePagingListContent(data: presenter.state.comment)
+                case .repost: TimelinePagingListContent(data: presenter.state.repost)
                 }
             }
             .detectScrolling()
@@ -113,11 +107,7 @@ struct VVOCommentScreen: View {
             .padding(.horizontal)
             .padding()
             .listRowBackground(Color.clear)
-            TimelinePagingView(data: presenter.state.list)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding(.horizontal)
-                .listRowBackground(Color.clear)
+            TimelinePagingListContent(data: presenter.state.list, usesDefaultHorizontalPadding: true)
         }
         .detectScrolling()
         .scrollContentBackground(.hidden)

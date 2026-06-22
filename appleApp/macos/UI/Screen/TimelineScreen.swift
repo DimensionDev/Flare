@@ -18,7 +18,7 @@ struct TimelineScreen: View {
     }
 
     var body: some View {
-        TimelinePagingContent(
+        TimelinePagingView(
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: presenter.key,

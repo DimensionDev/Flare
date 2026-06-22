@@ -17,7 +17,7 @@ struct StatusDetailScreen: View {
 
     var body: some View {
         ZStack {
-            TimelinePagingContent(
+            UITimelinePagingView(
                 data: presenter.state.listState,
                 detailStatusKey: statusKey,
                 key: presenter.key,

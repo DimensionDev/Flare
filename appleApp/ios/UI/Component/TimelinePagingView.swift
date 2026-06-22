@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleUI
 
-struct TimelinePagingContent: View {
+struct UITimelinePagingView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
     @Environment(\.refresh) private var refreshAction: RefreshAction?
@@ -31,14 +31,14 @@ struct TimelinePagingContent: View {
 
     var body: some View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
-            GalleryTimelinePagingView(data: data)
+            UIGalleryTimelinePagingView(data: data)
                 .ignoresSafeArea(edges: .vertical)
         } else if horizontalSizeClass == .compact {
             singleListView
         } else {
             GeometryReader { proxy in
                 let columnCount = max(Int((proxy.size.width / 320).rounded(.down)), 1)
-                CollectionViewTimelineView(
+                UITimelineCollectionView(
                     data: data,
                     detailStatusKey: detailStatusKey,
                     topContentInset: topContentInset,
@@ -51,7 +51,7 @@ struct TimelinePagingContent: View {
     }
 
     var singleListView: some View {
-        CollectionViewTimelineView(
+        UITimelineCollectionView(
             data: data,
             detailStatusKey: detailStatusKey,
             topContentInset: topContentInset,

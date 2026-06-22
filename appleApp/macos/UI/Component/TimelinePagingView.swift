@@ -2,7 +2,7 @@ import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
 
-struct TimelinePagingContent: View {
+struct TimelinePagingView: View {
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
@@ -64,7 +64,9 @@ struct TimelinePagingContent: View {
                 availableWidth: availableWidth
             )
         } else {
-            TimelinePagingView(data: data, detailStatusKey: detailStatusKey)
+            LazyVStack(spacing: 2) {
+                TimelinePagingContent(data: data, detailStatusKey: detailStatusKey)
+            }
         }
     }
 

@@ -49,7 +49,7 @@ struct NotificationScreen: View {
     }
 
     var body: some View {
-        TimelinePagingContent(
+        TimelinePagingView(
             data: presenter.state.timeline,
             detailStatusKey: nil,
             key: timelineKey

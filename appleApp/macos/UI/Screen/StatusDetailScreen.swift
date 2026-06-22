@@ -22,7 +22,7 @@ struct StatusDetailScreen: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                TimelinePagingView(
+                TimelinePagingContent(
                     data: presenter.state.listState,
                     detailStatusKey: statusKey
                 )

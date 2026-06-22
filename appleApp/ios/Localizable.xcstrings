@@ -2667,6 +2667,7 @@
       }
     },
     "add_rss_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -37291,6 +37292,7 @@
       }
     },
     "discover_status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -37481,6 +37483,7 @@
       }
     },
     "discover_tags" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -37862,6 +37865,7 @@
       }
     },
     "discover_users" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -39382,6 +39386,7 @@
       }
     },
     "Edit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -39953,6 +39958,7 @@
       }
     },
     "edit_rss_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -54990,6 +54996,7 @@
       }
     },
     "local_history_search_prompt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -55180,6 +55187,7 @@
       }
     },
     "local_history_status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -55560,6 +55568,7 @@
       }
     },
     "local_history_user" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57463,6 +57472,7 @@
       }
     },
     "mastodon_available_timelines" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57653,6 +57663,7 @@
       }
     },
     "mastodon_federated_timeline" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -58414,6 +58425,7 @@
       }
     },
     "mastodon_local_timeline" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -60894,6 +60906,7 @@
       }
     },
     "mastodon_trending_statuses" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -103661,6 +103674,7 @@
       }
     },
     "No Drafts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -108928,6 +108942,7 @@
       }
     },
     "opml_import" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -118352,6 +118367,7 @@
       }
     },
     "rss_feed_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -118542,6 +118558,7 @@
       }
     },
     "rss_hub_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -118732,6 +118749,7 @@
       }
     },
     "rss_hub_host_placeholder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -118922,6 +118940,7 @@
       }
     },
     "rss_hub_server_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -119112,6 +119131,7 @@
       }
     },
     "rss_item_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -119302,6 +119322,7 @@
       }
     },
     "rss_open_in" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -119874,6 +119895,7 @@
       }
     },
     "rss_sources_description_only" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -120064,6 +120086,7 @@
       }
     },
     "rss_sources_full_content" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -120254,6 +120277,7 @@
       }
     },
     "rss_sources_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -120444,6 +120468,7 @@
       }
     },
     "rss_sources_open_in_browser" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -120824,6 +120849,7 @@
       }
     },
     "rss_url_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -121014,6 +121040,7 @@
       }
     },
     "rss_url_placeholder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -124244,6 +124271,7 @@
       }
     },
     "Send" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -142912,6 +142940,7 @@
       "isCommentAutoGenerated" : true
     },
     "subscription_url_hint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

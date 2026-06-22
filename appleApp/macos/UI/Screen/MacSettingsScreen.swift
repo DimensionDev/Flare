@@ -352,20 +352,6 @@ private struct MacAccountManagementSettingsPane: View {
                 ServiceSelectionScreen {
                     isLoginSheetPresented = false
                 }
-                .navigationTitle("login_button")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button {
-                            isLoginSheetPresented = false
-                        } label: {
-                            Label {
-                                Text("cancel_button")
-                            } icon: {
-                                Image(fontAwesome: .xmark)
-                            }
-                        }
-                    }
-                }
             }
             .frame(width: 420, height: 540)
         }

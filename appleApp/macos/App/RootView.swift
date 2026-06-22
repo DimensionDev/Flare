@@ -12,9 +12,11 @@ struct RootView: View {
     @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
     @StateObject private var notificationPresenter = KotlinPresenter(presenter: AllNotificationPresenter())
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @State private var selectedTab: Route?
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
+    @State private var showLogin = false
 
     var body: some View {
         NavigationSplitView {
@@ -107,36 +109,53 @@ struct RootView: View {
 
                 if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
                     let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
-                    Section {
-                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                            DisclosureGroup {
-                                ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
-                                    if let route = route(for: tab) {
-                                        Label {
-                                            Text(tab.title.text)
-                                        } icon: {
-                                            Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                    if !items.isEmpty {
+                        Section {
+                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                DisclosureGroup {
+                                    ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
+                                        if let route = route(for: tab) {
+                                            Label {
+                                                Text(tab.title.text)
+                                            } icon: {
+                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                                            }
+                                            .tag(route)
                                         }
-                                        .tag(route)
+                                    }
+                                } label: {
+                                    StateView(state: item.user) { user in
+                                        UserOnelineView(data: user)
                                     }
                                 }
-                            } label: {
-                                StateView(state: item.user) { user in
-                                    UserOnelineView(data: user)
-                                }
                             }
+                        } header: {
+                            Text("macos_sidebar_accounts")
                         }
-                    } header: {
-                        Text("macos_sidebar_accounts")
                     }
                 }
             }
             .listStyle(.sidebar)
-            .toolbar(removing: .sidebarToggle)
         } detail: {
             if let selectedTab {
                 Router(initialRoute: selectedTab)
                     .id(selectedTab)
+                    .toolbar {
+                        if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
+                            ToolbarItem(placement: .primaryAction) {
+                                Button {
+                                    showLogin = true
+                                } label: {
+                                    Text("login_button")
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showLogin) {
+            NavigationStack {
+                ServiceSelectionScreen(toHome: { showLogin = false })
             }
         }
     }

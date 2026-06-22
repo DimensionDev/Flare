@@ -18,6 +18,31 @@ struct HomeSidebarTabsSection: View {
     @State private var addPopover: HomeSidebarAddPopover?
 
     var body: some View {
+        Group {
+            if !isCustomizing, liveTabs.count == 1, let tab = liveTabs.first {
+                sidebarRow(for: tab, showsReorderHandle: false)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .overlay(alignment: .trailing) {
+                        controls
+                    }
+            } else {
+                groupedTabs
+            }
+        }
+        .onAppear {
+            editableTabs = liveTabs
+            if selectedTab == nil, let first = liveTabs.first {
+                selectedTab = .timeline(first)
+            }
+        }
+        .onChange(of: liveTabs.map(\.id)) { _, _ in
+            if !isCustomizing {
+                editableTabs = liveTabs
+            }
+        }
+    }
+
+    private var groupedTabs: some View {
         DisclosureGroup(isExpanded: $isExpanded) {
             if isCustomizing {
                 ForEach(editableTabs, id: \.id) { tab in
@@ -38,17 +63,6 @@ struct HomeSidebarTabsSection: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .trailing) {
                 controls
-            }
-        }
-        .onAppear {
-            editableTabs = liveTabs
-            if selectedTab == nil, let first = liveTabs.first {
-                selectedTab = .timeline(first)
-            }
-        }
-        .onChange(of: liveTabs.map(\.id)) { _, _ in
-            if !isCustomizing {
-                editableTabs = liveTabs
             }
         }
     }

@@ -13,6 +13,7 @@ private enum MacOSServiceSelectionAnimation {
 }
 
 struct ServiceSelectionScreen: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     let toHome: () -> Void
@@ -58,6 +59,20 @@ struct ServiceSelectionScreen: View {
         .animation(MacOSServiceSelectionAnimation.standard, value: serviceContentKey(state: presenter.state))
         .onChange(of: instanceInput) { _, newValue in
             presenter.state.setFilter(value: newValue)
+        }
+        .navigationTitle("login_button")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Label {
+                        Text("cancel_button")
+                    } icon: {
+                        Image(fontAwesome: .xmark)
+                    }
+                }
+            }
         }
     }
 
@@ -370,13 +385,29 @@ private struct LoginFlowView: View {
             }
         )) {
             if let webCookieUrl {
-                MacOSWebLoginScreen(onCookie: { cookie in
-                    guard presenter.state.canResume(value: cookie) else {
-                        return
+                NavigationStack {
+                    MacOSWebLoginScreen(onCookie: { cookie in
+                        guard presenter.state.canResume(value: cookie) else {
+                            return
+                        }
+                        presenter.state.resume(value: cookie)
+                        self.webCookieUrl = nil
+                    }, url: webCookieUrl)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button {
+                                self.webCookieUrl = nil
+                            } label: {
+                                Label {
+                                    Text("cancel_button")
+                                } icon: {
+                                    Image(fontAwesome: .xmark)
+                                }
+                            }
+                        }
                     }
-                    presenter.state.resume(value: cookie)
-                    self.webCookieUrl = nil
-                }, url: webCookieUrl)
+                }
+                .frame(width: 600, height: 600)
             }
         }
     }
@@ -606,18 +637,6 @@ private struct MacOSWebLoginScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                }
-                .buttonStyle(.plain)
-                .help(String(localized: "compose_button_cancel", defaultValue: "Cancel", bundle: .main))
-            }
-            .padding(12)
-
             if viewModel.canShowWebView {
                 MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
                     webView.navigationDelegate = viewModel.delegate

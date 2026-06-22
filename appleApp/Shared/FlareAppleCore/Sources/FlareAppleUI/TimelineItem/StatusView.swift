@@ -11,6 +11,7 @@ public struct StatusView: View {
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.timelineAppearance.showPlatformLogo) private var showPlatformLogo
     @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
+    @Environment(\.timelineAppearance.lineLimit) private var appearanceLineLimit
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @Environment(\.openURL) private var openURL
     private let data: UiTimelineV2.Post
@@ -18,12 +19,14 @@ public struct StatusView: View {
     private let isQuote: Bool
     private let withLeadingPadding: Bool
     private let showMedia: Bool
-    private let maxLine: Int
+    private let maxLine: Int?
     private let showExpandTextButton: Bool
     private let forceHideActions: Bool
     private let showTranslate: Bool
     private let showParents: Bool
-    @State private var expand = false
+    @State private var contentWarningExpanded = false
+    @State private var textExpanded = false
+    @State private var textOverflows = false
 
     public init(
         data: UiTimelineV2.Post,
@@ -31,7 +34,7 @@ public struct StatusView: View {
         isQuote: Bool = false,
         withLeadingPadding: Bool = false,
         showMedia: Bool = true,
-        maxLine: Int = 5,
+        maxLine: Int? = nil,
         showExpandTextButton: Bool = true,
         forceHideActions: Bool = false,
         showTranslate: Bool = true,
@@ -78,6 +81,14 @@ public struct StatusView: View {
         let actions = Array(data.actions)
         let accountType = data.accountType
         let statusKey = data.statusKey
+        let effectiveLineLimit = max(maxLine ?? Int(appearanceLineLimit), 1)
+        let usesExplicitShortLineLimit = maxLine != nil && effectiveLineLimit < 5
+        let contentLineLimit: Int? =
+            if isDetail || ((shouldExpandTextByDefault || textExpanded) && !usesExplicitShortLineLimit) {
+                nil
+            } else {
+                effectiveLineLimit
+            }
 
         VStack(
             alignment: .leading,
@@ -180,10 +191,14 @@ public struct StatusView: View {
                             if !expandContentWarning {
                                 Button {
                                     withAnimation {
-                                        expand = !expand
+                                        contentWarningExpanded.toggle()
+                                        if !contentWarningExpanded {
+                                            textExpanded = false
+                                            textOverflows = false
+                                        }
                                     }
                                 } label: {
-                                    if expand {
+                                    if contentWarningExpanded {
                                         Text("mastodon_item_show_less", bundle: FlareAppleUILocalization.bundle)
                                     } else {
                                         Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
@@ -194,26 +209,22 @@ public struct StatusView: View {
                             }
                         }
 
-                        if expand || expandContentWarning || contentWarningIsEmpty {
+                        if contentWarningExpanded || expandContentWarning || contentWarningIsEmpty {
                             if !contentIsEmpty {
-                                RichText(text: content)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .if(isDetail) { richText in
-                                        richText
-                                            .textSelection(.enabled)
-                                    } else: { richText in
-                                        richText
-                                            .if((shouldExpandTextByDefault || expand) && maxLine >= 5, if: { view in
-                                                view.lineLimit(nil)
-                                            }, else: { view in
-                                                view.lineLimit(maxLine)
-                                            })
+                                CollapsibleRichText(
+                                    text: content,
+                                    lineLimit: contentLineLimit,
+                                    isExpanded: textExpanded,
+                                    isTextSelectionEnabled: isDetail
+                                ) { overflows in
+                                    if textOverflows != overflows {
+                                        textOverflows = overflows
                                     }
-                                    .fixedSize(horizontal: false, vertical: true)
-                                if !shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
+                                }
+                                if textOverflows, !shouldExpandTextByDefault, !isDetail, !textExpanded, showExpandTextButton {
                                     Button {
                                         withAnimation {
-                                            expand = true
+                                            textExpanded = true
                                         }
                                     } label: {
                                         Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
@@ -319,6 +330,15 @@ public struct StatusView: View {
         .onTapGesture {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }
+        .onChange(of: data.renderHash) { _, _ in
+            contentWarningExpanded = false
+            textExpanded = false
+            textOverflows = false
+        }
+        .onChange(of: effectiveLineLimit) { _, _ in
+            textExpanded = false
+            textOverflows = false
+        }
     }
     
     private func topEndContent(
@@ -399,6 +419,110 @@ public struct StatusView: View {
                 .accessibilityLabel(Text("status_insight_title", bundle: FlareAppleUILocalization.bundle))
             }
         }
+    }
+}
+
+private struct CollapsibleRichText: View {
+    let text: UiRichText
+    let lineLimit: Int?
+    let isExpanded: Bool
+    let isTextSelectionEnabled: Bool
+    let onOverflowChanged: (Bool) -> Void
+
+    @ScaledMetric(relativeTo: .body) private var fallbackLineHeight: CGFloat = 20
+    @State private var fullHeight: CGFloat = 0
+    @State private var lineHeight: CGFloat = 0
+
+    private var effectiveLineHeight: CGFloat {
+        max(lineHeight, fallbackLineHeight)
+    }
+
+    private var collapsedHeight: CGFloat? {
+        guard let lineLimit, !isExpanded else { return nil }
+        return ceil(effectiveLineHeight * CGFloat(max(lineLimit, 1)))
+    }
+
+    var body: some View {
+        richText
+            .fixedSize(horizontal: false, vertical: true)
+            .background {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: RichTextFullHeightPreferenceKey.self,
+                        value: proxy.size.height
+                    )
+                }
+            }
+            .overlay(alignment: .topLeading) {
+                Text(verbatim: "A")
+                    .fixedSize()
+                    .hidden()
+                    .background {
+                        GeometryReader { proxy in
+                            Color.clear.preference(
+                                key: RichTextLineHeightPreferenceKey.self,
+                                value: proxy.size.height
+                            )
+                        }
+                    }
+                    .allowsHitTesting(false)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxHeight: collapsedHeight, alignment: .top)
+            .clipped()
+            .onPreferenceChange(RichTextFullHeightPreferenceKey.self) { value in
+                fullHeight = value
+                publishOverflow(fullHeight: value, lineHeight: lineHeight)
+            }
+            .onPreferenceChange(RichTextLineHeightPreferenceKey.self) { value in
+                lineHeight = value
+                publishOverflow(fullHeight: fullHeight, lineHeight: value)
+            }
+            .onChange(of: lineLimit) { _, _ in
+                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
+            }
+            .onChange(of: isExpanded) { _, _ in
+                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
+            }
+            .onChange(of: text.raw) { _, _ in
+                fullHeight = 0
+                onOverflowChanged(false)
+            }
+    }
+
+    @ViewBuilder
+    private var richText: some View {
+        if isTextSelectionEnabled {
+            RichText(text: text)
+                .textSelection(.enabled)
+        } else {
+            RichText(text: text)
+        }
+    }
+
+    private func publishOverflow(fullHeight: CGFloat, lineHeight: CGFloat) {
+        guard let lineLimit, !isExpanded else {
+            onOverflowChanged(false)
+            return
+        }
+        let limitHeight = ceil(max(lineHeight, fallbackLineHeight) * CGFloat(max(lineLimit, 1)))
+        onOverflowChanged(fullHeight > limitHeight + 1)
+    }
+}
+
+private struct RichTextFullHeightPreferenceKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+private struct RichTextLineHeightPreferenceKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 

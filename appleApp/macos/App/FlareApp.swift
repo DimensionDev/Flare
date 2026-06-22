@@ -5,6 +5,7 @@ import SwiftUI
 import AppleFontAwesome
 
 enum MacWindowID {
+    static let compose = "compose"
     static let rssManagement = "rss-management"
 }
 
@@ -29,6 +30,14 @@ struct FlareApp: App {
             MacAppCommands()
         }
 //        .windowToolbarStyle(.unified(showsTitle: false))
+        WindowGroup("home_compose", id: MacWindowID.compose, for: UUID.self) { requestID in
+            FlareTheme {
+                MacComposeWindowRoot(requestID: requestID.wrappedValue)
+            }
+        }
+        .defaultSize(width: 100, height: 80)
+        .windowToolbarStyle(.unified)
+
         WindowGroup("settings_rss_management_title", id: MacWindowID.rssManagement) {
             FlareTheme {
                 RssScreen()
@@ -55,6 +64,17 @@ private struct MacAppCommands: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
+            Button {
+                MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
+            } label: {
+                Label {
+                    Text("home_compose")
+                } icon: {
+                    Image(fontAwesome: .penToSquare)
+                }
+            }
+            .keyboardShortcut("n")
+
             Button {
                 openWindow(id: MacWindowID.rssManagement)
             } label: {

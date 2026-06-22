@@ -5,6 +5,7 @@ import AppleFontAwesome
 import FlareAppleUI
 
 struct TimelineScreen: View {
+    @Environment(\.openWindow) private var openWindow
     let tabItem: UiTimelineTabItem
     let allowGalleryMode: Bool
     @StateObject private var presenter: KotlinPresenter<TimelineItemPresenterState>
@@ -52,6 +53,7 @@ struct TimelineScreen: View {
             if case .success(let value) = onEnum(of: canComposePresenter.state.canCompose), value.data.boolValue {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
+                        MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
                     } label: {
                         Label {
                             Text("home_compose")

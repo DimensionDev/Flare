@@ -139,165 +139,11 @@ struct ComposeScreen: View {
             }
             .scrollIndicators(.hidden)
             .safeAreaInset(edge: .bottom) {
-                HStack {
-                    ScrollView(.horizontal) {
-                        HStack(
-                            spacing: 16,
-                        ) {
-                            if !viewModel.pollViewModel.enabled {
-                                StateView(state: presenter.state.composeConfig) { config in
-                                    if config.media != nil {
-                                        PhotosPicker(
-                                            selection: Binding(get: {
-                                                viewModel.mediaViewModel.selectedItems
-                                            }, set: { value in
-                                                viewModel.mediaViewModel.selectedItems = value
-                                                viewModel.mediaViewModel.update()
-                                            }),
-                                            maxSelectionCount: viewModel.mediaViewModel.maxSize,
-                                            matching: .any(of: [.images, .videos, .livePhotos])) {
-                                            Image(fontAwesome: .image)
-                                        }
-                                    }
-                                }
-                            }
-                            if viewModel.mediaViewModel.selectedItems.count == 0 {
-                                StateView(state: presenter.state.composeConfig) { config in
-                                    if config.poll != nil {
-                                         Button(action: {
-                                             withAnimation {
-                                                 viewModel.togglePoll()
-                                             }
-                                         }, label: {
-                                             Image(fontAwesome: .squarePollHorizontal)
-                                         })
-                                    }
-                                }
-                            }
-                            StateView(state: presenter.state.visibilityState) { visibilityState in
-                                Menu {
-                                    ForEach(visibilityState.allVisibilities, id: \.self) { visibility in
-                                        Button {
-                                            visibilityState.setVisibility(value: visibility)
-                                        } label: {
-                                            Label {
-                                                Text(visibility.title)
-                                            } icon: {
-                                                StatusVisibilityView(data: visibility)
-                                            }
-                                            Text(visibility.desc)
-                                        }
-                                    }
-                                } label: {
-                                    StatusVisibilityView(data: visibilityState.visibility)
-                                }
-                            }
-                            StateView(state: presenter.state.composeConfig) { config in
-                                if config.contentWarning != nil {
-                                    Button(action: {
-                                        withAnimation {
-                                            viewModel.toggleCW()
-                                            if viewModel.enableCW {
-                                                cwKeyboardFocused = true
-                                            } else {
-                                                keyboardFocused = true
-                                            }
-                                        }
-                                    }, label: {
-                                        Image(fontAwesome: .circleExclamation)
-                                    })
-                                }
-                            }
-                            StateView(state: presenter.state.emojiState) { emojis in
-                                Button(action: {
-                                    viewModel.showEmojiPanel()
-                                }, label: {
-                                    Image(fontAwesome: .faceSmile)
-                                })
-                                .popover(isPresented: $viewModel.showEmoji) {
-                                    NavigationStack {
-                                        EmojiPopup(data: emojis) { item in
-                                            viewModel.addEmoji(emoji: item)
-                                            insert(item.insertText)
-                                        }
-                                        .toolbar {
-                                            ToolbarItem(placement: .cancellationAction) {
-                                                Button(
-                                                    role: .cancel
-                                                ) {
-                                                    viewModel.showEmoji = false
-                                                } label: {
-                                                    Label {
-                                                        Text("Cancel")
-                                                    } icon: {
-                                                        Image(fontAwesome: .xmark)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            StateView(state: presenter.state.composeConfig) { config in
-                                if let languageConfig = config.language {
-                                    Menu {
-                                        ForEach(languageConfig.sortedIsoCodes, id: \.self) { code in
-                                            Button {
-                                                if languageConfig.maxCount > 1 {
-                                                    if viewModel.languages.contains(code) {
-                                                        if viewModel.languages.count > 1 {
-                                                            viewModel.languages.removeAll { $0 == code }
-                                                        }
-                                                    } else {
-                                                        if viewModel.languages.count < languageConfig.maxCount {
-                                                            viewModel.languages.append(code)
-                                                        }
-                                                    }
-                                                } else {
-                                                    viewModel.languages = [code]
-                                                }
-                                            } label: {
-                                                HStack {
-                                                    Text(Locale.current.localizedString(forLanguageCode: code) ?? code)
-                                                    if viewModel.languages.contains(code) {
-                                                        Image(systemName: "checkmark")
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } label: {
-                                        if let first = viewModel.languages.first, viewModel.languages.count == 1 {
-                                             Text(first.uppercased())
-                                                .font(.caption)
-                                                .bold()
-                                                .padding(4)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 4)
-                                                        .stroke(Color.primary, lineWidth: 1)
-                                                )
-                                        } else {
-                                            Image(systemName: "globe")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .font(.title)
-                        .buttonStyle(.plain)
-                    }
-                    .scrollIndicators(.hidden)
-                    Spacer()
-                    StateView(state: presenter.state.composeConfig) { config in
-                        if let maxLength = config.text?.maxLength {
-                            Text("\(viewModel.text.count)/\(maxLength)")
-                                .foregroundStyle(viewModel.text.count > maxLength ? .red : .gray)
-                        }
-                    }
-                }
-                .padding()
-                .backport
-                .glassEffect(.regular, in: .capsule, fallbackBackground: .regularMaterial)
-                .padding()
+                composeActionBar
+                    .padding()
+                    .backport
+                    .glassEffect(.regular, in: .capsule, fallbackBackground: .regularMaterial)
+                    .padding()
             }
             
         }
@@ -401,6 +247,64 @@ struct ComposeScreen: View {
                     }
                 }
                 .disabled(!presenter.state.canSend)
+            }
+        }
+    }
+
+    private var composeActionBar: some View {
+        ComposeActionBarContent(
+            isPollEnabled: viewModel.pollViewModel.enabled,
+            hasMedia: !viewModel.mediaViewModel.items.isEmpty,
+            canAddPoll: presenter.state.pollMaxOptions != nil,
+            canUseContentWarning: presenter.state.contentWarningEnabled,
+            visibility: composeVisibility,
+            allVisibilities: composeVisibilities,
+            emojiState: presenter.state.emojiState,
+            isEmojiPresented: $viewModel.showEmoji,
+            languageCodes: Array(presenter.state.languageCodes),
+            selectedLanguages: $viewModel.languages,
+            maxLanguageSelectionCount: languageMaxCount,
+            textCount: viewModel.text.count,
+            maxTextLength: textMaxLength,
+            onTogglePoll: {
+                withAnimation {
+                    viewModel.togglePoll()
+                }
+            },
+            onToggleContentWarning: {
+                withAnimation {
+                    viewModel.toggleCW()
+                    if viewModel.enableCW {
+                        cwKeyboardFocused = true
+                    } else {
+                        keyboardFocused = true
+                    }
+                }
+            },
+            onSelectVisibility: setVisibility,
+            onSelectEmoji: { item in
+                viewModel.addEmoji(emoji: item)
+                insert(item.insertText)
+            }
+        ) {
+            composeMediaPicker
+        }
+    }
+
+    @ViewBuilder
+    private var composeMediaPicker: some View {
+        if presenter.state.mediaEnabled {
+            PhotosPicker(
+                selection: Binding(get: {
+                    viewModel.mediaViewModel.selectedItems
+                }, set: { value in
+                    viewModel.mediaViewModel.selectedItems = value
+                    viewModel.mediaViewModel.update()
+                }),
+                maxSelectionCount: viewModel.mediaViewModel.maxSize,
+                matching: .any(of: [.images, .videos, .livePhotos])
+            ) {
+                Image(fontAwesome: .image)
             }
         }
     }
@@ -645,6 +549,38 @@ struct ComposeScreen: View {
             case .success(let success): return success.data.visibility
             default: return .public
         }
+    }
+
+    private func setVisibility(_ visibility: UiTimelineV2.PostVisibility) {
+        if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
+            visibilityState.data.setVisibility(value: visibility)
+        }
+    }
+
+    private var composeVisibility: UiTimelineV2.PostVisibility? {
+        guard case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) else {
+            return nil
+        }
+        return visibilityState.data.visibility
+    }
+
+    private var composeVisibilities: [UiTimelineV2.PostVisibility] {
+        guard case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) else {
+            return []
+        }
+        return Array(visibilityState.data.allVisibilities)
+    }
+
+    private var textMaxLength: Int? {
+        presenter.state.textMaxLength.map { Int(truncating: $0) }
+    }
+
+    private var languageMaxCount: Int {
+        guard case .success(let config) = onEnum(of: presenter.state.composeConfig),
+              let language = config.data.language else {
+            return 1
+        }
+        return Int(language.maxCount)
     }
 
     private var draftSheet: some View {
@@ -1031,37 +967,6 @@ struct ComposeMediaItemView: View {
                 .sheet(isPresented: $showAltTextEditor) {
                     AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
                 }
-        }
-    }
-}
-
-extension UiTimelineV2.PostVisibility {
-    var title: LocalizedStringResource {
-        switch self {
-        case .public:
-            return LocalizedStringResource("status_visibility_public")
-        case .home:
-            return LocalizedStringResource("status_visibility_home")
-        case .followers:
-            return LocalizedStringResource("status_visibility_followers")
-        case .specified:
-            return LocalizedStringResource("status_visibility_specified")
-        case .channel:
-            return LocalizedStringResource("status_visibility_public")
-        }
-    }
-    var desc: LocalizedStringResource {
-        switch self {
-        case .public:
-            return LocalizedStringResource("status_visibility_public_description")
-        case .home:
-            return LocalizedStringResource("status_visibility_home_description")
-        case .followers:
-            return LocalizedStringResource("status_visibility_followers_description")
-        case .specified:
-            return LocalizedStringResource("status_visibility_specified_description")
-        case .channel:
-            return LocalizedStringResource("status_visibility_public_description")
         }
     }
 }

@@ -72,7 +72,13 @@ struct RootView: View {
                     .buttonStyle(.plain)
                     .popover(isPresented: $showDraftBoxPopover, arrowEdge: .trailing) {
                         NavigationStack {
-                            DraftBoxScreen()
+                            DraftBoxScreen { groupId in
+                                showDraftBoxPopover = false
+                                MacComposeWindowCoordinator.shared.openDraft(
+                                    groupId: groupId,
+                                    openWindow: openWindow
+                                )
+                            }
                         }
                         .frame(width: 380, height: 480)
                     }

@@ -97,7 +97,12 @@ public sealed class PagingState<T> {
             override val isRefreshing: Boolean
                 get() = data.isRefreshing
 
-            override operator fun get(index: Int): T? = data[index]
+            override operator fun get(index: Int): T? =
+                if (index < 0 || index >= data.itemCount) {
+                    null
+                } else {
+                    data[index]
+                }
 
             override fun peek(index: Int): T? =
                 if (index < 0 || index >= data.itemCount) {

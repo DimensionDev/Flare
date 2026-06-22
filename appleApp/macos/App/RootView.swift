@@ -23,34 +23,13 @@ struct RootView: View {
                     ForEach(homeTabs, id: \.name) { tab in
                         if tab == .home, case .success(let data) = onEnum(of: homeTimelineWithTabsPresenter.state.tabState) {
                             let tabs: [UiTimelineTabItem] = data.data.cast(UiTimelineTabItem.self)
-                            DisclosureGroup(isExpanded: $homeExpanded) {
-                                ForEach(tabs, id: \.id) { tab in
-                                    Label {
-                                        Text(tab.title.text)
-                                    } icon: {
-                                        TabIcon(tabItem: tab)
-                                    }
-                                    .tag(Route.timeline(tab))
-                                }
-                            } label: {
-                                Label {
-                                    Text(tab.macOSTitle)
-                                } icon: {
-                                    Image(fontAwesome: tab.macOSIcon)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .overlay(alignment: .trailing) {
-                                    Button {
-                                        
-                                    } label: {
-                                        Image(fontAwesome: .sliders)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .onAppear {
-                                selectedTab = .timeline(tabs.first!)
-                            }
+                            HomeSidebarTabsSection(
+                                title: tab.macOSTitle,
+                                icon: tab.macOSIcon,
+                                liveTabs: tabs,
+                                selectedTab: $selectedTab,
+                                isExpanded: $homeExpanded
+                            )
                         } else if tab == .notifications {
                             DisclosureGroup {
                                 ForEach(notificationPresenter.state.notifications, id: \.profile.key) { item in
@@ -98,7 +77,7 @@ struct RootView: View {
                     }
                     .buttonStyle(.plain)
                 }
-                
+
                 if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
                     let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
                     Section {
@@ -134,38 +113,9 @@ struct RootView: View {
             }
         }
     }
-
-    @TabContentBuilder<String?>
-    private func homeTab(_ tab: HomeTabsPresenterStateHomeTabs) -> some TabContent<String?> {
-        Tab(value: "home:\(tab.name)") {
-            Router(initialRoute: tab.macOSInitialRoute)
-        } label: {
-            Label {
-                Text(tab.macOSTitle)
-            } icon: {
-                Image(fontAwesome: tab.macOSIcon)
-            }
-        }
-        .tabPlacement(.sidebarOnly)
-    }
-
-    @TabContentBuilder<String?>
-    private func secondaryTab(_ tab: SecondaryTabsPresenter.Tab, route: Route) -> some TabContent<String?> {
-        Tab(value: "secondary:\(tab.hashValue)") {
-            Router(initialRoute: route)
-        } label: {
-            Label {
-                Text(tab.title.text)
-            } icon: {
-                Image(fontAwesome: tab.icon.fontAwesomeIcon)
-            }
-        }
-        .tabPlacement(.sidebarOnly)
-    }
 }
 
-
-func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
+private func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
     switch onEnum(of: tab.destination) {
     case .route(let destination):
         return Route.fromDeepLinkRoute(deeplinkRoute: destination.route)

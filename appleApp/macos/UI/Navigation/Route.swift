@@ -6,8 +6,10 @@ import FlareAppleUI
 enum Route: Hashable, Identifiable {
     case empty
     case notification
+    case accountNotification(MicroBlogKey)
     case discover
     case serviceSelect
+    case localHistory
     case timeline(UiTimelineTabItem)
     case statusDetail(AccountType, MicroBlogKey)
     case profileUser(AccountType, MicroBlogKey)
@@ -33,6 +35,10 @@ enum Route: Hashable, Identifiable {
 
     func hash(into hasher: inout Hasher) {
         switch self {
+        case .accountNotification(let accountKey):
+            hasher.combine("accountNotification")
+            hasher.combine(accountKey.host)
+            hasher.combine(accountKey.id)
         case .timeline(let item):
             hasher.combine("timeline")
             hasher.combine(item.id)
@@ -52,10 +58,14 @@ enum Route: Hashable, Identifiable {
             EmptyView()
         case .notification:
             PlaceholderPanel(destination: .notifications)
+        case .accountNotification(let accountKey):
+            NotificationScreen(accountKey: accountKey)
         case .discover:
-            PlaceholderPanel(destination: .discover)
+            DiscoverScreen()
         case .serviceSelect:
             ServiceSelectionScreen(toHome: goBack)
+        case .localHistory:
+            LocalHistoryContentScreen()
         case .timeline(let item):
             TimelineScreen(tabItem: item, allowGalleryMode: true)
                 .navigationTitle(item.title.text)

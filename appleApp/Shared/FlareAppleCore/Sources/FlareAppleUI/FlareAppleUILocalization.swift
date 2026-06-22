@@ -8,10 +8,10 @@ enum FlareAppleUILocalization {
     static func string(
         _ key: String,
         fallback: String? = nil,
-        arguments: [String] = []
+        arguments: [CVarArg] = []
     ) -> String {
         let value = bundle.localizedString(forKey: key, value: fallback ?? key, table: nil)
         guard !arguments.isEmpty else { return value }
-        return String(format: value, arguments: arguments.map { $0 as CVarArg })
+        return String(format: value, arguments: arguments)
     }
 }

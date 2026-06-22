@@ -56,30 +56,12 @@ private struct MacAppCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
             Button {
-            } label: {
-                Label {
-                    Text("draft_box_title")
-                } icon: {
-                    Image(fontAwesome: .penToSquare)
-                }
-            }
-
-            Button {
                 openWindow(id: MacWindowID.rssManagement)
             } label: {
                 Label {
                     Text("settings_rss_management_title")
                 } icon: {
                     Image(fontAwesome: .squareRss)
-                }
-            }
-
-            Button {
-            } label: {
-                Label {
-                    Text("local_history_title")
-                } icon: {
-                    Image(fontAwesome: .clockRotateLeft)
                 }
             }
 

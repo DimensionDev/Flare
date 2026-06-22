@@ -15,7 +15,7 @@ struct HomeSidebarTabsSection: View {
     @StateObject private var settingsPresenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @State private var isCustomizing = false
     @State private var editableTabs: [UiTimelineTabItem] = []
-    @State private var showAddPopover = false
+    @State private var addPopover: HomeSidebarAddPopover?
 
     var body: some View {
         DisclosureGroup(isExpanded: $isExpanded) {
@@ -89,29 +89,53 @@ struct HomeSidebarTabsSection: View {
     private var controls: some View {
         HStack(spacing: 6) {
             if isCustomizing {
-                Button {
-                    showAddPopover.toggle()
+                Menu {
+                    Button {
+                        addPopover = .tab
+                    } label: {
+                        Label {
+                            Text("tab_settings_add_tab")
+                        } icon: {
+                            Image(fontAwesome: .plus)
+                        }
+                    }
+
+                    Button {
+                        addPopover = .group
+                    } label: {
+                        Label {
+                            Text("tab_settings_add_group")
+                        } icon: {
+                            Image(fontAwesome: .tableList)
+                        }
+                    }
                 } label: {
                     Image(fontAwesome: .plus)
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "tab_settings_add_tab", bundle: .main))
-                .popover(isPresented: $showAddPopover, arrowEdge: .trailing) {
-                    HomeSidebarAddTabPopover(
-                        selectedTabs: editableTabs,
-                        onAddGroup: { group in
+                .popover(item: $addPopover, arrowEdge: .trailing) { popover in
+                    switch popover {
+                    case .tab:
+                        HomeSidebarAddTabPopover(
+                            selectedTabs: editableTabs,
+                            onAddGroup: nil,
+                            onAdd: add,
+                            onDelete: remove
+                        )
+                        .frame(width: 360, height: 460)
+                    case .group:
+                        HomeSidebarCreateGroupPopover { group in
                             add(group)
-                            showAddPopover = false
-                        },
-                        onAdd: add,
-                        onDelete: remove
-                    )
-                    .frame(width: 360, height: 460)
+                            addPopover = nil
+                        }
+                        .frame(width: 440, height: 560)
+                    }
                 }
 
                 Button {
                     isCustomizing = false
-                    showAddPopover = false
+                    addPopover = nil
                 } label: {
                     Image(fontAwesome: .check)
                 }
@@ -172,6 +196,13 @@ struct HomeSidebarTabsSection: View {
     private func persist() {
         settingsPresenter.state.replaceHomeTimelineTabs(tabs: editableTabs)
     }
+}
+
+private enum HomeSidebarAddPopover: String, Identifiable {
+    case tab
+    case group
+
+    var id: String { rawValue }
 }
 
 private struct HomeSidebarEditableGroupRow: View {

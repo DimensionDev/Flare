@@ -14,6 +14,7 @@ struct RootView: View {
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @State private var selectedTab: Route?
     @State private var homeExpanded: Bool = true
+    @State private var showDraftBoxPopover = false
 
     var body: some View {
         NavigationSplitView {
@@ -35,6 +36,7 @@ struct RootView: View {
                                 ForEach(notificationPresenter.state.notifications, id: \.profile.key) { item in
                                     UserOnelineView(data: item.profile)
                                         .badge(Int(item.badge))
+                                        .tag(Route.accountNotification(item.profile.key))
                                 }
                             } label: {
                                 Label {
@@ -57,6 +59,23 @@ struct RootView: View {
 
                 Section {
                     Button {
+                        showDraftBoxPopover.toggle()
+                    } label: {
+                        Label {
+                            Text("draft_box_title")
+                        } icon: {
+                            Image(fontAwesome: .inbox)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $showDraftBoxPopover, arrowEdge: .trailing) {
+                        NavigationStack {
+                            DraftBoxScreen()
+                        }
+                        .frame(width: 380, height: 480)
+                    }
+
+                    Button {
                         openWindow(id: MacWindowID.rssManagement)
                     } label: {
                         Label {
@@ -66,6 +85,14 @@ struct RootView: View {
                         }
                     }
                     .buttonStyle(.plain)
+
+                    Label {
+                        Text("local_history_title")
+                    } icon: {
+                        Image(fontAwesome: .clockRotateLeft)
+                    }
+                    .tag(Route.localHistory)
+
                     Button {
                         openSettings()
                     } label: {

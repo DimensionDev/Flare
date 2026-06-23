@@ -29,7 +29,7 @@ struct FlareApp: App {
         }
         .defaultSize(width: 480, height: 600)
         .windowResizability(.contentSize)
-        .windowIdealSize(.fitToContent)
+        .windowSizeFitContent()
         .commands {
             MacAppCommands()
         }
@@ -40,10 +40,10 @@ struct FlareApp: App {
             }
         }
         .windowResizability(.contentSize)
-        .windowIdealSize(.fitToContent)
+        .windowSizeFitContent()
         .defaultSize(width: 100, height: 80)
         .windowToolbarStyle(.unified)
-        .restorationBehavior(.disabled)
+        .disableRestorationBehavior()
 
         WindowGroup("Media", id: MacWindowID.media, for: MacMediaWindowValue.self) { request in
             FlareTheme {
@@ -51,21 +51,9 @@ struct FlareApp: App {
             }
         }
         .defaultSize(width: 960, height: 720)
-        .defaultWindowPlacement { _, context in
-            let visibleRect = context.defaultDisplay.visibleRect
-            let maxWindowSize = CGSize(
-                width: visibleRect.width * 0.8,
-                height: visibleRect.height * 0.8
-            )
-            return WindowPlacement(
-                .center,
-                size: MacMediaWindowCoordinator.shared.placementSize(
-                    maxWindowSize: maxWindowSize
-                )
-            )
-        }
+        .mediaWindowPlacement()
         .windowToolbarStyle(.unified(showsTitle: false))
-        .restorationBehavior(.disabled)
+        .disableRestorationBehavior()
 
         WindowGroup("settings_rss_management_title", id: MacWindowID.rssManagement) {
             FlareTheme {
@@ -85,6 +73,42 @@ struct FlareApp: App {
 //        .commands {
 //            SidebarCommands()
 //        }
+    }
+}
+
+extension Scene {
+    func mediaWindowPlacement() -> some Scene {
+        if #available(macOS 15.0, *) {
+            return self.defaultWindowPlacement { _, context in
+                    let visibleRect = context.defaultDisplay.visibleRect
+                    let maxWindowSize = CGSize(
+                        width: visibleRect.width * 0.8,
+                        height: visibleRect.height * 0.8
+                    )
+                    return WindowPlacement(
+                        .center,
+                        size: MacMediaWindowCoordinator.shared.placementSize(
+                            maxWindowSize: maxWindowSize
+                        )
+                    )
+                }
+        } else {
+            return self
+        }
+    }
+    func disableRestorationBehavior() -> some Scene {
+        if #available(macOS 15.0, *) {
+            return self.restorationBehavior(.disabled)
+        } else {
+            return self
+        }
+    }
+    func windowSizeFitContent() -> some Scene {
+        if #available(macOS 15.0, *) {
+            return self.windowIdealSize(.fitToContent)
+        } else {
+            return self
+        }
     }
 }
 

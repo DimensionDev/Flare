@@ -51,7 +51,8 @@ struct Router: View {
                     onNavigate: handle(route:),
                     goBack: goBack
                 )
-                .navigationTransition(.automatic)
+                .backport
+                .navigationTransitionAutomatic()
             }
         }
         .sheet(item: $sheet) { route in

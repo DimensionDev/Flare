@@ -6,6 +6,7 @@ public struct NetworkImage: View {
     private let placeholder: URL?
     private let customHeader: [String: String]?
     private let contentMode: SwiftUI.ContentMode
+    private let usesCrossfade: Bool
     private let onProgress: ((Double?) -> Void)?
 
     private init(
@@ -13,12 +14,14 @@ public struct NetworkImage: View {
         placeholder: URL?,
         customHeader: [String: String]?,
         contentMode: SwiftUI.ContentMode,
+        usesCrossfade: Bool = false,
         onProgress: ((Double?) -> Void)? = nil
     ) {
         self.data = data
         self.placeholder = placeholder
         self.customHeader = customHeader
         self.contentMode = contentMode
+        self.usesCrossfade = usesCrossfade
         self.onProgress = onProgress
     }
 
@@ -53,7 +56,7 @@ public struct NetworkImage: View {
                 }
                 .cancelOnDisappear(true)
                 .aspectRatio(contentMode: contentMode)
-        } else {
+        } else if usesCrossfade {
             CrossfadeNetworkImage(
                 data: data,
                 placeholder: placeholder,
@@ -61,6 +64,41 @@ public struct NetworkImage: View {
                 contentMode: contentMode,
                 onProgress: onProgress
             )
+        } else {
+            KFImage(data)
+                .resizable()
+                .fade(duration: 0.25)
+                .requestModifier({ request in
+                    if let customHeader {
+                        for (key, value) in customHeader {
+                            request.setValue(value, forHTTPHeaderField: key)
+                        }
+                    }
+                })
+                .onProgress { receivedSize, totalSize in
+                    reportProgress(receivedSize: receivedSize, totalSize: totalSize)
+                }
+                .onSuccess { _ in
+                    onProgress?(1)
+                }
+                .onFailure { _ in
+                    onProgress?(nil)
+                }
+                .placeholder {
+                    if let placeholder {
+                        NetworkImage(
+                            data: placeholder,
+                            customHeader: customHeader,
+                            contentMode: contentMode
+                        )
+                    } else {
+                        Rectangle()
+                            .fill(.placeholder)
+                            .redacted(reason: .placeholder)
+                    }
+                }
+                .cancelOnDisappear(true)
+                .aspectRatio(contentMode: contentMode)
         }
     }
 
@@ -191,6 +229,7 @@ public extension NetworkImage {
         data: String?,
         customHeader: [String: String]? = nil,
         contentMode: SwiftUI.ContentMode = .fill,
+        usesCrossfade: Bool = false,
         onProgress: ((Double?) -> Void)? = nil
     ) {
         self.init(
@@ -198,6 +237,7 @@ public extension NetworkImage {
             placeholder: nil,
             customHeader: customHeader,
             contentMode: contentMode,
+            usesCrossfade: usesCrossfade,
             onProgress: onProgress
         )
     }
@@ -205,6 +245,7 @@ public extension NetworkImage {
         data: String,
         customHeader: [String: String]? = nil,
         contentMode: SwiftUI.ContentMode = .fill,
+        usesCrossfade: Bool = false,
         onProgress: ((Double?) -> Void)? = nil
     ) {
         self.init(
@@ -212,6 +253,7 @@ public extension NetworkImage {
             placeholder: nil,
             customHeader: customHeader,
             contentMode: contentMode,
+            usesCrossfade: usesCrossfade,
             onProgress: onProgress
         )
     }
@@ -220,6 +262,7 @@ public extension NetworkImage {
         placeholder: String,
         customHeader: [String: String]? = nil,
         contentMode: SwiftUI.ContentMode = .fill,
+        usesCrossfade: Bool = false,
         onProgress: ((Double?) -> Void)? = nil
     ) {
         self.init(
@@ -227,12 +270,14 @@ public extension NetworkImage {
             placeholder: .init(string: placeholder),
             customHeader: customHeader,
             contentMode: contentMode,
+            usesCrossfade: usesCrossfade,
             onProgress: onProgress
         )
     }
     init(
         data: URL?,
         contentMode: SwiftUI.ContentMode = .fill,
+        usesCrossfade: Bool = false,
         onProgress: ((Double?) -> Void)? = nil
     ) {
         self.init(
@@ -240,6 +285,7 @@ public extension NetworkImage {
             placeholder: nil,
             customHeader: nil,
             contentMode: contentMode,
+            usesCrossfade: usesCrossfade,
             onProgress: onProgress
         )
     }
@@ -247,6 +293,7 @@ public extension NetworkImage {
         data: URL?,
         customHeader: [String: String]?,
         contentMode: SwiftUI.ContentMode = .fill,
+        usesCrossfade: Bool = false,
         onProgress: ((Double?) -> Void)? = nil
     ) {
         self.init(
@@ -254,6 +301,7 @@ public extension NetworkImage {
             placeholder: nil,
             customHeader: customHeader,
             contentMode: contentMode,
+            usesCrossfade: usesCrossfade,
             onProgress: onProgress
         )
     }

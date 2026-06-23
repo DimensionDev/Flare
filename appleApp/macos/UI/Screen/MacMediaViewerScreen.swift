@@ -207,7 +207,7 @@ struct MacMediaViewerScreen: View {
                 minimumMagnification: macMediaMinimumZoomScale,
                 maximumMagnification: macMediaMaximumZoomScale
             ) {
-                NetworkImage(data: preview, contentMode: .fit)
+                NetworkImage(data: preview, contentMode: .fit, usesCrossfade: true)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         } else {
@@ -491,6 +491,7 @@ private struct MacMediaViewerPage: View {
                     data: url,
                     customHeader: customHeaders,
                     contentMode: .fit,
+                    usesCrossfade: true,
                     onProgress: handleImageLoadingProgress
                 )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -500,6 +501,7 @@ private struct MacMediaViewerPage: View {
                     placeholder: preview,
                     customHeader: customHeaders,
                     contentMode: .fit,
+                    usesCrossfade: true,
                     onProgress: handleImageLoadingProgress
                 )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

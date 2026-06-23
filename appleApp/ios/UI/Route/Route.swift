@@ -141,7 +141,26 @@ enum Route: Hashable, Identifiable {
         case .rssDetail(let url, let descriptionHtml, let title):
             RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
         case .article(let accountType, let articleKey):
-            ArticleScreen(accountType: accountType, articleKey: articleKey, onNavigate: onNavigate)
+            ArticleScreen(
+                accountType: accountType,
+                articleKey: articleKey,
+                onOpenProfile: { accountType, userKey in
+                    onNavigate(.profileUser(accountType, userKey))
+                },
+                onOpenMedia: { medias, index, preview in
+                    onNavigate(.mediaRaw(medias, index, preview))
+                },
+                onShareArticle: { accountType, articleKey, shareUrl in
+                    onNavigate(.statusShareSheet(accountType, articleKey, shareUrl, nil, nil))
+                },
+                onDownloadFile: { block in
+                    MediaSaver.shared.saveFile(
+                        url: block.url,
+                        fileName: block.downloadFileName,
+                        customHeaders: block.customHeaders
+                    )
+                }
+            )
         case .statusVVOStatus(let accountType, let statusKey):
             VVOStatusScreen(accountType: accountType, statusKey: statusKey)
         case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
@@ -180,13 +199,31 @@ enum Route: Hashable, Identifiable {
         case .userDirectMessages(let accountType, let userKey):
             UserDMConversationScreen(accountType: accountType, userKey: userKey)
         case .allLists(let accountType):
-            AllListScreen(accountType: accountType)
+            AllListScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) },
+                createListContent: {
+                    AnyView(CreateListScreen(accountType: accountType))
+                },
+                editListContent: { listId in
+                    AnyView(EditListScreen(accountType: accountType, listId: listId))
+                }
+            )
         case .allFeeds(let accountType):
-            AllFeedScreen(accountType: accountType)
+            AllFeedScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
         case .allAntennas(let accountType):
-            AntennasListScreen(accountType: accountType)
+            AntennasListScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
         case .allChannels(let accountType):
-            ChannelListScreen(accountType: accountType)
+            ChannelListScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
         case .allDirectMessages(let accountType):
             DMListScreen(accountType: accountType)
         case .rssManagement:

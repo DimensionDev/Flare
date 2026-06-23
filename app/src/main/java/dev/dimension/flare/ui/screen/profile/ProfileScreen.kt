@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -87,6 +88,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStrings
@@ -628,6 +630,7 @@ private fun ProfileMediaTab(
     modifier: Modifier = Modifier,
 ) {
     val isBigScreen = isBigScreen()
+    val uriHandler = LocalUriHandler.current
     CompositionLocalProvider(
         LocalTimelineAppearance provides
             LocalTimelineAppearance.current.copy(
@@ -672,16 +675,26 @@ private fun ProfileMediaTab(
                             .clickable {
                                 val content = item.status
                                 if (content is UiTimelineV2.Post) {
-                                    onItemClicked(
-                                        item.statusKey,
-                                        item.index,
-                                        when (media) {
-                                            is UiMedia.Image -> media.previewUrl
-                                            is UiMedia.Video -> media.thumbnailUrl
-                                            is UiMedia.Gif -> media.previewUrl
-                                            else -> null
-                                        },
-                                    )
+                                    when (content.mediaClickPolicy) {
+                                        UiTimelineV2.Post.MediaClickPolicy.OpenStatusMedia -> {
+                                            onItemClicked(
+                                                item.statusKey,
+                                                item.index,
+                                                when (media) {
+                                                    is UiMedia.Image -> media.previewUrl
+                                                    is UiMedia.Video -> media.thumbnailUrl
+                                                    is UiMedia.Gif -> media.previewUrl
+                                                    else -> null
+                                                },
+                                            )
+                                        }
+
+                                        UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent -> {
+                                            content.onClicked.invoke(
+                                                ClickContext(launcher = uriHandler::openUri),
+                                            )
+                                        }
+                                    }
                                 }
                             },
                 )

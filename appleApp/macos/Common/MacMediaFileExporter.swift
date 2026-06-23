@@ -85,6 +85,30 @@ enum MacMediaFileExporter {
         return true
     }
 
+    static func saveRemoteFile(
+        url: String,
+        fileName: String,
+        customHeaders: [String: String]?
+    ) async throws -> Bool {
+        let remoteURL = try makeRemoteURL(url)
+        let (downloadedURL, response) = try await downloadRemoteFile(
+            url: remoteURL,
+            customHeaders: customHeaders
+        )
+        guard isSuccessfulHTTPResponse(response) else {
+            throw MacMediaExportError.downloadFailed
+        }
+
+        guard let destinationURL = await selectDestinationURL(
+            defaultFileName: safeFileName(fileName, fallbackURL: remoteURL, response: response)
+        ) else {
+            return false
+        }
+
+        try copyReplacingItem(at: downloadedURL, to: destinationURL)
+        return true
+    }
+
     private static func downloadFile(source: MacMediaExportSource) async throws -> URL {
         let remoteURL = try makeRemoteURL(source.url)
         switch source.kind {
@@ -296,6 +320,22 @@ enum MacMediaFileExporter {
         }.map(String.init).joined()
         return sanitized.isEmpty ? "flare-media" : sanitized
     }
+
+    private static func safeFileName(_ fileName: String, fallbackURL: URL, response: URLResponse?) -> String {
+        let sourceName = fileName.trimmedNonEmpty
+            ?? response?.suggestedFilename?.trimmedNonEmpty
+            ?? fallbackURL.lastPathComponent.trimmedNonEmpty
+            ?? "file"
+        let safeName = sourceName.map { character -> Character in
+            if character == "/" ||
+                character == "\\" ||
+                character.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }) {
+                return "_"
+            }
+            return character
+        }
+        return String(safeName).trimmedNonEmpty ?? "file"
+    }
 }
 
 private enum MacMediaExportError: LocalizedError {
@@ -318,5 +358,12 @@ private enum MacMediaExportError: LocalizedError {
         case .missingWindow:
             String(localized: "Unable to present the share sheet")
         }
+    }
+}
+
+private extension String {
+    var trimmedNonEmpty: String? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
     }
 }

@@ -779,6 +779,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 appearanceExpandMediaSize: appearance.expandMediaSize
             )
             mediaView.onMediaClicked = { [weak self] media, index in
+                guard let self else { return }
+                if data.mediaClickPolicy == .openPostClickEvent {
+                    data.onClicked(ClickContext(launcher: self.makeLauncher()))
+                    return
+                }
                 let preview: String? = switch onEnum(of: media) {
                 case .image(let image): image.previewUrl
                 case .video(let video): video.thumbnailUrl
@@ -792,7 +797,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     preview: preview
                 )
                 if let url = URL(string: route.toUri()) {
-                    self?.openURL?(url)
+                    self.openURL?(url)
                 }
             }
             mediaView.onLocalHeightInvalidated = { [weak self] in

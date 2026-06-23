@@ -1,23 +1,26 @@
 import SwiftUI
-import FlareAppleUI
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
 
-struct ChannelListScreen: View {
+public struct ChannelListScreen<Destination: Hashable>: View {
     @StateObject private var presenter: KotlinPresenter<MisskeyChannelListPresenterState>
-    let accountType: AccountType
+    private let accountType: AccountType
+    private let timelineDestination: (UiTimelineTabItem) -> Destination
     @State private var selectedTab: MisskeyChannelListPresenterStateType = .following
-    init(accountType: AccountType) {
+
+    public init(
+        accountType: AccountType,
+        timelineDestination: @escaping (UiTimelineTabItem) -> Destination
+    ) {
         self.accountType = accountType
+        self.timelineDestination = timelineDestination
         self._presenter = .init(wrappedValue: .init(presenter: MisskeyChannelListPresenter(accountType: accountType)))
     }
 
-    var body: some View {
+    public var body: some View {
         List {
             PagingView(data: presenter.state.data) { item in
-                 NavigationLink(value: Route.timeline(
-                     presenter.state.timelineTabItem(item: item)
-                 )) {
+                 NavigationLink(value: timelineDestination(presenter.state.timelineTabItem(item: item))) {
                      UiListView(data: item)
                          .contextMenu {
                              if case .channel(let data) = onEnum(of: item) {
@@ -27,7 +30,7 @@ struct ChannelListScreen: View {
                                              presenter.state.unfollow(list: item)
                                          } label: {
                                              Label {
-                                                 Text("misskey_channel_unfollow")
+                                                 Text("misskey_channel_unfollow", bundle: FlareAppleUILocalization.bundle)
                                              } icon: {
                                                  Image(fontAwesome: .minus)
                                              }
@@ -37,7 +40,7 @@ struct ChannelListScreen: View {
                                              presenter.state.follow(list: item)
                                          } label: {
                                              Label {
-                                                 Text("misskey_channel_follow")
+                                                 Text("misskey_channel_follow", bundle: FlareAppleUILocalization.bundle)
                                              } icon: {
                                                  Image(fontAwesome: .plus)
                                              }
@@ -50,7 +53,7 @@ struct ChannelListScreen: View {
                                              presenter.state.unfavorite(list: item)
                                          } label: {
                                              Label {
-                                                 Text("misskey_channel_unfavorite")
+                                                 Text("misskey_channel_unfavorite", bundle: FlareAppleUILocalization.bundle)
                                              } icon: {
                                                  Image(fontAwesome: .heartCircleMinus)
                                              }
@@ -60,7 +63,7 @@ struct ChannelListScreen: View {
                                              presenter.state.favorite(list: item)
                                          } label: {
                                              Label {
-                                                 Text("misskey_channel_favorite")
+                                                 Text("misskey_channel_favorite", bundle: FlareAppleUILocalization.bundle)
                                              } icon: {
                                                  Image(fontAwesome: .heartCirclePlus)
                                              }
@@ -75,10 +78,12 @@ struct ChannelListScreen: View {
              }
         }
         .safeAreaInset(edge: .top, content: {
-            Picker("Tabs", selection: $selectedTab) {
+            Picker(selection: $selectedTab) {
                 ForEach(presenter.state.allTypes, id: \.self) { tab in
                     Text(tab.localizedName).tag(tab)
                 }
+            } label: {
+                Text("Tabs", bundle: FlareAppleUILocalization.bundle)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -89,17 +94,21 @@ struct ChannelListScreen: View {
         .onChange(of: selectedTab, { oldValue, newValue in
             presenter.state.setType(data: newValue)
         })
-        .navigationTitle("channels_title")
+        .navigationTitle(Text("channels_title", bundle: FlareAppleUILocalization.bundle))
     }
 }
 
 extension MisskeyChannelListPresenterStateType {
     var localizedName: String {
         switch self {
-        case .following: return NSLocalizedString("misskey_channel_tab_following", comment: "")
-        case .favorites: return NSLocalizedString("misskey_channel_tab_favorites", comment: "")
-        case .owned: return NSLocalizedString("misskey_channel_tab_owned", comment: "")
-        case .featured: return NSLocalizedString("misskey_channel_tab_featured", comment: "")
+        case .following:
+            return FlareAppleUILocalization.string("misskey_channel_tab_following")
+        case .favorites:
+            return FlareAppleUILocalization.string("misskey_channel_tab_favorites")
+        case .owned:
+            return FlareAppleUILocalization.string("misskey_channel_tab_owned")
+        case .featured:
+            return FlareAppleUILocalization.string("misskey_channel_tab_featured")
         }
     }
 }

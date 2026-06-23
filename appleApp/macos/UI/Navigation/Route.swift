@@ -17,6 +17,8 @@ enum Route: Hashable, Identifiable {
     case composeReply(AccountType, MicroBlogKey)
     case composeVVOReplyComment(AccountType, MicroBlogKey, String)
     case statusDetail(AccountType, MicroBlogKey)
+    case galleryDetail(AccountType, MicroBlogKey)
+    case galleryComments(AccountType, MicroBlogKey)
     case statusVVOComment(AccountType, MicroBlogKey)
     case statusVVOStatus(AccountType, MicroBlogKey)
     case profileUser(AccountType, MicroBlogKey)
@@ -28,6 +30,23 @@ enum Route: Hashable, Identifiable {
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
     case rssDetail(String, String?, String?)
+    case article(AccountType, MicroBlogKey)
+    case search(AccountType, String)
+    case statusAddReaction(AccountType, MicroBlogKey)
+    case statusBlueskyReport(AccountType, MicroBlogKey)
+    case statusDeleteConfirm(AccountType, MicroBlogKey)
+    case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
+    case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
+    case blockUser(AccountType?, MicroBlogKey)
+    case unblockUser(AccountType?, MicroBlogKey)
+    case muteUser(AccountType?, MicroBlogKey)
+    case unmuteUser(AccountType?, MicroBlogKey)
+    case reportUser(AccountType?, MicroBlogKey)
+    case editUserList(AccountType, MicroBlogKey)
+    case allLists(AccountType)
+    case allFeeds(AccountType)
+    case allAntennas(AccountType)
+    case allChannels(AccountType)
     case externalLink(String)
 
     var id: Int {
@@ -95,10 +114,21 @@ enum Route: Hashable, Identifiable {
                 .composeVVOReplyComment,
                 .mediaImage,
                 .mediaRaw,
-                .mediaStatusMedia:
+                .mediaStatusMedia,
+                .statusDeleteConfirm,
+                .statusMastodonReport,
+                .blockUser,
+                .unblockUser,
+                .muteUser,
+                .unmuteUser,
+                .reportUser:
             EmptyView()
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        case .galleryDetail(let accountType, let statusKey):
+            GalleryDetailScreen(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
+        case .galleryComments(let accountType, let statusKey):
+            GalleryCommentsScreen(accountType: accountType, statusKey: statusKey)
         case .statusVVOComment(let accountType, let statusKey):
             VVOCommentScreen(accountType: accountType, statusKey: statusKey)
         case .statusVVOStatus(let accountType, let statusKey):
@@ -132,10 +162,94 @@ enum Route: Hashable, Identifiable {
             )
         case .rssDetail(let url, let descriptionHtml, let title):
             RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
+        case .article(let accountType, let articleKey):
+            MacArticleScreen(
+                accountType: accountType,
+                articleKey: articleKey,
+                onNavigate: onNavigate
+            )
+        case .search(let accountType, let query):
+            SearchScreen(accountType: accountType, initialQuery: query)
+        case .statusAddReaction(let accountType, let statusKey):
+            StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+        case .statusBlueskyReport(let accountType, let statusKey):
+            BlueskyReportSheet(accountType: accountType, statusKey: statusKey)
+        case .statusMisskeyReport(let accountType, let userKey, let statusKey):
+            MisskeyReportSheet(accountType: accountType, userKey: userKey, statusKey: statusKey)
+        case .editUserList(let accountType, let userKey):
+            EditUserInListScreen(accountType: accountType, userKey: userKey)
+        case .allLists(let accountType):
+            AllListScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
+        case .allFeeds(let accountType):
+            AllFeedScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
+        case .allAntennas(let accountType):
+            AntennasListScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
+        case .allChannels(let accountType):
+            ChannelListScreen(
+                accountType: accountType,
+                timelineDestination: { Route.timeline($0) }
+            )
         case .externalLink:
             EmptyView()
         }
     }
+}
+
+private struct MacArticleScreen: View {
+    let accountType: AccountType
+    let articleKey: MicroBlogKey
+    let onNavigate: (Route) -> Void
+
+    @State private var downloadAlert: MacArticleDownloadAlert?
+
+    var body: some View {
+        ArticleScreen(
+            accountType: accountType,
+            articleKey: articleKey,
+            onOpenProfile: { accountType, userKey in
+                onNavigate(.profileUser(accountType, userKey))
+            },
+            onOpenMedia: { medias, index, preview in
+                onNavigate(.mediaRaw(medias, index, preview))
+            },
+            onDownloadFile: downloadFile
+        )
+        .alert(item: $downloadAlert) { alert in
+            Alert(
+                title: Text("save_error"),
+                message: Text(verbatim: alert.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+    }
+
+    private func downloadFile(_ block: UiArticleBlockFile) {
+        Task {
+            do {
+                _ = try await MacMediaFileExporter.saveRemoteFile(
+                    url: block.url,
+                    fileName: block.downloadFileName,
+                    customHeaders: block.customHeaders
+                )
+            } catch {
+                downloadAlert = MacArticleDownloadAlert(message: error.localizedDescription)
+            }
+        }
+    }
+}
+
+private struct MacArticleDownloadAlert: Identifiable {
+    let id = UUID()
+    let message: String
 }
 
 extension Route {
@@ -151,14 +265,60 @@ extension Route {
             fromCompose(compose)
         case .media(let media):
             fromMedia(media)
+        case .gallery(let gallery):
+            fromGallery(gallery)
         case .profile(let profile):
             fromProfile(profile)
         case .rss(let rss):
             fromRss(rss)
+        case .article(let data):
+            .article(data.accountType, data.articleKey)
+        case .search(let search):
+            .search(search.accountType, search.query)
         case .deepLinkAccountPicker(let picker):
             fromAccountPicker(picker)
         case .openLinkDirectly(let data):
             .externalLink(data.url)
+        case .editUserList(let data):
+            .editUserList(.Specific(accountKey: data.accountKey), data.userKey)
+        case .blockUser(let data):
+            if let accountKey = data.accountKey {
+                .blockUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                .blockUser(nil, data.userKey)
+            }
+        case .unblockUser(let data):
+            if let accountKey = data.accountKey {
+                .unblockUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                .unblockUser(nil, data.userKey)
+            }
+        case .muteUser(let data):
+            if let accountKey = data.accountKey {
+                .muteUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                .muteUser(nil, data.userKey)
+            }
+        case .unmuteUser(let data):
+            if let accountKey = data.accountKey {
+                .unmuteUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                .unmuteUser(nil, data.userKey)
+            }
+        case .reportUser(let data):
+            if let accountKey = data.accountKey {
+                .reportUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                .reportUser(nil, data.userKey)
+            }
+        case .allLists(let data):
+            .allLists(.Specific(accountKey: data.accountKey))
+        case .allFeeds(let data):
+            .allFeeds(.Specific(accountKey: data.accountKey))
+        case .allAntennas(let data):
+            .allAntennas(.Specific(accountKey: data.accountKey))
+        case .allChannels(let data):
+            .allChannels(.Specific(accountKey: data.accountKey))
         default:
                 .empty
         }
@@ -192,6 +352,13 @@ extension Route {
         }
     }
 
+    private static func fromGallery(_ gallery: DeeplinkRoute.Gallery) -> Route? {
+        switch onEnum(of: gallery) {
+        case .detail(let data):
+            .galleryDetail(data.accountType, data.statusKey)
+        }
+    }
+
     private static func fromTimeline(_ timeline: DeeplinkRoute.Timeline) -> Route? {
         switch onEnum(of: timeline) {
         case .xQTDeviceFollow(let data):
@@ -214,8 +381,18 @@ extension Route {
 
     private static func fromStatus(_ status: DeeplinkRoute.Status) -> Route? {
         switch onEnum(of: status) {
+        case .addReaction(let data):
+            .statusAddReaction(data.accountType, data.statusKey)
+        case .blueskyReport(let data):
+            .statusBlueskyReport(data.accountType, data.statusKey)
+        case .deleteConfirm(let data):
+            .statusDeleteConfirm(data.accountType, data.statusKey)
         case .detail(let data):
             .statusDetail(data.accountType, data.statusKey)
+        case .mastodonReport(let data):
+            .statusMastodonReport(data.accountType, data.userKey, data.statusKey)
+        case .misskeyReport(let data):
+            .statusMisskeyReport(data.accountType, data.userKey, data.statusKey)
         case .vVOComment(let data):
             .statusVVOComment(data.accountType, data.commentKey)
         case .vVOStatus(let data):
@@ -237,5 +414,91 @@ extension Route {
             fromDeepLinkRoute(deeplinkRoute: route) ?? .empty
         }
         return .deepLinkAccountPicker(picker.originalUrl, routes)
+    }
+}
+
+extension Route {
+    var alertTitle: LocalizedStringKey? {
+        switch self {
+        case .statusDeleteConfirm:
+            "delete_status_title"
+        case .statusMastodonReport:
+            "mastodon_report_title"
+        case .blockUser:
+            "block_user_title"
+        case .unblockUser:
+            "unblock_user_title"
+        case .muteUser:
+            "mute_user_title"
+        case .unmuteUser:
+            "unmute_user_title"
+        case .reportUser:
+            "report_user_title"
+        default:
+            nil
+        }
+    }
+
+    @ViewBuilder
+    func alertMessage() -> some View {
+        switch self {
+        case .statusDeleteConfirm:
+            Text("delete_status_message")
+        case .statusMastodonReport:
+            Text("mastodon_report_description")
+        case .blockUser:
+            Text("block_user_description")
+        case .unblockUser:
+            Text("unblock_user_description")
+        case .muteUser:
+            Text("mute_user_description")
+        case .unmuteUser:
+            Text("unmute_user_description")
+        case .reportUser:
+            Text("report_user_description")
+        default:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    func alertActions() -> some View {
+        switch self {
+        case .statusDeleteConfirm(let accountType, let statusKey):
+            Button("cancel_button", role: .cancel) {}
+            Button("delete_button", role: .destructive) {
+                DeleteStatusPresenter(accountType: accountType, statusKey: statusKey).models.value.delete()
+            }
+        case .statusMastodonReport(let accountType, let userKey, let statusKey):
+            Button("cancel_button", role: .cancel) {}
+            Button("report_button", role: .destructive) {
+                MastodonReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
+            }
+        case .blockUser(let accountType, let userKey):
+            Button("cancel_button", role: .cancel) {}
+            Button("block_button", role: .destructive) {
+                BlockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .unblockUser(let accountType, let userKey):
+            Button("cancel_button", role: .cancel) {}
+            Button("unblock_button", role: .destructive) {
+                UnblockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .muteUser(let accountType, let userKey):
+            Button("cancel_button", role: .cancel) {}
+            Button("mute_button", role: .destructive) {
+                MuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .unmuteUser(let accountType, let userKey):
+            Button("cancel_button", role: .cancel) {}
+            Button("unmute_button", role: .destructive) {
+                UnmuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .reportUser:
+            Button("cancel_button", role: .cancel) {}
+            Button("ok_button") {}
+        default:
+            EmptyView()
+        }
     }
 }

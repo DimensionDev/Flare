@@ -332,6 +332,7 @@ private struct ProfileGalleryTabContent: View {
 
 private struct ProfileGalleryTile: View {
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openURL) private var openURL
 
     let item: ProfileMedia
     let accountType: AccountType
@@ -394,6 +395,10 @@ private struct ProfileGalleryTile: View {
 
     private func openMedia() {
         if let post = item.status as? UiTimelineV2.Post {
+            if post.mediaClickPolicy == .openPostClickEvent {
+                post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                return
+            }
             MacMediaWindowCoordinator.shared.open(
                 post: post,
                 media: item.media,

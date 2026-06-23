@@ -8,9 +8,9 @@ struct Router: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.openWindow) private var openWindow
     let initialRoute: Route
-    let isActive: Bool
     @State private var backStack: [Route] = []
     @State private var sheet: Route?
+    @State private var alertRoute: Route?
     @State private var statusMediaResolveRequest: MacStatusMediaResolveRequest?
     @State private var didHandleInitialActionRoute = false
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
@@ -18,10 +18,8 @@ struct Router: View {
 
     init(
         initialRoute: Route,
-        isActive: Bool = true
     ) {
         self.initialRoute = initialRoute
-        self.isActive = isActive
         let handler = MacDeepLinkHandler()
         _deepLinkHandler = .init(wrappedValue: handler)
         _deepLinkPresenter = .init(
@@ -46,6 +44,10 @@ struct Router: View {
                 onNavigate: handle(route:),
                 goBack: {}
             )
+            .environment(\.openURL, OpenURLAction { url in
+                deepLinkPresenter.state.handle(url: url.absoluteString)
+                return .handled
+            })
             .navigationDestination(for: Route.self) { route in
                 route.view(
                     onNavigate: handle(route:),
@@ -53,6 +55,10 @@ struct Router: View {
                 )
                 .backport
                 .navigationTransitionAutomatic()
+                .environment(\.openURL, OpenURLAction { url in
+                    deepLinkPresenter.state.handle(url: url.absoluteString)
+                    return .handled
+                })
             }
         }
         .sheet(item: $sheet) { route in
@@ -65,6 +71,18 @@ struct Router: View {
                 )
             }
             .frame(minWidth: 380, minHeight: 420)
+        }
+        .alert(alertRoute?.alertTitle ?? "", isPresented: Binding(
+            get: { alertRoute != nil },
+            set: { isPresented in
+                if !isPresented {
+                    alertRoute = nil
+                }
+            }
+        )) {
+            alertRoute?.alertActions()
+        } message: {
+            alertRoute?.alertMessage()
         }
         .background {
             if let statusMediaResolveRequest {
@@ -86,14 +104,8 @@ struct Router: View {
                 .id(statusMediaResolveRequest.id)
             }
         }
-        .environment(\.openURL, OpenURLAction { url in
-            deepLinkPresenter.state.handle(url: url.absoluteString)
-            return .handled
-        })
         .onOpenURL { url in
-            if isActive {
-                deepLinkPresenter.state.handle(url: url.absoluteString)
-            }
+            deepLinkPresenter.state.handle(url: url.absoluteString)
         }
         .onAppear {
             deepLinkHandler.onRoute = { route in
@@ -155,6 +167,8 @@ struct Router: View {
             if let url = URL(string: link) {
                 openURL(url)
             }
+        case _ where route.alertTitle != nil:
+            alertRoute = route
         case _ where route == initialRoute:
             backStack.removeAll()
             sheet = nil
@@ -171,6 +185,11 @@ struct Router: View {
     private func handleInitialActionRouteIfNeeded() {
         guard !didHandleInitialActionRoute else { return }
         didHandleInitialActionRoute = true
+
+        if initialRoute.alertTitle != nil {
+            handle(route: initialRoute)
+            return
+        }
 
         switch initialRoute {
         case .composeNew,
@@ -196,7 +215,12 @@ struct Router: View {
 
     private func isSheetRoute(_ route: Route) -> Bool {
         switch route {
-        case .serviceSelect, .deepLinkAccountPicker:
+        case .serviceSelect,
+                .deepLinkAccountPicker,
+                .statusAddReaction,
+                .statusBlueskyReport,
+                .statusMisskeyReport,
+                .editUserList:
             true
         default:
             false

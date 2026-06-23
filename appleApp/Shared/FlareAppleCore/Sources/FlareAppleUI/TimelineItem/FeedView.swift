@@ -51,20 +51,26 @@ struct FeedView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if let image = data.media {
-                        NetworkImage(data: image.url, customHeader: image.customHeaders)
-                            .if(desc != nil, transform: { view in
-                                view.frame(width: 80, height: 80)
-                            })
-                            .if(desc == nil, transform: { view in
-                                view
-                                    .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                                    .frame(maxWidth: .infinity)
-                            })
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        if desc != nil {
+                            NetworkImage(data: image.url, customHeader: image.customHeaders)
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        } else {
+                            Color.clear
+                                .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
+                                .overlay {
+                                    NetworkImage(data: image.url, customHeader: image.customHeaders)
+                                        .allowsHitTesting(false)
+                                }
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .onTapGesture {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }

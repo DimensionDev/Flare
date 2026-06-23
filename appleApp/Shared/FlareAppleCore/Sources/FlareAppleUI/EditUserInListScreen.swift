@@ -1,17 +1,16 @@
 import SwiftUI
-import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 
-struct EditUserInListScreen: View {
+public struct EditUserInListScreen: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<EditAccountListState>
     
-    init(accountType: AccountType, userKey: MicroBlogKey) {
+    public init(accountType: AccountType, userKey: MicroBlogKey) {
         self._presenter = .init(wrappedValue: .init(presenter: EditAccountListPresenter(accountType: accountType, userKey: userKey)))
     }
     
-    var body: some View {
+    public var body: some View {
         List {
             PagingView(data: presenter.state.lists) { item in
                 HStack {
@@ -42,7 +41,7 @@ struct EditUserInListScreen: View {
             }
 
         }
-        .navigationTitle("edit_user_in_list")
+        .navigationTitle(Text("edit_user_in_list", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button {

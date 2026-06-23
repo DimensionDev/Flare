@@ -2,22 +2,22 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 
-struct MisskeyReportSheet: View {
+public struct MisskeyReportSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<MisskeyReportState>
     @State private var reason: String = ""
     
-    var body: some View {
+    public var body: some View {
         List {
             Section {
                 TextField(text: $reason) {
-                    Text("misskey_report_reason_placeholder")
+                    Text("misskey_report_reason_placeholder", bundle: FlareAppleUILocalization.bundle)
                 }
             } header: {
-                Text("misskey_report_reason")
+                Text("misskey_report_reason", bundle: FlareAppleUILocalization.bundle)
             }
         }
-        .navigationTitle("misskey_report_title")
+        .navigationTitle(Text("misskey_report_title", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button(
@@ -26,7 +26,7 @@ struct MisskeyReportSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Cancel")
+                        Text("Cancel", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .xmark)
                     }
@@ -40,7 +40,7 @@ struct MisskeyReportSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Done")
+                        Text("Done", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .check)
                     }
@@ -51,7 +51,7 @@ struct MisskeyReportSheet: View {
     }
 }
 
-extension MisskeyReportSheet {
+public extension MisskeyReportSheet {
     init(
         accountType: AccountType,
         userKey: MicroBlogKey,

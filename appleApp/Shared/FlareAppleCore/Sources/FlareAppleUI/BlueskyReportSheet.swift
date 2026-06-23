@@ -2,27 +2,29 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 
-struct BlueskyReportSheet: View {
+public struct BlueskyReportSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<BlueskyReportStatusState>
     @State private var selecedtReason: BlueskyReportStatusStateReportReason? = nil
     
-    var body: some View {
+    public var body: some View {
         List {
-            Picker("bluesky_report_reason", selection: $selecedtReason) {
+            Picker(selection: $selecedtReason) {
                 ForEach(BlueskyReportStatusStateReportReason.allCases, id: \.self) { reason in
                     VStack {
-                        Text(reason.stringKey)
-                        Text(reason.descriptionKey)
+                        Text(FlareAppleUILocalization.string(reason.stringKey))
+                        Text(FlareAppleUILocalization.string(reason.descriptionKey))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .tag(reason)
                 }
+            } label: {
+                Text("bluesky_report_reason", bundle: FlareAppleUILocalization.bundle)
             }
             .pickerStyle(.inline)
         }
-        .navigationTitle("bluesky_report")
+        .navigationTitle(Text("bluesky_report", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button(
@@ -31,7 +33,7 @@ struct BlueskyReportSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Cancel")
+                        Text("Cancel", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .xmark)
                     }
@@ -49,7 +51,7 @@ struct BlueskyReportSheet: View {
                         }
                     } label: {
                         Label {
-                            Text("Done")
+                            Text("Done", bundle: FlareAppleUILocalization.bundle)
                         } icon: {
                             Image(fontAwesome: .check)
                         }
@@ -62,14 +64,14 @@ struct BlueskyReportSheet: View {
 }
 
 
-extension BlueskyReportSheet {
+public extension BlueskyReportSheet {
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         self._presenter = .init(wrappedValue: .init(presenter: BlueskyReportStatusPresenter(accountType: accountType, statusKey: statusKey)))
     }
 }
 
 extension BlueskyReportStatusStateReportReason {
-    var stringKey: LocalizedStringResource {
+    var stringKey: String {
         switch self {
         case .spam:
             return "bluesky_report_reason_spam"
@@ -85,8 +87,8 @@ extension BlueskyReportStatusStateReportReason {
             return "bluesky_report_reason_other"
         }
     }
-    
-    var descriptionKey: LocalizedStringResource {
+
+    var descriptionKey: String {
         switch self {
         case .spam:
             return "bluesky_report_reason_spam_description"

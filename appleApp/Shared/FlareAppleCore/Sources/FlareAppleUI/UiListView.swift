@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import FlareAppleUI
 
 public struct UiListView: View {
     private let data: UiList
@@ -139,9 +138,9 @@ public struct UiListPlaceholder: View {
                     .fill(.placeholder)
                     .frame(width: 24, height: 24)
                     .clipShape(.circle)
-                Text("#loading")
+                Text("#loading", bundle: FlareAppleUILocalization.bundle)
             }
-            Text("#loading")
+            Text("#loading", bundle: FlareAppleUILocalization.bundle)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

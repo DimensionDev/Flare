@@ -1,13 +1,13 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import FlareAppleUI
 
-struct StatusAddReactionSheet: View {
-    let accountType: AccountType
+public struct StatusAddReactionSheet: View {
+    private let accountType: AccountType
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<AddReactionState>
-    var body: some View {
+
+    public var body: some View {
         StateView(state: presenter.state.emojis) { emojiData in
             EmojiPopup(data: emojiData) { emoji in
                 presenter.state.select(emoji: emoji)
@@ -24,7 +24,7 @@ struct StatusAddReactionSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Cancel")
+                        Text("Cancel", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .xmark)
                     }
@@ -34,7 +34,7 @@ struct StatusAddReactionSheet: View {
     }
 }
 
-extension StatusAddReactionSheet {
+public extension StatusAddReactionSheet {
     init(
         accountType: AccountType,
         statusKey: MicroBlogKey,

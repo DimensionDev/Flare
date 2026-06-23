@@ -463,21 +463,3 @@ extension MediaViewerScreen where SupplementaryOverlay == EmptyView {
         }
     }
 }
-
-extension UiMedia {
-    var mediaPreviewURL: String? {
-        switch onEnum(of: self) {
-        case .image(let image): image.previewUrl
-        case .video(let video): video.thumbnailUrl
-        case .gif(let gif): gif.previewUrl
-        case .audio: nil
-        }
-    }
-
-    var isVideoMedia: Bool {
-        if case .video = onEnum(of: self) {
-            return true
-        }
-        return false
-    }
-}

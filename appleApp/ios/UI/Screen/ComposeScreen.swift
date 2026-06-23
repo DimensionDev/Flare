@@ -15,7 +15,8 @@ struct ComposeScreen: View {
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     @StateObject private var presenter: KotlinPresenter<ComposeState>
-    @State private var viewModel = ComposeInputViewModel()
+    @State private var viewModel = ComposeContentViewModel()
+    @State private var mediaViewModel = MediaViewModel()
     @State private var uiTextView: UITextView?
     @State private var pendingCursor: Int?
     @State private var initialTextApplied = false
@@ -32,7 +33,7 @@ struct ComposeScreen: View {
                 VStack(
                     spacing: 8
                 ) {
-                    if viewModel.enableCW {
+                    if viewModel.enableContentWarning {
                         TextField(text: $viewModel.contentWarning) {
                             Text("compose_cw_placeholder")
                         }
@@ -54,85 +55,32 @@ struct ComposeScreen: View {
                         requestDefaultFocus()
                     }
                     Spacer()
-                    if viewModel.mediaViewModel.items.count > 0 {
+                    if mediaViewModel.items.count > 0 {
                         ScrollView(.horizontal) {
                             HStack {
-                                ForEach(viewModel.mediaViewModel.items) { item in
-                                    ComposeMediaItemView(item: item, mediaViewModel: viewModel.mediaViewModel)
+                                ForEach(mediaViewModel.items) { item in
+                                    ComposeMediaItemView(item: item, mediaViewModel: mediaViewModel)
                                 }
                             }
                         }
                         StateView(state: presenter.state.composeConfig) { config in
                             if let media = config.media, media.canSensitive {
-                                Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
+                                Toggle(isOn: $mediaViewModel.sensitive, label: {
                                     Text("compose_media_mark_sensitive")
                                 })
                             }
                         }
                     }
                     if viewModel.pollViewModel.enabled {
-                        HStack(
-                            spacing: 8
-                        ) {
-                            Picker("compose_poll_type", selection: $viewModel.pollViewModel.pollType) {
-                                Text("compose_poll_type_single")
-                                    .tag(ComposePollType.single)
-                                Text("compose_poll_type_multiple")
-                                    .tag(ComposePollType.multiple)
-                            }
-                            .pickerStyle(.segmented)
-                            Button {
-                                withAnimation {
-                                    viewModel.pollViewModel.add()
-                                }
-                            } label: {
-                                Image(fontAwesome: .plus)
-                            }.disabled(viewModel.pollViewModel.choices.count >= 4)
-                        }
-                        ForEach($viewModel.pollViewModel.choices) { $choice in
-                            HStack(
-                                spacing: 8
-                            ) {
-                                TextField(text: $choice.text) {
-                                    Text("compose_poll_choice_placeholder")
-                                }
-                                .textFieldStyle(.roundedBorder)
-                                Button {
-                                    withAnimation {
-                                        viewModel.pollViewModel.remove(choice: choice)
-                                    }
-                                } label: {
-                                    Image(fontAwesome: .deleteLeft)
-                                }
-                                .disabled(viewModel.pollViewModel.choices.count <= 2)
-                            }
-                        }
-                        HStack {
-                            Spacer()
-                            Menu {
-                                ForEach(viewModel.pollViewModel.allExpiration, id: \.self) { expiration in
-                                    Button(action: {
-                                        viewModel.pollViewModel.expired = expiration
-                                    }, label: {
-                                        Text(expiration.rawValue)
-                                    })
-                                }
-                            } label: {
-                                Text("compose_poll_expiration")
-                                Text(viewModel.pollViewModel.expired.rawValue)
-                            }
-                        }
+                        ComposePollSection(
+                            viewModel: viewModel.pollViewModel,
+                            maxChoices: maxPollOptions
+                        )
                     }
                     if let replyState = presenter.state.replyState,
                        case .success(let reply) = onEnum(of: replyState),
                        let content = reply.data as? UiTimelineV2.Post {
-                        StatusView(data: content, isQuote: true, showMedia: false, forceHideActions: true)
-                            .padding()
-                            .clipShape(.rect(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color(.separator), lineWidth: 1)
-                            )
+                        ComposeReferenceStatusPreview(data: content)
                     }
                 }
                 .padding(.horizontal)
@@ -160,9 +108,9 @@ struct ComposeScreen: View {
         }
         .onSuccessOf(of: presenter.state.composeConfig) { config in
             if let media = config.media {
-                viewModel.mediaViewModel.maxSize = Int(media.maxCount)
-                viewModel.mediaViewModel.enableAltText = media.altTextMaxLength > 0
-                viewModel.mediaViewModel.altTextMaxLength = Int(media.altTextMaxLength)
+                mediaViewModel.maxSize = Int(media.maxCount)
+                mediaViewModel.enableAltText = media.altTextMaxLength > 0
+                mediaViewModel.altTextMaxLength = Int(media.altTextMaxLength)
             }
         }
         .onChange(of: presenter.state.loadedDraftState) { _, newValue in
@@ -178,7 +126,7 @@ struct ComposeScreen: View {
                 applyCursorIfPossible()
             }
         }
-        .onChange(of: viewModel.mediaViewModel.items.count) { _, newValue in
+        .onChange(of: mediaViewModel.items.count) { _, newValue in
             presenter.state.setMediaSize(value: Int32(newValue))
         }
         .sheet(isPresented: $showDraftSheet) {
@@ -254,7 +202,7 @@ struct ComposeScreen: View {
     private var composeActionBar: some View {
         ComposeActionBarContent(
             isPollEnabled: viewModel.pollViewModel.enabled,
-            hasMedia: !viewModel.mediaViewModel.items.isEmpty,
+            hasMedia: !mediaViewModel.items.isEmpty,
             canAddPoll: presenter.state.pollMaxOptions != nil,
             canUseContentWarning: presenter.state.contentWarningEnabled,
             visibility: composeVisibility,
@@ -273,8 +221,8 @@ struct ComposeScreen: View {
             },
             onToggleContentWarning: {
                 withAnimation {
-                    viewModel.toggleCW()
-                    if viewModel.enableCW {
+                    viewModel.toggleContentWarning()
+                    if viewModel.enableContentWarning {
                         cwKeyboardFocused = true
                     } else {
                         keyboardFocused = true
@@ -296,12 +244,12 @@ struct ComposeScreen: View {
         if presenter.state.mediaEnabled {
             PhotosPicker(
                 selection: Binding(get: {
-                    viewModel.mediaViewModel.selectedItems
+                    mediaViewModel.selectedItems
                 }, set: { value in
-                    viewModel.mediaViewModel.selectedItems = value
-                    viewModel.mediaViewModel.update()
+                    mediaViewModel.selectedItems = value
+                    mediaViewModel.update()
                 }),
-                maxSelectionCount: viewModel.mediaViewModel.maxSize,
+                maxSelectionCount: mediaViewModel.maxSize,
                 matching: .any(of: [.images, .videos, .livePhotos])
             ) {
                 Image(fontAwesome: .image)
@@ -464,24 +412,17 @@ struct ComposeScreen: View {
     }
     
     private func getComposeData() -> ComposeData {
-        ComposeData(
-            content: viewModel.text,
+        viewModel.makeComposeData(
             visibility: getVisibility(),
-            language: viewModel.languages,
             medias: getMedia(),
-            sensitive: viewModel.mediaViewModel.sensitive,
-            spoilerText: viewModel.contentWarning,
-            poll: getPoll(),
-            localOnly: false,
-            referenceStatus: getReferenceStatus()
+            sensitive: mediaViewModel.sensitive,
+            composeStatus: presenter.state.composeStatus
         )
     }
 
     private var hasDraftContent: Bool {
-        !viewModel.text.isEmpty ||
-        !viewModel.contentWarning.isEmpty ||
-        !viewModel.mediaViewModel.items.isEmpty ||
-        viewModel.pollViewModel.enabled
+        viewModel.hasDraftContent ||
+        !mediaViewModel.items.isEmpty
     }
     
     private func send() {
@@ -503,24 +444,15 @@ struct ComposeScreen: View {
     }
 
     private func applyDraft(_ draft: UiDraft) {
-        let data = draft.data
-        viewModel.text = data.content
-        viewModel.contentWarning = data.spoilerText ?? ""
-        viewModel.enableCW = !(data.spoilerText ?? "").isEmpty
-        if !data.language.isEmpty {
-            viewModel.languages = data.language
-        }
-        viewModel.mediaViewModel.sensitive = data.sensitive
-        viewModel.mediaViewModel.restore(draftMedias: draft.medias)
-        viewModel.apply(poll: data.poll)
-        if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
-            visibilityState.data.setVisibility(value: data.visibility)
-        }
+        let result = viewModel.applyDraft(draft)
+        mediaViewModel.sensitive = result.sensitive
+        mediaViewModel.restore(draftMedias: draft.medias)
+        setVisibility(result.visibility)
         requestComposerFocus()
     }
     
     private func getMedia() -> [ComposeData.Media] {
-        return viewModel.mediaViewModel.items.compactMap { item in
+        return mediaViewModel.items.compactMap { item in
             guard let data = item.data else {
                 return nil
             }
@@ -528,20 +460,6 @@ struct ComposeScreen: View {
                 file: .init(name: item.fileName, data: KotlinByteArray.from(data: data), type: item.type),
                 altText: item.altText.isEmpty ? nil : item.altText
             )
-        }
-    }
-    private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
-        return if let data = presenter.state.composeStatus {
-            ComposeData.ReferenceStatus(composeStatus: data)
-        } else {
-            nil
-        }
-    }
-    private func getPoll() -> ComposeData.Poll? {
-        return if viewModel.pollViewModel.enabled {
-            ComposeData.Poll(options: viewModel.pollViewModel.choices.map { item in item.text }, expiredAfter: viewModel.pollViewModel.expired.inWholeMilliseconds, multiple: viewModel.pollViewModel.pollType == ComposePollType.multiple)
-        } else {
-            nil
         }
     }
     private func getVisibility() -> UiTimelineV2.PostVisibility {
@@ -575,6 +493,10 @@ struct ComposeScreen: View {
         presenter.state.textMaxLength.map { Int(truncating: $0) }
     }
 
+    private var maxPollOptions: Int {
+        presenter.state.pollMaxOptions.map { Int(truncating: $0) } ?? ComposePollViewModel.defaultMaxChoiceCount
+    }
+
     private var languageMaxCount: Int {
         guard case .success(let config) = onEnum(of: presenter.state.composeConfig),
               let language = config.data.language else {
@@ -594,57 +516,6 @@ struct ComposeScreen: View {
     }
 
 }
-
-@Observable
-class ComposeInputViewModel {
-    var text: String = ""
-    var contentWarning: String = ""
-    var enableCW = false
-    var showEmoji = false
-    var pollViewModel = PollViewModel()
-    var mediaViewModel = MediaViewModel()
-//    var visibility: UiTimeline.ItemContentStatusTopEndContentVisibilityType = .public
-    var languages: [String] = {
-        if let code = Locale.current.language.languageCode?.identifier {
-            return [code]
-        }
-        return ["en"]
-    }()
-    
-    
-    func showEmojiPanel() {
-        showEmoji = true
-    }
-    func toggleCW() {
-        enableCW = !enableCW
-    }
-    func togglePoll() {
-        if pollViewModel.enabled {
-            pollViewModel = PollViewModel()
-        } else {
-            pollViewModel.enabled = true
-        }
-    }
-    func apply(poll: ComposeData.Poll?) {
-        guard let poll else {
-            pollViewModel = PollViewModel()
-            return
-        }
-
-        pollViewModel.enabled = true
-        pollViewModel.pollType = poll.multiple ? .multiple : .single
-        pollViewModel.expired = ComposePollExpired(milliseconds: poll.expiredAfter) ?? .minutes5
-        pollViewModel.choices = poll.options.map(PollChoice.init)
-        while pollViewModel.choices.count < 2 {
-            pollViewModel.choices.append(PollChoice())
-        }
-    }
-    func addEmoji(emoji: UiEmoji) {
-//        text += " :" + emoji.shortcode + ": "
-        showEmoji = false
-    }
-}
-
 
 @Observable
 class MediaViewModel {
@@ -739,103 +610,6 @@ class MediaItem: Equatable, Identifiable {
             self.type = .video
         default:
             self.type = .other
-        }
-    }
-}
-
-@Observable
-class PollViewModel {
-    var enabled = false
-    var pollType = ComposePollType.single
-    var choices: [PollChoice] = [PollChoice(), PollChoice()]
-    var expired = ComposePollExpired.minutes5
-    let allExpiration = [
-        ComposePollExpired.minutes5,
-        ComposePollExpired.minutes30,
-        ComposePollExpired.hours1,
-        ComposePollExpired.hours6,
-        ComposePollExpired.hours12,
-        ComposePollExpired.days1,
-        ComposePollExpired.days3,
-        ComposePollExpired.days7
-    ]
-    func add() {
-        if choices.count < 4 {
-            choices.append(PollChoice())
-        }
-    }
-    func remove(choice: PollChoice) {
-        if choices.count > 2 {
-            choices.removeAll { value in
-                value.id == choice.id
-            }
-        }
-    }
-}
-
-@Observable
-class PollChoice: Identifiable {
-    var text = ""
-
-    init(text: String = "") {
-        self.text = text
-    }
-}
-
-enum ComposePollType {
-    case single
-    case multiple
-}
-
-enum ComposePollExpired: String {
-    case minutes5
-    case minutes30
-    case hours1
-    case hours6
-    case hours12
-    case days1
-    case days3
-    case days7
-    init?(milliseconds: Int64) {
-        switch milliseconds {
-        case 5 * 60 * 1000:
-            self = .minutes5
-        case 30 * 60 * 1000:
-            self = .minutes30
-        case 1 * 60 * 60 * 1000:
-            self = .hours1
-        case 6 * 60 * 60 * 1000:
-            self = .hours6
-        case 12 * 60 * 60 * 1000:
-            self = .hours12
-        case 24 * 60 * 60 * 1000:
-            self = .days1
-        case 3 * 24 * 60 * 60 * 1000:
-            self = .days3
-        case 7 * 24 * 60 * 60 * 1000:
-            self = .days7
-        default:
-            return nil
-        }
-    }
-    var inWholeMilliseconds: Int64 {
-        switch self {
-        case .minutes5:
-            return 5 * 60 * 1000
-        case .minutes30:
-            return 30 * 60 * 1000
-        case .hours1:
-            return 1 * 60 * 60 * 1000
-        case .hours6:
-            return 6 * 60 * 60 * 1000
-        case .hours12:
-            return 12 * 60 * 60 * 1000
-        case .days1:
-            return 24 * 60 * 60 * 1000
-        case .days3:
-            return 3 * 24 * 60 * 60 * 1000
-        case .days7:
-            return 7 * 24 * 60 * 60 * 1000
         }
     }
 }

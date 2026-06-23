@@ -6,10 +6,12 @@ import SwiftUIBackports
 
 struct Router: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.openWindow) private var openWindow
     let initialRoute: Route
     let isActive: Bool
     @State private var backStack: [Route] = []
     @State private var sheet: Route?
+    @State private var didHandleInitialActionRoute = false
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @StateObject private var deepLinkHandler: MacDeepLinkHandler
 
@@ -38,7 +40,7 @@ struct Router: View {
     }
 
     var body: some View {
-        NavigationStack(path: $backStack.animation()) {
+        NavigationStack(path: $backStack) {
             initialRoute.view(
                 onNavigate: handle(route:),
                 goBack: {}
@@ -48,10 +50,8 @@ struct Router: View {
                     onNavigate: handle(route:),
                     goBack: goBack
                 )
-                .background(Color(nsColor: .windowBackgroundColor))
+                .navigationTransition(.automatic)
             }
-            .backport
-            .navigationTransitionAutomatic()
         }
         .sheet(item: $sheet) { route in
             NavigationStack {
@@ -82,6 +82,7 @@ struct Router: View {
                     openURL(url)
                 }
             }
+            handleInitialActionRouteIfNeeded()
         }
     }
 
@@ -93,6 +94,32 @@ struct Router: View {
 
     private func handle(route: Route) {
         switch route {
+        case .composeNew:
+            MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
+        case .composeDraft(let groupId):
+            MacComposeWindowCoordinator.shared.openDraft(
+                groupId: groupId,
+                openWindow: openWindow
+            )
+        case .composeQuote(let accountType, let statusKey):
+            MacComposeWindowCoordinator.shared.openQuote(
+                accountType: accountType,
+                statusKey: statusKey,
+                openWindow: openWindow
+            )
+        case .composeReply(let accountType, let statusKey):
+            MacComposeWindowCoordinator.shared.openReply(
+                accountType: accountType,
+                statusKey: statusKey,
+                openWindow: openWindow
+            )
+        case .composeVVOReplyComment(let accountType, let statusKey, let rootId):
+            MacComposeWindowCoordinator.shared.openVVOReplyComment(
+                accountType: accountType,
+                statusKey: statusKey,
+                rootId: rootId,
+                openWindow: openWindow
+            )
         case .externalLink(let link):
             if let url = URL(string: link) {
                 openURL(url)
@@ -107,6 +134,23 @@ struct Router: View {
                 navigate(route)
                 sheet = nil
             }
+        }
+    }
+
+    private func handleInitialActionRouteIfNeeded() {
+        guard !didHandleInitialActionRoute else { return }
+        didHandleInitialActionRoute = true
+
+        switch initialRoute {
+        case .composeNew,
+                .composeDraft,
+                .composeQuote,
+                .composeReply,
+                .composeVVOReplyComment,
+                .externalLink:
+            handle(route: initialRoute)
+        default:
+            break
         }
     }
 

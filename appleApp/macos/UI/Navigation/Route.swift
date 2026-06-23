@@ -11,7 +11,14 @@ enum Route: Hashable, Identifiable {
     case serviceSelect
     case localHistory
     case timeline(UiTimelineTabItem)
+    case composeNew
+    case composeDraft(String)
+    case composeQuote(AccountType, MicroBlogKey)
+    case composeReply(AccountType, MicroBlogKey)
+    case composeVVOReplyComment(AccountType, MicroBlogKey, String)
     case statusDetail(AccountType, MicroBlogKey)
+    case statusVVOComment(AccountType, MicroBlogKey)
+    case statusVVOStatus(AccountType, MicroBlogKey)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
     case userFollowing(AccountType, MicroBlogKey)
@@ -69,8 +76,18 @@ enum Route: Hashable, Identifiable {
         case .timeline(let item):
             TimelineScreen(tabItem: item, allowGalleryMode: true)
                 .navigationTitle(item.title.text)
+        case .composeNew,
+                .composeDraft,
+                .composeQuote,
+                .composeReply,
+                .composeVVOReplyComment:
+            EmptyView()
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        case .statusVVOComment(let accountType, let statusKey):
+            VVOCommentScreen(accountType: accountType, statusKey: statusKey)
+        case .statusVVOStatus(let accountType, let statusKey):
+            VVOStatusScreen(accountType: accountType, statusKey: statusKey)
         case .profileUser(let accountType, let userKey):
             ProfileScreen(
                 accountType: accountType,
@@ -115,6 +132,8 @@ extension Route {
             fromTimeline(data)
         case .status(let status):
             fromStatus(status)
+        case .compose(let compose):
+            fromCompose(compose)
         case .profile(let profile):
             fromProfile(profile)
         case .rss(let rss):
@@ -125,6 +144,23 @@ extension Route {
             .externalLink(data.url)
         default:
                 .empty
+        }
+    }
+
+    private static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
+        switch onEnum(of: compose) {
+        case .new:
+            .composeNew
+        case .quote(let data):
+            .composeQuote(AccountType.Specific(accountKey: data.accountKey), data.statusKey)
+        case .reply(let data):
+            .composeReply(AccountType.Specific(accountKey: data.accountKey), data.statusKey)
+        case .vVOReplyComment(let data):
+            .composeVVOReplyComment(
+                AccountType.Specific(accountKey: data.accountKey),
+                data.replyTo,
+                data.rootId
+            )
         }
     }
 
@@ -152,6 +188,10 @@ extension Route {
         switch onEnum(of: status) {
         case .detail(let data):
             .statusDetail(data.accountType, data.statusKey)
+        case .vVOComment(let data):
+            .statusVVOComment(data.accountType, data.commentKey)
+        case .vVOStatus(let data):
+            .statusVVOStatus(data.accountType, data.statusKey)
         default:
             .empty
         }

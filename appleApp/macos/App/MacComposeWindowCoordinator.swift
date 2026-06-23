@@ -71,6 +71,24 @@ final class MacComposeWindowCoordinator {
         )
     }
 
+    func openVVOReplyComment(
+        accountType: AccountType,
+        statusKey: MicroBlogKey,
+        rootId: String,
+        openWindow: OpenWindowAction
+    ) {
+        open(
+            request: MacComposeWindowRequest(
+                accountType: accountType,
+                composeStatus: ComposeStatus.VVOComment(
+                    statusKey: statusKey,
+                    rootId: rootId
+                )
+            ),
+            openWindow: openWindow
+        )
+    }
+
     private func open(request: MacComposeWindowRequest, openWindow: OpenWindowAction) {
         requests[request.id] = request
         openWindow(id: MacWindowID.compose, value: request.id)

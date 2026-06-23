@@ -26,6 +26,9 @@ struct FlareApp: App {
                 RootView()
             }
         }
+        .defaultSize(width: 480, height: 600)
+        .windowResizability(.contentSize)
+        .windowIdealSize(.fitToContent)
         .commands {
             MacAppCommands()
         }
@@ -35,6 +38,8 @@ struct FlareApp: App {
                 MacComposeWindowRoot(requestID: requestID.wrappedValue)
             }
         }
+        .windowResizability(.contentSize)
+        .windowIdealSize(.fitToContent)
         .defaultSize(width: 100, height: 80)
         .windowToolbarStyle(.unified)
 

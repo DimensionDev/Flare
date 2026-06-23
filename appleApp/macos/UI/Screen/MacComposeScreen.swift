@@ -4,29 +4,27 @@ import FlareAppleCore
 import FlareAppleUI
 @preconcurrency import KotlinSharedUI
 import SwiftUI
+import SwiftUIIntrospect
 import UniformTypeIdentifiers
 
 struct MacComposeScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var textEditorFocused: Bool
 
     let request: MacComposeWindowRequest
     @StateObject private var presenter: KotlinPresenter<ComposeState>
 
-    @State private var text = ""
-    @State private var contentWarning = ""
-    @State private var enableContentWarning = false
+    @State private var viewModel = ComposeContentViewModel()
     @State private var sensitive = false
-    @State private var languages: [String] = MacComposeDefaults.languages
     @State private var mediaItems: [MacComposeMediaItem] = []
-    @State private var pollEnabled = false
-    @State private var pollMultiple = false
-    @State private var pollChoices = ["", ""]
-    @State private var pollExpiration = MacComposePollExpiration.minutes5
     @State private var showFileImporter = false
     @State private var showCloseConfirmation = false
     @State private var showEmojiPopover = false
     @State private var showAccountPopover = false
+    @State private var showDraftBoxPopover = false
     @State private var initialTextApplied = false
+    @State private var nsTextView: NSTextView?
+    @State private var pendingCursor: Int?
 
     init(request: MacComposeWindowRequest) {
         self.request = request
@@ -43,21 +41,26 @@ struct MacComposeScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if enableContentWarning {
-                TextField("compose_cw_placeholder", text: $contentWarning)
+            if viewModel.enableContentWarning {
+                TextField("compose_cw_placeholder", text: $viewModel.contentWarning)
                 Divider()
             }
             
-            TextEditor(text: $text)
+            TextEditor(text: $viewModel.text)
                 .font(.body)
                 .scrollDisabled(true)
+                .introspect(.textEditor, on: .macOS(.v13, .v14, .v15, .v26, .v27)) { textView in
+                    nsTextView = textView
+                    applyCursorIfPossible()
+                }
+                .focused($textEditorFocused)
                 .frame(maxWidth: .infinity, minHeight: 60, maxHeight: .infinity)
             
             if !mediaItems.isEmpty {
                 mediaSection
             }
 
-            if pollEnabled {
+            if viewModel.pollViewModel.enabled {
                 pollSection
             }
 
@@ -73,17 +76,21 @@ struct MacComposeScreen: View {
                 accountToolbarButton
             }
 
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    saveDraft(shouldDismiss: false)
-                } label: {
-                    Label {
-                        Text("compose_save_draft")
-                    } icon: {
-                        Image(systemName: "tray.and.arrow.down")
+            if presenter.state.showDraft {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showDraftBoxPopover.toggle()
+                    } label: {
+                        Label {
+                            Text("Drafts")
+                        } icon: {
+                            Image(fontAwesome: .inbox)
+                        }
+                    }
+                    .popover(isPresented: $showDraftBoxPopover, arrowEdge: .top) {
+                        draftBoxPopover
                     }
                 }
-                .disabled(!hasDraftContent)
             }
 
             ToolbarItem(placement: .confirmationAction) {
@@ -119,10 +126,10 @@ struct MacComposeScreen: View {
             Button("compose_button_cancel", role: .cancel) {}
         }
         .onAppear {
-            presenter.state.setText(value: text)
+            presenter.state.setText(value: viewModel.text)
             presenter.state.setMediaSize(value: Int32(mediaItems.count))
         }
-        .onChange(of: text) { _, newValue in
+        .onChange(of: viewModel.text) { _, newValue in
             presenter.state.setText(value: newValue)
         }
         .onChange(of: mediaItems.count) { _, newValue in
@@ -132,7 +139,10 @@ struct MacComposeScreen: View {
             guard !initialTextApplied else { return }
             if case .success(let initialText) = onEnum(of: newValue) {
                 initialTextApplied = true
-                text = initialText.data.text
+                viewModel.text = initialText.data.text
+                pendingCursor = Int(initialText.data.cursorPosition)
+                requestComposerFocus()
+                applyCursorIfPossible()
             }
         }
         .onChange(of: presenter.state.loadedDraftState) { _, newValue in
@@ -232,74 +242,9 @@ struct MacComposeScreen: View {
     }
 
     private var pollSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("compose_poll_type")
-                    .font(.headline)
-
-                Picker("compose_poll_type", selection: $pollMultiple) {
-                    Text("compose_poll_type_single").tag(false)
-                    Text("compose_poll_type_multiple").tag(true)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 260)
-
-                Spacer()
-
-                Button {
-                    pollEnabled = false
-                    pollChoices = ["", ""]
-                } label: {
-                    Image(systemName: "xmark")
-                }
-                .buttonStyle(.borderless)
-            }
-
-            ForEach(pollChoices.indices, id: \.self) { index in
-                HStack {
-                    TextField(
-                        "compose_poll_choice_placeholder",
-                        text: Binding(
-                            get: { pollChoices[index] },
-                            set: { pollChoices[index] = $0 }
-                        )
-                    )
-                    .textFieldStyle(.roundedBorder)
-
-                    Button {
-                        pollChoices.remove(at: index)
-                    } label: {
-                        Image(fontAwesome: .deleteLeft)
-                    }
-                    .buttonStyle(.borderless)
-                    .disabled(pollChoices.count <= 2)
-                }
-            }
-
-            HStack {
-                Button {
-                    pollChoices.append("")
-                } label: {
-                    Label {
-                        Text("macos_compose_add_poll_choice")
-                    } icon: {
-                        Image(fontAwesome: .plus)
-                    }
-                }
-                .disabled(pollChoices.count >= max(2, maxPollOptions))
-
-                Spacer()
-
-                Picker("compose_poll_expiration", selection: $pollExpiration) {
-                    ForEach(MacComposePollExpiration.allCases) { expiration in
-                        Text(expiration.title).tag(expiration)
-                    }
-                }
-                .frame(width: 180)
-            }
-        }
-        .padding(12)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+        ComposePollSection(viewModel: viewModel.pollViewModel, maxChoices: maxPollOptions)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
     }
 
     @ViewBuilder
@@ -307,15 +252,13 @@ struct MacComposeScreen: View {
         if let replyState = presenter.state.replyState,
            case .success(let reply) = onEnum(of: replyState),
            let content = reply.data as? UiTimelineV2.Post {
-            StatusView(data: content, isQuote: true, showMedia: false, forceHideActions: true)
-                .padding(12)
-                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+            ComposeReferenceStatusPreview(data: content)
         }
     }
 
     private var bottomBar: some View {
         ComposeActionBarContent(
-            isPollEnabled: pollEnabled,
+            isPollEnabled: viewModel.pollViewModel.enabled,
             hasMedia: !mediaItems.isEmpty,
             canAddPoll: presenter.state.pollMaxOptions != nil,
             canUseContentWarning: presenter.state.contentWarningEnabled,
@@ -324,22 +267,22 @@ struct MacComposeScreen: View {
             emojiState: presenter.state.emojiState,
             isEmojiPresented: $showEmojiPopover,
             languageCodes: Array(presenter.state.languageCodes),
-            selectedLanguages: $languages,
+            selectedLanguages: $viewModel.languages,
             maxLanguageSelectionCount: languageMaxCount,
-            textCount: text.count,
+            textCount: viewModel.text.count,
             maxTextLength: textMaxLength,
             onTogglePoll: {
-                pollEnabled.toggle()
-                if pollEnabled {
+                viewModel.togglePoll()
+                if viewModel.pollViewModel.enabled {
                     mediaItems = []
                 }
             },
             onToggleContentWarning: {
-                enableContentWarning.toggle()
+                viewModel.toggleContentWarning()
             },
             onSelectVisibility: setVisibility,
             onSelectEmoji: { emoji in
-                text += emoji.insertText
+                viewModel.text += emoji.insertText
                 showEmojiPopover = false
             }
         ) {
@@ -359,10 +302,8 @@ struct MacComposeScreen: View {
     }
 
     private var hasDraftContent: Bool {
-        !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !contentWarning.isEmpty ||
-        !mediaItems.isEmpty ||
-        pollEnabled
+        viewModel.hasDraftContent ||
+        !mediaItems.isEmpty
     }
 
     private var textMaxLength: Int? {
@@ -370,7 +311,7 @@ struct MacComposeScreen: View {
     }
 
     private var maxPollOptions: Int {
-        presenter.state.pollMaxOptions.map { Int(truncating: $0) } ?? 4
+        presenter.state.pollMaxOptions.map { Int(truncating: $0) } ?? ComposePollViewModel.defaultMaxChoiceCount
     }
 
     private var languageMaxCount: Int {
@@ -407,17 +348,22 @@ struct MacComposeScreen: View {
     }
 
     private var composeData: ComposeData {
-        ComposeData(
-            content: text,
+        viewModel.makeComposeData(
             visibility: currentVisibility,
-            language: languages,
             medias: mediaItems.map(\.composeMedia),
             sensitive: sensitive,
-            spoilerText: enableContentWarning ? contentWarning : nil,
-            poll: poll,
-            localOnly: false,
-            referenceStatus: referenceStatus
+            composeStatus: presenter.state.composeStatus
         )
+    }
+
+    private var draftBoxPopover: some View {
+        NavigationStack {
+            DraftBoxScreen { groupId in
+                presenter.state.loadDraft(groupId: groupId)
+                showDraftBoxPopover = false
+            }
+        }
+        .frame(width: 380, height: 480)
     }
 
     private var currentVisibility: UiTimelineV2.PostVisibility {
@@ -429,33 +375,12 @@ struct MacComposeScreen: View {
         }
     }
 
-    private var referenceStatus: ComposeData.ReferenceStatus? {
-        if let composeStatus = presenter.state.composeStatus {
-            ComposeData.ReferenceStatus(composeStatus: composeStatus)
-        } else {
-            nil
-        }
-    }
-
-    private var poll: ComposeData.Poll? {
-        guard pollEnabled else { return nil }
-        let options = pollChoices
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        guard options.count >= 2 else { return nil }
-        return ComposeData.Poll(
-            options: options,
-            expiredAfter: pollExpiration.milliseconds,
-            multiple: pollMultiple
-        )
-    }
-
     private func importFiles(_ result: Result<[URL], Error>) {
         guard case .success(let urls) = result else { return }
         let remaining = max(Int(presenter.state.mediaMaxCount) - mediaItems.count, 0)
         let items = urls.prefix(remaining).compactMap(MacComposeMediaItem.init(url:))
         if !items.isEmpty {
-            pollEnabled = false
+            viewModel.pollViewModel.reset()
             mediaItems.append(contentsOf: items)
         }
     }
@@ -489,38 +414,46 @@ struct MacComposeScreen: View {
         return Array(visibilityState.data.allVisibilities)
     }
 
-    private func applyDraft(_ draft: UiDraft) {
-        let data = draft.data
-        text = data.content
-        contentWarning = data.spoilerText ?? ""
-        enableContentWarning = !(data.spoilerText ?? "").isEmpty
-        if !data.language.isEmpty {
-            languages = data.language
-        }
-        sensitive = data.sensitive
-        mediaItems = draft.medias.compactMap(MacComposeMediaItem.init(draftMedia:))
-        applyPoll(data.poll)
-        if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
-            visibilityState.data.setVisibility(value: data.visibility)
+    private func applyCursorIfPossible(retryCount: Int = 0) {
+        guard nsTextView != nil, pendingCursor != nil else { return }
+        DispatchQueue.main.async {
+            guard let textView = nsTextView, let pendingCursor else { return }
+            if textView.string != viewModel.text {
+                guard retryCount >= 3 else {
+                    applyCursorIfPossible(retryCount: retryCount + 1)
+                    return
+                }
+                textView.string = viewModel.text
+            }
+
+            guard textView.string == viewModel.text else {
+                return
+            }
+
+            let length = (textView.string as NSString).length
+            let clamped = NSRange(
+                location: max(0, min(pendingCursor, length)),
+                length: 0
+            )
+            textView.setSelectedRange(clamped)
+            textView.scrollRangeToVisible(clamped)
+            self.pendingCursor = nil
         }
     }
 
-    private func applyPoll(_ data: ComposeData.Poll?) {
-        guard let data else {
-            pollEnabled = false
-            pollChoices = ["", ""]
-            pollMultiple = false
-            pollExpiration = .minutes5
-            return
+    private func requestComposerFocus() {
+        DispatchQueue.main.async {
+            textEditorFocused = true
+            nsTextView?.window?.makeFirstResponder(nsTextView)
+            applyCursorIfPossible()
         }
+    }
 
-        pollEnabled = true
-        pollChoices = data.options
-        while pollChoices.count < 2 {
-            pollChoices.append("")
-        }
-        pollMultiple = data.multiple
-        pollExpiration = MacComposePollExpiration(milliseconds: data.expiredAfter) ?? .minutes5
+    private func applyDraft(_ draft: UiDraft) {
+        let result = viewModel.applyDraft(draft)
+        sensitive = result.sensitive
+        mediaItems = draft.medias.compactMap(MacComposeMediaItem.init(draftMedia:))
+        setVisibility(result.visibility)
     }
 
     private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {
@@ -745,93 +678,6 @@ private struct MacComposeMediaItem: Identifiable {
             return .video
         }
         return .other
-    }
-}
-
-private enum MacComposePollExpiration: String, CaseIterable, Identifiable {
-    case minutes5
-    case minutes30
-    case hours1
-    case hours6
-    case hours12
-    case days1
-    case days3
-    case days7
-
-    init?(milliseconds: Int64) {
-        switch milliseconds {
-        case 5 * 60 * 1000:
-            self = .minutes5
-        case 30 * 60 * 1000:
-            self = .minutes30
-        case 1 * 60 * 60 * 1000:
-            self = .hours1
-        case 6 * 60 * 60 * 1000:
-            self = .hours6
-        case 12 * 60 * 60 * 1000:
-            self = .hours12
-        case 24 * 60 * 60 * 1000:
-            self = .days1
-        case 3 * 24 * 60 * 60 * 1000:
-            self = .days3
-        case 7 * 24 * 60 * 60 * 1000:
-            self = .days7
-        default:
-            return nil
-        }
-    }
-
-    var id: String { rawValue }
-
-    var title: LocalizedStringKey {
-        switch self {
-        case .minutes5:
-            "macos_compose_poll_5_minutes"
-        case .minutes30:
-            "macos_compose_poll_30_minutes"
-        case .hours1:
-            "macos_compose_poll_1_hour"
-        case .hours6:
-            "macos_compose_poll_6_hours"
-        case .hours12:
-            "macos_compose_poll_12_hours"
-        case .days1:
-            "macos_compose_poll_1_day"
-        case .days3:
-            "macos_compose_poll_3_days"
-        case .days7:
-            "macos_compose_poll_7_days"
-        }
-    }
-
-    var milliseconds: Int64 {
-        switch self {
-        case .minutes5:
-            5 * 60 * 1000
-        case .minutes30:
-            30 * 60 * 1000
-        case .hours1:
-            1 * 60 * 60 * 1000
-        case .hours6:
-            6 * 60 * 60 * 1000
-        case .hours12:
-            12 * 60 * 60 * 1000
-        case .days1:
-            24 * 60 * 60 * 1000
-        case .days3:
-            3 * 24 * 60 * 60 * 1000
-        case .days7:
-            7 * 24 * 60 * 60 * 1000
-        }
-    }
-}
-
-private enum MacComposeDefaults {
-    static var languages: [String] {
-        if let code = Locale.current.language.languageCode?.identifier {
-            return [code]
-        }
-        return ["en"]
     }
 }
 

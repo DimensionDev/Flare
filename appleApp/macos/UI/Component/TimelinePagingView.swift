@@ -31,13 +31,13 @@ struct TimelinePagingView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let columnCount = resolvedColumnCount(width: proxy.size.width)
+//            let columnCount = resolvedColumnCount(width: proxy.size.width)
             ScrollView {
-                content(columnCount: columnCount, availableWidth: proxy.size.width)
+                content(columnCount: 1, availableWidth: proxy.size.width)
                     .padding(.top, topContentInset)
                     .padding(.bottom, 12)
             }
-            .background(timelineDisplayMode == .card || columnCount > 1 || timelineDisplayMode == .gallery ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
+            .background(timelineDisplayMode == .card || timelineDisplayMode == .gallery ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
             .detectScrolling()
             .id(key)
             .refreshable {

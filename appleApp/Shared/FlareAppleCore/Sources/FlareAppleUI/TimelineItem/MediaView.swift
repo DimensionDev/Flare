@@ -189,14 +189,15 @@ public struct MediaVideoView: View {
             return
         }
 
-        macPlayer.isMuted = true
-        macPlayer.actionAtItemEnd = .advance
-
         guard macPlayerURL != videoURL else {
+            macPlayer.isMuted = true
+            macPlayer.actionAtItemEnd = .advance
             return
         }
 
         resetMacPlayer()
+        macPlayer.isMuted = true
+        macPlayer.actionAtItemEnd = .advance
         let item = AVPlayerItem(url: videoURL)
         macPlayerLooper = AVPlayerLooper(player: macPlayer, templateItem: item)
         macPlayerURL = videoURL
@@ -257,9 +258,10 @@ public struct MediaVideoView: View {
     }
 
     private func resetMacPlayer() {
-        macPlayer.pause()
+        let player = macPlayer
+        player.pause()
         macPlayerLooper = nil
-        macPlayer.removeAllItems()
+        macPlayer = AVQueuePlayer()
         macPlayerURL = nil
     }
 

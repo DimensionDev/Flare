@@ -576,6 +576,7 @@
       }
     },
     "%lld/%d" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -4000,6 +4001,7 @@
     },
     "AI" : {
       "comment" : "The name of the AI translation service.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -4190,6 +4192,7 @@
       }
     },
     "AI model used for translation and summary" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -4380,6 +4383,7 @@
       }
     },
     "AI translation test" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -4570,6 +4574,7 @@
       }
     },
     "AI Type" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5141,6 +5146,7 @@
       }
     },
     "ai_config_post_insight" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5331,6 +5337,7 @@
       }
     },
     "ai_config_post_insight_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5521,6 +5528,7 @@
       }
     },
     "ai_config_pre_translate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5711,6 +5719,7 @@
       }
     },
     "ai_config_pre_translate_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -6283,6 +6292,7 @@
       }
     },
     "ai_config_summarize" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -6854,6 +6864,7 @@
       }
     },
     "AI-compatible API" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -8566,6 +8577,7 @@
       }
     },
     "API Key" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -10847,6 +10859,7 @@
       }
     },
     "appearance_deck_mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -11037,6 +11050,7 @@
       }
     },
     "appearance_deck_mode_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -12558,6 +12572,7 @@
       }
     },
     "appearance_font_size_diff" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -13128,6 +13143,7 @@
       }
     },
     "appearance_in_app_browser" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -13318,6 +13334,7 @@
       }
     },
     "appearance_in_app_browser_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -15408,6 +15425,7 @@
       }
     },
     "appearance_show_bottom_bar_labels" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -15598,6 +15616,7 @@
       }
     },
     "appearance_show_bottom_bar_labels_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -17688,6 +17707,7 @@
       }
     },
     "appearance_theme" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -17878,6 +17898,7 @@
       }
     },
     "appearance_theme_dark" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -18068,6 +18089,7 @@
       }
     },
     "appearance_theme_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -18638,6 +18660,7 @@
       }
     },
     "appearance_theme_light" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -18828,6 +18851,7 @@
       }
     },
     "appearance_theme_system" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -21678,6 +21702,7 @@
       }
     },
     "Auto-translate excluded languages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -29868,6 +29893,7 @@
       }
     },
     "Choose how much effort the model spends on reasoning. Default uses the provider's default behavior." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -30633,6 +30659,7 @@
       }
     },
     "Choose which service handles translation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -34822,6 +34849,7 @@
       }
     },
     "DeepL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -35012,6 +35040,7 @@
       }
     },
     "DeepL API Key" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -35202,6 +35231,7 @@
       }
     },
     "DeepL Pro Endpoint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -35392,6 +35422,7 @@
       }
     },
     "Default" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -40339,6 +40370,7 @@
       }
     },
     "emoji_recently_used" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -40529,6 +40561,7 @@
       }
     },
     "emoji_search_placeholder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -42431,6 +42464,7 @@
       }
     },
     "Extra Body" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -43769,6 +43803,7 @@
       }
     },
     "Google Cloud API Key" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -43959,6 +43994,7 @@
       }
     },
     "Google Cloud Translate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -44149,6 +44185,7 @@
       }
     },
     "Google Translate (Web)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -44719,6 +44756,7 @@
       }
     },
     "High" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -47963,6 +48001,7 @@
       "isCommentAutoGenerated" : true
     },
     "LibreTranslate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -48153,6 +48192,7 @@
       }
     },
     "LibreTranslate API Key" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -48343,6 +48383,7 @@
       }
     },
     "LibreTranslate Base URL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -52145,6 +52186,7 @@
       }
     },
     "Loading models..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -52525,6 +52567,7 @@
       }
     },
     "local_filter_delete" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -52905,6 +52948,7 @@
       }
     },
     "local_filter_edit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -53095,6 +53139,7 @@
       }
     },
     "local_filter_edit_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -53285,6 +53330,7 @@
       }
     },
     "local_filter_keyword_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -53475,6 +53521,7 @@
       }
     },
     "local_filter_keyword_placeholder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -53665,6 +53712,7 @@
       }
     },
     "local_filter_notification" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -53855,6 +53903,7 @@
       }
     },
     "local_filter_regex" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -54045,6 +54094,7 @@
       }
     },
     "local_filter_scope_header" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -54235,6 +54285,7 @@
       }
     },
     "local_filter_search" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -54425,6 +54476,7 @@
       }
     },
     "local_filter_timeline" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -56710,6 +56762,7 @@
       }
     },
     "Low" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57282,6 +57335,7 @@
       }
     },
     "Manual Model" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -61671,6 +61725,7 @@
       }
     },
     "Medium" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -100814,6 +100869,7 @@
       }
     },
     "Model" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -105770,6 +105826,7 @@
       }
     },
     "Not set" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -108562,6 +108619,7 @@
       }
     },
     "On Device" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -114738,6 +114796,7 @@
       }
     },
     "Reasoning Effort" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -121231,6 +121290,7 @@
       }
     },
     "Run a short rich-text sample through the current AI translation setup." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -121421,6 +121481,7 @@
       }
     },
     "Sample text" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -122941,6 +123002,7 @@
       }
     },
     "Search language" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -123701,6 +123763,7 @@
       }
     },
     "Select AI provider" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -124081,6 +124144,7 @@
       }
     },
     "Select model" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -124844,6 +124908,7 @@
       }
     },
     "Server URL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -125034,6 +125099,7 @@
       }
     },
     "Server URL must end with '/' and support the AI-compatible v1/chat/completions API." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -140086,6 +140152,7 @@
       }
     },
     "status_visibility_followers" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -140276,6 +140343,7 @@
       }
     },
     "status_visibility_followers_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -140466,6 +140534,7 @@
       }
     },
     "status_visibility_home" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -140656,6 +140725,7 @@
       }
     },
     "status_visibility_home_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -140846,6 +140916,7 @@
       }
     },
     "status_visibility_public" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -141036,6 +141107,7 @@
       }
     },
     "status_visibility_public_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -141226,6 +141298,7 @@
       }
     },
     "status_visibility_specified" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -141416,6 +141489,7 @@
       }
     },
     "status_visibility_specified_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -143131,6 +143205,7 @@
       }
     },
     "Suggestions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -143511,6 +143586,7 @@
       }
     },
     "Summarize long text with AI" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -143892,6 +143968,7 @@
       }
     },
     "Summary Prompt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -150927,6 +151004,7 @@
       }
     },
     "Test translation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -151688,6 +151766,7 @@
       }
     },
     "Translate Prompt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -152069,6 +152148,7 @@
       }
     },
     "Translated text" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -152259,6 +152339,7 @@
       }
     },
     "Translation Provider" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -153211,6 +153292,7 @@
       }
     },
     "Use api.deepl.com instead of the free endpoint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

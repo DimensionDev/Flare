@@ -51,7 +51,7 @@ struct FlareApp: App {
                 MacSettingsScreen()
             }
         }
-        .windowToolbarStyle(.unified)
+        .windowToolbarStyle(.expanded)
 //        .defaultSize(width: 1120, height: 760)
 //        .commands {
 //            SidebarCommands()

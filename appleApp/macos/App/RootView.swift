@@ -3,6 +3,7 @@ import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
+import SwiftUIIntrospect
 
 struct RootView: View {
     @Environment(\.openWindow) private var openWindow
@@ -10,7 +11,6 @@ struct RootView: View {
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
-    @StateObject private var notificationPresenter = KotlinPresenter(presenter: AllNotificationPresenter())
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @State private var selectedTab: Route?
@@ -35,7 +35,7 @@ struct RootView: View {
                             )
                         } else if tab == .notifications {
                             DisclosureGroup {
-                                ForEach(notificationPresenter.state.notifications, id: \.profile.key) { item in
+                                ForEach(allNotificationBadgePresenter.state.notifications, id: \.profile.key) { item in
                                     UserOnelineView(data: item.profile)
                                         .badge(Int(item.badge))
                                         .tag(Route.accountNotification(item.profile.key))
@@ -141,10 +141,14 @@ struct RootView: View {
                     }
                 }
             }
+            .toolbar(removing: .sidebarToggle)
             .listStyle(.sidebar)
+            .frame(minWidth: 100, maxWidth: 280)
+            .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
             if let selectedTab {
                 Router(initialRoute: selectedTab)
+                    .navigationSplitViewColumnWidth(ideal: 380, max: 480)
                     .id(selectedTab)
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
@@ -157,6 +161,13 @@ struct RootView: View {
                             }
                         }
                     }
+            }
+        }
+        .introspect(.navigationSplitView, on: .macOS(.v13, .v14, .v15, .v26, .v27)) { splitview in
+            if let delegate = splitview.delegate as? NSSplitViewController {
+                // Disables the ability to collapse the sidebar via dragging
+                delegate.splitViewItems.first?.canCollapse = false
+                delegate.splitViewItems.first?.canCollapseFromWindowResize = false
             }
         }
         .sheet(isPresented: $showLogin) {

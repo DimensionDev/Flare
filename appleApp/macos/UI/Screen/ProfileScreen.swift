@@ -66,6 +66,7 @@ struct ProfileScreen: View {
             }
             .padding(.bottom, 16)
         }
+        .navigationTitle(title)
         .background(timelineDisplayMode == .card ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
         .detectScrolling()
         .toolbar {
@@ -84,8 +85,17 @@ struct ProfileScreen: View {
                         useText: false,
                         allowSpacer: false
                     )
+                    .buttonStyle(.plain)
                 }
             }
+        }
+    }
+    
+    private var title: Text {
+        if case .success(let data) = onEnum(of: presenter.state.userState) {
+            Text(data.data.name.raw)
+        } else {
+            Text(String("Profile"))
         }
     }
 

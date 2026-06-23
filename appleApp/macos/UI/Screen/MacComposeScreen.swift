@@ -66,6 +66,7 @@ struct MacComposeScreen: View {
 
             bottomBar
         }
+        .frame(minWidth: 400, idealWidth: 440, minHeight: 160)
         .navigationTitle(windowTitle)
         .toolbar {
             ToolbarItem(placement: .navigation) {

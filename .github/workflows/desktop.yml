@@ -82,6 +82,126 @@ jobs:
         with:
           name: macOS-package
           path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg
+
+  build-native-macos:
+    runs-on: [macos-26]
+    timeout-minutes: 30
+    steps:
+      - uses: yumis-coconudge/clean-workspace-action@v1
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          distribution: 'jetbrains'
+          java-version: 25
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: import certs
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: apple-actions/import-codesign-certs@v6
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
+          p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
+      - name: Install macOS Provision Profile
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$MACOS_EMBEDDED_PROVISION" > "$RUNNER_TEMP/native-macos.provisionprofile.b64"
+          base64 -d -i "$RUNNER_TEMP/native-macos.provisionprofile.b64" > "$RUNNER_TEMP/native-macos.provisionprofile"
+          security cms -D -i "$RUNNER_TEMP/native-macos.provisionprofile" > "$RUNNER_TEMP/native-macos-profile.plist"
+          profile_uuid=$(/usr/libexec/PlistBuddy -c "Print UUID" "$RUNNER_TEMP/native-macos-profile.plist")
+          cp "$RUNNER_TEMP/native-macos.provisionprofile" "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.provisionprofile"
+        env:
+          MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
+      - name: Generate Xcode project
+        run: xcodegen generate --spec appleApp/project.yml
+      - name: Resolve native macOS version
+        run: |
+          marketing_version="$(sed -n 's/^versionName=//p' fdroid.properties | head -n 1)"
+
+          if [[ "$GITHUB_REF_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            marketing_version="$GITHUB_REF_NAME"
+          fi
+
+          if [ -z "$marketing_version" ]; then
+            echo "Unable to resolve native macOS marketing version"
+            exit 1
+          fi
+
+          echo "NATIVE_MACOS_MARKETING_VERSION=$marketing_version" >> "$GITHUB_ENV"
+          echo "NATIVE_MACOS_BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+      - name: Build native macOS app
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        working-directory: ./appleApp
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          xcodebuild build \
+            -project Flare.xcodeproj \
+            -scheme macOS \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
+            CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER" \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Archive native macOS app
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ./appleApp
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          xcodebuild archive \
+            -project Flare.xcodeproj \
+            -scheme macOS \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -archivePath "$RUNNER_TEMP/Flare-native-macOS.xcarchive" \
+            -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            DEVELOPMENT_TEAM=7LFDZ96332 \
+            MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
+            CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER"
+      - name: Package native macOS app
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          app_path="$RUNNER_TEMP/Flare-native-macOS.xcarchive/Products/Applications/Flare.app"
+          if [ ! -d "$app_path" ]; then
+            echo "No archived app found at $app_path"
+            exit 1
+          fi
+
+          mkdir -p appleApp/build/native-macos/pkg
+          safe_ref="${GITHUB_REF_NAME//\//-}"
+          pkg_path="appleApp/build/native-macos/pkg/Flare-native-macOS-$safe_ref.pkg"
+          installer_identity=$(security find-identity -v -p basic | sed -n 's/.*"\(Developer ID Installer: SUJITEKU LIMITED LIABILITY CO\. (7LFDZ96332)\)".*/\1/p' | head -n 1)
+
+          if [ -n "$installer_identity" ]; then
+            productbuild --sign "$installer_identity" --component "$app_path" /Applications "$pkg_path"
+          else
+            echo "No Developer ID Installer identity found; creating unsigned pkg."
+            productbuild --component "$app_path" /Applications "$pkg_path"
+          fi
+      - name: Upload native macOS package
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v6
+        with:
+          name: Native-macOS-package
+          path: appleApp/build/native-macos/pkg/*.pkg
   
   build-windows:
     runs-on: [windows-latest]
@@ -227,7 +347,7 @@ jobs:
   upload:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [ubuntu-latest]
-    needs: [build-macos, build-windows, build-linux]
+    needs: [build-macos, build-native-macos, build-windows, build-linux]
     timeout-minutes: 30
     steps:
       - uses: actions/download-artifact@v7

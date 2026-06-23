@@ -23,6 +23,9 @@ enum Route: Hashable, Identifiable {
     case profileUserNameWithHost(AccountType, String, String)
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
+    case mediaImage(String, String?, [String: String]?)
+    case mediaRaw([any UiMedia], Int, String?)
+    case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
     case rssDetail(String, String?, String?)
     case externalLink(String)
@@ -35,6 +38,10 @@ enum Route: Hashable, Identifiable {
         switch (lhs, rhs) {
         case (.timeline(let lhs), .timeline(let rhs)):
             return lhs.id == rhs.id
+        case (.mediaRaw(let lhsMedias, let lhsIndex, let lhsPreview), .mediaRaw(let rhsMedias, let rhsIndex, let rhsPreview)):
+            return lhsIndex == rhsIndex &&
+                lhsPreview == rhsPreview &&
+                lhsMedias.map { $0.url } == rhsMedias.map { $0.url }
         default:
             return lhs.hashValue == rhs.hashValue
         }
@@ -49,6 +56,11 @@ enum Route: Hashable, Identifiable {
         case .timeline(let item):
             hasher.combine("timeline")
             hasher.combine(item.id)
+        case .mediaRaw(let medias, let selectedIndex, let preview):
+            hasher.combine("mediaRaw")
+            hasher.combine(medias.map { $0.url })
+            hasher.combine(selectedIndex)
+            hasher.combine(preview)
         default:
             hasher.combine(String(describing: self))
         }
@@ -80,7 +92,10 @@ enum Route: Hashable, Identifiable {
                 .composeDraft,
                 .composeQuote,
                 .composeReply,
-                .composeVVOReplyComment:
+                .composeVVOReplyComment,
+                .mediaImage,
+                .mediaRaw,
+                .mediaStatusMedia:
             EmptyView()
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
@@ -134,6 +149,8 @@ extension Route {
             fromStatus(status)
         case .compose(let compose):
             fromCompose(compose)
+        case .media(let media):
+            fromMedia(media)
         case .profile(let profile):
             fromProfile(profile)
         case .rss(let rss):
@@ -161,6 +178,17 @@ extension Route {
                 data.replyTo,
                 data.rootId
             )
+        }
+    }
+
+    private static func fromMedia(_ media: DeeplinkRoute.Media) -> Route? {
+        switch onEnum(of: media) {
+        case .image(let data):
+            .mediaImage(data.uri, data.previewUrl, data.customHeaders)
+        case .statusMedia(let data):
+            .mediaStatusMedia(data.accountType, data.statusKey, Int32(data.index), data.preview)
+        case .podcast:
+            .empty
         }
     }
 

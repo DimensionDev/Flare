@@ -181,6 +181,7 @@ private struct TimelinePagingRows: @MainActor RandomAccessCollection {
 public struct TimelineGalleryItemView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.showMedia) private var showMedia
+    @Environment(\.timelineMediaOpenAction) private var timelineMediaOpenAction
 
     private let item: UiTimelineV2?
     private let placeholderVariant: Int
@@ -263,6 +264,10 @@ public struct TimelineGalleryItemView: View {
             post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         } else if let onOpenMedia {
             onOpenMedia(post, media)
+        } else if let timelineMediaOpenAction {
+            let medias = Array(post.images)
+            let index = medias.firstIndex { $0.url == media.url } ?? 0
+            timelineMediaOpenAction(post, media, index)
         } else {
             post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }

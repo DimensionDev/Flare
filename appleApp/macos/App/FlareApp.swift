@@ -6,6 +6,7 @@ import AppleFontAwesome
 
 enum MacWindowID {
     static let compose = "compose"
+    static let media = "media"
     static let rssManagement = "rss-management"
 }
 
@@ -42,6 +43,29 @@ struct FlareApp: App {
         .windowIdealSize(.fitToContent)
         .defaultSize(width: 100, height: 80)
         .windowToolbarStyle(.unified)
+        .restorationBehavior(.disabled)
+
+        WindowGroup("Media", id: MacWindowID.media, for: MacMediaWindowValue.self) { request in
+            FlareTheme {
+                MacMediaWindowRoot(value: request.wrappedValue)
+            }
+        }
+        .defaultSize(width: 960, height: 720)
+        .defaultWindowPlacement { _, context in
+            let visibleRect = context.defaultDisplay.visibleRect
+            let maxWindowSize = CGSize(
+                width: visibleRect.width * 0.8,
+                height: visibleRect.height * 0.8
+            )
+            return WindowPlacement(
+                .center,
+                size: MacMediaWindowCoordinator.shared.placementSize(
+                    maxWindowSize: maxWindowSize
+                )
+            )
+        }
+        .windowToolbarStyle(.unified(showsTitle: false))
+        .restorationBehavior(.disabled)
 
         WindowGroup("settings_rss_management_title", id: MacWindowID.rssManagement) {
             FlareTheme {

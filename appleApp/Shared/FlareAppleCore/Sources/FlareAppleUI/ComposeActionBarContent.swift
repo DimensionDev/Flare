@@ -195,7 +195,7 @@ public struct ComposeEmojiButton: View {
                     Image(fontAwesome: .faceSmile)
                 }
             }
-            .popover(isPresented: isPresented) {
+            .popover(isPresented: isPresented, arrowEdge: .bottom) {
                 NavigationStack {
                     EmojiPopup(data: emojis, onItemClicked: onSelect)
                         .toolbar {
@@ -211,6 +211,9 @@ public struct ComposeEmojiButton: View {
                                 }
                             }
                         }
+                    #if os(macOS)
+                        .frame(width: 400, height: 300)
+                    #endif
                 }
             }
         }

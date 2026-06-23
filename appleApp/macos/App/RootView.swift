@@ -1,8 +1,11 @@
+import AppKit
 import AppleFontAwesome
 import FlareAppleCore
 import FlareAppleUI
+import Foundation
 import KotlinSharedUI
 import SwiftUI
+import SwiftUIBackports
 import SwiftUIIntrospect
 
 struct RootView: View {
@@ -17,82 +20,55 @@ struct RootView: View {
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
     @State private var showLogin = false
+    @State private var homeSidebarTabEditor: HomeSidebarTabEditor?
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selectedTab) {
-                StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                    let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
-                    ForEach(homeTabs, id: \.name) { tab in
-                        if tab == .home, case .success(let data) = onEnum(of: homeTimelineWithTabsPresenter.state.tabState) {
-                            let tabs: [UiTimelineTabItem] = data.data.cast(UiTimelineTabItem.self)
-                            HomeSidebarTabsSection(
-                                title: tab.macOSTitle,
-                                icon: tab.macOSIcon,
-                                liveTabs: tabs,
-                                selectedTab: $selectedTab,
-                                isExpanded: $homeExpanded
-                            )
-                        } else if tab == .notifications {
-                            DisclosureGroup {
-                                ForEach(allNotificationBadgePresenter.state.notifications, id: \.profile.key) { item in
-                                    UserOnelineView(data: item.profile)
-                                        .badge(Int(item.badge))
-                                        .tag(Route.accountNotification(item.profile.key))
+            VStack(spacing: 0) {
+                List(selection: $selectedTab) {
+                    StateView(state: homeTabsPresenter.state.tabs) { tabs in
+                        let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
+                        ForEach(homeTabs, id: \.name) { tab in
+                            if tab == .home, case .success(let data) = onEnum(of: homeTimelineWithTabsPresenter.state.tabState) {
+                                let tabs: [UiTimelineTabItem] = data.data.cast(UiTimelineTabItem.self)
+                                HomeSidebarTabsSection(
+                                    title: tab.macOSTitle,
+                                    icon: tab.macOSIcon,
+                                    liveTabs: tabs,
+                                    selectedTab: $selectedTab,
+                                    isExpanded: $homeExpanded,
+                                    onEditTab: { tab, onSave in
+                                        homeSidebarTabEditor = HomeSidebarTabEditor(
+                                            tab: tab,
+                                            onSave: onSave
+                                        )
+                                    }
+                                )
+                            } else if tab == .notifications {
+                                DisclosureGroup {
+                                    ForEach(allNotificationBadgePresenter.state.notifications, id: \.profile.key) { item in
+                                        UserOnelineView(data: item.profile)
+                                            .badge(Int(item.badge))
+                                            .tag(Route.accountNotification(item.profile.key))
+                                    }
+                                } label: {
+                                    Label {
+                                        Text(tab.macOSTitle)
+                                    } icon: {
+                                        Image(fontAwesome: tab.macOSIcon)
+                                    }
+                                    .badge(Int(allNotificationBadgePresenter.state.count))
                                 }
-                            } label: {
+                            } else {
                                 Label {
                                     Text(tab.macOSTitle)
                                 } icon: {
                                     Image(fontAwesome: tab.macOSIcon)
                                 }
-                                .badge(Int(allNotificationBadgePresenter.state.count))
-                            }
-                        } else {
-                            Label {
-                                Text(tab.macOSTitle)
-                            } icon: {
-                                Image(fontAwesome: tab.macOSIcon)
-                            }
-                            .tag(tab.macOSInitialRoute)
-                        }
-                    }
-                }
-
-                Section {
-                    Button {
-                        showDraftBoxPopover.toggle()
-                    } label: {
-                        Label {
-                            Text("draft_box_title")
-                        } icon: {
-                            Image(fontAwesome: .inbox)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .popover(isPresented: $showDraftBoxPopover, arrowEdge: .trailing) {
-                        NavigationStack {
-                            DraftBoxScreen { groupId in
-                                showDraftBoxPopover = false
-                                MacComposeWindowCoordinator.shared.openDraft(
-                                    groupId: groupId,
-                                    openWindow: openWindow
-                                )
+                                .tag(tab.macOSInitialRoute)
                             }
                         }
-                        .frame(width: 380, height: 480)
                     }
-
-                    Button {
-                        openWindow(id: MacWindowID.rssManagement)
-                    } label: {
-                        Label {
-                            Text("settings_rss_management_title")
-                        } icon: {
-                            Image(fontAwesome: .squareRss)
-                        }
-                    }
-                    .buttonStyle(.plain)
 
                     Label {
                         Text("local_history_title")
@@ -101,48 +77,53 @@ struct RootView: View {
                     }
                     .tag(Route.localHistory)
 
-                    Button {
-                        openSettings()
-                    } label: {
-                        Label {
-                            Text("settings_title")
-                        } icon: {
-                            Image(fontAwesome: .gear)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
-                    let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
-                    if !items.isEmpty {
-                        Section {
-                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                                DisclosureGroup {
-                                    ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
-                                        if let route = route(for: tab) {
-                                            Label {
-                                                Text(tab.title.text)
-                                            } icon: {
-                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                    if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
+                        let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
+                        if !items.isEmpty {
+                            Section {
+                                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                    DisclosureGroup {
+                                        ForEach(item.tabs, id: \.self) { (tab: SecondaryTabsPresenter.Tab) in
+                                            if let route = route(for: tab) {
+                                                Label {
+                                                    Text(tab.title.text)
+                                                } icon: {
+                                                    Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                                                }
+                                                .tag(route)
                                             }
-                                            .tag(route)
+                                        }
+                                    } label: {
+                                        StateView(state: item.user) { user in
+                                            UserOnelineView(data: user)
                                         }
                                     }
-                                } label: {
-                                    StateView(state: item.user) { user in
-                                        UserOnelineView(data: user)
-                                    }
                                 }
+                            } header: {
+                                Text("macos_sidebar_accounts")
                             }
-                        } header: {
-                            Text("macos_sidebar_accounts")
                         }
                     }
                 }
+                .listStyle(.sidebar)
+
+                MacSidebarPinnedActions(
+                    showDraftBoxPopover: $showDraftBoxPopover,
+                    openDraft: { groupId in
+                        MacComposeWindowCoordinator.shared.openDraft(
+                            groupId: groupId,
+                            openWindow: openWindow
+                        )
+                    },
+                    openRssManagement: {
+                        openWindow(id: MacWindowID.rssManagement)
+                    },
+                    openAppSettings: {
+                        openSettings()
+                    }
+                )
             }
             .toolbar(removing: .sidebarToggle)
-            .listStyle(.sidebar)
             .frame(minWidth: 100, maxWidth: 280)
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
@@ -175,6 +156,105 @@ struct RootView: View {
                 ServiceSelectionScreen(toHome: { showLogin = false })
             }
         }
+        .sheet(item: $homeSidebarTabEditor) { editor in
+            HomeSidebarTabEditSheet(
+                tab: editor.tab,
+                onCancel: {
+                    homeSidebarTabEditor = nil
+                },
+                onSave: { updated in
+                    editor.onSave(updated)
+                    homeSidebarTabEditor = nil
+                }
+            )
+            .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
+        }
+    }
+}
+
+private struct HomeSidebarTabEditor: Identifiable {
+    let id = UUID()
+    let tab: UiTimelineTabItem
+    let onSave: (UiTimelineTabItem) -> Void
+}
+
+private struct MacSidebarPinnedActions: View {
+    @Binding var showDraftBoxPopover: Bool
+    let openDraft: (String) -> Void
+    let openRssManagement: () -> Void
+    let openAppSettings: () -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            MacSidebarPinnedIconButton(
+                title: "settings_title",
+                icon: .gear,
+                action: openAppSettings
+            )
+
+            Divider()
+                .frame(height: 18)
+                .padding(.vertical, 8)
+
+            MacSidebarPinnedIconButton(
+                title: "settings_rss_management_title",
+                icon: .squareRss,
+                action: openRssManagement
+            )
+
+            Divider()
+                .frame(height: 18)
+                .padding(.vertical, 8)
+
+            MacSidebarPinnedIconButton(
+                title: "draft_box_title",
+                icon: .inbox,
+                action: {
+                    showDraftBoxPopover.toggle()
+                }
+            )
+            .popover(isPresented: $showDraftBoxPopover, arrowEdge: .trailing) {
+                NavigationStack {
+                    DraftBoxScreen { groupId in
+                        showDraftBoxPopover = false
+                        openDraft(groupId)
+                    }
+                }
+                .frame(width: 380, height: 480)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 34)
+        .clipShape(actionGroupShape)
+        .backport
+        .glassEffect(.regularInteractive, in: actionGroupShape, fallbackBackground: .regularMaterial)
+        .backport
+        .glassEffectContainer(spacing: 0)
+        .padding(.horizontal, 8)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var actionGroupShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 100, style: .continuous)
+    }
+}
+
+private struct MacSidebarPinnedIconButton: View {
+    let title: LocalizedStringKey
+    let icon: FontAwesomeIcon
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(fontAwesome: icon)
+                .frame(maxWidth: .infinity, minHeight: 30)
+                .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        }
+        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .help(Text(title))
+        .accessibilityLabel(Text(title))
     }
 }
 

@@ -11,6 +11,7 @@ struct HomeSidebarTabsSection: View {
     let liveTabs: [UiTimelineTabItem]
     @Binding var selectedTab: Route?
     @Binding var isExpanded: Bool
+    let onEditTab: (UiTimelineTabItem, @escaping (UiTimelineTabItem) -> Void) -> Void
 
     @StateObject private var settingsPresenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @State private var isCustomizing = false
@@ -76,8 +77,10 @@ struct HomeSidebarTabsSection: View {
             HomeSidebarEditableGroupRow(
                 group: group,
                 showsReorderHandle: showsReorderHandle,
-                onUpdate: { updated in
-                    update(tab, with: updated)
+                onEdit: {
+                    onEditTab(group) { updated in
+                        update(tab, with: updated)
+                    }
                 },
                 onDelete: {
                     remove(tab)
@@ -88,8 +91,10 @@ struct HomeSidebarTabsSection: View {
             HomeSidebarEditableTabRow(
                 tab: tab,
                 showsReorderHandle: showsReorderHandle,
-                onUpdate: { updated in
-                    update(tab, with: updated)
+                onEdit: {
+                    onEditTab(tab) { updated in
+                        update(tab, with: updated)
+                    }
                 },
                 onDelete: {
                     remove(tab)
@@ -222,11 +227,10 @@ private enum HomeSidebarAddPopover: String, Identifiable {
 private struct HomeSidebarEditableGroupRow: View {
     let group: UiGroupTimelineTabItem
     let showsReorderHandle: Bool
-    let onUpdate: (UiGroupTimelineTabItem) -> Void
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     @State private var isHovering = false
-    @State private var showEditSheet = false
 
     var body: some View {
         rowContent
@@ -234,9 +238,6 @@ private struct HomeSidebarEditableGroupRow: View {
             .onHover { isHovering = $0 }
             .contextMenu {
                 contextMenu
-            }
-            .sheet(isPresented: $showEditSheet) {
-                editSheet
             }
     }
 
@@ -265,9 +266,7 @@ private struct HomeSidebarEditableGroupRow: View {
     @ViewBuilder
     private var editButton: some View {
         if showsReorderHandle && isHovering {
-            Button {
-                showEditSheet = true
-            } label: {
+            Button(action: onEdit) {
                 Image(fontAwesome: .pen)
             }
             .buttonStyle(.borderless)
@@ -295,9 +294,7 @@ private struct HomeSidebarEditableGroupRow: View {
 
     @ViewBuilder
     private var contextMenu: some View {
-        Button {
-            showEditSheet = true
-        } label: {
+        Button(action: onEdit) {
             Label {
                 Text("macos_action_edit")
             } icon: {
@@ -313,32 +310,15 @@ private struct HomeSidebarEditableGroupRow: View {
             }
         }
     }
-
-    private var editSheet: some View {
-        HomeSidebarTabEditSheet(
-            tab: group,
-            onCancel: {
-                showEditSheet = false
-            },
-            onSave: { updated in
-                if let updated = updated as? UiGroupTimelineTabItem {
-                    onUpdate(updated)
-                }
-                showEditSheet = false
-            }
-        )
-        .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
-    }
 }
 
 private struct HomeSidebarEditableTabRow: View {
     let tab: UiTimelineTabItem
     let showsReorderHandle: Bool
-    let onUpdate: (UiTimelineTabItem) -> Void
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     @State private var isHovering = false
-    @State private var showEditSheet = false
 
     var body: some View {
         HStack(spacing: 8) {
@@ -363,9 +343,7 @@ private struct HomeSidebarEditableTabRow: View {
         .contentShape(Rectangle())
         .onHover { isHovering = $0 }
         .contextMenu {
-            Button {
-                showEditSheet = true
-            } label: {
+            Button(action: onEdit) {
                 Label {
                     Text("macos_action_edit")
                 } icon: {
@@ -381,27 +359,12 @@ private struct HomeSidebarEditableTabRow: View {
                 }
             }
         }
-        .sheet(isPresented: $showEditSheet) {
-            HomeSidebarTabEditSheet(
-                tab: tab,
-                onCancel: {
-                    showEditSheet = false
-                },
-                onSave: { updated in
-                    onUpdate(updated)
-                    showEditSheet = false
-                }
-            )
-            .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
-        }
     }
 
     @ViewBuilder
     private var editButton: some View {
         if showsReorderHandle && isHovering {
-            Button {
-                showEditSheet = true
-            } label: {
+            Button(action: onEdit) {
                 Image(fontAwesome: .pen)
             }
             .buttonStyle(.borderless)

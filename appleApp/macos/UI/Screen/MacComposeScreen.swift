@@ -18,13 +18,13 @@ struct MacComposeScreen: View {
     @State private var sensitive = false
     @State private var mediaItems: [MacComposeMediaItem] = []
     @State private var showFileImporter = false
-    @State private var showCloseConfirmation = false
     @State private var showEmojiPopover = false
     @State private var showAccountPopover = false
     @State private var showDraftBoxPopover = false
     @State private var initialTextApplied = false
     @State private var nsTextView: NSTextView?
     @State private var pendingCursor: Int?
+    @State private var closeController = MacComposeWindowCloseController()
 
     init(request: MacComposeWindowRequest) {
         self.request = request
@@ -112,18 +112,19 @@ struct MacComposeScreen: View {
             allowsMultipleSelection: true,
             onCompletion: importFiles
         )
-        .confirmationDialog(
-            "compose_save_draft_prompt",
-            isPresented: $showCloseConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("compose_save_draft") {
-                saveDraft(shouldDismiss: true)
-            }
-            Button("compose_discard_draft", role: .destructive) {
-                dismiss()
-            }
-            Button("compose_button_cancel", role: .cancel) {}
+        .background {
+            MacComposeWindowCloseInterceptor(
+                closeController: closeController,
+                hasDraftContent: {
+                    hasDraftContent
+                },
+                onSaveDraft: {
+                    saveDraft(shouldDismiss: true)
+                },
+                onCloseWithoutSaving: {
+                    dismissComposeWindow()
+                }
+            )
         }
         .onAppear {
             presenter.state.setText(value: viewModel.text)
@@ -324,16 +325,23 @@ struct MacComposeScreen: View {
 
     private func close() {
         if hasDraftContent {
-            showCloseConfirmation = true
+            closeController.presentCloseConfirmation(
+                onSaveDraft: {
+                    saveDraft(shouldDismiss: true)
+                },
+                onCloseWithoutSaving: {
+                    dismissComposeWindow()
+                }
+            )
         } else {
-            dismiss()
+            dismissComposeWindow()
         }
     }
 
     private func send() {
         presenter.state.send(data: composeData) { dispatched in
             if dispatched.boolValue {
-                dismiss()
+                dismissComposeWindow()
             }
         }
     }
@@ -342,8 +350,14 @@ struct MacComposeScreen: View {
         presenter.state.saveDraft(data: composeData) { dispatched in
             guard dispatched.boolValue else { return }
             if shouldDismiss {
-                dismiss()
+                dismissComposeWindow()
             }
+        }
+    }
+
+    private func dismissComposeWindow() {
+        closeController.closeWindow {
+            dismiss()
         }
     }
 
@@ -678,6 +692,133 @@ private struct MacComposeMediaItem: Identifiable {
             return .video
         }
         return .other
+    }
+}
+
+@MainActor
+private final class MacComposeWindowCloseController {
+    weak var window: NSWindow?
+    var allowsWindowClose = false
+    private var isPresentingCloseConfirmation = false
+
+    func closeWindow(fallback: () -> Void) {
+        allowsWindowClose = true
+        if let window {
+            window.close()
+        } else {
+            fallback()
+        }
+    }
+
+    func presentCloseConfirmation(
+        onSaveDraft: @escaping () -> Void,
+        onCloseWithoutSaving: @escaping () -> Void
+    ) {
+        guard !isPresentingCloseConfirmation,
+              let window else {
+            return
+        }
+
+        isPresentingCloseConfirmation = true
+        let alert = NSAlert()
+        alert.messageText = String(localized: "compose_save_draft_prompt")
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: String(localized: "compose_save_draft"))
+        alert.addButton(withTitle: String(localized: "compose_button_cancel"))
+        alert.beginSheetModal(for: window) { [weak self] response in
+            self?.isPresentingCloseConfirmation = false
+            switch response {
+            case .alertFirstButtonReturn:
+                onSaveDraft()
+            case .alertSecondButtonReturn:
+                onCloseWithoutSaving()
+            default:
+                break
+            }
+        }
+    }
+}
+
+private struct MacComposeWindowCloseInterceptor: NSViewRepresentable {
+    let closeController: MacComposeWindowCloseController
+    let hasDraftContent: () -> Bool
+    let onSaveDraft: () -> Void
+    let onCloseWithoutSaving: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(closeController: closeController)
+    }
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        updateCoordinator(context.coordinator)
+        DispatchQueue.main.async {
+            context.coordinator.attach(to: view.window)
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        updateCoordinator(context.coordinator)
+        DispatchQueue.main.async {
+            context.coordinator.attach(to: nsView.window)
+        }
+    }
+
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        coordinator.detach()
+    }
+
+    private func updateCoordinator(_ coordinator: Coordinator) {
+        coordinator.hasDraftContent = hasDraftContent
+        coordinator.onSaveDraft = onSaveDraft
+        coordinator.onCloseWithoutSaving = onCloseWithoutSaving
+    }
+
+    final class Coordinator: NSObject, NSWindowDelegate {
+        let closeController: MacComposeWindowCloseController
+        var hasDraftContent: () -> Bool = { false }
+        var onSaveDraft: () -> Void = {}
+        var onCloseWithoutSaving: () -> Void = {}
+        private weak var window: NSWindow?
+        private weak var previousDelegate: (any NSWindowDelegate)?
+
+        init(closeController: MacComposeWindowCloseController) {
+            self.closeController = closeController
+        }
+
+        func attach(to window: NSWindow?) {
+            guard let window, self.window !== window else {
+                return
+            }
+            detach()
+            self.window = window
+            closeController.window = window
+            previousDelegate = window.delegate
+            window.delegate = self
+        }
+
+        func detach() {
+            if window?.delegate === self {
+                window?.delegate = previousDelegate
+            }
+            if closeController.window === window {
+                closeController.window = nil
+            }
+            window = nil
+            previousDelegate = nil
+        }
+
+        func windowShouldClose(_ sender: NSWindow) -> Bool {
+            if closeController.allowsWindowClose || !hasDraftContent() {
+                return true
+            }
+            closeController.presentCloseConfirmation(
+                onSaveDraft: onSaveDraft,
+                onCloseWithoutSaving: onCloseWithoutSaving
+            )
+            return false
+        }
     }
 }
 

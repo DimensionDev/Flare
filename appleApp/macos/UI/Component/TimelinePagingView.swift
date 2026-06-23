@@ -3,6 +3,7 @@ import KotlinSharedUI
 import SwiftUI
 
 struct TimelinePagingView: View {
+    @Environment(\.openWindow) private var openWindow
     @Environment(\.refresh) private var refreshAction: RefreshAction?
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
 
@@ -45,6 +46,7 @@ struct TimelinePagingView: View {
                     await refreshAction()
                 }
             }
+            .environment(\.timelineMediaOpenAction, timelineMediaOpenAction)
         }
     }
 
@@ -76,6 +78,17 @@ struct TimelinePagingView: View {
             return min(max(Int((width / 220).rounded(.down)), 2), 6)
         }
         return min(max(Int((width / 320).rounded(.down)), 1), 4)
+    }
+
+    private var timelineMediaOpenAction: TimelineMediaOpenAction {
+        { post, media, index in
+            MacMediaWindowCoordinator.shared.open(
+                post: post,
+                media: media,
+                index: index,
+                openWindow: openWindow
+            )
+        }
     }
 }
 

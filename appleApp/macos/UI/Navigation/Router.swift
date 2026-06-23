@@ -11,6 +11,7 @@ struct Router: View {
     let isActive: Bool
     @State private var backStack: [Route] = []
     @State private var sheet: Route?
+    @State private var statusMediaResolveRequest: MacStatusMediaResolveRequest?
     @State private var didHandleInitialActionRoute = false
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @StateObject private var deepLinkHandler: MacDeepLinkHandler
@@ -63,6 +64,26 @@ struct Router: View {
                 )
             }
             .frame(minWidth: 380, minHeight: 420)
+        }
+        .background {
+            if let statusMediaResolveRequest {
+                MacStatusMediaResolver(
+                    request: statusMediaResolveRequest,
+                    onResolved: { medias, index, preview, shareContext in
+                        MacMediaWindowCoordinator.shared.open(
+                            medias: medias,
+                            initialIndex: index,
+                            preview: preview,
+                            shareContext: shareContext,
+                            openWindow: openWindow
+                        )
+                    },
+                    onFinished: {
+                        self.statusMediaResolveRequest = nil
+                    }
+                )
+                .id(statusMediaResolveRequest.id)
+            }
         }
         .environment(\.openURL, OpenURLAction { url in
             deepLinkPresenter.state.handle(url: url.absoluteString)
@@ -120,6 +141,15 @@ struct Router: View {
                 rootId: rootId,
                 openWindow: openWindow
             )
+        case .mediaImage, .mediaRaw:
+            MacMediaWindowCoordinator.shared.open(route: route, openWindow: openWindow)
+        case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
+            statusMediaResolveRequest = MacStatusMediaResolveRequest(
+                accountType: accountType,
+                statusKey: statusKey,
+                initialIndex: Int(selectedIndex),
+                preview: preview
+            )
         case .externalLink(let link):
             if let url = URL(string: link) {
                 openURL(url)
@@ -147,6 +177,9 @@ struct Router: View {
                 .composeQuote,
                 .composeReply,
                 .composeVVOReplyComment,
+                .mediaImage,
+                .mediaRaw,
+                .mediaStatusMedia,
                 .externalLink:
             handle(route: initialRoute)
         default:

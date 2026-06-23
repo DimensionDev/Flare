@@ -4,6 +4,19 @@ import SwiftUIBackports
 import FlareAppleCore
 import AppleFontAwesome
 
+public typealias TimelineMediaOpenAction = (UiTimelineV2.Post, any UiMedia, Int) -> Void
+
+private struct TimelineMediaOpenActionKey: EnvironmentKey {
+    static let defaultValue: TimelineMediaOpenAction? = nil
+}
+
+public extension EnvironmentValues {
+    var timelineMediaOpenAction: TimelineMediaOpenAction? {
+        get { self[TimelineMediaOpenActionKey.self] }
+        set { self[TimelineMediaOpenActionKey.self] = newValue }
+    }
+}
+
 public struct StatusView: View {
     @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
     @Environment(\.timelineAppearance.showLinkPreview) private var showLinkPreview
@@ -14,6 +27,7 @@ public struct StatusView: View {
     @Environment(\.timelineAppearance.lineLimit) private var appearanceLineLimit
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @Environment(\.openURL) private var openURL
+    @Environment(\.timelineMediaOpenAction) private var timelineMediaOpenAction
     private let data: UiTimelineV2.Post
     private let isDetail: Bool
     private let isQuote: Bool
@@ -244,24 +258,28 @@ public struct StatusView: View {
                         
                         if hasImages, showMedia {
                             StatusMediaContent(data: images, sensitive: sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
-                                let preview: String? = switch onEnum(of: media) {
-                                case .image(let image):
-                                    image.previewUrl
-                                case .video(let video):
-                                    video.thumbnailUrl
-                                case .gif(let gif):
-                                    gif.previewUrl
-                                case .audio:
-                                    nil
-                                }
-                                let route = DeeplinkRoute.MediaStatusMedia(
-                                    statusKey: statusKey,
-                                    accountType: accountType,
-                                    index: Int32(index),
-                                    preview: preview
-                                )
-                                if let url = URL(string: route.toUri()) {
-                                    openURL(url)
+                                if let timelineMediaOpenAction {
+                                    timelineMediaOpenAction(data, media, index)
+                                } else {
+                                    let preview: String? = switch onEnum(of: media) {
+                                    case .image(let image):
+                                        image.previewUrl
+                                    case .video(let video):
+                                        video.thumbnailUrl
+                                    case .gif(let gif):
+                                        gif.previewUrl
+                                    case .audio:
+                                        nil
+                                    }
+                                    let route = DeeplinkRoute.MediaStatusMedia(
+                                        statusKey: statusKey,
+                                        accountType: accountType,
+                                        index: Int32(index),
+                                        preview: preview
+                                    )
+                                    if let url = URL(string: route.toUri()) {
+                                        openURL(url)
+                                    }
                                 }
                             }
                         }

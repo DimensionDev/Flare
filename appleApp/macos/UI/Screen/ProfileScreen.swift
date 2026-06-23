@@ -222,6 +222,7 @@ struct ProfileWithUserNameAndHostScreen: View {
 }
 
 private struct ProfileTimelineTabContent: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<TimelineState>
 
     init(presenter: TimelinePresenter) {
@@ -230,6 +231,14 @@ private struct ProfileTimelineTabContent: View {
 
     var body: some View {
         TimelinePagingContent(data: presenter.state.listState)
+            .environment(\.timelineMediaOpenAction, { post, media, index in
+                MacMediaWindowCoordinator.shared.open(
+                    post: post,
+                    media: media,
+                    index: index,
+                    openWindow: openWindow
+                )
+            })
     }
 }
 
@@ -323,7 +332,7 @@ private struct ProfileGalleryTabContent: View {
 }
 
 private struct ProfileGalleryTile: View {
-    @Environment(\.openURL) private var openURL
+    @Environment(\.openWindow) private var openWindow
 
     let item: ProfileMedia
     let accountType: AccountType
@@ -385,14 +394,20 @@ private struct ProfileGalleryTile: View {
     }
 
     private func openMedia() {
-        let route = DeeplinkRoute.MediaStatusMedia(
-            statusKey: item.statusKey,
-            accountType: accountType,
-            index: Int32(item.index),
-            preview: item.media.profileGalleryRoutePreviewURL
-        )
-        if let url = URL(string: route.toUri()) {
-            openURL(url)
+        if let post = item.status as? UiTimelineV2.Post {
+            MacMediaWindowCoordinator.shared.open(
+                post: post,
+                media: item.media,
+                index: Int(item.index),
+                openWindow: openWindow
+            )
+        } else {
+            MacMediaWindowCoordinator.shared.open(
+                medias: [item.media],
+                initialIndex: 0,
+                preview: item.media.profileGalleryRoutePreviewURL,
+                openWindow: openWindow
+            )
         }
     }
 }

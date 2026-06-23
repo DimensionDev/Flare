@@ -4,12 +4,10 @@ import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
+import dev.dimension.flare.data.io.AppleDataDirectories
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.core.annotation.Single
-import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSFileManager
-import platform.Foundation.NSSearchPathForDirectoriesInDomains
-import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringWithString
 import kotlin.native.HiddenFromObjC
 
@@ -20,7 +18,7 @@ public actual class DriverFactory {
         name: String,
         isCache: Boolean,
     ): RoomDatabase.Builder<T> {
-        val dbFilePath = databaseDirPath() + "/$name"
+        val dbFilePath = databaseDirPath(isCache) + "/$name"
         return Room
             .databaseBuilder<T>(
                 name = dbFilePath,
@@ -38,7 +36,7 @@ public actual class DriverFactory {
         name: String,
         isCache: Boolean,
     ) {
-        val dbFilePath = databaseDirPath() + "/$name"
+        val dbFilePath = databaseDirPath(isCache) + "/$name"
         val dbFile = platform.Foundation.NSString.stringWithString(dbFilePath)
         val fileManager = NSFileManager.defaultManager()
         if (fileManager.fileExistsAtPath(dbFile)) {
@@ -47,26 +45,5 @@ public actual class DriverFactory {
     }
 
     @PublishedApi
-    internal fun databaseDirPath(): String = iosDirPath("databases")
-
-    @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.UnsafeNumber::class)
-    internal fun iosDirPath(folder: String): String {
-        val paths =
-            NSSearchPathForDirectoriesInDomains(
-                NSApplicationSupportDirectory,
-                NSUserDomainMask,
-                true,
-            )
-        val documentsDirectory = paths[0] as String
-
-        val databaseDirectory = "$documentsDirectory/$folder"
-
-        val fileManager = NSFileManager.defaultManager()
-
-        if (!fileManager.fileExistsAtPath(databaseDirectory)) {
-            fileManager.createDirectoryAtPath(databaseDirectory, true, null, null)
-        }; // Create folder
-
-        return databaseDirectory
-    }
+    internal fun databaseDirPath(isCache: Boolean): String = AppleDataDirectories.databaseRootDirectory(isCache)
 }

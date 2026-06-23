@@ -5,7 +5,7 @@ import LazyPager
 import AVKit
 import SwiftUIBackports
 import UIKit
-import AppleFontAwesome
+import FlareAppleCore
 
 struct MediaViewerShareContext {
     let statusKey: String?

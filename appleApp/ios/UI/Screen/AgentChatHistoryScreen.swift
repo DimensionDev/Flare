@@ -1,7 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 struct AgentChatHistoryScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AgentChatHistoryPresenter())

@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
-import AppleFontAwesome
 
 struct StatusAddReactionSheet: View {
     let accountType: AccountType

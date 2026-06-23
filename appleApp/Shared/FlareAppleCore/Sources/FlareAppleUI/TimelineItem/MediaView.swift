@@ -1,6 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
-import AppleFontAwesome
+import FlareAppleCore
 import AVFoundation
 import Combine
 

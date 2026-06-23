@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
 import FlareAppleCore
-import AppleFontAwesome
 
 public typealias TimelineMediaOpenAction = (UiTimelineV2.Post, any UiMedia, Int) -> Void
 

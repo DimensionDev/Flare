@@ -3,7 +3,7 @@ import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleUI
-import AppleFontAwesome
+import FlareAppleCore
 
 struct TimelineVideoAutoplayCandidate {
     let id: String

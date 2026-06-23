@@ -3,7 +3,6 @@ import AuthenticationServices
 import Combine
 import FlareAppleCore
 import FlareAppleUI
-import AppleFontAwesome
 @preconcurrency import KotlinSharedUI
 import WebKit
 

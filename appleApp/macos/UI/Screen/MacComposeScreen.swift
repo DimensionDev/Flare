@@ -1,5 +1,4 @@
 import AppKit
-import AppleFontAwesome
 import FlareAppleCore
 import FlareAppleUI
 @preconcurrency import KotlinSharedUI

@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
-import AppleFontAwesome
 
 struct EditListMemberScreen: View {
     @Environment(\.dismiss) var dismiss

@@ -1,7 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 struct AppLogScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: DevModePresenter())

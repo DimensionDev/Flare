@@ -2,7 +2,7 @@ import ChatLayout
 import Kingfisher
 import SwiftUI
 import FlareAppleUI
-import AppleFontAwesome
+import FlareAppleCore
 @preconcurrency import KotlinSharedUI
 
 struct DMConversationMessagesView: UIViewControllerRepresentable {

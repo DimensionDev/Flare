@@ -1,4 +1,3 @@
-import AppleFontAwesome
 import Foundation
 import KotlinSharedUI
 import SwiftUI

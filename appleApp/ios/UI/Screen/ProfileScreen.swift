@@ -1,7 +1,6 @@
 import SwiftUI
 import FlareAppleUI
 import SwiftUIBackports
-import AppleFontAwesome
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
 import Combine

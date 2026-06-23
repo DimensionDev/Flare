@@ -2,7 +2,6 @@ import UIKit
 import Kingfisher
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 // MARK: - AvatarUIView
 // Mirrors AvatarView.swift (NetworkImage + clipShape by avatarShape).

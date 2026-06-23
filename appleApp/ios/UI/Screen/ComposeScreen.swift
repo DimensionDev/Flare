@@ -5,7 +5,6 @@ import FlareAppleUI
 import PhotosUI
 import SwiftUIIntrospect
 import SwiftUIBackports
-import AppleFontAwesome
 
 struct ComposeScreen: View {
     @Environment(\.dismiss) var dismiss

@@ -1,6 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
-import AppleFontAwesome
+import FlareAppleCore
 
 public struct StatusVisibilityView: View {
     private let data: UiTimelineV2.PostVisibility

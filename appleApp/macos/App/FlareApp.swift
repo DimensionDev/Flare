@@ -2,7 +2,6 @@ import AppKit
 import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
-import AppleFontAwesome
 
 enum MacWindowID {
     static let compose = "compose"

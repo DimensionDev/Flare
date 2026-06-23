@@ -2,7 +2,6 @@ import UIKit
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 /// UIKit port of the SwiftUI `StatusView`.
 ///

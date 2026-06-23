@@ -1,4 +1,4 @@
-import AppleFontAwesome
+import FlareAppleCore
 @preconcurrency import KotlinSharedUI
 import SwiftUI
 

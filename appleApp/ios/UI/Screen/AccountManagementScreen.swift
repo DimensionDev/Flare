@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
-import AppleFontAwesome
 
 struct AccountManagementScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())

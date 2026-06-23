@@ -5,7 +5,6 @@ import SafariServices
 import SwiftUIBackports
 import WebKit
 import FlareAppleCore
-import AppleFontAwesome
 
 struct RssDetailScreen: View {
     @State private var webViewHeight: CGFloat = .zero

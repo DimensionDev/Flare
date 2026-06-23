@@ -1,7 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 struct BlueskyReportSheet: View {
     @Environment(\.dismiss) private var dismiss

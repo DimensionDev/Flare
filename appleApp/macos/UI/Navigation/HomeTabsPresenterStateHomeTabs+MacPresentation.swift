@@ -1,4 +1,4 @@
-import AppleFontAwesome
+import FlareAppleCore
 import Foundation
 import KotlinSharedUI
 

@@ -1,6 +1,6 @@
 import SwiftUI
 import UIKit
-import AppleFontAwesome
+import FlareAppleCore
 
 struct AppIconSettingsScreen: View {
     @State private var currentIconName = UIApplication.shared.alternateIconName

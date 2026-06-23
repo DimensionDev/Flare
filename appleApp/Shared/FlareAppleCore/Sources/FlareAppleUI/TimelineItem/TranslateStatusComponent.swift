@@ -1,6 +1,6 @@
 import KotlinSharedUI
 import SwiftUI
-import AppleFontAwesome
+import FlareAppleCore
 
 public struct TranslateStatusComponent: View {
     private let data: TranslationDisplayState

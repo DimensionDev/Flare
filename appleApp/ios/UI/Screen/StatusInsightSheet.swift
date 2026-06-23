@@ -2,7 +2,6 @@ import SwiftUI
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 struct StatusInsightSheet: View {
     @Environment(\.dismiss) private var dismiss

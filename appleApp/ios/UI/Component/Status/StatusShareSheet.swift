@@ -4,7 +4,6 @@ import SwiftUIBackports
 import UniformTypeIdentifiers
 import FlareAppleCore
 import FlareAppleUI
-import AppleFontAwesome
 
 struct StatusShareSheet: View {
     let statusKey: MicroBlogKey

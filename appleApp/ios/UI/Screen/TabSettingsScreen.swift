@@ -2,7 +2,6 @@ import SwiftUI
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 struct TabSettingsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: HomeTabSettingsPresenter())
     @Environment(\.dismiss) private var dismiss

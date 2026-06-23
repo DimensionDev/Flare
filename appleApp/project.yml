@@ -47,9 +47,6 @@ settings:
       VALIDATE_PRODUCT: YES
 
 packages:
-  AppleFontAwesome:
-    url: https://github.com/Tlaster/AppleFontAwesome
-    branch: main
   ChatLayout:
     url: https://github.com/ekazaev/ChatLayout
     exactVersion: 2.4.2
@@ -96,7 +93,6 @@ targets:
           - Info.plist
           - AppIcon_*.icon
     dependencies:
-      - package: AppleFontAwesome
       - package: Kingfisher
       - package: LazyPager
       - package: SwiftUI-Flow
@@ -139,7 +135,6 @@ targets:
         excludes:
           - Info.plist
     dependencies:
-      - package: AppleFontAwesome
       - package: CHTCollectionViewWaterfallLayout
       - package: Kingfisher
       - package: swiftui-introspect
@@ -178,8 +173,6 @@ targets:
     supportedDestinations: [iOS, macOS]
     sources:
       - path: Shared/FlareAppleCore/Sources/FlareAppleCore
-    dependencies:
-      - package: AppleFontAwesome
     preBuildScripts:
       - name: Compile Kotlin
         basedOnDependencyAnalysis: false
@@ -204,7 +197,6 @@ targets:
     sources:
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI
     dependencies:
-      - package: AppleFontAwesome
       - package: Kingfisher
       - package: iOS-Backports
         product: SwiftUIBackports

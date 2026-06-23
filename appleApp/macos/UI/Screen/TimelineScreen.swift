@@ -1,7 +1,6 @@
 import FlareAppleCore
 @preconcurrency import KotlinSharedUI
 import SwiftUI
-import AppleFontAwesome
 import FlareAppleUI
 
 struct TimelineScreen: View {

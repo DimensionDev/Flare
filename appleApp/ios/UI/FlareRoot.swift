@@ -3,7 +3,6 @@ import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 import SwiftUIBackports
-import AppleFontAwesome
 
 @available(iOS 18.0, *)
 struct FlareRoot: View {

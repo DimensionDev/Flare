@@ -5,7 +5,6 @@ import Kingfisher
 import KotlinSharedUI
 import CHTCollectionViewWaterfallLayout
 import FlareAppleCore
-import AppleFontAwesome
 
 // MARK: - SwiftUI Wrapper
 

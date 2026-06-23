@@ -1,7 +1,6 @@
 import UIKit
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 // MARK: - StatusActionsUIView
 // Mirrors StatusActionsView/StatusActionView/StatusActionItemView in

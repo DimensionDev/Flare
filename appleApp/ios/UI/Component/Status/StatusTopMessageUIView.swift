@@ -2,7 +2,6 @@ import UIKit
 import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
-import AppleFontAwesome
 
 /// UIKit port of StatusTopMessageView: icon + user name + localized text.
 final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {

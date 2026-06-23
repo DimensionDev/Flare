@@ -1,6 +1,6 @@
 import SwiftUI
 import UIKit
-import AppleFontAwesome
+import FlareAppleCore
 
 struct AboutScreen: View {
     @Environment(\.openURL) private var openURL

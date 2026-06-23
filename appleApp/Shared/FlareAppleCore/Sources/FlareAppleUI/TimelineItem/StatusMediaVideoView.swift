@@ -3,7 +3,7 @@ import KotlinSharedUI
 import AVFoundation
 import Combine
 import SwiftUIBackports
-import AppleFontAwesome
+import FlareAppleCore
 
 #if os(iOS)
 import UIKit

@@ -1,7 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
-import AppleFontAwesome
+import FlareAppleCore
 
 private let statusMediaMaxVisibleMediaCount = 9
 

@@ -3,7 +3,6 @@ import FlareAppleUI
 import KotlinSharedUI
 import SwiftUIBackports
 import FlareAppleCore
-import AppleFontAwesome
 
 struct GroupConfigScreen: View {
     @Environment(\.dismiss) private var dismiss

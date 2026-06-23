@@ -1,7 +1,7 @@
 import SwiftUI
 import FlareAppleUI
 import KotlinSharedUI
-import AppleFontAwesome
+import FlareAppleCore
 
 public struct TimelinePresentationEditor: View {
     @Binding var text: String

@@ -9,7 +9,6 @@ import SwiftUIBackports
 import VideoPlayer
 import Combine
 import UIKit
-import AppleFontAwesome
 import FlareAppleCore
 
 struct StatusMediaScreen: View {

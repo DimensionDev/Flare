@@ -2,7 +2,6 @@ import SwiftUI
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
-import AppleFontAwesome
 
 struct SettingsScreen: View {
     var body: some View {

@@ -117,7 +117,11 @@ targets:
         basedOnDependencyAnalysis: false
         script: |
           cd "$SRCROOT/.."
-          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
     settings:
       groups:
         - appVersion
@@ -150,7 +154,11 @@ targets:
         basedOnDependencyAnalysis: false
         script: |
           cd "$SRCROOT/.."
-          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
     settings:
       groups:
         - appVersion
@@ -178,7 +186,11 @@ targets:
         basedOnDependencyAnalysis: false
         script: |
           cd "$SRCROOT/.."
-          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
     settings:
       base:
         CLANG_ENABLE_MODULE_VERIFIER: YES
@@ -208,7 +220,11 @@ targets:
         basedOnDependencyAnalysis: false
         script: |
           cd "$SRCROOT/.."
-          ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
     settings:
       base:
         CLANG_ENABLE_MODULE_VERIFIER: YES

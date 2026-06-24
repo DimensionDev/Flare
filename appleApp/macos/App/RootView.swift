@@ -99,7 +99,18 @@ struct RootView: View {
                                     }
                                 }
                             } header: {
-                                Text("macos_sidebar_accounts")
+                                HStack {
+                                    Text("macos_sidebar_accounts")
+                                    Spacer()
+                                    Button {
+                                        showLogin = true
+                                    } label: {
+                                        Image(fontAwesome: .plus)
+                                    }
+                                    .buttonStyle(.plain)
+                                    Spacer()
+                                        .frame(width: 16)
+                                }
                             }
                         }
                     }

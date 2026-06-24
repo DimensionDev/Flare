@@ -16,6 +16,7 @@ struct FlareTheme<Content: View>: View {
 
     var body: some View {
         content()
+            .networkStatus()
             .environment(\.aiConfig, appSettings.aiConfig)
             .environment(\.translateConfig, appSettings.translateConfig)
             .environment(\.globalAppearance, globalAppearance)

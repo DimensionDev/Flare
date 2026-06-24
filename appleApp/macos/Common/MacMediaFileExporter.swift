@@ -90,23 +90,33 @@ enum MacMediaFileExporter {
         fileName: String,
         customHeaders: [String: String]?
     ) async throws -> Bool {
-        let remoteURL = try makeRemoteURL(url)
-        let (downloadedURL, response) = try await downloadRemoteFile(
-            url: remoteURL,
-            customHeaders: customHeaders
-        )
-        guard isSuccessfulHTTPResponse(response) else {
-            throw MacMediaExportError.downloadFailed
-        }
+        let notification = MacMediaExportNotification()
 
-        guard let destinationURL = await selectDestinationURL(
-            defaultFileName: safeFileName(fileName, fallbackURL: remoteURL, response: response)
-        ) else {
-            return false
-        }
+        do {
+            let remoteURL = try makeRemoteURL(url)
+            notification.progress()
+            let (downloadedURL, response) = try await downloadRemoteFile(
+                url: remoteURL,
+                customHeaders: customHeaders
+            )
+            guard isSuccessfulHTTPResponse(response) else {
+                throw MacMediaExportError.downloadFailed
+            }
 
-        try copyReplacingItem(at: downloadedURL, to: destinationURL)
-        return true
+            guard let destinationURL = await selectDestinationURL(
+                defaultFileName: safeFileName(fileName, fallbackURL: remoteURL, response: response)
+            ) else {
+                notification.finishProgress()
+                return false
+            }
+
+            try copyReplacingItem(at: downloadedURL, to: destinationURL)
+            notification.success()
+            return true
+        } catch {
+            notification.error()
+            throw error
+        }
     }
 
     private static func downloadFile(source: MacMediaExportSource) async throws -> URL {
@@ -358,6 +368,47 @@ private enum MacMediaExportError: LocalizedError {
         case .missingWindow:
             String(localized: "Unable to present the share sheet")
         }
+    }
+}
+
+private struct MacMediaExportNotification {
+    let identifier = "media-export-\(UUID().uuidString)"
+
+    func progress() {
+        SwiftInAppNotification.shared.notifyProgress(
+            identifier: identifier,
+            title: progressTitle
+        )
+    }
+
+    func success() {
+        SwiftInAppNotification.shared.notifySuccess(
+            identifier: identifier,
+            title: successTitle
+        )
+    }
+
+    func error() {
+        SwiftInAppNotification.shared.notifyError(
+            identifier: identifier,
+            title: errorTitle
+        )
+    }
+
+    func finishProgress() {
+        SwiftInAppNotification.shared.finishProgress(identifier: identifier)
+    }
+
+    private var progressTitle: String {
+        String(localized: "notification_download_file_started", defaultValue: "Download started", bundle: .main)
+    }
+
+    private var successTitle: String {
+        String(localized: "notification_save_file_success", defaultValue: "Saved to Files", bundle: .main)
+    }
+
+    private var errorTitle: String {
+        String(localized: "notification_save_file_error", defaultValue: "Failed to save file", bundle: .main)
     }
 }
 

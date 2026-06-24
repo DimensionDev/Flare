@@ -143,6 +143,7 @@ jobs:
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         working-directory: ./appleApp
         env:
+          JAVA_OPTS: -Xmx16G
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           xcodebuild build \
@@ -160,6 +161,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         working-directory: ./appleApp
         env:
+          JAVA_OPTS: -Xmx16G
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           xcodebuild archive \

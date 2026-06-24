@@ -97,6 +97,13 @@ public class LocalHistoryAgentPresenter(
                 onAgentRunCompleted = {
                     historyProvider.generateTitleIfNeeded(conversationId)
                 },
+                onRoomRuntimeStateChanged = { isRunning ->
+                    historyProvider.updateRoomState(
+                        conversationId = conversationId,
+                        isRunning = isRunning,
+                        updateErrorMessage = false,
+                    )
+                },
                 onRoomStateChanged = { errorMessage ->
                     historyProvider.updateRoomState(
                         conversationId = conversationId,

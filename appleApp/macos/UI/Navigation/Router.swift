@@ -167,6 +167,8 @@ struct Router: View {
             if let url = URL(string: link) {
                 openURL(url)
             }
+        case _ where route.isAgentWindowRoute:
+            MacAgentWindowCoordinator.shared.open(route: route, openWindow: openWindow)
         case _ where route.alertTitle != nil:
             alertRoute = route
         case _ where route == initialRoute:

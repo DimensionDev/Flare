@@ -18,6 +18,7 @@ internal interface AgentConversationDao {
             conversation.titleGenerated AS titleGenerated,
             conversation.createdAt AS createdAt,
             COALESCE(MAX(message.createdAt), conversation.createdAt) AS updatedAt,
+            conversation.isRunning AS isRunning,
             conversation.errorMessage AS errorMessage
         FROM agent_conversations AS conversation
         LEFT JOIN agent_messages AS message
@@ -64,6 +65,12 @@ internal interface AgentConversationDao {
 
     @Query("UPDATE agent_conversations SET title = :title, titleGenerated = 1 WHERE conversationId = :conversationId")
     suspend fun updateGeneratedTitle(
+        conversationId: String,
+        title: String,
+    )
+
+    @Query("UPDATE agent_conversations SET title = :title WHERE conversationId = :conversationId")
+    suspend fun updateFallbackTitle(
         conversationId: String,
         title: String,
     )

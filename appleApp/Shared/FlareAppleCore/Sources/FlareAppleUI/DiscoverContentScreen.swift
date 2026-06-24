@@ -4,6 +4,7 @@ import SwiftUI
 
 public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @StateObject private var presenter: KotlinPresenter<DiscoverState>
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @StateObject private var searchHistoryPresenter = KotlinPresenter(presenter: SearchHistoryPresenter())
@@ -48,6 +49,8 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         .background(Color.flareSystemGroupedBackground)
         .toolbar {
             #if os(macOS)
+            askAiToolbarItem
+
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     refresh()
@@ -156,6 +159,15 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     #endif
 
     #if os(macOS)
+    @ToolbarContentBuilder
+    private var askAiToolbarItem: some ToolbarContent {
+        if agentEnabled {
+            ToolbarItem(placement: .primaryAction) {
+                AskAiSearchToolbarButton(action: askAi)
+            }
+        }
+    }
+
     @ToolbarContentBuilder
     private var macAccountToolbarItem: some ToolbarContent {
         if case .success(let data) = onEnum(of: presenter.state.accounts) {

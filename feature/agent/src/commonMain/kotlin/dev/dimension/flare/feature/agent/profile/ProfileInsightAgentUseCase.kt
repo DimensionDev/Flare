@@ -56,10 +56,16 @@ internal class ProfileInsightAgentUseCase(
         conversationId: String,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
+        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+            return
+        }
         if (userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }
         val profile = userDataSource.loadProfile(userKey)
+        if (userInputValue.isBlank()) {
+            chatHistoryProvider.ensureConversationTitle(conversationId, profile.insightConversationTitle())
+        }
         send(AgentConversationEvent.ContentLoaded(profile))
 
         val result =
@@ -225,6 +231,12 @@ internal class ProfileInsightAgentUseCase(
                 "- After tool results are available, answer directly and include exact attachmentRef markers for the profile or the clearest supporting posts when useful.",
             )
         }
+
+    private fun UiProfile.insightConversationTitle(): String =
+        name.raw.trim()
+            .ifBlank { handle.raw.trim() }
+            .ifBlank { description?.raw.orEmpty().trim() }
+            .ifBlank { key.toString() }
 
     private fun UiProfile.BottomContent?.toPromptLines(): List<String> =
         when (this) {

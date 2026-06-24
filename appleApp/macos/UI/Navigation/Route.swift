@@ -10,6 +10,9 @@ enum Route: Hashable, Identifiable {
     case discover
     case serviceSelect
     case localHistory
+    case agentHistory
+    case agentChat(String, String?)
+    case localHistoryAgent(String, String?, String)
     case timeline(UiTimelineTabItem)
     case composeNew
     case composeDraft(String)
@@ -17,12 +20,14 @@ enum Route: Hashable, Identifiable {
     case composeReply(AccountType, MicroBlogKey)
     case composeVVOReplyComment(AccountType, MicroBlogKey, String)
     case statusDetail(AccountType, MicroBlogKey)
+    case statusInsight(AccountType, MicroBlogKey)
     case galleryDetail(AccountType, MicroBlogKey)
     case galleryComments(AccountType, MicroBlogKey)
     case statusVVOComment(AccountType, MicroBlogKey)
     case statusVVOStatus(AccountType, MicroBlogKey)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
+    case profileInsight(AccountType, MicroBlogKey)
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
     case mediaImage(String, String?, [String: String]?)
@@ -100,11 +105,34 @@ enum Route: Hashable, Identifiable {
         case .accountNotification(let accountKey):
             NotificationScreen(accountKey: accountKey)
         case .discover:
-            DiscoverScreen()
+            DiscoverScreen { query in
+                onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+            }
         case .serviceSelect:
             ServiceSelectionScreen(toHome: goBack)
         case .localHistory:
-            LocalHistoryContentScreen()
+            LocalHistoryContentScreen(
+                onAskAi: { query, target in
+                    onNavigate(.localHistoryAgent(Self.newLocalHistoryAgentConversationId(), query, target))
+                }
+            ) { _, _ in
+                EmptyView()
+            }
+        case .agentHistory:
+            AgentChatHistoryScreen(onNavigate: onNavigate)
+        case .agentChat(let conversationId, let initialMessage):
+            AgentChatScreen(
+                conversationId: conversationId,
+                initialMessage: initialMessage,
+                onNavigate: onNavigate
+            )
+        case .localHistoryAgent(let conversationId, let query, let target):
+            LocalHistoryAgentScreen(
+                conversationId: conversationId,
+                query: query,
+                target: target,
+                onNavigate: onNavigate
+            )
         case .timeline(let item):
             TimelineScreen(tabItem: item, allowGalleryMode: true)
                 .navigationTitle(item.title.text)
@@ -126,6 +154,12 @@ enum Route: Hashable, Identifiable {
             EmptyView()
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        case .statusInsight(let accountType, let statusKey):
+            StatusInsightScreen(
+                accountType: accountType,
+                statusKey: statusKey,
+                onNavigate: onNavigate
+            )
         case .galleryDetail(let accountType, let statusKey):
             GalleryDetailScreen(accountType: accountType, statusKey: statusKey, onNavigate: onNavigate)
         case .galleryComments(let accountType, let statusKey):
@@ -140,6 +174,7 @@ enum Route: Hashable, Identifiable {
                 userKey: userKey,
                 onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) },
                 onFansClick: { key in onNavigate(.userFans(accountType, key)) },
+                onProfileInsight: { key in onNavigate(.profileInsight(accountType, key)) },
                 goBack: goBack
             )
         case .profileUserNameWithHost(let accountType, let userName, let host):
@@ -149,7 +184,14 @@ enum Route: Hashable, Identifiable {
                 accountType: accountType,
                 onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) },
                 onFansClick: { key in onNavigate(.userFans(accountType, key)) },
+                onProfileInsight: { key in onNavigate(.profileInsight(accountType, key)) },
                 goBack: goBack
+            )
+        case .profileInsight(let accountType, let userKey):
+            ProfileInsightScreen(
+                accountType: accountType,
+                userKey: userKey,
+                onNavigate: onNavigate
             )
         case .userFollowing(let accountType, let userKey):
             UserListScreen(accountType: accountType, userKey: userKey, isFollowing: true)
@@ -170,7 +212,13 @@ enum Route: Hashable, Identifiable {
                 onNavigate: onNavigate
             )
         case .search(let accountType, let query):
-            SearchScreen(accountType: accountType, initialQuery: query)
+            SearchScreen(
+                accountType: accountType,
+                initialQuery: query,
+                onAskAi: { query in
+                    onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
+                }
+            )
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
         case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
@@ -209,6 +257,41 @@ enum Route: Hashable, Identifiable {
             )
         case .externalLink:
             EmptyView()
+        }
+    }
+
+    static func newGenericChatConversationId() -> String {
+        "generic-chat:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
+
+    static func newLocalHistoryAgentConversationId() -> String {
+        "local-history:\(Int64(Date().timeIntervalSince1970 * 1000))"
+    }
+
+    var isAgentWindowRoute: Bool {
+        switch self {
+        case .agentHistory,
+                .agentChat,
+                .localHistoryAgent,
+                .statusInsight,
+                .profileInsight:
+            true
+        default:
+            false
+        }
+    }
+
+    var agentConversationId: String? {
+        switch self {
+        case .agentChat(let conversationId, _),
+                .localHistoryAgent(let conversationId, _, _):
+            conversationId
+        case .statusInsight(let accountType, let statusKey):
+            "status-insight:\(String(describing: accountType)):\(statusKey.description())"
+        case .profileInsight(let accountType, let userKey):
+            "profile-insight:\(String(describing: accountType)):\(userKey.description())"
+        default:
+            nil
         }
     }
 }
@@ -265,6 +348,14 @@ private struct MacArticleDownloadAlert: Identifiable {
 }
 
 extension Route {
+    static func fromDeepLink(url: String) -> Route? {
+        if let deeplinkRoute = DeeplinkRoute.companion.parse(uri: url) {
+            return fromDeepLinkRoute(deeplinkRoute: deeplinkRoute)
+        } else {
+            return nil
+        }
+    }
+
     static func fromDeepLinkRoute(deeplinkRoute: DeeplinkRoute) -> Route? {
         switch onEnum(of: deeplinkRoute) {
         case .login:
@@ -401,6 +492,8 @@ extension Route {
             .statusDeleteConfirm(data.accountType, data.statusKey)
         case .detail(let data):
             .statusDetail(data.accountType, data.statusKey)
+        case .insight(let data):
+            .statusInsight(data.accountType, data.statusKey)
         case .mastodonReport(let data):
             .statusMastodonReport(data.accountType, data.userKey, data.statusKey)
         case .misskeyReport(let data):

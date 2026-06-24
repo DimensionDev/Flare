@@ -27,17 +27,6 @@ struct ProfileInsightSheet: View {
                 if let route = agentRoute(for: user) {
                     onNavigate(route)
                 }
-            },
-            leadingContent: {
-                AnyView(
-                    Group {
-                        if let profile = presenter.state.profile {
-                            ProfileInsightUserPreview(profile: profile) {
-                                onNavigate(.profileUser(accountType, profile.key))
-                            }
-                        }
-                    }
-                )
             }
         )
         .navigationTitle(String(localized: "profile_insight_title", defaultValue: "Profile insight"))

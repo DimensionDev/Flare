@@ -12,6 +12,7 @@ import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
 import dev.dimension.flare.feature.agent.profile.ProfileInsightAgentUseCase
 import dev.dimension.flare.model.AccountType
@@ -102,8 +103,22 @@ public class ProfileInsightPresenter(
                 onInputRequestSelected = { requestId, optionId ->
                     historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
                 },
+                onInitialContentLoaded = { profile ->
+                    historyProvider.storeUserUiMessage(
+                        conversationId = conversationId,
+                        displayText = profile.insightUserMessageTitle(),
+                        parts = listOf(AgentMessagePart.UserCard(profile)),
+                    )
+                },
                 onAgentRunCompleted = {
                     historyProvider.generateTitleIfNeeded(conversationId)
+                },
+                onRoomRuntimeStateChanged = { isRunning ->
+                    historyProvider.updateRoomState(
+                        conversationId = conversationId,
+                        isRunning = isRunning,
+                        updateErrorMessage = false,
+                    )
                 },
                 onRoomStateChanged = { errorMessage ->
                     historyProvider.updateRoomState(
@@ -159,3 +174,9 @@ public class ProfileInsightPresenter(
         val searchDataSources: List<AccountMicroblogDataSource>,
     )
 }
+
+private fun UiProfile.insightUserMessageTitle(): String =
+    name.raw.trim()
+        .ifBlank { handle.raw.trim() }
+        .ifBlank { description?.raw.orEmpty().trim() }
+        .ifBlank { key.toString() }

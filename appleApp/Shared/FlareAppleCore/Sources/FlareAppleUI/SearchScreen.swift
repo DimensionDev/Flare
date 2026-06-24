@@ -4,9 +4,7 @@ import FlareAppleCore
 
 public struct SearchScreen: View {
     @Environment(\.openURL) private var openURL
-    #if os(iOS)
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
-    #endif
     private let onAskAi: (String?) -> Void
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @StateObject private var searchHistoryPresenter: KotlinPresenter<SearchHistoryState>
@@ -94,6 +92,9 @@ public struct SearchScreen: View {
         .background(Color.flareSystemGroupedBackground)
         .navigationTitle(Text("search_title", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
+            #if os(macOS)
+            askAiToolbarItem
+            #endif
             accountToolbarItem
         }
         .searchable(text: $searchText, isPresented: $isSearchPresented)
@@ -197,6 +198,15 @@ public struct SearchScreen: View {
     #endif
 
     #if os(macOS)
+    @ToolbarContentBuilder
+    private var askAiToolbarItem: some ToolbarContent {
+        if agentEnabled {
+            ToolbarItem(placement: .primaryAction) {
+                AskAiSearchToolbarButton(action: askAi)
+            }
+        }
+    }
+
     @ToolbarContentBuilder
     private var accountToolbarItem: some ToolbarContent {
         if case .success(let data) = onEnum(of: searchPresenter.state.accounts) {
@@ -303,7 +313,6 @@ private struct MacSearchAccountRow: View {
 }
 #endif
 
-#if os(iOS)
 public struct AskAiSearchOverlayModifier: ViewModifier {
     private let agentEnabled: Bool
     private let isSearchPresented: Bool
@@ -381,4 +390,24 @@ public struct AskAiSearchAccessory: View {
         .padding(.horizontal)
     }
 }
-#endif
+
+public struct AskAiSearchToolbarButton: View {
+    private let action: () -> Void
+
+    public init(action: @escaping () -> Void) {
+        self.action = action
+    }
+
+    public var body: some View {
+        Button(action: action) {
+            Label {
+                Text("ask_ai", bundle: FlareAppleUILocalization.bundle)
+            } icon: {
+                Image(fontAwesome: .robot)
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .help(String(localized: "ask_ai", bundle: FlareAppleUILocalization.bundle))
+        .accessibilityLabel(Text("ask_ai", bundle: FlareAppleUILocalization.bundle))
+    }
+}

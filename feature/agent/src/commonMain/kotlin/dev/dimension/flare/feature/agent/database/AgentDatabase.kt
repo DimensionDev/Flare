@@ -15,7 +15,7 @@ import dev.dimension.flare.feature.agent.database.model.DbAgentMessage
         DbAgentConversation::class,
         DbAgentMessage::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 @ConstructedBy(AgentDatabaseConstructor::class)

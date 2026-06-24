@@ -7,8 +7,10 @@ struct ProfileScreen: View {
     let accountType: AccountType
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
+    let onProfileInsight: (MicroBlogKey) -> Void
     let goBack: () -> Void
     @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
 
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab = 0
@@ -18,11 +20,13 @@ struct ProfileScreen: View {
         userKey: MicroBlogKey?,
         onFollowingClick: @escaping (MicroBlogKey) -> Void,
         onFansClick: @escaping (MicroBlogKey) -> Void,
+        onProfileInsight: @escaping (MicroBlogKey) -> Void = { _ in },
         goBack: @escaping () -> Void = {}
     ) {
         self.accountType = accountType
         self.onFollowingClick = onFollowingClick
         self.onFansClick = onFansClick
+        self.onProfileInsight = onProfileInsight
         self.goBack = goBack
         _presenter = .init(
             wrappedValue: .init(
@@ -77,8 +81,17 @@ struct ProfileScreen: View {
 //                    Text(String(localized: "profile_title", defaultValue: "Profile", bundle: .main))
 //                }
 //            }
-            if !presenter.state.actions.isEmpty {
+            if agentEnabled || !presenter.state.actions.isEmpty {
                 ToolbarItemGroup(placement: .primaryAction) {
+                    if agentEnabled, case .success(let userState) = onEnum(of: presenter.state.userState) {
+                        Button {
+                            onProfileInsight(userState.data.key)
+                        } label: {
+                            Image(fontAwesome: .robot)
+                        }
+                        .accessibilityLabel(Text("profile_insight_title", bundle: .main))
+                        .help(String(localized: "profile_insight_title", defaultValue: "Profile insight", bundle: .main))
+                    }
                     StatusActionsView(
                         data: presenter.state.actions,
                         useText: false,
@@ -178,6 +191,7 @@ struct ProfileWithUserNameAndHostScreen: View {
     let accountType: AccountType
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
+    let onProfileInsight: (MicroBlogKey) -> Void
     let goBack: () -> Void
 
     init(
@@ -186,11 +200,13 @@ struct ProfileWithUserNameAndHostScreen: View {
         accountType: AccountType,
         onFollowingClick: @escaping (MicroBlogKey) -> Void,
         onFansClick: @escaping (MicroBlogKey) -> Void,
+        onProfileInsight: @escaping (MicroBlogKey) -> Void = { _ in },
         goBack: @escaping () -> Void = {}
     ) {
         self.accountType = accountType
         self.onFollowingClick = onFollowingClick
         self.onFansClick = onFansClick
+        self.onProfileInsight = onProfileInsight
         self.goBack = goBack
         _presenter = .init(
             wrappedValue: .init(
@@ -210,6 +226,7 @@ struct ProfileWithUserNameAndHostScreen: View {
                 userKey: user.key,
                 onFollowingClick: onFollowingClick,
                 onFansClick: onFansClick,
+                onProfileInsight: onProfileInsight,
                 goBack: goBack
             )
         } loadingContent: {

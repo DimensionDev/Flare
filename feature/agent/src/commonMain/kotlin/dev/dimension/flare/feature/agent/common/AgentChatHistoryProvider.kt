@@ -9,7 +9,6 @@ import dev.dimension.flare.feature.agent.database.connect
 import dev.dimension.flare.feature.agent.database.model.DbAgentConversation
 import dev.dimension.flare.feature.agent.database.model.DbAgentMessage
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
-import dev.dimension.flare.feature.agent.presenter.agentMessageText
 import dev.dimension.flare.feature.agent.presenter.buildAgentMessageParts
 import dev.dimension.flare.feature.agent.presenter.markAgentInputRequestSelected
 import dev.dimension.flare.feature.agent.presenter.toAgentTextParts
@@ -61,10 +60,46 @@ internal class AgentChatHistoryProvider(
     fun observeStatusInsightPosts(conversationId: String): Flow<List<UiTimelineV2.Post>> =
         observeMessages(conversationId).map { messages ->
             messages
+                .filterNot { message -> message.role == AgentChatHistoryMessage.Role.User }
                 .flatMap { message -> message.parts }
                 .mapNotNull { part -> (part as? AgentMessagePart.PostCard)?.post }
                 .distinctBy { post -> "${post.platformType}:${post.statusKey}" }
         }
+
+    suspend fun hasAssistantMessage(conversationId: String): Boolean =
+        database
+            .conversationDao()
+            .getMessages(conversationId)
+            .any { message ->
+                message.role == Message.Role.Assistant.name && message.toHistoryMessage() != null
+            }
+
+    suspend fun ensureConversationTitle(
+        conversationId: String,
+        title: String,
+    ) {
+        val fallbackTitle = title.agentFallbackTitle()
+        val existing = database.conversationDao().getConversation(conversationId)
+        val resolvedTitle = existing.agentTitleOrFallback(conversationId, fallbackTitle)
+        if (existing != null && existing.title == resolvedTitle) {
+            return
+        }
+
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            database.conversationDao().upsertConversation(
+                DbAgentConversation(
+                    conversationId = conversationId,
+                    title = resolvedTitle,
+                    titleGenerated = existing?.titleGenerated ?: false,
+                    createdAt = existing?.createdAt ?: now,
+                    updatedAt = existing?.updatedAt ?: now,
+                    isRunning = existing?.isRunning ?: false,
+                    errorMessage = existing?.errorMessage,
+                ),
+            )
+        }
+    }
 
     suspend fun storeUserUiMessage(
         conversationId: String,
@@ -79,6 +114,23 @@ internal class AgentChatHistoryProvider(
             rawText = displayText,
             displayTitle = displayText,
             parts = displayText.toAgentTextParts(),
+        )
+    }
+
+    suspend fun storeUserUiMessage(
+        conversationId: String,
+        displayText: String,
+        parts: List<AgentMessagePart>,
+    ) {
+        val normalizedText = displayText.agentFallbackTitle()
+        if (normalizedText.isBlank() || parts.isEmpty()) {
+            return
+        }
+        storeUserUiContent(
+            conversationId = conversationId,
+            rawText = normalizedText,
+            displayTitle = normalizedText,
+            parts = parts,
         )
     }
 
@@ -131,10 +183,11 @@ internal class AgentChatHistoryProvider(
             database.conversationDao().upsertConversation(
                 DbAgentConversation(
                     conversationId = conversationId,
-                    title = existing?.title ?: title.fallbackTitle(),
+                    title = existing?.title ?: title.agentFallbackTitle(),
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = now,
+                    isRunning = existing?.isRunning ?: false,
                     errorMessage = existing?.errorMessage,
                 ),
             )
@@ -186,13 +239,22 @@ internal class AgentChatHistoryProvider(
 
     suspend fun updateRoomState(
         conversationId: String,
-        errorMessage: String?,
+        errorMessage: String? = null,
+        isRunning: Boolean? = null,
+        updateErrorMessage: Boolean = true,
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
         val existing = database.conversationDao().getConversation(conversationId)
         val latestMessageAt = database.conversationDao().getLatestVisibleMessageCreatedAt(conversationId)
+        val nextIsRunning = isRunning ?: existing?.isRunning ?: false
+        val nextErrorMessage =
+            if (updateErrorMessage) {
+                errorMessage
+            } else {
+                existing?.errorMessage
+            }
         val isEmptyIdleState =
-            errorMessage == null
+            !nextIsRunning && nextErrorMessage == null
         if (existing == null &&
             isEmptyIdleState &&
             database.conversationDao().getMessages(conversationId).isEmpty()
@@ -207,7 +269,8 @@ internal class AgentChatHistoryProvider(
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = latestMessageAt ?: existing?.updatedAt ?: now,
-                    errorMessage = errorMessage,
+                    isRunning = nextIsRunning,
+                    errorMessage = nextErrorMessage,
                 ),
             )
         }
@@ -255,9 +318,16 @@ internal class AgentChatHistoryProvider(
     }
 
     suspend fun clear(conversationId: String) {
+        val existing = database.conversationDao().getConversation(conversationId)
         database.connect {
             database.conversationDao().deleteMessages(conversationId)
-            database.conversationDao().deleteConversation(conversationId)
+            // Initial insight runs clear old messages after the room is marked running.
+            // Keep that row so history can continue observing its progress state.
+            if (existing?.isRunning == true) {
+                database.conversationDao().upsertConversation(existing)
+            } else {
+                database.conversationDao().deleteConversation(conversationId)
+            }
         }
     }
 
@@ -274,13 +344,15 @@ internal class AgentChatHistoryProvider(
             )
         val historyMessages = messages.mapNotNull { it.toHistoryMessage(conversationId) }
         val fallbackTitle =
-            existing?.title
-                ?: historyMessages
-                    .firstOrNull { it.role == AgentChatHistoryMessage.Role.User }
-                    ?.parts
-                    ?.agentMessageText()
-                    ?.fallbackTitle()
-                ?: conversationId
+            existing.agentTitleOrFallback(
+                conversationId = conversationId,
+                fallbackTitle =
+                    agentConversationFallbackTitle(
+                        conversationId = conversationId,
+                        messages = messages,
+                        historyMessages = historyMessages,
+                    ),
+            )
         database.connect {
             database.conversationDao().upsertConversation(
                 DbAgentConversation(
@@ -289,6 +361,7 @@ internal class AgentChatHistoryProvider(
                     titleGenerated = existing?.titleGenerated ?: false,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = latestMessageAt,
+                    isRunning = existing?.isRunning ?: false,
                     errorMessage = existing?.errorMessage,
                 ),
             )
@@ -317,21 +390,49 @@ internal class AgentChatHistoryProvider(
         if (existing.titleGenerated) {
             return
         }
-        val messages =
+        val dbMessages =
             database
                 .conversationDao()
                 .getMessages(conversationId)
-                .mapNotNull { it.toHistoryMessage() }
-        if (messages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
+        val historyMessages = dbMessages.mapNotNull { it.toHistoryMessage() }
+        if (historyMessages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
             return
         }
-        val generatedTitle = titleGenerator.generate(messages) ?: return
+        val generatedTitle =
+            titleGenerator.generate(historyMessages)
+                ?: run {
+                    updateFallbackTitleIfNeeded(
+                        conversationId = conversationId,
+                        fallbackTitle =
+                            agentConversationFallbackTitle(
+                                conversationId = conversationId,
+                                messages = dbMessages.mapNotNull { it.toMessage() },
+                                historyMessages = historyMessages,
+                            ),
+                    )
+                    return
+                }
         if (database.conversationDao().getConversation(conversationId)?.titleGenerated == true) {
             return
         }
         database.conversationDao().updateGeneratedTitle(
             conversationId = conversationId,
             title = generatedTitle,
+        )
+    }
+
+    private suspend fun updateFallbackTitleIfNeeded(
+        conversationId: String,
+        fallbackTitle: String,
+    ) {
+        val existing = database.conversationDao().getConversation(conversationId) ?: return
+        val title = existing.agentTitleOrFallback(conversationId, fallbackTitle)
+        if (title == existing.title) {
+            return
+        }
+        database.conversationDao().updateFallbackTitle(
+            conversationId = conversationId,
+            title = title,
         )
     }
 
@@ -392,7 +493,7 @@ internal class AgentChatHistoryProvider(
             title = title.orEmpty().ifBlank { conversationId },
             createdAt = createdAt,
             updatedAt = updatedAt,
-            isRunning = false,
+            isRunning = isRunning,
             currentTrace = null,
             errorMessage = errorMessage,
         )
@@ -452,8 +553,14 @@ internal class AgentChatHistoryProvider(
     private fun String.cleanAgentUserVisibleText(conversationId: String?): String {
         extractLatestInsightQuestion()?.let { return it }
         return when {
-            conversationId?.startsWith(STATUS_INSIGHT_CONVERSATION_PREFIX) == true && isStatusInsightSourcePrompt() -> ""
-            conversationId?.startsWith(PROFILE_INSIGHT_CONVERSATION_PREFIX) == true && isProfileInsightSourcePrompt() -> ""
+            conversationId?.startsWith(STATUS_INSIGHT_CONVERSATION_PREFIX) == true && isStatusInsightSourcePrompt() -> {
+                agentInsightSourceFallbackTitle(conversationId)?.agentFallbackTitle().orEmpty()
+            }
+
+            conversationId?.startsWith(PROFILE_INSIGHT_CONVERSATION_PREFIX) == true && isProfileInsightSourcePrompt() -> {
+                agentInsightSourceFallbackTitle(conversationId)?.agentFallbackTitle().orEmpty()
+            }
+
             else -> this
         }
     }
@@ -482,14 +589,6 @@ internal class AgentChatHistoryProvider(
             contains("Current profile snapshot:") ||
             contains("\nProfile:\nplatform:")
 
-    private fun String.fallbackTitle(): String =
-        lineSequence()
-            .firstOrNull { it.isNotBlank() }
-            ?.trim()
-            ?.take(MAX_FALLBACK_TITLE_CHARS)
-            .orEmpty()
-            .ifBlank { "Flare AI" }
-
     private fun AgentInputRequest.Option.displayTitle(): String =
         when {
             userPreview != null -> {
@@ -512,7 +611,6 @@ internal class AgentChatHistoryProvider(
         }
 
     private companion object {
-        const val MAX_FALLBACK_TITLE_CHARS = 80
         const val STATUS_INSIGHT_CONVERSATION_PREFIX = "status-insight:"
         const val PROFILE_INSIGHT_CONVERSATION_PREFIX = "profile-insight:"
         const val LATEST_USER_QUESTION_MARKER = "Latest user question:\n"

@@ -3,6 +3,7 @@ import FlareAppleCore
 import SwiftUI
 
 public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
+    @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @StateObject private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @State private var searchText = ""
     @State private var isSearchPresented = false
@@ -29,6 +30,10 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
         }
         .modifier(LocalHistoryListStyle(selection: selection))
         .toolbar {
+            #if os(macOS)
+            askAiToolbarItem
+            #endif
+
             ToolbarItem(placement: .primaryAction) {
                 Picker("local_history_title", selection: $selection) {
                     Text("local_history_status", bundle: .main).tag(LocalHistorySelection.status)
@@ -85,6 +90,17 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
         isSearchPresented = false
         onAskAi(query.isEmpty ? nil : query, selection.agentTargetRouteValue)
     }
+
+    #if os(macOS)
+    @ToolbarContentBuilder
+    private var askAiToolbarItem: some ToolbarContent {
+        if agentEnabled {
+            ToolbarItem(placement: .primaryAction) {
+                AskAiSearchToolbarButton(action: askAi)
+            }
+        }
+    }
+    #endif
 }
 
 public extension LocalHistoryContentScreen where AskAiOverlay == EmptyView {

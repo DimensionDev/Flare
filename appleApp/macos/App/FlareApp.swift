@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
@@ -7,6 +8,7 @@ enum MacWindowID {
     static let compose = "compose"
     static let media = "media"
     static let rssManagement = "rss-management"
+    static let agentHistory = "agent-history"
 }
 
 @main
@@ -61,6 +63,15 @@ struct FlareApp: App {
         }
         .defaultSize(width: 1120, height: 760)
         .windowToolbarStyle(.unified)
+
+        Window("settings_agent_history_title", id: MacWindowID.agentHistory) {
+            FlareTheme {
+                Router(initialRoute: .agentHistory)
+            }
+        }
+        .defaultSize(width: 760, height: 640)
+        .windowToolbarStyle(.unified)
+        .disableRestorationBehavior()
 
         Settings {
             FlareTheme {
@@ -138,6 +149,7 @@ private struct MacAppCommands: Commands {
             }
 
             Button {
+                MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
             } label: {
                 Label {
                     Text("settings_agent_history_title")
@@ -146,5 +158,33 @@ private struct MacAppCommands: Commands {
                 }
             }
         }
+    }
+}
+
+struct MacAgentWindowRequest: Identifiable {
+    let id: UUID
+    let route: Route
+
+    init(id: UUID = UUID(), route: Route) {
+        self.id = id
+        self.route = route
+    }
+}
+
+@MainActor
+final class MacAgentWindowCoordinator: ObservableObject {
+    static let shared = MacAgentWindowCoordinator()
+
+    @Published private(set) var request: MacAgentWindowRequest?
+
+    private init() {}
+
+    func open(route: Route, openWindow: OpenWindowAction) {
+        guard route.isAgentWindowRoute else {
+            return
+        }
+
+        request = MacAgentWindowRequest(route: route)
+        openWindow(id: MacWindowID.agentHistory)
     }
 }

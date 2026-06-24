@@ -27,20 +27,6 @@ struct StatusInsightSheet: View {
                 if let route = agentRoute(for: user) {
                     onNavigate(route)
                 }
-            },
-            leadingContent: {
-                AnyView(
-                    Group {
-                        if let post = presenter.state.post {
-                            StatusInsightPostPreview(
-                                post: post,
-                                onClick: {
-                                    onNavigate(.statusDetail(post.accountType, post.statusKey))
-                                }
-                            )
-                        }
-                    }
-                )
             }
         )
         .navigationTitle(String(localized: "status_insight_title"))

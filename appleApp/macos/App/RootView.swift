@@ -15,6 +15,7 @@ struct RootView: View {
     @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
+    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @State private var selectedTab: Route?
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
@@ -119,6 +120,7 @@ struct RootView: View {
 
                 MacSidebarPinnedActions(
                     showDraftBoxPopover: $showDraftBoxPopover,
+                    showsAgentHistory: aiAgentEnabledPresenter.state.enabled,
                     openDraft: { groupId in
                         MacComposeWindowCoordinator.shared.openDraft(
                             groupId: groupId,
@@ -127,6 +129,9 @@ struct RootView: View {
                     },
                     openRssManagement: {
                         openWindow(id: MacWindowID.rssManagement)
+                    },
+                    openAgentHistory: {
+                        MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
                     },
                     openAppSettings: {
                         openSettings()
@@ -190,8 +195,10 @@ private struct HomeSidebarTabEditor: Identifiable {
 
 private struct MacSidebarPinnedActions: View {
     @Binding var showDraftBoxPopover: Bool
+    let showsAgentHistory: Bool
     let openDraft: (String) -> Void
     let openRssManagement: () -> Void
+    let openAgentHistory: () -> Void
     let openAppSettings: () -> Void
 
     var body: some View {
@@ -215,6 +222,18 @@ private struct MacSidebarPinnedActions: View {
             Divider()
                 .frame(height: 18)
                 .padding(.vertical, 8)
+
+            if showsAgentHistory {
+                MacSidebarPinnedIconButton(
+                    title: "settings_agent_history_title",
+                    icon: .robot,
+                    action: openAgentHistory
+                )
+
+                Divider()
+                    .frame(height: 18)
+                    .padding(.vertical, 8)
+            }
 
             MacSidebarPinnedIconButton(
                 title: "draft_box_title",

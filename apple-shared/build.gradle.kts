@@ -34,6 +34,7 @@ kotlin {
             projects.feature.login,
             projects.feature.subscription,
             projects.feature.tab,
+            projects.feature.agent,
         )
 
     listOf("iosArm64", "iosSimulatorArm64", "macosArm64")
@@ -53,7 +54,6 @@ kotlin {
 
                 if (appleTarget.name.startsWith("ios")) {
                     export(projects.social.nostr)
-                    export(projects.feature.agent)
                 }
             }
         }
@@ -73,6 +73,7 @@ kotlin {
                 api(projects.feature.login)
                 api(projects.feature.subscription)
                 api(projects.feature.tab)
+                api(projects.feature.agent)
                 implementation(libs.compose.runtime)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -84,7 +85,6 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 api(projects.social.nostr)
-                api(projects.feature.agent)
             }
         }
     }

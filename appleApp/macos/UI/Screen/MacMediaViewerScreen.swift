@@ -546,8 +546,8 @@ private struct MacZoomableScrollView<Content: View>: NSViewRepresentable {
         self.content = content()
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(magnification: $magnification)
+    func makeCoordinator() -> MacZoomableScrollCoordinator {
+        MacZoomableScrollCoordinator(magnification: $magnification)
     }
 
     func makeNSView(context: Context) -> FlareZoomScrollView {
@@ -604,209 +604,211 @@ private struct MacZoomableScrollView<Content: View>: NSViewRepresentable {
         min(max(scale, minimumMagnification), maximumMagnification)
     }
 
-    final class Coordinator {
-        private let magnification: Binding<CGFloat>
-        private let documentView = NSView()
-        private var hostingView: NSHostingView<Content>?
-        private var minimumMagnification = macMediaMinimumZoomScale
-        private var maximumMagnification = macMediaMaximumZoomScale
-        private(set) var currentMagnification = macMediaMinimumZoomScale
+}
 
-        init(magnification: Binding<CGFloat>) {
-            self.magnification = magnification
-            self.currentMagnification = magnification.wrappedValue
-            documentView.wantsLayer = true
-            documentView.layer?.backgroundColor = NSColor.clear.cgColor
+// Keep this coordinator non-generic to avoid a Swift 6.3 Release optimizer crash in deinit.
+private final class MacZoomableScrollCoordinator {
+    private let magnification: Binding<CGFloat>
+    private let documentView = NSView()
+    private var hostingView: NSHostingView<AnyView>?
+    private var minimumMagnification = macMediaMinimumZoomScale
+    private var maximumMagnification = macMediaMaximumZoomScale
+    private(set) var currentMagnification = macMediaMinimumZoomScale
+
+    init(magnification: Binding<CGFloat>) {
+        self.magnification = magnification
+        self.currentMagnification = magnification.wrappedValue
+        documentView.wantsLayer = true
+        documentView.layer?.backgroundColor = NSColor.clear.cgColor
+    }
+
+    func updateConfiguration(
+        minimumMagnification: CGFloat,
+        maximumMagnification: CGFloat
+    ) {
+        self.minimumMagnification = minimumMagnification
+        self.maximumMagnification = maximumMagnification
+    }
+
+    func install<Content: View>(content: Content, in scrollView: FlareZoomScrollView) {
+        let hostingView = NSHostingView(rootView: AnyView(content))
+        hostingView.autoresizingMask = [.width, .height]
+        hostingView.frame = documentView.bounds
+        hostingView.layer?.backgroundColor = NSColor.clear.cgColor
+        documentView.addSubview(hostingView)
+        self.hostingView = hostingView
+        scrollView.documentView = documentView
+        resizeDocument(to: scrollView.contentView.bounds.size, in: scrollView)
+    }
+
+    func update<Content: View>(content: Content, in scrollView: FlareZoomScrollView) {
+        hostingView?.rootView = AnyView(content)
+        resizeDocument(to: scrollView.contentView.bounds.size, in: scrollView)
+    }
+
+    func resizeDocument(to size: NSSize, in scrollView: FlareZoomScrollView) {
+        guard size.width > 0, size.height > 0 else { return }
+        layoutDocument(
+            viewportSize: size,
+            scale: currentMagnification,
+            in: scrollView,
+            centeredAt: nil
+        )
+    }
+
+    func magnify(
+        by delta: CGFloat,
+        in scrollView: FlareZoomScrollView,
+        anchoredAt point: NSPoint,
+        viewportOffset: NSPoint
+    ) {
+        let multiplier = max(0.2, 1 + delta)
+        setMagnification(
+            currentMagnification * multiplier,
+            in: scrollView,
+            centeredAt: point,
+            viewportOffset: viewportOffset,
+            publishesStateChange: true
+        )
+    }
+
+    func setMagnification(
+        _ scale: CGFloat,
+        in scrollView: FlareZoomScrollView,
+        publishesStateChange: Bool
+    ) {
+        setMagnification(
+            scale,
+            in: scrollView,
+            centeredAt: documentCenter(in: scrollView),
+            publishesStateChange: publishesStateChange
+        )
+    }
+
+    func toggleZoom(in scrollView: FlareZoomScrollView, centeredAt point: NSPoint) {
+        let nextScale = currentMagnification <= minimumMagnification + 0.01 ? 2 : minimumMagnification
+        setMagnification(
+            nextScale,
+            in: scrollView,
+            centeredAt: point,
+            publishesStateChange: true
+        )
+    }
+
+    private func setMagnification(
+        _ scale: CGFloat,
+        in scrollView: FlareZoomScrollView,
+        centeredAt point: NSPoint,
+        viewportOffset: NSPoint? = nil,
+        publishesStateChange: Bool
+    ) {
+        let clampedScale = clamped(scale)
+        guard abs(currentMagnification - clampedScale) > 0.005 else {
+            return
         }
 
-        func updateConfiguration(
-            minimumMagnification: CGFloat,
-            maximumMagnification: CGFloat
-        ) {
-            self.minimumMagnification = minimumMagnification
-            self.maximumMagnification = maximumMagnification
-        }
-
-        func install(content: Content, in scrollView: FlareZoomScrollView) {
-            let hostingView = NSHostingView(rootView: content)
-            hostingView.autoresizingMask = [.width, .height]
-            hostingView.frame = documentView.bounds
-            hostingView.layer?.backgroundColor = NSColor.clear.cgColor
-            documentView.addSubview(hostingView)
-            self.hostingView = hostingView
-            scrollView.documentView = documentView
-            resizeDocument(to: scrollView.contentView.bounds.size, in: scrollView)
-        }
-
-        func update(content: Content, in scrollView: FlareZoomScrollView) {
-            hostingView?.rootView = content
-            resizeDocument(to: scrollView.contentView.bounds.size, in: scrollView)
-        }
-
-        func resizeDocument(to size: NSSize, in scrollView: FlareZoomScrollView) {
-            guard size.width > 0, size.height > 0 else { return }
-            layoutDocument(
-                viewportSize: size,
-                scale: currentMagnification,
-                in: scrollView,
-                centeredAt: nil
-            )
-        }
-
-        func magnify(
-            by delta: CGFloat,
-            in scrollView: FlareZoomScrollView,
-            anchoredAt point: NSPoint,
-            viewportOffset: NSPoint
-        ) {
-            let multiplier = max(0.2, 1 + delta)
-            setMagnification(
-                currentMagnification * multiplier,
-                in: scrollView,
-                centeredAt: point,
-                viewportOffset: viewportOffset,
-                publishesStateChange: true
-            )
-        }
-
-        func setMagnification(
-            _ scale: CGFloat,
-            in scrollView: FlareZoomScrollView,
-            publishesStateChange: Bool
-        ) {
-            setMagnification(
-                scale,
-                in: scrollView,
-                centeredAt: documentCenter(in: scrollView),
-                publishesStateChange: publishesStateChange
-            )
-        }
-
-        func toggleZoom(in scrollView: FlareZoomScrollView, centeredAt point: NSPoint) {
-            let nextScale = currentMagnification <= minimumMagnification + 0.01 ? 2 : minimumMagnification
-            setMagnification(
-                nextScale,
-                in: scrollView,
-                centeredAt: point,
-                publishesStateChange: true
-            )
-        }
-
-        private func setMagnification(
-            _ scale: CGFloat,
-            in scrollView: FlareZoomScrollView,
-            centeredAt point: NSPoint,
-            viewportOffset: NSPoint? = nil,
-            publishesStateChange: Bool
-        ) {
-            let clampedScale = clamped(scale)
-            guard abs(currentMagnification - clampedScale) > 0.005 else {
-                return
-            }
-
-            let viewportSize = scrollView.contentView.bounds.size
-            guard viewportSize.width > 0, viewportSize.height > 0 else {
-                currentMagnification = clampedScale
-                if publishesStateChange {
-                    publishMagnification(clampedScale)
-                }
-                return
-            }
-
+        let viewportSize = scrollView.contentView.bounds.size
+        guard viewportSize.width > 0, viewportSize.height > 0 else {
             currentMagnification = clampedScale
-            layoutDocument(
-                viewportSize: viewportSize,
-                scale: clampedScale,
-                in: scrollView,
-                centeredAt: point,
-                viewportOffset: viewportOffset
-            )
-
             if publishesStateChange {
                 publishMagnification(clampedScale)
             }
+            return
         }
 
-        private func layoutDocument(
-            viewportSize: NSSize,
-            scale: CGFloat,
-            in scrollView: FlareZoomScrollView,
-            centeredAt point: NSPoint?,
-            viewportOffset: NSPoint? = nil
-        ) {
-            let oldDocumentSize = documentView.bounds.size
-            let oldVisibleRect = scrollView.contentView.bounds
-            let anchor = point ?? NSPoint(x: oldVisibleRect.midX, y: oldVisibleRect.midY)
-            let anchorRatio = CGPoint(
-                x: oldDocumentSize.width > 0 ? anchor.x / oldDocumentSize.width : 0.5,
-                y: oldDocumentSize.height > 0 ? anchor.y / oldDocumentSize.height : 0.5
-            )
-            let newDocumentSize = NSSize(
-                width: max(viewportSize.width, viewportSize.width * scale),
-                height: max(viewportSize.height, viewportSize.height * scale)
-            )
+        currentMagnification = clampedScale
+        layoutDocument(
+            viewportSize: viewportSize,
+            scale: clampedScale,
+            in: scrollView,
+            centeredAt: point,
+            viewportOffset: viewportOffset
+        )
 
-            documentView.frame = NSRect(origin: .zero, size: newDocumentSize)
-            hostingView?.frame = documentView.bounds
-
-            let newAnchor = NSPoint(
-                x: newDocumentSize.width * anchorRatio.x,
-                y: newDocumentSize.height * anchorRatio.y
-            )
-            let visibleOffset = clampedViewportOffset(
-                viewportOffset ?? NSPoint(x: viewportSize.width / 2, y: viewportSize.height / 2),
-                viewportSize: viewportSize
-            )
-            let proposedOrigin = NSPoint(
-                x: newAnchor.x - visibleOffset.x,
-                y: newAnchor.y - visibleOffset.y
-            )
-            scrollView.contentView.scroll(to: clampedVisibleOrigin(
-                proposedOrigin,
-                viewportSize: viewportSize,
-                documentSize: newDocumentSize
-            ))
-            scrollView.reflectScrolledClipView(scrollView.contentView)
-            scrollView.invalidateDragCursorRects()
-            scrollView.contentView.needsDisplay = true
+        if publishesStateChange {
+            publishMagnification(clampedScale)
         }
+    }
 
-        private func clampedVisibleOrigin(
-            _ origin: NSPoint,
-            viewportSize: NSSize,
-            documentSize: NSSize
-        ) -> NSPoint {
-            NSPoint(
-                x: min(max(origin.x, 0), max(documentSize.width - viewportSize.width, 0)),
-                y: min(max(origin.y, 0), max(documentSize.height - viewportSize.height, 0))
-            )
-        }
+    private func layoutDocument(
+        viewportSize: NSSize,
+        scale: CGFloat,
+        in scrollView: FlareZoomScrollView,
+        centeredAt point: NSPoint?,
+        viewportOffset: NSPoint? = nil
+    ) {
+        let oldDocumentSize = documentView.bounds.size
+        let oldVisibleRect = scrollView.contentView.bounds
+        let anchor = point ?? NSPoint(x: oldVisibleRect.midX, y: oldVisibleRect.midY)
+        let anchorRatio = CGPoint(
+            x: oldDocumentSize.width > 0 ? anchor.x / oldDocumentSize.width : 0.5,
+            y: oldDocumentSize.height > 0 ? anchor.y / oldDocumentSize.height : 0.5
+        )
+        let newDocumentSize = NSSize(
+            width: max(viewportSize.width, viewportSize.width * scale),
+            height: max(viewportSize.height, viewportSize.height * scale)
+        )
 
-        private func clampedViewportOffset(
-            _ offset: NSPoint,
-            viewportSize: NSSize
-        ) -> NSPoint {
-            NSPoint(
-                x: min(max(offset.x, 0), viewportSize.width),
-                y: min(max(offset.y, 0), viewportSize.height)
-            )
-        }
+        documentView.frame = NSRect(origin: .zero, size: newDocumentSize)
+        hostingView?.frame = documentView.bounds
 
-        private func documentCenter(in scrollView: FlareZoomScrollView) -> NSPoint {
-            let visibleRect = scrollView.contentView.bounds
-            return NSPoint(x: visibleRect.midX, y: visibleRect.midY)
-        }
+        let newAnchor = NSPoint(
+            x: newDocumentSize.width * anchorRatio.x,
+            y: newDocumentSize.height * anchorRatio.y
+        )
+        let visibleOffset = clampedViewportOffset(
+            viewportOffset ?? NSPoint(x: viewportSize.width / 2, y: viewportSize.height / 2),
+            viewportSize: viewportSize
+        )
+        let proposedOrigin = NSPoint(
+            x: newAnchor.x - visibleOffset.x,
+            y: newAnchor.y - visibleOffset.y
+        )
+        scrollView.contentView.scroll(to: clampedVisibleOrigin(
+            proposedOrigin,
+            viewportSize: viewportSize,
+            documentSize: newDocumentSize
+        ))
+        scrollView.reflectScrolledClipView(scrollView.contentView)
+        scrollView.invalidateDragCursorRects()
+        scrollView.contentView.needsDisplay = true
+    }
 
-        private func clamped(_ scale: CGFloat) -> CGFloat {
-            min(max(scale, minimumMagnification), maximumMagnification)
-        }
+    private func clampedVisibleOrigin(
+        _ origin: NSPoint,
+        viewportSize: NSSize,
+        documentSize: NSSize
+    ) -> NSPoint {
+        NSPoint(
+            x: min(max(origin.x, 0), max(documentSize.width - viewportSize.width, 0)),
+            y: min(max(origin.y, 0), max(documentSize.height - viewportSize.height, 0))
+        )
+    }
 
-        private func publishMagnification(_ scale: CGFloat) {
-            guard abs(magnification.wrappedValue - scale) > 0.005 else {
-                return
-            }
-            magnification.wrappedValue = scale
+    private func clampedViewportOffset(
+        _ offset: NSPoint,
+        viewportSize: NSSize
+    ) -> NSPoint {
+        NSPoint(
+            x: min(max(offset.x, 0), viewportSize.width),
+            y: min(max(offset.y, 0), viewportSize.height)
+        )
+    }
+
+    private func documentCenter(in scrollView: FlareZoomScrollView) -> NSPoint {
+        let visibleRect = scrollView.contentView.bounds
+        return NSPoint(x: visibleRect.midX, y: visibleRect.midY)
+    }
+
+    private func clamped(_ scale: CGFloat) -> CGFloat {
+        min(max(scale, minimumMagnification), maximumMagnification)
+    }
+
+    private func publishMagnification(_ scale: CGFloat) {
+        guard abs(magnification.wrappedValue - scale) > 0.005 else {
+            return
         }
+        magnification.wrappedValue = scale
     }
 }
 

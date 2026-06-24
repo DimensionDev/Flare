@@ -24,6 +24,7 @@ struct MacComposeScreen: View {
     @State private var nsTextView: NSTextView?
     @State private var pendingCursor: Int?
     @State private var closeController = MacComposeWindowCloseController()
+    @State private var mediaDropTargeted = false
 
     init(request: MacComposeWindowRequest) {
         self.request = request
@@ -48,6 +49,9 @@ struct MacComposeScreen: View {
             TextEditor(text: $viewModel.text)
                 .font(.body)
                 .scrollDisabled(true)
+                .onDrop(of: Self.mediaTransferTypes, isTargeted: $mediaDropTargeted) { providers in
+                    importMediaProviders(providers)
+                }
                 .introspect(.textEditor, on: .macOS(.v13, .v14, .v15, .v26, .v27)) { textView in
                     nsTextView = textView
                     applyCursorIfPossible()
@@ -111,6 +115,21 @@ struct MacComposeScreen: View {
             allowsMultipleSelection: true,
             onCompletion: importFiles
         )
+        .onDrop(of: Self.mediaTransferTypes, isTargeted: $mediaDropTargeted) { providers in
+            importMediaProviders(providers)
+        }
+        .onPasteCommand(of: Self.mediaTransferTypes) { providers in
+            _ = importMediaProviders(providers)
+        }
+        .overlay {
+            mediaDropOverlay
+        }
+        .background {
+            MacComposeMediaInputBridge(
+                canAcceptMedia: canAcceptMediaInput,
+                onPasteMedia: pasteMediaFromPasteboard
+            )
+        }
         .background {
             MacComposeWindowCloseInterceptor(
                 closeController: closeController,
@@ -156,6 +175,19 @@ struct MacComposeScreen: View {
             }
         }
     }
+
+    private static let mediaTransferTypes: [UTType] = [
+        .fileURL,
+        .image,
+        .movie,
+        .png,
+        .jpeg,
+        .tiff,
+        .gif,
+        .heic,
+        .mpeg4Movie,
+        .quickTimeMovie,
+    ]
 
     private var windowTitle: LocalizedStringKey {
         switch onEnum(of: presenter.state.composeStatus) {
@@ -213,29 +245,27 @@ struct MacComposeScreen: View {
 
     private var mediaSection: some View {
         VStack(alignment: .leading, spacing: 10) {
+            ScrollView(.horizontal, content: {
+                LazyHStack(spacing: 8) {
+                    ForEach(mediaItems) { item in
+                        MacComposeMediaTile(
+                            item: item,
+                            onAltTextChange: { value in
+                                updateAltText(for: item.id, value: value)
+                            },
+                            onRemove: {
+                                removeMedia(item)
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal)
+            })
+            .frame(height: 75)
             HStack {
-                Text("macos_compose_media")
-                    .font(.headline)
-
-                Spacer()
-
                 if presenter.state.mediaCanSensitive {
                     Toggle("compose_media_mark_sensitive", isOn: $sensitive)
                         .toggleStyle(.checkbox)
-                }
-            }
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 10)], spacing: 10) {
-                ForEach(mediaItems) { item in
-                    MacComposeMediaTile(
-                        item: item,
-                        onAltTextChange: { value in
-                            updateAltText(for: item.id, value: value)
-                        },
-                        onRemove: {
-                            removeMedia(item)
-                        }
-                    )
                 }
             }
         }
@@ -295,15 +325,46 @@ struct MacComposeScreen: View {
                     Image(fontAwesome: .image)
                 }
             }
-            .disabled(!presenter.state.mediaEnabled || mediaItems.count >= Int(presenter.state.mediaMaxCount))
+            .disabled(!canAcceptMediaInput)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
     }
 
+    @ViewBuilder
+    private var mediaDropOverlay: some View {
+        if mediaDropTargeted {
+            let canAccept = canAcceptMediaInput
+            ZStack {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.accentColor.opacity(canAccept ? 0.08 : 0.03))
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(
+                        canAccept ? Color.accentColor : Color.secondary,
+                        style: StrokeStyle(lineWidth: 2, dash: [7, 5])
+                    )
+                Image(systemName: canAccept ? "photo.badge.plus" : "nosign")
+                    .font(.system(size: 32, weight: .semibold))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(canAccept ? Color.accentColor : Color.secondary)
+            }
+            .padding(8)
+            .allowsHitTesting(false)
+        }
+    }
+
     private var hasDraftContent: Bool {
         viewModel.hasDraftContent ||
         !mediaItems.isEmpty
+    }
+
+    private var canAcceptMediaInput: Bool {
+        presenter.state.mediaEnabled &&
+        remainingMediaSlots > 0
+    }
+
+    private var remainingMediaSlots: Int {
+        max(Int(presenter.state.mediaMaxCount) - mediaItems.count, 0)
     }
 
     private var textMaxLength: Int? {
@@ -390,12 +451,48 @@ struct MacComposeScreen: View {
 
     private func importFiles(_ result: Result<[URL], Error>) {
         guard case .success(let urls) = result else { return }
-        let remaining = max(Int(presenter.state.mediaMaxCount) - mediaItems.count, 0)
-        let items = urls.prefix(remaining).compactMap(MacComposeMediaItem.init(url:))
-        if !items.isEmpty {
-            viewModel.pollViewModel.reset()
-            mediaItems.append(contentsOf: items)
+        appendMediaItems(urls.compactMap(MacComposeMediaItem.init(url:)))
+    }
+
+    private func importMediaProviders(_ providers: [NSItemProvider]) -> Bool {
+        guard canAcceptMediaInput, !providers.isEmpty else {
+            return false
         }
+
+        MacComposeMediaItem.loadItems(
+            from: providers,
+            maxCount: remainingMediaSlots
+        ) { items in
+            appendMediaItems(items)
+        }
+        return true
+    }
+
+    private func pasteMediaFromPasteboard() -> Bool {
+        guard canAcceptMediaInput else {
+            return false
+        }
+
+        let items = MacComposeMediaItem.loadItems(
+            from: .general,
+            maxCount: remainingMediaSlots
+        )
+        appendMediaItems(items)
+        return !items.isEmpty
+    }
+
+    private func appendMediaItems(_ items: [MacComposeMediaItem]) {
+        guard presenter.state.mediaEnabled, remainingMediaSlots > 0 else {
+            return
+        }
+
+        let accepted = Array(items.prefix(remainingMediaSlots))
+        guard !accepted.isEmpty else {
+            return
+        }
+
+        viewModel.pollViewModel.reset()
+        mediaItems.append(contentsOf: accepted)
     }
 
     private func removeMedia(_ item: MacComposeMediaItem) {
@@ -581,42 +678,51 @@ private struct MacComposeAccountAvatar: View {
 
 private struct MacComposeMediaTile: View {
     let item: MacComposeMediaItem
+    @State private var showPopOver = false
     let onAltTextChange: (String) -> Void
     let onRemove: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-
-                if let image = item.image {
-                    Image(nsImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    VStack(spacing: 6) {
-                        Image(systemName: item.type == .video ? "film" : "doc")
-                            .font(.title2)
-                        Text(item.fileName)
-                            .font(.caption)
-                            .lineLimit(1)
-                    }
-                    .foregroundStyle(.secondary)
-                    .padding(8)
+            if let image = item.image {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                VStack(spacing: 6) {
+                    Image(systemName: item.type == .video ? "film" : "doc")
+                        .font(.title2)
+                    Text(item.fileName)
+                        .font(.caption)
+                        .lineLimit(1)
+                }
+                .foregroundStyle(.secondary)
+                .padding(8)
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .contextMenu {
+            Button {
+                showPopOver = true
+            } label: {
+                Label {
+                    Text("macos_compose_alt_text")
+                } icon: {
+                    EmptyView()
                 }
             }
-            .frame(height: 96)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(alignment: .topTrailing) {
-                Button(action: onRemove) {
-                    Image(systemName: "xmark.circle.fill")
-                        .symbolRenderingMode(.hierarchical)
+            
+            Button(role: .destructive) {
+                onRemove()
+            } label: {
+                Label {
+                    Text("delete_button")
+                } icon: {
+                    Image(fontAwesome: .trash)
                 }
-                .buttonStyle(.plain)
-                .padding(5)
             }
-
+        }
+        .popover(isPresented: $showPopOver) {
             TextField(
                 "macos_compose_alt_text",
                 text: Binding(
@@ -624,6 +730,8 @@ private struct MacComposeMediaTile: View {
                     set: { value in onAltTextChange(value) }
                 )
             )
+            .padding()
+            .frame(minWidth: 300)
             .textFieldStyle(.roundedBorder)
         }
     }
@@ -635,6 +743,16 @@ private struct MacComposeMediaItem: Identifiable {
     let data: Data
     let type: FileType
     var altText = ""
+
+    init?(data: Data, fileName: String?, contentType: UTType?) {
+        guard !data.isEmpty else {
+            return nil
+        }
+
+        self.fileName = Self.normalizedFileName(fileName, contentType: contentType)
+        self.data = data
+        self.type = Self.fileType(for: contentType)
+    }
 
     init?(url: URL) {
         let didStartAccessing = url.startAccessingSecurityScopedResource()
@@ -650,6 +768,60 @@ private struct MacComposeMediaItem: Identifiable {
         self.fileName = url.lastPathComponent
         self.data = data
         self.type = MacComposeMediaItem.fileType(for: url)
+    }
+
+    static func loadItems(
+        from providers: [NSItemProvider],
+        maxCount: Int,
+        completion: @escaping ([MacComposeMediaItem]) -> Void
+    ) {
+        guard maxCount > 0 else {
+            completion([])
+            return
+        }
+
+        guard !providers.isEmpty else {
+            completion([])
+            return
+        }
+
+        let group = DispatchGroup()
+        let lock = NSLock()
+        var results = Array<MacComposeMediaItem?>(repeating: nil, count: providers.count)
+
+        for (index, provider) in providers.enumerated() {
+            group.enter()
+            provider.loadMacComposeMediaItem { item in
+                lock.lock()
+                results[index] = item
+                lock.unlock()
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            completion(Array(results.compactMap { $0 }.prefix(maxCount)))
+        }
+    }
+
+    static func loadItems(
+        from pasteboard: NSPasteboard,
+        maxCount: Int
+    ) -> [MacComposeMediaItem] {
+        guard maxCount > 0 else {
+            return []
+        }
+
+        let fileURLItems = pasteboard.fileURLs.compactMap(MacComposeMediaItem.init(url:))
+        if !fileURLItems.isEmpty {
+            return Array(fileURLItems.prefix(maxCount))
+        }
+
+        let dataItems =
+            pasteboard
+                .pasteboardItems?
+                .compactMap(MacComposeMediaItem.init(pasteboardItem:)) ?? []
+        return Array(dataItems.prefix(maxCount))
     }
 
     init?(draftMedia: UiDraftMedia) {
@@ -683,7 +855,12 @@ private struct MacComposeMediaItem: Identifiable {
     }
 
     private static func fileType(for url: URL) -> FileType {
-        let contentType = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType
+        let resourceContentType = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType
+        let contentType = resourceContentType ?? UTType(filenameExtension: url.pathExtension)
+        return fileType(for: contentType)
+    }
+
+    private static func fileType(for contentType: UTType?) -> FileType {
         if contentType?.conforms(to: .image) == true {
             return .image
         }
@@ -691,6 +868,234 @@ private struct MacComposeMediaItem: Identifiable {
             return .video
         }
         return .other
+    }
+
+    private static func normalizedFileName(_ fileName: String?, contentType: UTType?) -> String {
+        let fallbackExtension = contentType?.preferredFilenameExtension ?? "dat"
+        let fallbackName = "pasted-media-\(UUID().uuidString).\(fallbackExtension)"
+        let trimmed = fileName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lastPathComponent = trimmed.map { URL(fileURLWithPath: $0).lastPathComponent }
+        let candidate = lastPathComponent?.isEmpty == false ? lastPathComponent! : fallbackName
+
+        guard URL(fileURLWithPath: candidate).pathExtension.isEmpty,
+              let preferredExtension = contentType?.preferredFilenameExtension else {
+            return candidate
+        }
+        return "\(candidate).\(preferredExtension)"
+    }
+}
+
+private extension MacComposeMediaItem {
+    init?(pasteboardItem: NSPasteboardItem) {
+        guard let contentType = pasteboardItem.firstMediaContentType,
+              let data = pasteboardItem.data(forType: NSPasteboard.PasteboardType(contentType.identifier)) else {
+            return nil
+        }
+
+        self.init(
+            data: data,
+            fileName: nil,
+            contentType: contentType
+        )
+    }
+}
+
+private extension NSPasteboard {
+    var fileURLs: [URL] {
+        let objects =
+            readObjects(
+                forClasses: [NSURL.self],
+                options: [.urlReadingFileURLsOnly: true]
+            ) ?? []
+
+        return objects.compactMap { object in
+            switch object {
+            case let url as URL:
+                url.isFileURL ? url : nil
+            case let url as NSURL:
+                (url as URL).isFileURL ? url as URL : nil
+            default:
+                nil
+            }
+        }
+    }
+}
+
+private extension NSPasteboardItem {
+    var firstMediaContentType: UTType? {
+        let mediaTypes =
+            types
+                .compactMap { UTType($0.rawValue) }
+                .filter(\.isComposeMediaContentType)
+
+        return mediaTypes.first(where: { !$0.isAbstractComposeMediaContentType }) ?? mediaTypes.first
+    }
+}
+
+private extension UTType {
+    var isComposeMediaContentType: Bool {
+        conforms(to: .image) || conforms(to: .movie)
+    }
+
+    var isAbstractComposeMediaContentType: Bool {
+        self == .image || self == .movie
+    }
+}
+
+private extension NSItemProvider {
+    func loadMacComposeMediaItem(completion: @escaping (MacComposeMediaItem?) -> Void) {
+        if hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
+            loadFileURL { url in
+                if let url,
+                   let item = MacComposeMediaItem(url: url) {
+                    completion(item)
+                } else {
+                    self.loadMediaData(completion: completion)
+                }
+            }
+        } else {
+            loadMediaData(completion: completion)
+        }
+    }
+
+    private func loadFileURL(completion: @escaping (URL?) -> Void) {
+        loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, _ in
+            switch item {
+            case let url as URL:
+                completion(url.isFileURL ? url : nil)
+            case let url as NSURL:
+                let swiftURL = url as URL
+                completion(swiftURL.isFileURL ? swiftURL : nil)
+            case let data as Data:
+                completion(URL(dataRepresentation: data, relativeTo: nil))
+            case let data as NSData:
+                completion(URL(dataRepresentation: data as Data, relativeTo: nil))
+            case let string as String:
+                completion(Self.fileURL(from: string))
+            case let string as NSString:
+                completion(Self.fileURL(from: string as String))
+            default:
+                completion(nil)
+            }
+        }
+    }
+
+    private func loadMediaData(completion: @escaping (MacComposeMediaItem?) -> Void) {
+        guard let contentType = firstRegisteredMediaContentType else {
+            completion(nil)
+            return
+        }
+
+        loadDataRepresentation(forTypeIdentifier: contentType.identifier) { data, _ in
+            guard let data,
+                  let item =
+                    MacComposeMediaItem(
+                        data: data,
+                        fileName: self.suggestedName,
+                        contentType: contentType
+                    ) else {
+                completion(nil)
+                return
+            }
+            completion(item)
+        }
+    }
+
+    private var firstRegisteredMediaContentType: UTType? {
+        let mediaTypes =
+            registeredTypeIdentifiers
+            .compactMap(UTType.init)
+            .filter(\.isComposeMediaContentType)
+
+        return mediaTypes.first(where: { !$0.isAbstractComposeMediaContentType }) ?? mediaTypes.first
+    }
+
+    private static func fileURL(from value: String) -> URL? {
+        if let url = URL(string: value), url.isFileURL {
+            return url
+        }
+        return URL(fileURLWithPath: value)
+    }
+}
+
+private struct MacComposeMediaInputBridge: NSViewRepresentable {
+    let canAcceptMedia: Bool
+    let onPasteMedia: () -> Bool
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        context.coordinator.attach(to: view)
+        updateCoordinator(context.coordinator)
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        context.coordinator.attach(to: nsView)
+        updateCoordinator(context.coordinator)
+    }
+
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        coordinator.detach()
+    }
+
+    private func updateCoordinator(_ coordinator: Coordinator) {
+        coordinator.canAcceptMedia = canAcceptMedia
+        coordinator.onPasteMedia = onPasteMedia
+    }
+
+    final class Coordinator {
+        var canAcceptMedia = false
+        var onPasteMedia: () -> Bool = { false }
+        private weak var view: NSView?
+        private var eventMonitor: Any?
+
+        func attach(to view: NSView) {
+            self.view = view
+            guard eventMonitor == nil else {
+                return
+            }
+
+            eventMonitor =
+                NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                    guard let self,
+                          self.isPasteShortcut(event),
+                          self.isEventInComposeWindow(event),
+                          self.canAcceptMedia,
+                          self.onPasteMedia() else {
+                        return event
+                    }
+                    return nil
+                }
+        }
+
+        func detach() {
+            if let eventMonitor {
+                NSEvent.removeMonitor(eventMonitor)
+            }
+            eventMonitor = nil
+            view = nil
+        }
+
+        private func isPasteShortcut(_ event: NSEvent) -> Bool {
+            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            return flags == .command &&
+            event.charactersIgnoringModifiers?.lowercased() == "v"
+        }
+
+        private func isEventInComposeWindow(_ event: NSEvent) -> Bool {
+            guard let window = view?.window else {
+                return false
+            }
+
+            if let eventWindow = event.window {
+                return eventWindow === window
+            }
+            return NSApp.keyWindow === window
+        }
     }
 }
 

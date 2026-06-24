@@ -135,9 +135,7 @@ public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View 
                     Text("appearance_show_numbers_description", bundle: FlareAppleUILocalization.bundle)
                 }
             }
-            #if os(iOS)
             postActionLayoutLink()
-            #endif
         }
     }
 }

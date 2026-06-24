@@ -505,15 +505,32 @@ private struct MacAccountOrderButtons: View {
 }
 
 private struct MacAppearanceSettingsPane: View {
+    @State private var isPostActionLayoutPresented = false
+
     var body: some View {
         MacSettingsForm(
             title: "macos_settings_section_appearance",
             subtitle: "appearance_description"
         ) {
             AppearanceThemeSettingsSection()
-            AppearanceLayoutSettingsSection()
+            AppearanceLayoutSettingsSection {
+                MacSettingActionRow(
+                    "post_action_layout_title",
+                    subtitle: "post_action_layout_customize_description",
+                    buttonTitle: "macos_action_open",
+                    icon: .sliders
+                ) {
+                    isPostActionLayoutPresented = true
+                }
+            }
             AppearanceDisplaySettingsSection()
             AppearanceMediaSettingsSection()
+        }
+        .sheet(isPresented: $isPostActionLayoutPresented) {
+            NavigationStack {
+                MacPostActionLayoutScreen()
+            }
+            .frame(width: 920, height: 620)
         }
     }
 }

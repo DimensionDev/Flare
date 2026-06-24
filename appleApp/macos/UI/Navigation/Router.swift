@@ -70,7 +70,7 @@ struct Router: View {
                     }
                 )
             }
-            .frame(minWidth: 380, minHeight: 420)
+//            .frame(minWidth: 380, minHeight: 420)
         }
         .alert(alertRoute?.alertTitle ?? "", isPresented: Binding(
             get: { alertRoute != nil },
@@ -218,6 +218,7 @@ struct Router: View {
         case .serviceSelect,
                 .deepLinkAccountPicker,
                 .statusAddReaction,
+                .statusShareSheet,
                 .statusBlueskyReport,
                 .statusMisskeyReport,
                 .editUserList:

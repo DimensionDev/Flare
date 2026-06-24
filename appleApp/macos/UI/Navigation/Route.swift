@@ -33,6 +33,7 @@ enum Route: Hashable, Identifiable {
     case article(AccountType, MicroBlogKey)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
+    case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
     case statusBlueskyReport(AccountType, MicroBlogKey)
     case statusDeleteConfirm(AccountType, MicroBlogKey)
     case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
@@ -172,6 +173,14 @@ enum Route: Hashable, Identifiable {
             SearchScreen(accountType: accountType, initialQuery: query)
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+        case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
+            MacStatusShareSheet(
+                statusKey: statusKey,
+                accountType: accountType,
+                shareUrl: shareUrl,
+                fxShareUrl: fxShareUrl,
+                fixvxShareUrl: fixvxShareUrl
+            )
         case .statusBlueskyReport(let accountType, let statusKey):
             BlueskyReportSheet(accountType: accountType, statusKey: statusKey)
         case .statusMisskeyReport(let accountType, let userKey, let statusKey):
@@ -220,6 +229,9 @@ private struct MacArticleScreen: View {
             },
             onOpenMedia: { medias, index, preview in
                 onNavigate(.mediaRaw(medias, index, preview))
+            },
+            onShareArticle: { accountType, articleKey, shareUrl in
+                onNavigate(.statusShareSheet(accountType, articleKey, shareUrl, nil, nil))
             },
             onDownloadFile: downloadFile
         )
@@ -397,6 +409,8 @@ extension Route {
             .statusVVOComment(data.accountType, data.commentKey)
         case .vVOStatus(let data):
             .statusVVOStatus(data.accountType, data.statusKey)
+        case .shareSheet(let data):
+            .statusShareSheet(data.accountType, data.statusKey, data.shareUrl, data.fxShareUrl, data.fixvxShareUrl)
         default:
             .empty
         }

@@ -14,7 +14,13 @@ public struct TranslateStatusComponent: View {
             Image(fontAwesome: .language)
             switch data {
             case .failed: Image(fontAwesome: .circleExclamation)
-            case .translating: ProgressView().progressViewStyle(.circular).scaledToFit().frame(width: 12, height: 12)
+            case .translating: ProgressView()
+                    .progressViewStyle(.circular)
+                #if os(macOS)
+                    .scaleEffect(0.5)
+                #endif
+                    .scaledToFit()
+                    .frame(width: 12, height: 12)
             default: EmptyView()
             }
         }

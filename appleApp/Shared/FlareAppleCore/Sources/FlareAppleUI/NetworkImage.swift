@@ -28,6 +28,8 @@ public struct NetworkImage: View {
     public var body: some View {
         if data?.absoluteString.hasSuffix(".gif") == true {
             KFAnimatedImage(data)
+                .backgroundDecode()
+                .loadDiskFileSynchronously(false)
                 .fade(duration: 0.25)
                 .requestModifier({ request in
                     if let customHeader {
@@ -66,6 +68,8 @@ public struct NetworkImage: View {
             )
         } else {
             KFImage(data)
+                .backgroundDecode()
+                .loadDiskFileSynchronously(false)
                 .resizable()
                 .fade(duration: 0.25)
                 .requestModifier({ request in
@@ -131,6 +135,8 @@ private struct CrossfadeNetworkImage: View {
             }
 
             KFImage(data)
+                .backgroundDecode()
+                .loadDiskFileSynchronously(false)
                 .resizable()
                 .requestModifier { request in
                     if let customHeader {

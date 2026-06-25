@@ -33,6 +33,8 @@ public struct RichText: View {
                 case let imageContent as PlatformTextBlockImageContent:
                     if let url = URL(string: imageContent.url) {
                         KFImage(url)
+                            .backgroundDecode()
+                            .loadDiskFileSynchronously(false)
                             .resizable()
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 12))

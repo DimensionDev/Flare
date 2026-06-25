@@ -107,10 +107,14 @@ targets:
       - package: GSPlayer
       - package: ChatLayout
       - target: FlareAppleCore
-        embed: true
         destinationFilters: [iOS]
       - target: FlareAppleUI
+        destinationFilters: [iOS]
+      - target: FlareAppleResource
         embed: true
+        link: false
+        copy:
+          destination: resources
         destinationFilters: [iOS]
     preBuildScripts:
       - name: Compile Kotlin
@@ -144,10 +148,14 @@ targets:
       - package: swiftui-introspect
         product: SwiftUIIntrospect
       - target: FlareAppleCore
-        embed: true
         destinationFilters: [macOS]
       - target: FlareAppleUI
+        destinationFilters: [macOS]
+      - target: FlareAppleResource
         embed: true
+        link: false
+        copy:
+          destination: resources
         destinationFilters: [macOS]
     preBuildScripts:
       - name: Compile Kotlin
@@ -177,12 +185,27 @@ targets:
         PROVISIONING_PROFILE_SPECIFIER: "$(NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER)"
         REGISTER_APP_GROUPS: YES
 
+  FlareAppleResource:
+    type: bundle
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Shared/FlareAppleResource/Resources
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleresource
+        PRODUCT_NAME: FlareAppleResource
+        SKIP_INSTALL: YES
+
   FlareAppleCore:
-    type: framework
+    type: framework.static
     platform: auto
     supportedDestinations: [iOS, macOS]
     sources:
       - path: Shared/FlareAppleCore/Sources/FlareAppleCore
+        excludes:
+          - Resources/**
     preBuildScripts:
       - name: Compile Kotlin
         basedOnDependencyAnalysis: false
@@ -205,11 +228,13 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.applecore
 
   FlareAppleUI:
-    type: framework
+    type: framework.static
     platform: auto
     supportedDestinations: [iOS, macOS]
     sources:
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI
+        excludes:
+          - Resources/**
     dependencies:
       - package: Kingfisher
       - package: iOS-Backports

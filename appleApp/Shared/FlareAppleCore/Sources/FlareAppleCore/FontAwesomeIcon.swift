@@ -109,11 +109,9 @@ public enum FontAwesomeIcon: String, CaseIterable, Hashable, Identifiable, Senda
     }
 }
 
-private final class FontAwesomeResourceToken {}
-
 private extension Bundle {
     static var flareFontAwesomeResources: Bundle {
-        Bundle(for: FontAwesomeResourceToken.self)
+        FlareAppleResource.bundle
     }
 }
 

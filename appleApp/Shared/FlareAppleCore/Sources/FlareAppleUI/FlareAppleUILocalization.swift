@@ -1,9 +1,8 @@
 import Foundation
-
-private final class FlareAppleUIBundleToken {}
+import FlareAppleCore
 
 enum FlareAppleUILocalization {
-    static let bundle = Bundle(for: FlareAppleUIBundleToken.self)
+    static let bundle = FlareAppleResource.bundle
 
     static func string(
         _ key: String,

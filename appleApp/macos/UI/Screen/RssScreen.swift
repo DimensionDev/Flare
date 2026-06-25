@@ -55,7 +55,7 @@ struct RssScreen: View {
             .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 220, ideal: 280, max: 360)
             .toolbar {
-                ToolbarItemGroup(placement: .navigation) {
+                ToolbarItemGroup(placement: .primaryAction) {
                     Button {
                         showAddSheet = true
                     } label: {

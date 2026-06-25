@@ -102,6 +102,7 @@ public struct StatusView: View {
             } else {
                 effectiveLineLimit
             }
+        let canExpandLineLimitedContent = contentLineLimit != nil && !isDetail && !textExpanded && showExpandTextButton
 
         VStack(
             alignment: .leading,
@@ -234,7 +235,7 @@ public struct StatusView: View {
                                         textOverflows = overflows
                                     }
                                 }
-                                if textOverflows, !shouldExpandTextByDefault, !isDetail, !textExpanded, showExpandTextButton {
+                                if textOverflows, canExpandLineLimitedContent {
                                     Button {
                                         withAnimation {
                                             textExpanded = true

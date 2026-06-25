@@ -26,10 +26,14 @@ struct TimelineScreen: View {
         )
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
         .overlay(alignment: .top) {
-            if presenter.state.isRefreshing {
-                ProgressView()
-                    .progressViewStyle(.linear)
-                    .padding(.horizontal)
+            if #available(macOS 27.0, *) {
+                
+            } else {
+                if presenter.state.isRefreshing {
+                    ProgressView()
+                        .progressViewStyle(.linear)
+                        .padding(.horizontal)
+                }
             }
         }
         .refreshable {

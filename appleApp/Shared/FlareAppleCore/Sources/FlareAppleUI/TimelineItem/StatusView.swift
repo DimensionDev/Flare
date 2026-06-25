@@ -292,10 +292,10 @@ public struct StatusView: View {
                         }
 
                         if hasQuotes, !isQuote {
-                            VStack {
-                                ForEach(quotes, id: \.itemKey) { quote in
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(Array(quotes.enumerated()), id: \.offset) { index, quote in
                                     StatusView(data: quote, isQuote: true, forceHideActions: true)
-                                    if quotes.last != quote {
+                                    if index < quotes.count - 1 {
                                         Divider()
                                     }
                                 }

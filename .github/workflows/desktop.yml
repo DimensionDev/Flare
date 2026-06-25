@@ -122,6 +122,29 @@ jobs:
           cp "$RUNNER_TEMP/native-macos.provisionprofile" "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.provisionprofile"
         env:
           MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
+      - name: Resolve native macOS signing identities
+        # if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          security find-identity -v -p codesigning
+          security find-identity -v -p basic
+
+          app_identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
+          installer_identity=$(security find-identity -v -p basic | sed -n 's/.*"\(Developer ID Installer: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
+
+          if [ -z "$app_identity" ]; then
+            echo "No Developer ID Application identity found for team 7LFDZ96332."
+            exit 1
+          fi
+
+          if [ -z "$installer_identity" ]; then
+            echo "No Developer ID Installer identity found for team 7LFDZ96332."
+            exit 1
+          fi
+
+          echo "NATIVE_MACOS_APP_SIGNING_IDENTITY=$app_identity" >> "$GITHUB_ENV"
+          echo "NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY=$installer_identity" >> "$GITHUB_ENV"
       - name: Generate Xcode project
         run: xcodegen generate --spec appleApp/project.yml
       - name: Resolve native macOS version
@@ -174,6 +197,10 @@ jobs:
             -skipPackagePluginValidation \
             -skipMacroValidation \
             DEVELOPMENT_TEAM=7LFDZ96332 \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="$NATIVE_MACOS_APP_SIGNING_IDENTITY" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            PROVISIONING_PROFILE="" \
             GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" \
             JAVA_OPTS="-Xmx16G" \
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
@@ -192,14 +219,7 @@ jobs:
           mkdir -p appleApp/build/native-macos/pkg
           safe_ref="${GITHUB_REF_NAME//\//-}"
           pkg_path="appleApp/build/native-macos/pkg/Flare-native-macOS-$safe_ref.pkg"
-          installer_identity=$(security find-identity -v -p basic | sed -n 's/.*"\(Developer ID Installer: SUJITEKU LIMITED LIABILITY CO\. (7LFDZ96332)\)".*/\1/p' | head -n 1)
-
-          if [ -n "$installer_identity" ]; then
-            productbuild --sign "$installer_identity" --component "$app_path" /Applications "$pkg_path"
-          else
-            echo "No Developer ID Installer identity found; creating unsigned pkg."
-            productbuild --component "$app_path" /Applications "$pkg_path"
-          fi
+          productbuild --sign "$NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY" --component "$app_path" /Applications "$pkg_path"
       - name: Upload native macOS package
         # if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v6

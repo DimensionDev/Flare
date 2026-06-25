@@ -119,7 +119,10 @@ jobs:
           base64 -d -i "$RUNNER_TEMP/native-macos.provisionprofile.b64" > "$RUNNER_TEMP/native-macos.provisionprofile"
           security cms -D -i "$RUNNER_TEMP/native-macos.provisionprofile" > "$RUNNER_TEMP/native-macos-profile.plist"
           profile_uuid=$(/usr/libexec/PlistBuddy -c "Print UUID" "$RUNNER_TEMP/native-macos-profile.plist")
+          profile_name=$(/usr/libexec/PlistBuddy -c "Print Name" "$RUNNER_TEMP/native-macos-profile.plist")
           cp "$RUNNER_TEMP/native-macos.provisionprofile" "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.provisionprofile"
+          echo "NATIVE_MACOS_PROVISIONING_PROFILE=$profile_uuid" >> "$GITHUB_ENV"
+          echo "NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER=$profile_name" >> "$GITHUB_ENV"
         env:
           MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
       - name: Resolve native macOS signing identities
@@ -130,16 +133,16 @@ jobs:
           security find-identity -v -p codesigning
           security find-identity -v -p basic
 
-          app_identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
-          installer_identity=$(security find-identity -v -p basic | sed -n 's/.*"\(Developer ID Installer: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
+          app_identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(3rd Party Mac Developer Application: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
+          installer_identity=$(security find-identity -v -p basic | sed -n 's/.*"\(3rd Party Mac Developer Installer: .* (7LFDZ96332)\)".*/\1/p' | head -n 1)
 
           if [ -z "$app_identity" ]; then
-            echo "No Developer ID Application identity found for team 7LFDZ96332."
+            echo "No 3rd Party Mac Developer Application identity found for team 7LFDZ96332."
             exit 1
           fi
 
           if [ -z "$installer_identity" ]; then
-            echo "No Developer ID Installer identity found for team 7LFDZ96332."
+            echo "No 3rd Party Mac Developer Installer identity found for team 7LFDZ96332."
             exit 1
           fi
 
@@ -199,8 +202,8 @@ jobs:
             DEVELOPMENT_TEAM=7LFDZ96332 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="$NATIVE_MACOS_APP_SIGNING_IDENTITY" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            PROVISIONING_PROFILE="" \
+            PROVISIONING_PROFILE_SPECIFIER="$NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER" \
+            PROVISIONING_PROFILE="$NATIVE_MACOS_PROVISIONING_PROFILE" \
             GRADLE_JVM_ARGS="-Xmx16G -Dfile.encoding=UTF-8" \
             JAVA_OPTS="-Xmx16G" \
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \

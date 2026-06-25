@@ -192,8 +192,11 @@ targets:
     sources:
       - path: Shared/FlareAppleResource/Resources
     settings:
+      groups:
+        - appVersion
       base:
-        GENERATE_INFOPLIST_FILE: YES
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Shared/FlareAppleResource/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleresource
         PRODUCT_NAME: FlareAppleResource
         SKIP_INSTALL: YES

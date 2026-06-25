@@ -85,7 +85,6 @@ jobs:
 
   build-native-macos:
     runs-on: [macos-26]
-    timeout-minutes: 60
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
 

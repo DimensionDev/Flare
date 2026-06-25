@@ -33,7 +33,7 @@ public struct RichText: View {
                 case let imageContent as PlatformTextBlockImageContent:
                     if let url = URL(string: imageContent.url) {
                         KFImage(url)
-                            .backgroundDecode()
+                            .flareBackgroundDecodeIfSupported()
                             .loadDiskFileSynchronously(false)
                             .resizable()
                             .scaledToFit()

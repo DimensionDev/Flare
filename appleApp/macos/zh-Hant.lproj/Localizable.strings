@@ -425,6 +425,8 @@
 "notification_compose_progress" = "正在傳送貼文";
 "notification_compose_success" = "貼文已傳送";
 "notification_compose_error" = "貼文傳送失敗";
+"notification_login_expired" = "登入已過期";
+"notification_login_expired %@" = "帳戶 %@ 的登入已過期";
 "notification_download_file_started" = "已開始下載";
 "notification_save_file_success" = "已儲存到檔案";
 "notification_save_file_error" = "檔案儲存失敗";

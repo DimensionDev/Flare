@@ -1,9 +1,17 @@
+import Combine
 import Foundation
 import KotlinSharedUI
 import UserNotifications
 
-final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificationCenterDelegate {
+struct LoginExpiredToast: Identifiable {
+    let id = UUID()
+    let accountKey: String?
+}
+
+final class SwiftInAppNotification: NSObject, ObservableObject, InAppNotification, UNUserNotificationCenterDelegate {
     static let shared = SwiftInAppNotification()
+
+    @Published private(set) var loginExpiredToast: LoginExpiredToast?
 
     private let notificationCenter = UNUserNotificationCenter.current()
     private var progressNotifications = Set<String>()
@@ -14,6 +22,15 @@ final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificat
     }
 
     func onError(message: Message, throwable: KotlinThrowable) {
+        switch message {
+        case .loginExpired:
+            progressNotifications.remove(messageKey(for: message))
+            showLoginExpiredToast(accountKey: (throwable as? LoginExpiredException).map { "\($0.accountKey)" })
+            return
+        default:
+            break
+        }
+
         guard shouldDeliverSystemNotification(for: message) else { return }
         progressNotifications.remove(messageKey(for: message))
         deliverNotification(
@@ -87,6 +104,25 @@ final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificat
 
     func finishProgress(identifier: String) {
         progressNotifications.remove(identifier)
+    }
+
+    func dismissLoginExpiredToast(id: UUID? = nil) {
+        guard id == nil || loginExpiredToast?.id == id else { return }
+        publishLoginExpiredToast(nil)
+    }
+
+    private func showLoginExpiredToast(accountKey: String?) {
+        publishLoginExpiredToast(LoginExpiredToast(accountKey: accountKey))
+    }
+
+    private func publishLoginExpiredToast(_ toast: LoginExpiredToast?) {
+        if Thread.isMainThread {
+            loginExpiredToast = toast
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.loginExpiredToast = toast
+            }
+        }
     }
 
     nonisolated func userNotificationCenter(

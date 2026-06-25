@@ -29,7 +29,6 @@ struct TimelineScreen: View {
             if presenter.state.isRefreshing {
                 ProgressView()
                     .progressViewStyle(.linear)
-                    .ignoresSafeArea()
                     .padding(.horizontal)
             }
         }

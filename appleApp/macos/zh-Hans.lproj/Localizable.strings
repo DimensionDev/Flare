@@ -425,6 +425,8 @@
 "notification_compose_progress" = "正在发送帖子";
 "notification_compose_success" = "帖子已发送";
 "notification_compose_error" = "帖子发送失败";
+"notification_login_expired" = "登录已过期";
+"notification_login_expired %@" = "账户 %@ 的登录已过期";
 "notification_download_file_started" = "已开始下载";
 "notification_save_file_success" = "已保存到文件";
 "notification_save_file_error" = "文件保存失败";

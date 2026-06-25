@@ -16,6 +16,7 @@ struct RootView: View {
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @ObservedObject private var inAppNotification = SwiftInAppNotification.shared
     @State private var selectedTab: Route?
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
@@ -157,6 +158,14 @@ struct RootView: View {
                             }
                         }
                     }
+                    .overlay(alignment: .top) {
+                        LoginExpiredToastOverlay(
+                            toast: inAppNotification.loginExpiredToast,
+                            onDismiss: { id in
+                                inAppNotification.dismissLoginExpiredToast(id: id)
+                            }
+                        )
+                    }
             }
         }
         .introspect(.navigationSplitView, on: .macOS(.v13, .v14, .v15, .v26, .v27)) { splitview in
@@ -191,6 +200,87 @@ private struct HomeSidebarTabEditor: Identifiable {
     let id = UUID()
     let tab: UiTimelineTabItem
     let onSave: (UiTimelineTabItem) -> Void
+}
+
+private struct LoginExpiredToastOverlay: View {
+    let toast: LoginExpiredToast?
+    let onDismiss: (UUID) -> Void
+
+    @State private var showNotification = false
+
+    var body: some View {
+        Group {
+            if let toast, showNotification {
+                LoginExpiredToastView(accountKey: toast.accountKey)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onTapGesture {
+                    dismiss(toast)
+                }
+            }
+        }
+        .padding(.top, 14)
+        .padding(.horizontal, 16)
+        .task(id: toast?.id) {
+            guard toast != nil else {
+                showNotification = false
+                return
+            }
+
+            withAnimation {
+                showNotification = true
+            }
+
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            guard !Task.isCancelled else { return }
+            guard let toast else { return }
+            dismiss(toast)
+        }
+    }
+
+    private func dismiss(_ toast: LoginExpiredToast) {
+        withAnimation {
+            showNotification = false
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: 180_000_000)
+            guard !Task.isCancelled else { return }
+            onDismiss(toast.id)
+        }
+    }
+}
+
+private struct LoginExpiredToastView: View {
+    let accountKey: String?
+
+    private var message: String {
+        guard let accountKey, !accountKey.isEmpty else {
+            return NSLocalizedString("notification_login_expired", comment: "")
+        }
+
+        return String.localizedStringWithFormat(
+            NSLocalizedString("notification_login_expired %@", comment: ""),
+            accountKey
+        )
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(fontAwesome: .circleExclamation)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.red)
+                .frame(width: 20, height: 20)
+
+            Text(message)
+                .font(.callout)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .frame(maxWidth: 420, alignment: .leading)
+        .background(.background, in: Capsule())
+        .contentShape(Capsule())
+        .shadow(color: .black.opacity(0.18), radius: 8, y: 4)
+    }
 }
 
 private struct MacSidebarPinnedActions: View {

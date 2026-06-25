@@ -425,6 +425,8 @@
 "notification_compose_progress" = "Sending post";
 "notification_compose_success" = "Post sent";
 "notification_compose_error" = "Failed to send post";
+"notification_login_expired" = "Login expired";
+"notification_login_expired %@" = "Login expired for %@";
 "notification_download_file_started" = "Download started";
 "notification_save_file_success" = "Saved to Files";
 "notification_save_file_error" = "Failed to save file";

@@ -28,7 +28,7 @@ public struct NetworkImage: View {
     public var body: some View {
         if data?.absoluteString.hasSuffix(".gif") == true {
             KFAnimatedImage(data)
-                .backgroundDecode()
+                .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .fade(duration: 0.25)
                 .requestModifier({ request in
@@ -68,7 +68,7 @@ public struct NetworkImage: View {
             )
         } else {
             KFImage(data)
-                .backgroundDecode()
+                .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .resizable()
                 .fade(duration: 0.25)
@@ -135,7 +135,7 @@ private struct CrossfadeNetworkImage: View {
             }
 
             KFImage(data)
-                .backgroundDecode()
+                .flareBackgroundDecodeIfSupported()
                 .loadDiskFileSynchronously(false)
                 .resizable()
                 .requestModifier { request in
@@ -227,6 +227,16 @@ private struct CrossfadeNetworkImage: View {
             return
         }
         onProgress?(min(max(Double(receivedSize) / Double(totalSize), 0), 1))
+    }
+}
+
+extension KFImageProtocol {
+    func flareBackgroundDecodeIfSupported() -> Self {
+        #if os(macOS)
+        return self
+        #else
+        return backgroundDecode()
+        #endif
     }
 }
 

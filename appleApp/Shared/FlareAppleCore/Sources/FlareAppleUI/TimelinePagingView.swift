@@ -140,7 +140,12 @@ private struct TimelinePagingRowView: View {
                 AdaptiveTimelineCard(index: row.index, totalCount: totalCount) {
                     TimelineView(data: item, detailStatusKey: detailStatusKey)
                         .padding(.horizontal)
+                        #if os(macOS)
+                        .padding(.top, 12)
+                        .padding(.bottom, 8)
+                        #else
                         .padding(.vertical, 12)
+                        #endif
                 }
             } else {
                 AdaptiveTimelineCard(index: row.index, totalCount: totalCount) {

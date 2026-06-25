@@ -329,9 +329,13 @@ public struct StatusView: View {
 
                         if (postActionStyle != .hidden || isDetail) && !forceHideActions {
                             StatusActionsView(data: actions, useText: false)
+                            #if os(macOS)
+                                .font(isDetail ? .body : .callout)
+                            #else
                                 .font(isDetail ? .body : .footnote)
-                                .foregroundStyle(isDetail ? .primary : .secondary)
                                 .padding(.top, 4)
+                            #endif
+                                .foregroundStyle(isDetail ? .primary : .secondary)
                         }
                     }
                 }

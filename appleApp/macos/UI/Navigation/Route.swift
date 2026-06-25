@@ -221,6 +221,7 @@ enum Route: Hashable, Identifiable {
             )
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+                .frame(width: 400, height: 300)
         case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
             MacStatusShareSheet(
                 statusKey: statusKey,

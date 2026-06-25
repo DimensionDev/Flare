@@ -16,7 +16,11 @@ public struct StatusActionsView: View {
     @Environment(\.timelineAppearance.showNumbers) private var showNumbers
     @Environment(\.timelineAppearance.postActionLayout) private var postActionLayout
     @Environment(\.openURL) private var openURL
+    #if os(macOS)
+    @ScaledMetric(relativeTo: .callout) private var fontSize = 16
+    #else
     @ScaledMetric(relativeTo: .footnote) private var fontSize = 13
+    #endif
     private let data: [ActionMenu]
     private let useText: Bool
     private let allowSpacer: Bool

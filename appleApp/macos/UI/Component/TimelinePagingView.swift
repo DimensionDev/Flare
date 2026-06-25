@@ -215,7 +215,12 @@ private struct MacTimelineMasonryRowView: View {
                 }
             }
             .padding(.horizontal)
+            #if os(macOS)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            #else
             .padding(.vertical, 12)
+            #endif
         }
         .onAppear {
             onDisplay(row.index)

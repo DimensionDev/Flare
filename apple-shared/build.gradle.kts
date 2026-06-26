@@ -75,7 +75,9 @@ kotlin {
                 api(projects.feature.tab)
                 api(projects.feature.agent)
                 implementation(libs.compose.runtime)
+// START Non-FOSS component
                 implementation(libs.crashkios.crashlytics)
+// END Non-FOSS component
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

@@ -258,7 +258,7 @@ private fun PixivIllust.renderContent(): String =
         }
     }
 
-private fun PixivIllust.toUiMedia(): List<UiMedia> {
+internal fun PixivIllust.toUiMedia(): List<UiMedia> {
     val headers = persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)
     return if (metaPages.isNotEmpty()) {
         metaPages.mapNotNull { page ->
@@ -276,6 +276,7 @@ private fun PixivIllust.toUiMedia(): List<UiMedia> {
                 height = height.toFloat(),
                 sensitive = xRestrict > 0 || sanityLevel >= 6,
                 headers = headers,
+                preferredOriginalUrl = metaSinglePage?.originalImageUrl,
             )?.let(::listOf)
             .orEmpty()
     }
@@ -286,8 +287,9 @@ private fun dev.dimension.flare.data.network.pixiv.model.PixivImageUrls.toUiImag
     height: Float,
     sensitive: Boolean,
     headers: kotlinx.collections.immutable.ImmutableMap<String, String>,
+    preferredOriginalUrl: String? = null,
 ): UiMedia.Image? {
-    val url = original ?: large ?: medium ?: squareMedium ?: return null
+    val url = preferredOriginalUrl?.takeIf { it.isNotBlank() } ?: original ?: large ?: medium ?: squareMedium ?: return null
     return UiMedia.Image(
         url = url,
         previewUrl = medium ?: squareMedium ?: url,

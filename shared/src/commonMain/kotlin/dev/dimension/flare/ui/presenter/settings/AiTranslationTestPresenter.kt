@@ -30,15 +30,13 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("aiTranslationTest")
 public class AiTranslationTestPresenter :
-    PresenterBase<AiTranslationTestPresenter.State>(),
-    KoinComponent {
-    private val appDataStore by inject<AppDataStore>()
-    private val aiCompletionService by inject<AiCompletionService>()
+    PresenterBase<AiTranslationTestPresenter.State>() {
+    private val appDataStore by koinInject<AppDataStore>()
+    private val aiCompletionService by koinInject<AiCompletionService>()
 
     @Immutable
     public interface State {

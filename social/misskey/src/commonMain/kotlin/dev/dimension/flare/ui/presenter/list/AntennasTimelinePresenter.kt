@@ -8,15 +8,13 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class AntennasTimelinePresenter(
     private val accountType: AccountType,
     private val id: String,
-) : TimelinePresenter(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : TimelinePresenter() {
+    private val accountService: AccountService by koinInject()
 
     override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         accountService.accountServiceFlow(accountType).map { service ->

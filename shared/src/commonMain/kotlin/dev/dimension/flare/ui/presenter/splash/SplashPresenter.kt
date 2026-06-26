@@ -12,15 +12,13 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class SplashPresenter(
     private val toHome: () -> Unit,
     private val toLogin: () -> Unit,
-) : PresenterBase<SplashType>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<SplashType>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): SplashType {

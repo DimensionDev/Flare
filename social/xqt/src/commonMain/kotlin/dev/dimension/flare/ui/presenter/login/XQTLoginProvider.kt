@@ -23,8 +23,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 private const val LOGIN_ACTION = "login"
 
@@ -75,9 +74,8 @@ public data object XQTLoginProvider : LoginPlatformProvider {
 
 private class XQTWebCookieLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
     private val _state = MutableStateFlow(state())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
 

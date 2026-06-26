@@ -19,16 +19,14 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class ImportOPMLPresenter(
     private val opmlContent: String,
     private val fetchIcon: suspend (String) -> String? = { RssService.fetchIcon(it) },
-) : PresenterBase<ImportOPMLPresenter.State>(),
-    KoinComponent {
-    private val subscriptionRepository: SubscriptionRepository by inject()
+) : PresenterBase<ImportOPMLPresenter.State>() {
+    private val subscriptionRepository: SubscriptionRepository by koinInject()
 
     @Immutable
     public interface State {

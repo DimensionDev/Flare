@@ -17,18 +17,16 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class PostEventHandler(
     private val accountType: AccountType,
     private val handler: Handler,
-) : KoinComponent,
-    DatabaseUpdater {
-    private val coroutineScope: CoroutineScope by inject()
-    private val database: CacheDatabase by inject()
+) : DatabaseUpdater {
+    private val coroutineScope: CoroutineScope by koinInject()
+    private val database: CacheDatabase by koinInject()
     private val dbAccountType = accountType as DbAccountType
 
     public interface Handler {

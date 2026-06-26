@@ -18,16 +18,14 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 public class NotificationBadgePresenter(
     private val accountType: AccountType,
     private val autoRefresh: Boolean = true,
-) : PresenterBase<NotificationBadgeState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<NotificationBadgeState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     private val countFlow by lazy {
         accountServiceFlow(

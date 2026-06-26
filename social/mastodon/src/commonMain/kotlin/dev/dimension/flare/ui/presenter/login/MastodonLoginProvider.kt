@@ -32,8 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public data object MastodonLoginProvider : LoginPlatformProvider {
@@ -131,10 +130,9 @@ public data object MastodonLoginProvider : LoginPlatformProvider {
 
 private class MastodonOAuthLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val pendingRepository: PlatformOAuthPendingRepository by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
+    private val pendingRepository: PlatformOAuthPendingRepository by koinInject()
     private val _state = MutableStateFlow(oauthState())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
 

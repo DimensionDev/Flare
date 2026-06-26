@@ -7,8 +7,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.translation.HtmlArticleTranslationService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter that translates the HTML content of an RSS article
@@ -20,9 +19,8 @@ public class RssDetailTranslatePresenter(
     private val htmlContent: String,
     private val title: String,
     private val targetLanguage: String = Locale.language,
-) : PresenterBase<RssDetailTranslatePresenter.State>(),
-    KoinComponent {
-    private val translationService: HtmlArticleTranslationService by inject()
+) : PresenterBase<RssDetailTranslatePresenter.State>() {
+    private val translationService: HtmlArticleTranslationService by koinInject()
 
     @Immutable
     public interface State {

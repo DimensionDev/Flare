@@ -9,8 +9,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for retrieving list timeline.
@@ -18,9 +17,8 @@ import org.koin.core.component.inject
 public class ListTimelinePresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : TimelinePresenter(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : TimelinePresenter() {
+    private val accountRepository: AccountRepository by koinInject()
 
     override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         accountServiceFlow(

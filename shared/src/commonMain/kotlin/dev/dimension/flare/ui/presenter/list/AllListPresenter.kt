@@ -18,8 +18,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Retrieving lists.
@@ -27,9 +26,8 @@ import org.koin.core.component.inject
  */
 public class AllListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<AllListState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<AllListState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): AllListState {

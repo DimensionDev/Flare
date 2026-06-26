@@ -24,8 +24,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -34,9 +33,9 @@ public class ListMemberHandler(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,
     private val loader: ListMemberLoader,
-) : KoinComponent {
+)  {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
-    private val database: CacheDatabase by inject()
+    private val database: CacheDatabase by koinInject()
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 

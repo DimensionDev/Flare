@@ -16,15 +16,13 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class EditTabPresenter(
     private val tabItem: UiTimelineTabItem,
     private val localizedString: suspend (UiStrings) -> String = { it.name },
-) : PresenterBase<EditTabPresenter.State>(),
-    KoinComponent {
-    private val timelineResolver: TimelineResolver by inject()
+) : PresenterBase<EditTabPresenter.State>() {
+    private val timelineResolver: TimelineResolver by koinInject()
 
     public interface State {
         public val availableIcons: ImmutableList<IconType>

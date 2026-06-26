@@ -23,17 +23,15 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class ArticlePresenter(
     private val accountType: AccountType,
     private val articleKey: MicroBlogKey,
-) : PresenterBase<ArticlePresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val cacheDatabase: CacheDatabase by inject()
+) : PresenterBase<ArticlePresenter.State>() {
+    private val accountService: AccountService by koinInject()
+    private val cacheDatabase: CacheDatabase by koinInject()
 
     private val articleStateFlow by lazy {
         accountService

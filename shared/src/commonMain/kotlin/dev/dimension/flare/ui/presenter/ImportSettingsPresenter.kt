@@ -14,14 +14,12 @@ import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.toTabSettingsV2
 import dev.dimension.flare.data.repository.SettingsRepository
 import kotlinx.serialization.json.jsonObject
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ImportSettingsPresenter(
     private val jsonContent: String,
-) : PresenterBase<ImportState>(),
-    KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
+) : PresenterBase<ImportState>() {
+    private val settingsRepository: SettingsRepository by koinInject()
 
     @Composable
     override fun body(): ImportState =

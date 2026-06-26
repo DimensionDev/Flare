@@ -13,15 +13,13 @@ import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class UserDMConversationPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
-) : PresenterBase<UserDMConversationPresenter.State>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<UserDMConversationPresenter.State>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Immutable
     public interface State {

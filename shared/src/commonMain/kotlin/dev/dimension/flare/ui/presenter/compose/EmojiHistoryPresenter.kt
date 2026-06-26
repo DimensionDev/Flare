@@ -19,18 +19,16 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class EmojiHistoryPresenter(
     private val accountType: AccountType,
     private val emojis: ImmutableList<UiEmoji>,
-) : PresenterBase<EmojiHistoryPresenter.State>(),
-    KoinComponent {
-    private val cacheDatabase by inject<CacheDatabase>()
-    private val accountRepository by inject<AccountRepository>()
-    private val scope by inject<CoroutineScope>()
+) : PresenterBase<EmojiHistoryPresenter.State>() {
+    private val cacheDatabase by koinInject<CacheDatabase>()
+    private val accountRepository by koinInject<AccountRepository>()
+    private val scope by koinInject<CoroutineScope>()
 
     @Immutable
     public interface State {
@@ -85,12 +83,11 @@ public class EmojiHistoryPresenter(
 public class WebEmojiHistoryPresenter(
     private val accountType: AccountType?,
     shortcodesText: String,
-) : PresenterBase<WebEmojiHistoryPresenter.State>(),
-    KoinComponent {
+) : PresenterBase<WebEmojiHistoryPresenter.State>() {
     private val shortcodes = shortcodesText.split(SHORTCODE_SEPARATOR).filter { it.isNotEmpty() }
-    private val cacheDatabase by inject<CacheDatabase>()
-    private val accountRepository by inject<AccountRepository>()
-    private val scope by inject<CoroutineScope>()
+    private val cacheDatabase by koinInject<CacheDatabase>()
+    private val accountRepository by koinInject<AccountRepository>()
+    private val scope by koinInject<CoroutineScope>()
 
     @Immutable
     public interface State {

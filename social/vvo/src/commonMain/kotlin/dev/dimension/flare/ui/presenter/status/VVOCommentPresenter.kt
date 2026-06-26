@@ -27,16 +27,14 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 public class VVOCommentPresenter(
     private val accountType: AccountType,
     private val commentKey: MicroBlogKey,
-) : PresenterBase<VVOCommentState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<VVOCommentState>() {
+    private val accountService: AccountService by koinInject()
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType)
     }

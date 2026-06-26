@@ -6,14 +6,12 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ServiceSelectPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<ServiceSelectState>(),
-    KoinComponent {
-    private val loginPlatformRegistry: LoginPlatformRegistry by inject()
+) : PresenterBase<ServiceSelectState>() {
+    private val loginPlatformRegistry: LoginPlatformRegistry by koinInject()
 
     @Composable
     override fun body(): ServiceSelectState {

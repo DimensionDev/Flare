@@ -22,8 +22,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withTimeout
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 private const val LOGIN_ACTION = "login"
@@ -32,9 +31,8 @@ private const val CANCEL_ACTION = "cancel"
 private const val INPUT_FIELD = "credential"
 
 public data object NostrLoginProvider :
-    LoginPlatformProvider,
-    KoinComponent {
-    private val amberSignerBridge: AmberSignerBridge by inject()
+    LoginPlatformProvider {
+    private val amberSignerBridge: AmberSignerBridge by koinInject()
 
     override val platformType: PlatformType = PlatformType.Nostr
     override val metadata: PlatformTypeMetadata
@@ -102,9 +100,8 @@ public data object NostrLoginProvider :
 
 private class NostrCredentialLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
     private var input = ""
     private val _state = MutableStateFlow(state())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
@@ -176,9 +173,8 @@ private class NostrCredentialLoginHandler(
 
 private class NostrQrLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
     private var pendingQrLogin: NostrService.Companion.PendingQrLogin? = null
     private var waiting = false
     private val _state = MutableStateFlow(state())
@@ -273,10 +269,9 @@ private class NostrQrLoginHandler(
 
 private class NostrExternalSignerLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val amberSignerBridge: AmberSignerBridge by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
+    private val amberSignerBridge: AmberSignerBridge by koinInject()
     private val _state = MutableStateFlow(state())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
 

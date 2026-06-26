@@ -28,7 +28,6 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import org.koin.core.component.KoinComponent
 
 internal class GuestMastodonDataSource(
     private val host: String,
@@ -37,8 +36,7 @@ internal class GuestMastodonDataSource(
     UserDataSource,
     RelationDataSource,
     PostDataSource,
-    PostEventHandler.Handler,
-    KoinComponent {
+    PostEventHandler.Handler {
     private val service by lazy {
         GuestMastodonService("https://$host/", locale)
     }

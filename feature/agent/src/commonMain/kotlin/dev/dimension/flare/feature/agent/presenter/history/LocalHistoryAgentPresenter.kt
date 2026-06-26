@@ -19,18 +19,16 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class LocalHistoryAgentPresenter(
     private val conversationId: String,
     private val query: String? = null,
     private val target: LocalHistoryAgentTarget = LocalHistoryAgentTarget.All,
-) : PresenterBase<LocalHistoryAgentPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val localHistoryAgentUseCase: LocalHistoryAgentUseCase by inject()
-    private val historyProvider: AgentChatHistoryProvider by inject()
+) : PresenterBase<LocalHistoryAgentPresenter.State>() {
+    private val accountService: AccountService by koinInject()
+    private val localHistoryAgentUseCase: LocalHistoryAgentUseCase by koinInject()
+    private val historyProvider: AgentChatHistoryProvider by koinInject()
 
     @Immutable
     public interface State {

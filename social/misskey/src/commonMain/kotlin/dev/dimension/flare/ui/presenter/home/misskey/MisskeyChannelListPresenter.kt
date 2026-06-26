@@ -30,14 +30,12 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class MisskeyChannelListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<MisskeyChannelListPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<MisskeyChannelListPresenter.State>() {
+    private val accountService: AccountService by koinInject()
 
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType).map {

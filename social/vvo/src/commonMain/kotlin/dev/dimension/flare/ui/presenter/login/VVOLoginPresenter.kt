@@ -18,14 +18,12 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 internal class VVOLoginPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<VVOLoginState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<VVOLoginState>() {
+    private val accountService: AccountService by koinInject()
 
     @Composable
     override fun body(): VVOLoginState {

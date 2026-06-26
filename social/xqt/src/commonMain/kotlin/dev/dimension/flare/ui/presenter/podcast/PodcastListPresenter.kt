@@ -15,14 +15,12 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.flow
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class PodcastListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<PodcastListPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<PodcastListPresenter.State>() {
+    private val accountService: AccountService by koinInject()
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType)
     }

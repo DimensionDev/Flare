@@ -40,8 +40,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -50,8 +49,8 @@ public class DirectMessageHandler(
     private val accountKey: MicroBlogKey,
     private val loader: DirectMessageLoader,
     private val coroutineScope: CoroutineScope,
-) : KoinComponent {
-    private val database: CacheDatabase by inject()
+)  {
+    private val database: CacheDatabase by koinInject()
     private val accountType = AccountType.Specific(accountKey)
     private val inMemoryBadgeCount = MutableStateFlow<Int?>(null)
 

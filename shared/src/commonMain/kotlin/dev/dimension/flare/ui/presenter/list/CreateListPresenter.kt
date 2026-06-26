@@ -13,17 +13,15 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for creating lists.
  */
 public class CreateListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<CreateListState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<CreateListState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): CreateListState {

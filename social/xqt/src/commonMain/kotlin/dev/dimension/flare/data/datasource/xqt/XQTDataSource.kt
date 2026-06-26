@@ -89,8 +89,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
@@ -109,15 +108,14 @@ internal class XQTDataSource(
     UserDataSource,
     PostDataSource,
     ArticleDataSource,
-    KoinComponent,
     ListDataSource,
     PinnableTimelineTabDataSource,
     TimelineTabConfigurationDataSource,
     DirectMessageDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val coroutineScope: CoroutineScope by inject()
-    private val imageCompressor: ImageCompressor by inject()
+    private val coroutineScope: CoroutineScope by koinInject()
+    private val imageCompressor: ImageCompressor by koinInject()
     private val credentialFlow by lazy {
         sourceCredentialFlow.distinctUntilChanged()
     }

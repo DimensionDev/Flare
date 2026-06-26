@@ -20,16 +20,14 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 internal class NostrLoginPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<NostrLoginState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val amberSignerBridge: AmberSignerBridge by inject()
+) : PresenterBase<NostrLoginState>() {
+    private val accountService: AccountService by koinInject()
+    private val amberSignerBridge: AmberSignerBridge by koinInject()
 
     @Composable
     override fun body(): NostrLoginState {

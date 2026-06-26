@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.humanizer
 
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.math.round
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
@@ -11,8 +10,8 @@ internal fun Float.humanizePercentage(): String {
     return "$roundedNumber%"
 }
 
-internal object Formatter : KoinComponent {
-    val platformFormatter: PlatformFormatter by inject()
+internal object Formatter  {
+    val platformFormatter: PlatformFormatter by koinInject()
 
     internal fun Long.humanize(): String = platformFormatter.formatNumber(number = this)
 

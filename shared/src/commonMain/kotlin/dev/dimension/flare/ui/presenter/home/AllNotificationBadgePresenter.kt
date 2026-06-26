@@ -26,14 +26,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("notificationBadge")
 public class AllNotificationBadgePresenter :
-    PresenterBase<AllNotificationBadgePresenter.State>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    PresenterBase<AllNotificationBadgePresenter.State>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @androidx.compose.runtime.Immutable
     public interface State {

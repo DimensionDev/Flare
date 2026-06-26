@@ -21,17 +21,15 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Instant
 
 public class DraftBoxPresenter :
-    PresenterBase<DraftBoxState>(),
-    KoinComponent {
-    private val draftRepository: DraftRepository by inject()
-    private val sendDraftUseCase: SendDraftUseCase by inject()
-    private val inAppNotification: InAppNotification by inject()
-    private val coroutineScope: CoroutineScope by inject()
+    PresenterBase<DraftBoxState>() {
+    private val draftRepository: DraftRepository by koinInject()
+    private val sendDraftUseCase: SendDraftUseCase by koinInject()
+    private val inAppNotification: InAppNotification by koinInject()
+    private val coroutineScope: CoroutineScope by koinInject()
 
     @Composable
     override fun body(): DraftBoxState {

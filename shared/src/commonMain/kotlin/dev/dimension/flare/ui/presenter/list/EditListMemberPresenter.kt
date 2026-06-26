@@ -30,8 +30,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @Immutable
 public interface EditListMemberState {
@@ -47,9 +46,8 @@ public interface EditListMemberState {
 public class EditListMemberPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<EditListMemberState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<EditListMemberState>() {
+    private val accountRepository: AccountRepository by koinInject()
     private val filterFlow = MutableStateFlow("")
 
     @OptIn(ExperimentalCoroutinesApi::class)

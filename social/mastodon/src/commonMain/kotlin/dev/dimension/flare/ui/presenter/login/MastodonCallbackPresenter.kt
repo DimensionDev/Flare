@@ -21,18 +21,16 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 
 public class MastodonCallbackPresenter(
     private val code: String?,
     private val toHome: () -> Unit,
-) : PresenterBase<UiState<Nothing>>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val pendingRepository: PlatformOAuthPendingRepository by inject()
+) : PresenterBase<UiState<Nothing>>() {
+    private val accountService: AccountService by koinInject()
+    private val pendingRepository: PlatformOAuthPendingRepository by koinInject()
 
     @Composable
     override fun body(): UiState<Nothing> {
@@ -150,8 +148,8 @@ public suspend fun mastodonLoginUseCase(
         launchOAuth(target)
     }
 
-private object MastodonOAuthPendingBridge : KoinComponent {
-    val pendingRepository: PlatformOAuthPendingRepository by inject()
+private object MastodonOAuthPendingBridge  {
+    val pendingRepository: PlatformOAuthPendingRepository by koinInject()
 }
 
 private object MastodonLoginSessionStore {

@@ -20,17 +20,15 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class GenericChatPresenter(
     private val conversationId: String = "generic-chat",
     private val initialMessage: String? = null,
-) : PresenterBase<GenericChatPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val genericChatAgentUseCase: GenericChatAgentUseCase by inject()
-    private val historyProvider: AgentChatHistoryProvider by inject()
+) : PresenterBase<GenericChatPresenter.State>() {
+    private val accountService: AccountService by koinInject()
+    private val genericChatAgentUseCase: GenericChatAgentUseCase by koinInject()
+    private val historyProvider: AgentChatHistoryProvider by koinInject()
 
     @Immutable
     public interface State {

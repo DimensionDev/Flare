@@ -25,8 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 private const val LOGIN_ACTION = "login"
 private const val FANBOX_SESSION_COOKIE = "FANBOXSESSID"
@@ -77,9 +76,8 @@ public data object FanboxLoginProvider : LoginPlatformProvider {
 
 private class FanboxWebCookieLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val _state = MutableStateFlow(state())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)

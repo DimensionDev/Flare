@@ -42,8 +42,7 @@ import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.koin.core.annotation.Single
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @Immutable
@@ -732,8 +731,8 @@ internal class TimelinePresenterFactory(
         }
 }
 
-internal object MixedTimelineLoaderFactory : KoinComponent {
-    private val database: dev.dimension.flare.data.database.cache.CacheDatabase by inject()
+internal object MixedTimelineLoaderFactory  {
+    private val database: dev.dimension.flare.data.database.cache.CacheDatabase by koinInject()
 
     fun create(
         loaders: List<RemoteLoader<UiTimelineV2>>,

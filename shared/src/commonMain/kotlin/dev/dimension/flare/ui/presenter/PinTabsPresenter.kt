@@ -10,8 +10,7 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class PinTabs<T> internal constructor(
     private val pinnedIds: Set<String>,
@@ -21,11 +20,10 @@ public class PinTabs<T> internal constructor(
 }
 
 public abstract class PinTabsPresenter<T> :
-    PresenterBase<PinTabsPresenter.State<T>>(),
-    KoinComponent {
-    private val settingsRepository by inject<SettingsRepository>()
-    private val timelineResolver by inject<TimelineResolver>()
-    private val appScope: CoroutineScope by inject()
+    PresenterBase<PinTabsPresenter.State<T>>() {
+    private val settingsRepository by koinInject<SettingsRepository>()
+    private val timelineResolver by koinInject<TimelineResolver>()
+    private val appScope: CoroutineScope by koinInject()
 
     public interface State<T> {
         public val pins: UiState<PinTabs<T>>

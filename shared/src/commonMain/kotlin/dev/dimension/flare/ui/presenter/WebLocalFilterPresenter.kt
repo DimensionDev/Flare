@@ -11,14 +11,12 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("localFilter")
 public class WebLocalFilterPresenter :
-    PresenterBase<WebLocalFilterPresenter.State>(),
-    KoinComponent {
-    private val repository by inject<LocalFilterRepository>()
+    PresenterBase<WebLocalFilterPresenter.State>() {
+    private val repository by koinInject<LocalFilterRepository>()
 
     @Immutable
     public interface State {

@@ -15,16 +15,14 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 public class DirectMessageBadgePresenter(
     private val accountType: AccountType,
     private val autoRefresh: Boolean = true,
-) : PresenterBase<NotificationBadgeState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<NotificationBadgeState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): NotificationBadgeState {

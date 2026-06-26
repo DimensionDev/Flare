@@ -12,14 +12,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class SearchStatusTimelinePresenter(
     private val accountType: AccountType,
     private val queryFlow: MutableStateFlow<String> = MutableStateFlow(""),
-) : TimelinePresenter(),
-    KoinComponent {
+) : TimelinePresenter() {
     public constructor(
         accountType: AccountType,
         initialQuery: String,
@@ -28,7 +26,7 @@ public class SearchStatusTimelinePresenter(
         queryFlow = MutableStateFlow(initialQuery),
     )
 
-    private val accountRepository: AccountRepository by inject()
+    private val accountRepository: AccountRepository by koinInject()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {

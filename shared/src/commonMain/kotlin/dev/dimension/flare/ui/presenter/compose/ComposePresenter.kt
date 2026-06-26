@@ -63,8 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -74,14 +73,13 @@ public class ComposePresenter(
     private val accountType: AccountType?,
     private val status: ComposeStatus? = null,
     private val draftGroupId: String? = null,
-) : PresenterBase<ComposeState>(),
-    KoinComponent {
-    private val composeUseCase: ComposeUseCase by inject()
-    private val accountRepository: AccountRepository by inject()
-    private val appDataStore: AppDataStore by inject()
-    private val restoreDraftUseCase: RestoreDraftUseCase by inject()
-    private val draftRepository: DraftRepository by inject()
-    private val ioScope: CoroutineScope by inject()
+) : PresenterBase<ComposeState>() {
+    private val composeUseCase: ComposeUseCase by koinInject()
+    private val accountRepository: AccountRepository by koinInject()
+    private val appDataStore: AppDataStore by koinInject()
+    private val restoreDraftUseCase: RestoreDraftUseCase by koinInject()
+    private val draftRepository: DraftRepository by koinInject()
+    private val ioScope: CoroutineScope by koinInject()
     private val shouldPersistSelectedAccounts: Boolean =
         accountType == null && status == null && draftGroupId == null
 

@@ -10,14 +10,12 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("storage")
 public class StoragePresenter :
-    PresenterBase<StorageState>(),
-    KoinComponent {
-    private val cacheDatabase by inject<CacheDatabase>()
+    PresenterBase<StorageState>() {
+    private val cacheDatabase by koinInject<CacheDatabase>()
 
     public suspend fun clearCacheSuspend() {
         cacheDatabase.clearAllTables()

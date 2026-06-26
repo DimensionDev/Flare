@@ -41,17 +41,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("search")
 public class SearchPresenter(
     private val accountType: AccountType,
     private val initialQuery: String = "",
-) : PresenterBase<SearchState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<SearchState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     private val accountsFlow by lazy {
         allAccountServicesFlow(accountRepository)

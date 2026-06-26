@@ -27,15 +27,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class AccountNotificationPresenter(
     private val accountKey: MicroBlogKey,
     initialFilter: NotificationFilter = NotificationFilter.All,
-) : PresenterBase<AccountNotificationPresenter.State>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<AccountNotificationPresenter.State>() {
+    private val accountRepository: AccountRepository by koinInject()
     private val selectedNotificationFilterFlow = MutableStateFlow(initialFilter)
 
     @Immutable

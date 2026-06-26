@@ -79,8 +79,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MisskeyDataSource(
@@ -92,14 +91,13 @@ internal class MisskeyDataSource(
     ComposeDataSource,
     UserDataSource,
     PostDataSource,
-    KoinComponent,
     ListDataSource,
     PinnableTimelineTabDataSource,
     TimelineTabConfigurationDataSource,
     ReactionDataSource,
     RelationDataSource,
     PostEventHandler.Handler {
-    private val imageCompressor: ImageCompressor by inject()
+    private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",

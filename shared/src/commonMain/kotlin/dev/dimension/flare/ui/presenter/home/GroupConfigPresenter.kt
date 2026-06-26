@@ -23,15 +23,13 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class GroupConfigPresenter :
-    PresenterBase<GroupConfigPresenter.State>(),
-    KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
-    private val appScope: CoroutineScope by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    PresenterBase<GroupConfigPresenter.State>() {
+    private val settingsRepository: SettingsRepository by koinInject()
+    private val appScope: CoroutineScope by koinInject()
+    private val timelineResolver: TimelineResolver by koinInject()
 
     @Composable
     override fun body(): State {

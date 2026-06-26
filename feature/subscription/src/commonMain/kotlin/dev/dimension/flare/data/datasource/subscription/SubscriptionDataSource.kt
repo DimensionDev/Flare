@@ -25,8 +25,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
@@ -80,11 +79,10 @@ public sealed interface SubscriptionSourceDetection {
 
 @HiddenFromObjC
 public object KoinSubscriptionDataSource :
-    SubscriptionDataSource,
-    KoinComponent {
-    private val subscriptionRepository: SubscriptionRepository by inject()
-    private val settingsRepository: SettingsRepository by inject()
-    private val platformRegistry: PlatformRegistry by inject()
+    SubscriptionDataSource {
+    private val subscriptionRepository: SubscriptionRepository by koinInject()
+    private val settingsRepository: SettingsRepository by koinInject()
+    private val platformRegistry: PlatformRegistry by koinInject()
     private val readability = Readability()
 
     override suspend fun listSources(): List<UiRssSource> = subscriptionRepository.observeAll().first()

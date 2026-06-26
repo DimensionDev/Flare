@@ -12,17 +12,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class DeleteStatusPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<DeleteStatusState>(),
-    KoinComponent {
+) : PresenterBase<DeleteStatusState>() {
     // using io scope because it's a long-running operation
-    private val scope by inject<CoroutineScope>()
-    private val accountRepository: AccountRepository by inject()
+    private val scope by koinInject<CoroutineScope>()
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): DeleteStatusState =

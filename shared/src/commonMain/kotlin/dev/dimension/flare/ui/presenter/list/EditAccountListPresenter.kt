@@ -29,8 +29,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for editing lists for a user.
@@ -39,9 +38,8 @@ import org.koin.core.component.inject
 public class EditAccountListPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
-) : PresenterBase<EditAccountListState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<EditAccountListState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val userListFlow by lazy {

@@ -8,13 +8,11 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class LoggedInPresenter :
-    PresenterBase<LoggedInState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    PresenterBase<LoggedInState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     private val loggedInFlow by lazy {
         accountRepository.allAccounts.map { it.isNotEmpty() }

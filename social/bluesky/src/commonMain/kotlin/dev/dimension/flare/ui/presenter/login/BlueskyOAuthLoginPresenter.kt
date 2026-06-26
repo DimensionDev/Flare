@@ -22,8 +22,7 @@ import io.ktor.http.takeFrom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
@@ -36,10 +35,9 @@ private const val REDIRECT_URI = "https://flareapp.moe/callback"
 
 internal class BlueskyOAuthLoginPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<BlueskyOAuthLoginState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val pendingRepository: PlatformOAuthPendingRepository by inject()
+) : PresenterBase<BlueskyOAuthLoginState>() {
+    private val accountService: AccountService by koinInject()
+    private val pendingRepository: PlatformOAuthPendingRepository by koinInject()
 
     private val oauthClient =
         OAuthClient(

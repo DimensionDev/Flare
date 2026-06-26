@@ -28,8 +28,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for pinnable lists.
@@ -38,8 +37,7 @@ import org.koin.core.component.inject
  */
 public class PinnableTimelineTabPresenter(
     private val accountType: AccountType,
-) : PresenterBase<PinnableTimelineTabPresenter.State>(),
-    KoinComponent {
+) : PresenterBase<PinnableTimelineTabPresenter.State>() {
     @Immutable
     public interface State {
         public val tabs: UiState<ImmutableList<PinnableTimelineTab>>
@@ -51,7 +49,7 @@ public class PinnableTimelineTabPresenter(
         val data: PagingState<UiTimelineTabItem>,
     )
 
-    private val accountRepository: AccountRepository by inject()
+    private val accountRepository: AccountRepository by koinInject()
 
     private data class Sections(
         val builtInTabs: ImmutableList<TimelineCandidate<*>>,

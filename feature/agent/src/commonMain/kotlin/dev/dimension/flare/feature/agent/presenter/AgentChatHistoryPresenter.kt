@@ -9,13 +9,11 @@ import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class AgentChatHistoryPresenter :
-    PresenterBase<AgentChatHistoryPresenter.State>(),
-    KoinComponent {
-    private val historyProvider: AgentChatHistoryProvider by inject()
+    PresenterBase<AgentChatHistoryPresenter.State>() {
+    private val historyProvider: AgentChatHistoryProvider by koinInject()
 
     @Immutable
     public interface State {

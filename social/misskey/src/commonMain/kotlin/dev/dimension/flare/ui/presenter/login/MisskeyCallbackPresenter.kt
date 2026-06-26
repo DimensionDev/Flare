@@ -20,8 +20,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.delay
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
@@ -30,10 +29,9 @@ import kotlin.uuid.Uuid
 public class MisskeyCallbackPresenter(
     private val session: String?,
     private val toHome: () -> Unit,
-) : PresenterBase<UiState<Nothing>>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val pendingRepository: PlatformOAuthPendingRepository by inject()
+) : PresenterBase<UiState<Nothing>>() {
+    private val accountService: AccountService by koinInject()
+    private val pendingRepository: PlatformOAuthPendingRepository by koinInject()
 
     @Composable
     override fun body(): UiState<Nothing> {
@@ -129,8 +127,8 @@ public suspend fun misskeyLoginUseCase(
         launchOAuth(target)
     }
 
-private object MisskeyOAuthPendingBridge : KoinComponent {
-    val pendingRepository: PlatformOAuthPendingRepository by inject()
+private object MisskeyOAuthPendingBridge  {
+    val pendingRepository: PlatformOAuthPendingRepository by koinInject()
 }
 
 private object MisskeyLoginSessionStore {

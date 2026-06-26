@@ -23,17 +23,15 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ProfileInsightPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
-) : PresenterBase<ProfileInsightPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val profileInsightAgentUseCase: ProfileInsightAgentUseCase by inject()
-    private val historyProvider: AgentChatHistoryProvider by inject()
+) : PresenterBase<ProfileInsightPresenter.State>() {
+    private val accountService: AccountService by koinInject()
+    private val profileInsightAgentUseCase: ProfileInsightAgentUseCase by koinInject()
+    private val historyProvider: AgentChatHistoryProvider by koinInject()
 
     @Immutable
     public interface State {

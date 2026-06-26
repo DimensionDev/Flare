@@ -20,18 +20,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class UserHandler(
     private val host: String,
     private val loader: UserLoader,
-) : KoinComponent {
-    private val database: CacheDatabase by inject()
-    private val appDataStore: AppDataStore by inject()
-    private val preTranslationService: PreTranslationService by inject()
+)  {
+    private val database: CacheDatabase by koinInject()
+    private val appDataStore: AppDataStore by koinInject()
+    private val preTranslationService: PreTranslationService by koinInject()
 
     private val translationDisplayFlow by lazy {
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)

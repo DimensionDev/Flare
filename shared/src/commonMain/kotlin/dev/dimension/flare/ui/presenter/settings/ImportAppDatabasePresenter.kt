@@ -7,14 +7,12 @@ import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.ui.presenter.ImportState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ImportAppDatabasePresenter(
     private val jsonContent: String,
-) : PresenterBase<ImportState>(),
-    KoinComponent {
-    private val appDatabase: AppDatabase by inject()
+) : PresenterBase<ImportState>() {
+    private val appDatabase: AppDatabase by koinInject()
 
     @Composable
     override fun body(): ImportState =

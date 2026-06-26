@@ -16,14 +16,12 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class DMListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<DMListState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<DMListState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): DMListState {

@@ -29,15 +29,13 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("homeTabSettings")
 public class HomeTabSettingsPresenter :
-    PresenterBase<HomeTabSettingsPresenter.State>(),
-    KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
-    private val appScope: CoroutineScope by inject()
+    PresenterBase<HomeTabSettingsPresenter.State>() {
+    private val settingsRepository: SettingsRepository by koinInject()
+    private val appScope: CoroutineScope by koinInject()
 
     private val homeTimelineTabs by lazy {
         settingsRepository.homeTimelineTabs

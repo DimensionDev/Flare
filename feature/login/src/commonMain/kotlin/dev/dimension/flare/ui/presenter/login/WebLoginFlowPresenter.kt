@@ -13,8 +13,7 @@ import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("loginFlow")
 public class WebLoginFlowPresenter(
@@ -26,9 +25,8 @@ public class WebLoginFlowPresenter(
     private val onOpenWebCookieLogin: (String) -> Unit,
     private val onShowQr: (String) -> Unit,
     private val onSuccess: () -> Unit,
-) : PresenterBase<WebLoginFlowPresenter.State>(),
-    KoinComponent {
-    private val loginPlatformRegistry: LoginPlatformRegistry by inject()
+) : PresenterBase<WebLoginFlowPresenter.State>() {
+    private val loginPlatformRegistry: LoginPlatformRegistry by koinInject()
 
     @Immutable
     public interface State {

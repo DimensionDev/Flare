@@ -29,19 +29,17 @@ import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.coroutines.flow.first
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class TranslatePresenter(
     private val source: UiRichText,
     private val targetLanguage: String = Locale.language,
     private val cacheTarget: TranslateCacheTarget? = null,
-) : PresenterBase<UiState<UiRichText>>(),
-    KoinComponent {
-    private val aiCompletionService by inject<AiCompletionService>()
-    private val appDataStore: AppDataStore by inject()
-    private val database: CacheDatabase by inject()
+) : PresenterBase<UiState<UiRichText>>() {
+    private val aiCompletionService by koinInject<AiCompletionService>()
+    private val appDataStore: AppDataStore by koinInject()
+    private val database: CacheDatabase by koinInject()
     private val sourceJson: String by lazy { source.toTranslationJson(targetLanguage) }
     private val promptTemplate by lazy {
         AiPlaceholderTranslationSupport.buildPromptTemplate(

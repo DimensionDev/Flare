@@ -17,17 +17,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class RelationHandler(
     public val accountType: AccountType,
     public val dataSource: RelationLoader,
-) : KoinComponent {
-    private val database: CacheDatabase by inject()
-    private val coroutineScope: CoroutineScope by inject()
+)  {
+    private val database: CacheDatabase by koinInject()
+    private val coroutineScope: CoroutineScope by koinInject()
 
     public fun relation(userKey: MicroBlogKey): Cacheable<UiRelation> =
         Cacheable(

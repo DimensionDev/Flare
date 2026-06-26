@@ -52,6 +52,8 @@ import dev.dimension.flare.mastodon_tab_public_title
 import dev.dimension.flare.misskey_channel_tab_following
 import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.ok
+import dev.dimension.flare.pixiv_private_bookmarks_title
+import dev.dimension.flare.pixiv_private_following_title
 import dev.dimension.flare.pixiv_ranking_day_female_title
 import dev.dimension.flare.pixiv_ranking_day_male_title
 import dev.dimension.flare.pixiv_ranking_day_manga_title
@@ -267,4 +269,6 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.Manga -> Res.string.manga_title
             UiStrings.FanboxSupported -> Res.string.fanbox_supported_title
             UiStrings.FanboxRecommendedCreators -> Res.string.fanbox_recommended_creators_title
+            UiStrings.PixivPrivateFollowing -> Res.string.pixiv_private_following_title
+            UiStrings.PixivPrivateBookmarks -> Res.string.pixiv_private_bookmarks_title
         }

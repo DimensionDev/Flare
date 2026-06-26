@@ -27,6 +27,7 @@ import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.pixiv.PixivRankingMode
+import dev.dimension.flare.data.network.pixiv.PixivRestrict
 import dev.dimension.flare.data.network.pixiv.PixivService
 import dev.dimension.flare.data.network.pixiv.PixivWorkType
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
@@ -128,7 +129,13 @@ internal class PixivDataSource(
             PixivPlatformSpec.followingTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
+            PixivPlatformSpec.privateFollowingTimelineSpec.galleryCandidate(
+                data = TimelineSpec.AccountBasedData(accountKey),
+            ),
             PixivPlatformSpec.bookmarkTimelineSpec.galleryCandidate(
+                data = TimelineSpec.AccountBasedData(accountKey),
+            ),
+            PixivPlatformSpec.privateBookmarkTimelineSpec.galleryCandidate(
                 data = TimelineSpec.AccountBasedData(accountKey),
             ),
             PixivPlatformSpec.rankingWeekTimelineSpec.galleryCandidate(
@@ -190,11 +197,31 @@ internal class PixivDataSource(
                     ),
             ),
             ShortcutSpec(
+                title = UiStrings.PixivPrivateFollowing,
+                icon = UiIcon.Follow,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        PixivPlatformSpec.privateFollowingTimelineSpec.galleryCandidate(
+                            data = TimelineSpec.AccountBasedData(accountKey),
+                        ),
+                    ),
+            ),
+            ShortcutSpec(
                 title = UiStrings.Bookmark,
                 icon = UiIcon.Bookmark,
                 target =
                     ShortcutSpec.Target.Timeline(
                         PixivPlatformSpec.bookmarkTimelineSpec.galleryCandidate(
+                            data = TimelineSpec.AccountBasedData(accountKey),
+                        ),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.PixivPrivateBookmarks,
+                icon = UiIcon.Bookmark,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        PixivPlatformSpec.privateBookmarkTimelineSpec.galleryCandidate(
                             data = TimelineSpec.AccountBasedData(accountKey),
                         ),
                     ),
@@ -388,17 +415,23 @@ internal class PixivDataSource(
             service = service,
         )
 
-    fun bookmarkTimelineLoader(): RemoteLoader<UiTimelineV2> =
+    fun bookmarkTimelineLoader(
+        restrict: PixivRestrict = PixivRestrict.Public,
+    ): RemoteLoader<UiTimelineV2> =
         PixivBookmarkTimelineLoader(
             service = service,
             credentialFlow = credentialFlow,
             accountKey = accountKey,
+            restrict = restrict,
         )
 
-    fun followingTimelineLoader(): RemoteLoader<UiTimelineV2> =
+    fun followingTimelineLoader(
+        restrict: PixivRestrict = PixivRestrict.Public,
+    ): RemoteLoader<UiTimelineV2> =
         PixivFollowingTimelineLoader(
             service = service,
             accountKey = accountKey,
+            restrict = restrict,
         )
 
     fun rankingTimelineLoader(mode: PixivRankingMode): RemoteLoader<UiTimelineV2> =

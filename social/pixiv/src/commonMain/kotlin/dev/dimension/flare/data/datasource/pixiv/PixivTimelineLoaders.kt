@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.pixiv.PixivRankingMode
+import dev.dimension.flare.data.network.pixiv.PixivRestrict
 import dev.dimension.flare.data.network.pixiv.PixivSearchSort
 import dev.dimension.flare.data.network.pixiv.PixivService
 import dev.dimension.flare.data.network.pixiv.PixivWorkType
@@ -91,10 +92,19 @@ internal class PixivRankingTimelineLoader(
 internal class PixivFollowingTimelineLoader(
     service: PixivService,
     accountKey: MicroBlogKey,
+    private val restrict: PixivRestrict = PixivRestrict.Public,
 ) : PixivTimelineLoader(service, accountKey) {
-    override val pagingKey: String = "pixiv_following_$accountKey"
+    override val pagingKey: String =
+        if (restrict == PixivRestrict.Public) {
+            "pixiv_following_$accountKey"
+        } else {
+            "pixiv_following_${restrict.value}_$accountKey"
+        }
 
-    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse = service.followedIllusts()
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
+        service.followedIllusts(
+            restrict = restrict,
+        )
 }
 
 internal class PixivSearchTimelineLoader(
@@ -219,13 +229,20 @@ internal class PixivBookmarkTimelineLoader(
     service: PixivService,
     private val credentialFlow: Flow<PixivCredential>,
     accountKey: MicroBlogKey,
+    private val restrict: PixivRestrict = PixivRestrict.Public,
 ) : PixivTimelineLoader(service, accountKey) {
-    override val pagingKey: String = "pixiv_bookmark_$accountKey"
+    override val pagingKey: String =
+        if (restrict == PixivRestrict.Public) {
+            "pixiv_bookmark_$accountKey"
+        } else {
+            "pixiv_bookmark_${restrict.value}_$accountKey"
+        }
 
     override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse {
         val credential = credentialFlow.first()
         return service.userBookmarkedIllusts(
             userId = credential.userId,
+            restrict = restrict,
         )
     }
 }

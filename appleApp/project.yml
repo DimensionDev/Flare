@@ -56,6 +56,9 @@ packages:
   Drops:
     url: https://github.com/omaralbeik/Drops.git
     exactVersion: 1.7.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    exactVersion: 12.15.0
   GSPlayer:
     url: https://github.com/wxxsw/GSPlayer
     from: 0.2.30
@@ -81,8 +84,57 @@ packages:
     url: https://github.com/wxxsw/VideoPlayer
     exactVersion: 1.2.5
 
+targetTemplates:
+  FirebaseOptionalApp:
+    sources:
+      - path: Shared/Firebase
+    dependencies:
+      - package: Firebase
+        product: FirebaseAnalytics
+      - package: Firebase
+        product: FirebaseCrashlytics
+    postBuildScripts:
+      - name: Copy Firebase Config
+        basedOnDependencyAnalysis: false
+        script: |
+          SRC_PLIST="$SRCROOT/Firebase/GoogleService-Info.plist"
+          DST_PLIST="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/GoogleService-Info.plist"
+
+          if [ -f "$SRC_PLIST" ]; then
+            mkdir -p "$(dirname "$DST_PLIST")"
+            cp "$SRC_PLIST" "$DST_PLIST"
+          else
+            echo "Firebase config not found; Firebase stays disabled."
+          fi
+      - name: Upload Crashlytics dSYMs
+        basedOnDependencyAnalysis: false
+        script: |
+          case "${FIREBASE_CRASHLYTICS_UPLOAD_SYMBOLS:-}" in
+            1|true|TRUE|yes|YES) ;;
+            *)
+              echo "Skipping Crashlytics dSYM upload."
+              exit 0
+              ;;
+          esac
+
+          GSP_PATH="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/GoogleService-Info.plist"
+          RUN_SCRIPT="${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+
+          if [ ! -f "$GSP_PATH" ]; then
+            echo "Crashlytics dSYM upload requested, but $GSP_PATH is missing."
+            exit 1
+          fi
+
+          if [ ! -x "$RUN_SCRIPT" ]; then
+            echo "Crashlytics run script not found at $RUN_SCRIPT."
+            exit 1
+          fi
+
+          "$RUN_SCRIPT"
+
 targets:
   iOS:
+    templates: [FirebaseOptionalApp]
     type: application
     platform: iOS
     sources:
@@ -91,6 +143,7 @@ targets:
           - .DS_Store
           - Assets.xcassets/.DS_Store
           - Info.plist
+          - GoogleService-Info.plist
           - AppIcon_*.icon
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
@@ -134,15 +187,19 @@ targets:
       base:
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow"
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
         INFOPLIST_FILE: ios/Info.plist
+        OTHER_LDFLAGS: "$(inherited) -ObjC"
 
   macOS:
+    templates: [FirebaseOptionalApp]
     type: application
     platform: macOS
     sources:
       - path: macos
         excludes:
           - Info.plist
+          - GoogleService-Info.plist
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
@@ -176,12 +233,13 @@ targets:
         CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
         CODE_SIGN_ENTITLEMENTS: macos/Flare.entitlements
         DEAD_CODE_STRIPPING: YES
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
         ENABLE_USER_SELECTED_FILES: readwrite
         INFOPLIST_FILE: macos/Info.plist
-        OTHER_LDFLAGS: "$(inherited) -lsqlite3"
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3 -ObjC"
         PROVISIONING_PROFILE: "$(NATIVE_MACOS_PROVISIONING_PROFILE)"
         PROVISIONING_PROFILE_SPECIFIER: "$(NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER)"
         REGISTER_APP_GROUPS: YES

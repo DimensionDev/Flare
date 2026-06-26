@@ -1,5 +1,7 @@
 package dev.dimension.flare.apple.shared
 
+import co.touchlab.crashkios.crashlytics.enableCrashlytics
+import co.touchlab.crashkios.crashlytics.setCrashlyticsUnhandledExceptionHook
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.SwiftOnDeviceAI
@@ -19,9 +21,13 @@ import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.koin.plugin.module.dsl.startKoin
-import kotlin.native.HiddenFromObjC
 
 public object AppleSharedHelper {
+    public fun setupCrashlytics() {
+        enableCrashlytics()
+        setCrashlyticsUnhandledExceptionHook()
+    }
+
     public fun initialize(
         inAppNotification: InAppNotification,
         swiftFormatter: SwiftFormatter,

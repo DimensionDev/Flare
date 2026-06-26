@@ -43,6 +43,16 @@ jobs:
         run: xcodebuild -downloadPlatform iOS
       - name: Install XcodeGen
         run: brew install xcodegen
+      - name: Add Firebase config
+        env:
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
+        run: |
+          if [ -n "${GOOGLE_SERVICE_INFO_PLIST_B64:-}" ]; then
+            mkdir -p appleApp/Firebase
+            printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 -D > appleApp/Firebase/GoogleService-Info.plist
+          else
+            echo "GOOGLE_SERVICE_INFO_PLIST_B64 is not set; Firebase config will not be bundled."
+          fi
       - name: Generate Xcode project
         run: xcodegen generate --spec appleApp/project.yml
       - name: Build

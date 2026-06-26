@@ -147,6 +147,16 @@ jobs:
 
           echo "NATIVE_MACOS_APP_SIGNING_IDENTITY=$app_identity" >> "$GITHUB_ENV"
           echo "NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY=$installer_identity" >> "$GITHUB_ENV"
+      - name: Add Firebase config
+        env:
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
+        run: |
+          if [ -n "${GOOGLE_SERVICE_INFO_PLIST_B64:-}" ]; then
+            mkdir -p appleApp/Firebase
+            printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 -D > appleApp/Firebase/GoogleService-Info.plist
+          else
+            echo "GOOGLE_SERVICE_INFO_PLIST_B64 is not set; Firebase config will not be bundled."
+          fi
       - name: Generate Xcode project
         run: xcodegen generate --spec appleApp/project.yml
       - name: Resolve native macOS version
@@ -187,6 +197,7 @@ jobs:
         # if: startsWith(github.ref, 'refs/tags/')
         working-directory: ./appleApp
         env:
+          FIREBASE_CRASHLYTICS_UPLOAD_SYMBOLS: ${{ startsWith(github.ref, 'refs/tags/') && '1' || '0' }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           xcodebuild archive \

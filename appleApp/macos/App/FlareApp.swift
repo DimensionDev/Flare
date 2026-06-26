@@ -14,6 +14,10 @@ enum MacWindowID {
 @main
 struct FlareApp: App {
     init() {
+        let firebaseEnabled = FirebaseBootstrap.configureIfAvailable()
+        if firebaseEnabled {
+            AppleSharedHelper.shared.setupCrashlytics()
+        }
         AppleSharedHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,

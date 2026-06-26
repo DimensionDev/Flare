@@ -75,6 +75,7 @@ kotlin {
                 api(projects.feature.tab)
                 api(projects.feature.agent)
                 implementation(libs.compose.runtime)
+                implementation(libs.crashkios.crashlytics)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

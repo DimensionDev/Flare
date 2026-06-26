@@ -655,6 +655,8 @@
     <string name="pixiv_ranking_week_original_title">Original Ranking</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Private Following</string>
+    <string name="pixiv_private_bookmarks_title">Private Bookmarks</string>
     <string name="agent_ui_cancel">Cancel</string>
     <string name="agent_ui_confirm_execute">Confirm</string>
     <string name="agent_ui_confirm_save_subscription">Save</string>

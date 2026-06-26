@@ -101,6 +101,10 @@ export function localizedUiString(value: UiStrings): string {
 			return 'Supported posts';
 		case 'FanboxRecommendedCreators':
 			return 'Recommended creators';
+		case 'PixivPrivateFollowing':
+			return 'Private Following';
+		case 'PixivPrivateBookmarks':
+			return 'Private Bookmarks';
 		default:
 			return m.loginCredentialImport();
 	}

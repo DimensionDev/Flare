@@ -100737,6 +100737,26 @@
         }
       }
     },
+    "pixiv_private_bookmarks_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Private Bookmarks"
+          }
+        }
+      }
+    },
+    "pixiv_private_following_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Private Following"
+          }
+        }
+      }
+    },
     "pixiv_ranking_day_female_title" : {
       "comment" : "Title of the ranking of female artists on the pixiv app.",
       "extractionState" : "stale",

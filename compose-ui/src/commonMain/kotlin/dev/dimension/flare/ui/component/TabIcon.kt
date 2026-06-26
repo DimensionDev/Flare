@@ -51,6 +51,8 @@ import dev.dimension.flare.compose.ui.nostr_login_account_hint
 import dev.dimension.flare.compose.ui.nostr_login_amber_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_button
 import dev.dimension.flare.compose.ui.nostr_login_title
+import dev.dimension.flare.compose.ui.pixiv_private_bookmarks_title
+import dev.dimension.flare.compose.ui.pixiv_private_following_title
 import dev.dimension.flare.compose.ui.pixiv_ranking_day_female_title
 import dev.dimension.flare.compose.ui.pixiv_ranking_day_male_title
 import dev.dimension.flare.compose.ui.pixiv_ranking_day_manga_title
@@ -322,4 +324,6 @@ internal val UiStrings.res: StringResource
             UiStrings.Manga -> Res.string.manga_title
             UiStrings.FanboxSupported -> Res.string.fanbox_supported_title
             UiStrings.FanboxRecommendedCreators -> Res.string.fanbox_recommended_creators_title
+            UiStrings.PixivPrivateFollowing -> Res.string.pixiv_private_following_title
+            UiStrings.PixivPrivateBookmarks -> Res.string.pixiv_private_bookmarks_title
         }

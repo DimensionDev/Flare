@@ -219,4 +219,6 @@ private val UiStrings.androidStringRes: Int
             UiStrings.Manga -> R.string.manga_title
             UiStrings.FanboxSupported -> R.string.fanbox_supported_title
             UiStrings.FanboxRecommendedCreators -> R.string.fanbox_recommended_creators_title
+            UiStrings.PixivPrivateFollowing -> R.string.pixiv_private_following_title
+            UiStrings.PixivPrivateBookmarks -> R.string.pixiv_private_bookmarks_title
         }

@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datasource.pixiv.PixivDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.data.network.pixiv.PixivRankingMode
+import dev.dimension.flare.data.network.pixiv.PixivRestrict
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -47,6 +48,19 @@ public data object PixivPlatformSpec :
                 },
         )
 
+    internal val privateBookmarkTimelineSpec =
+        TimelineSpec(
+            id = PIXIV_PRIVATE_BOOKMARK,
+            title = UiStrings.PixivPrivateBookmarks,
+            icon = UiIcon.Bookmark.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            loaderFactory =
+                accountLoader<PixivDataSource, TimelineSpec.AccountBasedData> {
+                    bookmarkTimelineLoader(PixivRestrict.Private)
+                },
+        )
+
     internal val followingTimelineSpec =
         TimelineSpec(
             id = PIXIV_FOLLOWING,
@@ -57,6 +71,19 @@ public data object PixivPlatformSpec :
             loaderFactory =
                 accountLoader<PixivDataSource, TimelineSpec.AccountBasedData> {
                     followingTimelineLoader()
+                },
+        )
+
+    internal val privateFollowingTimelineSpec =
+        TimelineSpec(
+            id = PIXIV_PRIVATE_FOLLOWING,
+            title = UiStrings.PixivPrivateFollowing,
+            icon = UiIcon.Follow.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            loaderFactory =
+                accountLoader<PixivDataSource, TimelineSpec.AccountBasedData> {
+                    followingTimelineLoader(PixivRestrict.Private)
                 },
         )
 
@@ -114,7 +141,9 @@ public data object PixivPlatformSpec :
             CommonTimelineSpecs.home,
             CommonTimelineSpecs.discover,
             followingTimelineSpec,
+            privateFollowingTimelineSpec,
             bookmarkTimelineSpec,
+            privateBookmarkTimelineSpec,
             rankingWeekTimelineSpec,
             rankingMonthTimelineSpec,
             rankingDayMaleTimelineSpec,
@@ -181,6 +210,8 @@ public const val PIXIV_HOST: String = "pixiv.net"
 
 private const val PIXIV_FOLLOWING: String = "pixiv.following"
 private const val PIXIV_BOOKMARK: String = "pixiv.bookmark"
+private const val PIXIV_PRIVATE_FOLLOWING: String = "pixiv.following.private"
+private const val PIXIV_PRIVATE_BOOKMARK: String = "pixiv.bookmark.private"
 private const val PIXIV_RANKING_WEEK: String = "pixiv.ranking.week"
 private const val PIXIV_RANKING_MONTH: String = "pixiv.ranking.month"
 private const val PIXIV_RANKING_DAY_MALE: String = "pixiv.ranking.day_male"

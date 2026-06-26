@@ -57,10 +57,7 @@ internal class PixivHomeTimelineLoader(
 ) : PixivTimelineLoader(service, accountKey) {
     override val pagingKey: String = "pixiv_home_$accountKey"
 
-    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
-        service.recommendedIllusts(
-            includeRankingIllusts = true,
-        )
+    override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse = service.followedIllusts()
 }
 
 internal class PixivDiscoverTimelineLoader(

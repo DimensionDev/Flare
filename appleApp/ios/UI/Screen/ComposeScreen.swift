@@ -22,6 +22,7 @@ struct ComposeScreen: View {
     @State private var defaultFocusRequested = false
     @State private var showDraftSheet = false
     @State private var showDraftConfirmation = false
+    @State private var showAccountPicker = false
 
     var body: some View {
         VStack(
@@ -262,7 +263,9 @@ struct ComposeScreen: View {
 
         return HStack {
             if !accounts.isEmpty {
-                accountPickerMenu(selected: selected, accounts: accounts) {
+                Button {
+                    showAccountPicker.toggle()
+                } label: {
                     HStack(spacing: 8) {
                         if !selected.isEmpty {
                             accountAvatarStack(users: selected)
@@ -279,34 +282,57 @@ struct ComposeScreen: View {
                     .background(Color(.secondarySystemBackground))
                     .clipShape(Capsule())
                 }
+                .buttonStyle(.plain)
+                .popover(isPresented: $showAccountPicker, arrowEdge: .top) {
+                    accountPickerPopover(selected: selected, accounts: accounts)
+                }
             }
             Spacer()
         }
         .padding(.horizontal)
     }
 
-    private func accountPickerMenu<LabelContent: View>(
+    private func accountPickerPopover(
         selected: [UiProfile],
-        accounts: [UiProfile],
-        @ViewBuilder label: () -> LabelContent
+        accounts: [UiProfile]
     ) -> some View {
-        Menu {
-            ForEach(accounts, id: \.accountPickerKey) { user in
-                Toggle(
-                    isOn: Binding(
-                        get: {
-                            selected.containsAccount(user)
-                        },
-                        set: { _ in
-                            presenter.state.selectAccount(accountKey: user.key)
-                        }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(accounts, id: \.accountPickerKey) { user in
+                    accountPickerButton(
+                        user: user,
+                        isSelected: selected.containsAccount(user)
                     )
-                ) {
-                    accountPickerRow(user: user)
                 }
             }
+            .padding(8)
+        }
+        .frame(minWidth: 280, maxWidth: 340, maxHeight: 420)
+        .presentationDetents([.medium, .large])
+    }
+
+    private func accountPickerButton(
+        user: UiProfile,
+        isSelected: Bool
+    ) -> some View {
+        Button {
+            presenter.state.selectAccount(accountKey: user.key)
         } label: {
-            label()
+            HStack(spacing: 10) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                    .frame(width: 24)
+                accountPickerRow(user: user)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(
+                isSelected ? Color.accentColor.opacity(0.12) : Color.clear,
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
     }

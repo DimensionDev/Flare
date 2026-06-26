@@ -22,14 +22,12 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class BlueskyFeedsPresenter(
     private val accountType: AccountType,
-) : PresenterBase<BlueskyFeedsState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<BlueskyFeedsState>() {
+    private val accountService: AccountService by koinInject()
 
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType).map {

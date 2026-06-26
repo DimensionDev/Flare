@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.model.IconType
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 // icon should add after the last one, otherwise it will break the serialization compatibility.
 // If you want to remove an icon, please deprecate it and hide it from the tab/group icon picker instead of removing it directly.
@@ -72,6 +73,7 @@ public enum class UiIcon {
  * Keep this list in sync with UiIcon.toImageVector(): entries that render to the
  * same Font Awesome icon should appear only once here.
  */
+@HiddenFromObjC
 public val TabPickerUiIcons: List<UiIcon> =
     listOf(
         UiIcon.Twitter,
@@ -121,4 +123,5 @@ public val TabPickerUiIcons: List<UiIcon> =
         UiIcon.UnFavourite,
     )
 
+@HiddenFromObjC
 public fun UiIcon.asType(): IconType = IconType.Material(this)

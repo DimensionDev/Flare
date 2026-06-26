@@ -28,16 +28,14 @@ import io.ktor.http.set
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("editRssSource")
 public class EditRssSourcePresenter(
     private val id: Int?,
-) : PresenterBase<EditRssSourcePresenter.State>(),
-    KoinComponent {
-    private val subscriptionRepository: SubscriptionRepository by inject()
-    private val scope by inject<CoroutineScope>()
+) : PresenterBase<EditRssSourcePresenter.State>() {
+    private val subscriptionRepository: SubscriptionRepository by koinInject()
+    private val scope by koinInject<CoroutineScope>()
 
     @Immutable
     public interface State {

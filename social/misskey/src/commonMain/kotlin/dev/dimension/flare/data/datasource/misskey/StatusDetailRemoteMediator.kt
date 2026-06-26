@@ -10,7 +10,6 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import org.koin.core.component.KoinComponent
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -18,8 +17,7 @@ internal class StatusDetailRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val statusOnly: Boolean,
-) : CacheableRemoteLoader<UiTimelineV2>,
-    KoinComponent {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String =
         buildString {
             append("status_detail_")

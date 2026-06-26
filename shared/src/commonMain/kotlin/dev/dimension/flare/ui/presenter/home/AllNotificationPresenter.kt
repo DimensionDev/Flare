@@ -43,8 +43,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public data class NotificationAccountItem(
     val stableKey: String,
@@ -54,9 +53,8 @@ public data class NotificationAccountItem(
 
 @WebPresenter("notifications")
 public class AllNotificationPresenter :
-    PresenterBase<AllNotificationPresenter.State>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    PresenterBase<AllNotificationPresenter.State>() {
+    private val accountRepository: AccountRepository by koinInject()
     private val selectedAccountFlow = MutableStateFlow<UiProfile?>(null)
     private val selectedNotificationFilterFlow = MutableStateFlow<NotificationFilter?>(null)
 

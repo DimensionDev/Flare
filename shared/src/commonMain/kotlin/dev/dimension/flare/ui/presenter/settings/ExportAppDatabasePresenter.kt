@@ -7,13 +7,11 @@ import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.ui.presenter.ExportState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ExportAppDatabasePresenter :
-    PresenterBase<ExportState>(),
-    KoinComponent {
-    private val appDatabase: AppDatabase by inject()
+    PresenterBase<ExportState>() {
+    private val appDatabase: AppDatabase by koinInject()
 
     @Composable
     override fun body(): ExportState =

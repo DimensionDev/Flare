@@ -6,7 +6,9 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.asType
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun UiSourceTimelineTabItem.Companion.xqtDeviceFollow(accountKey: MicroBlogKey): UiSourceTimelineTabItem =
     XqtPlatformSpec.deviceFollowTimelineSpec
         .candidate(

@@ -15,13 +15,11 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ActiveAccountPresenter :
-    PresenterBase<UserState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+    PresenterBase<UserState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val userFlow by lazy {

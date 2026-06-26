@@ -1,0 +1,43 @@
+import SwiftUI
+import KotlinSharedUI
+import FlareAppleCore
+
+struct UserListView: View {
+    @Environment(\.openURL) private var openURL
+    let data: UiTimelineV2.UserList
+
+    var body: some View {
+        VStack {
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(data.users, id: \.key) { user in
+                        UserCompatView(data: user)
+                            .padding(8)
+                            .frame(width: 280)
+                            .clipShape(.rect(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.flareSeparator, lineWidth: 1)
+                            )
+                            .onTapGesture {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            }
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+            if let status = data.post {
+                VStack {
+                    StatusView(data: status, isQuote: true, forceHideActions: true)
+                        .padding(8)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipShape(.rect(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.flareSeparator, lineWidth: 1)
+                )
+            }
+        }
+    }
+}

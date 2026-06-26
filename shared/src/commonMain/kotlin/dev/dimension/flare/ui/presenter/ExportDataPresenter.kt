@@ -5,11 +5,9 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.model.DataExport
 import dev.dimension.flare.ui.presenter.settings.ExportAppDatabasePresenter
 import kotlinx.serialization.json.Json
-import org.koin.core.component.KoinComponent
 
 public class ExportDataPresenter :
-    PresenterBase<ExportState>(),
-    KoinComponent {
+    PresenterBase<ExportState>() {
     private val exportAppDatabasePresenter = ExportAppDatabasePresenter()
     private val exportSettingsPresenter = ExportSettingsPresenter()
     private val json = Json { ignoreUnknownKeys = true }

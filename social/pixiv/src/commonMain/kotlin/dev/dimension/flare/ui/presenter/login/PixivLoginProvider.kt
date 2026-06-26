@@ -30,8 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -82,10 +81,9 @@ public data object PixivLoginProvider : LoginPlatformProvider {
 
 private class PixivOAuthLoginHandler(
     private val context: LoginContext,
-) : LoginMethodHandler,
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val pendingRepository: PlatformOAuthPendingRepository by inject()
+) : LoginMethodHandler {
+    private val accountService: AccountService by koinInject()
+    private val pendingRepository: PlatformOAuthPendingRepository by koinInject()
     private val _state = MutableStateFlow(oauthState())
     private val _effects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
     private val resumeMutex = Mutex()

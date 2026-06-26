@@ -69,6 +69,9 @@ internal class LocalHistoryAgentUseCase(
     ) {
         val normalizedQuery = query?.trim()?.takeIf { it.isNotBlank() }
         val userInputValue = userInput?.trim().orEmpty()
+        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+            return
+        }
         if (userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }

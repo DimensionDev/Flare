@@ -43,12 +43,22 @@ jobs:
         run: xcodebuild -downloadPlatform iOS
       - name: Install XcodeGen
         run: brew install xcodegen
-      - name: Generate Xcode project
-        run: xcodegen generate --spec iosApp/project.yml
-      - name: Build
-        working-directory: ./iosApp
+      - name: Add Firebase config
         env:
-          scheme: Flare
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}
+        run: |
+          if [ -n "${GOOGLE_SERVICE_INFO_PLIST_B64:-}" ]; then
+            mkdir -p appleApp/Firebase
+            printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 -D > appleApp/Firebase/GoogleService-Info.plist
+          else
+            echo "GOOGLE_SERVICE_INFO_PLIST_B64 is not set; Firebase config will not be bundled."
+          fi
+      - name: Generate Xcode project
+        run: xcodegen generate --spec appleApp/project.yml
+      - name: Build
+        working-directory: ./appleApp
+        env:
+          scheme: iOS
           platform: ${{ 'iOS Simulator' }}
         run: |
           # xcrun xctrace returns via stderr, not the expected stdout (see https://developer.apple.com/forums/thread/663959)

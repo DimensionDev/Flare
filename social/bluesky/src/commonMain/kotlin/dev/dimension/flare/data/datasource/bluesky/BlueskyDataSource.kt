@@ -99,8 +99,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
@@ -125,15 +124,14 @@ internal class BlueskyDataSource(
     NotificationDataSource,
     UserDataSource,
     PostDataSource,
-    KoinComponent,
     ListDataSource,
     PinnableTimelineTabDataSource,
     TimelineTabConfigurationDataSource,
     RelationDataSource,
     DirectMessageDataSource,
     PostEventHandler.Handler {
-    private val coroutineScope: CoroutineScope by inject()
-    private val imageCompressor: ImageCompressor by inject()
+    private val coroutineScope: CoroutineScope by koinInject()
+    private val imageCompressor: ImageCompressor by koinInject()
     private var cachedPdsService: BlueskyService? = null
 
     private val mutex = Mutex(locked = false)

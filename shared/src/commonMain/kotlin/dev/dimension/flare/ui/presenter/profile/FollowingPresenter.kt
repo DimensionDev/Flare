@@ -19,14 +19,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public abstract class UserListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<UserListPresenter.State>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<UserListPresenter.State>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Immutable
     public interface State {

@@ -38,23 +38,21 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("statusContext")
 public class StatusContextPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<StatusContextPresenter.State>(),
-    KoinComponent {
+) : PresenterBase<StatusContextPresenter.State>() {
     @Immutable
     public interface State : TimelineState {
         public val current: UiState<UiTimelineV2>
     }
 
-    private val database: CacheDatabase by inject()
-    private val accountRepository: AccountRepository by inject()
+    private val database: CacheDatabase by koinInject()
+    private val accountRepository: AccountRepository by koinInject()
 
     private val currentStatusFlow by lazy {
         accountServiceFlow(

@@ -4,6 +4,7 @@ collection = "1.6.0"
 compileSdk = "37"
 composemediaplayer = "0.9.0"
 composewebview = "1.0.0-beta-02"
+crashkios = "0.9.0"
 cryptographyProviderOptimal = "0.5.0"
 jna = "5.19.1"
 lifecycleViewmodelComposeVersion = "2.10.0"
@@ -19,7 +20,7 @@ lifecycle-runtime-ktx = "2.11.0"
 activity-compose = "1.13.0"
 compose-bom = "2026.06.00"
 ksp = "2.3.9"
-koog = "1.0.0"
+koog = "1.0.1-SNAPSHOT"
 nucleus = "1.15.7"
 openaiClient = "4.1.0"
 paging = "3.5.0"
@@ -76,6 +77,7 @@ androidx-collection = { module = "androidx.collection:collection", version.ref =
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
 bluesky-oauth = { module = "moe.tlaster.ozone:oauth", version.ref = "bluesky" }
 composewebview = { module = "io.github.kdroidfilter:composewebview", version.ref = "composewebview" }
+crashkios-crashlytics = { module = "co.touchlab.crashkios:crashlytics", version.ref = "crashkios" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal", version.ref = "cryptographyProviderOptimal" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
@@ -83,9 +85,9 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup", version.ref = "ksoup" }
-koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
-koog-agents-features-memory = { module = "ai.koog:agents-features-memory", version.ref = "koog" }
-koog-http-client-ktor = { module = "ai.koog:http-client-ktor", version.ref = "koog" }
+koog-agents = { module = "moe.tlaster:koog-agents", version.ref = "koog" }
+koog-agents-features-memory = { module = "moe.tlaster:agents-features-memory", version.ref = "koog" }
+koog-http-client-ktor = { module = "moe.tlaster:http-client-ktor", version.ref = "koog" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }

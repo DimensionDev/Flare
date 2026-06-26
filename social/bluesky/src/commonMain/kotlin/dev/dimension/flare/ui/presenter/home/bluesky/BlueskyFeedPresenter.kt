@@ -28,15 +28,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class BlueskyFeedPresenter(
     private val accountType: AccountType,
     private val uri: String,
-) : PresenterBase<BlueskyFeedState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<BlueskyFeedState>() {
+    private val accountService: AccountService by koinInject()
 
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType).map {

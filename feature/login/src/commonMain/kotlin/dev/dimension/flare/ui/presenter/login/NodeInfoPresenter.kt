@@ -34,14 +34,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("loginServiceSelect")
 public class NodeInfoPresenter :
-    PresenterBase<NodeInfoState>(),
-    KoinComponent {
-    private val loginPlatformRegistry: LoginPlatformRegistry by inject()
+    PresenterBase<NodeInfoState>() {
+    private val loginPlatformRegistry: LoginPlatformRegistry by koinInject()
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @Composable

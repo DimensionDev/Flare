@@ -10,13 +10,11 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class LocalFilterPresenter :
-    PresenterBase<LocalFilterState>(),
-    KoinComponent {
-    private val repository by inject<LocalFilterRepository>()
+    PresenterBase<LocalFilterState>() {
+    private val repository by koinInject<LocalFilterRepository>()
 
     @Composable
     override fun body(): LocalFilterState {

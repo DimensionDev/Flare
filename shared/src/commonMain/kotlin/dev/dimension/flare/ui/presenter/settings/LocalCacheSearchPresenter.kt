@@ -25,15 +25,13 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("localCacheSearch")
 public class LocalCacheSearchPresenter :
-    PresenterBase<LocalCacheSearchPresenter.State>(),
-    KoinComponent {
-    private val database: CacheDatabase by inject()
-    private val accountRepository: AccountRepository by inject()
+    PresenterBase<LocalCacheSearchPresenter.State>() {
+    private val database: CacheDatabase by koinInject()
+    private val accountRepository: AccountRepository by koinInject()
 
     @androidx.compose.runtime.Immutable
     public interface State {

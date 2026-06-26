@@ -19,8 +19,7 @@ import dev.dimension.flare.ui.presenter.home.TimelineState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class RssTimelinePresenter(
     private val url: String,
@@ -40,10 +39,9 @@ public class SubscriptionTimelinePresenter(
 }
 
 public class AllRssTimelinePresenter :
-    TimelinePresenter(),
-    KoinComponent {
-    private val subscriptionRepository: SubscriptionRepository by inject()
-    private val subscriptionTimelineLoaderFactory: SubscriptionTimelineLoaderFactory by inject()
+    TimelinePresenter() {
+    private val subscriptionRepository: SubscriptionRepository by koinInject()
+    private val subscriptionTimelineLoaderFactory: SubscriptionTimelineLoaderFactory by koinInject()
 
     override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         subscriptionRepository
@@ -61,9 +59,8 @@ public class AllRssTimelinePresenter :
 
 public class RssSourcePresenter(
     private val id: Int,
-) : PresenterBase<RssSourcePresenter.State>(),
-    KoinComponent {
-    private val subscriptionRepository: SubscriptionRepository by inject()
+) : PresenterBase<RssSourcePresenter.State>() {
+    private val subscriptionRepository: SubscriptionRepository by koinInject()
 
     @androidx.compose.runtime.Immutable
     public interface State {

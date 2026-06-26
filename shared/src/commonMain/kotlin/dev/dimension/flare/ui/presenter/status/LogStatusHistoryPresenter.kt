@@ -11,20 +11,18 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class LogStatusHistoryPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<LogStatusHistoryPresenter.State>(),
-    KoinComponent {
+) : PresenterBase<LogStatusHistoryPresenter.State>() {
     internal companion object {
         const val PAGING_KEY = STATUS_HISTORY_PAGING_KEY
     }
 
-    private val cacheDatabase: CacheDatabase by inject()
+    private val cacheDatabase: CacheDatabase by koinInject()
 
     @Immutable
     public interface State

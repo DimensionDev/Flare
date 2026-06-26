@@ -25,8 +25,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -35,9 +34,9 @@ public class ListHandler<T : UiList>(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,
     private val loader: ListLoader<T>,
-) : KoinComponent {
+)  {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
-    private val database: CacheDatabase by inject()
+    private val database: CacheDatabase by koinInject()
 
     public val supportedMetaData: ImmutableList<ListMetaDataType> by lazy {
         loader.supportedMetaData

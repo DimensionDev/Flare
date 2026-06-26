@@ -22,17 +22,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class DeepLinkPresenter(
     private val onRoute: (DeeplinkRoute) -> Unit,
     private val onLink: (String) -> Unit,
-) : PresenterBase<DeepLinkPresenter.State>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
-    private val preTranslationService: PreTranslationService by inject()
-    private val platformRegistry: PlatformRegistry by inject()
+) : PresenterBase<DeepLinkPresenter.State>() {
+    private val accountRepository: AccountRepository by koinInject()
+    private val preTranslationService: PreTranslationService by koinInject()
+    private val platformRegistry: PlatformRegistry by koinInject()
 
     @androidx.compose.runtime.Immutable
     public interface State {

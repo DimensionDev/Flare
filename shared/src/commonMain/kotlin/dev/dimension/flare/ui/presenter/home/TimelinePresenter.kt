@@ -59,8 +59,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class TimelinePresenterOptions(
     public val allowLongTextTranslationDisplay: (RemoteLoader<UiTimelineV2>) -> Boolean = { false },
@@ -70,20 +69,19 @@ public class TimelinePresenterOptions(
 @OptIn(ExperimentalPagingApi::class)
 @WebPresenter(name = "timeline", creatable = false)
 public open class TimelinePresenter :
-    PresenterBase<TimelineState>,
-    KoinComponent {
+    PresenterBase<TimelineState> {
     private val baseLoader: Flow<RemoteLoader<UiTimelineV2>>
     public open val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() = baseLoader
     private val options: TimelinePresenterOptions
 
-    private val database: CacheDatabase by inject()
-    private val appDataStore: AppDataStore by inject()
-    private val preTranslationService: PreTranslationService by inject()
-    private val settingsRepository: SettingsRepository by inject()
+    private val database: CacheDatabase by koinInject()
+    private val appDataStore: AppDataStore by koinInject()
+    private val preTranslationService: PreTranslationService by koinInject()
+    private val settingsRepository: SettingsRepository by koinInject()
 
-    private val localFilterRepository: LocalFilterRepository by inject()
-    private val inAppNotification: InAppNotification by inject()
+    private val localFilterRepository: LocalFilterRepository by koinInject()
+    private val inAppNotification: InAppNotification by koinInject()
 
     private val filterFlow: Flow<List<KeywordFilterPattern>> by lazy {
         localFilterRepository.getFlow(forTimeline = true)

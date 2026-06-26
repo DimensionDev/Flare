@@ -57,8 +57,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(
@@ -67,14 +66,13 @@ internal class VVODataSource(
 ) : AuthenticatedMicroblogDataSource,
     NotificationTimelineDataSource,
     ComposeDataSource,
-    KoinComponent,
     NotificationDataSource,
     UserDataSource,
     RelationDataSource,
     TimelineTabConfigurationDataSource,
     PostDataSource,
     PostEventHandler.Handler {
-    private val imageCompressor: ImageCompressor by inject()
+    private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         VVOService(
             chocolateFlow = credentialFlow.map { it.chocolate },

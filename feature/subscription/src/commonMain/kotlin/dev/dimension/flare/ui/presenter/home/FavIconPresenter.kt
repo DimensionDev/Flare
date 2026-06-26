@@ -7,12 +7,10 @@ import dev.dimension.flare.data.network.FaviconService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
 
 public class FavIconPresenter(
     private val host: String,
-) : PresenterBase<UiState<String>>(),
-    KoinComponent {
+) : PresenterBase<UiState<String>>() {
     private val cacheKey by lazy {
         "$host-favIcon"
     }

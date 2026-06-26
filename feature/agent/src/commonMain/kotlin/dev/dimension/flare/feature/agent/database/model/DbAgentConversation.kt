@@ -11,5 +11,6 @@ internal data class DbAgentConversation(
     val titleGenerated: Boolean,
     val createdAt: Long,
     val updatedAt: Long,
+    val isRunning: Boolean = false,
     val errorMessage: String?,
 )

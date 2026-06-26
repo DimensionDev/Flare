@@ -53,17 +53,15 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("profile")
 public class ProfilePresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
-) : PresenterBase<ProfileState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<ProfileState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     private val serviceFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
@@ -522,9 +520,8 @@ public class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
     private val accountType: AccountType,
-) : PresenterBase<UserState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<UserState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): UserState {

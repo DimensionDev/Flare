@@ -61,11 +61,17 @@ internal class StatusInsightAgentUseCase(
         conversationId: String,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
+        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
+            return
+        }
         if (userInputValue.isBlank()) {
             agentRunner.clearConversation(conversationId)
         }
         send(AgentTrace(AgentPhase.LoadingPostContext).toConversationEvent())
         val post = postDataSource.loadPost(statusKey)
+        if (userInputValue.isBlank()) {
+            chatHistoryProvider.ensureConversationTitle(conversationId, post.insightConversationTitle())
+        }
         send(AgentConversationEvent.ContentLoaded(post))
         send(AgentTrace(AgentPhase.PostContextLoaded).toConversationEvent())
         val imageAttachments = post.aiImageAttachments()
@@ -289,6 +295,14 @@ internal class StatusInsightAgentUseCase(
                 appendLine("- ${reaction.name}: ${reaction.count.value}")
             }
         }
+
+    private fun UiTimelineV2.Post.insightConversationTitle(): String =
+        content.raw.trim()
+            .ifBlank { contentWarning?.raw.orEmpty().trim() }
+            .ifBlank { card?.title.orEmpty().trim() }
+            .ifBlank { user?.name?.raw.orEmpty().trim() }
+            .ifBlank { user?.handle?.raw.orEmpty().trim() }
+            .ifBlank { statusKey.toString() }
 
     private fun UiTimelineV2.Post.aiImageAttachments(): List<UiMedia.Image> =
         images

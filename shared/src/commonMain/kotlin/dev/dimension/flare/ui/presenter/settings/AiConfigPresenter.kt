@@ -30,8 +30,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public enum class AiTypeOption {
     OnDevice,
@@ -57,11 +56,10 @@ public enum class TranslateProviderOption {
 
 @WebPresenter("aiConfig")
 public class AiConfigPresenter :
-    PresenterBase<AiConfigPresenter.State>(),
-    KoinComponent {
-    private val appDataStore by inject<AppDataStore>()
-    private val openAIService by inject<OpenAIService>()
-    private val onDeviceAI by inject<OnDeviceAI>()
+    PresenterBase<AiConfigPresenter.State>() {
+    private val appDataStore by koinInject<AppDataStore>()
+    private val openAIService by koinInject<OpenAIService>()
+    private val onDeviceAI by koinInject<OnDeviceAI>()
 
     @Immutable
     public interface State {

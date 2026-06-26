@@ -19,15 +19,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class MixedTimelinePresenter(
     id: String,
     private val fallbackSubTimelinePresenter: List<TimelinePresenter> = emptyList(),
     private val fallbackMergePolicy: TimelineMergePolicy = TimelineMergePolicy.TimePerPage,
-) : TimelinePresenter(tabId = id),
-    KoinComponent {
+) : TimelinePresenter(tabId = id) {
     private val groupId = id
 
     public constructor(
@@ -39,9 +37,9 @@ public class MixedTimelinePresenter(
         fallbackMergePolicy = mergePolicy,
     )
 
-    private val database: CacheDatabase by inject()
-    private val settingsRepository: SettingsRepository by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val database: CacheDatabase by koinInject()
+    private val settingsRepository: SettingsRepository by koinInject()
+    private val timelineResolver: TimelineResolver by koinInject()
 
     private val groupTabFlow: Flow<UiGroupTimelineTabItem?> by lazy {
         settingsRepository
@@ -96,13 +94,12 @@ public class MixedTimelinePresenter(
 
 public class SystemHomeMixedTimelinePresenter(
     id: String,
-) : TimelinePresenter(tabId = id),
-    KoinComponent {
+) : TimelinePresenter(tabId = id) {
     private val groupId = id
 
-    private val database: CacheDatabase by inject()
-    private val settingsRepository: SettingsRepository by inject()
-    private val timelineResolver: TimelineResolver by inject()
+    private val database: CacheDatabase by koinInject()
+    private val settingsRepository: SettingsRepository by koinInject()
+    private val timelineResolver: TimelineResolver by koinInject()
 
     private val groupTabFlow: Flow<UiGroupTimelineTabItem?> by lazy {
         settingsRepository

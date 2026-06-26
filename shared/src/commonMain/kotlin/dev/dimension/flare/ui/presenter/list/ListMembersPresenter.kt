@@ -18,8 +18,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @Immutable
 public interface ListMembersState {
@@ -29,9 +28,8 @@ public interface ListMembersState {
 public class ListMembersPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<ListMembersState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<ListMembersState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val membersFlow by lazy {

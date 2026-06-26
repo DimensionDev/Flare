@@ -16,14 +16,12 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class NostrRelaysPresenter(
     private val accountKey: MicroBlogKey,
-) : PresenterBase<NostrRelaysPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<NostrRelaysPresenter.State>() {
+    private val accountService: AccountService by koinInject()
 
     @Immutable
     public interface State {

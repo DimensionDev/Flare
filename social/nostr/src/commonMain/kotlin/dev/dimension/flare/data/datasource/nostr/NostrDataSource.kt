@@ -53,8 +53,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 internal typealias NostrServiceManager = SwitchingServiceManager<NostrCredential, NostrService>
 
@@ -69,11 +68,10 @@ internal class NostrDataSource(
     TimelineTabConfigurationDataSource,
     PostDataSource,
     PostEventHandler.Handler,
-    KoinComponent,
     AutoCloseable {
-    private val ioScope: CoroutineScope by inject()
-    private val nostrCache: NostrCache by inject()
-    private val amberSignerBridge: AmberSignerBridge by inject()
+    private val ioScope: CoroutineScope by koinInject()
+    private val nostrCache: NostrCache by koinInject()
+    private val amberSignerBridge: AmberSignerBridge by koinInject()
     private val loader by lazy {
         NostrLoader(
             accountKey = accountKey,

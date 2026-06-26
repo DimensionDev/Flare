@@ -5,15 +5,13 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 
 @WebPresenter("dataTransfer")
 public class WebDataTransferPresenter(
     private val onExported: (String) -> Unit,
     private val onImported: () -> Unit,
     private val onError: (String) -> Unit,
-) : PresenterBase<WebDataTransferState>(),
-    KoinComponent {
+) : PresenterBase<WebDataTransferState>() {
     private val exportDataPresenter = ExportDataPresenter()
 
     @Composable

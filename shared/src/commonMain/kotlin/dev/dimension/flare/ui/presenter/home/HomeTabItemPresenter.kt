@@ -11,14 +11,12 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.guestMastodonHomeTimelineTab
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class HomeTabItemPresenter(
     private val id: String,
-) : PresenterBase<HomeTabItemPresenter.State>(),
-    KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
+) : PresenterBase<HomeTabItemPresenter.State>() {
+    private val settingsRepository: SettingsRepository by koinInject()
 
     public interface State {
         public val tabItem: UiState<UiTimelineTabItem>

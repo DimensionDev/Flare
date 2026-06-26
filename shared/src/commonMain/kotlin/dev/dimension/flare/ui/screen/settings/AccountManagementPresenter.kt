@@ -11,11 +11,9 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
-import org.koin.core.component.KoinComponent
 
 public class AccountManagementPresenter :
-    PresenterBase<AccountManagementPresenter.State>(),
-    KoinComponent {
+    PresenterBase<AccountManagementPresenter.State>() {
     public interface State : AccountsState {
         public fun logout(accountKey: MicroBlogKey)
 

@@ -28,15 +28,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class MisskeyChannelPresenter(
     private val accountType: AccountType,
     private val channelId: String,
-) : PresenterBase<MisskeyChannelState>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
+) : PresenterBase<MisskeyChannelState>() {
+    private val accountService: AccountService by koinInject()
 
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType).map {

@@ -12,6 +12,7 @@ import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
 import dev.dimension.flare.feature.agent.profile.ProfileInsightAgentUseCase
 import dev.dimension.flare.model.AccountType
@@ -22,17 +23,15 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ProfileInsightPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
-) : PresenterBase<ProfileInsightPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val profileInsightAgentUseCase: ProfileInsightAgentUseCase by inject()
-    private val historyProvider: AgentChatHistoryProvider by inject()
+) : PresenterBase<ProfileInsightPresenter.State>() {
+    private val accountService: AccountService by koinInject()
+    private val profileInsightAgentUseCase: ProfileInsightAgentUseCase by koinInject()
+    private val historyProvider: AgentChatHistoryProvider by koinInject()
 
     @Immutable
     public interface State {
@@ -102,8 +101,22 @@ public class ProfileInsightPresenter(
                 onInputRequestSelected = { requestId, optionId ->
                     historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
                 },
+                onInitialContentLoaded = { profile ->
+                    historyProvider.storeUserUiMessage(
+                        conversationId = conversationId,
+                        displayText = profile.insightUserMessageTitle(),
+                        parts = listOf(AgentMessagePart.UserCard(profile)),
+                    )
+                },
                 onAgentRunCompleted = {
                     historyProvider.generateTitleIfNeeded(conversationId)
+                },
+                onRoomRuntimeStateChanged = { isRunning ->
+                    historyProvider.updateRoomState(
+                        conversationId = conversationId,
+                        isRunning = isRunning,
+                        updateErrorMessage = false,
+                    )
                 },
                 onRoomStateChanged = { errorMessage ->
                     historyProvider.updateRoomState(
@@ -159,3 +172,9 @@ public class ProfileInsightPresenter(
         val searchDataSources: List<AccountMicroblogDataSource>,
     )
 }
+
+private fun UiProfile.insightUserMessageTitle(): String =
+    name.raw.trim()
+        .ifBlank { handle.raw.trim() }
+        .ifBlank { description?.raw.orEmpty().trim() }
+        .ifBlank { key.toString() }

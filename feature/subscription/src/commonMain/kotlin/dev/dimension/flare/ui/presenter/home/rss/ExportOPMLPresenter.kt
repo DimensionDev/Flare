@@ -16,14 +16,12 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first
 import nl.adaptivity.xmlutil.serialization.XML
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class ExportOPMLPresenter :
-    PresenterBase<UiState<String>>(),
-    KoinComponent {
-    private val subscriptionRepository: SubscriptionRepository by inject()
+    PresenterBase<UiState<String>>() {
+    private val subscriptionRepository: SubscriptionRepository by koinInject()
 
     @Composable
     override fun body(): UiState<String> {

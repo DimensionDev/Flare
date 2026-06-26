@@ -4,12 +4,10 @@ import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.model.DataExport
 import dev.dimension.flare.ui.presenter.settings.ImportAppDatabasePresenter
-import org.koin.core.component.KoinComponent
 
 public class ImportDataPresenter(
     private val jsonContent: String,
-) : PresenterBase<ImportState>(),
-    KoinComponent {
+) : PresenterBase<ImportState>() {
     @Composable
     override fun body(): ImportState =
         object : ImportState {

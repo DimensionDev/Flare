@@ -12,6 +12,7 @@ import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
 import dev.dimension.flare.feature.agent.status.StatusInsightAgentUseCase
 import dev.dimension.flare.model.AccountType
@@ -22,17 +23,15 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class StatusInsightPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<StatusInsightPresenter.State>(),
-    KoinComponent {
-    private val accountService: AccountService by inject()
-    private val statusInsightAgentUseCase: StatusInsightAgentUseCase by inject()
-    private val historyProvider: AgentChatHistoryProvider by inject()
+) : PresenterBase<StatusInsightPresenter.State>() {
+    private val accountService: AccountService by koinInject()
+    private val statusInsightAgentUseCase: StatusInsightAgentUseCase by koinInject()
+    private val historyProvider: AgentChatHistoryProvider by koinInject()
 
     @Immutable
     public interface State {
@@ -102,8 +101,22 @@ public class StatusInsightPresenter(
                 onInputRequestSelected = { requestId, optionId ->
                     historyProvider.markInputRequestSelected(conversationId, requestId, optionId)
                 },
+                onInitialContentLoaded = { post ->
+                    historyProvider.storeUserUiMessage(
+                        conversationId = conversationId,
+                        displayText = post.insightUserMessageTitle(),
+                        parts = listOf(AgentMessagePart.PostCard(post)),
+                    )
+                },
                 onAgentRunCompleted = {
                     historyProvider.generateTitleIfNeeded(conversationId)
+                },
+                onRoomRuntimeStateChanged = { isRunning ->
+                    historyProvider.updateRoomState(
+                        conversationId = conversationId,
+                        isRunning = isRunning,
+                        updateErrorMessage = false,
+                    )
                 },
                 onRoomStateChanged = { errorMessage ->
                     historyProvider.updateRoomState(
@@ -159,3 +172,11 @@ public class StatusInsightPresenter(
         val searchDataSources: List<AccountMicroblogDataSource>,
     )
 }
+
+private fun UiTimelineV2.Post.insightUserMessageTitle(): String =
+    content.raw.trim()
+        .ifBlank { contentWarning?.raw.orEmpty().trim() }
+        .ifBlank { card?.title.orEmpty().trim() }
+        .ifBlank { user?.name?.raw.orEmpty().trim() }
+        .ifBlank { user?.handle?.raw.orEmpty().trim() }
+        .ifBlank { statusKey.toString() }

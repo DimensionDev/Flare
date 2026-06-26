@@ -17,8 +17,8 @@ files:
       "excluded_target_languages": ["fr", "it"],
     },
     {
-      "source": "iosApp/flare/Localizable.xcstrings",
-      "translation": "iosApp/flare/Localizable.xcstrings",
+      "source": "appleApp/Shared/FlareAppleResource/Resources/Localizable.xcstrings",
+      "translation": "appleApp/Shared/FlareAppleResource/Resources/Localizable.xcstrings",
       "multilingual": true,
     },
   ]

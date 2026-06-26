@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 public expect class PlatformText
 
@@ -121,6 +122,7 @@ public data class UiRichText(
     }
 }
 
+@HiddenFromObjC
 public fun uiRichTextOf(
     renderRuns: List<RenderContent>,
     raw: String? = null,
@@ -139,6 +141,7 @@ public fun uiRichTextOf(
     )
 }
 
+@HiddenFromObjC
 public fun String.toUiPlainText(sourceLanguages: List<String> = emptyList()): UiRichText =
     UiRichText(
         renderRuns =
@@ -180,6 +183,7 @@ public fun UiRichText.toTranslatableText(): String {
     return builder.toString().trim()
 }
 
+@HiddenFromObjC
 public fun RenderContent.Text.plainText(): String =
     buildString {
         runs.forEach { run ->

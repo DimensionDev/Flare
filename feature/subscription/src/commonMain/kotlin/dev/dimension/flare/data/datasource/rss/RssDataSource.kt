@@ -5,10 +5,8 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.subscription.KoinSubscriptionDataSource
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
-import org.koin.core.component.KoinComponent
 
-internal object RssDataSource :
-    KoinComponent {
+internal object RssDataSource {
     fun fetchLoader(url: String) = KoinSubscriptionDataSource.createTimelineLoader(SubscriptionType.RSS, url)
 
     fun fetchLoader(

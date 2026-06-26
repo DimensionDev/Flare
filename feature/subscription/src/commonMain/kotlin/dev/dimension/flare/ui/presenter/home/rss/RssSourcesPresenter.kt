@@ -20,15 +20,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("rssSources")
 public class RssSourcesPresenter :
-    PresenterBase<RssSourcesPresenter.State>(),
-    KoinComponent {
-    private val subscriptionRepository by inject<SubscriptionRepository>()
-    private val settingsRepository by inject<SettingsRepository>()
+    PresenterBase<RssSourcesPresenter.State>() {
+    private val subscriptionRepository by koinInject<SubscriptionRepository>()
+    private val settingsRepository by koinInject<SettingsRepository>()
 
     @androidx.compose.runtime.Immutable
     public interface State {

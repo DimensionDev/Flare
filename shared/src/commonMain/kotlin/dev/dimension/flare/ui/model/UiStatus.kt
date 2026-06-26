@@ -10,8 +10,10 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 
+@HiddenFromObjC
 public fun createSampleStatus(user: UiProfile): UiTimelineV2.Post =
     UiTimelineV2.Post(
         message = null,

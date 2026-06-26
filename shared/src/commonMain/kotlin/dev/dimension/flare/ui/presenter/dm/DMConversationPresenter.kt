@@ -24,16 +24,14 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.seconds
 
 public class DMConversationPresenter(
     private val accountType: AccountType,
     private val roomKey: MicroBlogKey,
-) : PresenterBase<DMConversationState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<DMConversationState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): DMConversationState {

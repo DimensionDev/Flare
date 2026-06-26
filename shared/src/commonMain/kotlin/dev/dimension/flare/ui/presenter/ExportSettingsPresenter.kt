@@ -5,13 +5,11 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class ExportSettingsPresenter :
-    PresenterBase<ExportState>(),
-    KoinComponent {
-    private val settingsRepository: SettingsRepository by inject()
+    PresenterBase<ExportState>() {
+    private val settingsRepository: SettingsRepository by koinInject()
 
     @Composable
     override fun body(): ExportState =

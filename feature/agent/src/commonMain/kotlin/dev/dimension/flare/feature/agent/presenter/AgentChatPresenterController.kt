@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
@@ -18,10 +18,15 @@ import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -86,17 +91,24 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         }
     },
     onInputRequestSelected: suspend (String, String) -> Unit = { _, _ -> },
+    onInitialContentLoaded: suspend (Content) -> Unit = {},
     onAgentRunCompleted: suspend () -> Unit = {},
+    onRoomRuntimeStateChanged: suspend (isRunning: Boolean) -> Unit = {},
     onRoomStateChanged: suspend (errorMessage: String?) -> Unit,
     missingContextError: () -> Throwable,
     autoRunOnContext: Boolean = true,
     initialUserInput: String? = null,
 ): AgentChatPresenterController<Content, Context> {
-    val scope = rememberCoroutineScope()
     val runtime =
-        remember(key, conversationId) {
-            AgentChatPresenterRuntime<Context>()
+        remember(conversationId) {
+            AgentChatRunRegistry.retainRuntime(conversationId)
         }
+    DisposableEffect(conversationId, runtime) {
+        onDispose {
+            AgentChatRunRegistry.releaseRuntime(conversationId, runtime)
+        }
+    }
+    val runState by runtime.state.collectAsState()
     val messages =
         remember(messageRecords) {
             messageRecords.toImmutableList()
@@ -104,41 +116,35 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
     var input by remember(key, conversationId) {
         mutableStateOf("")
     }
-    var content by remember(key, conversationId) {
-        mutableStateOf<Content?>(null)
-    }
-    var isRunning by remember(key, conversationId) {
-        mutableStateOf(false)
-    }
-    var currentTrace by remember(key, conversationId) {
-        mutableStateOf<AgentTrace?>(null)
-    }
-
-    DisposableEffect(key, conversationId) {
-        onDispose {
-            runtime.runJob?.cancel()
-            runtime.runJob = null
-            runtime.titleGenerationJob?.cancel()
-            runtime.titleGenerationJob = null
-        }
-    }
 
     suspend fun setPersistentError(errorMessage: String?) {
         onRoomStateChanged(errorMessage)
     }
 
-    fun setRuntimeState(
+    suspend fun setRuntimeState(
         running: Boolean,
         trace: AgentTrace?,
     ) {
-        isRunning = running
-        currentTrace = trace
+        val previousState = runtime.state.value
+        AgentChatRunRegistry.updateState(runtime) { state ->
+            state.copy(
+                isRunning = running,
+                currentTrace = trace,
+            )
+        }
+        if (previousState.isRunning != running) {
+            onRoomRuntimeStateChanged(running)
+        }
     }
 
-    fun appendTrace(trace: AgentTrace) {
-        isRunning = true
-        if (currentTrace != trace) {
-            currentTrace = trace
+    suspend fun appendTrace(trace: AgentTrace) {
+        if (runtime.state.value.currentTrace != trace || !runtime.state.value.isRunning) {
+            AgentChatRunRegistry.updateState(runtime) { state ->
+                state.copy(
+                    isRunning = true,
+                    currentTrace = trace,
+                )
+            }
         }
     }
 
@@ -146,16 +152,15 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         if (runtime.titleGenerationJob?.isActive == true) {
             return
         }
-        runtime.titleGenerationJob =
-            scope.launch {
-                try {
-                    onAgentRunCompleted()
-                } catch (throwable: Throwable) {
-                    if (throwable is CancellationException) {
-                        throw throwable
-                    }
+        AgentChatRunRegistry.launchTitleGeneration(conversationId, runtime) {
+            try {
+                onAgentRunCompleted()
+            } catch (throwable: Throwable) {
+                if (throwable is CancellationException) {
+                    throw throwable
                 }
             }
+        }
     }
 
     fun List<AgentChatHistoryMessage>.latestOpenInputRequest(): AgentInputRequest? =
@@ -171,11 +176,12 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             }
 
     fun runCurrentAgent(userInput: String?) {
+        @Suppress("UNCHECKED_CAST")
         val contextValue =
-            runtime.context
+            runtime.context as? Context
                 ?: run {
                     val throwable = missingContextError()
-                    scope.launch {
+                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
                         setRuntimeState(running = false, trace = null)
                         setPersistentError(throwable.message)
                     }
@@ -184,51 +190,57 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         runtime.runJob?.cancel()
         val generation = runtime.runGeneration + 1
         runtime.runGeneration = generation
-        runtime.runJob =
-            scope.launch {
-                setRuntimeState(running = true, trace = null)
-                setPersistentError(null)
-                var failed = false
-                var cancelled = false
-                try {
-                    runAgent(contextValue, userInput, conversationId).collect { event ->
-                        when (event) {
-                            is AgentConversationEvent.ContentLoaded -> {
-                                content = event.content
+        AgentChatRunRegistry.launchRun(conversationId, runtime) {
+            setRuntimeState(running = true, trace = null)
+            setPersistentError(null)
+            var failed = false
+            var cancelled = false
+            try {
+                runAgent(contextValue, userInput, conversationId).collect { event ->
+                    when (event) {
+                        is AgentConversationEvent.ContentLoaded -> {
+                            if (userInput == null && !runtime.initialContentMessageStored) {
+                                runtime.initialContentMessageStored = true
+                                onInitialContentLoaded(event.content)
                             }
-
-                            is AgentConversationEvent.Trace -> {
-                                appendTrace(event.trace)
-                            }
-
-                            is AgentConversationEvent.Result -> {
-                                setRuntimeState(running = true, trace = null)
+                            AgentChatRunRegistry.updateState(runtime) { state ->
+                                state.copy(
+                                    content = event.content,
+                                )
                             }
                         }
+
+                        is AgentConversationEvent.Trace -> {
+                            appendTrace(event.trace)
+                        }
+
+                        is AgentConversationEvent.Result -> {
+                            setRuntimeState(running = true, trace = null)
+                        }
                     }
-                } catch (throwable: Throwable) {
-                    if (throwable is CancellationException) {
-                        cancelled = true
-                    } else if (runtime.runGeneration == generation) {
-                        failed = true
-                        setRuntimeState(running = false, trace = null)
-                        setPersistentError(throwable.message)
-                    }
-                } finally {
-                    if (runtime.runGeneration == generation) {
-                        runtime.runJob = null
-                        if (!failed) {
-                            withContext(NonCancellable) {
-                                setRuntimeState(running = false, trace = null)
-                                setPersistentError(null)
-                            }
-                            if (!cancelled) {
-                                scheduleAgentRunCompleted()
-                            }
+                }
+            } catch (throwable: Throwable) {
+                if (throwable is CancellationException) {
+                    cancelled = true
+                } else if (runtime.runGeneration == generation) {
+                    failed = true
+                    setRuntimeState(running = false, trace = null)
+                    setPersistentError(throwable.message)
+                }
+            } finally {
+                if (runtime.runGeneration == generation) {
+                    if (!failed) {
+                        withContext(NonCancellable) {
+                            setRuntimeState(running = false, trace = null)
+                            setPersistentError(null)
+                        }
+                        if (!cancelled) {
+                            scheduleAgentRunCompleted()
                         }
                     }
                 }
             }
+        }
     }
 
     LaunchedEffect(key, conversationId) {
@@ -242,8 +254,6 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             runtime.context = contextValue
             if (!wasInitialized) {
                 input = ""
-                content = null
-                setRuntimeState(running = false, trace = null)
             }
             if (contextValue != null && (!wasInitialized || previousContext == null)) {
                 setPersistentError(null)
@@ -251,8 +261,10 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             val initialText = initialUserInput?.trim()?.takeIf { it.isNotEmpty() }
             if (!runtime.initialUserInputConsumed && initialText != null && contextValue != null) {
                 runtime.initialUserInputConsumed = true
-                onUserMessageSubmitted(initialText)
-                runCurrentAgent(userInput = initialText)
+                AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
+                    onUserMessageSubmitted(initialText)
+                    runCurrentAgent(userInput = initialText)
+                }
             } else if (autoRunOnContext && !runtime.autoRunOnContextConsumed && contextValue != null) {
                 runtime.autoRunOnContextConsumed = true
                 runCurrentAgent(userInput = null)
@@ -262,9 +274,11 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
 
     val runtimeRoom =
         room.copy(
-            isRunning = isRunning,
-            currentTrace = currentTrace,
+            isRunning = runState.isRunning,
+            currentTrace = runState.currentTrace,
         )
+    @Suppress("UNCHECKED_CAST")
+    val content = runState.content as? Content
 
     return AgentChatPresenterController(
         room = runtimeRoom,
@@ -276,16 +290,16 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         },
         sendMessage = {
             val text = input.trim()
-            if (text.isNotEmpty() && !isRunning) {
+            if (text.isNotEmpty() && !runtime.state.value.isRunning) {
                 if (runtime.context == null) {
                     val throwable = missingContextError()
-                    scope.launch {
+                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
                         setRuntimeState(running = false, trace = null)
                         setPersistentError(throwable.message)
                     }
                 } else {
                     input = ""
-                    scope.launch {
+                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
                         onUserMessageSubmitted(text)
                         runCurrentAgent(userInput = text)
                     }
@@ -294,19 +308,19 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         },
         selectInputRequestOption = { option ->
             val text = option.value.trim()
-            if (!option.submit && !isRunning) {
+            if (!option.submit && !runtime.state.value.isRunning) {
                 input = text
-            } else if (text.isNotEmpty() && !isRunning) {
+            } else if (text.isNotEmpty() && !runtime.state.value.isRunning) {
                 if (runtime.context == null) {
                     val throwable = missingContextError()
-                    scope.launch {
+                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
                         setRuntimeState(running = false, trace = null)
                         setPersistentError(throwable.message)
                     }
                 } else {
                     val request = messages.latestOpenInputRequestForOption(option)
                     input = ""
-                    scope.launch {
+                    AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
                         request?.let { selectedRequest ->
                             onInputRequestSelected(selectedRequest.requestId, option.id)
                         }
@@ -319,12 +333,164 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
     )
 }
 
-private class AgentChatPresenterRuntime<Context : Any> {
-    var context: Context? = null
+internal data class AgentChatPresenterRuntimeState(
+    val isRunning: Boolean = false,
+    val currentTrace: AgentTrace? = null,
+    val content: Any? = null,
+)
+
+internal class AgentChatPresenterRuntime {
+    val state: MutableStateFlow<AgentChatPresenterRuntimeState> = MutableStateFlow(AgentChatPresenterRuntimeState())
+    var context: Any? = null
     var contextInitialized: Boolean = false
     var runJob: Job? = null
     var titleGenerationJob: Job? = null
+    var activeTaskCount: Int = 0
+    var retainedPresenterCount: Int = 0
     var runGeneration: Int = 0
     var initialUserInputConsumed: Boolean = false
+    var initialContentMessageStored: Boolean = false
     var autoRunOnContextConsumed: Boolean = false
+}
+
+internal object AgentChatRunRegistry {
+    private val scope = CoroutineScope(SupervisorJob())
+    private val runtimes = MutableStateFlow<Map<String, AgentChatPresenterRuntime>>(emptyMap())
+
+    fun retainRuntime(conversationId: String): AgentChatPresenterRuntime {
+        val runtime = runtime(conversationId)
+        runtime.retainedPresenterCount += 1
+        return runtime
+    }
+
+    fun releaseRuntime(
+        conversationId: String,
+        runtime: AgentChatPresenterRuntime,
+    ) {
+        if (runtime.retainedPresenterCount > 0) {
+            runtime.retainedPresenterCount -= 1
+        }
+        releaseIfIdle(conversationId, runtime)
+    }
+
+    private fun runtime(conversationId: String): AgentChatPresenterRuntime {
+        runtimes.value[conversationId]?.let { return it }
+
+        val createdRuntime = AgentChatPresenterRuntime()
+        var selectedRuntime = createdRuntime
+        runtimes.update { currentRuntimes ->
+            currentRuntimes[conversationId]?.let { existingRuntime ->
+                selectedRuntime = existingRuntime
+                currentRuntimes
+            } ?: currentRuntimes + (conversationId to createdRuntime)
+        }
+        return selectedRuntime
+    }
+
+    fun updateState(
+        runtime: AgentChatPresenterRuntime,
+        transform: (AgentChatPresenterRuntimeState) -> AgentChatPresenterRuntimeState,
+    ) {
+        val state = transform(runtime.state.value)
+        runtime.state.value = state
+    }
+
+    fun launchRuntimeTask(
+        conversationId: String,
+        runtime: AgentChatPresenterRuntime,
+        block: suspend CoroutineScope.() -> Unit,
+    ): Job {
+        runtime.activeTaskCount += 1
+        lateinit var job: Job
+        job =
+            scope.launch(start = CoroutineStart.LAZY) {
+                try {
+                    block()
+                } finally {
+                    runtime.activeTaskCount -= 1
+                    releaseIfIdle(conversationId, runtime)
+                }
+            }
+        job.start()
+        return job
+    }
+
+    fun launchRun(
+        conversationId: String,
+        runtime: AgentChatPresenterRuntime,
+        block: suspend CoroutineScope.() -> Unit,
+    ): Job {
+        lateinit var job: Job
+        job =
+            scope.launch(start = CoroutineStart.LAZY) {
+                try {
+                    block()
+                } finally {
+                    if (runtime.runJob === job) {
+                        runtime.runJob = null
+                    }
+                    releaseIfIdle(conversationId, runtime)
+                }
+            }
+        runtime.runJob = job
+        job.start()
+        return job
+    }
+
+    fun launchTitleGeneration(
+        conversationId: String,
+        runtime: AgentChatPresenterRuntime,
+        block: suspend CoroutineScope.() -> Unit,
+    ): Job {
+        lateinit var job: Job
+        job =
+            scope.launch(start = CoroutineStart.LAZY) {
+                try {
+                    block()
+                } finally {
+                    if (runtime.titleGenerationJob === job) {
+                        runtime.titleGenerationJob = null
+                    }
+                    releaseIfIdle(conversationId, runtime)
+                }
+            }
+        runtime.titleGenerationJob = job
+        job.start()
+        return job
+    }
+
+    fun hasRuntime(conversationId: String): Boolean = runtimes.value[conversationId] != null
+
+    fun activeRuntimeCount(): Int = runtimes.value.size
+
+    fun resetForTesting() {
+        runtimes.value.values.forEach { runtime ->
+            runtime.runJob?.cancel()
+            runtime.titleGenerationJob?.cancel()
+        }
+        runtimes.value = emptyMap()
+    }
+
+    private fun releaseIfIdle(
+        conversationId: String,
+        runtime: AgentChatPresenterRuntime,
+    ) {
+        if (!runtime.isIdle) {
+            return
+        }
+        runtimes.update { currentRuntimes ->
+            if (currentRuntimes[conversationId] === runtime) {
+                currentRuntimes - conversationId
+            } else {
+                currentRuntimes
+            }
+        }
+    }
+
+    private val AgentChatPresenterRuntime.isIdle: Boolean
+        get() =
+            retainedPresenterCount <= 0 &&
+                activeTaskCount <= 0 &&
+                runJob?.isActive != true &&
+                titleGenerationJob?.isActive != true
 }

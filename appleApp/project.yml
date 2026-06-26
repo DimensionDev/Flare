@@ -1,0 +1,364 @@
+name: Flare
+
+options:
+  minimumXcodeGenVersion: 2.45.4
+  developmentLanguage: en
+  defaultConfig: Release
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+settingGroups:
+  appVersion:
+    CURRENT_PROJECT_VERSION: 1600
+    MARKETING_VERSION: 1.6.0
+  appleApp:
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_PREVIEWS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    # FRAMEWORK_SEARCH_PATHS:
+    #   - "$(inherited)"
+    #   - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+    PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare
+    PRODUCT_NAME: Flare
+
+settings:
+  base:
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    DEAD_CODE_STRIPPING: YES
+    DEVELOPMENT_TEAM: 7LFDZ96332
+    "EXCLUDED_ARCHS[sdk=macosx*]": x86_64
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    STRING_CATALOG_GENERATE_SYMBOLS: YES
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_EMIT_LOC_STRINGS: YES
+    SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+    SWIFT_VERSION: "6.3"
+  configs:
+    Release:
+      VALIDATE_PRODUCT: YES
+
+packages:
+  ChatLayout:
+    url: https://github.com/ekazaev/ChatLayout
+    exactVersion: 2.4.2
+  CHTCollectionViewWaterfallLayout:
+    url: https://github.com/chiahsien/CHTCollectionViewWaterfallLayout
+    from: 1.0.1
+  Drops:
+    url: https://github.com/omaralbeik/Drops.git
+    exactVersion: 1.7.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    exactVersion: 12.15.0
+  GSPlayer:
+    url: https://github.com/wxxsw/GSPlayer
+    from: 0.2.30
+  iOS-Backports:
+    url: https://github.com/superwall/iOS-Backports
+    exactVersion: 1.0.5
+  Kingfisher:
+    url: https://github.com/onevcat/Kingfisher.git
+    exactVersion: 8.8.1
+  LazyPager:
+    url: https://github.com/gh123man/LazyPager
+    exactVersion: 1.2.1
+  SwiftLintPlugins:
+    url: https://github.com/SimplyDanny/SwiftLintPlugins
+    exactVersion: 0.62.2
+  SwiftUI-Flow:
+    url: https://github.com/tevelee/SwiftUI-Flow
+    exactVersion: 3.1.1
+  swiftui-introspect:
+    url: https://github.com/siteline/swiftui-introspect
+    exactVersion: 27.0.0-beta.1
+  VideoPlayer:
+    url: https://github.com/wxxsw/VideoPlayer
+    exactVersion: 1.2.5
+
+targetTemplates:
+  FirebaseOptionalApp:
+    sources:
+      - path: Shared/Firebase
+    dependencies:
+      - package: Firebase
+        product: FirebaseAnalytics
+      - package: Firebase
+        product: FirebaseCrashlytics
+    postBuildScripts:
+      - name: Copy Firebase Config
+        basedOnDependencyAnalysis: false
+        script: |
+          SRC_PLIST="$SRCROOT/Firebase/GoogleService-Info.plist"
+          DST_PLIST="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/GoogleService-Info.plist"
+
+          if [ -f "$SRC_PLIST" ]; then
+            mkdir -p "$(dirname "$DST_PLIST")"
+            cp "$SRC_PLIST" "$DST_PLIST"
+          else
+            echo "Firebase config not found; Firebase stays disabled."
+          fi
+      - name: Upload Crashlytics dSYMs
+        basedOnDependencyAnalysis: false
+        script: |
+          case "${FIREBASE_CRASHLYTICS_UPLOAD_SYMBOLS:-}" in
+            1|true|TRUE|yes|YES) ;;
+            *)
+              echo "Skipping Crashlytics dSYM upload."
+              exit 0
+              ;;
+          esac
+
+          GSP_PATH="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/GoogleService-Info.plist"
+          RUN_SCRIPT="${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+
+          if [ ! -f "$GSP_PATH" ]; then
+            echo "Crashlytics dSYM upload requested, but $GSP_PATH is missing."
+            exit 1
+          fi
+
+          if [ ! -x "$RUN_SCRIPT" ]; then
+            echo "Crashlytics run script not found at $RUN_SCRIPT."
+            exit 1
+          fi
+
+          "$RUN_SCRIPT"
+
+targets:
+  iOS:
+    templates: [FirebaseOptionalApp]
+    type: application
+    platform: iOS
+    sources:
+      - path: ios
+        excludes:
+          - .DS_Store
+          - Assets.xcassets/.DS_Store
+          - Info.plist
+          - GoogleService-Info.plist
+          - AppIcon_*.icon
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
+    dependencies:
+      - package: Kingfisher
+      - package: LazyPager
+      - package: SwiftUI-Flow
+        product: Flow
+      - package: swiftui-introspect
+        product: SwiftUIIntrospect
+      - package: Drops
+      - package: iOS-Backports
+        product: SwiftUIBackports
+      - package: VideoPlayer
+      - package: CHTCollectionViewWaterfallLayout
+      - package: GSPlayer
+      - package: ChatLayout
+      - target: FlareAppleCore
+        destinationFilters: [iOS]
+      - target: FlareAppleUI
+        destinationFilters: [iOS]
+      - target: FlareAppleResource
+        embed: true
+        link: false
+        copy:
+          destination: resources
+        destinationFilters: [iOS]
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
+    settings:
+      groups:
+        - appVersion
+        - appleApp
+      base:
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow"
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+        INFOPLIST_FILE: ios/Info.plist
+        OTHER_LDFLAGS: "$(inherited) -ObjC"
+
+  macOS:
+    templates: [FirebaseOptionalApp]
+    type: application
+    platform: macOS
+    sources:
+      - path: macos
+        excludes:
+          - Info.plist
+          - GoogleService-Info.plist
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
+    dependencies:
+      - package: Kingfisher
+      - package: iOS-Backports
+        product: SwiftUIBackports
+      - package: swiftui-introspect
+        product: SwiftUIIntrospect
+      - target: FlareAppleCore
+        destinationFilters: [macOS]
+      - target: FlareAppleUI
+        destinationFilters: [macOS]
+      - target: FlareAppleResource
+        embed: true
+        link: false
+        copy:
+          destination: resources
+        destinationFilters: [macOS]
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
+    settings:
+      groups:
+        - appVersion
+        - appleApp
+      base:
+        CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+        CODE_SIGN_ENTITLEMENTS: macos/Flare.entitlements
+        DEAD_CODE_STRIPPING: YES
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+        ENABLE_USER_SELECTED_FILES: readwrite
+        INFOPLIST_FILE: macos/Info.plist
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3 -ObjC"
+        PROVISIONING_PROFILE: "$(NATIVE_MACOS_PROVISIONING_PROFILE)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER)"
+        REGISTER_APP_GROUPS: YES
+
+  FlareAppleResource:
+    type: bundle
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Shared/FlareAppleResource/Resources
+    settings:
+      groups:
+        - appVersion
+      base:
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Shared/FlareAppleResource/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleresource
+        PRODUCT_NAME: FlareAppleResource
+        SKIP_INSTALL: YES
+
+  FlareAppleCore:
+    type: framework.static
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Shared/FlareAppleCore/Sources/FlareAppleCore
+        excludes:
+          - Resources/**
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
+    settings:
+      base:
+        CLANG_ENABLE_MODULE_VERIFIER: YES
+        DEAD_CODE_STRIPPING: YES
+        # FRAMEWORK_SEARCH_PATHS:
+        #   - "$(inherited)"
+        #   - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: YES
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.applecore
+
+  FlareAppleUI:
+    type: framework.static
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Shared/FlareAppleCore/Sources/FlareAppleUI
+        excludes:
+          - Resources/**
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
+    dependencies:
+      - package: Kingfisher
+        link: false
+      - package: iOS-Backports
+        product: SwiftUIBackports
+        link: false
+      - package: VideoPlayer
+        destinationFilters: [iOS]
+        link: false
+      - target: FlareAppleCore
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
+          fi
+    settings:
+      base:
+        CLANG_ENABLE_MODULE_VERIFIER: YES
+        DEAD_CODE_STRIPPING: YES
+        # FRAMEWORK_SEARCH_PATHS:
+        #   - "$(inherited)"
+        #   - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: YES
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleui
+
+schemes:
+  iOS:
+    build:
+      targets:
+        iOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  macOS:
+    build:
+      targets:
+        macOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

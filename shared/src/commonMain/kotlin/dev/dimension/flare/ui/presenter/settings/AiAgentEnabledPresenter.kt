@@ -6,13 +6,11 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class AiAgentEnabledPresenter :
-    PresenterBase<AiAgentEnabledPresenter.State>(),
-    KoinComponent {
-    private val appDataStore: AppDataStore by inject()
+    PresenterBase<AiAgentEnabledPresenter.State>() {
+    private val appDataStore: AppDataStore by koinInject()
 
     public interface State {
         public val enabled: Boolean

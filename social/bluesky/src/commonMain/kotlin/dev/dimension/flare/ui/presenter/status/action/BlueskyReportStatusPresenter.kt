@@ -21,17 +21,15 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class BlueskyReportStatusPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<BlueskyReportStatusState>(),
-    KoinComponent {
+) : PresenterBase<BlueskyReportStatusState>() {
     // using io scope because it's a long-running operation
-    private val scope by inject<CoroutineScope>()
-    private val accountService: AccountService by inject()
+    private val scope by koinInject<CoroutineScope>()
+    private val accountService: AccountService by koinInject()
     private val serviceFlow by lazy {
         accountService.accountServiceFlow(accountType).map { service ->
             require(service is BlueskyDataSource)

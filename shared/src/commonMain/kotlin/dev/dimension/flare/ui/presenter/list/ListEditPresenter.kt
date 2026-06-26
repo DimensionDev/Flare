@@ -17,8 +17,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for editing lists.
@@ -26,8 +25,7 @@ import org.koin.core.component.inject
 public class ListEditPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<ListEditPresenter.State>(),
-    KoinComponent {
+) : PresenterBase<ListEditPresenter.State>() {
     @Immutable
     public interface State :
         EditListMemberState,
@@ -40,7 +38,7 @@ public class ListEditPresenter(
         public suspend fun updateList(listMetaData: ListMetaData)
     }
 
-    private val accountRepository: AccountRepository by inject()
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): State {

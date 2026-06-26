@@ -21,8 +21,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 public data object RssTimelineSpecs {
@@ -94,9 +93,8 @@ public class AllRssTimelineLoaderFactory(
 }
 
 private object KoinAllRssTimelineLoaderFactory :
-    TimelineLoaderFactory<AllRssTimelineData>,
-    KoinComponent {
-    private val delegate: AllRssTimelineLoaderFactory by inject()
+    TimelineLoaderFactory<AllRssTimelineData> {
+    private val delegate: AllRssTimelineLoaderFactory by koinInject()
 
     override fun create(
         data: AllRssTimelineData,

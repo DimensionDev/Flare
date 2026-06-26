@@ -25,19 +25,18 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class PostHandler(
     public val accountType: AccountType,
     public val loader: PostLoader,
-) : KoinComponent {
-    private val database: CacheDatabase by inject()
-    private val coroutineScope: CoroutineScope by inject()
-    private val appDataStore: AppDataStore by inject()
-    private val preTranslationService: PreTranslationService by inject()
+)  {
+    private val database: CacheDatabase by koinInject()
+    private val coroutineScope: CoroutineScope by koinInject()
+    private val appDataStore: AppDataStore by koinInject()
+    private val preTranslationService: PreTranslationService by koinInject()
 
     private val translationDisplayFlow by lazy {
         TranslationSettingsSupport.displayOptionsFlow(appDataStore)

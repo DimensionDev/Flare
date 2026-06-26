@@ -9,16 +9,14 @@ import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class AiTLDRPresenter(
     private val source: String,
     private val targetLanguage: String = Locale.language,
-) : PresenterBase<UiState<String>>(),
-    KoinComponent {
-    private val appDataStore: AppDataStore by inject()
-    private val aiCompletionService: AiCompletionService by inject()
+) : PresenterBase<UiState<String>>() {
+    private val appDataStore: AppDataStore by koinInject()
+    private val aiCompletionService: AiCompletionService by koinInject()
 
     @Composable
     override fun body(): UiState<String> {

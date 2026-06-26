@@ -16,13 +16,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class OpenAIModelsPresenter :
-    PresenterBase<OpenAIModelsPresenter.State>(),
-    KoinComponent {
-    private val openAIService by inject<OpenAIService>()
+    PresenterBase<OpenAIModelsPresenter.State>() {
+    private val openAIService by koinInject<OpenAIService>()
 
     @Immutable
     public interface State {

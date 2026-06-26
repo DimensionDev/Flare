@@ -13,8 +13,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for retrieving list information.
@@ -22,9 +21,8 @@ import org.koin.core.component.inject
 public class ListInfoPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<ListInfoState>(),
-    KoinComponent {
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<ListInfoState>() {
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): ListInfoState {

@@ -10,14 +10,12 @@ import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class TimelineItemPresenter(
     private val timelineTabItem: UiTimelineTabItem,
-) : PresenterBase<TimelineItemPresenter.State>(),
-    KoinComponent {
-    private val timelinePresenterFactory by inject<TimelinePresenterFactory>()
+) : PresenterBase<TimelineItemPresenter.State>() {
+    private val timelinePresenterFactory by koinInject<TimelinePresenterFactory>()
 
     public interface State {
         public val listState: PagingState<UiTimelineV2>
@@ -57,9 +55,8 @@ public class TimelineItemPresenter(
 @WebPresenter("timelineItem")
 public class WebTimelineItemPresenter(
     private val loaderKey: String,
-) : PresenterBase<TimelineItemPresenter.State>(),
-    KoinComponent {
-    private val timelineResolver by inject<TimelineResolver>()
+) : PresenterBase<TimelineItemPresenter.State>() {
+    private val timelineResolver by koinInject<TimelineResolver>()
 
     private val delegate by lazy {
         TimelineItemPresenter(timelineResolver.toTabItem(loaderKey))

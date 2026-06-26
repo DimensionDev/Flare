@@ -21,14 +21,12 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("settings")
 public class SettingsPresenter :
-    PresenterBase<SettingsPresenter.State>(),
-    KoinComponent {
-    private val repository: SettingsRepository by inject()
+    PresenterBase<SettingsPresenter.State>() {
+    private val repository: SettingsRepository by koinInject()
 
     @Composable
     override fun body(): State {

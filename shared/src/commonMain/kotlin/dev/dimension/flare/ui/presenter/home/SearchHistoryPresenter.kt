@@ -10,13 +10,11 @@ import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class SearchHistoryPresenter :
-    PresenterBase<SearchHistoryState>(),
-    KoinComponent {
-    private val repository: SearchHistoryRepository by inject()
+    PresenterBase<SearchHistoryState>() {
+    private val repository: SearchHistoryRepository by koinInject()
 
     @Composable
     override fun body(): SearchHistoryState {

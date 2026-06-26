@@ -11,16 +11,14 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class BlockUserPresenter(
     private val accountType: AccountType?,
     private val userKey: MicroBlogKey,
-) : PresenterBase<BlockUserPresenter.State>(),
-    KoinComponent {
-    private val accountRepository by inject<AccountRepository>()
-    private val scope by inject<CoroutineScope>()
+) : PresenterBase<BlockUserPresenter.State>() {
+    private val accountRepository by koinInject<AccountRepository>()
+    private val scope by koinInject<CoroutineScope>()
 
     @Immutable
     public interface State {

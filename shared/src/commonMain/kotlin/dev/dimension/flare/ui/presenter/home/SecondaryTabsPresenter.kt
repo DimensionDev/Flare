@@ -30,13 +30,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("secondaryTabs")
 public class SecondaryTabsPresenter :
-    PresenterBase<SecondaryTabsPresenter.State>(),
-    KoinComponent {
+    PresenterBase<SecondaryTabsPresenter.State>() {
     @Immutable
     public interface State {
         public val items: UiState<ImmutableList<Item>>
@@ -70,7 +68,7 @@ public class SecondaryTabsPresenter :
         ) : Destination
     }
 
-    private val accountRepository: AccountRepository by inject()
+    private val accountRepository: AccountRepository by koinInject()
 
     private val itemsFlow by lazy {
         allAccountServicesFlow(accountRepository)

@@ -24,15 +24,13 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 @WebPresenter("homeTimelineWithTabs")
 public class HomeTimelineWithTabsPresenter :
-    PresenterBase<HomeTimelineWithTabsPresenter.State>(),
-    KoinComponent {
-    private val settingsRepository by inject<SettingsRepository>()
-    private val accountRepository by inject<AccountRepository>()
+    PresenterBase<HomeTimelineWithTabsPresenter.State>() {
+    private val settingsRepository by koinInject<SettingsRepository>()
+    private val accountRepository by koinInject<AccountRepository>()
 
     public interface State : UserState {
         public val tabState: UiState<ImmutableList<UiTimelineTabItem>>

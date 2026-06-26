@@ -11,8 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter for deleting lists.
@@ -20,10 +19,9 @@ import org.koin.core.component.inject
 public class DeleteListPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<DeleteListState>(),
-    KoinComponent {
-    private val scope by inject<CoroutineScope>()
-    private val accountRepository: AccountRepository by inject()
+) : PresenterBase<DeleteListState>() {
+    private val scope by koinInject<CoroutineScope>()
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): DeleteListState =

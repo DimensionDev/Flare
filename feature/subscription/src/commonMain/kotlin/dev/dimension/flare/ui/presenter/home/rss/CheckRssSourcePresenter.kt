@@ -26,15 +26,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 import kotlin.time.Instant
 
 public class CheckRssSourcePresenter(
     private val url: String,
-) : PresenterBase<CheckRssSourcePresenter.State>(),
-    KoinComponent {
-    private val platformRegistry: PlatformRegistry by inject()
+) : PresenterBase<CheckRssSourcePresenter.State>() {
+    private val platformRegistry: PlatformRegistry by koinInject()
 
     @Immutable
     public interface State {

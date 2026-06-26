@@ -25,17 +25,15 @@ import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import dev.dimension.flare.di.koinInject
 
 public class AddReactionPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<AddReactionState>(),
-    KoinComponent {
+) : PresenterBase<AddReactionState>() {
     // using io scope because it's a long-running operation
-    private val scope by inject<CoroutineScope>()
-    private val accountRepository: AccountRepository by inject()
+    private val scope by koinInject<CoroutineScope>()
+    private val accountRepository: AccountRepository by koinInject()
 
     @Composable
     override fun body(): AddReactionState {

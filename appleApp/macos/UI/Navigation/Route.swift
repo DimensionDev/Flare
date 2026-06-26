@@ -203,6 +203,7 @@ enum Route: Hashable, Identifiable {
                 data: data,
                 onNavigate: onNavigate
             )
+            .frame(width: 300, height: 400)
         case .rssDetail(let url, let descriptionHtml, let title):
             RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
         case .article(let accountType, let articleKey):
@@ -232,8 +233,10 @@ enum Route: Hashable, Identifiable {
             )
         case .statusBlueskyReport(let accountType, let statusKey):
             BlueskyReportSheet(accountType: accountType, statusKey: statusKey)
+                .frame(width: 300, height: 400)
         case .statusMisskeyReport(let accountType, let userKey, let statusKey):
             MisskeyReportSheet(accountType: accountType, userKey: userKey, statusKey: statusKey)
+                .frame(width: 300, height: 400)
         case .editUserList(let accountType, let userKey):
             EditUserInListScreen(accountType: accountType, userKey: userKey)
         case .allLists(let accountType):

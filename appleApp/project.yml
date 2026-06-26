@@ -203,6 +203,8 @@ targets:
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
+      - package: iOS-Backports
+        product: SwiftUIBackports
       - package: swiftui-introspect
         product: SwiftUIIntrospect
       - target: FlareAppleCore
@@ -301,10 +303,13 @@ targets:
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
+        link: false
       - package: iOS-Backports
         product: SwiftUIBackports
+        link: false
       - package: VideoPlayer
         destinationFilters: [iOS]
+        link: false
       - target: FlareAppleCore
     preBuildScripts:
       - name: Compile Kotlin

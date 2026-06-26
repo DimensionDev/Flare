@@ -2,6 +2,7 @@ package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Immutable
 @Serializable
@@ -35,6 +36,7 @@ public sealed class AccountType {
     }
 }
 
+@HiddenFromObjC
 public fun MicroBlogKey?.toAccountType(): AccountType =
     if (this == null) {
         AccountType.Guest
@@ -42,6 +44,7 @@ public fun MicroBlogKey?.toAccountType(): AccountType =
         AccountType.Specific(this)
     }
 
+@HiddenFromObjC
 public fun MicroBlogKey?.toAccountType(guestHost: String): AccountType =
     if (this == null) {
         AccountType.GuestHost(guestHost)

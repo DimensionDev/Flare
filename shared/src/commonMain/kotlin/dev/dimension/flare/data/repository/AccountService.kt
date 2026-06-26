@@ -38,12 +38,14 @@ public interface AccountService {
     ): Job
 }
 
+@HiddenFromObjC
 public data class AccountMicroblogDataSource(
     public val accountKey: MicroBlogKey,
     public val platformType: PlatformType,
     public val dataSource: MicroblogDataSource,
 )
 
+@HiddenFromObjC
 public inline fun <reified T : Any> AccountService.addAccount(
     account: UiAccount,
     credential: T,
@@ -54,12 +56,14 @@ public inline fun <reified T : Any> AccountService.addAccount(
         serializer = serializer(),
     )
 
+@HiddenFromObjC
 public inline fun <reified T : Any> AccountService.credentialFlow(accountKey: MicroBlogKey): Flow<T> =
     credentialFlow(
         accountKey = accountKey,
         serializer = serializer(),
     )
 
+@HiddenFromObjC
 public inline fun <reified T : Any> AccountService.updateCredential(
     accountKey: MicroBlogKey,
     credential: T,

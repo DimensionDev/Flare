@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableMap
 import dev.dimension.flare.common.sanitizeFileName
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
 @Immutable
@@ -75,6 +76,7 @@ public sealed interface UiMedia {
     ) : UiMedia
 }
 
+@HiddenFromObjC
 public fun String?.toUiImage(customHeaders: SerializableImmutableMap<String, String>? = null): UiMedia.Image? =
     this
         ?.takeIf { it.isNotBlank() }
@@ -90,6 +92,7 @@ public fun String?.toUiImage(customHeaders: SerializableImmutableMap<String, Str
             )
         }
 
+@HiddenFromObjC
 public fun UiMedia.getFileName(
     statusKey: String,
     userHandle: String,

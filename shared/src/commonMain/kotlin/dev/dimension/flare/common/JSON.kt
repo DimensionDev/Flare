@@ -44,12 +44,14 @@ public val JSON: Json get() = json
 @HiddenFromObjC
 public val JSON_WITH_ENCODE_DEFAULT: Json get() = jsonWithEncodeDefault
 
+@HiddenFromObjC
 public inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
 
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
 
+@HiddenFromObjC
 public inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
 
 @OptIn(ExperimentalObjCRefinement::class)

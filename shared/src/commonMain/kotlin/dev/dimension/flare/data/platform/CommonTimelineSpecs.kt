@@ -81,6 +81,7 @@ public object CommonTimelineSpecs {
     ) : TimelineSpec.Data
 }
 
+@HiddenFromObjC
 public fun UiList.List.toTimelineCandidate(accountKey: MicroBlogKey): TimelineCandidate<*> =
     CommonTimelineSpecs.list
         .candidate(

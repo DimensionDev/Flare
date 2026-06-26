@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 
 public class MastodonCallbackPresenter(
@@ -107,6 +108,7 @@ public class MastodonCallbackPresenter(
     }
 }
 
+@HiddenFromObjC
 public suspend fun mastodonLoginUseCase(
     domain: String,
     launchOAuth: (String) -> Unit,

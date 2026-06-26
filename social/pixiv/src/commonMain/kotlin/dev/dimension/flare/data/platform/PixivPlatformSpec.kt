@@ -176,6 +176,7 @@ private data class PixivUserDeepLink(
     val id: String,
 )
 
+@HiddenFromObjC
 public const val PIXIV_HOST: String = "pixiv.net"
 
 private const val PIXIV_FOLLOWING: String = "pixiv.following"

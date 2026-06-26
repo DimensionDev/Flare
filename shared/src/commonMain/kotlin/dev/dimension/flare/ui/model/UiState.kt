@@ -31,6 +31,7 @@ public sealed class UiState<T : Any> {
     public class Loading<T : Any> : UiState<T>()
 }
 
+@HiddenFromObjC
 public inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
     when (this) {
         is UiState.Success -> {
@@ -50,6 +51,7 @@ public inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiStat
         }
     }
 
+@HiddenFromObjC
 public inline fun <T : Any, R : Any> UiState<T>.mapNotNull(transform: (T) -> R?): UiState<R> =
     when (this) {
         is UiState.Success -> transform(data)?.let { UiState.Success(it) } ?: UiState.Error(IllegalStateException())
@@ -57,6 +59,7 @@ public inline fun <T : Any, R : Any> UiState<T>.mapNotNull(transform: (T) -> R?)
         is UiState.Loading -> UiState.Loading()
     }
 
+@HiddenFromObjC
 public inline fun <T : Any, R : Any> UiState<T>.flatMap(
     onError: (Throwable) -> UiState<R> = { UiState.Error(it) },
     transform: (T) -> UiState<R>,
@@ -79,6 +82,7 @@ public inline fun <T : Any, R : Any> UiState<T>.flatMap(
         }
     }
 
+@HiddenFromObjC
 public inline fun <T1 : Any, T2 : Any, R : Any> zipState(
     a: UiState<T1>,
     b: UiState<T2>,
@@ -111,6 +115,7 @@ public inline fun <T1 : Any, T2 : Any, R : Any> zipState(
         }
     }
 
+@HiddenFromObjC
 public fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState<List<T>> {
     val success = filterIsInstance<UiState.Success<T>>().map { it.data }
     val error = filterIsInstance<UiState.Error<T>>().map { it.throwable }
@@ -135,6 +140,7 @@ public fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): 
     }
 }
 
+@HiddenFromObjC
 public inline fun <T : Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> =
     apply {
         if (this is UiState.Success) {
@@ -142,6 +148,7 @@ public inline fun <T : Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T
         }
     }
 
+@HiddenFromObjC
 public inline fun <T : Any> UiState<T>.onError(action: (Throwable) -> Unit): UiState<T> =
     apply {
         if (this is UiState.Error) {
@@ -149,6 +156,7 @@ public inline fun <T : Any> UiState<T>.onError(action: (Throwable) -> Unit): UiS
         }
     }
 
+@HiddenFromObjC
 public inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
     apply {
         if (this is UiState.Loading) {
@@ -156,8 +164,10 @@ public inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T>
         }
     }
 
+@HiddenFromObjC
 public fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.data
 
+@HiddenFromObjC
 public fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)?.data ?: value
 
 @HiddenFromObjC

@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.delay
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
@@ -103,6 +104,7 @@ public class MisskeyCallbackPresenter(
     }
 }
 
+@HiddenFromObjC
 public suspend fun misskeyLoginUseCase(
     host: String,
     launchOAuth: (String) -> Unit,

@@ -27,8 +27,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
+@HiddenFromObjC
 public interface SubscriptionDataSource {
     public suspend fun listSources(): List<UiRssSource>
 
@@ -50,19 +52,24 @@ public interface SubscriptionDataSource {
     ): DocumentData
 }
 
+@HiddenFromObjC
 public sealed interface SubscriptionSourceDetection {
+    @HiddenFromObjC
     public data object RssHub : SubscriptionSourceDetection
 
+    @HiddenFromObjC
     public data class RssFeed(
         val title: String,
         val url: String,
         val icon: String?,
     ) : SubscriptionSourceDetection
 
+    @HiddenFromObjC
     public data class RssSources(
         val sources: List<UiRssSource>,
     ) : SubscriptionSourceDetection
 
+    @HiddenFromObjC
     public data class SubscriptionInstance(
         val host: String,
         val instanceName: String?,
@@ -71,6 +78,7 @@ public sealed interface SubscriptionSourceDetection {
     ) : SubscriptionSourceDetection
 }
 
+@HiddenFromObjC
 public object KoinSubscriptionDataSource :
     SubscriptionDataSource,
     KoinComponent {

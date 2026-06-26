@@ -13,6 +13,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.native.HiddenFromObjC
 
 @Serializable
 @Immutable
@@ -135,6 +136,7 @@ public sealed interface UiArticleContentGateReason {
     ) : UiArticleContentGateReason
 }
 
+@HiddenFromObjC
 public fun uiArticleContentOf(
     blocks: List<UiArticleBlock>,
     rawText: String? = null,
@@ -150,6 +152,7 @@ public fun uiArticleContentOf(
                     .trim(),
     )
 
+@HiddenFromObjC
 public fun UiArticleBlock.plainText(): String =
     when (this) {
         is UiArticleBlock.Text -> {

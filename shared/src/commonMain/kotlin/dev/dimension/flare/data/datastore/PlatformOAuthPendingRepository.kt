@@ -5,7 +5,9 @@ import dev.dimension.flare.data.datastore.model.PlatformOAuthPendingData
 import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public data class PlatformOAuthPending(
     val platformType: PlatformType,
     val host: String,
@@ -19,6 +21,7 @@ public data class PlatformOAuthPending(
 }
 
 @Single
+@HiddenFromObjC
 public class PlatformOAuthPendingRepository internal constructor(
     appDataStore: AppDataStore,
 ) {

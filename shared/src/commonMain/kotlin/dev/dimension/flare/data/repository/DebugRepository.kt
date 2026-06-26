@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.native.HiddenFromObjC
 
 @PublishedApi
 internal object DebugRepository {
@@ -74,6 +75,7 @@ internal object DebugRepository {
  * @param block The function to execute
  * @return A [Result] object containing either the successful result or the failure exception
  */
+@HiddenFromObjC
 public inline fun <R> tryRun(block: () -> R): Result<R> =
     try {
         Result.success(block())

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import KotlinSharedUI
 import FlareAppleUI
 
@@ -37,17 +38,24 @@ struct UITimelinePagingView: View {
             singleListView
         } else {
             GeometryReader { proxy in
-                let columnCount = max(Int((proxy.size.width / 320).rounded(.down)), 1)
-                UITimelineCollectionView(
-                    data: data,
-                    detailStatusKey: detailStatusKey,
-                    topContentInset: topContentInset,
-                    columnCount: columnCount,
-                    suppressInitialRefreshIndicator: suppressInitialRefreshIndicator
-                )
-                .ignoresSafeArea(edges: .vertical)
+                if isIPhoneLandscape(size: proxy.size) {
+                    singleListView
+                } else {
+                    UITimelineCollectionView(
+                        data: data,
+                        detailStatusKey: detailStatusKey,
+                        topContentInset: topContentInset,
+                        columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1),
+                        suppressInitialRefreshIndicator: suppressInitialRefreshIndicator
+                    )
+                    .ignoresSafeArea(edges: .vertical)
+                }
             }
         }
+    }
+
+    private func isIPhoneLandscape(size: CGSize) -> Bool {
+        UIDevice.current.userInterfaceIdiom == .phone && size.width > size.height
     }
 
     var singleListView: some View {

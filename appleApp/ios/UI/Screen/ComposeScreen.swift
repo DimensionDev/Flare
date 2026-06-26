@@ -44,7 +44,7 @@ struct ComposeScreen: View {
                     TextField(text: $viewModel.text, axis: .vertical) {
                         Text("compose_placeholder")
                     }
-                    .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18, .v26)) { textField in
+                    .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18, .v26, .v27)) { textField in
                         self.uiTextView = textField
                         applyCursorIfPossible()
                     }

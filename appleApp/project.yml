@@ -51,8 +51,8 @@ packages:
     url: https://github.com/ekazaev/ChatLayout
     exactVersion: 2.4.2
   CHTCollectionViewWaterfallLayout:
-    url: https://github.com/Tlaster/CHTCollectionViewWaterfallLayout
-    branch: master
+    url: https://github.com/chiahsien/CHTCollectionViewWaterfallLayout
+    from: 1.0.1
   Drops:
     url: https://github.com/omaralbeik/Drops.git
     exactVersion: 1.7.0
@@ -145,7 +145,6 @@ targets:
           - Info.plist
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
-      - package: CHTCollectionViewWaterfallLayout
       - package: Kingfisher
       - package: swiftui-introspect
         product: SwiftUIIntrospect

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +49,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -57,6 +57,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -97,7 +98,6 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
@@ -222,30 +222,47 @@ internal fun HomeTimelineScreen(
             } else {
                 TopAppBarDefaults.enterAlwaysScrollBehavior()
             }
-        val appearance = LocalTimelineAppearance.current
-        val displayMode =
-            remember(
-                state.tabState,
-                state.pagerState.takeSuccess()?.currentPage,
-                appearance,
-            ) {
-                state.tabState
-                    .map {
-                        it
-                            .getOrNull(state.pagerState.takeSuccess()?.currentPage ?: 0)
-                            ?.resolveTimelineAppearance(appearance)
-                            ?.timelineDisplayMode ?: TimelineDisplayMode.Plain
-                    }.takeSuccessOr(TimelineDisplayMode.Plain)
-            }
-        val color by animateColorAsState(
-            when (displayMode) {
-                TimelineDisplayMode.Plain if isLightTheme() && isCompatScreen() -> MaterialTheme.colorScheme.surface
-                else -> MaterialTheme.colorScheme.background
-            },
-            label = "TopAppBarBackground",
-        )
         FlareScaffold(
             topBar = {
+                val appearance = LocalTimelineAppearance.current
+                val backgroundColor = MaterialTheme.colorScheme.background
+                val plainColor =
+                    if (isLightTheme() && isCompatScreen()) {
+                        MaterialTheme.colorScheme.surface
+                    } else {
+                        backgroundColor
+                    }
+                val tabs = state.tabState.takeSuccess()
+                val tabBackgroundColors =
+                    remember(tabs, appearance, plainColor, backgroundColor) {
+                        tabs
+                            ?.map { tab ->
+                                when (tab.resolveTimelineAppearance(appearance).timelineDisplayMode) {
+                                    TimelineDisplayMode.Plain -> plainColor
+                                    else -> backgroundColor
+                                }
+                            }.orEmpty()
+                    }
+                val pagerState = state.pagerState.takeSuccess()
+                val color by remember(pagerState, tabBackgroundColors, backgroundColor) {
+                    derivedStateOf {
+                        if (pagerState == null || tabBackgroundColors.isEmpty()) {
+                            backgroundColor
+                        } else {
+                            val pagePosition =
+                                (pagerState.currentPage + pagerState.currentPageOffsetFraction)
+                                    .coerceIn(0f, tabBackgroundColors.lastIndex.toFloat())
+                            val startIndex = pagePosition.toInt().coerceIn(0, tabBackgroundColors.lastIndex)
+                            val endIndex = (startIndex + 1).coerceAtMost(tabBackgroundColors.lastIndex)
+                            val fraction = (pagePosition - startIndex).coerceIn(0f, 1f)
+                            lerp(
+                                tabBackgroundColors[startIndex],
+                                tabBackgroundColors[endIndex],
+                                fraction,
+                            )
+                        }
+                    }
+                }
                 FlareTopAppBar(
                     colors =
                         TopAppBarDefaults.topAppBarColors(

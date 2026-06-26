@@ -39,7 +39,7 @@ struct PlaceholderPanel: View {
                 } label: {
                     Image(fontAwesome: .arrowsRotate)
                 }
-                .help(String(localized: "refresh", defaultValue: "Refresh", bundle: .main))
+                .help(String(localized: "Refresh", defaultValue: "Refresh", bundle: .main))
             }
         }
     }

@@ -146,7 +146,7 @@ struct AccountManagementScreen: View {
             Button("Cancel", role: .cancel) {
                 clearPendingLogout()
             }
-            Button("Delete", role: .destructive) {
+            Button("delete", role: .destructive) {
                 confirmLogout()
             }
         } message: {

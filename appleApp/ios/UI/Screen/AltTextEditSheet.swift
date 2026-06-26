@@ -42,7 +42,7 @@ struct AltTextEditSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button("done") {
                         dismiss()
                     }
                 }

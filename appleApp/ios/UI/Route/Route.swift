@@ -483,15 +483,15 @@ enum Route: Hashable, Identifiable {
     var alertTitle: LocalizedStringKey? {
         switch self {
         case .statusDeleteConfirm:
-            return "delete_alert_title"
+            return "delete"
         case .statusMastodonReport, .statusMisskeyReport, .reportUser: // Assuming misskey uses same key for now or similar pattern, adhering to original code for mastodon
-            return "mastodon_report_status_alert_title"
+            return "bluesky_report"
         case .blockUser:
-            return "block_user_alert_title"
+            return "Block user"
         case .unblockUser:
             return "unblock"
         case .muteUser:
-            return "mute_user_alert_title"
+            return "Mute user"
         case .unmuteUser:
             return "unmute"
         default:
@@ -529,17 +529,17 @@ enum Route: Hashable, Identifiable {
             }
         case .statusMastodonReport(let accountType, let userKey, let statusKey):
             Button("Cancel", role: .cancel) {}
-            Button("report", role: .destructive) {
+            Button("bluesky_report", role: .destructive) {
                 MastodonReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
             }
         case .statusMisskeyReport(let accountType, let userKey, let statusKey):
             Button("Cancel", role: .cancel) {}
-            Button("report", role: .destructive) {
+            Button("bluesky_report", role: .destructive) {
 //                MisskeyReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
             }
         case .reportUser(let accountType, let userKey):
             Button("Cancel", role: .cancel) {}
-            Button("report", role: .destructive) {
+            Button("bluesky_report", role: .destructive) {
 //                UserReportPresenter(accountType: accountType, userKey: userKey).models.value.report()
             }
         case .blockUser(let accountType, let userKey):

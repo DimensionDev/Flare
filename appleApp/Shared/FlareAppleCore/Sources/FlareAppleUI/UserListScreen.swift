@@ -34,6 +34,6 @@ public struct UserListScreen: View {
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
-        .navigationTitle(isFollowing ? "user_list_title_following" : "user_list_title_fans")
+        .navigationTitle(isFollowing ? "matrix_following" : "user_list_title_fans")
     }
 }

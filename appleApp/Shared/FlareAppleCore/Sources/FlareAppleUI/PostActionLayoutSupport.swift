@@ -95,22 +95,22 @@ public extension PostActionPlacement {
     var postActionLayoutTitleKey: LocalizedStringKey {
         switch self {
         case .buttonRow:
-            "post_action_layout_button_row"
+            "Button row"
         case .moreMenu:
-            "post_action_layout_more_menu"
+            "More menu"
         case .hidden:
-            "post_action_layout_hidden"
+            "appearance_post_action_style_hidden"
         }
     }
 
     var postActionLayoutMoveTitleKey: LocalizedStringKey {
         switch self {
         case .buttonRow:
-            "post_action_layout_move_to_button_row"
+            "Move to button row"
         case .moreMenu:
-            "post_action_layout_move_to_more_menu"
+            "Move to More menu"
         case .hidden:
-            "post_action_layout_hide_action"
+            "Hide action"
         }
     }
 }
@@ -119,35 +119,35 @@ public extension PostActionFamily {
     var postActionLayoutTitleKey: LocalizedStringKey {
         switch self {
         case .reply:
-            "post_action_family_reply"
+            "compose_title_reply"
         case .comment:
-            "post_action_family_comment"
+            "comment"
         case .repost:
-            "post_action_family_repost"
+            "Repost"
         case .quote:
-            "post_action_family_quote"
+            "compose_title_quote"
         case .like:
-            "post_action_family_like"
+            "like"
         case .react:
-            "post_action_family_react"
+            "React"
         case .translate:
-            "post_action_family_translate"
+            "Translate"
         case .bookmark:
-            "post_action_family_bookmark"
+            "Bookmark"
         case .favorite:
-            "post_action_family_favorite"
+            "Favorite"
         case .share:
-            "post_action_family_share"
+            "fx_share"
         case .fxShare:
-            "post_action_family_fx_share"
+            "Fx share"
         case .delete:
-            "post_action_family_delete"
+            "delete"
         case .report:
-            "post_action_family_report"
+            "bluesky_report"
         case .muteUser:
-            "post_action_family_mute_user"
+            "Mute user"
         case .blockUser:
-            "post_action_family_block_user"
+            "Block user"
         }
     }
 

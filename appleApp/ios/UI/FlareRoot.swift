@@ -47,9 +47,9 @@ struct FlareRoot: View {
                                 StateView(state: item.user) { user in
                                     UserOnelineView(data: user)
                                 } errorContent: { _ in
-                                    Text("Accounts")
+                                    Text("account_management_title")
                                 } loadingContent: {
-                                    Text("Accounts")
+                                    Text("account_management_title")
                                 }
                             }
                             .tabPlacement(.sidebarOnly)
@@ -163,7 +163,7 @@ private func homeTabTitle(_ tab: HomeTabsPresenterStateHomeTabs) -> LocalizedStr
     case .notifications:
         return "home_tab_notifications_title"
     case .discover:
-        return "home_tab_discover_title"
+        return "discover_title"
     case .home:
         return "home_tab_home_title"
     }
@@ -239,7 +239,7 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
         case .localHistory:
             return "local_history_title"
         case .agentHistory:
-            return "settings_agent_history_title"
+            return "agent_history_title"
         case .settings:
             return "settings_title"
         }

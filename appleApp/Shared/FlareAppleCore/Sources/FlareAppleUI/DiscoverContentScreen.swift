@@ -56,7 +56,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                     refresh()
                 } label: {
                     Label {
-                        Text("action_refresh", bundle: FlareAppleUILocalization.bundle)
+                        Text("Refresh", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .arrowsRotate)
                     }
@@ -205,7 +205,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     private var searchResultContent: some View {
         if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
             DiscoverUserSection(
-                titleKey: "search_users",
+                titleKey: "local_history_user",
                 usersState: usersState,
                 openURL: openURL
             )
@@ -213,7 +213,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
 
         if !searchPresenter.state.status.isEmpty && !searchPresenter.state.status.isError {
             DiscoverTimelineSection(
-                titleKey: "search_status",
+                titleKey: "local_history_status",
                 data: searchPresenter.state.status
             )
         }

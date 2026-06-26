@@ -152,7 +152,7 @@ struct ComposeScreen: View {
                     }
                 } label: {
                     Label {
-                        Text("compose_button_cancel")
+                        Text("Cancel")
                     } icon: {
                         Image(systemName: "xmark")
                     }
@@ -188,7 +188,7 @@ struct ComposeScreen: View {
                     send()
                 } label: {
                     Label {
-                        Text("compose_button_send")
+                        Text("agent_chat_send")
                     } icon: {
                         Image(systemName: "paperplane.fill")
                     }

@@ -69,9 +69,9 @@ private extension AgentToolKey {
     var localizedLabel: String {
         return switch self {
         case .loadStatusContextStarted:
-            localizedPresentationString("status_insight_trace_tool_load_status_context_started", fallback: "Loading status context")
+            localizedPresentationString("status_insight_trace_loading_post_context", fallback: "Loading status context")
         case .loadStatusContextCompleted:
-            localizedPresentationString("status_insight_trace_tool_load_status_context_completed", fallback: "Loaded status context")
+            localizedPresentationString("status_insight_trace_post_context_loaded", fallback: "Loaded status context")
         case .loadStatusContextValidationFailed:
             localizedPresentationString("status_insight_trace_tool_load_status_context_validation_failed", fallback: "Status context validation failed")
         case .loadStatusContextFailed:

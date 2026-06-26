@@ -65,7 +65,7 @@ public struct ArticleScreen: View {
                     } label: {
                         Image(systemName: "safari")
                     }
-                    .accessibilityLabel(Text("Open in Browser", bundle: FlareAppleUILocalization.bundle))
+                    .accessibilityLabel(Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle))
                 }
                 if let onShareArticle {
                     ToolbarItem {
@@ -74,7 +74,7 @@ public struct ArticleScreen: View {
                         } label: {
                             Image(fontAwesome: .shareNodes)
                         }
-                        .accessibilityLabel(Text("Share", bundle: FlareAppleUILocalization.bundle))
+                        .accessibilityLabel(Text("fx_share", bundle: FlareAppleUILocalization.bundle))
                     }
                 }
             }
@@ -521,7 +521,7 @@ private struct ArticleContentGateBlockView: View {
                     Button {
                         onOpenURL(actionUrl)
                     } label: {
-                        Text("Open in Browser", bundle: FlareAppleUILocalization.bundle)
+                        Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle)
                     }
                     .buttonStyle(.borderedProminent)
                 }

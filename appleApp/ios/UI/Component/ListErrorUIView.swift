@@ -103,7 +103,7 @@ final class ListErrorUIView: UIView {
             mode = .openLogin
         } else {
             iconView.image = UIImage(systemName: "exclamationmark.triangle.text.page")
-            titleLabel.text = String(localized: "error_generic")
+            titleLabel.text = String(localized: "error")
             button.setTitle(String(localized: "action_retry"), for: .normal)
             mode = .retry
             if let message = error.message {

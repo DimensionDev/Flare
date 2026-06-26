@@ -567,7 +567,7 @@ struct StatusMediaContent: View {
             } label: {
                 Label {
                     Text(
-                        "show_media_button",
+                        "appearance_show_media",
                         bundle: FlareAppleUILocalization.bundle,
                         comment: "Button to show media attachments"
                     )

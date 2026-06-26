@@ -29,13 +29,13 @@ public extension UiStrings {
         case .notifications:
             localizedPresentationString("home_tab_notifications_title", fallback: "Notifications")
         case .discover:
-            localizedPresentationString("home_tab_discover_title", fallback: "Discover")
+            localizedPresentationString("discover_title", fallback: "Discover")
         case .me:
             localizedPresentationString("home_tab_me_title", fallback: "Me")
         case .settings:
             localizedPresentationString("settings_title", fallback: "Settings")
         case .mastodonLocal:
-            localizedPresentationString("mastodon_tab_local_title", fallback: "Local")
+            localizedPresentationString("mastodon_local_timeline", fallback: "Local")
         case .mastodonPublic:
             localizedPresentationString("mastodon_tab_public_title", fallback: "Public")
         case .featured:
@@ -45,11 +45,11 @@ public extension UiStrings {
         case .favourite:
             localizedPresentationString("home_tab_favorite_title", fallback: "Favorites")
         case .list:
-            localizedPresentationString("home_tab_list_title", fallback: "Lists")
+            localizedPresentationString("all_lists_title", fallback: "Lists")
         case .feeds:
-            localizedPresentationString("home_tab_feeds_title", fallback: "Feeds")
+            localizedPresentationString("bluesky_feeds_title", fallback: "Feeds")
         case .directMessage:
-            localizedPresentationString("dm_list_title", fallback: "Direct Messages")
+            localizedPresentationString("direct_messages_title", fallback: "Direct Messages")
         case .rss:
             localizedPresentationString("rss_title", fallback: "Subscriptions")
         case .antenna:
@@ -63,17 +63,17 @@ public extension UiStrings {
         case .allRssFeeds:
             localizedPresentationString("all_rss_feeds_title", fallback: "All Subscriptions")
         case .posts:
-            localizedPresentationString("posts_title", fallback: "Posts")
+            localizedPresentationString("local_history_status", fallback: "Posts")
         case .channel:
             localizedPresentationString("channel_title", fallback: "Channel")
         case .default:
-            localizedPresentationString("tab_settings_default", fallback: "Default")
+            localizedPresentationString("Default", fallback: "Default")
         case .login:
-            localizedPresentationString("login_button", fallback: "Log in")
+            localizedPresentationString("Login", fallback: "Log in")
         case .verify:
             localizedPresentationString("verify_button", fallback: "Verify")
         case .cancel:
-            localizedPresentationString("cancel_button", fallback: "Cancel")
+            localizedPresentationString("Cancel", fallback: "Cancel")
         case .next:
             localizedPresentationString("service_select_next_button", fallback: "Next")
         case .username:
@@ -93,7 +93,7 @@ public extension UiStrings {
         case .externalSigner:
             localizedPresentationString("nostr_login_amber_button", fallback: "External Signer")
         case .webCookieLogin:
-            localizedPresentationString("login_button", fallback: "Log in")
+            localizedPresentationString("Login", fallback: "Log in")
         case .nostrLoginAccount:
             localizedPresentationString("nostr_login_account_hint", fallback: "Nostr Account")
         case .pixivRankingWeek:
@@ -119,11 +119,11 @@ public extension UiStrings {
         case .fanboxRecommendedCreators:
             localizedPresentationString("fanbox_recommended_creators_title", fallback: "Recommended creators")
         case .following:
-            localizedPresentationString("misskey_channel_tab_following", fallback: "Following")
+            localizedPresentationString("matrix_following", fallback: "Following")
         case .postsWithReplies:
             localizedPresentationString("posts_with_replies_title", fallback: "Posts & Replies")
         case .media:
-            localizedPresentationString("media_title", fallback: "Media")
+            localizedPresentationString("appearance_media_group_title", fallback: "Media")
         }
     }
 }
@@ -136,33 +136,33 @@ public extension ActionMenuItemText {
         case .localized(let localized):
             switch localized.type {
             case .like:
-                localizedPresentationString("like", fallback: "Like")
+                localizedPresentationString("like", fallback: "like")
             case .unlike:
                 localizedPresentationString("unlike", fallback: "Unlike")
             case .retweet:
-                localizedPresentationString("retweet", fallback: "Retweet")
+                localizedPresentationString("Repost", fallback: "Retweet")
             case .unretweet:
                 localizedPresentationString("retweet_remove", fallback: "Remove retweet")
             case .reply:
-                localizedPresentationString("reply", fallback: "Reply")
+                localizedPresentationString("compose_title_reply", fallback: "compose_title_reply")
             case .comment:
-                localizedPresentationString("comment", fallback: "Comment")
+                localizedPresentationString("comment", fallback: "comment")
             case .quote:
-                localizedPresentationString("quote", fallback: "Quote")
+                localizedPresentationString("compose_title_quote", fallback: "compose_title_quote")
             case .bookmark:
                 localizedPresentationString("bookmark_add", fallback: "Add bookmark")
             case .unbookmark:
                 localizedPresentationString("bookmark_remove", fallback: "Remove bookmark")
             case .more:
-                localizedPresentationString("more", fallback: "More")
+                localizedPresentationString("more", fallback: "more")
             case .delete:
-                localizedPresentationString("delete", fallback: "Delete")
+                localizedPresentationString("delete", fallback: "delete")
             case .report:
-                localizedPresentationString("report", fallback: "Report")
+                localizedPresentationString("bluesky_report", fallback: "bluesky_report")
             case .react:
                 localizedPresentationString("reaction_add", fallback: "Add reaction")
             case .share:
-                localizedPresentationString("share", fallback: "Share")
+                localizedPresentationString("fx_share", fallback: "fx_share")
             case .fxShare:
                 localizedPresentationString("fx_share", fallback: "FX Share")
             case .unReact:
@@ -204,7 +204,7 @@ public extension ActionMenuItemText {
             case .favorite:
                 localizedPresentationString("Favourite", fallback: "Favourite")
             case .unFavorite:
-                localizedPresentationString("Unfavourite", fallback: "Unfavourite")
+                localizedPresentationString("misskey_channel_unfavorite", fallback: "misskey_channel_unfavorite")
             }
         }
     }

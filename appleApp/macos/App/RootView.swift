@@ -102,7 +102,7 @@ struct RootView: View {
                                 }
                             } header: {
                                 HStack {
-                                    Text("macos_sidebar_accounts")
+                                    Text("account_management_title")
                                     Spacer()
                                     Button {
                                         showLogin = true
@@ -153,7 +153,7 @@ struct RootView: View {
                                 Button {
                                     showLogin = true
                                 } label: {
-                                    Text("login_button")
+                                    Text("Login")
                                 }
                             }
                         }
@@ -258,7 +258,7 @@ private struct LoginExpiredToastView: View {
         }
 
         return String.localizedStringWithFormat(
-            NSLocalizedString("notification_login_expired %@", comment: ""),
+            NSLocalizedString("error_login_expired %@", comment: ""),
             accountKey
         )
     }
@@ -315,7 +315,7 @@ private struct MacSidebarPinnedActions: View {
 
             if showsAgentHistory {
                 MacSidebarPinnedIconButton(
-                    title: "settings_agent_history_title",
+                    title: "agent_history_title",
                     icon: .robot,
                     action: openAgentHistory
                 )
@@ -326,7 +326,7 @@ private struct MacSidebarPinnedActions: View {
             }
 
             MacSidebarPinnedIconButton(
-                title: "draft_box_title",
+                title: "Drafts",
                 icon: .inbox,
                 action: {
                     showDraftBoxPopover.toggle()

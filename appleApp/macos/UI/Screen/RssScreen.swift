@@ -33,7 +33,7 @@ struct RssScreen: View {
                             selectedEditItem = EditRssSelection(item)
                         } label: {
                             Label {
-                                Text("macos_action_edit")
+                                Text("edit")
                             } icon: {
                                 Image(fontAwesome: .pen)
                             }
@@ -43,7 +43,7 @@ struct RssScreen: View {
                             presenter.state.delete(id: Int32(item.id))
                         } label: {
                             Label {
-                                Text("delete_button")
+                                Text("delete")
                             } icon: {
                                 Image(fontAwesome: .trash)
                             }
@@ -543,12 +543,12 @@ struct RssDetailScreen: View {
                         openURL(url)
                     } label: {
                         Label {
-                            Text("Open in Browser")
+                            Text("deep_link_account_picker_open_in_browser")
                         } icon: {
                             Image(systemName: "safari")
                         }
                     }
-                    .help("Open in Browser")
+                    .help("deep_link_account_picker_open_in_browser")
                 }
             }
         }
@@ -647,7 +647,7 @@ private struct RssArticleContentView: View {
                     ) {
                         Image(fontAwesome: .shareNodes)
                     }
-                    .help("Share")
+                    .help("fx_share")
                 }
             }
 
@@ -922,13 +922,13 @@ private struct RssSourceSidebarRow: View {
                 Image(fontAwesome: .pen)
             }
             .buttonStyle(.borderless)
-            .help(String(localized: "macos_action_edit", bundle: .main))
+            .help(String(localized: "edit", bundle: .main))
 
             Button(role: .destructive, action: onDelete) {
                 Image(fontAwesome: .trash)
             }
             .buttonStyle(.borderless)
-            .help(String(localized: "delete_button", bundle: .main))
+            .help(String(localized: "delete", bundle: .main))
         }
         .padding(.vertical, 6)
     }
@@ -1004,7 +1004,7 @@ private struct ImportOPMLScreen: View {
                 .listStyle(.inset)
             }
         }
-        .navigationTitle("opml_import_title")
+        .navigationTitle("opml_import")
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button {

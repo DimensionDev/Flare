@@ -46,13 +46,13 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
         case .accountManagement:
             "account_management_title"
         case .appearance:
-            "macos_settings_section_appearance"
+            "appearance_title"
         case .localFilter:
             "local_filter_title"
         case .storage:
             "storage_title"
         case .aiConfig:
-            "ai_config_title"
+            "AI"
         case .translationConfig:
             "settings_translation_title"
         case .about:
@@ -309,7 +309,7 @@ private struct MacAccountManagementSettingsPane: View {
                     isLoginSheetPresented = true
                 } label: {
                     Label {
-                        Text("login_button")
+                        Text("Login")
                     } icon: {
                         Image(fontAwesome: .plus)
                     }
@@ -361,10 +361,10 @@ private struct MacAccountManagementSettingsPane: View {
                 clearPendingLogout()
             }
         })) {
-            Button("cancel_button", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 clearPendingLogout()
             }
-            Button("delete_button", role: .destructive) {
+            Button("delete", role: .destructive) {
                 confirmLogout()
             }
         } message: {
@@ -509,13 +509,13 @@ private struct MacAppearanceSettingsPane: View {
 
     var body: some View {
         MacSettingsForm(
-            title: "macos_settings_section_appearance",
+            title: "appearance_title",
             subtitle: "appearance_description"
         ) {
             AppearanceThemeSettingsSection()
             AppearanceLayoutSettingsSection {
                 MacSettingActionRow(
-                    "post_action_layout_title",
+                    "Post actions",
                     subtitle: "post_action_layout_customize_description",
                     buttonTitle: "macos_action_open",
                     icon: .sliders
@@ -570,7 +570,7 @@ private struct MacStorageSettingsPane: View {
                 MacSettingActionRow(
                     "storage_clear_image_cache",
                     subtitle: "storage_clear_image_cache_desc",
-                    buttonTitle: "macos_action_clear",
+                    buttonTitle: "Clear",
                     icon: .trash,
                     role: .destructive
                 ) {
@@ -583,7 +583,7 @@ private struct MacStorageSettingsPane: View {
                 MacSettingActionRow(
                     "storage_clear_database_cache",
                     value: "\(presenter.state.userCount) users, \(presenter.state.statusCount) posts",
-                    buttonTitle: "macos_action_clear",
+                    buttonTitle: "Clear",
                     icon: .trash,
                     role: .destructive
                 ) {
@@ -596,7 +596,7 @@ private struct MacStorageSettingsPane: View {
 
             Section {
                 MacSettingActionRow(
-                    "storage_view_app_log",
+                    "app_log",
                     subtitle: "storage_view_app_log_desc",
                     buttonTitle: "macos_action_open",
                     icon: .envelope
@@ -637,19 +637,19 @@ private struct MacStorageSettingsPane: View {
             }
         }
         .alert("storage_clear_image_cache_confirm", isPresented: $showImageClearAlert) {
-            Button("cancel_button", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
             Button("ok_button", role: .destructive) {
                 clearImageCache()
             }
         }
         .alert("storage_clear_database_cache_confirm", isPresented: $showDatabaseClearAlert) {
-            Button("cancel_button", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
             Button("ok_button", role: .destructive) {
                 clearDatabaseCache()
             }
         }
         .alert("import_confirmation_title", isPresented: $showImportConfirmation) {
-            Button("cancel_button", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 pendingImportJson = nil
             }
             Button("ok_button") {
@@ -662,7 +662,7 @@ private struct MacStorageSettingsPane: View {
             Alert(
                 title: Text(notice.title),
                 message: Text(notice.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text("Ok"))
             )
         }
         .fileExporter(
@@ -709,7 +709,7 @@ private struct MacStorageSettingsPane: View {
                                 showingAppLog = false
                             } label: {
                                 Label {
-                                    Text("cancel_button")
+                                    Text("Cancel")
                                 } icon: {
                                     Image(fontAwesome: .xmark)
                                 }
@@ -823,7 +823,7 @@ private struct MacJSONFile: FileDocument {
 private struct MacAiConfigSettingsPane: View {
     var body: some View {
         MacSettingsForm(
-            title: "ai_config_title",
+            title: "AI",
             subtitle: "ai_config_description"
         ) {
             AiConfigSettingsSections()
@@ -883,7 +883,7 @@ private struct MacAppLogSettingsPane: View {
                     presenter.state.clear()
                 } label: {
                     Label {
-                        Text("macos_action_clear")
+                        Text("Clear")
                     } icon: {
                         Image(fontAwesome: .trash)
                     }
@@ -929,7 +929,7 @@ private struct MacAppLogSettingsPane: View {
                             selectedMessage = nil
                         } label: {
                             Label {
-                                Text("cancel_button")
+                                Text("Cancel")
                             } icon: {
                                 Image(fontAwesome: .xmark)
                             }

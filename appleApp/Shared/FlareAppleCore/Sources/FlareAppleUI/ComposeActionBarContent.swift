@@ -278,9 +278,9 @@ private extension UiTimelineV2.PostVisibility {
         case .public:
             "status_visibility_public"
         case .home:
-            "status_visibility_home"
+            "home_tab_home_title"
         case .followers:
-            "status_visibility_followers"
+            "matrix_followers"
         case .specified:
             "status_visibility_specified"
         case .channel:

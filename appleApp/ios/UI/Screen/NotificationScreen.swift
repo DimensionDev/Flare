@@ -206,9 +206,9 @@ struct NotificationFilterSegments: View {
                     case .all:
                         Text("notification_type_all").tag(type)
                     case .comment:
-                        Text("notification_type_comments").tag(type)
+                        Text("comment").tag(type)
                     case .like:
-                        Text("notification_type_likes").tag(type)
+                        Text("like").tag(type)
                     case .mention:
                         Text("notification_type_mentions").tag(type)
                     }

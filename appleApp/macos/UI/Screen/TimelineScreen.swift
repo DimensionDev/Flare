@@ -58,7 +58,7 @@ struct TimelineScreen: View {
                         MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
                     } label: {
                         Label {
-                            Text("home_compose")
+                            Text("compose_title_new")
                         } icon: {
                             Image(fontAwesome: .penToSquare)
                         }

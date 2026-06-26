@@ -39,7 +39,7 @@ public struct AllListScreen<Destination: Hashable>: View {
                                         editListId = item.id
                                     } label: {
                                         Label {
-                                            Text("list_edit_title", bundle: FlareAppleUILocalization.bundle)
+                                            Text("edit_list_title", bundle: FlareAppleUILocalization.bundle)
                                         } icon: {
                                             Image(fontAwesome: .pen)
                                         }
@@ -121,7 +121,7 @@ public struct AllListScreen<Destination: Hashable>: View {
                     deleteListId = nil
                 }
             } label: {
-                Text("Delete", bundle: FlareAppleUILocalization.bundle)
+                Text("delete", bundle: FlareAppleUILocalization.bundle)
             }
         }, message: { data in
             Text("delete_list_description", bundle: FlareAppleUILocalization.bundle)

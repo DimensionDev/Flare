@@ -107,7 +107,7 @@ struct MacMediaViewerScreen: View {
                         }
                         .background(MacSharePickerAnchorView(anchor: sharePickerAnchor))
                         .disabled(isSharingSelectedMedia)
-                        .help(Text(verbatim: "Share"))
+                        .help(Text(verbatim: "fx_share"))
                     }
                 }
 
@@ -144,7 +144,7 @@ struct MacMediaViewerScreen: View {
             Alert(
                 title: Text(verbatim: alert.title),
                 message: Text(verbatim: alert.message),
-                dismissButton: .default(Text(verbatim: "OK"))
+                dismissButton: .default(Text(verbatim: "Ok"))
             )
         }
         .onAppear {

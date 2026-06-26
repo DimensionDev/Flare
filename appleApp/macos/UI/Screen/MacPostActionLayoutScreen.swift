@@ -22,10 +22,10 @@ struct MacPostActionLayoutScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 860, minHeight: 560)
-        .navigationTitle("post_action_layout_title")
+        .navigationTitle("Post actions")
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("done_button") {
+                Button("done") {
                     dismiss()
                 }
             }
@@ -72,7 +72,7 @@ struct MacPostActionLayoutScreen: View {
                     )
                 })) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("post_action_layout_customize")
+                        Text("Customize actions")
                         Text("post_action_layout_customize_description")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -119,7 +119,7 @@ struct MacPostActionLayoutScreen: View {
             }
 
             if families.isEmpty {
-                Text("post_action_layout_no_actions")
+                Text("No actions")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)

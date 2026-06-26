@@ -110,7 +110,7 @@ public struct UserErrorView: View {
                 VStack(
                     alignment: .leading
                 ) {
-                    Text("error_generic", bundle: FlareAppleUILocalization.bundle)
+                    Text("error", bundle: FlareAppleUILocalization.bundle)
                     Text(error.message ?? "Unknown error")
                         .font(.caption)
                         .foregroundStyle(.secondary)

@@ -101,7 +101,7 @@ struct MacComposeScreen: View {
                     send()
                 } label: {
                     Label {
-                        Text("compose_button_send")
+                        Text("agent_chat_send")
                     } icon: {
                         Image(systemName: "paperplane.fill")
                     }
@@ -230,7 +230,7 @@ struct MacComposeScreen: View {
                 .contentShape(Capsule())
             }
             .buttonStyle(.plain)
-            .help(selected.isEmpty ? String(localized: "macos_compose_select_account") : selected.map { $0.handle.canonical }.joined(separator: ", "))
+            .help(selected.isEmpty ? String(localized: "deep_link_account_picker_title") : selected.map { $0.handle.canonical }.joined(separator: ", "))
             .popover(isPresented: $showAccountPopover, arrowEdge: .top) {
                 MacComposeAccountPopover(
                     accounts: accounts,
@@ -716,7 +716,7 @@ private struct MacComposeMediaTile: View {
                 onRemove()
             } label: {
                 Label {
-                    Text("delete_button")
+                    Text("delete")
                 } icon: {
                     Image(fontAwesome: .trash)
                 }
@@ -1127,8 +1127,8 @@ private final class MacComposeWindowCloseController {
         let alert = NSAlert()
         alert.messageText = String(localized: "compose_save_draft_prompt")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: String(localized: "compose_save_draft"))
-        alert.addButton(withTitle: String(localized: "compose_button_cancel"))
+        alert.addButton(withTitle: String(localized: "Save Draft"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         alert.beginSheetModal(for: window) { [weak self] response in
             self?.isPresentingCloseConfirmation = false
             switch response {

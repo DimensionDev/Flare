@@ -393,7 +393,7 @@ private struct GalleryRecommendationsGrid: View {
             Button {
                 success.retry()
             } label: {
-                Text("Retry")
+                Text("action_retry")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)

@@ -203,7 +203,7 @@ private struct AgentChatHistoryDetailPlaceholder: View {
     var body: some View {
         ContentUnavailableView {
             Label {
-                Text("settings_agent_history_title", bundle: .main)
+                Text("agent_history_title", bundle: .main)
             } icon: {
                 Image(fontAwesome: .robot)
             }
@@ -989,9 +989,9 @@ private extension AgentToolKey {
     var localizedLabel: String {
         return switch self {
         case .loadStatusContextStarted:
-            localizedAgentPresentationString("status_insight_trace_tool_load_status_context_started", fallback: "Loading status context")
+            localizedAgentPresentationString("status_insight_trace_loading_post_context", fallback: "Loading status context")
         case .loadStatusContextCompleted:
-            localizedAgentPresentationString("status_insight_trace_tool_load_status_context_completed", fallback: "Loaded status context")
+            localizedAgentPresentationString("status_insight_trace_post_context_loaded", fallback: "Loaded status context")
         case .loadStatusContextValidationFailed:
             localizedAgentPresentationString("status_insight_trace_tool_load_status_context_validation_failed", fallback: "Status context validation failed")
         case .loadStatusContextFailed:

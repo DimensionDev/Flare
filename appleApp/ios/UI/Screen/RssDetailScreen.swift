@@ -89,7 +89,7 @@ Maecenas fringilla vitae leo sit amet lacinia. Donec in dui a ex hendrerit volut
                         openURL(url)
                     } label: {
                         Label {
-                            Text("Open in Browser")
+                            Text("deep_link_account_picker_open_in_browser")
                         } icon: {
                             Image(systemName: "safari")
                         }

@@ -350,7 +350,7 @@ private enum AiConfigEditableField: String, Identifiable {
     var titleKey: LocalizedStringKey {
         switch self {
         case .serverUrl:
-            "Server URL"
+            "ai_config_server_provider_section_header"
         case .apiKey:
             "API Key"
         case .extraBody:

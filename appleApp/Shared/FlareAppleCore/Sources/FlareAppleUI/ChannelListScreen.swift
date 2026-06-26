@@ -63,7 +63,7 @@ public struct ChannelListScreen<Destination: Hashable>: View {
                                              presenter.state.favorite(list: item)
                                          } label: {
                                              Label {
-                                                 Text("misskey_channel_favorite", bundle: FlareAppleUILocalization.bundle)
+                                                 Text("Favourite", bundle: FlareAppleUILocalization.bundle)
                                              } icon: {
                                                  Image(fontAwesome: .heartCirclePlus)
                                              }
@@ -102,13 +102,13 @@ extension MisskeyChannelListPresenterStateType {
     var localizedName: String {
         switch self {
         case .following:
-            return FlareAppleUILocalization.string("misskey_channel_tab_following")
+            return FlareAppleUILocalization.string("matrix_following")
         case .favorites:
-            return FlareAppleUILocalization.string("misskey_channel_tab_favorites")
+            return FlareAppleUILocalization.string("home_tab_favorite_title")
         case .owned:
             return FlareAppleUILocalization.string("misskey_channel_tab_owned")
         case .featured:
-            return FlareAppleUILocalization.string("misskey_channel_tab_featured")
+            return FlareAppleUILocalization.string("home_tab_featured_title")
         }
     }
 }

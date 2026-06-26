@@ -40,13 +40,13 @@ public extension UiTimelineV2.MessageType {
         if let data = self as? UiTimelineV2.MessageTypeLocalized {
             return switch data.data {
             case .mention:
-                FlareAppleUILocalization.string("mastodon_notification_mention")
+                FlareAppleUILocalization.string("bluesky_notification_mention")
             case .newPost:
-                FlareAppleUILocalization.string("mastodon_notification_status")
+                FlareAppleUILocalization.string("bluesky_notification_repost")
             case .repost:
                 FlareAppleUILocalization.string("mastodon_notification_reblog")
             case .follow:
-                FlareAppleUILocalization.string("mastodon_notification_follow")
+                FlareAppleUILocalization.string("bluesky_notification_follow")
             case .followRequest:
                 FlareAppleUILocalization.string("mastodon_notification_follow_request")
             case .favourite:
@@ -105,7 +105,7 @@ public extension UiTimelineV2.MessageType {
             case .starterpackJoined:
                 FlareAppleUILocalization.string("bluesky_notification_starterpackJoined")
             case .pinned:
-                FlareAppleUILocalization.string("mastodon_item_pinned")
+                FlareAppleUILocalization.string("bluesky_notification_item_pin")
             case .like:
                 FlareAppleUILocalization.string("bluesky_notification_like")
             }

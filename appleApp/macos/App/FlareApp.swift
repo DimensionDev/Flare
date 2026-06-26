@@ -35,7 +35,7 @@ struct FlareApp: App {
             MacAppCommands()
         }
 //        .windowToolbarStyle(.unified(showsTitle: false))
-        WindowGroup("home_compose", id: MacWindowID.compose, for: UUID.self) { requestID in
+        WindowGroup("compose_title_new", id: MacWindowID.compose, for: UUID.self) { requestID in
             FlareTheme {
                 MacComposeWindowRoot(requestID: requestID.wrappedValue)
             }
@@ -64,7 +64,7 @@ struct FlareApp: App {
         .defaultSize(width: 1120, height: 760)
         .windowToolbarStyle(.unified)
 
-        Window("settings_agent_history_title", id: MacWindowID.agentHistory) {
+        Window("agent_history_title", id: MacWindowID.agentHistory) {
             FlareTheme {
                 Router(initialRoute: .agentHistory)
             }
@@ -131,7 +131,7 @@ private struct MacAppCommands: Commands {
                 MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
             } label: {
                 Label {
-                    Text("home_compose")
+                    Text("compose_title_new")
                 } icon: {
                     Image(fontAwesome: .penToSquare)
                 }
@@ -152,7 +152,7 @@ private struct MacAppCommands: Commands {
                 MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
             } label: {
                 Label {
-                    Text("settings_agent_history_title")
+                    Text("agent_history_title")
                 } icon: {
                     Image(fontAwesome: .robot)
                 }

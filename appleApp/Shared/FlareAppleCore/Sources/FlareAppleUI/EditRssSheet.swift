@@ -180,7 +180,7 @@ public struct EditRssSheet: View {
                     Section {
                         Picker("rss_open_in", selection: $displayMode) {
                             Text("rss_sources_full_content").tag(RssDisplayMode.fullContent)
-                            Text("rss_sources_open_in_browser").tag(RssDisplayMode.openInBrowser)
+                            Text("deep_link_account_picker_open_in_browser").tag(RssDisplayMode.openInBrowser)
                             Text("rss_sources_description_only").tag(RssDisplayMode.descriptionOnly)
                         }
                     }
@@ -220,7 +220,7 @@ public struct EditRssSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("cancel_button")
+                        Text("Cancel")
                     } icon: {
                         Image(fontAwesome: .xmark)
                     }

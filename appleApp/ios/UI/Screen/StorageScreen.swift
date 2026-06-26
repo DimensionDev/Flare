@@ -104,7 +104,7 @@ struct StorageScreen: View {
                 
                 NavigationLink(value: Route.appLog) {
                     Label {
-                        Text("storage_view_app_log")
+                        Text("app_log")
                     } icon: {
                         Image(fontAwesome: .envelope)
                     }

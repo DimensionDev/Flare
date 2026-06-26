@@ -323,7 +323,7 @@ private struct MacArticleScreen: View {
             Alert(
                 title: Text("save_error"),
                 message: Text(verbatim: alert.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text("Ok"))
             )
         }
     }
@@ -529,15 +529,15 @@ extension Route {
     var alertTitle: LocalizedStringKey? {
         switch self {
         case .statusDeleteConfirm:
-            "delete_status_title"
+            "delete"
         case .statusMastodonReport:
-            "mastodon_report_title"
+            "bluesky_report"
         case .blockUser:
-            "block_user_title"
+            "Block user"
         case .unblockUser:
             "unblock_user_title"
         case .muteUser:
-            "mute_user_title"
+            "Mute user"
         case .unmuteUser:
             "unmute_user_title"
         case .reportUser:
@@ -551,15 +551,15 @@ extension Route {
     func alertMessage() -> some View {
         switch self {
         case .statusDeleteConfirm:
-            Text("delete_status_message")
+            Text("delete_status_alert_message")
         case .statusMastodonReport:
-            Text("mastodon_report_description")
+            Text("mastodon_report_status_alert_message")
         case .blockUser:
-            Text("block_user_description")
+            Text("block_user_alert_message")
         case .unblockUser:
             Text("unblock_user_description")
         case .muteUser:
-            Text("mute_user_description")
+            Text("mute_user_alert_message")
         case .unmuteUser:
             Text("unmute_user_description")
         case .reportUser:
@@ -573,37 +573,37 @@ extension Route {
     func alertActions() -> some View {
         switch self {
         case .statusDeleteConfirm(let accountType, let statusKey):
-            Button("cancel_button", role: .cancel) {}
-            Button("delete_button", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("delete", role: .destructive) {
                 DeleteStatusPresenter(accountType: accountType, statusKey: statusKey).models.value.delete()
             }
         case .statusMastodonReport(let accountType, let userKey, let statusKey):
-            Button("cancel_button", role: .cancel) {}
-            Button("report_button", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("bluesky_report", role: .destructive) {
                 MastodonReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
             }
         case .blockUser(let accountType, let userKey):
-            Button("cancel_button", role: .cancel) {}
-            Button("block_button", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("block", role: .destructive) {
                 BlockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
             }
         case .unblockUser(let accountType, let userKey):
-            Button("cancel_button", role: .cancel) {}
-            Button("unblock_button", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("unblock", role: .destructive) {
                 UnblockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
             }
         case .muteUser(let accountType, let userKey):
-            Button("cancel_button", role: .cancel) {}
-            Button("mute_button", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("mute", role: .destructive) {
                 MuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
             }
         case .unmuteUser(let accountType, let userKey):
-            Button("cancel_button", role: .cancel) {}
-            Button("unmute_button", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("unmute", role: .destructive) {
                 UnmuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
             }
         case .reportUser:
-            Button("cancel_button", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
             Button("ok_button") {}
         default:
             EmptyView()

@@ -79,7 +79,7 @@ public struct LocalFilterSettingsView: View {
                                 showingAddFilter = true
                             } label: {
                                 Label {
-                                    Text("local_filter_edit", bundle: FlareAppleUILocalization.bundle)
+                                    Text("edit", bundle: FlareAppleUILocalization.bundle)
                                 } icon: {
                                     Image(fontAwesome: .pen)
                                 }
@@ -88,7 +88,7 @@ public struct LocalFilterSettingsView: View {
                                 presenter.state.delete(keyword: item.keyword)
                             } label: {
                                 Label {
-                                    Text("local_filter_delete", bundle: FlareAppleUILocalization.bundle)
+                                    Text("delete", bundle: FlareAppleUILocalization.bundle)
                                 } icon: {
                                     Image(fontAwesome: .trash)
                                 }
@@ -99,7 +99,7 @@ public struct LocalFilterSettingsView: View {
                                 presenter.state.delete(keyword: item.keyword)
                             } label: {
                                 Label {
-                                    Text("local_filter_delete", bundle: FlareAppleUILocalization.bundle)
+                                    Text("delete", bundle: FlareAppleUILocalization.bundle)
                                 } icon: {
                                     Image(fontAwesome: .trash)
                                 }
@@ -109,7 +109,7 @@ public struct LocalFilterSettingsView: View {
                                 showingAddFilter = true
                             } label: {
                                 Label {
-                                    Text("local_filter_edit", bundle: FlareAppleUILocalization.bundle)
+                                    Text("edit", bundle: FlareAppleUILocalization.bundle)
                                 } icon: {
                                     Image(fontAwesome: .pen)
                                 }
@@ -189,7 +189,7 @@ private struct LocalFilterEditSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Done", bundle: FlareAppleUILocalization.bundle)
+                        Text("done", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .check)
                     }

@@ -4,7 +4,7 @@ import SwiftUI
 struct AiConfigScreen: View {
     var body: some View {
         AiConfigSettingsView()
-            .navigationTitle("ai_config_title")
+            .navigationTitle("AI")
     }
 }
 

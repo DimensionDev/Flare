@@ -81,10 +81,10 @@ struct StatusShareSheet: View {
                     }
                 }
                 
-                Picker("Theme", selection: $theme) {
-                    Text("System").tag(nil as ColorScheme?)
-                    Text("Light").tag(Optional(ColorScheme.light))
-                    Text("Dark").tag(Optional(ColorScheme.dark))
+                Picker("appearance_theme", selection: $theme) {
+                    Text("appearance_theme_system").tag(nil as ColorScheme?)
+                    Text("appearance_theme_light").tag(Optional(ColorScheme.light))
+                    Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
                 }
             } loadingContent: {
                 TimelinePlaceholderView()
@@ -105,7 +105,7 @@ struct StatusShareSheet: View {
                 }
             }
         }
-        .navigationTitle("status_menu_share")
+        .navigationTitle("fx_share")
         .onSuccessOf(of: presenter.state.status) { data in
             Task {
                 image = await renderImage(data: data)

@@ -69,7 +69,7 @@ struct DMListScreen: View {
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
-        .navigationTitle("dm_list_title")
+        .navigationTitle("direct_messages_title")
     }
 }
 

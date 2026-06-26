@@ -35,7 +35,7 @@ public struct DraftBoxContentView: View {
             if presenter.state.items.isEmpty {
                 ContentUnavailableView {
                     Label {
-                        Text("draft_box_empty_title", bundle: FlareAppleUILocalization.bundle)
+                        Text("No Drafts", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .inbox)
                     }
@@ -69,7 +69,7 @@ public struct DraftBoxContentView: View {
                 .animation(.snappy, value: presenter.state.items.count)
             }
         }
-        .navigationTitle(Text("draft_box_title", bundle: FlareAppleUILocalization.bundle))
+        .navigationTitle(Text("Drafts", bundle: FlareAppleUILocalization.bundle))
     }
 }
 
@@ -200,7 +200,7 @@ private struct DraftBoxActionItems: View {
         if draft.status == .draft {
             Button(action: onSend) {
                 Label {
-                    Text("draft_box_send", bundle: FlareAppleUILocalization.bundle)
+                    Text("agent_chat_send", bundle: FlareAppleUILocalization.bundle)
                 } icon: {
                     Image(systemName: "paperplane.fill")
                 }
@@ -210,7 +210,7 @@ private struct DraftBoxActionItems: View {
         if draft.status == .failed {
             Button(action: onRetry) {
                 Label {
-                    Text("draft_box_retry", bundle: FlareAppleUILocalization.bundle)
+                    Text("action_retry", bundle: FlareAppleUILocalization.bundle)
                 } icon: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -220,7 +220,7 @@ private struct DraftBoxActionItems: View {
         if showsEditAction, let onEdit {
             Button(action: onEdit) {
                 Label {
-                    Text("draft_box_edit", bundle: FlareAppleUILocalization.bundle)
+                    Text("edit", bundle: FlareAppleUILocalization.bundle)
                 } icon: {
                     Image(systemName: "square.and.pencil")
                 }
@@ -229,7 +229,7 @@ private struct DraftBoxActionItems: View {
 
         Button(role: .destructive, action: onDelete) {
             Label {
-                Text("delete_button", bundle: FlareAppleUILocalization.bundle)
+                Text("delete", bundle: FlareAppleUILocalization.bundle)
             } icon: {
                 Image(systemName: "trash")
             }
@@ -398,7 +398,7 @@ private extension UiDraftStatus {
         case .failed:
             "draft_box_status_failed"
         default:
-            "draft_box_status_draft"
+            "Draft"
         }
     }
 

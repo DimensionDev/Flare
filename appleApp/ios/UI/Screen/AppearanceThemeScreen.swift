@@ -6,6 +6,6 @@ struct AppearanceThemeScreen: View {
         List {
             AppearanceThemeSettingsSection()
         }
-        .navigationTitle("appearance_theme_group_title")
+        .navigationTitle("appearance_theme")
     }
 }

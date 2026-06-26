@@ -54,7 +54,7 @@ public struct ListErrorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                Text("error_generic", bundle: FlareAppleUILocalization.bundle)
+                Text("error", bundle: FlareAppleUILocalization.bundle)
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {

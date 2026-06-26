@@ -14,13 +14,13 @@ private extension FollowButtonState {
         case .blocked:
             "relation_blocked"
         case .following:
-            "relation_following"
+            "matrix_following"
         case .requested:
             "relation_requested"
         case .requestFollow:
             "relation_request_follow"
         case .follow:
-            "relation_follow"
+            "misskey_channel_follow"
         }
     }
 }

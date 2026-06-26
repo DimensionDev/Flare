@@ -59,11 +59,11 @@ struct HomeSidebarTabEditSheet: View {
             HStack {
                 Spacer()
 
-                Button("cancel_button") {
+                Button("Cancel") {
                     onCancel()
                 }
 
-                Button("done_button") {
+                Button("done") {
                     save()
                 }
                 .keyboardShortcut(.defaultAction)
@@ -185,7 +185,7 @@ struct HomeSidebarTabEditSheet: View {
     @ViewBuilder
     private var groupChildrenSection: some View {
         if editableGroup != nil {
-            Section("tab_settings_group_tabs") {
+            Section("Tabs") {
                 if groupChildren.isEmpty {
                     Text("tab_settings_group_empty")
                         .foregroundStyle(.secondary)
@@ -348,7 +348,7 @@ private struct HomeSidebarGroupChildEditorRow: View {
                     .foregroundStyle(.red)
             }
             .buttonStyle(.borderless)
-            .help(Text("delete_button"))
+            .help(Text("delete"))
         }
     }
 }
@@ -481,13 +481,13 @@ private extension TimelinePostKind {
     var titleKey: LocalizedStringKey {
         switch self {
         case .reply:
-            return "tab_settings_filter_reply"
+            return "compose_title_reply"
         case .repost:
-            return "tab_settings_filter_repost"
+            return "Repost"
         case .quote:
-            return "tab_settings_filter_quote"
+            return "compose_title_quote"
         default:
-            return "tab_settings_filter_reply"
+            return "compose_title_reply"
         }
     }
 }

@@ -21,7 +21,7 @@ extension HomeTabsPresenterStateHomeTabs {
         case .notifications:
             String(localized: "home_tab_notifications_title", defaultValue: "Notifications", bundle: .main)
         case .discover:
-            String(localized: "home_tab_discover_title", defaultValue: "Discover", bundle: .main)
+            String(localized: "discover_title", defaultValue: "Discover", bundle: .main)
         }
     }
 

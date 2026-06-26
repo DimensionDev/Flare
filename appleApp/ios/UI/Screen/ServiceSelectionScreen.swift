@@ -616,7 +616,7 @@ private enum ServiceSelectCopy {
     static let nostrQRLinkLabel = String(localized: "nostr_login_qr_link_label", defaultValue: "Nostr Connect link")
     static let eulaPrivacyPolicy = String(localized: "eula_privacy_policy", defaultValue: "EULA and Privacy Policy")
     static let loginAgreementPrefix = String(localized: "login_agreement_prefix", defaultValue: "By logging in, you agree to the ")
-    static let search = String(localized: "Search")
+    static let search = String(localized: "search")
     static let clear = String(localized: "Clear")
 
     static func compatibilityWarning(_ software: String) -> String {

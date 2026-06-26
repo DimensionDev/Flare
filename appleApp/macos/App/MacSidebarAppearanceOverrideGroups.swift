@@ -256,7 +256,7 @@ struct MacSidebarThemeAppearanceOverrideGroup: View {
 
     var body: some View {
         MacSidebarAppearanceOverrideGroup(
-            title: "appearance_theme_group_title",
+            title: "appearance_theme",
             subtitle: "appearance_theme_group_subtitle",
             overridesEnabled: overridesEnabled,
             expanded: $expanded,

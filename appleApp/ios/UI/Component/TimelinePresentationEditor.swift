@@ -240,7 +240,7 @@ public struct TimelineFilterSheet: View {
                     )
                 } label: {
                     Label {
-                        Text("Done")
+                        Text("done")
                     } icon: {
                         Image(fontAwesome: .check)
                     }
@@ -254,13 +254,13 @@ private extension TimelinePostKind {
     var titleKey: LocalizedStringKey {
         switch self {
         case .reply:
-            return "tab_settings_filter_reply"
+            return "compose_title_reply"
         case .repost:
-            return "tab_settings_filter_repost"
+            return "Repost"
         case .quote:
-            return "tab_settings_filter_quote"
+            return "compose_title_quote"
         default:
-            return "tab_settings_filter_reply"
+            return "compose_title_reply"
         }
     }
 }
@@ -566,7 +566,7 @@ private struct ThemeAppearanceOverrideGroup: View {
 
     var body: some View {
         AppearanceOverrideGroup(
-            title: "appearance_theme_group_title",
+            title: "appearance_theme",
             subtitle: "appearance_theme_group_subtitle",
             overridesEnabled: overridesEnabled,
             expanded: $expanded,

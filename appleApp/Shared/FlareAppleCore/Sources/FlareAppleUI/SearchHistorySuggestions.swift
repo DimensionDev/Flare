@@ -89,7 +89,7 @@ private struct SearchHistoryDeleteAction: ViewModifier {
             onDelete(keyword)
         } label: {
             Label {
-                Text("delete_button", bundle: FlareAppleUILocalization.bundle)
+                Text("delete", bundle: FlareAppleUILocalization.bundle)
             } icon: {
                 Image(systemName: "trash")
             }

@@ -70,7 +70,7 @@ public struct SearchScreen: View {
                     }
                     .scrollIndicators(.hidden)
                 } header: {
-                    Text("search_users", bundle: FlareAppleUILocalization.bundle)
+                    Text("local_history_user", bundle: FlareAppleUILocalization.bundle)
                 }
                 .padding(.horizontal)
                 .listRowSeparator(.hidden)
@@ -80,7 +80,7 @@ public struct SearchScreen: View {
             Section {
                 TimelinePagingListContent(data: searchPresenter.state.status)
             } header: {
-                Text("search_status", bundle: FlareAppleUILocalization.bundle)
+                Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
             }
         }
         .scrollContentBackground(.hidden)
@@ -90,7 +90,7 @@ public struct SearchScreen: View {
             try? await searchPresenter.state.refreshSuspend()
         }
         .background(Color.flareSystemGroupedBackground)
-        .navigationTitle(Text("search_title", bundle: FlareAppleUILocalization.bundle))
+        .navigationTitle(Text("search", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
             #if os(macOS)
             askAiToolbarItem

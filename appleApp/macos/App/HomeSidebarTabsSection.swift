@@ -158,7 +158,7 @@ struct HomeSidebarTabsSection: View {
                     Image(fontAwesome: .check)
                 }
                 .buttonStyle(.plain)
-                .help(String(localized: "done_button", bundle: .main))
+                .help(String(localized: "done", bundle: .main))
             } else {
                 Button {
                     editableTabs = liveTabs
@@ -269,7 +269,7 @@ private struct HomeSidebarEditableGroupRow: View {
                 Image(fontAwesome: .pen)
             }
             .buttonStyle(.borderless)
-            .help(String(localized: "macos_action_edit", bundle: .main))
+            .help(String(localized: "edit", bundle: .main))
         } else {
             Image(fontAwesome: .pen)
                 .hidden()
@@ -284,7 +284,7 @@ private struct HomeSidebarEditableGroupRow: View {
                     .foregroundStyle(.red)
             }
             .buttonStyle(.borderless)
-            .help(String(localized: "delete_button", bundle: .main))
+            .help(String(localized: "delete", bundle: .main))
         } else {
             Image(fontAwesome: .trash)
                 .hidden()
@@ -295,7 +295,7 @@ private struct HomeSidebarEditableGroupRow: View {
     private var contextMenu: some View {
         Button(action: onEdit) {
             Label {
-                Text("macos_action_edit")
+                Text("edit")
             } icon: {
                 Image(fontAwesome: .pen)
             }
@@ -303,7 +303,7 @@ private struct HomeSidebarEditableGroupRow: View {
 
         Button(role: .destructive, action: onDelete) {
             Label {
-                Text("delete_button")
+                Text("delete")
             } icon: {
                 Image(fontAwesome: .trash)
             }
@@ -344,7 +344,7 @@ private struct HomeSidebarEditableTabRow: View {
         .contextMenu {
             Button(action: onEdit) {
                 Label {
-                    Text("macos_action_edit")
+                    Text("edit")
                 } icon: {
                     Image(fontAwesome: .pen)
                 }
@@ -352,7 +352,7 @@ private struct HomeSidebarEditableTabRow: View {
 
             Button(role: .destructive, action: onDelete) {
                 Label {
-                    Text("delete_button")
+                    Text("delete")
                 } icon: {
                     Image(fontAwesome: .trash)
                 }
@@ -367,7 +367,7 @@ private struct HomeSidebarEditableTabRow: View {
                 Image(fontAwesome: .pen)
             }
             .buttonStyle(.borderless)
-            .help(String(localized: "macos_action_edit", bundle: .main))
+            .help(String(localized: "edit", bundle: .main))
         } else {
             Image(fontAwesome: .pen)
                 .hidden()
@@ -382,7 +382,7 @@ private struct HomeSidebarEditableTabRow: View {
                     .foregroundStyle(.red)
             }
             .buttonStyle(.borderless)
-            .help(String(localized: "delete_button", bundle: .main))
+            .help(String(localized: "delete", bundle: .main))
         } else {
             Image(fontAwesome: .trash)
                 .hidden()
@@ -595,7 +595,7 @@ private struct HomeSidebarCreateGroupPopover: View {
 
                 Spacer()
 
-                Button("done_button") {
+                Button("done") {
                     create()
                 }
                 .keyboardShortcut(.defaultAction)

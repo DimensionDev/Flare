@@ -65,7 +65,7 @@ public struct VVOStatusScreen: View {
                 Picker(selection: $selectedType) {
                     Text("vvo_status_reposts", bundle: FlareAppleUILocalization.bundle)
                         .tag(VVOStatusDetailType.repost)
-                    Text("vvo_status_comments", bundle: FlareAppleUILocalization.bundle)
+                    Text("Comments", bundle: FlareAppleUILocalization.bundle)
                         .tag(VVOStatusDetailType.comment)
                 } label: {
                     

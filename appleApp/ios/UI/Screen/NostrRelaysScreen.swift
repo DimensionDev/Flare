@@ -23,7 +23,7 @@ struct NostrRelaysScreen: View {
                                     presenter.state.removeRelay(relay: item)
                                 } label: {
                                     Label {
-                                        Text("Delete")
+                                        Text("delete")
                                     } icon: {
                                         Image(fontAwesome: .trash)
                                     }
@@ -34,7 +34,7 @@ struct NostrRelaysScreen: View {
                                     presenter.state.removeRelay(relay: item)
                                 } label: {
                                     Label {
-                                        Text("Delete")
+                                        Text("delete")
                                     } icon: {
                                         Image(fontAwesome: .trash)
                                     }
@@ -68,7 +68,7 @@ struct NostrRelaysScreen: View {
             Button("Cancel", role: .cancel) {
                 relay = ""
             }
-            Button("OK") {
+            Button("Ok") {
                 let value = relay.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !value.isEmpty {
                     presenter.state.addRelay(relay: value)

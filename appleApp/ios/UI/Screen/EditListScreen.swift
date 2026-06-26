@@ -67,7 +67,7 @@ struct EditListScreen: View {
                 }
                 Section {
                     TextField(text: $title) {
-                        Text("list_name")
+                        Text("list_edit_name")
                     }
                 } header: {
                     Text("list_edit_name")
@@ -78,7 +78,7 @@ struct EditListScreen: View {
                             Text("list_description")
                         }
                     } header: {
-                        Text("list_edit_description")
+                        Text("list_description")
                     }
                 }
             }
@@ -126,7 +126,7 @@ struct EditListScreen: View {
                 default: self.desc = ""
             }
         })
-        .navigationTitle("list_edit_title")
+        .navigationTitle("edit_list_title")
         .sheet(isPresented: $showEditMember, content: {
             NavigationStack {
                 EditListMemberScreen(accountType: accountType, listId: listId)

@@ -20,7 +20,7 @@ struct CreateListScreen: View {
         Form {
             StateView(state: presenter.state.supportedMetaData) { metadata in
                 if metadata.contains(ListMetaDataType.avatar) {
-                    Section("list.create.avatar") {
+                    Section("list_edit_avatar") {
                         PhotosPicker(selection: $avatar, matching: .images) {
                             if let selectedImage {
                                 selectedImage
@@ -46,13 +46,13 @@ struct CreateListScreen: View {
                     }
                 }
             }
-            Section("list.create.name") {
-                TextField("list.create.name.placeholder", text: $listName)
+            Section("list_edit_name") {
+                TextField("list_edit_name", text: $listName)
             }
             StateView(state: presenter.state.supportedMetaData) { metadata in
                 if metadata.contains(ListMetaDataType.theDescription) {
-                    Section("list.create.description") {
-                        TextField("list.create.description.placeholder", text: $listDescription)
+                    Section("list_description") {
+                        TextField("list_description", text: $listDescription)
                     }
                 }
             }

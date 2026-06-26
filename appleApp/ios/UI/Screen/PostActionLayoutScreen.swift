@@ -165,7 +165,7 @@ private extension PostActionPlacement {
         switch self {
         case .buttonRow: return String(localized: "Button row")
         case .moreMenu: return String(localized: "More menu")
-        case .hidden: return String(localized: "Hidden")
+        case .hidden: return String(localized: "appearance_post_action_style_hidden")
         }
     }
 
@@ -181,19 +181,19 @@ private extension PostActionPlacement {
 private extension PostActionFamily {
     var title: String {
         switch self {
-        case .reply: return String(localized: "Reply")
-        case .comment: return String(localized: "Comment")
+        case .reply: return String(localized: "compose_title_reply")
+        case .comment: return String(localized: "comment")
         case .repost: return String(localized: "Repost")
-        case .quote: return String(localized: "Quote")
-        case .like: return String(localized: "Like")
+        case .quote: return String(localized: "compose_title_quote")
+        case .like: return String(localized: "like")
         case .react: return String(localized: "React")
         case .translate: return String(localized: "Translate")
         case .bookmark: return String(localized: "Bookmark")
         case .favorite: return String(localized: "Favorite")
-        case .share: return String(localized: "Share")
+        case .share: return String(localized: "fx_share")
         case .fxShare: return String(localized: "Fx share")
-        case .delete: return String(localized: "Delete")
-        case .report: return String(localized: "Report")
+        case .delete: return String(localized: "delete")
+        case .report: return String(localized: "bluesky_report")
         case .muteUser: return String(localized: "Mute user")
         case .blockUser: return String(localized: "Block user")
         }

@@ -78,7 +78,7 @@ struct StatusMediaView: View {
                     } label: {
                         Label {
                             Text(
-                                "sensitive_button_show",
+                                "profile_blocked_gate_show",
                                 bundle: FlareAppleUILocalization.bundle,
                                 comment: "Button to show sensitive media"
                             )

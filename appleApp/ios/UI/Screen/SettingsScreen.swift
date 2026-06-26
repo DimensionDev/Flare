@@ -18,7 +18,7 @@ struct SettingsScreen: View {
             Section {
                 NavigationLink(value: Route.appearanceTheme) {
                     Label {
-                        Text("appearance_theme_group_title")
+                        Text("appearance_theme")
                         Text("appearance_theme_group_subtitle")
                     } icon: {
                         Image(fontAwesome: .palette)
@@ -102,7 +102,7 @@ struct SettingsScreen: View {
             Section {
                 NavigationLink(value: Route.aiConfig) {
                     Label {
-                        Text("ai_config_title")
+                        Text("AI")
                         Text("ai_config_description")
                     } icon: {
                         Image(fontAwesome: .robot)

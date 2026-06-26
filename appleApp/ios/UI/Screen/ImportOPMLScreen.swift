@@ -37,10 +37,10 @@ struct ImportOPMLScreen: View {
                 }
             }
         }
-        .navigationTitle("opml_import_title")
+        .navigationTitle("opml_import")
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Done") {
+                Button("done") {
                     dismiss()
                 }
                 .disabled(presenter.state.importing)

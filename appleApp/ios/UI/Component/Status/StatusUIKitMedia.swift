@@ -651,7 +651,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         toggleButton.isHidden = false
         var cfg = UIButton.Configuration.bordered()
         if isBlurred {
-            cfg.title = String(localized: "sensitive_button_show")
+            cfg.title = String(localized: "profile_blocked_gate_show")
             cfg.image = UIImage(fontAwesome: .eye)
             cfg.imagePlacement = .leading
             cfg.baseForegroundColor = .white
@@ -822,7 +822,7 @@ private final class AltTextButton: UIButton {
     @objc private func showAlt() {
         guard let parent = findParentViewController() else { return }
         let alert = UIAlertController(title: nil, message: altText, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default))
+        alert.addAction(UIAlertAction(title: String(localized: "Ok"), style: .default))
         parent.present(alert, animated: true)
     }
     private func findParentViewController() -> UIViewController? {
@@ -882,7 +882,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         showButton.translatesAutoresizingMaskIntoConstraints = false
 
         var cfg = UIButton.Configuration.bordered()
-        cfg.title = String(localized: "show_media_button")
+        cfg.title = String(localized: "appearance_show_media")
         cfg.image = UIImage(fontAwesome: .image)
         cfg.imagePlacement = .leading
         cfg.imagePadding = 4

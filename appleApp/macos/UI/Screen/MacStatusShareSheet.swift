@@ -71,10 +71,10 @@ struct MacStatusShareSheet: View {
             TimelinePlaceholderView()
                 .frame(width: macStatusShareSheetWidth, height: macStatusShareSheetHeight)
         }
-        .navigationTitle("status_menu_share")
+        .navigationTitle("fx_share")
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("done_button") {
+                Button("done") {
                     dismiss()
                 }
             }
@@ -83,7 +83,7 @@ struct MacStatusShareSheet: View {
             Alert(
                 title: Text(alert.title),
                 message: Text(verbatim: alert.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text("Ok"))
             )
         }
     }
@@ -155,7 +155,7 @@ struct MacStatusShareSheet: View {
             }
 
             Section {
-                Picker("share_theme", selection: $theme) {
+                Picker("appearance_theme", selection: $theme) {
                     Text("appearance_theme_system").tag(nil as ColorScheme?)
                     Text("appearance_theme_light").tag(Optional(ColorScheme.light))
                     Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))

@@ -17,7 +17,7 @@ public struct MisskeyReportSheet: View {
                 Text("misskey_report_reason", bundle: FlareAppleUILocalization.bundle)
             }
         }
-        .navigationTitle(Text("misskey_report_title", bundle: FlareAppleUILocalization.bundle))
+        .navigationTitle(Text("bluesky_report", bundle: FlareAppleUILocalization.bundle))
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button(
@@ -40,7 +40,7 @@ public struct MisskeyReportSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Done", bundle: FlareAppleUILocalization.bundle)
+                        Text("done", bundle: FlareAppleUILocalization.bundle)
                     } icon: {
                         Image(fontAwesome: .check)
                     }

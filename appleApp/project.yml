@@ -92,6 +92,7 @@ targets:
           - Assets.xcassets/.DS_Store
           - Info.plist
           - AppIcon_*.icon
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
       - package: LazyPager
@@ -142,6 +143,7 @@ targets:
       - path: macos
         excludes:
           - Info.plist
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: CHTCollectionViewWaterfallLayout
       - package: Kingfisher
@@ -209,6 +211,7 @@ targets:
       - path: Shared/FlareAppleCore/Sources/FlareAppleCore
         excludes:
           - Resources/**
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     preBuildScripts:
       - name: Compile Kotlin
         basedOnDependencyAnalysis: false
@@ -238,6 +241,7 @@ targets:
       - path: Shared/FlareAppleCore/Sources/FlareAppleUI
         excludes:
           - Resources/**
+      - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
       - package: iOS-Backports

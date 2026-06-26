@@ -27,7 +27,7 @@ struct WebLoginScreen: View {
                                 dismiss()
                             } label: {
                                 Label {
-                                    Text("compose_button_cancel")
+                                    Text("Cancel")
                                 } icon: {
                                     Image(systemName: "xmark")
                                 }

@@ -38,7 +38,7 @@ struct SecondaryTabsScreen: View {
                                 }
                             }
                         } header: {
-                            Text("Accounts")
+                            Text("account_management_title")
                         }
                     }
                 }
@@ -68,7 +68,7 @@ struct SecondaryTabsScreen: View {
                     if aiAgentEnabledPresenter.state.enabled {
                         NavigationLink(value: Route.agentHistory) {
                             Label {
-                                Text("settings_agent_history_title")
+                                Text("agent_history_title")
                             } icon: {
                                 Image(fontAwesome: .robot)
                             }

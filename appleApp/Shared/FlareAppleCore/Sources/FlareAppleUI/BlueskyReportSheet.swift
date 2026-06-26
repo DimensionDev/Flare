@@ -51,7 +51,7 @@ public struct BlueskyReportSheet: View {
                         }
                     } label: {
                         Label {
-                            Text("Done", bundle: FlareAppleUILocalization.bundle)
+                            Text("done", bundle: FlareAppleUILocalization.bundle)
                         } icon: {
                             Image(fontAwesome: .check)
                         }

@@ -28,7 +28,7 @@ public struct AntennasListScreen<Destination: Hashable>: View {
                 UiListPlaceholder()
             }
         }
-        .navigationTitle(Text("antennas_lists_title", bundle: FlareAppleUILocalization.bundle))
+        .navigationTitle(Text("antenna_title", bundle: FlareAppleUILocalization.bundle))
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }

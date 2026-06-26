@@ -73,7 +73,7 @@ struct TabSettingsScreen: View {
                             }
                         } label: {
                             Label {
-                                Text("tab_settings_edit")
+                                Text("edit")
                             } icon: {
                                 Image(fontAwesome: .pen)
                             }
@@ -86,7 +86,7 @@ struct TabSettingsScreen: View {
                             }
                         } label: {
                             Label {
-                                Text("tab_settings_delete")
+                                Text("delete")
                             } icon: {
                                 Image(fontAwesome: .trash)
                             }
@@ -349,7 +349,7 @@ struct EditTabSheet: View {
                     dismiss()
                 } label: {
                     Label {
-                        Text("Done")
+                        Text("done")
                     } icon: {
                         Image(fontAwesome: .check)
                     }
@@ -384,7 +384,7 @@ struct AddTabSheet: View {
                         showAddRssSource = true
                     } label: {
                         Label {
-                            Text("rss_add_source")
+                            Text("add_rss_title")
                         } icon: {
                             Image(fontAwesome: .plus)
                         }

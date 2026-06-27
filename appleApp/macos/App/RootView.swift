@@ -25,7 +25,7 @@ struct RootView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack(spacing: 0) {
+//            VStack(spacing: 0) {
                 List(selection: $selectedTab) {
                     StateView(state: homeTabsPresenter.state.tabs) { tabs in
                         let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
@@ -117,28 +117,30 @@ struct RootView: View {
                         }
                     }
                 }
+                .safeAreaInset(edge: .bottom) {
+                    MacSidebarPinnedActions(
+                        showDraftBoxPopover: $showDraftBoxPopover,
+                        showsAgentHistory: aiAgentEnabledPresenter.state.enabled,
+                        openDraft: { groupId in
+                            MacComposeWindowCoordinator.shared.openDraft(
+                                groupId: groupId,
+                                openWindow: openWindow
+                            )
+                        },
+                        openRssManagement: {
+                            openWindow(id: MacWindowID.rssManagement)
+                        },
+                        openAgentHistory: {
+                            MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
+                        },
+                        openAppSettings: {
+                            openSettings()
+                        }
+                    )
+                }
                 .listStyle(.sidebar)
 
-                MacSidebarPinnedActions(
-                    showDraftBoxPopover: $showDraftBoxPopover,
-                    showsAgentHistory: aiAgentEnabledPresenter.state.enabled,
-                    openDraft: { groupId in
-                        MacComposeWindowCoordinator.shared.openDraft(
-                            groupId: groupId,
-                            openWindow: openWindow
-                        )
-                    },
-                    openRssManagement: {
-                        openWindow(id: MacWindowID.rssManagement)
-                    },
-                    openAgentHistory: {
-                        MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
-                    },
-                    openAppSettings: {
-                        openSettings()
-                    }
-                )
-            }
+//            }
             .toolbar(removing: .sidebarToggle)
             .frame(minWidth: 100, maxWidth: 280)
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)

@@ -25,17 +25,6 @@ struct TimelineScreen: View {
             allowGalleryMode: allowGalleryMode
         )
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
-        .overlay(alignment: .top) {
-            if #available(macOS 27.0, *) {
-                
-            } else {
-                if presenter.state.isRefreshing {
-                    ProgressView()
-                        .progressViewStyle(.linear)
-                        .padding(.horizontal)
-                }
-            }
-        }
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
@@ -47,10 +36,17 @@ struct TimelineScreen: View {
                     Label {
                         Text("Refresh")
                     } icon: {
-                        Image(fontAwesome: .arrowsRotate)
+                        if presenter.state.isRefreshing {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .scaleEffect(0.5)
+                                .frame(width: 12, height: 12)
+                        } else {
+                            Image(fontAwesome: .arrowsRotate)
+                        }
                     }
-
                 }
+                .disabled(presenter.state.isRefreshing)
             }
             if case .success(let value) = onEnum(of: canComposePresenter.state.canCompose), value.data.boolValue {
                 ToolbarItem(placement: .primaryAction) {

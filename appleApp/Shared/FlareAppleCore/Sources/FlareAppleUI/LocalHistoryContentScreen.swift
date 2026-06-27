@@ -34,6 +34,16 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
             askAiToolbarItem
             #endif
 
+            #if os(macOS)
+            ToolbarItem(placement: .principal) {
+                Picker("local_history_title", selection: $selection) {
+                    Text("local_history_status", bundle: .main).tag(LocalHistorySelection.status)
+                    Text("local_history_user", bundle: .main).tag(LocalHistorySelection.user)
+                }
+                .modifier(LocalHistoryPickerStyle())
+                .fixedSize()
+            }
+            #else
             ToolbarItem(placement: .primaryAction) {
                 Picker("local_history_title", selection: $selection) {
                     Text("local_history_status", bundle: .main).tag(LocalHistorySelection.status)
@@ -42,6 +52,7 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
                 .modifier(LocalHistoryPickerStyle())
                 .fixedSize()
             }
+            #endif
         }
         .detectScrolling()
         .background(Color.flareSystemGroupedBackground)

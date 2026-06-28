@@ -5,14 +5,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
-public class CanComposePresenter :
-    PresenterBase<CanComposeState>() {
+public class CanComposePresenter : PresenterBase<CanComposeState>() {
     private val accountRepository: AccountRepository by koinInject()
 
     private val canComposeFlow by lazy {

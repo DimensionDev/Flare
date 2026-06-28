@@ -6,14 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.data.repository.SearchHistoryRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.di.koinInject
 
-public class SearchHistoryPresenter :
-    PresenterBase<SearchHistoryState>() {
+public class SearchHistoryPresenter : PresenterBase<SearchHistoryState>() {
     private val repository: SearchHistoryRepository by koinInject()
 
     @Composable

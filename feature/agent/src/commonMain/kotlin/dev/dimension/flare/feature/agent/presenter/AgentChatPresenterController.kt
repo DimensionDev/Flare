@@ -9,13 +9,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.collectPagingState
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentTrace
-import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -33,33 +37,13 @@ import kotlinx.coroutines.withContext
 @Immutable
 internal data class AgentChatPresenterController<Content : Any, Context : Any>(
     val room: AgentChatRoom,
-    val messages: ImmutableList<AgentChatHistoryMessage>,
+    val messages: PagingState<AgentChatHistoryMessage>,
     val input: String,
     val content: Content?,
     private val setInput: (String) -> Unit,
     private val sendMessage: () -> Unit,
     private val selectInputRequestOption: (AgentInputRequest.Option) -> Unit,
 ) {
-    val insight: UiState<String> =
-        when {
-            room.errorMessage != null -> {
-                UiState.Error(IllegalStateException(room.errorMessage))
-            }
-
-            room.isRunning && messages.none { it.isAssistant } -> {
-                UiState.Loading()
-            }
-
-            else -> {
-                messages
-                    .lastOrNull { it.isAssistant }
-                    ?.parts
-                    ?.agentMessageText()
-                    ?.let { UiState.Success(it) }
-                    ?: UiState.Loading()
-            }
-        }
-
     val canSend: Boolean = input.isNotBlank() && !room.isRunning
 
     fun setInput(value: String) {
@@ -80,7 +64,6 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
     key: String,
     conversationId: String,
     room: AgentChatRoom,
-    messageRecords: List<AgentChatHistoryMessage>,
     contextFlow: Flow<Context?>,
     runAgent: (Context, String?, String) -> Flow<AgentConversationEvent<Content, AgentTrace>>,
     onUserMessageSubmitted: suspend (String) -> Unit = {},
@@ -109,10 +92,10 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         }
     }
     val runState by runtime.state.collectAsState()
-    val messages =
-        remember(messageRecords) {
-            messageRecords.toImmutableList()
-        }
+    val historyProvider: AgentChatHistoryProvider by koinInject()
+    val messages by remember(conversationId) {
+        historyProvider.observeMessages(conversationId)
+    }.collectPagingState()
     var input by remember(key, conversationId) {
         mutableStateOf("")
     }
@@ -277,6 +260,7 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
             isRunning = runState.isRunning,
             currentTrace = runState.currentTrace,
         )
+
     @Suppress("UNCHECKED_CAST")
     val content = runState.content as? Content
 
@@ -318,7 +302,8 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
                         setPersistentError(throwable.message)
                     }
                 } else {
-                    val request = messages.latestOpenInputRequestForOption(option)
+                    val currentMessages = messages.snapshotMessages()
+                    val request = currentMessages.latestOpenInputRequestForOption(option)
                     input = ""
                     AgentChatRunRegistry.launchRuntimeTask(conversationId, runtime) {
                         request?.let { selectedRequest ->
@@ -332,6 +317,22 @@ internal fun <Content : Any, Context : Any> rememberAgentChatPresenterController
         },
     )
 }
+
+private fun PagingState<AgentChatHistoryMessage>.snapshotMessages(): ImmutableList<AgentChatHistoryMessage> =
+    when (this) {
+        is PagingState.Success -> {
+            (0 until itemCount)
+                .mapNotNull { index -> peek(index) }
+                .toImmutableList()
+        }
+
+        is PagingState.Empty,
+        is PagingState.Error,
+        is PagingState.Loading,
+        -> {
+            persistentListOf()
+        }
+    }
 
 internal data class AgentChatPresenterRuntimeState(
     val isRunning: Boolean = false,

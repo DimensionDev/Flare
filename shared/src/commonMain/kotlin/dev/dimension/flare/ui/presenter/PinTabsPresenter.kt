@@ -5,12 +5,12 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 public class PinTabs<T> internal constructor(
     private val pinnedIds: Set<String>,
@@ -19,8 +19,7 @@ public class PinTabs<T> internal constructor(
     public fun contains(item: T): Boolean = itemId(item) in pinnedIds
 }
 
-public abstract class PinTabsPresenter<T> :
-    PresenterBase<PinTabsPresenter.State<T>>() {
+public abstract class PinTabsPresenter<T> : PresenterBase<PinTabsPresenter.State<T>>() {
     private val settingsRepository by koinInject<SettingsRepository>()
     private val timelineResolver by koinInject<TimelineResolver>()
     private val appScope: CoroutineScope by koinInject()

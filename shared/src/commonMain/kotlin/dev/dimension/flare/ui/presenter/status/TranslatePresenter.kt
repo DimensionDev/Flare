@@ -19,6 +19,7 @@ import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider
 import dev.dimension.flare.data.translation.TranslationResponseSanitizer
 import dev.dimension.flare.data.translation.translationProviderCacheKey
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -29,7 +30,6 @@ import dev.dimension.flare.ui.render.applyTranslationJson
 import dev.dimension.flare.ui.render.toTranslationJson
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.coroutines.flow.first
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class TranslatePresenter(

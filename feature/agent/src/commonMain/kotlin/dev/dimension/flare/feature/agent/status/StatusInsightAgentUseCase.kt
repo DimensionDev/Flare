@@ -297,12 +297,23 @@ internal class StatusInsightAgentUseCase(
         }
 
     private fun UiTimelineV2.Post.insightConversationTitle(): String =
-        content.raw.trim()
+        content.raw
+            .trim()
             .ifBlank { contentWarning?.raw.orEmpty().trim() }
             .ifBlank { card?.title.orEmpty().trim() }
-            .ifBlank { user?.name?.raw.orEmpty().trim() }
-            .ifBlank { user?.handle?.raw.orEmpty().trim() }
-            .ifBlank { statusKey.toString() }
+            .ifBlank {
+                user
+                    ?.name
+                    ?.raw
+                    .orEmpty()
+                    .trim()
+            }.ifBlank {
+                user
+                    ?.handle
+                    ?.raw
+                    .orEmpty()
+                    .trim()
+            }.ifBlank { statusKey.toString() }
 
     private fun UiTimelineV2.Post.aiImageAttachments(): List<UiMedia.Image> =
         images

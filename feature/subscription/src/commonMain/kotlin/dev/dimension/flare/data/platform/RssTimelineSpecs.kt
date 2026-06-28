@@ -12,6 +12,7 @@ import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.remoteLoaderFactory
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.subscription.SubscriptionTimelineLoaderFactory
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -21,7 +22,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 public data object RssTimelineSpecs {

@@ -2680,6 +2680,50 @@
         }
       }
     },
+    "agent_chat_empty_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask about timelines and posts, or use this space to shape an idea."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可以询问时间线和帖子，也可以用它整理想法。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可以詢問時間軸和貼文，也可以用它整理想法。"
+          }
+        }
+      }
+    },
+    "agent_chat_empty_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask AI anything"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "问问 AI"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問問 AI"
+          }
+        }
+      }
+    },
     "agent_chat_input_placeholder" : {
       "localizations" : {
         "af" : {

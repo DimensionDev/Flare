@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -13,7 +14,6 @@ import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
-import dev.dimension.flare.di.koinInject
 
 public class UserDMConversationPresenter(
     private val accountType: AccountType,

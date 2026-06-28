@@ -10,16 +10,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import dev.dimension.flare.di.koinInject
 
-public class OpenAIModelsPresenter :
-    PresenterBase<OpenAIModelsPresenter.State>() {
+public class OpenAIModelsPresenter : PresenterBase<OpenAIModelsPresenter.State>() {
     private val openAIService by koinInject<OpenAIService>()
 
     @Immutable

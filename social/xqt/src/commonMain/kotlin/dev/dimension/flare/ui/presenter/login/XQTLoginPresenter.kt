@@ -13,6 +13,7 @@ import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
@@ -20,7 +21,6 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 internal class XQTLoginPresenter(
     private val toHome: () -> Unit,

@@ -6,8 +6,7 @@ import dev.dimension.flare.data.model.DataExport
 import dev.dimension.flare.ui.presenter.settings.ExportAppDatabasePresenter
 import kotlinx.serialization.json.Json
 
-public class ExportDataPresenter :
-    PresenterBase<ExportState>() {
+public class ExportDataPresenter : PresenterBase<ExportState>() {
     private val exportAppDatabasePresenter = ExportAppDatabasePresenter()
     private val exportSettingsPresenter = ExportSettingsPresenter()
     private val json = Json { ignoreUnknownKeys = true }

@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.rss.RssDataSource
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.subscription.SubscriptionTimelineLoaderFactory
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -19,7 +20,6 @@ import dev.dimension.flare.ui.presenter.home.TimelineState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 public class RssTimelinePresenter(
     private val url: String,
@@ -38,8 +38,7 @@ public class SubscriptionTimelinePresenter(
     }
 }
 
-public class AllRssTimelinePresenter :
-    TimelinePresenter() {
+public class AllRssTimelinePresenter : TimelinePresenter() {
     private val subscriptionRepository: SubscriptionRepository by koinInject()
     private val subscriptionTimelineLoaderFactory: SubscriptionTimelineLoaderFactory by koinInject()
 

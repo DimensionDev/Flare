@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -25,11 +26,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("accounts")
-public class AccountsPresenter :
-    PresenterBase<AccountsState>() {
+public class AccountsPresenter : PresenterBase<AccountsState>() {
     private val accountRepository: AccountRepository by koinInject()
 
     @OptIn(ExperimentalCoroutinesApi::class)

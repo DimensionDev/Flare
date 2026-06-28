@@ -55,6 +55,7 @@ import dev.dimension.flare.data.platform.MisskeyCredential
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.toTimelineCandidate
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
@@ -79,7 +80,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MisskeyDataSource(

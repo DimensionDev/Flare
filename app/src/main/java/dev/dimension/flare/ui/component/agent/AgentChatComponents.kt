@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
@@ -29,8 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -68,11 +67,10 @@ import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.commonmark.Markdown
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import compose.icons.fontawesomeicons.solid.Robot
-import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
@@ -81,6 +79,7 @@ import dev.dimension.flare.feature.agent.common.AgentPhase
 import dev.dimension.flare.feature.agent.common.AgentToolKey
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -97,7 +96,7 @@ import com.halilibo.richtext.ui.material3.RichText as ComposeRichText
 @Composable
 internal fun AgentChatContent(
     title: String,
-    messages: List<AgentChatHistoryMessage>,
+    messages: PagingState<AgentChatHistoryMessage>,
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
@@ -112,8 +111,6 @@ internal fun AgentChatContent(
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
     showHeader: Boolean = true,
-    leadingContentItemCount: Int = 0,
-    leadingContent: LazyListScope.() -> Unit = {},
 ) {
     AgentChatScaffold(
         messages = messages,
@@ -144,14 +141,12 @@ internal fun AgentChatContent(
             } else {
                 {}
             },
-        leadingContentItemCount = leadingContentItemCount,
-        leadingContent = leadingContent,
     )
 }
 
 @Composable
 internal fun AgentChatScaffold(
-    messages: List<AgentChatHistoryMessage>,
+    messages: PagingState<AgentChatHistoryMessage>,
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
@@ -167,8 +162,6 @@ internal fun AgentChatScaffold(
     onUserClick: (UiProfile) -> Unit = {},
     topBar: @Composable () -> Unit = {},
     reserveBottomBarHeight: Boolean = true,
-    leadingContentItemCount: Int = 0,
-    leadingContent: LazyListScope.() -> Unit = {},
 ) {
     val textState = rememberTextFieldState(input)
     val currentOnInputChange by rememberUpdatedState(onInputChange)
@@ -205,15 +198,9 @@ internal fun AgentChatScaffold(
                         color = FlareDividerDefaults.color,
                         thickness = FlareDividerDefaults.thickness,
                     )
-                    AgentChatInput(
-                        state = textState,
-                        canSend = canSend,
-                        placeholder = inputPlaceholder,
-                        sendContentDescription = sendContentDescription,
-                        onSend = onSend,
+                    Column(
                         modifier =
                             Modifier
-                                .padding(bottom = bottomBarHeight)
                                 .windowInsetsPadding(
                                     WindowInsets.systemBars.only(
                                         WindowInsetsSides.Horizontal,
@@ -223,12 +210,42 @@ internal fun AgentChatScaffold(
                                         bottom = bottomBarHeight,
                                     ),
                                 ).imePadding()
-                                .fillMaxWidth()
-                                .padding(
-                                    horizontal = screenHorizontalPadding,
-                                    vertical = 8.dp,
-                                ),
-                    )
+                                .fillMaxWidth(),
+                    ) {
+                        if (isRunning) {
+                            AgentChatCurrentTrace(
+                                trace = runningTrace,
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .padding(top = 8.dp),
+                            )
+                        }
+                        errorMessage?.let { text ->
+                            AgentChatError(
+                                text = text,
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .padding(top = 8.dp),
+                            )
+                        }
+                        AgentChatInput(
+                            state = textState,
+                            canSend = canSend,
+                            placeholder = inputPlaceholder,
+                            sendContentDescription = sendContentDescription,
+                            onSend = onSend,
+                            modifier =
+                                Modifier
+                                    .padding(bottom = bottomBarHeight)
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = screenHorizontalPadding,
+                                        vertical = 8.dp,
+                                    ),
+                        )
+                    }
                 }
             }
         },
@@ -247,9 +264,6 @@ internal fun AgentChatScaffold(
             )
         AgentChatMessageList(
             messages = messages,
-            isRunning = isRunning,
-            errorMessage = errorMessage,
-            runningTrace = runningTrace,
             onInputRequestOptionSelected = onInputRequestOptionSelected,
             onPostClick = onPostClick,
             onUserClick = onUserClick,
@@ -259,8 +273,6 @@ internal fun AgentChatScaffold(
                     .fillMaxSize()
                     .padding(horizontal = screenHorizontalPadding),
             contentPadding = messageListContentPadding,
-            leadingContentItemCount = leadingContentItemCount,
-            leadingContent = leadingContent,
         )
     }
 }
@@ -289,32 +301,14 @@ internal fun AgentChatHeader(
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun AgentChatMessageList(
-    messages: List<AgentChatHistoryMessage>,
-    isRunning: Boolean,
-    errorMessage: String?,
-    runningTrace: String,
+    messages: PagingState<AgentChatHistoryMessage>,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
     modifier: Modifier = Modifier,
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    leadingContentItemCount: Int = 0,
-    leadingContent: LazyListScope.() -> Unit = {},
 ) {
     val listState = rememberLazyListState()
-    val itemCount =
-        messages.size +
-            leadingContentItemCount +
-            (if (isRunning) 1 else 0) +
-            (if (errorMessage != null) 1 else 0)
-
-    if (listState.firstVisibleItemIndex == 0) {
-        LaunchedEffect(itemCount) {
-            if (itemCount > 0) {
-                listState.scrollToItem(0)
-            }
-        }
-    }
 
     LazyColumn(
         modifier =
@@ -327,28 +321,8 @@ internal fun AgentChatMessageList(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
     ) {
-        errorMessage?.let { text ->
-            item(
-                key = "agent-chat-error",
-                contentType = "agent-chat-error",
-            ) {
-                AgentChatError(
-                    text = text,
-                )
-            }
-        }
-
-        if (isRunning) {
-            item(
-                key = "agent-chat-current-trace",
-                contentType = "agent-chat-current-trace",
-            ) {
-                AgentChatCurrentTrace(trace = runningTrace)
-            }
-        }
-
-        items(
-            items = messages.asReversed(),
+        itemsIndexed(
+            state = messages,
             key = { message -> "agent-chat-message:${message.id}" },
             contentType = { message ->
                 if (message.isUser) {
@@ -357,17 +331,70 @@ internal fun AgentChatMessageList(
                     "agent-chat-assistant-message"
                 }
             },
-        ) { message ->
-            AgentChatMessageBubble(
-                parts = message.parts,
-                isUser = message.isUser,
-                onInputRequestOptionSelected = onInputRequestOptionSelected,
-                onPostClick = onPostClick,
-                onUserClick = onUserClick,
-            )
-        }
+            loadingCount = AGENT_CHAT_MESSAGE_LOADING_COUNT,
+            loadingContent = { index, _ ->
+                AgentChatMessageSkeleton(isUser = index == 0)
+            },
+            errorContent = { throwable ->
+                AgentChatError(text = throwable.message ?: throwable.toString())
+            },
+            itemContent = { _, _, message ->
+                AgentChatMessageBubble(
+                    parts = message.parts,
+                    isUser = message.isUser,
+                    onInputRequestOptionSelected = onInputRequestOptionSelected,
+                    onPostClick = onPostClick,
+                    onUserClick = onUserClick,
+                )
+            },
+        )
+    }
+}
 
-        leadingContent()
+private const val AGENT_CHAT_MESSAGE_LOADING_COUNT = 3
+
+@Composable
+private fun AgentChatMessageSkeleton(isUser: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement =
+            if (isUser) {
+                Arrangement.End
+            } else {
+                Arrangement.Start
+            },
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(0.72f),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ),
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Surface(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(14.dp),
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                    content = {},
+                )
+                Surface(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(0.62f)
+                            .height(14.dp),
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                    content = {},
+                )
+            }
+        }
     }
 }
 

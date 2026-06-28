@@ -26,6 +26,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagin
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
@@ -40,7 +41,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -49,7 +49,7 @@ public class DirectMessageHandler(
     private val accountKey: MicroBlogKey,
     private val loader: DirectMessageLoader,
     private val coroutineScope: CoroutineScope,
-)  {
+) {
     private val database: CacheDatabase by koinInject()
     private val accountType = AccountType.Specific(accountKey)
     private val inMemoryBadgeCount = MutableStateFlow<Int?>(null)

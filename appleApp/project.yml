@@ -35,6 +35,7 @@ settings:
     DEAD_CODE_STRIPPING: YES
     DEVELOPMENT_TEAM: 7LFDZ96332
     "EXCLUDED_ARCHS[sdk=macosx*]": x86_64
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     STRING_CATALOG_GENERATE_SYMBOLS: YES
     SWIFT_APPROACHABLE_CONCURRENCY: YES
@@ -77,6 +78,11 @@ packages:
   SwiftUI-Flow:
     url: https://github.com/tevelee/SwiftUI-Flow
     exactVersion: 3.1.1
+  # Temporary fork: upstream Textual currently requires iOS 18 / macOS 15, while Flare still
+  # supports iOS 17 / macOS 14. Switch back to gonzalezreal/textual when that is compatible.
+  Textual:
+    url: https://github.com/llsc12/textual
+    branch: main
   swiftui-introspect:
     url: https://github.com/siteline/swiftui-introspect
     exactVersion: 27.0.0-beta.1
@@ -160,6 +166,7 @@ targets:
       - package: CHTCollectionViewWaterfallLayout
       - package: GSPlayer
       - package: ChatLayout
+      - package: Textual
       - target: FlareAppleCore
         destinationFilters: [iOS]
       - target: FlareAppleUI
@@ -207,6 +214,7 @@ targets:
         product: SwiftUIBackports
       - package: swiftui-introspect
         product: SwiftUIIntrospect
+      - package: Textual
       - target: FlareAppleCore
         destinationFilters: [macOS]
       - target: FlareAppleUI

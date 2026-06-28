@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -35,12 +31,10 @@ import dev.dimension.flare.profile_insight_title
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
 import dev.dimension.flare.ui.component.agent.label
-import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.FluentDialog
@@ -115,19 +109,6 @@ internal fun ProfileInsightDialog(
                 onUserClick = { user ->
                     user.toRoute()?.let(navigate)
                 },
-                leadingContentItemCount = if (state.profile != null) 1 else 0,
-                leadingContent = {
-                    state.profile?.let { profile ->
-                        item {
-                            ProfileInsightUserPreview(
-                                profile = profile,
-                                onClick = {
-                                    navigate(Route.Profile(accountType = accountType, userKey = profile.key))
-                                },
-                            )
-                        }
-                    }
-                },
                 modifier =
                     Modifier
                         .weight(1f, fill = true),
@@ -140,42 +121,6 @@ internal fun ProfileInsightDialog(
                 Text(text = stringResource(Res.string.ok))
             }
         }
-    }
-}
-
-@Composable
-internal fun ProfileInsightUserPreview(
-    profile: UiProfile,
-    onClick: (() -> Unit)? = null,
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .let { base ->
-                    if (onClick != null) {
-                        base.clickable(onClick = onClick)
-                    } else {
-                        base
-                    }
-                }.border(
-                    border = BorderStroke(1.dp, FluentTheme.colors.stroke.card.default),
-                    shape = RoundedCornerShape(8.dp),
-                ),
-    ) {
-        UserCompat(
-            user = profile,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = screenHorizontalPadding,
-                        vertical = 12.dp,
-                    ),
-            onUserClick = {
-                onClick?.invoke()
-            },
-        )
     }
 }
 

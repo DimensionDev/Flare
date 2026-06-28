@@ -43,6 +43,7 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -59,7 +60,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import dev.dimension.flare.di.koinInject
 
 public class TimelinePresenterOptions(
     public val allowLongTextTranslationDisplay: (RemoteLoader<UiTimelineV2>) -> Boolean = { false },
@@ -68,8 +68,7 @@ public class TimelinePresenterOptions(
 
 @OptIn(ExperimentalPagingApi::class)
 @WebPresenter(name = "timeline", creatable = false)
-public open class TimelinePresenter :
-    PresenterBase<TimelineState> {
+public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val baseLoader: Flow<RemoteLoader<UiTimelineV2>>
     public open val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() = baseLoader

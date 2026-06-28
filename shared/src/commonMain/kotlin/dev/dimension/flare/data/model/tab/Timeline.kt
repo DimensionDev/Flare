@@ -15,6 +15,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRuntimeData
@@ -42,7 +43,6 @@ import kotlinx.serialization.decodeFromHexString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.koin.core.annotation.Single
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @Immutable
@@ -731,7 +731,7 @@ internal class TimelinePresenterFactory(
         }
 }
 
-internal object MixedTimelineLoaderFactory  {
+internal object MixedTimelineLoaderFactory {
     private val database: dev.dimension.flare.data.database.cache.CacheDatabase by koinInject()
 
     fun create(

@@ -5,8 +5,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
@@ -14,12 +16,9 @@ import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentUseCase
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 public class LocalHistoryAgentPresenter(
     private val conversationId: String,
@@ -32,9 +31,8 @@ public class LocalHistoryAgentPresenter(
 
     @Immutable
     public interface State {
-        public val response: UiState<String>
         public val room: AgentChatRoom
-        public val messages: ImmutableList<AgentChatHistoryMessage>
+        public val messages: PagingState<AgentChatHistoryMessage>
         public val input: String
         public val canSend: Boolean
 
@@ -52,9 +50,6 @@ public class LocalHistoryAgentPresenter(
             remember(conversationId, normalizedQuery, target) {
                 "local_history_agent:$conversationId:${normalizedQuery.orEmpty()}:$target"
             }
-        val restoredMessages by remember(conversationId) {
-            historyProvider.observeMessages(conversationId)
-        }.collectAsState(emptyList())
         val room by remember(conversationId) {
             historyProvider.observeRoom(conversationId)
         }.collectAsState(null)
@@ -72,7 +67,6 @@ public class LocalHistoryAgentPresenter(
                 key = key,
                 conversationId = conversationId,
                 room = currentRoom,
-                messageRecords = restoredMessages,
                 contextFlow = contextFlow,
                 runAgent = { context, userInput, currentConversationId ->
                     localHistoryAgentUseCase(
@@ -115,7 +109,6 @@ public class LocalHistoryAgentPresenter(
             )
 
         return StateImpl(
-            response = controller.insight,
             room = controller.room,
             messages = controller.messages,
             input = controller.input,
@@ -128,9 +121,8 @@ public class LocalHistoryAgentPresenter(
 
     @Immutable
     private data class StateImpl(
-        override val response: UiState<String>,
         override val room: AgentChatRoom,
-        override val messages: ImmutableList<AgentChatHistoryMessage>,
+        override val messages: PagingState<AgentChatHistoryMessage>,
         override val input: String,
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,

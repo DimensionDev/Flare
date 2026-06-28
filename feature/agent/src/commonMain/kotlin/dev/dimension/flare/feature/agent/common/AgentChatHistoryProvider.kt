@@ -13,7 +13,6 @@ import dev.dimension.flare.feature.agent.presenter.buildAgentMessageParts
 import dev.dimension.flare.feature.agent.presenter.markAgentInputRequestSelected
 import dev.dimension.flare.feature.agent.presenter.toAgentTextParts
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -56,15 +55,6 @@ internal class AgentChatHistoryProvider(
                     message.toHistoryMessage()
                 }
             }
-
-    fun observeStatusInsightPosts(conversationId: String): Flow<List<UiTimelineV2.Post>> =
-        observeMessages(conversationId).map { messages ->
-            messages
-                .filterNot { message -> message.role == AgentChatHistoryMessage.Role.User }
-                .flatMap { message -> message.parts }
-                .mapNotNull { part -> (part as? AgentMessagePart.PostCard)?.post }
-                .distinctBy { post -> "${post.platformType}:${post.statusKey}" }
-        }
 
     suspend fun hasAssistantMessage(conversationId: String): Boolean =
         database
@@ -340,7 +330,7 @@ internal class AgentChatHistoryProvider(
         val existing = database.conversationDao().getConversation(conversationId)
         val existingUiContent =
             MessageUiContentIndex(
-                database.conversationDao().getMessages(conversationId),
+                database.conversationDao().getMessagesChronological(conversationId),
             )
         val historyMessages = messages.mapNotNull { it.toHistoryMessage(conversationId) }
         val fallbackTitle =
@@ -381,7 +371,7 @@ internal class AgentChatHistoryProvider(
     override suspend fun load(conversationId: String): List<Message> =
         database
             .conversationDao()
-            .getMessages(conversationId)
+            .getMessagesChronological(conversationId)
             .mapNotNull { it.toMessage() }
             .sanitizeForReplay()
 
@@ -393,7 +383,7 @@ internal class AgentChatHistoryProvider(
         val dbMessages =
             database
                 .conversationDao()
-                .getMessages(conversationId)
+                .getMessagesChronological(conversationId)
         val historyMessages = dbMessages.mapNotNull { it.toHistoryMessage() }
         if (historyMessages.none { it.role == AgentChatHistoryMessage.Role.Assistant }) {
             return
@@ -561,7 +551,9 @@ internal class AgentChatHistoryProvider(
                 agentInsightSourceFallbackTitle(conversationId)?.agentFallbackTitle().orEmpty()
             }
 
-            else -> this
+            else -> {
+                this
+            }
         }
     }
 

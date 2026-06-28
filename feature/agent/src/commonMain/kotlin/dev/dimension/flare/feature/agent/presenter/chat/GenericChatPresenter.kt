@@ -5,22 +5,19 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.agent.chat.GenericChatAgentUseCase
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.presenter.rememberAgentChatPresenterController
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 public class GenericChatPresenter(
     private val conversationId: String = "generic-chat",
@@ -32,11 +29,9 @@ public class GenericChatPresenter(
 
     @Immutable
     public interface State {
-        public val response: UiState<String>
         public val room: AgentChatRoom
-        public val messages: ImmutableList<AgentChatHistoryMessage>
+        public val messages: PagingState<AgentChatHistoryMessage>
         public val input: String
-        public val statusInsightPosts: ImmutableList<UiTimelineV2.Post>
         public val canSend: Boolean
 
         public fun setInput(value: String)
@@ -48,12 +43,6 @@ public class GenericChatPresenter(
 
     @Composable
     override fun body(): State {
-        val restoredMessages by remember(conversationId) {
-            historyProvider.observeMessages(conversationId)
-        }.collectAsState(emptyList())
-        val statusInsightPosts by remember(conversationId) {
-            historyProvider.observeStatusInsightPosts(conversationId)
-        }.collectAsState(emptyList())
         val room by remember(conversationId) {
             historyProvider.observeRoom(conversationId)
         }.collectAsState(null)
@@ -71,7 +60,6 @@ public class GenericChatPresenter(
                 key = conversationId,
                 conversationId = conversationId,
                 room = currentRoom,
-                messageRecords = restoredMessages,
                 contextFlow = contextFlow,
                 runAgent = { context, userInput, currentConversationId ->
                     genericChatAgentUseCase(
@@ -113,11 +101,9 @@ public class GenericChatPresenter(
             )
 
         return StateImpl(
-            response = controller.insight,
             room = controller.room,
             messages = controller.messages,
             input = controller.input,
-            statusInsightPosts = statusInsightPosts.toImmutableList(),
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
@@ -127,11 +113,9 @@ public class GenericChatPresenter(
 
     @Immutable
     private data class StateImpl(
-        override val response: UiState<String>,
         override val room: AgentChatRoom,
-        override val messages: ImmutableList<AgentChatHistoryMessage>,
+        override val messages: PagingState<AgentChatHistoryMessage>,
         override val input: String,
-        override val statusInsightPosts: ImmutableList<UiTimelineV2.Post>,
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,

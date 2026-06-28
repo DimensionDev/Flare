@@ -13,13 +13,13 @@ import dev.dimension.flare.data.network.rss.model.OpmlOutline
 import dev.dimension.flare.data.network.rss.model.decodeOpml
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class ImportOPMLPresenter(

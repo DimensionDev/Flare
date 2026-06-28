@@ -7,6 +7,7 @@ import androidx.compose.runtime.produceState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -19,7 +20,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class EmojiHistoryPresenter(

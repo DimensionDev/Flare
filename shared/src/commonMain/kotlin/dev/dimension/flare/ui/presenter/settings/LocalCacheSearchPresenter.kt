@@ -14,6 +14,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -25,11 +26,9 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("localCacheSearch")
-public class LocalCacheSearchPresenter :
-    PresenterBase<LocalCacheSearchPresenter.State>() {
+public class LocalCacheSearchPresenter : PresenterBase<LocalCacheSearchPresenter.State>() {
     private val database: CacheDatabase by koinInject()
     private val accountRepository: AccountRepository by koinInject()
 

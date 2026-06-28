@@ -6,9 +6,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,11 +14,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,7 +35,6 @@ import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.Res
 import dev.dimension.flare.agent_chat_input_placeholder
 import dev.dimension.flare.agent_chat_send
-import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentPhase
 import dev.dimension.flare.feature.agent.common.AgentToolKey
 import dev.dimension.flare.feature.agent.common.AgentTrace
@@ -86,15 +80,11 @@ import dev.dimension.flare.status_insight_trace_tool_search_status_started
 import dev.dimension.flare.status_insight_trace_tool_search_status_validation_failed
 import dev.dimension.flare.status_insight_trace_tool_validation_failed
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
-import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentColor
 import io.github.composefluent.LocalTextStyle
@@ -171,19 +161,6 @@ internal fun StatusInsightDialog(
                 onUserClick = { user ->
                     user.toRoute()?.let(navigate)
                 },
-                leadingContentItemCount = if (state.post != null) 1 else 0,
-                leadingContent = {
-                    state.post?.let { post ->
-                        item {
-                            StatusInsightPostPreview(
-                                post = post,
-                                onClick = {
-                                    navigate(Route.StatusDetail(accountType = post.accountType, statusKey = post.statusKey))
-                                },
-                            )
-                        }
-                    }
-                },
                 modifier =
                     Modifier
                         .weight(1f, fill = true),
@@ -195,50 +172,6 @@ internal fun StatusInsightDialog(
             ) {
                 Text(text = stringResource(Res.string.ok))
             }
-        }
-    }
-}
-
-@Composable
-internal fun StatusInsightPostPreview(
-    post: UiTimelineV2.Post,
-    onClick: (() -> Unit)? = null,
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .let { base ->
-                    if (onClick != null) {
-                        base.clickable(onClick = onClick)
-                    } else {
-                        base
-                    }
-                }.border(
-                    border = BorderStroke(1.dp, FluentTheme.colors.stroke.card.default),
-                    shape = RoundedCornerShape(8.dp),
-                ),
-    ) {
-        CompositionLocalProvider(
-            LocalTimelineAppearance provides
-                LocalTimelineAppearance.current.copy(
-                    showMedia = false,
-                    expandMediaSize = false,
-                    showLinkPreview = false,
-                    postActionStyle = PostActionStyle.Hidden,
-                ),
-        ) {
-            CommonStatusComponent(
-                item = post,
-                modifier =
-                    Modifier
-                        .padding(
-                            horizontal = screenHorizontalPadding,
-                            vertical = 8.dp,
-                        ).fillMaxWidth(),
-                isQuote = true,
-                maxLines = 3,
-            )
         }
     }
 }

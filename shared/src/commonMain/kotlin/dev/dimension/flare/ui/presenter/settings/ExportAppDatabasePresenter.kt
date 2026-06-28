@@ -4,13 +4,12 @@ import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.ExportState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first
-import dev.dimension.flare.di.koinInject
 
-public class ExportAppDatabasePresenter :
-    PresenterBase<ExportState>() {
+public class ExportAppDatabasePresenter : PresenterBase<ExportState>() {
     private val appDatabase: AppDatabase by koinInject()
 
     @Composable

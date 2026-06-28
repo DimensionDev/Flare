@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
@@ -16,7 +17,6 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import dev.dimension.flare.di.koinInject
 
 public class EditTabPresenter(
     private val tabItem: UiTimelineTabItem,

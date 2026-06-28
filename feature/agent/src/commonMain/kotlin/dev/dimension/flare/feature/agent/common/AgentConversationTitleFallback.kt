@@ -65,7 +65,9 @@ internal fun String.agentInsightSourceFallbackTitle(conversationId: String): Str
                 ?: promptField("description")
         }
 
-        else -> null
+        else -> {
+            null
+        }
     }?.takeIf { it.isNotBlank() }
 
 private fun List<AgentChatHistoryMessage>.firstVisibleTitle(role: AgentChatHistoryMessage.Role): String? =

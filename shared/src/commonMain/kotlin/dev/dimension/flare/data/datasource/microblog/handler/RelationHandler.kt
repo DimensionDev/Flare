@@ -7,6 +7,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,14 +18,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class RelationHandler(
     public val accountType: AccountType,
     public val dataSource: RelationLoader,
-)  {
+) {
     private val database: CacheDatabase by koinInject()
     private val coroutineScope: CoroutineScope by koinInject()
 

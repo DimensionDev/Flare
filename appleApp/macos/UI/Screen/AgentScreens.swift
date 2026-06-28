@@ -3,6 +3,8 @@ import FlareAppleUI
 import Foundation
 @preconcurrency import KotlinSharedUI
 import SwiftUI
+import SwiftUIBackports
+import Textual
 
 struct AgentChatHistoryScreen: View {
     @ObservedObject private var windowCoordinator: MacAgentWindowCoordinator
@@ -237,7 +239,7 @@ struct AgentChatScreen: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -253,18 +255,6 @@ struct AgentChatScreen: View {
                 if let route = agentRoute(for: user) {
                     onNavigate(route)
                 }
-            },
-            leadingContent: {
-                AnyView(
-                    ForEach(Array(presenter.state.statusInsightPosts.enumerated()), id: \.offset) { _, post in
-                        StatusInsightPostPreview(
-                            post: post,
-                            onClick: {
-                                onNavigate(.statusDetail(post.accountType, post.statusKey))
-                            }
-                        )
-                    }
-                )
             }
         )
         .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title", bundle: .main) : presenter.state.room.title)
@@ -296,7 +286,7 @@ struct LocalHistoryAgentScreen: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -345,7 +335,7 @@ struct StatusInsightScreen: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -392,7 +382,7 @@ struct ProfileInsightScreen: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -434,7 +424,7 @@ extension ProfileInsightScreen {
 }
 
 struct AgentChatView: View {
-    let messages: [AgentChatHistoryMessage]
+    let messages: PagingState<AgentChatHistoryMessage>
     let isRunning: Bool
     let canSend: Bool
     let errorMessage: String?
@@ -445,109 +435,143 @@ struct AgentChatView: View {
     let onInputRequestOptionSelected: (AgentInputRequest.Option) -> Void
     let onPostClick: (UiTimelineV2.Post) -> Void
     let onUserClick: (UiProfile) -> Void
-    private let leadingContent: () -> AnyView
+    var showsEmptyPlaceholder: Bool = true
 
     @State private var draft = ""
 
-    init(
-        messages: [AgentChatHistoryMessage],
-        isRunning: Bool,
-        canSend: Bool,
-        errorMessage: String?,
-        runningTrace: String,
-        inputPlaceholder: String,
-        onInputChange: @escaping (String) -> Void,
-        onSend: @escaping () -> Void,
-        onInputRequestOptionSelected: @escaping (AgentInputRequest.Option) -> Void = { _ in },
-        onPostClick: @escaping (UiTimelineV2.Post) -> Void = { _ in },
-        onUserClick: @escaping (UiProfile) -> Void = { _ in },
-        leadingContent: @escaping () -> AnyView = { AnyView(EmptyView()) }
-    ) {
-        self.messages = messages
-        self.isRunning = isRunning
-        self.canSend = canSend
-        self.errorMessage = errorMessage
-        self.runningTrace = runningTrace
-        self.inputPlaceholder = inputPlaceholder
-        self.onInputChange = onInputChange
-        self.onSend = onSend
-        self.onInputRequestOptionSelected = onInputRequestOptionSelected
-        self.onPostClick = onPostClick
-        self.onUserClick = onUserClick
-        self.leadingContent = leadingContent
-    }
-
     var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 10) {
-                        leadingContent()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        ForEach(messages, id: \.id) { message in
-                            AgentChatMessageBubble(
-                                parts: Array(message.parts),
-                                isUser: message.isUser,
-                                onInputRequestOptionSelected: onInputRequestOptionSelected,
-                                onPostClick: onPostClick,
-                                onUserClick: onUserClick
+        ZStack {
+            if isEmptyPlaceholderVisible {
+                AgentChatEmptyPlaceholder()
+            } else {
+                switch onEnum(of: messages) {
+                case .loading:
+                    AgentChatMessagesSkeleton()
+                default:
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 10) {
+                            PagingView(
+                                data: messages,
+                                successContent: { message in
+                                    AgentChatMessageBubble(
+                                        parts: Array(message.parts),
+                                        isUser: message.isUser,
+                                        onInputRequestOptionSelected: onInputRequestOptionSelected,
+                                        onPostClick: onPostClick,
+                                        onUserClick: onUserClick
+                                    )
+//                                    .id(message.id)
+                                },
+                                loadingContent: {
+                                    ProgressView()
+                                },
+                                errorContent: { error, retry in
+                                    ListErrorView(error: error, onRetry: retry)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                },
+                                emptyContent: {
+                                    EmptyView()
+                                }
                             )
-                            .id(message.id)
                         }
-
-                        if isRunning {
-                            StatusInsightCurrentTrace(trace: runningTrace)
-                                .id("agent-running")
-                        }
-
-                        if let errorMessage {
-                            Text(verbatim: errorMessage)
-                                .foregroundStyle(.red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-
-                        Color.clear
-                            .frame(height: 1)
-                            .id("agent-bottom")
+                        .padding()
                     }
-                    .padding()
-                }
-                .onChange(of: messages.count) { _, _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onChange(of: isRunning) { _, _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onAppear {
-                    scrollToBottom(proxy: proxy)
+                    .defaultScrollAnchor(.bottom)
                 }
             }
-            Divider()
-            AgentChatInputBar(
-                draft: $draft,
-                inputPlaceholder: inputPlaceholder,
-                canSend: canSend,
-                onInputChange: onInputChange,
-                onSend: submit
-            )
         }
-        .background(Color.flareSystemGroupedBackground)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                if isRunning {
+                    StatusInsightCurrentTrace(trace: runningTrace)
+                        .padding(.horizontal)
+                }
+                if let errorMessage {
+                    Text(verbatim: errorMessage)
+                        .foregroundStyle(.red)
+                        .padding(.horizontal)
+                }
+
+                AgentChatInputBar(
+                    draft: $draft,
+                    inputPlaceholder: inputPlaceholder,
+                    canSend: canSend,
+                    onInputChange: onInputChange,
+                    onSend: submit
+                )
+            }
+        }
     }
 
-    private func scrollToBottom(proxy: ScrollViewProxy) {
-        DispatchQueue.main.async {
-            withAnimation(.easeOut(duration: 0.18)) {
-                proxy.scrollTo("agent-bottom", anchor: .bottom)
-            }
+    private var isEmptyPlaceholderVisible: Bool {
+        guard showsEmptyPlaceholder, errorMessage == nil else {
+            return false
         }
+        if case .empty = onEnum(of: messages) {
+            return true
+        }
+        return false
     }
 
     private func submit() {
         guard canSend else { return }
         onSend()
         draft = ""
+    }
+}
+
+private struct AgentChatEmptyPlaceholder: View {
+    var body: some View {
+        ContentUnavailableView {
+            Label {
+                Text("agent_chat_empty_title", bundle: .main)
+            } icon: {
+                Image(fontAwesome: .robot)
+            }
+        } description: {
+            Text("agent_chat_empty_description", bundle: .main)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 40)
+    }
+}
+
+private struct AgentChatMessagesSkeleton: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(0..<3, id: \.self) { index in
+                    AgentChatMessageSkeletonBubble(isUser: index == 0)
+                }
+            }
+            .padding()
+        }
+        .defaultScrollAnchor(.bottom)
+    }
+}
+
+private struct AgentChatMessageSkeletonBubble: View {
+    let isUser: Bool
+
+    var body: some View {
+        ZStack(alignment: isUser ? .trailing : .leading) {
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(.quaternary)
+                    .frame(width: 280, height: 14)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(.quaternary)
+                    .frame(width: 180, height: 14)
+            }
+            .padding(12)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color(nsColor: .separatorColor).opacity(0.35), lineWidth: 1)
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
     }
 }
 
@@ -559,28 +583,33 @@ private struct AgentChatInputBar: View {
     let onSend: () -> Void
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 10) {
-            TextField(inputPlaceholder, text: $draft, axis: .vertical)
-                .lineLimit(1...5)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit {
-                    onSend()
-                }
-
-            Button(action: onSend) {
-                Image(systemName: "paperplane.fill")
-                    .frame(width: 28, height: 22)
+        TextField(inputPlaceholder, text: $draft, axis: .vertical)
+            .lineLimit(1...5)
+            .textFieldStyle(.plain)
+            .padding()
+            .onSubmit {
+                onSend()
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!canSend)
-            .help(String(localized: "agent_chat_send", bundle: .main))
-            .accessibilityLabel(Text("agent_chat_send", bundle: .main))
-        }
-        .padding()
-        .background(.bar)
-        .onChange(of: draft) { _, value in
-            onInputChange(value)
-        }
+            .safeAreaInset(edge: .trailing, spacing: 8) {
+                Button(action: onSend) {
+                    Image(systemName: "paperplane.fill")
+                        .frame(width: 24, height: 24)
+                }
+                .buttonBorderShape(.circle)
+                .backport
+                .glassButtonStyle()
+                .disabled(!canSend)
+                .help(String(localized: "agent_chat_send", bundle: .main))
+                .accessibilityLabel(Text("agent_chat_send", bundle: .main))
+                .padding(.trailing, 8)
+            }
+            .backport
+            .glassEffect()
+            .padding(.horizontal)
+            .padding(.bottom)
+            .onChange(of: draft) { _, value in
+                onInputChange(value)
+            }
     }
 }
 
@@ -661,16 +690,13 @@ private struct AgentChatMessageBubble: View {
         }
     }
 
-    private func markdownText(_ value: String) -> Text {
+    @ViewBuilder
+    private func markdownText(_ value: String) -> some View {
         if isUser {
             Text(verbatim: value)
-        } else if let attributedText = try? AttributedString(
-            markdown: value,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        ) {
-            Text(attributedText)
         } else {
-            Text(verbatim: value)
+            StructuredText(markdown: value)
+                .textual.textSelection(.enabled)
         }
     }
 

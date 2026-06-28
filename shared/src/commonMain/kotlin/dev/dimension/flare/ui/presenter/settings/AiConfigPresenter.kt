@@ -15,6 +15,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.PreTranslationContentRules
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebIgnore
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import dev.dimension.flare.di.koinInject
 
 public enum class AiTypeOption {
     OnDevice,
@@ -55,8 +55,7 @@ public enum class TranslateProviderOption {
 }
 
 @WebPresenter("aiConfig")
-public class AiConfigPresenter :
-    PresenterBase<AiConfigPresenter.State>() {
+public class AiConfigPresenter : PresenterBase<AiConfigPresenter.State>() {
     private val appDataStore by koinInject<AppDataStore>()
     private val openAIService by koinInject<OpenAIService>()
     private val onDeviceAI by koinInject<OnDeviceAI>()

@@ -7,14 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("storage")
-public class StoragePresenter :
-    PresenterBase<StorageState>() {
+public class StoragePresenter : PresenterBase<StorageState>() {
     private val cacheDatabase by koinInject<CacheDatabase>()
 
     public suspend fun clearCacheSuspend() {

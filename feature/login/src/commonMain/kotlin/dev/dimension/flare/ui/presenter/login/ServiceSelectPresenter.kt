@@ -3,10 +3,10 @@ package dev.dimension.flare.ui.presenter.login
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.di.koinInject
 
 public class ServiceSelectPresenter(
     private val toHome: () -> Unit,

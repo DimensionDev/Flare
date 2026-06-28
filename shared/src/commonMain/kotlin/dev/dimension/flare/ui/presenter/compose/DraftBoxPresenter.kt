@@ -8,6 +8,7 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.repository.DraftRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
@@ -21,11 +22,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Instant
 
-public class DraftBoxPresenter :
-    PresenterBase<DraftBoxState>() {
+public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
     private val draftRepository: DraftRepository by koinInject()
     private val sendDraftUseCase: SendDraftUseCase by koinInject()
     private val inAppNotification: InAppNotification by koinInject()

@@ -18,6 +18,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.allAccountServicesFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 public data class NotificationAccountItem(
     val stableKey: String,
@@ -52,8 +52,7 @@ public data class NotificationAccountItem(
 )
 
 @WebPresenter("notifications")
-public class AllNotificationPresenter :
-    PresenterBase<AllNotificationPresenter.State>() {
+public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.State>() {
     private val accountRepository: AccountRepository by koinInject()
     private val selectedAccountFlow = MutableStateFlow<UiProfile?>(null)
     private val selectedNotificationFilterFlow = MutableStateFlow<NotificationFilter?>(null)

@@ -10,7 +10,7 @@ internal fun Float.humanizePercentage(): String {
     return "$roundedNumber%"
 }
 
-internal object Formatter  {
+internal object Formatter {
     val platformFormatter: PlatformFormatter by koinInject()
 
     internal fun Long.humanize(): String = platformFormatter.formatNumber(number = this)

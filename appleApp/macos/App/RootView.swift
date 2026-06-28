@@ -130,8 +130,11 @@ struct RootView: View {
                         openRssManagement: {
                             openWindow(id: MacWindowID.rssManagement)
                         },
-                        openAgentHistory: {
-                            MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
+                        openAgentChat: {
+                            MacAgentWindowCoordinator.shared.open(
+                                route: .agentChat(Route.newGenericChatConversationId(), nil),
+                                openWindow: openWindow
+                            )
                         },
                         openAppSettings: {
                             openSettings()
@@ -290,7 +293,7 @@ private struct MacSidebarPinnedActions: View {
     let showsAgentHistory: Bool
     let openDraft: (String) -> Void
     let openRssManagement: () -> Void
-    let openAgentHistory: () -> Void
+    let openAgentChat: () -> Void
     let openAppSettings: () -> Void
 
     var body: some View {
@@ -317,9 +320,9 @@ private struct MacSidebarPinnedActions: View {
 
             if showsAgentHistory {
                 MacSidebarPinnedIconButton(
-                    title: "agent_history_title",
+                    title: "agent_chat_title",
                     icon: .robot,
-                    action: openAgentHistory
+                    action: openAgentChat
                 )
 
                 Divider()

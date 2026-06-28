@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSourc
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.STATUS_HISTORY_PAGING_KEY
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -23,7 +24,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
 public class ArticlePresenter(

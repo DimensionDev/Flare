@@ -14,13 +14,13 @@ import dev.dimension.flare.data.network.nostr.defaultNostrRelays
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 internal class NostrLoginPresenter(

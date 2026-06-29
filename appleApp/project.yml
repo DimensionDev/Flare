@@ -318,6 +318,8 @@ targets:
       - package: VideoPlayer
         destinationFilters: [iOS]
         link: false
+      - package: Textual
+        link: false
       - target: FlareAppleCore
     preBuildScripts:
       - name: Compile Kotlin

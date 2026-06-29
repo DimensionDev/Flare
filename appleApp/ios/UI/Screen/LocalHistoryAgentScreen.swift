@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
+import FlareAppleUI
 
 struct LocalHistoryAgentScreen: View {
     @StateObject private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>

@@ -68,31 +68,6 @@ extension ProfileInsightSheet {
     }
 }
 
-struct ProfileInsightUserPreview: View {
-    let profile: UiProfile
-    let onClick: (() -> Void)?
-
-    init(profile: UiProfile, onClick: (() -> Void)? = nil) {
-        self.profile = profile
-        self.onClick = onClick
-    }
-
-    var body: some View {
-        UserCompatView(data: profile)
-            .padding(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(.separator), lineWidth: 1)
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 12))
-            .if(onClick != nil) { view in
-                view.onTapGesture {
-                    onClick?()
-                }
-            }
-    }
-}
-
 private func agentRoute(for user: UiProfile) -> Route? {
     guard let event = user.clickEvent as? ClickEventDeeplink else {
         return nil

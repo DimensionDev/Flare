@@ -321,6 +321,13 @@ internal class AgentChatHistoryProvider(
         }
     }
 
+    suspend fun deleteConversation(conversationId: String) {
+        database.connect {
+            database.conversationDao().deleteMessages(conversationId)
+            database.conversationDao().deleteConversation(conversationId)
+        }
+    }
+
     override suspend fun store(
         conversationId: String,
         messages: List<Message>,

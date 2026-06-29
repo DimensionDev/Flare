@@ -12041,7 +12041,6 @@
       }
     },
     "appearance_font_size_diff" : {
-      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

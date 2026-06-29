@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +27,7 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.agent_chat_title
 import dev.dimension.flare.agent_history_empty
+import dev.dimension.flare.delete
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
 import dev.dimension.flare.feature.agent.presenter.AgentChatHistoryPresenter
 import dev.dimension.flare.ui.component.DateTimeText
@@ -99,6 +102,9 @@ internal fun AgentHistoryScreen(
                             onClick = {
                                 onConversationClick(room.id)
                             },
+                            onDelete = {
+                                state.delete(room.id)
+                            },
                         )
                     }
                 }
@@ -113,34 +119,47 @@ private fun AgentHistoryConversationItem(
     index: Int,
     totalCount: Int,
     onClick: () -> Unit,
+    onDelete: () -> Unit,
 ) {
-    ListComponent(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .listCard(
-                    index = index,
-                    totalCount = totalCount,
-                ).background(FluentTheme.colors.control.default)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .clickable(onClick = onClick),
-        headlineContent = {
-            Row {
-                Text(
-                    text = room.title,
-                    style = FluentTheme.typography.body,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                DateTimeText(
-                    data = Instant.fromEpochMilliseconds(room.updatedAt).toUi(),
-                    style = FluentTheme.typography.caption,
-                    color = FluentTheme.colors.text.text.secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+    val deleteLabel = stringResource(Res.string.delete)
+    ContextMenuArea(
+        items = {
+            listOf(
+                ContextMenuItem(
+                    label = deleteLabel,
+                    onClick = onDelete,
+                ),
+            )
         },
-    )
+    ) {
+        ListComponent(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .listCard(
+                        index = index,
+                        totalCount = totalCount,
+                    ).background(FluentTheme.colors.control.default)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clickable(onClick = onClick),
+            headlineContent = {
+                Row {
+                    Text(
+                        text = room.title,
+                        style = FluentTheme.typography.body,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    DateTimeText(
+                        data = Instant.fromEpochMilliseconds(room.updatedAt).toUi(),
+                        style = FluentTheme.typography.caption,
+                        color = FluentTheme.colors.text.text.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            },
+        )
+    }
 }

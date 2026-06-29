@@ -346,6 +346,7 @@ internal class AgentChatPresenterRuntime {
     var contextInitialized: Boolean = false
     var runJob: Job? = null
     var titleGenerationJob: Job? = null
+    val runtimeTaskJobs: MutableSet<Job> = mutableSetOf()
     var activeTaskCount: Int = 0
     var retainedPresenterCount: Int = 0
     var runGeneration: Int = 0
@@ -408,10 +409,12 @@ internal object AgentChatRunRegistry {
                 try {
                     block()
                 } finally {
+                    runtime.runtimeTaskJobs.remove(job)
                     runtime.activeTaskCount -= 1
                     releaseIfIdle(conversationId, runtime)
                 }
             }
+        runtime.runtimeTaskJobs.add(job)
         job.start()
         return job
     }
@@ -464,10 +467,25 @@ internal object AgentChatRunRegistry {
 
     fun activeRuntimeCount(): Int = runtimes.value.size
 
+    fun cancel(conversationId: String) {
+        val runtime = runtimes.value[conversationId] ?: return
+        runtime.runGeneration += 1
+        runtime.state.value = AgentChatPresenterRuntimeState()
+        runtime.runJob?.cancel()
+        runtime.titleGenerationJob?.cancel()
+        runtime.runtimeTaskJobs.toList().forEach { job ->
+            job.cancel()
+        }
+        releaseIfIdle(conversationId, runtime)
+    }
+
     fun resetForTesting() {
         runtimes.value.values.forEach { runtime ->
             runtime.runJob?.cancel()
             runtime.titleGenerationJob?.cancel()
+            runtime.runtimeTaskJobs.forEach { job ->
+                job.cancel()
+            }
         }
         runtimes.value = emptyMap()
     }

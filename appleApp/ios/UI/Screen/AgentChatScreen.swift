@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
+import FlareAppleUI
 
 struct AgentChatScreen: View {
     @StateObject private var presenter: KotlinPresenter<GenericChatPresenterState>

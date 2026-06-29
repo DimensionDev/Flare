@@ -14,11 +14,13 @@ public struct PagingView<
     private let loadingContent: (Int, Int) -> LoadingContent
     private let loadingCount = 5
     private let maxCount: Int?
+    private let reversed: Bool
     private let successContent: (T, Int, Int) -> SuccessContent
 
     public init(
         data: PagingState<T>,
         maxCount: Int? = nil,
+        reversed: Bool = false,
         @ViewBuilder emptyContent: @escaping () -> EmptyContent,
         @ViewBuilder errorContent: @escaping (KotlinThrowable, @escaping () -> Void) -> ErrorContent,
         @ViewBuilder loadingContent: @escaping (Int, Int) -> LoadingContent,
@@ -26,6 +28,7 @@ public struct PagingView<
     ) {
         self.data = data
         self.maxCount = maxCount
+        self.reversed = reversed
         self.emptyContent = emptyContent
         self.errorContent = errorContent
         self.loadingContent = loadingContent
@@ -49,13 +52,17 @@ public struct PagingView<
         case .success(let success):
             let itemCount = Int(success.itemCount)
             let visibleItemCount = cappedCount(itemCount)
-            ForEach(0..<visibleItemCount, id: \.self) { index in
-                let kotlinIndex = Int32(index)
+            if reversed {
+                appendStateContent(success: success, itemCount: itemCount)
+            }
+            ForEach(0..<visibleItemCount, id: \.self) { displayIndex in
+                let pagingIndex = pagingIndex(displayIndex: displayIndex, visibleItemCount: visibleItemCount)
+                let kotlinIndex = Int32(pagingIndex)
                 ZStack {
-                    if index < itemCount, let item = success.peek(index: kotlinIndex) {
-                        successContent(item, Int(index), Int(visibleItemCount))
+                    if pagingIndex < itemCount, let item = success.peek(index: kotlinIndex) {
+                        successContent(item, displayIndex, visibleItemCount)
                     } else {
-                        loadingContent(Int(index), Int(visibleItemCount))
+                        loadingContent(displayIndex, visibleItemCount)
                     }
                 }
                 .onAppear {
@@ -63,22 +70,8 @@ public struct PagingView<
                 }
             }
 
-            if isMaxCountReached(itemCount) {
-                EmptyView()
-            } else {
-                switch onEnum(of: success.appendState) {
-                case .error(let error):
-                    errorContent(error.error) {
-                        success.retry()
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                case .loading:
-                    ProgressView()
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                case .notLoading:
-                    EmptyView()
-                }
+            if !reversed {
+                appendStateContent(success: success, itemCount: itemCount)
             }
         }
     }
@@ -96,18 +89,49 @@ public struct PagingView<
         }
         return count >= max(0, maxCount)
     }
+
+    private func pagingIndex(displayIndex: Int, visibleItemCount: Int) -> Int {
+        if reversed {
+            visibleItemCount - 1 - displayIndex
+        } else {
+            displayIndex
+        }
+    }
+
+    @ViewBuilder
+    private func appendStateContent(success: PagingStateSuccess<T>, itemCount: Int) -> some View {
+        if isMaxCountReached(itemCount) {
+            EmptyView()
+        } else {
+            switch onEnum(of: success.appendState) {
+            case .error(let error):
+                errorContent(error.error) {
+                    success.retry()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            case .loading:
+                ProgressView()
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .center)
+            case .notLoading:
+                EmptyView()
+            }
+        }
+    }
 }
 
 public extension PagingView {
     init(
         data: PagingState<T>,
         maxCount: Int? = nil,
+        reversed: Bool = false,
         @ViewBuilder successContent: @escaping (T) -> SuccessContent,
         @ViewBuilder loadingContent: @escaping () -> LoadingContent
     ) where ErrorContent == ListErrorView, EmptyContent == ListEmptyView {
         self.init(
             data: data,
             maxCount: maxCount,
+            reversed: reversed,
             emptyContent: { ListEmptyView() },
             errorContent: { error, retry in
                 ListErrorView(error: error) {
@@ -126,6 +150,7 @@ public extension PagingView {
     init(
         data: PagingState<T>,
         maxCount: Int? = nil,
+        reversed: Bool = false,
         @ViewBuilder successContent: @escaping (T) -> SuccessContent,
         @ViewBuilder loadingContent: @escaping () -> LoadingContent,
         @ViewBuilder errorContent: @escaping (KotlinThrowable, @escaping () -> Void) -> ErrorContent
@@ -133,6 +158,7 @@ public extension PagingView {
         self.init(
             data: data,
             maxCount: maxCount,
+            reversed: reversed,
             emptyContent: { ListEmptyView() },
             errorContent: { error, retry in
                 errorContent(error, retry)
@@ -149,6 +175,7 @@ public extension PagingView {
     init(
         data: PagingState<T>,
         maxCount: Int? = nil,
+        reversed: Bool = false,
         @ViewBuilder successContent: @escaping (T) -> SuccessContent,
         @ViewBuilder loadingContent: @escaping () -> LoadingContent,
         @ViewBuilder errorContent: @escaping (KotlinThrowable, @escaping () -> Void) -> ErrorContent,
@@ -157,6 +184,7 @@ public extension PagingView {
         self.init(
             data: data,
             maxCount: maxCount,
+            reversed: reversed,
             emptyContent: { emptyContent() },
             errorContent: { error, retry in
                 errorContent(error, retry)

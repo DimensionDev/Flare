@@ -90,7 +90,7 @@ public struct AgentChatView: View {
                 }
             }
         }
-        .background(Color.flareSystemGroupedBackground)
+//        .background(Color.flareSystemGroupedBackground)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
                 if isRunning {

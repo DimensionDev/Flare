@@ -167,6 +167,8 @@ struct Router: View {
             if let url = URL(string: link) {
                 openURL(url)
             }
+        case _ where route.isDirectMessageWindowRoute:
+            MacDirectMessageWindowCoordinator.shared.open(route: route, openWindow: openWindow)
         case _ where route.isAgentWindowRoute:
             MacAgentWindowCoordinator.shared.open(route: route, openWindow: openWindow)
         case _ where route.alertTitle != nil:
@@ -202,6 +204,10 @@ struct Router: View {
                 .mediaImage,
                 .mediaRaw,
                 .mediaStatusMedia,
+                .directMessages,
+                .dmConversation,
+                .userDirectMessages,
+                .allDirectMessages,
                 .externalLink:
             handle(route: initialRoute)
         default:

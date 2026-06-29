@@ -16,6 +16,7 @@ struct RootView: View {
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @StateObject private var directMessageAvailabilityPresenter = KotlinPresenter(presenter: DirectMessageAvailabilityPresenter())
     @ObservedObject private var inAppNotification = SwiftInAppNotification.shared
     @State private var selectedTab: Route?
     @State private var homeExpanded: Bool = true
@@ -26,7 +27,7 @@ struct RootView: View {
     var body: some View {
         NavigationSplitView {
 //            VStack(spacing: 0) {
-                List(selection: $selectedTab) {
+                List(selection: sidebarSelection) {
                     StateView(state: homeTabsPresenter.state.tabs) { tabs in
                         let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
                         ForEach(homeTabs, id: \.name) { tab in
@@ -77,6 +78,22 @@ struct RootView: View {
                         Image(fontAwesome: .clockRotateLeft)
                     }
                     .tag(Route.localHistory)
+
+                    if directMessageAvailabilityPresenter.state.hasAvailableAccount {
+                        Button {
+                            MacDirectMessageWindowCoordinator.shared.open(
+                                route: .directMessages,
+                                openWindow: openWindow
+                            )
+                        } label: {
+                            Label {
+                                Text("direct_messages_title")
+                            } icon: {
+                                Image(fontAwesome: .commentDots)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
 
                     if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
                         let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
@@ -197,6 +214,21 @@ struct RootView: View {
                 }
             )
             .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
+        }
+    }
+
+    private var sidebarSelection: Binding<Route?> {
+        Binding {
+            selectedTab
+        } set: { route in
+            guard let route else {
+                return
+            }
+            if route.isDirectMessageWindowRoute {
+                MacDirectMessageWindowCoordinator.shared.open(route: route, openWindow: openWindow)
+            } else {
+                selectedTab = route
+            }
         }
     }
 }
@@ -385,7 +417,12 @@ private struct MacSidebarPinnedIconButton: View {
 private func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
     switch onEnum(of: tab.destination) {
     case .route(let destination):
-        return Route.fromDeepLinkRoute(deeplinkRoute: destination.route)
+        guard let route = Route.fromDeepLinkRoute(deeplinkRoute: destination.route),
+              !route.isDirectMessageWindowRoute
+        else {
+            return nil
+        }
+        return route
     case .timeline(let destination):
         return .timeline(destination.tabItem)
     }

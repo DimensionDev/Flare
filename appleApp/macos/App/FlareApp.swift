@@ -9,6 +9,7 @@ enum MacWindowID {
     static let media = "media"
     static let rssManagement = "rss-management"
     static let agentHistory = "agent-history"
+    static let directMessages = "direct-messages"
 }
 
 @main
@@ -67,6 +68,15 @@ struct FlareApp: App {
         }
         .defaultSize(width: 1120, height: 760)
         .windowToolbarStyle(.unified)
+
+        Window("direct_messages_title", id: MacWindowID.directMessages) {
+            FlareTheme {
+                MacDirectMessagesScreen()
+            }
+        }
+        .defaultSize(width: 1120, height: 760)
+        .windowToolbarStyle(.unified)
+        .disableRestorationBehavior()
 
         Window("agent_history_title", id: MacWindowID.agentHistory) {
             FlareTheme {
@@ -153,6 +163,16 @@ private struct MacAppCommands: Commands {
             }
 
             Button {
+                MacDirectMessageWindowCoordinator.shared.open(route: .directMessages, openWindow: openWindow)
+            } label: {
+                Label {
+                    Text("direct_messages_title")
+                } icon: {
+                    Image(fontAwesome: .message)
+                }
+            }
+
+            Button {
                 MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
             } label: {
                 Label {
@@ -190,5 +210,33 @@ final class MacAgentWindowCoordinator: ObservableObject {
 
         request = MacAgentWindowRequest(route: route)
         openWindow(id: MacWindowID.agentHistory)
+    }
+}
+
+struct MacDirectMessageWindowRequest: Identifiable {
+    let id: UUID
+    let route: Route
+
+    init(id: UUID = UUID(), route: Route) {
+        self.id = id
+        self.route = route
+    }
+}
+
+@MainActor
+final class MacDirectMessageWindowCoordinator: ObservableObject {
+    static let shared = MacDirectMessageWindowCoordinator()
+
+    @Published private(set) var request: MacDirectMessageWindowRequest?
+
+    private init() {}
+
+    func open(route: Route = .directMessages, openWindow: OpenWindowAction) {
+        guard route.isDirectMessageWindowRoute else {
+            return
+        }
+
+        request = MacDirectMessageWindowRequest(route: route)
+        openWindow(id: MacWindowID.directMessages)
     }
 }

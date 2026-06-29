@@ -15,12 +15,14 @@ public struct PagingView<
     private let loadingCount = 5
     private let maxCount: Int?
     private let reversed: Bool
+    private let itemID: ((T) -> AnyHashable)?
     private let successContent: (T, Int, Int) -> SuccessContent
 
     public init(
         data: PagingState<T>,
         maxCount: Int? = nil,
         reversed: Bool = false,
+        id itemID: ((T) -> AnyHashable)? = nil,
         @ViewBuilder emptyContent: @escaping () -> EmptyContent,
         @ViewBuilder errorContent: @escaping (KotlinThrowable, @escaping () -> Void) -> ErrorContent,
         @ViewBuilder loadingContent: @escaping (Int, Int) -> LoadingContent,
@@ -29,6 +31,7 @@ public struct PagingView<
         self.data = data
         self.maxCount = maxCount
         self.reversed = reversed
+        self.itemID = itemID
         self.emptyContent = emptyContent
         self.errorContent = errorContent
         self.loadingContent = loadingContent
@@ -55,14 +58,19 @@ public struct PagingView<
             if reversed {
                 appendStateContent(success: success, itemCount: itemCount)
             }
-            ForEach(0..<visibleItemCount, id: \.self) { displayIndex in
-                let pagingIndex = pagingIndex(displayIndex: displayIndex, visibleItemCount: visibleItemCount)
-                let kotlinIndex = Int32(pagingIndex)
+            ForEach(
+                rows(
+                    success: success,
+                    itemCount: itemCount,
+                    visibleItemCount: visibleItemCount
+                )
+            ) { row in
+                let kotlinIndex = Int32(row.pagingIndex)
                 ZStack {
-                    if pagingIndex < itemCount, let item = success.peek(index: kotlinIndex) {
-                        successContent(item, displayIndex, visibleItemCount)
+                    if let item = row.item {
+                        successContent(item, row.displayIndex, visibleItemCount)
                     } else {
-                        loadingContent(displayIndex, visibleItemCount)
+                        loadingContent(row.displayIndex, visibleItemCount)
                     }
                 }
                 .onAppear {
@@ -73,6 +81,34 @@ public struct PagingView<
             if !reversed {
                 appendStateContent(success: success, itemCount: itemCount)
             }
+        }
+    }
+
+    private func rows(
+        success: PagingStateSuccess<T>,
+        itemCount: Int,
+        visibleItemCount: Int
+    ) -> [PagingViewRow<T>] {
+        (0..<visibleItemCount).map { displayIndex in
+            let pagingIndex = pagingIndex(displayIndex: displayIndex, visibleItemCount: visibleItemCount)
+            let item: T?
+            if pagingIndex < itemCount {
+                item = success.peek(index: Int32(pagingIndex))
+            } else {
+                item = nil
+            }
+            let id: AnyHashable
+            if let item, let itemID {
+                id = itemID(item)
+            } else {
+                id = AnyHashable(pagingIndex)
+            }
+            return PagingViewRow(
+                id: id,
+                displayIndex: displayIndex,
+                pagingIndex: pagingIndex,
+                item: item
+            )
         }
     }
 
@@ -118,6 +154,13 @@ public struct PagingView<
             }
         }
     }
+}
+
+private struct PagingViewRow<T: AnyObject>: Identifiable {
+    let id: AnyHashable
+    let displayIndex: Int
+    let pagingIndex: Int
+    let item: T?
 }
 
 public extension PagingView {

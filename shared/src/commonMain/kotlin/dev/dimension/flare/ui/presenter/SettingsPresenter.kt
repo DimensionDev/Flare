@@ -14,6 +14,7 @@ import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.web.shared.WebIgnore
@@ -21,11 +22,9 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("settings")
-public class SettingsPresenter :
-    PresenterBase<SettingsPresenter.State>() {
+public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
     private val repository: SettingsRepository by koinInject()
 
     @Composable

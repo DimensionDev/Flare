@@ -5,9 +5,9 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.ImportState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.di.koinInject
 
 public class ImportAppDatabasePresenter(
     private val jsonContent: String,

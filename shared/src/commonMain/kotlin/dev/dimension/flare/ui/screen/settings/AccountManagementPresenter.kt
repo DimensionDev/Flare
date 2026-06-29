@@ -12,8 +12,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
 
-public class AccountManagementPresenter :
-    PresenterBase<AccountManagementPresenter.State>() {
+public class AccountManagementPresenter : PresenterBase<AccountManagementPresenter.State>() {
     public interface State : AccountsState {
         public fun logout(accountKey: MicroBlogKey)
 

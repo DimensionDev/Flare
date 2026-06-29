@@ -13,8 +13,8 @@ import dev.dimension.flare.data.model.appearance.AppearanceBag
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.toTabSettingsV2
 import dev.dimension.flare.data.repository.SettingsRepository
-import kotlinx.serialization.json.jsonObject
 import dev.dimension.flare.di.koinInject
+import kotlinx.serialization.json.jsonObject
 
 public class ImportSettingsPresenter(
     private val jsonContent: String,

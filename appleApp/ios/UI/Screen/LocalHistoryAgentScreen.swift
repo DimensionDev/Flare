@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
+import FlareAppleUI
 
 struct LocalHistoryAgentScreen: View {
     @StateObject private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
@@ -8,7 +9,7 @@ struct LocalHistoryAgentScreen: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,

@@ -16,10 +16,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,11 +59,13 @@ import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.agent_chat_thinking
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentInputRequestOptionButtonType
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
+import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -85,7 +86,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun AgentChatScaffold(
-    messages: List<AgentChatHistoryMessage>,
+    messages: PagingState<AgentChatHistoryMessage>,
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
@@ -99,8 +100,6 @@ internal fun AgentChatScaffold(
     onPostClick: (UiTimelineV2.Post) -> Unit = {},
     onUserClick: (UiProfile) -> Unit = {},
     modifier: Modifier = Modifier,
-    leadingContentItemCount: Int = 0,
-    leadingContent: LazyListScope.() -> Unit = {},
 ) {
     val textState = rememberTextFieldState(input)
     LaunchedEffect(input) {
@@ -122,19 +121,35 @@ internal fun AgentChatScaffold(
     ) {
         AgentChatMessageList(
             messages = messages,
-            isRunning = isRunning,
-            errorMessage = errorMessage,
-            runningTrace = runningTrace,
             onInputRequestOptionSelected = onInputRequestOptionSelected,
             onPostClick = onPostClick,
             onUserClick = onUserClick,
-            leadingContentItemCount = leadingContentItemCount,
-            leadingContent = leadingContent,
             modifier =
                 Modifier
                     .weight(1f)
                     .fillMaxWidth(),
         )
+        if (isRunning) {
+            AgentChatCurrentTrace(
+                trace = runningTrace.ifBlank { stringResource(Res.string.agent_chat_thinking) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .padding(top = 8.dp),
+            )
+        }
+        errorMessage?.let { text ->
+            Text(
+                text = text,
+                color = FluentTheme.colors.system.critical,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .padding(top = 8.dp),
+            )
+        }
         AgentChatInput(
             state = textState,
             canSend = canSend,
@@ -154,31 +169,13 @@ internal fun AgentChatScaffold(
 
 @Composable
 private fun AgentChatMessageList(
-    messages: List<AgentChatHistoryMessage>,
-    isRunning: Boolean,
-    errorMessage: String?,
-    runningTrace: String,
+    messages: PagingState<AgentChatHistoryMessage>,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
     onPostClick: (UiTimelineV2.Post) -> Unit,
     onUserClick: (UiProfile) -> Unit,
-    leadingContentItemCount: Int,
-    leadingContent: LazyListScope.() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
-    val itemCount =
-        messages.size +
-            leadingContentItemCount +
-            (if (isRunning) 1 else 0) +
-            (if (errorMessage != null) 1 else 0)
-
-    if (listState.firstVisibleItemIndex == 0) {
-        LaunchedEffect(itemCount) {
-            if (itemCount > 0) {
-                listState.scrollToItem(0)
-            }
-        }
-    }
 
     FlareScrollBar(
         state = listState,
@@ -192,29 +189,8 @@ private fun AgentChatMessageList(
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Bottom),
             modifier = Modifier.fillMaxSize(),
         ) {
-            errorMessage?.let { text ->
-                item(
-                    key = "agent-chat-error",
-                    contentType = "agent-chat-error",
-                ) {
-                    Text(
-                        text = text,
-                        color = FluentTheme.colors.system.critical,
-                    )
-                }
-            }
-
-            if (isRunning) {
-                item(
-                    key = "agent-chat-current-trace",
-                    contentType = "agent-chat-current-trace",
-                ) {
-                    AgentChatCurrentTrace(trace = runningTrace.ifBlank { stringResource(Res.string.agent_chat_thinking) })
-                }
-            }
-
-            items(
-                items = messages.asReversed(),
+            itemsIndexed(
+                state = messages,
                 key = { message -> "agent-chat-message:${message.id}" },
                 contentType = { message ->
                     if (message.isUser) {
@@ -223,17 +199,77 @@ private fun AgentChatMessageList(
                         "agent-chat-assistant-message"
                     }
                 },
-            ) { message ->
-                AgentChatMessageBubble(
-                    parts = message.parts,
-                    isUser = message.isUser,
-                    onInputRequestOptionSelected = onInputRequestOptionSelected,
-                    onPostClick = onPostClick,
-                    onUserClick = onUserClick,
-                )
-            }
+                loadingCount = AGENT_CHAT_MESSAGE_LOADING_COUNT,
+                loadingContent = { index, _ ->
+                    AgentChatMessageSkeleton(isUser = index == 0)
+                },
+                errorContent = { throwable ->
+                    Text(
+                        text = throwable.message ?: throwable.toString(),
+                        color = FluentTheme.colors.system.critical,
+                    )
+                },
+                itemContent = { _, _, message ->
+                    AgentChatMessageBubble(
+                        parts = message.parts,
+                        isUser = message.isUser,
+                        onInputRequestOptionSelected = onInputRequestOptionSelected,
+                        onPostClick = onPostClick,
+                        onUserClick = onUserClick,
+                    )
+                },
+            )
+        }
+    }
+}
 
-            leadingContent()
+private const val AGENT_CHAT_MESSAGE_LOADING_COUNT = 3
+
+@Composable
+private fun AgentChatMessageSkeleton(isUser: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement =
+            if (isUser) {
+                Arrangement.End
+            } else {
+                Arrangement.Start
+            },
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.72f)
+                    .background(
+                        color = FluentTheme.colors.background.layer.default,
+                        shape = RoundedCornerShape(8.dp),
+                    ).border(
+                        width = 1.dp,
+                        color = FluentTheme.colors.stroke.card.default,
+                        shape = RoundedCornerShape(8.dp),
+                    ).padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(14.dp)
+                        .background(
+                            color = LocalContentColor.current.copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(4.dp),
+                        ),
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.62f)
+                        .height(14.dp)
+                        .background(
+                            color = LocalContentColor.current.copy(alpha = 0.08f),
+                            shape = RoundedCornerShape(4.dp),
+                        ),
+            )
         }
     }
 }
@@ -615,7 +651,10 @@ private fun List<AgentMessagePart>.isPreviewOnly(): Boolean =
         }
 
 @Composable
-private fun AgentChatCurrentTrace(trace: String) {
+private fun AgentChatCurrentTrace(
+    trace: String,
+    modifier: Modifier = Modifier,
+) {
     val transition = rememberInfiniteTransition()
     val shimmerOffset by transition.animateFloat(
         initialValue = -240f,
@@ -640,7 +679,7 @@ private fun AgentChatCurrentTrace(trace: String) {
         )
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

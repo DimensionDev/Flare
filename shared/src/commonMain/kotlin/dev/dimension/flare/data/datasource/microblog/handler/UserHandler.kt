@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,14 +21,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class UserHandler(
     private val host: String,
     private val loader: UserLoader,
-)  {
+) {
     private val database: CacheDatabase by koinInject()
     private val appDataStore: AppDataStore by koinInject()
     private val preTranslationService: PreTranslationService by koinInject()

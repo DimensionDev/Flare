@@ -5,9 +5,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentChatRoom
@@ -18,12 +20,9 @@ import dev.dimension.flare.feature.agent.profile.ProfileInsightAgentUseCase
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import dev.dimension.flare.di.koinInject
 
 public class ProfileInsightPresenter(
     private val accountType: AccountType,
@@ -35,9 +34,8 @@ public class ProfileInsightPresenter(
 
     @Immutable
     public interface State {
-        public val insight: UiState<String>
         public val room: AgentChatRoom
-        public val messages: ImmutableList<AgentChatHistoryMessage>
+        public val messages: PagingState<AgentChatHistoryMessage>
         public val input: String
         public val profile: UiProfile?
         public val canSend: Boolean
@@ -56,9 +54,6 @@ public class ProfileInsightPresenter(
             remember(accountType, userKey) {
                 "profile-insight:$accountType:$userKey"
             }
-        val restoredMessages by remember(conversationId) {
-            historyProvider.observeMessages(conversationId)
-        }.collectAsState(emptyList())
         val room by remember(conversationId) {
             historyProvider.observeRoom(conversationId)
         }.collectAsState(null)
@@ -81,7 +76,6 @@ public class ProfileInsightPresenter(
                 key = key,
                 conversationId = conversationId,
                 room = currentRoom,
-                messageRecords = restoredMessages,
                 contextFlow = contextFlow,
                 runAgent = { context, userInput, currentConversationId ->
                     profileInsightAgentUseCase(
@@ -134,7 +128,6 @@ public class ProfileInsightPresenter(
             messages = controller.messages,
             input = controller.input,
             profile = controller.content,
-            insight = controller.insight,
             canSend = controller.canSend,
             onSetInput = controller::setInput,
             onSendMessage = controller::sendMessage,
@@ -145,10 +138,9 @@ public class ProfileInsightPresenter(
     @Immutable
     private data class StateImpl(
         override val room: AgentChatRoom,
-        override val messages: ImmutableList<AgentChatHistoryMessage>,
+        override val messages: PagingState<AgentChatHistoryMessage>,
         override val input: String,
         override val profile: UiProfile?,
-        override val insight: UiState<String>,
         override val canSend: Boolean,
         private val onSetInput: (String) -> Unit,
         private val onSendMessage: () -> Unit,
@@ -174,7 +166,8 @@ public class ProfileInsightPresenter(
 }
 
 private fun UiProfile.insightUserMessageTitle(): String =
-    name.raw.trim()
+    name.raw
+        .trim()
         .ifBlank { handle.raw.trim() }
         .ifBlank { description?.raw.orEmpty().trim() }
         .ifBlank { key.toString() }

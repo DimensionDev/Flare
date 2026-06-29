@@ -4,11 +4,10 @@ import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.repository.SettingsRepository
-import kotlinx.coroutines.flow.first
 import dev.dimension.flare.di.koinInject
+import kotlinx.coroutines.flow.first
 
-public class ExportSettingsPresenter :
-    PresenterBase<ExportState>() {
+public class ExportSettingsPresenter : PresenterBase<ExportState>() {
     private val settingsRepository: SettingsRepository by koinInject()
 
     @Composable

@@ -14,6 +14,7 @@ import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -21,7 +22,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 
@@ -148,7 +148,7 @@ public suspend fun mastodonLoginUseCase(
         launchOAuth(target)
     }
 
-private object MastodonOAuthPendingBridge  {
+private object MastodonOAuthPendingBridge {
     val pendingRepository: PlatformOAuthPendingRepository by koinInject()
 }
 

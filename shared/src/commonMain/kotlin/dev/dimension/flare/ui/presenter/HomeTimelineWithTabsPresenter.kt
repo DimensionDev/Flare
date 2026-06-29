@@ -11,6 +11,7 @@ import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
@@ -24,11 +25,9 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("homeTimelineWithTabs")
-public class HomeTimelineWithTabsPresenter :
-    PresenterBase<HomeTimelineWithTabsPresenter.State>() {
+public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsPresenter.State>() {
     private val settingsRepository by koinInject<SettingsRepository>()
     private val accountRepository by koinInject<AccountRepository>()
 

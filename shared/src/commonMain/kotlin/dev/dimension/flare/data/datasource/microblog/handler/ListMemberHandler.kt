@@ -17,6 +17,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -24,7 +25,6 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -33,7 +33,7 @@ public class ListMemberHandler(
     private val pagingKey: String,
     private val accountKey: MicroBlogKey,
     private val loader: ListMemberLoader,
-)  {
+) {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
     private val database: CacheDatabase by koinInject()
     private val memberPagingKey: String

@@ -36,6 +36,7 @@ import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.normalized
 import dev.dimension.flare.data.platform.signerStableId
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
@@ -53,7 +54,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 internal typealias NostrServiceManager = SwitchingServiceManager<NostrCredential, NostrService>
 

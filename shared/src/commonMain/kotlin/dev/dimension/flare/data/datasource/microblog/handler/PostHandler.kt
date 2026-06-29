@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -25,14 +26,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class PostHandler(
     public val accountType: AccountType,
     public val loader: PostLoader,
-)  {
+) {
     private val database: CacheDatabase by koinInject()
     private val coroutineScope: CoroutineScope by koinInject()
     private val appDataStore: AppDataStore by koinInject()

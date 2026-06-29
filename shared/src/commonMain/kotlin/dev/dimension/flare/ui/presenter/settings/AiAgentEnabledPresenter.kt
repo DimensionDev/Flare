@@ -5,11 +5,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.ui.presenter.PresenterBase
 
-public class AiAgentEnabledPresenter :
-    PresenterBase<AiAgentEnabledPresenter.State>() {
+public class AiAgentEnabledPresenter : PresenterBase<AiAgentEnabledPresenter.State>() {
     private val appDataStore: AppDataStore by koinInject()
 
     public interface State {

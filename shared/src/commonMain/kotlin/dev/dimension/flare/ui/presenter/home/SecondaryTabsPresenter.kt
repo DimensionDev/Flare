@@ -12,6 +12,7 @@ import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
@@ -30,11 +31,9 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("secondaryTabs")
-public class SecondaryTabsPresenter :
-    PresenterBase<SecondaryTabsPresenter.State>() {
+public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State>() {
     @Immutable
     public interface State {
         public val items: UiState<ImmutableList<Item>>

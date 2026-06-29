@@ -33,11 +33,14 @@ internal interface AgentConversationDao {
     @Query("SELECT * FROM agent_conversations WHERE conversationId = :conversationId")
     fun observeConversation(conversationId: String): Flow<DbAgentConversation?>
 
-    @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position ASC")
+    @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position DESC")
     fun observeMessages(conversationId: String): Flow<List<DbAgentMessage>>
 
-    @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position ASC")
+    @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position DESC")
     suspend fun getMessages(conversationId: String): List<DbAgentMessage>
+
+    @Query("SELECT * FROM agent_messages WHERE conversationId = :conversationId ORDER BY position ASC")
+    suspend fun getMessagesChronological(conversationId: String): List<DbAgentMessage>
 
     @Query("SELECT MAX(createdAt) FROM agent_messages WHERE conversationId = :conversationId AND role != 'System'")
     suspend fun getLatestVisibleMessageCreatedAt(conversationId: String): Long?

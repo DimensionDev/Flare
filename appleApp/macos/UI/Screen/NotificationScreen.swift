@@ -60,12 +60,11 @@ struct NotificationScreen: View {
         }
         .toolbar {
             if supportedFilters.count > 1 {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .principal) {
                     NotificationFilterPicker(
                         allTypes: supportedFilters,
                         selected: $selectedFilter
                     )
-                    .frame(width: filterPickerWidth)
                 }
             }
 
@@ -78,9 +77,17 @@ struct NotificationScreen: View {
                     Label {
                         Text("Refresh")
                     } icon: {
-                        Image(fontAwesome: .arrowsRotate)
+                        if presenter.state.timeline.isRefreshing_ {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .scaleEffect(0.5)
+                                .frame(width: 12, height: 12)
+                        } else {
+                            Image(fontAwesome: .arrowsRotate)
+                        }
                     }
                 }
+                .disabled(presenter.state.timeline.isRefreshing_)
             }
         }
         .onAppear {
@@ -96,11 +103,7 @@ struct NotificationScreen: View {
             syncSelectedFilterToPresenter()
         }
     }
-
-    private var filterPickerWidth: CGFloat {
-        CGFloat(min(max(supportedFilters.count, 2), 4)) * 92
-    }
-
+    
     private func syncSelectedFilterFromPresenter() {
         let presenterFilter = presenter.state.selectedFilter
         let resolvedFilter =

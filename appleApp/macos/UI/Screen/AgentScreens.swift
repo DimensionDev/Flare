@@ -22,23 +22,15 @@ struct AgentChatHistoryScreen: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selectedConversationId) {
-                ForEach(rooms, id: \.id) { room in
-                    AgentChatHistoryRow(room: room)
-                        .tag(room.id)
-                }
-            }
-            .overlay {
-                if rooms.isEmpty {
-                    ContentUnavailableView {
-                        Label {
-                            Text("agent_history_empty", bundle: .main)
-                        } icon: {
-                            Image(fontAwesome: .robot)
-                        }
+            AgentChatHistoryList(
+                rooms: rooms,
+                selectedConversationId: $selectedConversationId
+            ) { room in
+                AgentChatHistoryRow(room: room)
+                    .tag(room.id)
+                    .contextMenu {
+                        deleteButton(for: room)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
             }
             .listStyle(.sidebar)
             .navigationTitle("agent_history_title")
@@ -109,6 +101,27 @@ struct AgentChatHistoryScreen: View {
         openAgentRoute(.agentChat(Route.newGenericChatConversationId(), nil))
     }
 
+    private func delete(_ room: AgentChatRoom) {
+        if selectedConversationId == room.id {
+            selectedConversationId = nil
+            activeDetailRoute = nil
+            activeDetailConversationId = nil
+        }
+        presenter.state.delete(conversationId: room.id)
+    }
+
+    private func deleteButton(for room: AgentChatRoom) -> some View {
+        Button(role: .destructive) {
+            delete(room)
+        } label: {
+            Label {
+                Text("delete")
+            } icon: {
+                Image(fontAwesome: .trash)
+            }
+        }
+    }
+
     private func reconcileSelection() {
         if let selectedConversationId,
            roomIds.contains(selectedConversationId) || selectedConversationId.isPendingAgentConversationId {
@@ -140,104 +153,23 @@ struct AgentChatHistoryScreen: View {
     }
 }
 
-private struct AgentChatHistoryRow: View {
-    let room: AgentChatRoom
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(verbatim: room.title)
-                .font(.headline)
-                .lineLimit(2)
-
-            HStack(spacing: 6) {
-                if room.isRunning {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .scaleEffect(0.5)
-                }
-
-                TimelineView(.periodic(from: .now, by: 60)) { context in
-                    Text(relativeUpdatedAtText(now: context.date))
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 4)
-    }
-
-    private var updatedAtDate: Date {
-        Date(timeIntervalSince1970: TimeInterval(room.updatedAt) / 1000)
-    }
-
-    private func relativeUpdatedAtText(now: Date) -> String {
-        let elapsedSeconds = max(60, Int(now.timeIntervalSince(updatedAtDate)))
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = Self.allowedUnits(for: elapsedSeconds)
-        formatter.maximumUnitCount = 1
-        formatter.unitsStyle = .abbreviated
-        return formatter.string(from: TimeInterval(elapsedSeconds)) ?? ""
-    }
-
-    private static func allowedUnits(for elapsedSeconds: Int) -> NSCalendar.Unit {
-        switch elapsedSeconds {
-        case ..<3_600:
-            return .minute
-        case ..<86_400:
-            return .hour
-        case ..<604_800:
-            return .day
-        case ..<2_592_000:
-            return .weekOfMonth
-        case ..<31_536_000:
-            return .month
-        default:
-            return .year
-        }
-    }
-}
-
-private struct AgentChatHistoryDetailPlaceholder: View {
-    let onNewChat: () -> Void
-
-    var body: some View {
-        ContentUnavailableView {
-            Label {
-                Text("agent_history_title", bundle: .main)
-            } icon: {
-                Image(fontAwesome: .robot)
-            }
-        } description: {
-            Text("macos_placeholder_agent_history", bundle: .main)
-        } actions: {
-            Button(action: onNewChat) {
-                Label {
-                    Text("agent_chat_title", bundle: .main)
-                } icon: {
-                    Image(fontAwesome: .plus)
-                }
-            }
-            .buttonStyle(.borderedProminent)
-        }
-    }
-}
-
-private extension String {
-    var isPendingAgentConversationId: Bool {
-        hasPrefix("generic-chat:") ||
-            hasPrefix("local-history:") ||
-            hasPrefix("status-insight:") ||
-            hasPrefix("profile-insight:")
-    }
-}
-
 struct AgentChatScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<GenericChatPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {
+//        ScrollView {
+//            LazyVStack {
+//                PagingView(data: presenter.state.messages) { item in
+//                    Text(item.id)
+//                } loadingContent: {
+//                    ProgressView()
+//                }
+//            }
+//        }
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -247,27 +179,19 @@ struct AgentChatScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
-            },
-            leadingContent: {
-                AnyView(
-                    ForEach(Array(presenter.state.statusInsightPosts.enumerated()), id: \.offset) { _, post in
-                        StatusInsightPostPreview(
-                            post: post,
-                            onClick: {
-                                onNavigate(.statusDetail(post.accountType, post.statusKey))
-                            }
-                        )
-                    }
-                )
             }
         )
         .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title", bundle: .main) : presenter.state.room.title)
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -291,12 +215,13 @@ extension AgentChatScreen {
 }
 
 struct LocalHistoryAgentScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -306,15 +231,19 @@ struct LocalHistoryAgentScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(String(localized: "local_history_title", bundle: .main))
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -340,12 +269,13 @@ extension LocalHistoryAgentScreen {
 }
 
 struct StatusInsightScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<StatusInsightPresenterState>
     let onNavigate: (Route) -> Void
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -355,15 +285,19 @@ struct StatusInsightScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(String(localized: "status_insight_title", bundle: .main))
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -386,13 +320,14 @@ extension StatusInsightScreen {
 }
 
 struct ProfileInsightScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<ProfileInsightPresenterState>
     let accountType: AccountType
     let onNavigate: (Route) -> Void
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -402,15 +337,19 @@ struct ProfileInsightScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(String(localized: "profile_insight_title", defaultValue: "Profile insight", bundle: .main))
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -430,485 +369,6 @@ extension ProfileInsightScreen {
                 )
             )
         )
-    }
-}
-
-struct AgentChatView: View {
-    let messages: [AgentChatHistoryMessage]
-    let isRunning: Bool
-    let canSend: Bool
-    let errorMessage: String?
-    let runningTrace: String
-    let inputPlaceholder: String
-    let onInputChange: (String) -> Void
-    let onSend: () -> Void
-    let onInputRequestOptionSelected: (AgentInputRequest.Option) -> Void
-    let onPostClick: (UiTimelineV2.Post) -> Void
-    let onUserClick: (UiProfile) -> Void
-    private let leadingContent: () -> AnyView
-
-    @State private var draft = ""
-
-    init(
-        messages: [AgentChatHistoryMessage],
-        isRunning: Bool,
-        canSend: Bool,
-        errorMessage: String?,
-        runningTrace: String,
-        inputPlaceholder: String,
-        onInputChange: @escaping (String) -> Void,
-        onSend: @escaping () -> Void,
-        onInputRequestOptionSelected: @escaping (AgentInputRequest.Option) -> Void = { _ in },
-        onPostClick: @escaping (UiTimelineV2.Post) -> Void = { _ in },
-        onUserClick: @escaping (UiProfile) -> Void = { _ in },
-        leadingContent: @escaping () -> AnyView = { AnyView(EmptyView()) }
-    ) {
-        self.messages = messages
-        self.isRunning = isRunning
-        self.canSend = canSend
-        self.errorMessage = errorMessage
-        self.runningTrace = runningTrace
-        self.inputPlaceholder = inputPlaceholder
-        self.onInputChange = onInputChange
-        self.onSend = onSend
-        self.onInputRequestOptionSelected = onInputRequestOptionSelected
-        self.onPostClick = onPostClick
-        self.onUserClick = onUserClick
-        self.leadingContent = leadingContent
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 10) {
-                        leadingContent()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        ForEach(messages, id: \.id) { message in
-                            AgentChatMessageBubble(
-                                parts: Array(message.parts),
-                                isUser: message.isUser,
-                                onInputRequestOptionSelected: onInputRequestOptionSelected,
-                                onPostClick: onPostClick,
-                                onUserClick: onUserClick
-                            )
-                            .id(message.id)
-                        }
-
-                        if isRunning {
-                            StatusInsightCurrentTrace(trace: runningTrace)
-                                .id("agent-running")
-                        }
-
-                        if let errorMessage {
-                            Text(verbatim: errorMessage)
-                                .foregroundStyle(.red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-
-                        Color.clear
-                            .frame(height: 1)
-                            .id("agent-bottom")
-                    }
-                    .padding()
-                }
-                .onChange(of: messages.count) { _, _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onChange(of: isRunning) { _, _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onAppear {
-                    scrollToBottom(proxy: proxy)
-                }
-            }
-            Divider()
-            AgentChatInputBar(
-                draft: $draft,
-                inputPlaceholder: inputPlaceholder,
-                canSend: canSend,
-                onInputChange: onInputChange,
-                onSend: submit
-            )
-        }
-        .background(Color.flareSystemGroupedBackground)
-    }
-
-    private func scrollToBottom(proxy: ScrollViewProxy) {
-        DispatchQueue.main.async {
-            withAnimation(.easeOut(duration: 0.18)) {
-                proxy.scrollTo("agent-bottom", anchor: .bottom)
-            }
-        }
-    }
-
-    private func submit() {
-        guard canSend else { return }
-        onSend()
-        draft = ""
-    }
-}
-
-private struct AgentChatInputBar: View {
-    @Binding var draft: String
-    let inputPlaceholder: String
-    let canSend: Bool
-    let onInputChange: (String) -> Void
-    let onSend: () -> Void
-
-    var body: some View {
-        HStack(alignment: .bottom, spacing: 10) {
-            TextField(inputPlaceholder, text: $draft, axis: .vertical)
-                .lineLimit(1...5)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit {
-                    onSend()
-                }
-
-            Button(action: onSend) {
-                Image(systemName: "paperplane.fill")
-                    .frame(width: 28, height: 22)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(!canSend)
-            .help(String(localized: "agent_chat_send", bundle: .main))
-            .accessibilityLabel(Text("agent_chat_send", bundle: .main))
-        }
-        .padding()
-        .background(.bar)
-        .onChange(of: draft) { _, value in
-            onInputChange(value)
-        }
-    }
-}
-
-private struct AgentChatMessageBubble: View {
-    let parts: [AgentMessagePart]
-    let isUser: Bool
-    let onInputRequestOptionSelected: (AgentInputRequest.Option) -> Void
-    let onPostClick: (UiTimelineV2.Post) -> Void
-    let onUserClick: (UiProfile) -> Void
-
-    var body: some View {
-        HStack {
-            if isUser {
-                Spacer(minLength: 80)
-            }
-
-            if isPreviewOnlyUserMessage {
-                messageContent
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                messageContent
-                    .textSelection(.enabled)
-                    .padding(12)
-                    .foregroundStyle(isUser ? .white : .primary)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(isUser ? Color.accentColor : Color.flareSecondarySystemGroupedBackground)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(isUser ? Color.clear : Color.flareSeparator.opacity(0.45), lineWidth: 1)
-                    )
-            }
-
-            if !isUser {
-                Spacer(minLength: 80)
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    private var messageContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ForEach(Array(parts.enumerated()), id: \.offset) { _, part in
-                switch part {
-                case let textPart as AgentMessagePartText:
-                    markdownText(textPart.markdown)
-                        .fixedSize(horizontal: false, vertical: true)
-                case let postPart as AgentMessagePartPostCard:
-                    StatusInsightPostPreview(
-                        post: postPart.post,
-                        onClick: {
-                            onPostClick(postPart.post)
-                        }
-                    )
-                case let userPart as AgentMessagePartUserCard:
-                    AgentUserPreview(
-                        user: userPart.user,
-                        onClick: {
-                            onUserClick(userPart.user)
-                        }
-                    )
-                case let actionsPart as AgentMessagePartActions:
-                    if !isUser {
-                        AgentInputRequestOptionsView(
-                            request: actionsPart.request,
-                            enabled: !actionsPart.selected,
-                            selectedOptionId: actionsPart.selectedOptionId,
-                            onOptionSelected: onInputRequestOptionSelected
-                        )
-                    }
-                default:
-                    EmptyView()
-                }
-            }
-        }
-    }
-
-    private func markdownText(_ value: String) -> Text {
-        if isUser {
-            Text(verbatim: value)
-        } else if let attributedText = try? AttributedString(
-            markdown: value,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        ) {
-            Text(attributedText)
-        } else {
-            Text(verbatim: value)
-        }
-    }
-
-    private var isPreviewOnlyUserMessage: Bool {
-        isUser && !parts.isEmpty && parts.allSatisfy { part in
-            part is AgentMessagePartPostCard || part is AgentMessagePartUserCard
-        }
-    }
-}
-
-private struct AgentInputRequestOptionsView: View {
-    let request: AgentInputRequest
-    let enabled: Bool
-    let selectedOptionId: String?
-    let onOptionSelected: (AgentInputRequest.Option) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            let options = visibleOptions
-            let postOptions = options.filter { $0.postPreview != nil }
-            let userOptions = options.filter { $0.userPreview != nil }
-            let actionOptions = options.filter { $0.postPreview == nil && $0.userPreview == nil }
-
-            ForEach(postOptions, id: \.id) { option in
-                if let post = option.postPreview {
-                    Button {
-                        if enabled {
-                            onOptionSelected(option)
-                        }
-                    } label: {
-                        StatusInsightPostPreview(
-                            post: post,
-                            onClick: {
-                                onOptionSelected(option)
-                            }
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!enabled)
-                }
-            }
-
-            ForEach(userOptions, id: \.id) { option in
-                if let user = option.userPreview {
-                    Button {
-                        if enabled {
-                            onOptionSelected(option)
-                        }
-                    } label: {
-                        AgentUserPreview(
-                            user: user,
-                            onClick: {
-                                onOptionSelected(option)
-                            }
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!enabled)
-                }
-            }
-
-            AgentRequestPreviewView(request: request)
-
-            if !actionOptions.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(actionOptions, id: \.id) { option in
-                        AgentActionOptionButton(
-                            option: option,
-                            enabled: enabled,
-                            onOptionSelected: onOptionSelected
-                        )
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var visibleOptions: [AgentInputRequest.Option] {
-        let options = Array(request.options)
-        guard let selectedOptionId else {
-            return options
-        }
-        return options.filter { $0.id == selectedOptionId }
-    }
-}
-
-private struct AgentRequestPreviewView: View {
-    let request: AgentInputRequest
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let previewPost = request.postPreview {
-                StatusInsightPostPreview(post: previewPost, onClick: nil)
-            }
-
-            if let previewUser = request.userPreview {
-                AgentUserPreview(user: previewUser, onClick: {})
-            }
-        }
-    }
-}
-
-private struct AgentActionOptionButton: View {
-    let option: AgentInputRequest.Option
-    let enabled: Bool
-    let onOptionSelected: (AgentInputRequest.Option) -> Void
-
-    var body: some View {
-        Button(role: option.buttonRole) {
-            if enabled {
-                onOptionSelected(option)
-            }
-        } label: {
-            Text(option.label)
-                .frame(maxWidth: .infinity)
-        }
-        .modifier(AgentActionOptionButtonStyle(isPrimary: option.buttonType == .primary))
-        .frame(maxWidth: .infinity)
-        .disabled(!enabled)
-    }
-}
-
-private struct AgentActionOptionButtonStyle: ViewModifier {
-    let isPrimary: Bool
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if isPrimary {
-            content.buttonStyle(.borderedProminent)
-        } else {
-            content.buttonStyle(.bordered)
-        }
-    }
-}
-
-private extension AgentInputRequest.Option {
-    var buttonRole: ButtonRole? {
-        switch buttonType {
-        case .destructive:
-            return .destructive
-        case .cancel:
-            return .cancel
-        default:
-            return nil
-        }
-    }
-}
-
-private struct AgentUserPreview: View {
-    let user: UiProfile
-    let onClick: () -> Void
-
-    var body: some View {
-        UserCompatView(
-            data: user,
-            trailing: { EmptyView() },
-            onClicked: onClick
-        )
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.flareSecondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.flareSeparator.opacity(0.55), lineWidth: 1)
-        )
-    }
-}
-
-struct StatusInsightPostPreview: View {
-    @Environment(\.timelineAppearance) private var timelineAppearance
-    let post: UiTimelineV2.Post
-    let onClick: (() -> Void)?
-
-    init(post: UiTimelineV2.Post, onClick: (() -> Void)? = nil) {
-        self.post = post
-        self.onClick = onClick
-    }
-
-    var body: some View {
-        StatusView(
-            data: post,
-            isQuote: true,
-            showMedia: false,
-            maxLine: 3,
-            showExpandTextButton: false,
-            forceHideActions: true,
-            showTranslate: false,
-            showParents: false
-        )
-        .padding(12)
-        .environment(\.timelineAppearance, timelineAppearance.withStatusInsightPreviewDefaults())
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.flareSeparator, lineWidth: 1)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .onTapGesture {
-            onClick?()
-        }
-    }
-}
-
-struct ProfileInsightUserPreview: View {
-    let profile: UiProfile
-    let onClick: (() -> Void)?
-
-    init(profile: UiProfile, onClick: (() -> Void)? = nil) {
-        self.profile = profile
-        self.onClick = onClick
-    }
-
-    var body: some View {
-        UserCompatView(data: profile)
-            .padding(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.flareSeparator, lineWidth: 1)
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .onTapGesture {
-                onClick?()
-            }
-    }
-}
-
-struct StatusInsightCurrentTrace: View {
-    let trace: String
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(fontAwesome: .robot)
-            Text(verbatim: trace)
-                .font(.body)
-                .shimmeringText()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
     }
 }
 
@@ -1005,68 +465,6 @@ private extension AgentToolKey {
         case .searchPostsFailed, .searchUsersFailed:
             localizedAgentPresentationString("status_insight_trace_tool_search_status_failed", fallback: "Search failed")
         }
-    }
-}
-
-private extension TimelineAppearance {
-    func withStatusInsightPreviewDefaults() -> TimelineAppearance {
-        doCopy(
-            avatarShape: avatarShape,
-            showMedia: false,
-            showSensitiveContent: showSensitiveContent,
-            expandContentWarning: true,
-            expandMediaSize: false,
-            videoAutoplay: .never,
-            showLinkPreview: false,
-            compatLinkPreview: compatLinkPreview,
-            showNumbers: showNumbers,
-            postActionStyle: .hidden,
-            postActionLayout: postActionLayout,
-            fullWidthPost: fullWidthPost,
-            absoluteTimestamp: absoluteTimestamp,
-            showPlatformLogo: showPlatformLogo,
-            timelineDisplayMode: timelineDisplayMode,
-            aiConfig: aiConfig,
-            lineLimit: lineLimit,
-            showTranslateButton: showTranslateButton
-        )
-    }
-}
-
-private struct ShimmeringTextModifier: ViewModifier {
-    @State private var phase: CGFloat = -1
-
-    func body(content: Content) -> some View {
-        content
-            .foregroundStyle(.secondary)
-            .overlay {
-                GeometryReader { proxy in
-                    LinearGradient(
-                        colors: [
-                            .secondary.opacity(0.35),
-                            .primary,
-                            .secondary.opacity(0.35),
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: max(proxy.size.width * 0.65, 120))
-                    .offset(x: phase * proxy.size.width)
-                }
-                .mask(content)
-            }
-            .onAppear {
-                phase = -1
-                withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
-                    phase = 1.4
-                }
-            }
-    }
-}
-
-private extension View {
-    func shimmeringText() -> some View {
-        modifier(ShimmeringTextModifier())
     }
 }
 

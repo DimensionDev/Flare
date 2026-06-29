@@ -233,7 +233,8 @@ internal class ProfileInsightAgentUseCase(
         }
 
     private fun UiProfile.insightConversationTitle(): String =
-        name.raw.trim()
+        name.raw
+            .trim()
             .ifBlank { handle.raw.trim() }
             .ifBlank { description?.raw.orEmpty().trim() }
             .ifBlank { key.toString() }

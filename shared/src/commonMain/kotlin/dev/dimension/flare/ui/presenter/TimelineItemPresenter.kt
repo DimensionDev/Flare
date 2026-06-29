@@ -7,10 +7,10 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 public class TimelineItemPresenter(
     private val timelineTabItem: UiTimelineTabItem,

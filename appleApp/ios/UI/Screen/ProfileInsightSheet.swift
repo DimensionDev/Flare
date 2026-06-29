@@ -11,7 +11,7 @@ struct ProfileInsightSheet: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -65,31 +65,6 @@ extension ProfileInsightSheet {
                 )
             )
         )
-    }
-}
-
-struct ProfileInsightUserPreview: View {
-    let profile: UiProfile
-    let onClick: (() -> Void)?
-
-    init(profile: UiProfile, onClick: (() -> Void)? = nil) {
-        self.profile = profile
-        self.onClick = onClick
-    }
-
-    var body: some View {
-        UserCompatView(data: profile)
-            .padding(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(.separator), lineWidth: 1)
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 12))
-            .if(onClick != nil) { view in
-                view.onTapGesture {
-                    onClick?()
-                }
-            }
     }
 }
 

@@ -15,6 +15,7 @@ import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -25,7 +26,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 

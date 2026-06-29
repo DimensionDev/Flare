@@ -6,14 +6,13 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.web.shared.WebPresenter
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("environmentSettings")
-public class EnvironmentSettingsPresenter :
-    PresenterBase<EnvironmentSettingsPresenter.State>() {
+public class EnvironmentSettingsPresenter : PresenterBase<EnvironmentSettingsPresenter.State>() {
     private val repository: SettingsRepository by koinInject()
 
     @Composable

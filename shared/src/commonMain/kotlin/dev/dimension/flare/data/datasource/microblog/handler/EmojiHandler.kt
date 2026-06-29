@@ -6,20 +6,20 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transform
 import kotlinx.serialization.SerializationException
-import dev.dimension.flare.di.koinInject
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public class EmojiHandler(
     private val host: String,
     private val loader: EmojiLoader,
-)  {
+) {
     private val database: CacheDatabase by koinInject()
     public val emoji: Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
         Cacheable(

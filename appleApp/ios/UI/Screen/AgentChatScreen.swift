@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
+import FlareAppleUI
 
 struct AgentChatScreen: View {
     @StateObject private var presenter: KotlinPresenter<GenericChatPresenterState>
@@ -8,7 +9,7 @@ struct AgentChatScreen: View {
 
     var body: some View {
         AgentChatView(
-            messages: Array(presenter.state.messages),
+            messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
             errorMessage: presenter.state.room.errorMessage,
@@ -24,18 +25,6 @@ struct AgentChatScreen: View {
                 if let route = agentRoute(for: user) {
                     onNavigate(route)
                 }
-            },
-            leadingContent: {
-                AnyView(
-                    ForEach(Array(presenter.state.statusInsightPosts.enumerated()), id: \.offset) { _, post in
-                        StatusInsightPostPreview(
-                            post: post,
-                            onClick: {
-                                onNavigate(.statusDetail(post.accountType, post.statusKey))
-                            }
-                        )
-                    }
-                )
             }
         )
         .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title") : presenter.state.room.title)

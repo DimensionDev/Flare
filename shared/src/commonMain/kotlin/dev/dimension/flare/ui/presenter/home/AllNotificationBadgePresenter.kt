@@ -12,13 +12,13 @@ import dev.dimension.flare.data.datasource.microblog.datasource.NotificationData
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -26,11 +26,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
+import kotlin.time.Duration.Companion.minutes
 
 @WebPresenter("notificationBadge")
-public class AllNotificationBadgePresenter :
-    PresenterBase<AllNotificationBadgePresenter.State>() {
+public class AllNotificationBadgePresenter : PresenterBase<AllNotificationBadgePresenter.State>() {
     private val accountRepository: AccountRepository by koinInject()
 
     @androidx.compose.runtime.Immutable
@@ -103,7 +102,6 @@ public class AllNotificationBadgePresenter :
                     }.toImmutableList()
             }
     }
-
 
     @Composable
     override fun body(): State {

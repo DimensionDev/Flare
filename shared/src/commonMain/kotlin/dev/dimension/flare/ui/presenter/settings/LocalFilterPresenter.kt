@@ -5,15 +5,14 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
-import dev.dimension.flare.di.koinInject
 
-public class LocalFilterPresenter :
-    PresenterBase<LocalFilterState>() {
+public class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
     private val repository by koinInject<LocalFilterRepository>()
 
     @Composable

@@ -11,6 +11,7 @@ enum Route: Hashable, Identifiable {
     case serviceSelect
     case localHistory
     case agentHistory
+    case directMessages
     case agentChat(String, String?)
     case localHistoryAgent(String, String?, String)
     case timeline(UiTimelineTabItem)
@@ -49,6 +50,9 @@ enum Route: Hashable, Identifiable {
     case unmuteUser(AccountType?, MicroBlogKey)
     case reportUser(AccountType?, MicroBlogKey)
     case editUserList(AccountType, MicroBlogKey)
+    case dmConversation(AccountType, MicroBlogKey, String)
+    case userDirectMessages(AccountType, MicroBlogKey)
+    case allDirectMessages(AccountType)
     case allLists(AccountType)
     case allFeeds(AccountType)
     case allAntennas(AccountType)
@@ -120,6 +124,11 @@ enum Route: Hashable, Identifiable {
             }
         case .agentHistory:
             AgentChatHistoryScreen(onNavigate: onNavigate)
+        case .directMessages,
+                .dmConversation,
+                .userDirectMessages,
+                .allDirectMessages:
+            EmptyView()
         case .agentChat(let conversationId, let initialMessage):
             AgentChatScreen(
                 conversationId: conversationId,
@@ -298,6 +307,18 @@ enum Route: Hashable, Identifiable {
             nil
         }
     }
+
+    var isDirectMessageWindowRoute: Bool {
+        switch self {
+        case .directMessages,
+                .dmConversation,
+                .userDirectMessages,
+                .allDirectMessages:
+            true
+        default:
+            false
+        }
+    }
 }
 
 private struct MacArticleScreen: View {
@@ -418,6 +439,10 @@ extension Route {
             } else {
                 .reportUser(nil, data.userKey)
             }
+        case .directMessage(let data):
+            .userDirectMessages(.Specific(accountKey: data.accountKey), data.userKey)
+        case .allDirectMessages(let data):
+            .allDirectMessages(.Specific(accountKey: data.accountKey))
         case .allLists(let data):
             .allLists(.Specific(accountKey: data.accountKey))
         case .allFeeds(let data):

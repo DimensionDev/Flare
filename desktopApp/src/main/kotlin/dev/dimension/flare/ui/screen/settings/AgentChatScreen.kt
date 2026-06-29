@@ -28,7 +28,6 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.screen.status.action.StatusInsightPostPreview
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
@@ -96,19 +95,6 @@ internal fun AgentChatScreen(
             },
             onUserClick = { user ->
                 user.toRoute()?.let(navigate)
-            },
-            leadingContentItemCount = state.statusInsightPosts.size,
-            leadingContent = {
-                state.statusInsightPosts.forEach { post ->
-                    item {
-                        StatusInsightPostPreview(
-                            post = post,
-                            onClick = {
-                                navigate(Route.StatusDetail(accountType = post.accountType, statusKey = post.statusKey))
-                            },
-                        )
-                    }
-                }
             },
             modifier = Modifier.weight(1f),
         )

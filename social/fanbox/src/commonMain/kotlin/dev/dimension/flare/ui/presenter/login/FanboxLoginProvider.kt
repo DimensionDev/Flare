@@ -7,6 +7,7 @@ import dev.dimension.flare.data.platform.FANBOX_HOST
 import dev.dimension.flare.data.platform.FanboxCredential
 import dev.dimension.flare.data.platform.FanboxPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 private const val LOGIN_ACTION = "login"
 private const val FANBOX_SESSION_COOKIE = "FANBOXSESSID"

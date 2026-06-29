@@ -16,8 +16,11 @@ struct RootView: View {
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @StateObject private var directMessageAvailabilityPresenter = KotlinPresenter(presenter: DirectMessageAvailabilityPresenter())
+    @ObservedObject private var mainWindowCoordinator = MacMainWindowCoordinator.shared
     @ObservedObject private var inAppNotification = SwiftInAppNotification.shared
     @State private var selectedTab: Route?
+    @State private var mainNavigationRequest: MacMainWindowNavigationRequest?
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
     @State private var showLogin = false
@@ -25,8 +28,8 @@ struct RootView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack(spacing: 0) {
-                List(selection: $selectedTab) {
+//            VStack(spacing: 0) {
+                List(selection: sidebarSelection) {
                     StateView(state: homeTabsPresenter.state.tabs) { tabs in
                         let homeTabs: [HomeTabsPresenterStateHomeTabs] = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
                         ForEach(homeTabs, id: \.name) { tab in
@@ -78,6 +81,22 @@ struct RootView: View {
                     }
                     .tag(Route.localHistory)
 
+                    if directMessageAvailabilityPresenter.state.hasAvailableAccount {
+                        Button {
+                            MacDirectMessageWindowCoordinator.shared.open(
+                                route: .directMessages,
+                                openWindow: openWindow
+                            )
+                        } label: {
+                            Label {
+                                Text("direct_messages_title")
+                            } icon: {
+                                Image(fontAwesome: .commentDots)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if case .success(let data) = onEnum(of: secondaryTabPresenter.state.items) {
                         let items: [SecondaryTabsPresenter.Item] = data.data.cast(SecondaryTabsPresenter.Item.self)
                         if !items.isEmpty {
@@ -117,34 +136,42 @@ struct RootView: View {
                         }
                     }
                 }
+                .safeAreaInset(edge: .bottom) {
+                    MacSidebarPinnedActions(
+                        showDraftBoxPopover: $showDraftBoxPopover,
+                        showsAgentHistory: aiAgentEnabledPresenter.state.enabled,
+                        openDraft: { groupId in
+                            MacComposeWindowCoordinator.shared.openDraft(
+                                groupId: groupId,
+                                openWindow: openWindow
+                            )
+                        },
+                        openRssManagement: {
+                            openWindow(id: MacWindowID.rssManagement)
+                        },
+                        openAgentChat: {
+                            MacAgentWindowCoordinator.shared.open(
+                                route: .agentChat(Route.newGenericChatConversationId(), nil),
+                                openWindow: openWindow
+                            )
+                        },
+                        openAppSettings: {
+                            openSettings()
+                        }
+                    )
+                }
                 .listStyle(.sidebar)
 
-                MacSidebarPinnedActions(
-                    showDraftBoxPopover: $showDraftBoxPopover,
-                    showsAgentHistory: aiAgentEnabledPresenter.state.enabled,
-                    openDraft: { groupId in
-                        MacComposeWindowCoordinator.shared.openDraft(
-                            groupId: groupId,
-                            openWindow: openWindow
-                        )
-                    },
-                    openRssManagement: {
-                        openWindow(id: MacWindowID.rssManagement)
-                    },
-                    openAgentHistory: {
-                        MacAgentWindowCoordinator.shared.open(route: .agentHistory, openWindow: openWindow)
-                    },
-                    openAppSettings: {
-                        openSettings()
-                    }
-                )
-            }
+//            }
             .toolbar(removing: .sidebarToggle)
             .frame(minWidth: 100, maxWidth: 280)
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
             if let selectedTab {
-                Router(initialRoute: selectedTab)
+                Router(
+                    initialRoute: selectedTab,
+                    externalNavigationRequest: mainNavigationRequest
+                )
                     .navigationSplitViewColumnWidth(ideal: 380, max: 480)
                     .id(selectedTab)
                     .toolbar {
@@ -192,6 +219,40 @@ struct RootView: View {
                 }
             )
             .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
+        }
+        .onAppear {
+            handleMainWindowNavigationRequest(mainWindowCoordinator.navigationRequest)
+        }
+        .onChange(of: mainWindowCoordinator.navigationRequest?.id) { _, _ in
+            handleMainWindowNavigationRequest(mainWindowCoordinator.navigationRequest)
+        }
+    }
+
+    private var sidebarSelection: Binding<Route?> {
+        Binding {
+            selectedTab
+        } set: { route in
+            guard let route else {
+                return
+            }
+            if route.isDirectMessageWindowRoute {
+                MacDirectMessageWindowCoordinator.shared.open(route: route, openWindow: openWindow)
+            } else {
+                selectedTab = route
+            }
+        }
+    }
+
+    private func handleMainWindowNavigationRequest(_ request: MacMainWindowNavigationRequest?) {
+        guard let request else {
+            return
+        }
+
+        if selectedTab == nil {
+            selectedTab = request.route
+            mainNavigationRequest = nil
+        } else {
+            mainNavigationRequest = request
         }
     }
 }
@@ -288,7 +349,7 @@ private struct MacSidebarPinnedActions: View {
     let showsAgentHistory: Bool
     let openDraft: (String) -> Void
     let openRssManagement: () -> Void
-    let openAgentHistory: () -> Void
+    let openAgentChat: () -> Void
     let openAppSettings: () -> Void
 
     var body: some View {
@@ -315,9 +376,9 @@ private struct MacSidebarPinnedActions: View {
 
             if showsAgentHistory {
                 MacSidebarPinnedIconButton(
-                    title: "agent_history_title",
+                    title: "agent_chat_title",
                     icon: .robot,
-                    action: openAgentHistory
+                    action: openAgentChat
                 )
 
                 Divider()
@@ -380,7 +441,12 @@ private struct MacSidebarPinnedIconButton: View {
 private func route(for tab: SecondaryTabsPresenter.Tab) -> Route? {
     switch onEnum(of: tab.destination) {
     case .route(let destination):
-        return Route.fromDeepLinkRoute(deeplinkRoute: destination.route)
+        guard let route = Route.fromDeepLinkRoute(deeplinkRoute: destination.route),
+              !route.isDirectMessageWindowRoute
+        else {
+            return nil
+        }
+        return route
     case .timeline(let destination):
         return .timeline(destination.tabItem)
     }

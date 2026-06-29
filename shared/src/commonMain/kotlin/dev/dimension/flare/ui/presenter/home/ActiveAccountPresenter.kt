@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -15,10 +16,8 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import dev.dimension.flare.di.koinInject
 
-public class ActiveAccountPresenter :
-    PresenterBase<UserState>() {
+public class ActiveAccountPresenter : PresenterBase<UserState>() {
     private val accountRepository: AccountRepository by koinInject()
 
     @OptIn(ExperimentalCoroutinesApi::class)

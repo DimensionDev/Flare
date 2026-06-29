@@ -12,8 +12,7 @@ import platform.Foundation.NSUserDomainMask
 internal actual object AppleDataDirectories {
     actual fun dataStoreRootDirectory(): String = documentDirectory()
 
-    actual fun databaseRootDirectory(isCache: Boolean): String =
-        createDirectory(applicationSupportDirectory().appendPath("databases"))
+    actual fun databaseRootDirectory(isCache: Boolean): String = createDirectory(applicationSupportDirectory().appendPath("databases"))
 
     @OptIn(ExperimentalForeignApi::class)
     private fun documentDirectory(): String {

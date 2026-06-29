@@ -1,35 +1,22 @@
 package dev.dimension.flare.ui.screen.status.action
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentPhase
 import dev.dimension.flare.feature.agent.common.AgentToolKey
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.presenter.status.StatusInsightPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.agent.AgentChatSheetScaffold
-import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -66,63 +53,8 @@ internal fun StatusInsightSheet(
         onUserClick = { user ->
             user.toRoute()?.let(navigate)
         },
-        leadingContentItemCount = if (state.post != null) 1 else 0,
-        leadingContent = {
-            state.post?.let { post ->
-                item {
-                    StatusInsightPostPreview(
-                        post = post,
-                        onClick = {
-                            navigate(Route.Status.Detail(statusKey = post.statusKey, accountType = post.accountType))
-                        },
-                    )
-                }
-            }
-        },
         modifier = modifier,
     )
-}
-
-@Composable
-internal fun StatusInsightPostPreview(
-    post: UiTimelineV2.Post,
-    onClick: (() -> Unit)? = null,
-) {
-    Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .let { base ->
-                    if (onClick != null) {
-                        base.clickable(onClick = onClick)
-                    } else {
-                        base
-                    }
-                },
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        CompositionLocalProvider(
-            LocalTimelineAppearance provides
-                LocalTimelineAppearance.current.copy(
-                    showMedia = false,
-                    expandMediaSize = false,
-                    showLinkPreview = false,
-                    postActionStyle = PostActionStyle.Hidden,
-                ),
-        ) {
-            CommonStatusComponent(
-                item = post,
-                modifier =
-                    Modifier
-                        .padding(
-                            horizontal = screenHorizontalPadding,
-                            vertical = 8.dp,
-                        ).fillMaxWidth(),
-                isQuote = true,
-                maxLines = 3,
-            )
-        }
-    }
 }
 
 private fun UiProfile.toRoute(): Route? =

@@ -12,15 +12,14 @@ import dev.dimension.flare.data.network.rss.model.OpmlBody
 import dev.dimension.flare.data.network.rss.model.OpmlHead
 import dev.dimension.flare.data.network.rss.model.OpmlOutline
 import dev.dimension.flare.data.repository.SubscriptionRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first
 import nl.adaptivity.xmlutil.serialization.XML
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Clock
 
-public class ExportOPMLPresenter :
-    PresenterBase<UiState<String>>() {
+public class ExportOPMLPresenter : PresenterBase<UiState<String>>() {
     private val subscriptionRepository: SubscriptionRepository by koinInject()
 
     @Composable

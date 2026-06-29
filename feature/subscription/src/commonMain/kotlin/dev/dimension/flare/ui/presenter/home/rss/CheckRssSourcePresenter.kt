@@ -8,6 +8,7 @@ import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.network.FaviconService
 import dev.dimension.flare.data.network.rss.RssService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
@@ -26,7 +27,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Instant
 
 public class CheckRssSourcePresenter(

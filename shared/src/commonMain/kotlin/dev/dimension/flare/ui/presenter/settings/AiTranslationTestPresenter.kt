@@ -16,6 +16,7 @@ import dev.dimension.flare.data.translation.AiPlaceholderTranslationSupport
 import dev.dimension.flare.data.translation.TranslationPromptFormatter
 import dev.dimension.flare.data.translation.TranslationProvider
 import dev.dimension.flare.data.translation.TranslationResponseSanitizer
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -30,11 +31,9 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("aiTranslationTest")
-public class AiTranslationTestPresenter :
-    PresenterBase<AiTranslationTestPresenter.State>() {
+public class AiTranslationTestPresenter : PresenterBase<AiTranslationTestPresenter.State>() {
     private val appDataStore by koinInject<AppDataStore>()
     private val aiCompletionService by koinInject<AiCompletionService>()
 

@@ -5,9 +5,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.translation.HtmlArticleTranslationService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.di.koinInject
 
 /**
  * Presenter that translates the HTML content of an RSS article

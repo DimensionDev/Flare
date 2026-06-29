@@ -8,6 +8,7 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -18,7 +19,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 public class NotificationBadgePresenter(

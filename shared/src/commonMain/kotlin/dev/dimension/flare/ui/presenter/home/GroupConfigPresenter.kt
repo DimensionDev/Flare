@@ -17,16 +17,15 @@ import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.TabPickerUiIcons
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
-public class GroupConfigPresenter :
-    PresenterBase<GroupConfigPresenter.State>() {
+public class GroupConfigPresenter : PresenterBase<GroupConfigPresenter.State>() {
     private val settingsRepository: SettingsRepository by koinInject()
     private val appScope: CoroutineScope by koinInject()
     private val timelineResolver: TimelineResolver by koinInject()

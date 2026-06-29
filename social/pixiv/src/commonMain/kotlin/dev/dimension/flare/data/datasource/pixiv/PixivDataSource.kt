@@ -415,9 +415,7 @@ internal class PixivDataSource(
             service = service,
         )
 
-    fun bookmarkTimelineLoader(
-        restrict: PixivRestrict = PixivRestrict.Public,
-    ): RemoteLoader<UiTimelineV2> =
+    fun bookmarkTimelineLoader(restrict: PixivRestrict = PixivRestrict.Public): RemoteLoader<UiTimelineV2> =
         PixivBookmarkTimelineLoader(
             service = service,
             credentialFlow = credentialFlow,
@@ -425,9 +423,7 @@ internal class PixivDataSource(
             restrict = restrict,
         )
 
-    fun followingTimelineLoader(
-        restrict: PixivRestrict = PixivRestrict.Public,
-    ): RemoteLoader<UiTimelineV2> =
+    fun followingTimelineLoader(restrict: PixivRestrict = PixivRestrict.Public): RemoteLoader<UiTimelineV2> =
         PixivFollowingTimelineLoader(
             service = service,
             accountKey = accountKey,

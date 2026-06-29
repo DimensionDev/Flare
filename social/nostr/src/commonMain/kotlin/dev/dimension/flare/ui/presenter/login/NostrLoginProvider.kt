@@ -9,6 +9,7 @@ import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withTimeout
-import dev.dimension.flare.di.koinInject
 import kotlin.time.Duration.Companion.minutes
 
 private const val LOGIN_ACTION = "login"

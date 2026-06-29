@@ -11,13 +11,13 @@ import com.atproto.server.CreateSessionResponse
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 import sh.christian.ozone.api.response.AtpException
 import sh.christian.ozone.api.response.AtpResponse
 

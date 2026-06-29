@@ -12,6 +12,7 @@ import dev.dimension.flare.data.platform.RssTimelineSpecs
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
@@ -20,11 +21,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("rssSources")
-public class RssSourcesPresenter :
-    PresenterBase<RssSourcesPresenter.State>() {
+public class RssSourcesPresenter : PresenterBase<RssSourcesPresenter.State>() {
     private val subscriptionRepository by koinInject<SubscriptionRepository>()
     private val settingsRepository by koinInject<SettingsRepository>()
 

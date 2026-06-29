@@ -19,6 +19,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
@@ -34,11 +35,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("loginServiceSelect")
-public class NodeInfoPresenter :
-    PresenterBase<NodeInfoState>() {
+public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
     private val loginPlatformRegistry: LoginPlatformRegistry by koinInject()
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)

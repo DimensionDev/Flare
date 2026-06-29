@@ -11,6 +11,7 @@ import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
 import dev.dimension.flare.data.repository.toUiRssSource
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
@@ -28,7 +29,6 @@ import io.ktor.http.set
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import dev.dimension.flare.di.koinInject
 
 @WebPresenter("editRssSource")
 public class EditRssSourcePresenter(

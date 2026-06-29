@@ -17,8 +17,10 @@ struct RootView: View {
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @StateObject private var directMessageAvailabilityPresenter = KotlinPresenter(presenter: DirectMessageAvailabilityPresenter())
+    @ObservedObject private var mainWindowCoordinator = MacMainWindowCoordinator.shared
     @ObservedObject private var inAppNotification = SwiftInAppNotification.shared
     @State private var selectedTab: Route?
+    @State private var mainNavigationRequest: MacMainWindowNavigationRequest?
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
     @State private var showLogin = false
@@ -166,7 +168,10 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
             if let selectedTab {
-                Router(initialRoute: selectedTab)
+                Router(
+                    initialRoute: selectedTab,
+                    externalNavigationRequest: mainNavigationRequest
+                )
                     .navigationSplitViewColumnWidth(ideal: 380, max: 480)
                     .id(selectedTab)
                     .toolbar {
@@ -215,6 +220,12 @@ struct RootView: View {
             )
             .frame(minWidth: 820, idealWidth: 860, minHeight: 600, idealHeight: 660)
         }
+        .onAppear {
+            handleMainWindowNavigationRequest(mainWindowCoordinator.navigationRequest)
+        }
+        .onChange(of: mainWindowCoordinator.navigationRequest?.id) { _, _ in
+            handleMainWindowNavigationRequest(mainWindowCoordinator.navigationRequest)
+        }
     }
 
     private var sidebarSelection: Binding<Route?> {
@@ -229,6 +240,19 @@ struct RootView: View {
             } else {
                 selectedTab = route
             }
+        }
+    }
+
+    private func handleMainWindowNavigationRequest(_ request: MacMainWindowNavigationRequest?) {
+        guard let request else {
+            return
+        }
+
+        if selectedTab == nil {
+            selectedTab = request.route
+            mainNavigationRequest = nil
+        } else {
+            mainNavigationRequest = request
         }
     }
 }

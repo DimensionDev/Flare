@@ -58,8 +58,8 @@ public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View 
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    #endif
     @Environment(\.globalAppearance) private var globalAppearance
+    #endif
     @Environment(\.timelineAppearance) private var appearance
     private let postActionLayoutLink: () -> PostActionLayoutLink
 
@@ -81,6 +81,7 @@ public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View 
                 Text("appearance_timeline_display_mode", bundle: FlareAppleUILocalization.bundle)
                 Text("appearance_timeline_display_mode_description", bundle: FlareAppleUILocalization.bundle)
             }
+            #if os(iOS)
             Toggle(isOn: Binding(get: {
                 globalAppearance.showBottomBarLabels
             }, set: { newValue in
@@ -97,6 +98,7 @@ public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View 
                 Text("appearance_deck_mode", bundle: FlareAppleUILocalization.bundle)
                 Text("appearance_deck_mode_description", bundle: FlareAppleUILocalization.bundle)
             }
+            #endif
         }
         Section {
             #if os(iOS)
@@ -152,8 +154,8 @@ public struct AppearanceDisplaySettingsSection: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    #endif
     @Environment(\.globalAppearance) private var globalAppearance
+    #endif
     @Environment(\.timelineAppearance) private var timelineAppearance
 
     public init() {}
@@ -199,6 +201,7 @@ public struct AppearanceDisplaySettingsSection: View {
                     Text("appearance_compat_link_preview_description", bundle: FlareAppleUILocalization.bundle)
                 }
             }
+            #if os(iOS)
             Toggle(isOn: Binding(get: {
                 globalAppearance.inAppBrowser
             }, set: { newValue in
@@ -207,6 +210,7 @@ public struct AppearanceDisplaySettingsSection: View {
                 Text("appearance_in_app_browser", bundle: FlareAppleUILocalization.bundle)
                 Text("appearance_in_app_browser_description", bundle: FlareAppleUILocalization.bundle)
             }
+            #endif
         }
     }
 }

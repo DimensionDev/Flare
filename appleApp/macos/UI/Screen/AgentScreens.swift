@@ -154,6 +154,7 @@ struct AgentChatHistoryScreen: View {
 }
 
 struct AgentChatScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<GenericChatPresenterState>
     let onNavigate: (Route) -> Void
 
@@ -178,15 +179,19 @@ struct AgentChatScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(presenter.state.room.title.isEmpty ? String(localized: "agent_chat_title", bundle: .main) : presenter.state.room.title)
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -210,6 +215,7 @@ extension AgentChatScreen {
 }
 
 struct LocalHistoryAgentScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<LocalHistoryAgentPresenterState>
     let onNavigate: (Route) -> Void
 
@@ -225,15 +231,19 @@ struct LocalHistoryAgentScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(String(localized: "local_history_title", bundle: .main))
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -259,6 +269,7 @@ extension LocalHistoryAgentScreen {
 }
 
 struct StatusInsightScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<StatusInsightPresenterState>
     let onNavigate: (Route) -> Void
 
@@ -274,15 +285,19 @@ struct StatusInsightScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(String(localized: "status_insight_title", bundle: .main))
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 
@@ -305,6 +320,7 @@ extension StatusInsightScreen {
 }
 
 struct ProfileInsightScreen: View {
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var presenter: KotlinPresenter<ProfileInsightPresenterState>
     let accountType: AccountType
     let onNavigate: (Route) -> Void
@@ -321,15 +337,19 @@ struct ProfileInsightScreen: View {
             onSend: presenter.state.sendMessage,
             onInputRequestOptionSelected: presenter.state.selectInputRequestOption,
             onPostClick: { post in
-                onNavigate(.statusDetail(post.accountType, post.statusKey))
+                openInMainWindow(.statusDetail(post.accountType, post.statusKey))
             },
             onUserClick: { user in
                 if let route = agentRoute(for: user) {
-                    onNavigate(route)
+                    openInMainWindow(route)
                 }
             }
         )
         .navigationTitle(String(localized: "profile_insight_title", defaultValue: "Profile insight", bundle: .main))
+    }
+
+    private func openInMainWindow(_ route: Route) {
+        MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
     }
 }
 

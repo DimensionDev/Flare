@@ -8,18 +8,25 @@ struct Router: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.openWindow) private var openWindow
     let initialRoute: Route
+    let externalNavigationRequest: MacMainWindowNavigationRequest?
+    let forwardsContentRoutesToMainWindow: Bool
     @State private var backStack: [Route] = []
     @State private var sheet: Route?
     @State private var alertRoute: Route?
     @State private var statusMediaResolveRequest: MacStatusMediaResolveRequest?
     @State private var didHandleInitialActionRoute = false
+    @State private var handledExternalNavigationRequestId: UUID?
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @StateObject private var deepLinkHandler: MacDeepLinkHandler
 
     init(
         initialRoute: Route,
+        externalNavigationRequest: MacMainWindowNavigationRequest? = nil,
+        forwardsContentRoutesToMainWindow: Bool = false
     ) {
         self.initialRoute = initialRoute
+        self.externalNavigationRequest = externalNavigationRequest
+        self.forwardsContentRoutesToMainWindow = forwardsContentRoutesToMainWindow
         let handler = MacDeepLinkHandler()
         _deepLinkHandler = .init(wrappedValue: handler)
         _deepLinkPresenter = .init(
@@ -117,6 +124,10 @@ struct Router: View {
                 }
             }
             handleInitialActionRouteIfNeeded()
+            handleExternalNavigationRequestIfNeeded(externalNavigationRequest)
+        }
+        .onChange(of: externalNavigationRequest?.id) { _, _ in
+            handleExternalNavigationRequestIfNeeded(externalNavigationRequest)
         }
     }
 
@@ -128,6 +139,8 @@ struct Router: View {
 
     private func handle(route: Route) {
         switch route {
+        case _ where forwardsContentRoutesToMainWindow && shouldForwardToMainWindow(route):
+            MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
         case .composeNew:
             MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
         case .composeDraft(let groupId):
@@ -186,6 +199,17 @@ struct Router: View {
         }
     }
 
+    private func shouldForwardToMainWindow(_ route: Route) -> Bool {
+        switch route {
+        case .statusDetail,
+                .profileUser,
+                .profileUserNameWithHost:
+            true
+        default:
+            false
+        }
+    }
+
     private func handleInitialActionRouteIfNeeded() {
         guard !didHandleInitialActionRoute else { return }
         didHandleInitialActionRoute = true
@@ -213,6 +237,17 @@ struct Router: View {
         default:
             break
         }
+    }
+
+    private func handleExternalNavigationRequestIfNeeded(_ request: MacMainWindowNavigationRequest?) {
+        guard let request,
+              handledExternalNavigationRequestId != request.id
+        else {
+            return
+        }
+
+        handledExternalNavigationRequestId = request.id
+        handle(route: request.route)
     }
 
     private func goBack() {

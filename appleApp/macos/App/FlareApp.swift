@@ -1,10 +1,10 @@
-import AppKit
 import Combine
 import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 
 enum MacWindowID {
+    static let main = "main"
     static let compose = "compose"
     static let media = "media"
     static let rssManagement = "rss-management"
@@ -28,7 +28,7 @@ struct FlareApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        Window("Flare", id: MacWindowID.main) {
             FlareTheme {
                 RootView()
             }
@@ -80,7 +80,10 @@ struct FlareApp: App {
 
         Window("agent_history_title", id: MacWindowID.agentHistory) {
             FlareTheme {
-                Router(initialRoute: .agentHistory)
+                Router(
+                    initialRoute: .agentHistory,
+                    forwardsContentRoutesToMainWindow: true
+                )
             }
         }
         .defaultSize(width: 760, height: 640)
@@ -133,6 +136,30 @@ extension Scene {
         } else {
             return self
         }
+    }
+}
+
+struct MacMainWindowNavigationRequest: Identifiable {
+    let id: UUID
+    let route: Route
+
+    init(id: UUID = UUID(), route: Route) {
+        self.id = id
+        self.route = route
+    }
+}
+
+@MainActor
+final class MacMainWindowCoordinator: ObservableObject {
+    static let shared = MacMainWindowCoordinator()
+
+    @Published private(set) var navigationRequest: MacMainWindowNavigationRequest?
+
+    private init() {}
+
+    func open(route: Route, openWindow: OpenWindowAction) {
+        navigationRequest = MacMainWindowNavigationRequest(route: route)
+        openWindow(id: MacWindowID.main)
     }
 }
 

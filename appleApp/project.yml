@@ -68,7 +68,7 @@ packages:
     exactVersion: 1.0.5
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher.git
-    exactVersion: 8.8.1
+    exactVersion: 8.10.0
   LazyPager:
     url: https://github.com/gh123man/LazyPager
     exactVersion: 1.2.1

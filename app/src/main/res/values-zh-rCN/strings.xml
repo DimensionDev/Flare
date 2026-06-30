@@ -365,7 +365,7 @@
     <string name="media_menu_media_link">媒体链接</string>
     <string name="status_menu_share_via_fxembed">通过 FxEmbed 分享</string>
     <string name="status_menu_share_via_fixvx">通过 Fixvx 分享</string>
-    <string name="media_save_success">已保存到下载文件夹</string>
+    <string name="media_save_success">已保存</string>
     <string name="media_save_fail">保存失败</string>
     <string name="media_download_started">已开始下载。</string>
     <string name="media_prepare_started">正在准备媒体...</string>

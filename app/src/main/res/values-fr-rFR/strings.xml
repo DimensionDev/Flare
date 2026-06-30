@@ -364,7 +364,7 @@
     <string name="media_menu_media_link">Lien du média</string>
     <string name="status_menu_share_via_fxembed">Partager via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Partager via Fixvx</string>
-    <string name="media_save_success">Enregistré dans Téléchargements</string>
+    <string name="media_save_success">Enregistré</string>
     <string name="media_save_fail">Échec de l\'enregistrement</string>
     <string name="media_alt_text">Texte alternatif</string>
     <string name="media_is_downloading">Le média est toujours en cours de téléchargement. Réessayez dans un instant.</string>

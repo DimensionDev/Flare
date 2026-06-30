@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -42,6 +43,7 @@ import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import dev.dimension.flare.ui.theme.single
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 import kotlin.time.Clock
@@ -52,6 +54,7 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
     val state by producePresenter { presenter() }
     val context = LocalContext.current
     val downloadManager = koinInject<AndroidDownloadManager>()
+    val scope = rememberCoroutineScope()
     var selectedMessage by remember { mutableStateOf<String?>(null) }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
@@ -66,21 +69,24 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                 actions = {
                     IconButton(
                         onClick = {
-                            val success = downloadManager.saveByteArray(
-                                byteArray = state.printMessageToString().encodeToByteArray(),
-                                fileName = "flare-log-${Clock.System.now().toEpochMilliseconds()}",
-                                mimeType = "text/plain",
-                            )
-                            Toast
-                                .makeText(
-                                    context,
-                                    if (success) {
-                                        R.string.media_save_success
-                                    } else {
-                                        R.string.media_save_fail
-                                    },
-                                    Toast.LENGTH_SHORT,
-                                ).show()
+                            scope.launch {
+                                val success =
+                                    downloadManager.saveByteArray(
+                                        byteArray = state.printMessageToString().encodeToByteArray(),
+                                        fileName = "flare-log-${Clock.System.now().toEpochMilliseconds()}",
+                                        mimeType = "text/plain",
+                                    )
+                                Toast
+                                    .makeText(
+                                        context,
+                                        if (success) {
+                                            R.string.media_save_success
+                                        } else {
+                                            R.string.media_save_fail
+                                        },
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                            }
                         },
                     ) {
                         FAIcon(

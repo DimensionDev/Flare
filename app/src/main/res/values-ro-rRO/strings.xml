@@ -371,7 +371,7 @@
     <string name="media_menu_media_link">Link media</string>
     <string name="status_menu_share_via_fxembed">Distribuie prin FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Distribuie prin Fixvx</string>
-    <string name="media_save_success">Salvat în Descărcări</string>
+    <string name="media_save_success">Salvat</string>
     <string name="media_save_fail">Eroare la salvare</string>
     <string name="media_alt_text">Text alternativ</string>
     <string name="media_is_downloading">Media se descarcă încă. Reîncearcă imediat.</string>

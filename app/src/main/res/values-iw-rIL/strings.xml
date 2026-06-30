@@ -320,7 +320,7 @@
     <string name="media_menu_media_link">קישור מדיה</string>
     <string name="status_menu_share_via_fxembed">שתף באמצעות FxEmbed</string>
     <string name="status_menu_share_via_fixvx">שתף באמצעות Fixvx</string>
-    <string name="media_save_success">נשמר בהורדות</string>
+    <string name="media_save_success">נשמר</string>
     <string name="media_save_fail">השמירה נכשלה</string>
     <string name="media_alt_text">טקסט אלטרנטיבי</string>
     <string name="media_is_downloading">המדיה עדיין בהורדה. נסה שוב בעוד רגע.</string>

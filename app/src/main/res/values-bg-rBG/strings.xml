@@ -320,7 +320,7 @@
     <string name="media_menu_media_link">Медийна връзка</string>
     <string name="status_menu_share_via_fxembed">Споделяне чрез FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Споделяне чрез Fixvx</string>
-    <string name="media_save_success">Запазено в Изтегляния</string>
+    <string name="media_save_success">Запазено</string>
     <string name="media_save_fail">Неуспешно запазване</string>
     <string name="media_alt_text">Алтернативен текст</string>
     <string name="media_is_downloading">Медията все още се изтегля. Опитайте отново след малко.</string>

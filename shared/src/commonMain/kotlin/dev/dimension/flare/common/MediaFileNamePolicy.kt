@@ -24,7 +24,7 @@ public object MediaFileNamePolicy {
         val handle = sanitizeFileName(userHandle)
         return indexedMediaFileNames(medias) { media ->
             val extension = extensionFromUrl(url = media.url, fallbackExtension = media.fallbackExtension)
-            "${key}_${handle}.$extension"
+            "${key}_$handle.$extension"
         }
     }
 
@@ -44,8 +44,7 @@ public object MediaFileNamePolicy {
         }
     }
 
-    public fun rawMediaFileNames(medias: List<UiMedia>): Map<String, UiMedia> =
-        indexedMediaFileNames(medias, ::rawMediaFileName)
+    public fun rawMediaFileNames(medias: List<UiMedia>): Map<String, UiMedia> = indexedMediaFileNames(medias, ::rawMediaFileName)
 
     public fun articleFileName(
         name: String?,
@@ -151,7 +150,11 @@ public object MediaFileNamePolicy {
         medias: List<UiMedia>,
         fileName: (UiMedia) -> String,
     ): Map<String, UiMedia> {
-        val indexWidth = medias.size.toString().length.coerceAtLeast(2)
+        val indexWidth =
+            medias.size
+                .toString()
+                .length
+                .coerceAtLeast(2)
         return medias
             .mapIndexed { index, media ->
                 fileName(media).withIndexSuffix(

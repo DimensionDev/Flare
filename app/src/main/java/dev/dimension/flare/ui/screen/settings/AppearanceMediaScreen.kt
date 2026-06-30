@@ -1,13 +1,17 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
@@ -15,17 +19,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AndroidMediaSaveLocationRepository
+import dev.dimension.flare.common.MediaSaveLocationMode
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
@@ -40,6 +52,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
 import kotlinx.collections.immutable.persistentMapOf
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,6 +61,16 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
     val state by producePresenter { appearancePresenter() }
     val globalAppearance = LocalGlobalAppearance.current
     val timelineAppearance = LocalTimelineAppearance.current
+    val mediaSaveLocationRepository = koinInject<AndroidMediaSaveLocationRepository>()
+    val mediaSaveLocation by mediaSaveLocationRepository.state.collectAsState()
+    var showMediaSaveLocationMenu by remember { mutableStateOf(false) }
+    val mediaDirectoryLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocumentTree(),
+            onResult = { uri ->
+                uri?.let { mediaSaveLocationRepository.setCustomDirectory(it) }
+            },
+        )
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -91,11 +114,10 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     state.update(AppearanceKeys.ShowMedia, !timelineAppearance.showMedia)
                 },
                 shapes =
-                    when {
-                        !state.sampleStatus.isSuccess && !timelineAppearance.showMedia -> ListItemDefaults.single()
-                        !state.sampleStatus.isSuccess -> ListItemDefaults.first()
-                        !timelineAppearance.showMedia -> ListItemDefaults.last()
-                        else -> ListItemDefaults.item()
+                    if (!state.sampleStatus.isSuccess) {
+                        ListItemDefaults.first()
+                    } else {
+                        ListItemDefaults.item()
                     },
                 content = {
                     Text(text = stringResource(id = R.string.settings_appearance_show_media))
@@ -192,9 +214,81 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     onSelected = {
                         state.update(AppearanceKeys.VideoAutoplay, it)
                     },
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                 )
             }
+            val mediaSaveLocationText =
+                when (mediaSaveLocation.mode) {
+                    MediaSaveLocationMode.DefaultDownloads -> {
+                        stringResource(id = R.string.settings_media_save_location_downloads)
+                    }
+
+                    MediaSaveLocationMode.CustomDirectory -> {
+                        mediaSaveLocation.displayName
+                            ?: stringResource(id = R.string.settings_media_save_location_custom_folder)
+                    }
+
+                    MediaSaveLocationMode.AskEveryTime -> {
+                        stringResource(id = R.string.settings_media_save_location_ask_every_time)
+                    }
+                }
+            SegmentedListItem(
+                onClick = {
+                    showMediaSaveLocationMenu = true
+                },
+                shapes = ListItemDefaults.last(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_media_save_location))
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_media_save_location_description))
+                },
+                trailingContent = {
+                    Box {
+                        TextButton(
+                            onClick = {
+                                showMediaSaveLocationMenu = true
+                            },
+                        ) {
+                            Text(text = mediaSaveLocationText)
+                        }
+                        FlareDropdownMenu(
+                            expanded = showMediaSaveLocationMenu,
+                            onDismissRequest = {
+                                showMediaSaveLocationMenu = false
+                            },
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = stringResource(id = R.string.settings_media_save_location_choose_folder))
+                                },
+                                onClick = {
+                                    showMediaSaveLocationMenu = false
+                                    mediaDirectoryLauncher.launch(null)
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = stringResource(id = R.string.settings_media_save_location_ask_every_time))
+                                },
+                                onClick = {
+                                    showMediaSaveLocationMenu = false
+                                    mediaSaveLocationRepository.setAskEveryTime()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = stringResource(id = R.string.settings_media_save_location_reset_downloads))
+                                },
+                                onClick = {
+                                    showMediaSaveLocationMenu = false
+                                    mediaSaveLocationRepository.setDefaultDownloads()
+                                },
+                            )
+                        }
+                    }
+                },
+            )
         }
     }
 }

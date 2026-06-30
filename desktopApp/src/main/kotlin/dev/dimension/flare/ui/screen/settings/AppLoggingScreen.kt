@@ -22,10 +22,10 @@ import compose.icons.fontawesomeicons.solid.FloppyDisk
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.settings_app_logging_clear
 import dev.dimension.flare.settings_app_logging_enable_network_logging
 import dev.dimension.flare.settings_app_logging_save
-import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.presenter.invoke

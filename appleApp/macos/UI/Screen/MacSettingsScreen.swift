@@ -545,8 +545,10 @@ private struct MacLocalFilterSettingsPane: View {
 
 private struct MacStorageSettingsPane: View {
     @StateObject private var presenter: KotlinPresenter<StorageState>
+    @StateObject private var mediaSaveLocationStore = MacMediaSaveLocationStore.shared
     @State private var showDatabaseClearAlert = false
     @State private var showImageClearAlert = false
+    @State private var showMediaSaveLocationOptions = false
     @State private var showFileExporter = false
     @State private var showFileImporter = false
     @State private var showImportConfirmation = false
@@ -567,6 +569,15 @@ private struct MacStorageSettingsPane: View {
             subtitle: "storage_description"
         ) {
             Section {
+                MacSettingActionRow(
+                    "Media save location",
+                    value: mediaSaveLocationStore.state.displayName,
+                    buttonTitle: "Change",
+                    icon: .download
+                ) {
+                    showMediaSaveLocationOptions = true
+                }
+
                 MacSettingActionRow(
                     "storage_clear_image_cache",
                     subtitle: "storage_clear_image_cache_desc",
@@ -627,6 +638,24 @@ private struct MacStorageSettingsPane: View {
             }
         }
         .disabled(isClearingStorage)
+        .confirmationDialog(
+            "Media save location",
+            isPresented: $showMediaSaveLocationOptions,
+            titleVisibility: .visible
+        ) {
+            Button("Choose Folder") {
+                chooseMediaSaveLocation()
+            }
+            Button("Ask Every Time") {
+                mediaSaveLocationStore.setAskEveryTime()
+            }
+            Button("Reset to Downloads") {
+                mediaSaveLocationStore.setDefaultDownloads()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Choose where downloaded media is saved on this Mac.")
+        }
         .overlay {
             if isClearingStorage {
                 ZStack {
@@ -723,6 +752,25 @@ private struct MacStorageSettingsPane: View {
 
     private var isClearingStorage: Bool {
         isClearingImageCache || isClearingDatabaseCache
+    }
+
+    private func chooseMediaSaveLocation() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else {
+                return
+            }
+            do {
+                try mediaSaveLocationStore.setCustomDirectory(url)
+            } catch {
+                notice = MacStorageNotice(title: "save_error", message: error.localizedDescription)
+            }
+        }
     }
 
     private func clearImageCache() {

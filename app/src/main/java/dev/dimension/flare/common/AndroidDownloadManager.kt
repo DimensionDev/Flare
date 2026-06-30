@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
@@ -28,7 +29,8 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicLong
 
 /**
- * Saves files to Downloads. Remote media reuses the shared Media3 playback cache when possible.
+ * Saves files to the configured media destination. Remote media reuses the shared Media3 playback
+ * cache when possible.
  */
 @Stable
 @Single
@@ -36,6 +38,8 @@ import java.util.concurrent.atomic.AtomicLong
 internal class AndroidDownloadManager(
     @Provided private val context: Context,
     private val media3VideoCacheManager: Media3VideoCacheManager,
+    private val mediaSaveLocationRepository: AndroidMediaSaveLocationRepository,
+    private val mediaSavePicker: AndroidMediaSavePicker,
 ) {
     companion object {
         private const val TAG = "AndroidDownloadManager"
@@ -70,12 +74,12 @@ internal class AndroidDownloadManager(
 
     fun onPause() = Unit
 
-    fun saveByteArray(
+    suspend fun saveByteArray(
         byteArray: ByteArray,
         fileName: String,
         mimeType: String = imageMimeType(byteArray),
     ): Boolean =
-        saveToDownloads(fileName = fileName, mimeType = mimeType) { outputStream ->
+        saveFile(fileName = fileName, mimeType = mimeType) { outputStream ->
             outputStream.write(byteArray)
             outputStream.flush()
             true
@@ -83,7 +87,7 @@ internal class AndroidDownloadManager(
 
     /**
      * Save a media file. Full progressive cache is exported first; otherwise missing bytes are
-     * fetched through the same Media3 cache and written to Downloads.
+     * fetched through the same Media3 cache and written to the configured destination.
      */
     suspend fun downloadMedia(
         uri: String,
@@ -116,6 +120,19 @@ internal class AndroidDownloadManager(
     suspend fun downloadAllMedia(mediaByFileName: Map<String, UiMedia>): MediaDownloadBatchResult {
         val succeededFileNames = mutableListOf<String>()
         val failedFileNames = mutableListOf<String>()
+        val askEveryTime = mediaSaveLocationRepository.state.value.mode == MediaSaveLocationMode.AskEveryTime
+        val askDirectoryUri =
+            if (askEveryTime) {
+                mediaSavePicker.openDirectory()
+            } else {
+                null
+            }
+        if (askEveryTime && askDirectoryUri == null) {
+            return MediaDownloadBatchResult(
+                succeededFileNames = emptyList(),
+                failedFileNames = mediaByFileName.keys.toList(),
+            )
+        }
         mediaByFileName.forEach { (fileName, media) ->
             val success =
                 runCatching {
@@ -124,6 +141,7 @@ internal class AndroidDownloadManager(
                         fileName = fileName,
                         customHeaders = media.customHeaders,
                         onDownloadStarted = {},
+                        askDirectoryUri = askDirectoryUri,
                     )
                 }.getOrDefault(false)
             if (success) {
@@ -156,6 +174,7 @@ internal class AndroidDownloadManager(
         fileName: String,
         customHeaders: Map<String, String>?,
         onDownloadStarted: suspend () -> Unit,
+        askDirectoryUri: Uri? = null,
     ): Boolean =
         withContext(Dispatchers.IO) {
             if (isAdaptiveStream(uri)) {
@@ -167,8 +186,9 @@ internal class AndroidDownloadManager(
             val mimeType = getMimeType(uri = uri, fileName = fileName)
 
             if (media3VideoCacheManager.isFullyCached(uri = uri, customHeaders = headers)) {
+                val saveMode = mediaSaveLocationRepository.state.value.mode
                 val savedFromCache =
-                    saveToDownloads(fileName = fileName, mimeType = mimeType) { outputStream ->
+                    saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { outputStream ->
                         exportToStream(
                             uri = uri,
                             customHeaders = headers,
@@ -180,11 +200,14 @@ internal class AndroidDownloadManager(
                     Log.d(TAG, "Saved from Media3 cache: $uri")
                     return@withContext true
                 }
+                if (saveMode != MediaSaveLocationMode.DefaultDownloads) {
+                    return@withContext false
+                }
             }
 
             onDownloadStarted()
 
-            saveToDownloads(fileName = fileName, mimeType = mimeType) { outputStream ->
+            saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { outputStream ->
                 exportToStream(
                     uri = uri,
                     customHeaders = headers,
@@ -248,6 +271,60 @@ internal class AndroidDownloadManager(
         return options.outMimeType?.lowercase() ?: "image/jpeg"
     }
 
+    private suspend fun saveFile(
+        fileName: String,
+        mimeType: String,
+        askDirectoryUri: Uri? = null,
+        writer: (OutputStream) -> Boolean,
+    ): Boolean {
+        askDirectoryUri?.let { directoryUri ->
+            return withContext(Dispatchers.IO) {
+                saveToDirectoryUri(
+                    directoryUri = directoryUri,
+                    fileName = fileName,
+                    mimeType = mimeType,
+                    writer = writer,
+                )
+            }
+        }
+
+        val state = mediaSaveLocationRepository.state.value
+        return when (state.mode) {
+            MediaSaveLocationMode.DefaultDownloads -> {
+                withContext(Dispatchers.IO) {
+                    saveToDownloads(fileName = fileName, mimeType = mimeType, writer = writer)
+                }
+            }
+
+            MediaSaveLocationMode.CustomDirectory -> {
+                val directoryUri = state.directoryUri ?: return false
+                if (!hasPersistedWritePermission(directoryUri)) {
+                    mediaSaveLocationRepository.clearCustomDirectoryIfMatches(directoryUri)
+                    return false
+                }
+                withContext(Dispatchers.IO) {
+                    saveToDirectoryUri(
+                        directoryUri = directoryUri,
+                        fileName = fileName,
+                        mimeType = mimeType,
+                        writer = writer,
+                    )
+                }
+            }
+
+            MediaSaveLocationMode.AskEveryTime -> {
+                val outputUri =
+                    mediaSavePicker.createDocument(
+                        fileName = fileName,
+                        mimeType = mimeType,
+                    ) ?: return false
+                withContext(Dispatchers.IO) {
+                    writeToContentUri(outputUri = outputUri, writer = writer)
+                }
+            }
+        }
+    }
+
     private fun saveToDownloads(
         fileName: String,
         mimeType: String,
@@ -293,6 +370,108 @@ internal class AndroidDownloadManager(
         }
         return success
     }
+
+    private fun saveToDirectoryUri(
+        directoryUri: Uri,
+        fileName: String,
+        mimeType: String,
+        writer: (OutputStream) -> Boolean,
+    ): Boolean {
+        val safeFileName = MediaFileNamePolicy.safeLocalFileName(fileName, fallback = "media")
+        val treeDocumentId =
+            runCatching { DocumentsContract.getTreeDocumentId(directoryUri) }.getOrNull()
+                ?: return false
+        val parentUri =
+            DocumentsContract.buildDocumentUriUsingTree(
+                directoryUri,
+                treeDocumentId,
+            )
+        if (!deleteExistingChild(directoryUri = directoryUri, fileName = safeFileName)) {
+            return false
+        }
+        val outputUri =
+            runCatching {
+                DocumentsContract.createDocument(
+                    context.contentResolver,
+                    parentUri,
+                    mimeType,
+                    safeFileName,
+                )
+            }.getOrNull() ?: return false
+        return writeToContentUri(outputUri = outputUri, writer = writer)
+    }
+
+    private fun writeToContentUri(
+        outputUri: Uri,
+        writer: (OutputStream) -> Boolean,
+    ): Boolean {
+        val contentResolver = context.contentResolver
+        val success =
+            try {
+                contentResolver.openOutputStream(outputUri)?.use(writer) == true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to write content output: $outputUri", e)
+                false
+            }
+        if (!success) {
+            runCatching {
+                DocumentsContract.deleteDocument(contentResolver, outputUri)
+            }
+        }
+        return success
+    }
+
+    private fun deleteExistingChild(
+        directoryUri: Uri,
+        fileName: String,
+    ): Boolean {
+        val treeDocumentId =
+            runCatching { DocumentsContract.getTreeDocumentId(directoryUri) }.getOrNull()
+                ?: return false
+        val childrenUri =
+            DocumentsContract.buildChildDocumentsUriUsingTree(
+                directoryUri,
+                treeDocumentId,
+            )
+        val resolver = context.contentResolver
+        return try {
+            resolver
+                .query(
+                    childrenUri,
+                    arrayOf(
+                        DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                    ),
+                    null,
+                    null,
+                    null,
+                )?.use { cursor ->
+                    val idColumn = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                    val nameColumn = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                    while (cursor.moveToNext()) {
+                        val childName = cursor.getString(nameColumn)
+                        if (childName == fileName) {
+                            val documentId = cursor.getString(idColumn)
+                            val documentUri =
+                                DocumentsContract.buildDocumentUriUsingTree(
+                                    directoryUri,
+                                    documentId,
+                                )
+                            return DocumentsContract.deleteDocument(resolver, documentUri)
+                        }
+                    }
+                }
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to inspect custom save directory: $directoryUri", e)
+            false
+        }
+    }
+
+    private fun hasPersistedWritePermission(directoryUri: Uri): Boolean =
+        context.contentResolver.persistedUriPermissions.any { permission ->
+            permission.uri == directoryUri && permission.isWritePermission
+        }
 
     private fun saveToPublicDownloads(
         fileName: String,

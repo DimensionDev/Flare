@@ -317,7 +317,7 @@
     <string name="media_menu_media_link">미디어 링크</string>
     <string name="status_menu_share_via_fxembed">FxEmbed를 통해 공유</string>
     <string name="status_menu_share_via_fixvx">Fixvx를 통해 공유</string>
-    <string name="media_save_success">다운로드에 저장됨</string>
+    <string name="media_save_success">저장됨</string>
     <string name="media_save_fail">저장 실패</string>
     <string name="media_alt_text">대체 텍스트</string>
     <string name="media_is_downloading">미디어를 다운로드 중입니다. 잠시 후 다시 시도하세요.</string>

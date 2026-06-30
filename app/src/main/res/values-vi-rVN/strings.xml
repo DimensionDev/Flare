@@ -318,7 +318,7 @@
     <string name="media_menu_media_link">Liên kết phương tiện</string>
     <string name="status_menu_share_via_fxembed">Chia sẻ qua FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Chia sẻ qua Fixvx</string>
-    <string name="media_save_success">Đã lưu vào mục Tải xuống</string>
+    <string name="media_save_success">Đã lưu</string>
     <string name="media_save_fail">Lưu thất bại</string>
     <string name="media_alt_text">Văn bản thay thế</string>
     <string name="media_is_downloading">Phương tiện vẫn đang được tải xuống. Hãy thử lại sau giây lát.</string>

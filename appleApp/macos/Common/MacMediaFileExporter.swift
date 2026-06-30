@@ -1,8 +1,129 @@
 import AppKit
+import Combine
 import FlareAppleCore
 import Foundation
 import Kingfisher
 import KotlinSharedUI
+
+enum MacMediaSaveLocationMode: String {
+    case defaultDownloads
+    case customDirectory
+    case askEveryTime
+}
+
+struct MacMediaSaveLocationState {
+    let mode: MacMediaSaveLocationMode
+    let displayName: String
+}
+
+final class MacMediaSaveLocationStore: ObservableObject {
+    static let shared = MacMediaSaveLocationStore()
+
+    @Published private(set) var state: MacMediaSaveLocationState
+
+    private let defaults: UserDefaults
+
+    private init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        state = Self.readState(defaults: defaults)
+    }
+
+    func setDefaultDownloads() {
+        defaults.set(MacMediaSaveLocationMode.defaultDownloads.rawValue, forKey: Keys.mode)
+        defaults.removeObject(forKey: Keys.bookmarkData)
+        defaults.removeObject(forKey: Keys.displayName)
+        publishState()
+    }
+
+    func setAskEveryTime() {
+        defaults.set(MacMediaSaveLocationMode.askEveryTime.rawValue, forKey: Keys.mode)
+        publishState()
+    }
+
+    func setCustomDirectory(_ url: URL) throws {
+        let bookmarkData = try url.bookmarkData(
+            options: [.withSecurityScope],
+            includingResourceValuesForKeys: nil,
+            relativeTo: nil
+        )
+        defaults.set(MacMediaSaveLocationMode.customDirectory.rawValue, forKey: Keys.mode)
+        defaults.set(bookmarkData, forKey: Keys.bookmarkData)
+        defaults.set(url.path, forKey: Keys.displayName)
+        publishState()
+    }
+
+    func resolveCustomDirectory() -> URL? {
+        guard
+            Self.readMode(defaults: defaults) == .customDirectory,
+            let bookmarkData = defaults.data(forKey: Keys.bookmarkData)
+        else {
+            return nil
+        }
+
+        var isStale = false
+        do {
+            let url = try URL(
+                resolvingBookmarkData: bookmarkData,
+                options: [.withSecurityScope],
+                relativeTo: nil,
+                bookmarkDataIsStale: &isStale
+            )
+            guard !isStale else {
+                setDefaultDownloads()
+                return nil
+            }
+
+            var isDirectory: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
+                  isDirectory.boolValue else {
+                setDefaultDownloads()
+                return nil
+            }
+            return url
+        } catch {
+            setDefaultDownloads()
+            return nil
+        }
+    }
+
+    private func publishState() {
+        let newState = Self.readState(defaults: defaults)
+        if Thread.isMainThread {
+            state = newState
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.state = newState
+            }
+        }
+    }
+
+    private static func readState(defaults: UserDefaults) -> MacMediaSaveLocationState {
+        switch readMode(defaults: defaults) {
+        case .defaultDownloads:
+            return MacMediaSaveLocationState(mode: .defaultDownloads, displayName: "Downloads")
+        case .customDirectory:
+            return MacMediaSaveLocationState(
+                mode: .customDirectory,
+                displayName: defaults.string(forKey: Keys.displayName) ?? "Custom folder"
+            )
+        case .askEveryTime:
+            return MacMediaSaveLocationState(mode: .askEveryTime, displayName: "Ask Every Time")
+        }
+    }
+
+    private static func readMode(defaults: UserDefaults) -> MacMediaSaveLocationMode {
+        defaults
+            .string(forKey: Keys.mode)
+            .flatMap(MacMediaSaveLocationMode.init(rawValue:))
+            ?? .defaultDownloads
+    }
+
+    private enum Keys {
+        static let mode = "mediaSaveLocation.mode"
+        static let bookmarkData = "mediaSaveLocation.bookmarkData"
+        static let displayName = "mediaSaveLocation.displayName"
+    }
+}
 
 struct MacMediaShareContext: Hashable {
     let statusKey: String?
@@ -154,6 +275,7 @@ enum MacMediaFileExporter {
         source: MacMediaExportSource,
         existingFileURL: URL? = nil
     ) async throws -> Bool {
+        let notification = MacMediaExportNotification()
         let defaultFileName =
             if let existingFileURL {
                 existingFileURL.lastPathComponent
@@ -161,11 +283,40 @@ enum MacMediaFileExporter {
                 try defaultFileName(source: source)
             }
 
+        if let customDirectoryURL = customDirectoryForAutomaticSave() {
+            let didAccess = customDirectoryURL.startAccessingSecurityScopedResource()
+            if didAccess {
+                defer {
+                    customDirectoryURL.stopAccessingSecurityScopedResource()
+                }
+                let destinationURL = customDirectoryURL.appendingPathComponent(
+                    MediaFileNamePolicy.shared.safeLocalFileName(
+                        value: defaultFileName,
+                        fallback: "media"
+                    )
+                )
+                notification.progress()
+                do {
+                    if let existingFileURL {
+                        try copyReplacingItem(at: existingFileURL, to: destinationURL)
+                    } else {
+                        try await writeSource(source, to: destinationURL)
+                    }
+                    notification.success()
+                    return true
+                } catch {
+                    notification.error()
+                    throw error
+                }
+            } else {
+                MacMediaSaveLocationStore.shared.setDefaultDownloads()
+            }
+        }
+
         guard let destinationURL = await selectDestinationURL(defaultFileName: defaultFileName) else {
             return false
         }
 
-        let notification = MacMediaExportNotification()
         notification.progress()
         do {
             if let existingFileURL {
@@ -188,12 +339,28 @@ enum MacMediaFileExporter {
             return MacMediaBatchExportResult(succeededFileNames: [], failedFileNames: [])
         }
 
-        guard let destinationDirectoryURL = await selectDestinationDirectoryURL() else {
-            return MacMediaBatchExportResult(succeededFileNames: [], failedFileNames: [])
+        let notification = MacMediaExportNotification()
+        var didUseCustomDirectory = false
+        var destinationDirectoryURL: URL
+        if let customDirectoryURL = customDirectoryForAutomaticSave() {
+            destinationDirectoryURL = customDirectoryURL
+            didUseCustomDirectory = true
+        } else {
+            guard let selectedDirectoryURL = await selectDestinationDirectoryURL() else {
+                return MacMediaBatchExportResult(succeededFileNames: [], failedFileNames: [])
+            }
+            destinationDirectoryURL = selectedDirectoryURL
         }
 
-        let notification = MacMediaExportNotification()
-        let didAccess = destinationDirectoryURL.startAccessingSecurityScopedResource()
+        var didAccess = destinationDirectoryURL.startAccessingSecurityScopedResource()
+        if !didAccess && didUseCustomDirectory {
+            MacMediaSaveLocationStore.shared.setDefaultDownloads()
+            guard let selectedDirectoryURL = await selectDestinationDirectoryURL() else {
+                return MacMediaBatchExportResult(succeededFileNames: [], failedFileNames: [])
+            }
+            destinationDirectoryURL = selectedDirectoryURL
+            didAccess = destinationDirectoryURL.startAccessingSecurityScopedResource()
+        }
         defer {
             if didAccess {
                 destinationDirectoryURL.stopAccessingSecurityScopedResource()
@@ -247,11 +414,33 @@ enum MacMediaFileExporter {
             let sourceName = fileName.trimmedNonEmpty
                 ?? remoteURL.lastPathComponent.trimmedNonEmpty
                 ?? "file"
+            let defaultFileName = MediaFileNamePolicy.shared.safeDownloadFileName(
+                value: sourceName,
+                fallback: "file"
+            )
+
+            if let customDirectoryURL = customDirectoryForAutomaticSave() {
+                let didAccess = customDirectoryURL.startAccessingSecurityScopedResource()
+                if didAccess {
+                    defer {
+                        customDirectoryURL.stopAccessingSecurityScopedResource()
+                    }
+                    let destinationURL = customDirectoryURL.appendingPathComponent(defaultFileName)
+                    notification.progress()
+                    _ = try await writeRemoteFile(
+                        url: remoteURL,
+                        customHeaders: customHeaders,
+                        to: destinationURL
+                    )
+                    notification.success()
+                    return true
+                } else {
+                    MacMediaSaveLocationStore.shared.setDefaultDownloads()
+                }
+            }
+
             guard let destinationURL = await selectDestinationURL(
-                defaultFileName: MediaFileNamePolicy.shared.safeDownloadFileName(
-                    value: sourceName,
-                    fallback: "file"
-                )
+                defaultFileName: defaultFileName
             ) else {
                 return false
             }
@@ -583,12 +772,24 @@ enum MacMediaFileExporter {
         }
     }
 
+    private static func customDirectoryForAutomaticSave() -> URL? {
+        guard MacMediaSaveLocationStore.shared.state.mode == .customDirectory else {
+            return nil
+        }
+        return MacMediaSaveLocationStore.shared.resolveCustomDirectory()
+    }
+
+    private static var downloadsDirectoryURL: URL? {
+        FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
+    }
+
     private static func selectDestinationURL(defaultFileName: String) async -> URL? {
         await withCheckedContinuation { continuation in
             let panel = NSSavePanel()
             panel.canCreateDirectories = true
             panel.isExtensionHidden = false
             panel.nameFieldStringValue = defaultFileName
+            panel.directoryURL = downloadsDirectoryURL
             panel.begin { response in
                 continuation.resume(returning: response == .OK ? panel.url : nil)
             }
@@ -602,6 +803,7 @@ enum MacMediaFileExporter {
             panel.canChooseDirectories = true
             panel.canCreateDirectories = true
             panel.allowsMultipleSelection = false
+            panel.directoryURL = downloadsDirectoryURL
             panel.begin { response in
                 continuation.resume(returning: response == .OK ? panel.url : nil)
             }
@@ -692,7 +894,7 @@ private struct MacMediaExportNotification {
     }
 
     private var successTitle: String {
-        String(localized: "notification_save_file_success", defaultValue: "Saved to Files", bundle: .main)
+        String(localized: "notification_save_file_success", defaultValue: "Saved", bundle: .main)
     }
 
     private var errorTitle: String {

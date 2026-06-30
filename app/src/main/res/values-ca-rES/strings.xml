@@ -316,7 +316,7 @@
     <string name="media_menu_media_link">Enllaç multimèdia</string>
     <string name="status_menu_share_via_fxembed">Comparteix mitjançant FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Comparteix mitjançant Fixvx</string>
-    <string name="media_save_success">S\'ha desat a Baixades</string>
+    <string name="media_save_success">S\'ha desat</string>
     <string name="media_save_fail">No s\'ha pogut desar</string>
     <string name="media_alt_text">Text alternatiu</string>
     <string name="media_is_downloading">El contingut multimèdia s\'està baixant. Torna-ho a provar d\'aquí a un moment.</string>

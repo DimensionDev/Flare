@@ -326,6 +326,13 @@
     <string name="settings_storage_clear_database_description">Remove %1$s cached users and %2$s cached posts</string>
     <string name="settings_storage_app_log">App logs</string>
     <string name="settings_storage_app_log_description">View, save, or clear app logs</string>
+    <string name="settings_media_save_location">Media save location</string>
+    <string name="settings_media_save_location_description">Choose where downloaded media is saved on this device.</string>
+    <string name="settings_media_save_location_downloads">Downloads</string>
+    <string name="settings_media_save_location_custom_folder">Custom folder</string>
+    <string name="settings_media_save_location_choose_folder">Choose Folder</string>
+    <string name="settings_media_save_location_reset_downloads">Reset to Downloads</string>
+    <string name="settings_media_save_location_ask_every_time">Ask Every Time</string>
 
     <string name="service_select_instance_input_placeholder">Instance URL</string>
     <string name="service_select_next_button">Next</string>
@@ -343,7 +350,7 @@
     <string name="media_menu_media_link">Media link</string>
     <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
-    <string name="media_save_success">Saved to Downloads</string>
+    <string name="media_save_success">Saved</string>
     <string name="media_save_fail">Failed to save</string>
     <string name="media_download_started">Download started.</string>
     <string name="media_prepare_started">Preparing media...</string>

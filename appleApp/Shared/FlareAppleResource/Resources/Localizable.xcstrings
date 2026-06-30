@@ -20781,6 +20781,9 @@
         }
       }
     },
+    "Ask Every Time" : {
+
+    },
     "ask_ai" : {
       "localizations" : {
         "af" : {
@@ -28399,6 +28402,9 @@
         }
       }
     },
+    "Change" : {
+
+    },
     "channel_title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -28779,6 +28785,9 @@
           }
         }
       }
+    },
+    "Choose Folder" : {
+
     },
     "Choose how much effort the model spends on reasoning. Default uses the provider's default behavior." : {
       "localizations" : {
@@ -29352,6 +29361,9 @@
           }
         }
       }
+    },
+    "Choose where downloaded media is saved on this Mac." : {
+
     },
     "Choose which actions appear in the row, More menu, or stay hidden" : {
       "comment" : "A description of the toggle that lets you choose which actions appear in the row, More menu, or stay hidden.",
@@ -55746,6 +55758,9 @@
       }
     },
     "Media" : {
+
+    },
+    "Media save location" : {
 
     },
     "media_menu_copy_link" : {
@@ -99108,19 +99123,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved to Files"
+            "value" : "Saved"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已保存到文件"
+            "value" : "已保存"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已儲存到檔案"
+            "value" : "已儲存"
           }
         }
       }
@@ -107093,6 +107108,9 @@
           }
         }
       }
+    },
+    "Reset to Downloads" : {
+
     },
     "Retry translation" : {
       "extractionState" : "stale",

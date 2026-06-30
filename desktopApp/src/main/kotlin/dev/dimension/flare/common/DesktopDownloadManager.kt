@@ -36,52 +36,53 @@ internal class DesktopDownloadManager(
         customHeaders: Map<String, String>? = null,
         onProgress: (DownloadProgress) -> Unit = {},
         notify: Boolean = true,
-    ): Boolean = withContext(Dispatchers.IO) {
-        require(url.isNotBlank()) { "url must not be blank" }
-        require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
-        if (targetFile.exists() && !overwrite) {
-            throw IllegalStateException("Target file already exists: ${targetFile.absolutePath}")
-        }
-
-        targetFile.parentFile?.mkdirs()
-        val tempFile = File(targetFile.absolutePath + ".part")
-        tempFile.parentFile?.mkdirs()
-        if (tempFile.exists()) {
-            tempFile.delete()
-        }
-
-        try {
-            if (notify) {
-                inAppNotification.message(Res.string.media_download_started)
+    ): Boolean =
+        withContext(Dispatchers.IO) {
+            require(url.isNotBlank()) { "url must not be blank" }
+            require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
+            if (targetFile.exists() && !overwrite) {
+                throw IllegalStateException("Target file already exists: ${targetFile.absolutePath}")
             }
-            client
-                .prepareGet(url) {
-                    customHeaders?.forEach { (key, value) ->
-                        header(key, value)
+
+            targetFile.parentFile?.mkdirs()
+            val tempFile = File(targetFile.absolutePath + ".part")
+            tempFile.parentFile?.mkdirs()
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
+
+            try {
+                if (notify) {
+                    inAppNotification.message(Res.string.media_download_started)
+                }
+                client
+                    .prepareGet(url) {
+                        customHeaders?.forEach { (key, value) ->
+                            header(key, value)
+                        }
+                    }.execute { response ->
+                        writeResponseToFile(
+                            response = response,
+                            outputFile = tempFile,
+                            onProgress = onProgress,
+                        )
                     }
-                }.execute { response ->
-                    writeResponseToFile(
-                        response = response,
-                        outputFile = tempFile,
-                        onProgress = onProgress,
+                moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
+                if (notify) {
+                    inAppNotification.message(Res.string.media_save_success)
+                }
+                true
+            } catch (t: Exception) {
+                if (notify) {
+                    inAppNotification.message(
+                        Res.string.media_save_fail,
+                        success = false,
                     )
                 }
-            moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
-            if (notify) {
-                inAppNotification.message(Res.string.media_save_success)
+                tempFile.delete()
+                false
             }
-            true
-        } catch (t: Exception) {
-            if (notify) {
-                inAppNotification.message(
-                    Res.string.media_save_fail,
-                    success = false,
-                )
-            }
-            tempFile.delete()
-            false
         }
-    }
 
     suspend fun downloadAll(
         mediaByFileName: Map<String, UiMedia>,

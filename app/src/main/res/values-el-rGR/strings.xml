@@ -354,7 +354,7 @@
     <string name="media_menu_media_link">Σύνδεσμος μέσου</string>
     <string name="status_menu_share_via_fxembed">Κοινοποίηση μέσω FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Κοινοποίηση μέσω Fixvx</string>
-    <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
+    <string name="media_save_success">Αποθηκεύτηκε</string>
     <string name="media_save_fail">Αποτυχία αποθήκευσης</string>
     <string name="media_alt_text">Εναλλακτικό κείμενο</string>
     <string name="media_is_downloading">Το μέσο ακόμα λαμβάνεται. Δοκιμάστε ξανά σε λίγο.</string>

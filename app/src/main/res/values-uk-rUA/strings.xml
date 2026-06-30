@@ -362,7 +362,7 @@
     <string name="media_menu_media_link">Посилання на медіа</string>
     <string name="status_menu_share_via_fxembed">Поділитися через FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Поділитися через Fixvx</string>
-    <string name="media_save_success">Збережено в Завантаження</string>
+    <string name="media_save_success">Збережено</string>
     <string name="media_save_fail">Не вдалося зберегти</string>
     <string name="media_alt_text">Альтернативний текст</string>
     <string name="media_is_downloading">Медіа ще завантажується. Повторіть спробу за мить.</string>

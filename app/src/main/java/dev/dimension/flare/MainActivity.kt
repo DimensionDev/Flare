@@ -19,6 +19,7 @@ import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dev.dimension.flare.common.AndroidDownloadManager
+import dev.dimension.flare.common.ProvideAndroidMediaSavePicker
 import dev.dimension.flare.ui.AppContainer
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.status.ProvideAndroidTimelineMediaActions
@@ -45,12 +46,14 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalWifiState provides wifiState,
             ) {
-                ProvideAndroidTimelineMediaActions {
-                    AppContainer(
-                        afterInit = {
-                            keepSplashOnScreen = false
-                        },
-                    )
+                ProvideAndroidMediaSavePicker {
+                    ProvideAndroidTimelineMediaActions {
+                        AppContainer(
+                            afterInit = {
+                                keepSplashOnScreen = false
+                            },
+                        )
+                    }
                 }
             }
         }

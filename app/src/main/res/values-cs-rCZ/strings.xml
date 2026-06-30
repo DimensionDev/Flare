@@ -372,7 +372,7 @@
     <string name="media_menu_media_link">Odkaz na média</string>
     <string name="status_menu_share_via_fxembed">Sdílet přes FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Sdílet přes Fixvx</string>
-    <string name="media_save_success">Uloženo do složky Stažené soubory</string>
+    <string name="media_save_success">Uloženo</string>
     <string name="media_save_fail">Ukládání se nezdařilo</string>
     <string name="media_alt_text">Alternativní text</string>
     <string name="media_is_downloading">Média se stále stahují. Zkuste to znovu za chvíli.</string>

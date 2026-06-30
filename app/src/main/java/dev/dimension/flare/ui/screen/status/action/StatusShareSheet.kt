@@ -585,7 +585,7 @@ private fun View.findCaptureHostView(): ViewGroup? =
         ?: rootView as? ViewGroup
         ?: parent as? ViewGroup
 
-private fun saveBitmapToDownloads(
+private suspend fun saveBitmapToDownloads(
     context: Context,
     downloadManager: AndroidDownloadManager,
     bitmap: Bitmap,
@@ -597,11 +597,12 @@ private fun saveBitmapToDownloads(
             stream.toByteArray()
         }
     val fileName = MediaFileNamePolicy.screenshotFileName(statusKey)
-    val success = downloadManager.saveByteArray(
-        byteArray = bytes,
-        fileName = fileName,
-        mimeType = "image/png",
-    )
+    val success =
+        downloadManager.saveByteArray(
+            byteArray = bytes,
+            fileName = fileName,
+            mimeType = "image/png",
+        )
     Toast
         .makeText(
             context,
@@ -613,8 +614,7 @@ private fun saveBitmapToDownloads(
                 },
             ),
             Toast.LENGTH_SHORT,
-        )
-        .show()
+        ).show()
 }
 
 private fun shareBitmapAsImage(

@@ -370,7 +370,7 @@
     <string name="media_menu_media_link">Enlace al archivo</string>
     <string name="status_menu_share_via_fxembed">Compartir vía FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Compartir vía Fixvx</string>
-    <string name="media_save_success">Guardado en Descargas</string>
+    <string name="media_save_success">Guardado</string>
     <string name="media_save_fail">Error al guardar</string>
     <string name="media_alt_text">Texto alternativo</string>
     <string name="media_is_downloading">El archivo aún se está descargando. Inténtalo de nuevo en un momento.</string>

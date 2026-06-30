@@ -370,7 +370,7 @@
     <string name="media_menu_media_link">Link media</string>
     <string name="status_menu_share_via_fxembed">Condividi tramite FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Condividi tramite Fixvx</string>
-    <string name="media_save_success">Salvato in Download</string>
+    <string name="media_save_success">Salvato</string>
     <string name="media_save_fail">Salvataggio fallito</string>
     <string name="media_alt_text">Testo alternativo</string>
     <string name="media_is_downloading">Download in corso. Riprova tra un momento.</string>

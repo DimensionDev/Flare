@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,8 +100,10 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
+import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMedia
+import dev.dimension.flare.ui.presenter.profile.ProfileMediaPresenter
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
@@ -249,6 +252,8 @@ internal fun ProfileScreen(
     }
     val nestedScrollState = rememberNestedScrollViewState()
     var showBlockedProfileContent by remember(accountType, userKey) { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    var activeTabRefresh by remember { mutableStateOf<suspend () -> Unit>({}) }
     val isBlockedProfile =
         state.state
             .relationState
@@ -421,8 +426,17 @@ internal fun ProfileScreen(
             }
             RefreshContainer(
                 modifier = Modifier.fillMaxSize(),
-                onRefresh = state::refresh,
-                isRefreshing = state.isRefreshing,
+                onRefresh = {
+                    scope.launch {
+                        isRefreshing = true
+                        try {
+                            activeTabRefresh()
+                        } finally {
+                            isRefreshing = false
+                        }
+                    }
+                },
+                isRefreshing = isRefreshing,
                 indicatorPadding = it,
                 content = {
                     val content = @Composable {
@@ -483,8 +497,17 @@ internal fun ProfileScreen(
                                             val tab = tabs[index]
                                             when (tab) {
                                                 is ProfileTabItem.Media -> {
+                                                    val data = tab.presenter.body().mediaState
+                                                    val latestData = rememberUpdatedState(data)
+                                                    if (index == pagerState.currentPage) {
+                                                        LaunchedEffect(tab, index) {
+                                                            activeTabRefresh = {
+                                                                latestData.value.refreshSuspend()
+                                                            }
+                                                        }
+                                                    }
                                                     ProfileMediaTab(
-                                                        mediaState = tab.data,
+                                                        mediaState = data,
                                                         onItemClicked = { statusKey, index, preview ->
                                                             onMediaClick(statusKey, index, preview)
                                                         },
@@ -493,12 +516,23 @@ internal fun ProfileScreen(
                                                 }
 
                                                 is ProfileTabItem.Timeline -> {
+                                                    val data = tab.presenter.body().listState
+                                                    val latestData = rememberUpdatedState(data)
+                                                    if (index == pagerState.currentPage) {
+                                                        LaunchedEffect(tab, index) {
+                                                            activeTabRefresh = {
+                                                                latestData.value.refreshSuspend()
+                                                            }
+                                                        }
+                                                    }
                                                     val listState = rememberLazyStaggeredGridState()
                                                     if (index == pagerState.currentPage) {
                                                         RegisterTabCallback(
                                                             lazyListState = listState,
                                                             onRefresh = {
-                                                                state.refresh()
+                                                                scope.launch {
+                                                                    activeTabRefresh()
+                                                                }
                                                             },
                                                         )
                                                     }
@@ -511,7 +545,7 @@ internal fun ProfileScreen(
                                                             ),
                                                         modifier = Modifier.fillMaxSize(),
                                                     ) {
-                                                        status(tab.data)
+                                                        status(data)
                                                     }
                                                 }
                                             }
@@ -708,8 +742,6 @@ private fun profilePresenter(
     userKey: MicroBlogKey?,
     accountType: AccountType,
 ) = run {
-    val scope = rememberCoroutineScope()
-    var isRefreshing by remember { mutableStateOf(false) }
     val state =
         remember(userKey) {
             ProfilePresenter(
@@ -725,14 +757,14 @@ private fun profilePresenter(
                     is ProfileState.Tab.Timeline -> {
                         ProfileTabItem.Timeline(
                             name = it.name,
-                            data = it.presenter.body().listState,
+                            presenter = it.presenter,
                         )
                     }
 
                     is ProfileState.Tab.Media -> {
                         ProfileTabItem.Media(
                             name = it.name,
-                            data = it.presenter.body().mediaState,
+                            presenter = it.presenter,
                         )
                     }
                 }
@@ -748,33 +780,6 @@ private fun profilePresenter(
         val state = state
         val tabs = tabs
         val pagerState = pagerState
-        val isRefreshing = isRefreshing
-
-        fun refresh() {
-            scope.launch {
-                isRefreshing = true
-                pagerState.onSuccess {
-                    it.currentPage.let { index ->
-                        tabs.onSuccess { tabs ->
-                            tabs.getOrNull(index)?.let { tab ->
-                                when (tab) {
-                                    is ProfileTabItem.Media -> {
-                                        tab.data.refreshSuspend()
-                                    }
-
-                                    is ProfileTabItem.Timeline -> {
-                                        tab.data.onSuccess {
-                                            tab.data.refreshSuspend()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                isRefreshing = false
-            }
-        }
     }
 }
 
@@ -783,11 +788,11 @@ private sealed interface ProfileTabItem {
 
     data class Timeline(
         override val name: UiStrings,
-        val data: PagingState<UiTimelineV2>,
+        val presenter: TimelinePresenter,
     ) : ProfileTabItem
 
     data class Media(
         override val name: UiStrings,
-        val data: PagingState<ProfileMedia>,
+        val presenter: ProfileMediaPresenter,
     ) : ProfileTabItem
 }

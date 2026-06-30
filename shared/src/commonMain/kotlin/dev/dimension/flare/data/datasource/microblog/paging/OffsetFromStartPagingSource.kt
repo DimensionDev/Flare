@@ -75,8 +75,8 @@ internal class OffsetFromStartPagingSource<Item : Any>(
         )
     }
 
-    override fun getRefreshKey(state: PagingState<OffsetFromStartPagingKey, Item>): OffsetFromStartPagingKey {
-        val anchorPosition = state.anchorPosition ?: state.pages.sumOf { it.data.size }
+    override fun getRefreshKey(state: PagingState<OffsetFromStartPagingKey, Item>): OffsetFromStartPagingKey? {
+        val anchorPosition = state.anchorPosition ?: return null
         val limit =
             maxOf(
                 state.config.initialLoadSize,

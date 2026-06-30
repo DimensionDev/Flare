@@ -19,6 +19,15 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
+internal data class DbTimelinePageIdentity(
+    val statusId: String,
+    val sortId: Long,
+    val rootRenderHash: Int,
+    val rootTranslationSignature: String,
+    val referenceCount: Long,
+    val referenceSignature: String,
+)
+
 @Dao
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 internal interface PagingTimelineDao {
@@ -56,6 +65,75 @@ internal interface PagingTimelineDao {
         offset: Int,
         limit: Int,
     ): List<DbStatusWithReference>
+
+    @Query(
+        "WITH page AS (" +
+            "SELECT " +
+            "DbStatus.id AS statusId, " +
+            "DbPagingTimeline.sortId AS sortId, " +
+            "DbStatus.renderHash AS rootRenderHash " +
+            "FROM DbStatus " +
+            "INNER JOIN DbPagingTimeline ON DbStatus.id = DbPagingTimeline.statusId " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey " +
+            "ORDER BY DbPagingTimeline.sortId " +
+            "LIMIT :limit OFFSET :offset" +
+            "), translation_rows AS (" +
+            "SELECT " +
+            "DbTranslation.entityKey AS statusId, " +
+            "DbTranslation.id || ':' || DbTranslation.status || ':' || DbTranslation.displayMode || ':' || " +
+            "DbTranslation.updatedAt || ':' || DbTranslation.sourceHash AS signature " +
+            "FROM DbTranslation " +
+            "WHERE DbTranslation.entityType = 'Status' " +
+            "AND DbTranslation.entityKey IN (" +
+            "SELECT statusId FROM page " +
+            "UNION " +
+            "SELECT status_reference.referenceStatusId FROM status_reference " +
+            "WHERE status_reference.statusId IN (SELECT statusId FROM page)" +
+            ") " +
+            "ORDER BY DbTranslation.id" +
+            "), translation_stats AS (" +
+            "SELECT " +
+            "statusId AS statusId, " +
+            "COALESCE(GROUP_CONCAT(signature, '|'), '') AS signature " +
+            "FROM translation_rows " +
+            "GROUP BY statusId" +
+            "), reference_rows AS (" +
+            "SELECT " +
+            "status_reference.statusId AS statusId, " +
+            "status_reference.referenceOrder || ':' || status_reference.referenceType || ':' || " +
+            "status_reference.referenceStatusId || ':' || ReferenceStatus.renderHash || ':' || " +
+            "COALESCE(translation_stats.signature, '') AS signature " +
+            "FROM status_reference " +
+            "INNER JOIN DbStatus AS ReferenceStatus ON status_reference.referenceStatusId = ReferenceStatus.id " +
+            "LEFT JOIN translation_stats ON status_reference.referenceStatusId = translation_stats.statusId " +
+            "WHERE status_reference.statusId IN (SELECT statusId FROM page) " +
+            "ORDER BY status_reference.statusId, status_reference.referenceOrder, " +
+            "status_reference.referenceType, status_reference.referenceStatusId" +
+            "), reference_stats AS (" +
+            "SELECT " +
+            "reference_rows.statusId AS statusId, " +
+            "COUNT(*) AS referenceCount, " +
+            "COALESCE(GROUP_CONCAT(reference_rows.signature, '|'), '') AS referenceSignature " +
+            "FROM reference_rows " +
+            "GROUP BY reference_rows.statusId" +
+            ") " +
+            "SELECT " +
+            "page.statusId AS statusId, " +
+            "page.sortId AS sortId, " +
+            "page.rootRenderHash AS rootRenderHash, " +
+            "COALESCE(root_translation_stats.signature, '') AS rootTranslationSignature, " +
+            "COALESCE(reference_stats.referenceCount, 0) AS referenceCount, " +
+            "COALESCE(reference_stats.referenceSignature, '') AS referenceSignature " +
+            "FROM page " +
+            "LEFT JOIN reference_stats ON page.statusId = reference_stats.statusId " +
+            "LEFT JOIN translation_stats AS root_translation_stats ON page.statusId = root_translation_stats.statusId " +
+            "ORDER BY page.sortId",
+    )
+    suspend fun getTimelinePageIdentities(
+        pagingKey: String,
+        offset: Int,
+        limit: Int,
+    ): List<DbTimelinePageIdentity>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns

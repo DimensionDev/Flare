@@ -59,6 +59,8 @@ public class PostEventHandler(
                     statusKey = event.postKey,
                     accountType = dbAccountType,
                     content = updatedData,
+                    renderHash = updatedData.renderHash,
+                    text = updatedData.searchText,
                 )
             }
             if (event is PostEvent.PollEvent && originalData is UiTimelineV2.Post) {
@@ -87,6 +89,8 @@ public class PostEventHandler(
                     statusKey = event.postKey,
                     accountType = dbAccountType,
                     content = updatedData,
+                    renderHash = updatedData.renderHash,
+                    text = updatedData.searchText,
                 )
             }
             tryRun {
@@ -101,6 +105,8 @@ public class PostEventHandler(
                         statusKey = event.postKey,
                         accountType = dbAccountType,
                         content = originalData,
+                        renderHash = originalData.renderHash,
+                        text = originalData.searchText,
                     )
                 }
             }
@@ -139,6 +145,8 @@ public class PostEventHandler(
                     statusKey = postKey,
                     accountType = dbAccountType,
                     content = updatedData,
+                    renderHash = updatedData.renderHash,
+                    text = updatedData.searchText,
                 )
             }
         }
@@ -170,6 +178,8 @@ public class PostEventHandler(
                     statusKey = postKey,
                     accountType = dbAccountType,
                     content = updatedData,
+                    renderHash = updatedData.renderHash,
+                    text = updatedData.searchText,
                 )
             }
         }

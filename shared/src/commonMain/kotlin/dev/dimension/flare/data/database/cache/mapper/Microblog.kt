@@ -90,19 +90,25 @@ private suspend fun mergeWithExistingPostParents(
             return@map item
         }
         val existingReplyReferences = existingReplyReferencesByStatus[item.accountType to item.statusKey] ?: return@map item
-        item.copy(
-            content =
-                post.copy(
-                    references =
-                        (
-                            post.references +
-                                existingReplyReferences
-                        ).distinctBy { it.type to it.statusKey }
-                            .toImmutableList(),
-                ),
+        item.withContent(
+            post.copy(
+                references =
+                    (
+                        post.references +
+                            existingReplyReferences
+                    ).distinctBy { it.type to it.statusKey }
+                        .toImmutableList(),
+            ),
         )
     }
 }
+
+private fun DbStatus.withContent(content: UiTimelineV2): DbStatus =
+    copy(
+        content = content,
+        renderHash = content.renderHash,
+        text = content.searchText,
+    )
 
 private suspend fun loadExistingPostReplyReferences(
     database: CacheDatabase,

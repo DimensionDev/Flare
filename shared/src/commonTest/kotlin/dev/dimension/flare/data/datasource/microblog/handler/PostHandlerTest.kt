@@ -167,7 +167,8 @@ class PostHandlerTest : RobolectricTest() {
                     statusKey = postKey,
                     accountType = accountType,
                     content = local,
-                    text = "text",
+                    renderHash = local.renderHash,
+                    text = local.searchText,
                 ),
             )
 
@@ -247,7 +248,8 @@ class PostHandlerTest : RobolectricTest() {
                     statusKey = postKey,
                     accountType = accountType,
                     content = localWithParents,
-                    text = "text",
+                    renderHash = localWithParents.renderHash,
+                    text = localWithParents.searchText,
                 ),
             )
             fakeLoader.nextStatus = createPost(statusKey = postKey, parents = persistentListOf())
@@ -286,7 +288,8 @@ class PostHandlerTest : RobolectricTest() {
                     statusKey = postKey,
                     accountType = accountType,
                     content = local,
-                    text = "text",
+                    renderHash = local.renderHash,
+                    text = local.searchText,
                 ),
             )
             fakeLoader.nextStatus = createPost(statusKey = postKey, parents = persistentListOf(createPost(statusKey = remoteParentKey)))
@@ -308,12 +311,14 @@ class PostHandlerTest : RobolectricTest() {
         runTest {
             startTestKoin(this@runTest)
 
+            val local = createPost(statusKey = postKey)
             db.statusDao().insert(
                 DbStatus(
                     statusKey = postKey,
                     accountType = accountType,
-                    content = createPost(statusKey = postKey),
-                    text = "text",
+                    content = local,
+                    renderHash = local.renderHash,
+                    text = local.searchText,
                 ),
             )
             db.pagingTimelineDao().insertAll(
@@ -358,12 +363,14 @@ class PostHandlerTest : RobolectricTest() {
         runTest {
             startTestKoin(this@runTest)
 
+            val local = createPost(statusKey = postKey)
             db.statusDao().insert(
                 DbStatus(
                     statusKey = postKey,
                     accountType = accountType,
-                    content = createPost(statusKey = postKey),
-                    text = "text",
+                    content = local,
+                    renderHash = local.renderHash,
+                    text = local.searchText,
                 ),
             )
             db.pagingTimelineDao().insertAll(

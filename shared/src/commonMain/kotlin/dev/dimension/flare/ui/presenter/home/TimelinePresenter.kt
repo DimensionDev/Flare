@@ -28,6 +28,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagingSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
@@ -163,6 +164,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbStatusWithReference>> =
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
+            val pageCache = TimelineDbPageCache()
             Pager(
                 config = offsetPagingConfig,
                 remoteMediator =
@@ -182,6 +184,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         TimelineDbPageLoader(
                             database = database,
                             pagingKey = loader.pagingKey,
+                            pageCache = pageCache,
                         ),
                     )
                 },

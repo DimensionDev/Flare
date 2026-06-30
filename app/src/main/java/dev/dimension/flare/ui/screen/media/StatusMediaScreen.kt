@@ -114,8 +114,8 @@ import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
-import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
@@ -1374,7 +1374,7 @@ private fun mediaViewerPresenter(
     context: Context,
     fileName: (UiMedia) -> String,
     scope: CoroutineScope = koinInject(),
-    videoDownloadHelper: VideoDownloadHelper = koinInject(),
+    mediaDownloadManager: AndroidDownloadManager = koinInject(),
 ) = run {
     var showSheet by remember {
         mutableStateOf(false)
@@ -1506,12 +1506,12 @@ private fun mediaViewerPresenter(
             customHeaders: Map<String, String>?,
         ) {
             scope.launch {
-                videoDownloadHelper.downloadVideo(
+                mediaDownloadManager.downloadMedia(
                     uri = uri,
                     fileName = fileName,
                     customHeaders = customHeaders,
                     callback =
-                        object : VideoDownloadHelper.DownloadCallback {
+                        object : AndroidDownloadManager.DownloadCallback {
                             override fun onDownloadStarted(downloadId: Long) {
                                 scope.launch {
                                     withContext(Dispatchers.Main) {
@@ -1562,12 +1562,22 @@ private fun mediaViewerPresenter(
             scope.launch {
                 context.imageLoader.diskCache?.openSnapshot(uri)?.use {
                     val byteArray = it.data.toFile().readBytes()
-                    saveByteArrayToDownloads(context, byteArray, fileName)
+                    val success =
+                        mediaDownloadManager.saveByteArray(
+                            byteArray = byteArray,
+                            fileName = fileName,
+                        )
                     withContext(Dispatchers.Main) {
                         Toast
                             .makeText(
                                 context,
-                                context.getString(R.string.media_save_success),
+                                context.getString(
+                                    if (success) {
+                                        R.string.media_save_success
+                                    } else {
+                                        R.string.media_save_fail
+                                    },
+                                ),
                                 Toast.LENGTH_SHORT,
                             ).show()
                     }

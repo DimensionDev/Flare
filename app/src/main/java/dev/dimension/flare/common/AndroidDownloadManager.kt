@@ -2,6 +2,7 @@ package dev.dimension.flare.common
 
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -26,17 +27,17 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicLong
 
 /**
- * Saves remote media to Downloads, reusing the shared Media3 playback cache when possible.
+ * Saves files to Downloads. Remote media reuses the shared Media3 playback cache when possible.
  */
 @Stable
 @Single
 @OptIn(UnstableApi::class)
-internal class VideoDownloadHelper(
+internal class AndroidDownloadManager(
     @Provided private val context: Context,
     private val media3VideoCacheManager: Media3VideoCacheManager,
 ) {
     companion object {
-        private const val TAG = "VideoDownloadHelper"
+        private const val TAG = "AndroidDownloadManager"
     }
 
     private val nextDownloadId = AtomicLong()
@@ -68,11 +69,22 @@ internal class VideoDownloadHelper(
 
     fun onPause() = Unit
 
+    fun saveByteArray(
+        byteArray: ByteArray,
+        fileName: String,
+        mimeType: String = imageMimeType(byteArray),
+    ): Boolean =
+        saveToDownloads(fileName = fileName, mimeType = mimeType) { outputStream ->
+            outputStream.write(byteArray)
+            outputStream.flush()
+            true
+        }
+
     /**
      * Save a media file. Full progressive cache is exported first; otherwise missing bytes are
      * fetched through the same Media3 cache and written to Downloads.
      */
-    suspend fun downloadVideo(
+    suspend fun downloadMedia(
         uri: String,
         fileName: String,
         customHeaders: Map<String, String>? = null,
@@ -199,6 +211,15 @@ internal class VideoDownloadHelper(
                 dataSource.close()
             }
         }
+    }
+
+    private fun imageMimeType(byteArray: ByteArray): String {
+        val options =
+            BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+        BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size, options)
+        return options.outMimeType?.lowercase() ?: "image/jpeg"
     }
 
     private fun saveToDownloads(

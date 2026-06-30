@@ -52,6 +52,7 @@ import dev.dimension.flare.article_content_gate_subscription_description
 import dev.dimension.flare.article_content_gate_subscription_description_with_fee
 import dev.dimension.flare.article_content_gate_subscription_title
 import dev.dimension.flare.common.DesktopDownloadManager
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
@@ -94,8 +95,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import java.awt.FileDialog
-import java.io.File
 
 private val ArticleCoverHeight = 260.dp
 private const val ARTICLE_COVER_KEY = "cover"
@@ -820,26 +819,22 @@ private fun saveArticleFile(
     scope: CoroutineScope,
     downloadManager: DesktopDownloadManager,
 ) {
-    FileDialog(window).apply {
-        mode = FileDialog.SAVE
-        file =
-            MediaFileNamePolicy.articleFileName(
-                name = block.name,
-                url = block.url,
-                extensionName = block.extension,
-            )
-        isVisible = true
-        val selectedDirectory = directory
-        val selectedFile = file
-        if (!selectedDirectory.isNullOrBlank() && !selectedFile.isNullOrBlank()) {
-            scope.launch {
-                downloadManager.download(
+    val targetFile =
+        DesktopSaveDialog.chooseFile(
+            window = window,
+            defaultName =
+                MediaFileNamePolicy.articleFileName(
+                    name = block.name,
                     url = block.url,
-                    targetFile = File(selectedDirectory, selectedFile),
-                    customHeaders = block.customHeaders,
-                )
-            }
-        }
+                    extensionName = block.extension,
+                ),
+        ) ?: return
+    scope.launch {
+        downloadManager.download(
+            url = block.url,
+            targetFile = targetFile,
+            customHeaders = block.customHeaders,
+        )
     }
 }
 

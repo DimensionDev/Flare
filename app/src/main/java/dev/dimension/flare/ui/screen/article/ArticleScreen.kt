@@ -63,8 +63,8 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
-import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -130,7 +130,7 @@ internal fun ArticleScreen(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val downloadScope = koinInject<CoroutineScope>()
-    val videoDownloadHelper = koinInject<VideoDownloadHelper>()
+    val mediaDownloadManager = koinInject<AndroidDownloadManager>()
     val article = state.article.takeSuccess()
     val articleTitle = article?.title
     var titleHeightPx by remember(article?.key) { mutableIntStateOf(0) }
@@ -300,7 +300,7 @@ internal fun ArticleScreen(
                             block = file,
                             context = context,
                             scope = downloadScope,
-                            videoDownloadHelper = videoDownloadHelper,
+                            mediaDownloadManager = mediaDownloadManager,
                         )
                     },
                     onOpenMedia = { media ->
@@ -985,11 +985,11 @@ private fun downloadArticleFile(
     block: UiArticleBlock.File,
     context: Context,
     scope: CoroutineScope,
-    videoDownloadHelper: VideoDownloadHelper,
+    mediaDownloadManager: AndroidDownloadManager,
 ) {
     scope.launch {
         runCatching {
-            videoDownloadHelper.downloadVideo(
+            mediaDownloadManager.downloadMedia(
                 uri = block.url,
                 fileName =
                     MediaFileNamePolicy.articleFileName(
@@ -999,7 +999,7 @@ private fun downloadArticleFile(
                     ),
                 customHeaders = block.customHeaders,
                 callback =
-                    object : VideoDownloadHelper.DownloadCallback {
+                    object : AndroidDownloadManager.DownloadCallback {
                         override fun onDownloadStarted(downloadId: Long) {
                             context.showArticleDownloadToast(R.string.media_download_started)
                         }

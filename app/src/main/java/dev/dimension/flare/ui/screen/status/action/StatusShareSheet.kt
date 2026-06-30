@@ -84,6 +84,7 @@ import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
@@ -97,12 +98,12 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -133,6 +134,7 @@ internal fun StatusShareSheet(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val downloadManager = koinInject<AndroidDownloadManager>()
     val density = LocalDensity.current
     val view = LocalView.current
     val parentCompositionContext = rememberCompositionContext()
@@ -292,6 +294,7 @@ internal fun StatusShareSheet(
                         }
                         saveBitmapToDownloads(
                             context = context,
+                            downloadManager = downloadManager,
                             bitmap = bitmap,
                             statusKey = statusKey.toString(),
                         )
@@ -584,6 +587,7 @@ private fun View.findCaptureHostView(): ViewGroup? =
 
 private fun saveBitmapToDownloads(
     context: Context,
+    downloadManager: AndroidDownloadManager,
     bitmap: Bitmap,
     statusKey: String,
 ) {
@@ -593,14 +597,23 @@ private fun saveBitmapToDownloads(
             stream.toByteArray()
         }
     val fileName = MediaFileNamePolicy.screenshotFileName(statusKey)
-    saveByteArrayToDownloads(
-        context = context,
+    val success = downloadManager.saveByteArray(
         byteArray = bytes,
         fileName = fileName,
         mimeType = "image/png",
     )
     Toast
-        .makeText(context, context.getString(R.string.media_save_success), Toast.LENGTH_SHORT)
+        .makeText(
+            context,
+            context.getString(
+                if (success) {
+                    R.string.media_save_success
+                } else {
+                    R.string.media_save_fail
+                },
+            ),
+            Toast.LENGTH_SHORT,
+        )
         .show()
 }
 

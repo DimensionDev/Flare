@@ -34,6 +34,7 @@ import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.data.model.VideoAutoplay
@@ -71,12 +72,10 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import java.awt.FileDialog
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.awt.image.BufferedImage
-import java.io.File
 import javax.imageio.ImageIO
 
 private enum class SharePreviewTheme {
@@ -278,18 +277,11 @@ private fun saveImageWithDialog(
     image: ImageBitmap,
     defaultName: String,
 ) {
-    val dialog =
-        FileDialog(window).apply {
-            mode = FileDialog.SAVE
-            file = defaultName
-            isVisible = true
-        }
-    val directory = dialog.directory
-    val file = dialog.file
-    if (directory.isNullOrEmpty() || file.isNullOrEmpty()) {
-        return
-    }
-    val target = File(directory, file)
+    val target =
+        DesktopSaveDialog.chooseFile(
+            window = window,
+            defaultName = defaultName,
+        ) ?: return
     ImageIO.write(image.toBufferedImage(), "png", target)
 }
 

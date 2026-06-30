@@ -20,6 +20,10 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         }
     }
 
+    func saveImage(_ image: UIImage) {
+        saveImageToPhotos(image)
+    }
+
     func saveVideo(url: String, customHeaders: [String: String]? = nil) {
         guard let remoteUrl = URL(string: url),
               remoteUrl.pathExtension.lowercased() != "m3u8" else {
@@ -132,6 +136,14 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
             request.addResource(with: .photo, data: data, options: nil)
+        } completionHandler: { success, error in
+            self.showSaveResult(success: success && error == nil)
+        }
+    }
+
+    nonisolated private func saveImageToPhotos(_ image: UIImage) {
+        PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.creationRequestForAsset(from: image)
         } completionHandler: { success, error in
             self.showSaveResult(success: success && error == nil)
         }

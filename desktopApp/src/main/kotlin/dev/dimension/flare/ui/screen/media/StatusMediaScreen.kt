@@ -70,6 +70,7 @@ import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.DesktopDownloadManager
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.common.FlareHardwareShortcutDetector
 import dev.dimension.flare.common.FlareHardwareShortcutsElement
 import dev.dimension.flare.common.MediaFileNamePolicy
@@ -122,7 +123,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import java.awt.FileDialog
 import kotlin.math.max
 import kotlin.math.roundToLong
 import kotlin.time.Duration.Companion.milliseconds
@@ -631,20 +631,16 @@ private fun presenter(
                         userHandle = userHandle,
                         media = item,
                     )
-                FileDialog(window).apply {
-                    mode = FileDialog.SAVE
-                    file = fileName
-                    isVisible = true
-                    val dir = directory
-                    val file = file
-                    if (!dir.isNullOrEmpty() && !file.isNullOrEmpty()) {
-                        scope.launch {
-                            desktopDownloadManager.download(
-                                url = item.url,
-                                targetFile = java.io.File(dir, file),
-                            )
-                        }
-                    }
+                val targetFile =
+                    DesktopSaveDialog.chooseFile(
+                        window = window,
+                        defaultName = fileName,
+                    ) ?: return
+                scope.launch {
+                    desktopDownloadManager.download(
+                        url = item.url,
+                        targetFile = targetFile,
+                    )
                 }
             }
         }

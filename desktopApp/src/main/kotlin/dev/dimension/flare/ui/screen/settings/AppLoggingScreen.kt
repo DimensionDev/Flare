@@ -25,6 +25,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.settings_app_logging_clear
 import dev.dimension.flare.settings_app_logging_enable_network_logging
 import dev.dimension.flare.settings_app_logging_save
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.presenter.invoke
@@ -39,8 +40,6 @@ import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
-import java.awt.FileDialog
-import java.io.File
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -66,18 +65,12 @@ internal fun AppLoggingScreen() {
                 ) {
                     SubtleButton(
                         onClick = {
-                            FileDialog(window).apply {
-                                mode = FileDialog.SAVE
-                                file = "flare-log-${Clock.System.now().toEpochMilliseconds()}.txt"
-                                isVisible = true
-                                val dir = directory
-                                val file = file
-                                if (dir != null && file != null) {
-                                    val data = state.printMessageToString()
-                                    val file = File(dir, file)
-                                    file.writeText(data)
-                                }
-                            }
+                            val targetFile =
+                                DesktopSaveDialog.chooseFile(
+                                    window = window,
+                                    defaultName = "flare-log-${Clock.System.now().toEpochMilliseconds()}.txt",
+                                ) ?: return@SubtleButton
+                            targetFile.writeText(state.printMessageToString())
                         },
                     ) {
                         FAIcon(

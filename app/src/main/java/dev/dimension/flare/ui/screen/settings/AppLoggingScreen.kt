@@ -32,17 +32,18 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
-import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +51,7 @@ import kotlin.time.Clock
 internal fun AppLoggingScreen(onBack: () -> Unit) {
     val state by producePresenter { presenter() }
     val context = LocalContext.current
+    val downloadManager = koinInject<AndroidDownloadManager>()
     var selectedMessage by remember { mutableStateOf<String?>(null) }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
@@ -64,8 +66,7 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                 actions = {
                     IconButton(
                         onClick = {
-                            saveByteArrayToDownloads(
-                                context = context,
+                            val success = downloadManager.saveByteArray(
                                 byteArray = state.printMessageToString().encodeToByteArray(),
                                 fileName = "flare-log-${Clock.System.now().toEpochMilliseconds()}",
                                 mimeType = "text/plain",
@@ -73,7 +74,11 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                             Toast
                                 .makeText(
                                     context,
-                                    R.string.media_save_success,
+                                    if (success) {
+                                        R.string.media_save_success
+                                    } else {
+                                        R.string.media_save_fail
+                                    },
                                     Toast.LENGTH_SHORT,
                                 ).show()
                         },

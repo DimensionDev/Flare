@@ -18,7 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import dev.dimension.flare.common.VideoDownloadHelper
+import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.ui.AppContainer
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import kotlinx.coroutines.channels.awaitClose
@@ -27,7 +27,7 @@ import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
     private var keepSplashOnScreen = true
-    private val videoDownloadHelper by inject<VideoDownloadHelper>()
+    private val downloadManager by inject<AndroidDownloadManager>()
     private val wifiStateFlow by lazy {
         observeWifiStateAsFlow()
     }
@@ -60,12 +60,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        videoDownloadHelper.onResume()
+        downloadManager.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        videoDownloadHelper.onPause()
+        downloadManager.onPause()
     }
 }
 

@@ -1,11 +1,5 @@
 package dev.dimension.flare.ui.screen.media
 
-import android.content.ContentValues
-import android.content.Context
-import android.graphics.BitmapFactory
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -15,9 +9,6 @@ import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableMap
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 @Composable
 internal fun MediaScreen(
@@ -66,49 +57,4 @@ internal fun RawMediaScreen(
         uriHandler = uriHandler,
         fileName = MediaFileNamePolicy::rawMediaFileName,
     )
-}
-
-private fun getMimeType(byteArray: ByteArray): String {
-    val options =
-        BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-        }
-    BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size, options)
-    return options.outMimeType?.lowercase() ?: "image/jpeg"
-}
-
-internal fun saveByteArrayToDownloads(
-    context: Context,
-    byteArray: ByteArray,
-    fileName: String,
-    mimeType: String = getMimeType(byteArray),
-) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val values =
-            ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-            }
-
-        val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-        try {
-            context.contentResolver.openOutputStream(uri ?: return)?.use { outputStream ->
-                outputStream.write(byteArray)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    } else {
-        val directory =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val file = File(directory, fileName)
-        try {
-            FileOutputStream(file).use { outputStream ->
-                outputStream.write(byteArray)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
 }

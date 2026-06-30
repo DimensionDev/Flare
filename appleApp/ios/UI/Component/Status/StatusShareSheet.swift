@@ -61,9 +61,7 @@ struct StatusShareSheet: View {
                     }
 
                     Button {
-                        Task {
-                            await saveImage(data: data)
-                        }
+                        saveImage()
                     } label: {
                         Label("save_screenshot", systemImage: "arrow.down.circle")
                     }
@@ -140,9 +138,9 @@ struct StatusShareSheet: View {
         return await previewView(data: data).snapshot()
     }
     
-    private func saveImage(data: UiTimelineV2) async {
+    private func saveImage() {
         guard let image = image else { return }
-        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+        MediaSaver.shared.saveImage(image)
         dismiss()
     }
 }

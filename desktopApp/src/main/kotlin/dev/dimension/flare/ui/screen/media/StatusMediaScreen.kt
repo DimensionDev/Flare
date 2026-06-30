@@ -72,6 +72,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.common.DesktopDownloadManager
 import dev.dimension.flare.common.FlareHardwareShortcutDetector
 import dev.dimension.flare.common.FlareHardwareShortcutsElement
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
@@ -83,7 +84,6 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.getFileName
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -625,7 +625,12 @@ private fun presenter(
             val status = state.status.takeSuccess() as? UiTimelineV2.Post
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"
-                val fileName = item.getFileName(statusKey.toString(), userHandle)
+                val fileName =
+                    MediaFileNamePolicy.statusMediaFileName(
+                        statusKey = statusKey.toString(),
+                        userHandle = userHandle,
+                        media = item,
+                    )
                 FileDialog(window).apply {
                     mode = FileDialog.SAVE
                     file = fileName

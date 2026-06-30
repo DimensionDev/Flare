@@ -34,6 +34,7 @@ import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
@@ -227,7 +228,11 @@ internal fun StatusShareSheet(
                     onClick = {
                         scope.launch {
                             val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
-                            saveImageWithDialog(window, image, "status_${statusKey.toString().replace(Regex("[^A-Za-z0-9._-]"), "_")}.png")
+                            saveImageWithDialog(
+                                window,
+                                image,
+                                "status_${MediaFileNamePolicy.sanitizeFileName(statusKey.toString())}.png",
+                            )
                         }
                     },
                 ) {

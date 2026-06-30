@@ -2,6 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.FileStorage
@@ -21,7 +22,7 @@ internal class DraftMediaStore(
             medias.mapIndexed { index, media ->
                 val fileName =
                     media.file.name
-                        ?.sanitizeFileName()
+                        ?.let { MediaFileNamePolicy.sanitizeFileName(it, fallback = "") }
                         .orEmpty()
                         .ifBlank { "${Uuid.random()}.bin" }
                 val path = fileStorage.draftMediaFile(groupId, "${index}_$fileName")
@@ -125,5 +126,3 @@ private fun DraftMediaType.toFileType(): FileType =
         DraftMediaType.VIDEO -> FileType.Video
         DraftMediaType.OTHER -> FileType.Other
     }
-
-private fun String.sanitizeFileName(): String = replace(Regex("[^A-Za-z0-9._-]"), "_")

@@ -9,6 +9,7 @@ import android.provider.MediaStore
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
@@ -63,31 +64,8 @@ internal fun RawMediaScreen(
         onDismiss = onDismiss,
         toAltText = toAltText,
         uriHandler = uriHandler,
-        fileName = { it.rawMediaFileName() },
+        fileName = MediaFileNamePolicy::rawMediaFileName,
     )
-}
-
-private fun UiMedia.rawMediaFileName(): String {
-    val fallbackExtension =
-        when (this) {
-            is UiMedia.Audio -> "mp3"
-            is UiMedia.Gif -> "gif"
-            is UiMedia.Image -> "jpg"
-            is UiMedia.Video -> "mp4"
-        }
-    val path = url.substringBefore("?").substringBefore("#")
-    var fileName = path.substringAfterLast("/").substringAfterLast("\\")
-    val lastAtIndex = fileName.lastIndexOf('@')
-    val lastDotIndex = fileName.lastIndexOf('.')
-    if (lastAtIndex > lastDotIndex && lastAtIndex < fileName.length - 1) {
-        fileName = fileName.substring(0, lastAtIndex) + "." + fileName.substring(lastAtIndex + 1)
-    }
-    fileName = fileName.ifBlank { "media" }.replace(Regex("[^A-Za-z0-9._-]"), "_")
-    return if (fileName.contains(".")) {
-        fileName
-    } else {
-        "$fileName.$fallbackExtension"
-    }
 }
 
 private fun getMimeType(byteArray: ByteArray): String {

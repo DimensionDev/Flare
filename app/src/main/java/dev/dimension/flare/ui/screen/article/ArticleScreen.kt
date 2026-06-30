@@ -63,6 +63,7 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -990,7 +991,12 @@ private fun downloadArticleFile(
         runCatching {
             videoDownloadHelper.downloadVideo(
                 uri = block.url,
-                fileName = block.downloadFileName(),
+                fileName =
+                    MediaFileNamePolicy.articleFileName(
+                        name = block.name,
+                        url = block.url,
+                        extensionName = block.extension,
+                    ),
                 customHeaders = block.customHeaders,
                 callback =
                     object : VideoDownloadHelper.DownloadCallback {
@@ -1013,45 +1019,6 @@ private fun downloadArticleFile(
             }
         }
     }
-}
-
-private fun UiArticleBlock.File.downloadFileName(): String {
-    val sourceName =
-        name.trim().takeIf { it.isNotBlank() }
-            ?: url
-                .substringBefore("?")
-                .substringBefore("#")
-                .substringAfterLast("/")
-                .trim()
-                .takeIf { it.isNotBlank() }
-            ?: "file"
-    val extension = extension?.trim()?.trimStart('.')?.takeIf { it.isNotBlank() }
-    val fileName =
-        if (extension != null && !sourceName.hasFileExtension()) {
-            "$sourceName.$extension"
-        } else {
-            sourceName
-        }
-    return fileName.toSafeDownloadFileName()
-}
-
-private fun String.hasFileExtension(): Boolean {
-    val name = substringAfterLast('/').substringAfterLast('\\')
-    val lastDotIndex = name.lastIndexOf('.')
-    return lastDotIndex > 0 && lastDotIndex < name.length - 1
-}
-
-private fun String.toSafeDownloadFileName(): String {
-    val safeName =
-        trim()
-            .map { char ->
-                if (char == '/' || char == '\\' || char.code < 32 || char.code == 127) {
-                    '_'
-                } else {
-                    char
-                }
-            }.joinToString(separator = "")
-    return safeName.ifBlank { "file" }
 }
 
 private fun Context.showArticleDownloadToast(messageRes: Int) {

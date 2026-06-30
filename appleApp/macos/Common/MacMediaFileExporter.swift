@@ -1,6 +1,8 @@
 import AppKit
+import FlareAppleCore
 import Foundation
 import Kingfisher
+import KotlinSharedUI
 
 struct MacMediaShareContext: Hashable {
     let statusKey: String?
@@ -103,8 +105,15 @@ enum MacMediaFileExporter {
                 throw MacMediaExportError.downloadFailed
             }
 
+            let sourceName = fileName.trimmedNonEmpty
+                ?? response.suggestedFilename?.trimmedNonEmpty
+                ?? remoteURL.lastPathComponent.trimmedNonEmpty
+                ?? "file"
             guard let destinationURL = await selectDestinationURL(
-                defaultFileName: safeFileName(fileName, fallbackURL: remoteURL, response: response)
+                defaultFileName: MediaFileNamePolicy.shared.safeDownloadFileName(
+                    value: sourceName,
+                    fallback: "file"
+                )
             ) else {
                 notification.finishProgress()
                 return false
@@ -127,7 +136,7 @@ enum MacMediaFileExporter {
                 url: remoteURL,
                 customHeaders: source.customHeaders
             )
-            let extensionName = imageFileExtension(
+            let extensionName = AppleMediaFileExtension.image(
                 url: remoteURL,
                 data: data,
                 fallback: source.kind == .gif ? "gif" : "jpg"
@@ -151,7 +160,7 @@ enum MacMediaFileExporter {
             guard isSuccessfulHTTPResponse(response) else {
                 throw MacMediaExportError.downloadFailed
             }
-            let extensionName = videoFileExtension(from: remoteURL, response: response)
+            let extensionName = AppleMediaFileExtension.video(url: remoteURL, response: response)
             let fileURL = temporaryFileURL(
                 url: remoteURL,
                 shareContext: source.shareContext,
@@ -226,64 +235,24 @@ enum MacMediaFileExporter {
     ) -> String {
         if let statusKey = shareContext?.statusKey,
            let userHandle = shareContext?.userHandle {
-            return "\(sanitizeFileName(statusKey))_\(sanitizeFileName(userHandle)).\(extensionName)"
+            let safeStatusKey = MediaFileNamePolicy.shared.sanitizeFileName(
+                value: statusKey,
+                fallback: "flare-media"
+            )
+            let safeUserHandle = MediaFileNamePolicy.shared.sanitizeFileName(
+                value: userHandle,
+                fallback: "flare-media"
+            )
+            return "\(safeStatusKey)_\(safeUserHandle).\(extensionName)"
         }
 
         let originalName = url.deletingPathExtension().lastPathComponent
         let baseName = originalName.isEmpty ? "flare-media-\(UUID().uuidString)" : originalName
-        return "\(sanitizeFileName(baseName)).\(extensionName)"
-    }
-
-    private static func imageFileExtension(url: URL, data: Data, fallback: String) -> String {
-        let originalName = url.path
-            .split(separator: "/")
-            .last
-            .map(String.init) ?? ""
-        let lastDotIndex = originalName.lastIndex(of: ".")
-        let lastAtIndex = originalName.lastIndex(of: "@")
-        let separatorIndex = [lastDotIndex, lastAtIndex].compactMap { $0 }.max()
-
-        if let separatorIndex {
-            let nextIndex = originalName.index(after: separatorIndex)
-            if nextIndex < originalName.endIndex {
-                return String(originalName[nextIndex...])
-            }
-        }
-
-        if data.starts(with: [0xFF, 0xD8, 0xFF]) {
-            return "jpg"
-        }
-        if data.starts(with: [0x89, 0x50, 0x4E, 0x47]) {
-            return "png"
-        }
-        if data.starts(with: [0x47, 0x49, 0x46]) {
-            return "gif"
-        }
-        if data.starts(with: [0x52, 0x49, 0x46, 0x46]) {
-            return "webp"
-        }
-        if data.starts(with: [0x49, 0x49, 0x2A, 0x00]) || data.starts(with: [0x4D, 0x4D, 0x00, 0x2A]) {
-            return "tiff"
-        }
-        return fallback
-    }
-
-    private static func videoFileExtension(from url: URL, response: URLResponse?) -> String {
-        let pathExtension = url.pathExtension.lowercased()
-        if !pathExtension.isEmpty, pathExtension != "m3u8" {
-            return pathExtension
-        }
-
-        switch response?.mimeType?.lowercased() {
-        case "video/quicktime":
-            return "mov"
-        case "video/webm":
-            return "webm"
-        case "video/x-m4v":
-            return "m4v"
-        default:
-            return "mp4"
-        }
+        let safeBaseName = MediaFileNamePolicy.shared.sanitizeFileName(
+            value: baseName,
+            fallback: "flare-media"
+        )
+        return "\(safeBaseName).\(extensionName)"
     }
 
     private static func isSuccessfulHTTPResponse(_ response: URLResponse?) -> Bool {
@@ -320,32 +289,6 @@ enum MacMediaFileExporter {
         }
     }
 
-    private static func sanitizeFileName(_ value: String) -> String {
-        let sanitized = value.map { character in
-            if character.isASCII,
-               character.isLetter || character.isNumber || character == "." || character == "_" || character == "-" {
-                return character
-            }
-            return "_"
-        }.map(String.init).joined()
-        return sanitized.isEmpty ? "flare-media" : sanitized
-    }
-
-    private static func safeFileName(_ fileName: String, fallbackURL: URL, response: URLResponse?) -> String {
-        let sourceName = fileName.trimmedNonEmpty
-            ?? response?.suggestedFilename?.trimmedNonEmpty
-            ?? fallbackURL.lastPathComponent.trimmedNonEmpty
-            ?? "file"
-        let safeName = sourceName.map { character -> Character in
-            if character == "/" ||
-                character == "\\" ||
-                character.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }) {
-                return "_"
-            }
-            return character
-        }
-        return String(safeName).trimmedNonEmpty ?? "file"
-    }
 }
 
 private enum MacMediaExportError: LocalizedError {

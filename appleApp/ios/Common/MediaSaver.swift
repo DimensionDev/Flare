@@ -2,6 +2,7 @@ import FlareAppleCore
 import Foundation
 import GSPlayer
 import Kingfisher
+import KotlinSharedUI
 import Photos
 import UIKit
 import SwiftUI
@@ -77,7 +78,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
                 return
             }
 
-            let fileExtension = Self.videoFileExtension(from: url, response: response)
+            let fileExtension = AppleMediaFileExtension.video(url: url, response: response)
             let targetURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("flare-video-\(UUID().uuidString)")
                 .appendingPathExtension(fileExtension)
@@ -107,8 +108,14 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
 
             let exportDirectory = FileManager.default.temporaryDirectory
                 .appendingPathComponent("flare-file-\(UUID().uuidString)", isDirectory: true)
+            let sourceName = fileName.trimmedNonEmpty
+                ?? response?.suggestedFilename?.trimmedNonEmpty
+                ?? url.lastPathComponent.trimmedNonEmpty
+                ?? "file"
             let exportURL = exportDirectory
-                .appendingPathComponent(Self.safeFileName(fileName, fallbackURL: url, response: response))
+                .appendingPathComponent(
+                    MediaFileNamePolicy.shared.safeDownloadFileName(value: sourceName, fallback: "file")
+                )
 
             do {
                 try FileManager.default.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
@@ -142,46 +149,11 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         }
     }
 
-    nonisolated private static func videoFileExtension(from url: URL, response: URLResponse?) -> String {
-        let pathExtension = url.pathExtension.lowercased()
-        if !pathExtension.isEmpty, pathExtension != "m3u8" {
-            return pathExtension
-        }
-
-        switch response?.mimeType?.lowercased() {
-        case "video/quicktime":
-            return "mov"
-        case "video/webm":
-            return "webm"
-        case "video/x-m4v":
-            return "m4v"
-        default:
-            return "mp4"
-        }
-    }
-
     nonisolated private static func isSuccessfulHTTPResponse(_ response: URLResponse?) -> Bool {
         guard let response = response as? HTTPURLResponse else {
             return true
         }
         return (200..<300).contains(response.statusCode)
-    }
-
-    nonisolated private static func safeFileName(_ fileName: String, fallbackURL: URL, response: URLResponse?) -> String {
-        let sourceName = fileName.trimmedNonEmpty
-            ?? response?.suggestedFilename?.trimmedNonEmpty
-            ?? fallbackURL.lastPathComponent.trimmedNonEmpty
-            ?? "file"
-        let safeName = sourceName.map { character -> Character in
-            if character == "/" ||
-                character == "\\" ||
-                character.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }) {
-                return "_"
-            }
-            return character
-        }
-        let value = String(safeName).trimmedNonEmpty
-        return value ?? "file"
     }
 
     private func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {

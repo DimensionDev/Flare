@@ -114,6 +114,7 @@ import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -128,7 +129,6 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.getFileName
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -193,9 +193,10 @@ internal fun StatusMediaScreen(
         toAltText = toAltText,
         uriHandler = uriHandler,
         fileName = { media ->
-            media.getFileName(
+            MediaFileNamePolicy.statusMediaFileName(
                 statusKey = statusKey.toString(),
                 userHandle = status?.user?.handle?.canonical ?: "unknown",
+                media = media,
             )
         },
         status = status,

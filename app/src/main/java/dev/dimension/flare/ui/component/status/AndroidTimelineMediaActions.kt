@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
@@ -29,8 +30,9 @@ internal fun ProvideAndroidTimelineMediaActions(content: @Composable () -> Unit)
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     val downloadManager = koinInject<AndroidDownloadManager>()
+    val mediaLinkLabel = stringResource(R.string.media_menu_media_link)
     val config =
-        remember(context, clipboard, scope, downloadManager) {
+        remember(context, clipboard, scope, downloadManager, mediaLinkLabel) {
             TimelineMediaActionConfig(
                 showShareImage = true,
                 handler =
@@ -70,7 +72,7 @@ internal fun ProvideAndroidTimelineMediaActions(content: @Composable () -> Unit)
                                     clipboard.setClipEntry(
                                         ClipEntry(
                                             ClipData.newRawUri(
-                                                context.getString(R.string.media_menu_media_link),
+                                                mediaLinkLabel,
                                                 media.url.toUri(),
                                             ),
                                         ),

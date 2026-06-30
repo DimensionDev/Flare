@@ -285,6 +285,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     private static let maxVisibleMediaCount = 9
 
     var onMediaClicked: ((UiMedia, Int) -> Void)?
+    var onMediaMenuAction: ((UiMedia, TimelineMediaMenuAction) -> Void)?
 
     private let grid = UIView()
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
@@ -438,6 +439,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
             cell.onTap = { [weak self] index in
                 self?.handleCellTap(index: index)
             }
+            cell.onMenuAction = { [weak self] index, action in
+                self?.handleCellMenuAction(index: index, action: action)
+            }
             cellPool.append(cell)
             grid.addSubview(cell)
         }
@@ -448,7 +452,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
                 grid.addSubview(cell)
             }
             cell.isHidden = false
-            cell.configure(media: item, index: index)
+            cell.configure(media: item, index: index, showsDownloadAll: items.count > 1)
         }
         if visibleCount < cellPool.count {
             for cell in cellPool[visibleCount..<cellPool.count] {
@@ -632,6 +636,12 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         onMediaClicked?(items[index], index)
     }
 
+    private func handleCellMenuAction(index: Int, action: TimelineMediaMenuAction) {
+        if sensitive, isBlurred { return }
+        guard items.indices.contains(index) else { return }
+        onMediaMenuAction?(items[index], action)
+    }
+
     private var visibleItemCount: Int {
         min(items.count, Self.maxVisibleMediaCount)
     }
@@ -718,13 +728,15 @@ private extension Int {
     }
 }
 
-private final class MediaGridCellView: UIView {
+private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate {
     var onTap: ((Int) -> Void)?
+    var onMenuAction: ((Int, TimelineMediaMenuAction) -> Void)?
 
     private let mediaView = MediaUIView()
     private var altButton: AltTextButton?
     private var media: UiMedia?
     private var index: Int = 0
+    private var showsDownloadAll = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -741,14 +753,16 @@ private final class MediaGridCellView: UIView {
         let tap = UITapGestureRecognizer(target: self, action: #selector(onCellTapped))
         isUserInteractionEnabled = true
         addGestureRecognizer(tap)
+        addInteraction(UIContextMenuInteraction(delegate: self))
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func configure(media: UiMedia, index: Int) {
+    func configure(media: UiMedia, index: Int, showsDownloadAll: Bool) {
         tag = index
         self.index = index
         self.media = media
+        self.showsDownloadAll = showsDownloadAll
         mediaView.set(media: media, cornerRadius: 0)
         if let altText = media.description_, !altText.isEmpty {
             let button: AltTextButton
@@ -796,6 +810,63 @@ private final class MediaGridCellView: UIView {
         )
     }
 
+    func contextMenuInteraction(
+        _ interaction: UIContextMenuInteraction,
+        configurationForMenuAtLocation location: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard media != nil, onMenuAction != nil else {
+            return nil
+        }
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            self?.contextMenu() ?? UIMenu()
+        }
+    }
+
+    private func contextMenu() -> UIMenu {
+        guard let media else {
+            return UIMenu()
+        }
+        var actions: [UIAction] = [
+            UIAction(
+                title: String(localized: "media_menu_download", bundle: .main),
+                image: UIImage(fontAwesome: .download)
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.onMenuAction?(self.index, .download)
+            }
+        ]
+        if showsDownloadAll {
+            actions.append(UIAction(
+                title: String(localized: "media_menu_download_all", bundle: .main),
+                image: UIImage(fontAwesome: .download)
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.onMenuAction?(self.index, .downloadAll)
+            })
+        }
+        if case .image = onEnum(of: media) {
+            actions.append(
+                UIAction(
+                    title: String(localized: "media_menu_share_image", bundle: .main),
+                    image: UIImage(fontAwesome: .shareNodes)
+                ) { [weak self] _ in
+                    guard let self else { return }
+                    self.onMenuAction?(self.index, .shareImage)
+                }
+            )
+        }
+        actions.append(
+            UIAction(
+                title: String(localized: "media_menu_copy_link", bundle: .main),
+                image: UIImage(systemName: "doc.on.doc")
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.onMenuAction?(self.index, .copyLink)
+            }
+        )
+        return UIMenu(children: actions)
+    }
+
     @objc private func onCellTapped() {
         onTap?(tag)
     }
@@ -837,6 +908,7 @@ private final class AltTextButton: UIButton {
 // is off, renders a show-media button; after tapping, shows the grid.
 final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     var onMediaClicked: ((UiMedia, Int) -> Void)?
+    var onMediaMenuAction: ((UiMedia, TimelineMediaMenuAction) -> Void)?
     var onLocalHeightInvalidated: (() -> Void)?
 
     private let grid = StatusMediaUIView()
@@ -905,6 +977,9 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         NSLayoutConstraint.activate(showButtonConstraints)
         grid.onMediaClicked = { [weak self] media, index in
             self?.onMediaClicked?(media, index)
+        }
+        grid.onMediaMenuAction = { [weak self] media, action in
+            self?.onMediaMenuAction?(media, action)
         }
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }

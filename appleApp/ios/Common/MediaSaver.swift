@@ -12,51 +12,126 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
     private override init() {}
     
     static let shared = MediaSaver()
-    private var pendingFileExportDirectories: [ObjectIdentifier: URL] = [:]
-    
-    func saveImage(url: String, customHeaders: [String: String]? = nil) {
-        if let remoteUrl = URL(string: url) {
-            saveRemoteOriginalDataToPhotos(from: remoteUrl, customHeaders: customHeaders)
+    private var pendingFileExports: [ObjectIdentifier: PendingFileExport] = [:]
+
+    nonisolated static func showPreparingMedia() {
+        showPreparingMediaNotification()
+    }
+
+    func showDownloadStarted() {
+        showDownloadStarted(mediaType: .file)
+    }
+
+    func showBatchSaveResult(success: Bool) {
+        showSaveResult(success: success, mediaType: .photoAlbum)
+    }
+
+    func saveImage(
+        url: String,
+        customHeaders: [String: String]? = nil,
+        showsDownloadStarted: Bool = true,
+        showsSaveResult: Bool = true,
+        completion: (@Sendable (Bool) -> Void)? = nil
+    ) {
+        guard let remoteUrl = URL(string: url) else {
+            finishSave(success: false, mediaType: .image, showsSaveResult: showsSaveResult, completion: completion)
+            return
         }
+        if showsDownloadStarted {
+            showDownloadStarted(mediaType: .image)
+        }
+        saveRemoteOriginalDataToPhotos(
+            from: remoteUrl,
+            customHeaders: customHeaders,
+            showsSaveResult: showsSaveResult,
+            completion: completion
+        )
     }
 
     func saveImage(_ image: UIImage) {
         saveImageToPhotos(image)
     }
 
-    func saveVideo(url: String, customHeaders: [String: String]? = nil) {
+    func saveVideo(
+        url: String,
+        customHeaders: [String: String]? = nil,
+        showsDownloadStarted: Bool = true,
+        showsSaveResult: Bool = true,
+        completion: (@Sendable (Bool) -> Void)? = nil
+    ) {
         guard let remoteUrl = URL(string: url),
               remoteUrl.pathExtension.lowercased() != "m3u8" else {
-            showSaveResult(success: false, mediaType: .video)
+            finishSave(success: false, mediaType: .video, showsSaveResult: showsSaveResult, completion: completion)
             return
+        }
+
+        if showsDownloadStarted {
+            showDownloadStarted(mediaType: .video)
         }
 
         if let cachedFileURL = completeCachedVideoFileURL(for: remoteUrl) {
-            saveVideoFileToPhotos(cachedFileURL)
+            saveVideoFileToPhotos(
+                cachedFileURL,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
             return
         }
 
-        showDownloadStarted(mediaType: .video)
-        downloadRemoteVideoToPhotos(from: remoteUrl, customHeaders: customHeaders)
+        downloadRemoteVideoToPhotos(
+            from: remoteUrl,
+            customHeaders: customHeaders,
+            showsSaveResult: showsSaveResult,
+            completion: completion
+        )
     }
 
-    func saveFile(url: String, fileName: String, customHeaders: [String: String]? = nil) {
+    func saveFile(
+        url: String,
+        fileName: String,
+        customHeaders: [String: String]? = nil,
+        showsDownloadStarted: Bool = true,
+        showsSaveResult: Bool = true,
+        completion: (@Sendable (Bool) -> Void)? = nil
+    ) {
         guard let remoteUrl = URL(string: url) else {
-            showSaveResult(success: false, mediaType: .file)
+            finishSave(success: false, mediaType: .file, showsSaveResult: showsSaveResult, completion: completion)
             return
         }
 
-        showDownloadStarted(mediaType: .file)
-        downloadRemoteFileForExport(from: remoteUrl, fileName: fileName, customHeaders: customHeaders)
+        if showsDownloadStarted {
+            showDownloadStarted(mediaType: .file)
+        }
+        downloadRemoteFileForExport(
+            from: remoteUrl,
+            fileName: fileName,
+            customHeaders: customHeaders,
+            showsSaveResult: showsSaveResult,
+            completion: completion
+        )
     }
 
-    private func saveRemoteOriginalDataToPhotos(from url: URL, customHeaders: [String: String]?) {
+    private func saveRemoteOriginalDataToPhotos(
+        from url: URL,
+        customHeaders: [String: String]?,
+        showsSaveResult: Bool,
+        completion: (@Sendable (Bool) -> Void)?
+    ) {
         KingfisherManager.shared.downloader.downloadImage(with: url, options: kingfisherOptions(customHeaders: customHeaders), progressBlock: nil) { result in
             switch result {
             case .success(let v):
-                self.saveOriginalDataToPhotos(v.originalData)
+                self.saveOriginalDataToPhotos(
+                    v.originalData,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             case .failure:
-                self.showSaveResult(success: false)
+                self.finishSave(
+                    success: false,
+                    mediaType: .image,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             }
         }
     }
@@ -70,7 +145,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         return URL(fileURLWithPath: filePath)
     }
 
-    private func downloadRemoteVideoToPhotos(from url: URL, customHeaders: [String: String]?) {
+    private func downloadRemoteVideoToPhotos(
+        from url: URL,
+        customHeaders: [String: String]?,
+        showsSaveResult: Bool,
+        completion: (@Sendable (Bool) -> Void)?
+    ) {
         var request = URLRequest(url: url)
         customHeaders?.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
@@ -78,7 +158,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
 
         URLSession.shared.downloadTask(with: request) { temporaryURL, response, error in
             guard error == nil, let temporaryURL else {
-                self.showSaveResult(success: false, mediaType: .video)
+                self.finishSave(
+                    success: false,
+                    mediaType: .video,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
                 return
             }
 
@@ -89,14 +174,30 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
 
             do {
                 try FileManager.default.copyItem(at: temporaryURL, to: targetURL)
-                self.saveVideoFileToPhotos(targetURL, removeWhenDone: true)
+                self.saveVideoFileToPhotos(
+                    targetURL,
+                    removeWhenDone: true,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             } catch {
-                self.showSaveResult(success: false, mediaType: .video)
+                self.finishSave(
+                    success: false,
+                    mediaType: .video,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             }
         }.resume()
     }
 
-    private func downloadRemoteFileForExport(from url: URL, fileName: String, customHeaders: [String: String]?) {
+    private func downloadRemoteFileForExport(
+        from url: URL,
+        fileName: String,
+        customHeaders: [String: String]?,
+        showsSaveResult: Bool,
+        completion: (@Sendable (Bool) -> Void)?
+    ) {
         var request = URLRequest(url: url)
         customHeaders?.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
@@ -106,7 +207,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             guard error == nil,
                   let temporaryURL,
                   Self.isSuccessfulHTTPResponse(response) else {
-                self.showSaveResult(success: false, mediaType: .file)
+                self.finishSave(
+                    success: false,
+                    mediaType: .file,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
                 return
             }
 
@@ -124,20 +230,39 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             do {
                 try FileManager.default.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
                 try FileManager.default.copyItem(at: temporaryURL, to: exportURL)
-                self.presentFileExportPicker(fileURL: exportURL, cleanupDirectory: exportDirectory)
+                self.presentFileExportPicker(
+                    fileURL: exportURL,
+                    cleanupDirectory: exportDirectory,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             } catch {
                 try? FileManager.default.removeItem(at: exportDirectory)
-                self.showSaveResult(success: false, mediaType: .file)
+                self.finishSave(
+                    success: false,
+                    mediaType: .file,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             }
         }.resume()
     }
 
-    nonisolated private func saveOriginalDataToPhotos(_ data: Data) {
+    nonisolated private func saveOriginalDataToPhotos(
+        _ data: Data,
+        showsSaveResult: Bool = true,
+        completion: (@Sendable (Bool) -> Void)? = nil
+    ) {
         PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
             request.addResource(with: .photo, data: data, options: nil)
         } completionHandler: { success, error in
-            self.showSaveResult(success: success && error == nil)
+            self.finishSave(
+                success: success && error == nil,
+                mediaType: .image,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
         }
     }
 
@@ -149,7 +274,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         }
     }
 
-    nonisolated private func saveVideoFileToPhotos(_ fileURL: URL, removeWhenDone: Bool = false) {
+    nonisolated private func saveVideoFileToPhotos(
+        _ fileURL: URL,
+        removeWhenDone: Bool = false,
+        showsSaveResult: Bool = true,
+        completion: (@Sendable (Bool) -> Void)? = nil
+    ) {
         PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
             request.addResource(with: .video, fileURL: fileURL, options: nil)
@@ -157,7 +287,12 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             if removeWhenDone {
                 try? FileManager.default.removeItem(at: fileURL)
             }
-            self.showSaveResult(success: success && error == nil, mediaType: .video)
+            self.finishSave(
+                success: success && error == nil,
+                mediaType: .video,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
         }
     }
 
@@ -179,6 +314,18 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             }
             return request
         })]
+    }
+
+    nonisolated private func finishSave(
+        success: Bool,
+        mediaType: MediaSaveType = .image,
+        showsSaveResult: Bool,
+        completion: (@Sendable (Bool) -> Void)?
+    ) {
+        if showsSaveResult {
+            showSaveResult(success: success, mediaType: mediaType)
+        }
+        completion?(success)
     }
     
     nonisolated private func showSaveResult(success: Bool, mediaType: MediaSaveType = .image) {
@@ -203,36 +350,69 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
         }
     }
 
-    nonisolated private func presentFileExportPicker(fileURL: URL, cleanupDirectory: URL) {
+    nonisolated private static func showPreparingMediaNotification() {
+        DispatchQueue.main.async {
+            Drops.show(
+                .init(
+                    title: String(localized: "notification_prepare_media_started", defaultValue: "Preparing media"),
+                    icon: .init(fontAwesome: FontAwesomeIcon.photoFilm)
+                )
+            )
+        }
+    }
+
+    nonisolated private func presentFileExportPicker(
+        fileURL: URL,
+        cleanupDirectory: URL,
+        showsSaveResult: Bool,
+        completion: (@Sendable (Bool) -> Void)?
+    ) {
         Task { @MainActor in
             guard let presenter = Self.topViewController() else {
                 try? FileManager.default.removeItem(at: cleanupDirectory)
-                self.showSaveResult(success: false, mediaType: .file)
+                self.finishSave(
+                    success: false,
+                    mediaType: .file,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
                 return
             }
 
             let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
             picker.delegate = self
-            self.pendingFileExportDirectories[ObjectIdentifier(picker)] = cleanupDirectory
+            self.pendingFileExports[ObjectIdentifier(picker)] =
+                PendingFileExport(
+                    cleanupDirectory: cleanupDirectory,
+                    showsSaveResult: showsSaveResult,
+                    completion: completion
+                )
             presenter.present(picker, animated: true)
         }
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        cleanupFileExport(for: controller)
-        showSaveResult(success: true, mediaType: .file)
+        let pendingExport = cleanupFileExport(for: controller)
+        finishSave(
+            success: true,
+            mediaType: .file,
+            showsSaveResult: pendingExport?.showsSaveResult ?? true,
+            completion: pendingExport?.completion
+        )
     }
 
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        cleanupFileExport(for: controller)
+        let pendingExport = cleanupFileExport(for: controller)
+        pendingExport?.completion?(false)
     }
 
-    private func cleanupFileExport(for controller: UIDocumentPickerViewController) {
+    private func cleanupFileExport(for controller: UIDocumentPickerViewController) -> PendingFileExport? {
         let identifier = ObjectIdentifier(controller)
-        guard let cleanupDirectory = pendingFileExportDirectories.removeValue(forKey: identifier) else {
-            return
+        guard let pendingExport = pendingFileExports.removeValue(forKey: identifier) else {
+            return nil
         }
-        try? FileManager.default.removeItem(at: cleanupDirectory)
+        try? FileManager.default.removeItem(at: pendingExport.cleanupDirectory)
+        return pendingExport
     }
 
     private static func topViewController() -> UIViewController? {
@@ -259,10 +439,17 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
     }
 }
 
+private struct PendingFileExport {
+    let cleanupDirectory: URL
+    let showsSaveResult: Bool
+    let completion: (@Sendable (Bool) -> Void)?
+}
+
 private enum MediaSaveType {
     case image
     case video
     case file
+    case photoAlbum
 
     func title(success: Bool) -> String {
         switch self {
@@ -275,16 +462,23 @@ private enum MediaSaveType {
                 return String(localized: "notification_save_file_success", defaultValue: "Saved to Files")
             }
             return String(localized: "notification_save_file_error", defaultValue: "Failed to save file")
+        case .photoAlbum:
+            if success {
+                return String(localized: "notification_save_photo_album_success", defaultValue: "Saved to Photos")
+            }
+            return String(localized: "notification_save_file_error", defaultValue: "Failed to save file")
         }
     }
 
     var downloadStartedTitle: String {
         switch self {
         case .image:
-            return .init(localized: "notification_download_started")
+            return String(localized: "notification_download_file_started", defaultValue: "Download started")
         case .video:
             return .init(localized: "notification_download_video_started")
         case .file:
+            return String(localized: "notification_download_file_started", defaultValue: "Download started")
+        case .photoAlbum:
             return String(localized: "notification_download_file_started", defaultValue: "Download started")
         }
     }

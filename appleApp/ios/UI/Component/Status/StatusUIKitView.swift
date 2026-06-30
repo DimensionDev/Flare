@@ -800,6 +800,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     self.openURL?(url)
                 }
             }
+            mediaView.onMediaMenuAction = { media, action in
+                IOSTimelineMediaActions.handler(data, media, action)
+            }
             mediaView.onLocalHeightInvalidated = { [weak self] in
                 self?.notifyLocalHeightInvalidated()
             }

@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.screen.media
 import android.Manifest
 import android.content.ClipData
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -82,7 +81,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
@@ -116,6 +114,7 @@ import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
+import dev.dimension.flare.common.shareImageMedia
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
@@ -159,7 +158,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
-import java.io.File
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -199,6 +197,13 @@ internal fun StatusMediaScreen(
                 media = media,
             )
         },
+        fileNames = { medias ->
+            MediaFileNamePolicy.statusMediaFileNames(
+                statusKey = statusKey.toString(),
+                userHandle = status?.user?.handle?.canonical ?: "unknown",
+                medias = medias,
+            )
+        },
         status = status,
         surfaceBindingManager = surfaceBindingManager,
     )
@@ -217,6 +222,7 @@ internal fun MediaViewerScreen(
     toAltText: (UiMedia) -> Unit,
     uriHandler: UriHandler,
     fileName: (UiMedia) -> String,
+    fileNames: (List<UiMedia>) -> Map<String, UiMedia>,
     status: UiTimelineV2.Post? = null,
     surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
@@ -235,6 +241,7 @@ internal fun MediaViewerScreen(
             initialIndex = initialIndex,
             context = context,
             fileName = fileName,
+            fileNames = fileNames,
         )
     val pagerState =
         rememberPagerState(
@@ -801,6 +808,39 @@ internal fun MediaViewerScreen(
                         ),
                 )
                 state.medias.onSuccess { medias ->
+                    if (medias.size > 1) {
+                        ListItem(
+                            headlineContent = {
+                                Text(stringResource(id = R.string.media_menu_download_all))
+                            },
+                            leadingContent = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Download,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                                            if (!permissionState.status.isGranted) {
+                                                permissionState.launchPermissionRequest()
+                                            } else {
+                                                state.saveAll(medias)
+                                            }
+                                        } else {
+                                            state.saveAll(medias)
+                                        }
+                                        state.setShowSheet(false)
+                                    },
+                            colors =
+                                ListItemDefaults.colors(
+                                    containerColor = Color.Transparent,
+                                ),
+                        )
+                    }
+
                     val current = medias.getOrNull(state.currentPage)
                     if (current is UiMedia.Image) {
                         ListItem(
@@ -1373,6 +1413,7 @@ private fun mediaViewerPresenter(
     initialIndex: Int,
     context: Context,
     fileName: (UiMedia) -> String,
+    fileNames: (List<UiMedia>) -> Map<String, UiMedia>,
     scope: CoroutineScope = koinInject(),
     mediaDownloadManager: AndroidDownloadManager = koinInject(),
 ) = run {
@@ -1439,6 +1480,37 @@ private fun mediaViewerPresenter(
             }
         }
 
+        fun saveAll(data: List<UiMedia>) {
+            scope.launch {
+                withContext(Dispatchers.Main) {
+                    Toast
+                        .makeText(
+                            context,
+                            context.getString(R.string.media_download_started),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
+                val result =
+                    runCatching {
+                        mediaDownloadManager.downloadAllMedia(fileNames(data))
+                    }.getOrNull()
+                withContext(Dispatchers.Main) {
+                    Toast
+                        .makeText(
+                            context,
+                            context.getString(
+                                if (result != null && result.failedFileNames.isEmpty()) {
+                                    R.string.media_save_success
+                                } else {
+                                    R.string.media_save_fail
+                                },
+                            ),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
+            }
+        }
+
         fun shareMedia(data: UiMedia) {
             when (data) {
                 is UiMedia.Audio -> {
@@ -1451,46 +1523,11 @@ private fun mediaViewerPresenter(
 
                 is UiMedia.Image -> {
                     scope.launch {
-                        context.imageLoader.diskCache?.openSnapshot(data.url)?.use {
-                            val originFile = it.data.toFile()
-                            val targetFile =
-                                File(
-                                    context.cacheDir,
-                                    fileName(data),
-                                )
-                            originFile.copyTo(targetFile, overwrite = true)
-                            val uri =
-                                FileProvider.getUriForFile(
-                                    context,
-                                    context.packageName + ".provider",
-                                    targetFile,
-                                )
-                            val intent =
-                                Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    putExtra(Intent.EXTRA_STREAM, uri)
-                                    setDataAndType(
-                                        uri,
-                                        "image/*",
-                                    )
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                            context.startActivity(
-                                Intent.createChooser(
-                                    intent,
-                                    context.getString(R.string.media_menu_share_image),
-                                ),
-                            )
-                        } ?: run {
-                            withContext(Dispatchers.Main) {
-                                Toast
-                                    .makeText(
-                                        context,
-                                        context.getString(R.string.media_is_downloading),
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                            }
-                        }
+                        shareImageMedia(
+                            context = context,
+                            media = data,
+                            fileName = fileName(data),
+                        )
                     }
                 }
 

@@ -494,6 +494,7 @@ internal fun StatusMediasComponent(
             }
         }
         StatusMediaComponent(
+            post = item,
             data = item.images,
             onMediaClick = onMediaClick,
             sensitive = item.sensitive,

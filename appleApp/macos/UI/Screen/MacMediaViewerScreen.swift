@@ -1,5 +1,6 @@
 import AppKit
 import AVFoundation
+import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
@@ -169,8 +170,9 @@ struct MacMediaViewerScreen: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 0) {
                     ForEach(medias.indices, id: \.self) { index in
+                        let media = medias[index]
                         MacMediaViewerPage(
-                            media: medias[index],
+                            media: media,
                             isSelected: selectedIndex == index,
                             zoomScale: zoomBinding(for: index),
                             isPlaying: $isPlaying,
@@ -179,6 +181,26 @@ struct MacMediaViewerScreen: View {
                             playbackRate: $playbackRate
                         )
                         .frame(width: geometry.size.width, height: geometry.size.height)
+                        .contextMenu {
+                            MacMediaViewerContextMenu(
+                                media: media,
+                                showsDownloadAll: medias.count > 1,
+                                isSaving: isSavingSelectedMedia,
+                                isSharing: isSharingSelectedMedia,
+                                onDownload: {
+                                    saveMedia(media)
+                                },
+                                onDownloadAll: {
+                                    saveAllMedia()
+                                },
+                                onShareImage: {
+                                    shareMedia(media)
+                                },
+                                onCopyLink: {
+                                    copyMediaLink(media)
+                                }
+                            )
+                        }
                         .id(index)
                     }
                 }
@@ -335,7 +357,19 @@ struct MacMediaViewerScreen: View {
 
     private func saveSelectedMedia() {
         guard !isSavingSelectedMedia,
-              let source = selectedExportSource else {
+              let selectedMedia else {
+            return
+        }
+
+        saveMedia(selectedMedia)
+    }
+
+    private func saveMedia(_ media: any UiMedia) {
+        guard !isSavingSelectedMedia,
+              let source = MacMediaExportSource(
+                media: media,
+                shareContext: shareContext
+              ) else {
             return
         }
 
@@ -355,9 +389,48 @@ struct MacMediaViewerScreen: View {
         }
     }
 
+    private func saveAllMedia() {
+        guard !isSavingSelectedMedia,
+              medias.count > 1 else {
+            return
+        }
+
+        let mediaByFileName = mediaFileNames()
+        guard !mediaByFileName.isEmpty else {
+            return
+        }
+
+        isSavingSelectedMedia = true
+        Task {
+            do {
+                _ = try await MacMediaFileExporter.saveAll(
+                    mediaByFileName: mediaByFileName
+                )
+            } catch {
+                exportAlert = MacMediaExportAlert(
+                    title: "Save Failed",
+                    message: error.localizedDescription
+                )
+            }
+            isSavingSelectedMedia = false
+        }
+    }
+
     private func shareSelectedMedia() {
         guard !isSharingSelectedMedia,
-              let source = selectedExportSource,
+              let selectedMedia else {
+            return
+        }
+
+        shareMedia(selectedMedia)
+    }
+
+    private func shareMedia(_ media: any UiMedia) {
+        guard !isSharingSelectedMedia,
+              let source = MacMediaExportSource(
+                media: media,
+                shareContext: shareContext
+              ),
               source.supportsSharing else {
             return
         }
@@ -384,6 +457,22 @@ struct MacMediaViewerScreen: View {
         }
     }
 
+    private func copyMediaLink(_ media: any UiMedia) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(media.url, forType: .string)
+    }
+
+    private func mediaFileNames() -> [String: any UiMedia] {
+        if let statusKey = shareContext?.statusKey {
+            return MediaFileNamePolicy.shared.statusMediaFileNames(
+                statusKey: statusKey,
+                userHandle: shareContext?.userHandle ?? "unknown",
+                medias: medias
+            )
+        }
+        return MediaFileNamePolicy.shared.rawMediaFileNames(medias: medias)
+    }
+
     private func clampedZoomScale(_ scale: CGFloat) -> CGFloat {
         min(max(scale, macMediaMinimumZoomScale), macMediaMaximumZoomScale)
     }
@@ -393,6 +482,58 @@ struct MacMediaViewerScreen: View {
             return 0
         }
         return min(max(index, 0), count - 1)
+    }
+}
+
+private struct MacMediaViewerContextMenu: View {
+    let media: any UiMedia
+    let showsDownloadAll: Bool
+    let isSaving: Bool
+    let isSharing: Bool
+    let onDownload: () -> Void
+    let onDownloadAll: () -> Void
+    let onShareImage: () -> Void
+    let onCopyLink: () -> Void
+
+    var body: some View {
+        Button(action: onDownload) {
+            Label {
+                Text("media_menu_download", bundle: .main)
+            } icon: {
+                Image(systemName: "square.and.arrow.down")
+            }
+        }
+        .disabled(isSaving)
+
+        if showsDownloadAll {
+            Button(action: onDownloadAll) {
+                Label {
+                    Text("media_menu_download_all", bundle: .main)
+                } icon: {
+                    Image(systemName: "square.and.arrow.down")
+                }
+            }
+            .disabled(isSaving)
+        }
+
+        if case .image = onEnum(of: media) {
+            Button(action: onShareImage) {
+                Label {
+                    Text("media_menu_share_image", bundle: .main)
+                } icon: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+            .disabled(isSharing)
+        }
+
+        Button(action: onCopyLink) {
+            Label {
+                Text("media_menu_copy_link", bundle: .main)
+            } icon: {
+                Image(systemName: "doc.on.doc")
+            }
+        }
     }
 }
 

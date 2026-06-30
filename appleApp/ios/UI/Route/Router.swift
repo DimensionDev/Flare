@@ -3,6 +3,7 @@ import KotlinSharedUI
 import LazyPager
 import Combine
 import FlareAppleCore
+import FlareAppleUI
 
 struct Router<Root: View>: View {
     @Environment(\.openURL) private var openURL
@@ -39,6 +40,7 @@ struct Router<Root: View>: View {
                 )
             }
         }
+        .environment(\.timelineMediaActionHandler, IOSTimelineMediaActions.handler)
         .sheet(item: $sheet) { route in
             NavigationStack {
                 route.view(

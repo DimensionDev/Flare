@@ -27,6 +27,7 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.DesktopKoinApplication
 import dev.dimension.flare.ui.component.PlatformTitleBar
 import dev.dimension.flare.ui.component.PlatformWindow
+import dev.dimension.flare.ui.component.status.ProvideDesktopTimelineMediaActions
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideComposeWindow
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
@@ -125,9 +126,11 @@ fun main(args: Array<String>) {
                     }
                 FlareTheme {
                     ProvideComposeWindow {
-                        FlareApp(
-                            backButtonState = backButtonState,
-                        )
+                        ProvideDesktopTimelineMediaActions {
+                            FlareApp(
+                                backButtonState = backButtonState,
+                            )
+                        }
                     }
                     PlatformTitleBar {
                         if (backButtonState.canGoBack) {

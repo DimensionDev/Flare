@@ -8,23 +8,53 @@ struct OriginalImageShareFile {
         url: String,
         customHeaders: [String: String]?,
         statusKey: String? = nil,
-        userHandle: String? = nil
+        userHandle: String? = nil,
+        onPreparingNeeded: (@Sendable () -> Void)? = nil
     ) async throws -> URL {
         let imageURL = try makeImageURL(url)
+        if let cachedFileURL = cachedImageFileURL(for: imageURL) {
+            let data = try Data(contentsOf: cachedFileURL)
+            return try makeShareFile(
+                data: data,
+                url: imageURL,
+                statusKey: statusKey,
+                userHandle: userHandle
+            )
+        }
+
+        onPreparingNeeded?()
         let result = try await KingfisherManager.shared.downloader.downloadImage(
             with: imageURL,
             options: kingfisherOptions(customHeaders: customHeaders)
         )
-        let extensionName = AppleMediaFileExtension.image(url: imageURL, data: result.originalData)
-        let fileName = makeFileName(
+        return try makeShareFile(
+            data: result.originalData,
             url: imageURL,
+            statusKey: statusKey,
+            userHandle: userHandle
+        )
+    }
+
+    private static func cachedImageFileURL(for url: URL) -> URL? {
+        KingfisherManager.shared.cache.cacheFileURLIfOnDisk(forKey: url.cacheKey)
+    }
+
+    private static func makeShareFile(
+        data: Data,
+        url: URL,
+        statusKey: String?,
+        userHandle: String?
+    ) throws -> URL {
+        let extensionName = AppleMediaFileExtension.image(url: url, data: data)
+        let fileName = makeFileName(
+            url: url,
             statusKey: statusKey,
             userHandle: userHandle,
             extensionName: extensionName
         )
         let fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(fileName)
-        try result.originalData.write(to: fileURL, options: .atomic)
+        try data.write(to: fileURL, options: .atomic)
         return fileURL
     }
 

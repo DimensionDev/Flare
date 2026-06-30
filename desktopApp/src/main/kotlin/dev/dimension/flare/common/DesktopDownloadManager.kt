@@ -2,6 +2,7 @@ package dev.dimension.flare.common
 
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.media_download_started
 import dev.dimension.flare.media_save_fail
 import dev.dimension.flare.media_save_success
 import dev.dimension.flare.ui.component.ComposeInAppNotification
@@ -50,6 +51,9 @@ internal class DesktopDownloadManager(
         }
 
         try {
+            if (notify) {
+                inAppNotification.message(Res.string.media_download_started)
+            }
             client
                 .prepareGet(url) {
                     customHeaders?.forEach { (key, value) ->

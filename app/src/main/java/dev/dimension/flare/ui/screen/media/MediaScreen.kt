@@ -56,5 +56,6 @@ internal fun RawMediaScreen(
         toAltText = toAltText,
         uriHandler = uriHandler,
         fileName = MediaFileNamePolicy::rawMediaFileName,
+        fileNames = MediaFileNamePolicy::rawMediaFileNames,
     )
 }

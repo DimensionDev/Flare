@@ -359,6 +359,7 @@
     <string name="settings_accounts_remove">移除</string>
     <string name="settings_accounts_remove_confirm">您确定要从此设备移除账户 %1$s 吗？</string>
     <string name="media_menu_save">保存图片</string>
+    <string name="media_menu_download_all">下载全部</string>
     <string name="media_menu_share_image">分享图片</string>
     <string name="media_menu_copy_link">复制链接</string>
     <string name="media_menu_media_link">媒体链接</string>
@@ -366,7 +367,8 @@
     <string name="status_menu_share_via_fixvx">通过 Fixvx 分享</string>
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
-    <string name="media_download_started">缓存尚未准备好，已开始下载。</string>
+    <string name="media_download_started">已开始下载。</string>
+    <string name="media_prepare_started">正在准备媒体...</string>
     <string name="media_alt_text">替代文本</string>
     <string name="media_is_downloading">媒体仍在下载中。请稍后再试。</string>
     <string name="settings_side_panel_empty">默认情况下，侧边栏遵循当前账户的平台。</string>

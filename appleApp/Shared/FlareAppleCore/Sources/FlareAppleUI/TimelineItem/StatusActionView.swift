@@ -158,11 +158,11 @@ public struct StatusActionView: View {
                             }
                         } else {
                             StatusActionIcon(icon: group.displayItem.icon)
-                                .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
+                                .frame(minWidth: StatusActionHitArea.labelContentHeight(fontSize: fontSize))
                                 .contentShape(Rectangle())
                         }
                     }
-                    .statusActionContentPadding(isExpanded: true)
+                    .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
                 }
                 .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
@@ -234,7 +234,7 @@ public struct StatusActionItemView: View {
                     StatusActionIcon(icon: data.icon)
                 }
             }
-            .statusActionContentPadding(isExpanded: !useText)
+            .statusActionContentPadding(isExpanded: !useText, fontSize: fontSize)
         }
         .optionalForegroundStyle(data.color?.swiftColor)
         .buttonStyle(.plain)
@@ -247,6 +247,10 @@ public struct StatusActionItemView: View {
 private enum StatusActionHitArea {
     static let horizontalInset: CGFloat = 6
     static let verticalInset: CGFloat = 4
+
+    static func labelContentHeight(fontSize: CGFloat) -> CGFloat {
+        fontSize + 2
+    }
 }
 
 #if os(macOS)
@@ -288,9 +292,10 @@ private extension View {
     }
 
     @ViewBuilder
-    func statusActionContentPadding(isExpanded: Bool) -> some View {
+    func statusActionContentPadding(isExpanded: Bool, fontSize: CGFloat) -> some View {
         if isExpanded {
             self
+                .frame(minHeight: StatusActionHitArea.labelContentHeight(fontSize: fontSize))
                 .padding(.horizontal, StatusActionHitArea.horizontalInset)
                 .padding(.vertical, StatusActionHitArea.verticalInset)
                 .contentShape(Rectangle())

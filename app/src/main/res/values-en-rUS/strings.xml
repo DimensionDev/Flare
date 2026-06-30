@@ -337,6 +337,7 @@
     <string name="settings_accounts_remove_confirm">Are you sure you want to remove account %1$s from this device?</string>
 
     <string name="media_menu_save">Save image</string>
+    <string name="media_menu_download_all">Download all</string>
     <string name="media_menu_share_image">Share image</string>
     <string name="media_menu_copy_link">Copy link</string>
     <string name="media_menu_media_link">Media link</string>
@@ -344,7 +345,8 @@
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved to Downloads</string>
     <string name="media_save_fail">Failed to save</string>
-    <string name="media_download_started">Cache is not ready. Download started.</string>
+    <string name="media_download_started">Download started.</string>
+    <string name="media_prepare_started">Preparing media...</string>
     <string name="media_alt_text">Alt text</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 

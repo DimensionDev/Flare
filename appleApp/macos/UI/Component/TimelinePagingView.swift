@@ -1,3 +1,5 @@
+import AppKit
+import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
@@ -47,6 +49,7 @@ struct TimelinePagingView: View {
                 }
             }
             .environment(\.timelineMediaOpenAction, timelineMediaOpenAction)
+            .environment(\.timelineMediaActionHandler, timelineMediaActionHandler)
         }
     }
 
@@ -89,6 +92,55 @@ struct TimelinePagingView: View {
                 openWindow: openWindow
             )
         }
+    }
+
+    private var timelineMediaActionHandler: TimelineMediaActionHandler {
+        { post, media, action in
+            switch action {
+            case .download:
+                guard let source = MacMediaExportSource(media: media, shareContext: post.macShareContext) else { return }
+                Task {
+                    _ = try? await MacMediaFileExporter.save(source: source)
+                }
+            case .downloadAll:
+                let mediaByFileName = MediaFileNamePolicy.shared.statusMediaFileNames(
+                    statusKey: post.statusKey.description(),
+                    userHandle: post.user?.handle.canonical ?? "unknown",
+                    medias: Array(post.images)
+                )
+                Task {
+                    _ = try? await MacMediaFileExporter.saveAll(mediaByFileName: mediaByFileName)
+                }
+            case .shareImage:
+                guard let source = MacMediaExportSource(media: media, shareContext: post.macShareContext),
+                      source.supportsSharing else {
+                    return
+                }
+                Task {
+                    guard let fileURL = try? await MacMediaFileExporter.makeShareFile(source: source) else {
+                        return
+                    }
+                    try? await MainActor.run {
+                        try MacMediaFileExporter.presentSharePicker(
+                            fileURL: fileURL,
+                            relativeTo: NSApp.keyWindow?.contentView
+                        )
+                    }
+                }
+            case .copyLink:
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(media.url, forType: .string)
+            }
+        }
+    }
+}
+
+private extension UiTimelineV2.Post {
+    var macShareContext: MacMediaShareContext {
+        MacMediaShareContext(
+            statusKey: statusKey.description(),
+            userHandle: user?.handle.canonical
+        )
     }
 }
 

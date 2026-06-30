@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">敏感媒体</string>
     <string name="show_media">显示媒体</string>
     <string name="hide_media">隐藏媒体</string>
+    <string name="media_menu_download">下载</string>
+    <string name="media_menu_download_all">下载全部</string>
+    <string name="media_menu_share_image">分享图片</string>
+    <string name="media_menu_copy_link">复制链接</string>
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击以重新登录</string>
     <string name="login_expired_relogin">重新登录</string>

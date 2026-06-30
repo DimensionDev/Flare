@@ -31,9 +31,16 @@ import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
+import compose.icons.fontawesomeicons.solid.Copy
+import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.EyeSlash
+import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.common.SystemUtils
 import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_menu_copy_link
+import dev.dimension.flare.compose.ui.media_menu_download
+import dev.dimension.flare.compose.ui.media_menu_download_all
+import dev.dimension.flare.compose.ui.media_menu_share_image
 import dev.dimension.flare.compose.ui.status_sensitive_media
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AdaptiveGrid
@@ -43,12 +50,16 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformFlyoutContainer
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -58,6 +69,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun StatusMediaComponent(
+    post: UiTimelineV2.Post,
     data: ImmutableList<UiMedia>,
     onMediaClick: (UiMedia) -> Unit,
     sensitive: Boolean,
@@ -65,6 +77,7 @@ internal fun StatusMediaComponent(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalTimelineAppearance.current
+    val mediaActionConfig = LocalTimelineMediaActionConfig.current
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
@@ -75,6 +88,9 @@ internal fun StatusMediaComponent(
         AdaptiveGrid(
             content = {
                 data.fastForEach { media ->
+                    var isMenuExpanded by remember(media.url) {
+                        mutableStateOf(false)
+                    }
                     Box {
                         CompositionLocalProvider(
                             LocalTimelineAppearance provides
@@ -87,11 +103,9 @@ internal fun StatusMediaComponent(
                                         },
                                 ),
                         ) {
-                            MediaItem(
-                                media = media,
-                                modifier =
-                                    Modifier
-                                        .clipToBounds()
+                            val mediaModifier =
+                                Modifier
+                                    .clipToBounds()
 //                                .sharedElement(
 //                                    rememberSharedContentState(
 //                                        when (media) {
@@ -103,12 +117,52 @@ internal fun StatusMediaComponent(
 //                                    ),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                )
-                                        .pointerHoverIcon(PointerIcon.Hand)
-                                        .clickable {
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                            if (mediaActionConfig != null && !hideSensitive) {
+                                TimelineMediaMenuBox(
+                                    expanded = isMenuExpanded,
+                                    onExpandedChange = {
+                                        isMenuExpanded = it
+                                    },
+                                    onClick = {
+                                        onMediaClick(media)
+                                    },
+                                    modifier = mediaModifier,
+                                    menu = {
+                                        TimelineMediaDropdownMenu(
+                                            expanded = isMenuExpanded,
+                                            media = media,
+                                            showDownloadAll = data.size > 1,
+                                            mediaActionConfig = mediaActionConfig,
+                                            onDismissRequest = {
+                                                isMenuExpanded = false
+                                            },
+                                            onAction = { action ->
+                                                isMenuExpanded = false
+                                                mediaActionConfig.handler.handle(
+                                                    post = post,
+                                                    media = media,
+                                                    action = action,
+                                                )
+                                            },
+                                        )
+                                    },
+                                ) {
+                                    MediaItem(
+                                        media = media,
+                                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                                    )
+                                }
+                            } else {
+                                MediaItem(
+                                    media = media,
+                                    modifier =
+                                        mediaModifier.clickable {
                                             onMediaClick(media)
                                         },
-                                keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                            )
+                                    keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                                )
+                            }
                         }
                         if (!media.description.isNullOrEmpty()) {
                             PlatformFlyoutContainer(
@@ -233,6 +287,93 @@ internal fun StatusMediaComponent(
             }
         }
     }
+}
+
+@Composable
+private fun TimelineMediaDropdownMenu(
+    expanded: Boolean,
+    media: UiMedia,
+    showDownloadAll: Boolean,
+    mediaActionConfig: TimelineMediaActionConfig,
+    onDismissRequest: () -> Unit,
+    onAction: (TimelineMediaMenuAction) -> Unit,
+) {
+    PlatformDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        TimelineMediaMenuItem(
+            label = stringResource(Res.string.media_menu_download),
+            icon = {
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            },
+            onClick = {
+                onAction(TimelineMediaMenuAction.Download)
+            },
+        )
+        if (showDownloadAll) {
+            TimelineMediaMenuItem(
+                label = stringResource(Res.string.media_menu_download_all),
+                icon = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Download,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                },
+                onClick = {
+                    onAction(TimelineMediaMenuAction.DownloadAll)
+                },
+            )
+        }
+        if (media is UiMedia.Image && mediaActionConfig.showShareImage) {
+            TimelineMediaMenuItem(
+                label = stringResource(Res.string.media_menu_share_image),
+                icon = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.ShareNodes,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                },
+                onClick = {
+                    onAction(TimelineMediaMenuAction.ShareImage)
+                },
+            )
+        }
+        TimelineMediaMenuItem(
+            label = stringResource(Res.string.media_menu_copy_link),
+            icon = {
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Copy,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            },
+            onClick = {
+                onAction(TimelineMediaMenuAction.CopyLink)
+            },
+        )
+    }
+}
+
+@Composable
+private fun PlatformDropdownMenuScope.TimelineMediaMenuItem(
+    label: String,
+    icon: @Composable () -> Unit,
+    onClick: () -> Unit,
+) {
+    PlatformDropdownMenuItem(
+        text = {
+            PlatformText(text = label)
+        },
+        leadingIcon = icon,
+        onClick = onClick,
+    )
 }
 
 @Composable

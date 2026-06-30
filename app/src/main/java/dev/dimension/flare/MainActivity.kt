@@ -21,6 +21,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.ui.AppContainer
 import dev.dimension.flare.ui.component.platform.LocalWifiState
+import dev.dimension.flare.ui.component.status.ProvideAndroidTimelineMediaActions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import org.koin.android.ext.android.inject
@@ -44,11 +45,13 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalWifiState provides wifiState,
             ) {
-                AppContainer(
-                    afterInit = {
-                        keepSplashOnScreen = false
-                    },
-                )
+                ProvideAndroidTimelineMediaActions {
+                    AppContainer(
+                        afterInit = {
+                            keepSplashOnScreen = false
+                        },
+                    )
+                }
             }
         }
     }

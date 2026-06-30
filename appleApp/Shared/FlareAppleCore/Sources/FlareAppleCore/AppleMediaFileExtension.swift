@@ -1,6 +1,10 @@
 import Foundation
 
 public enum AppleMediaFileExtension {
+    public nonisolated static func image(url: URL, fallback: String = "jpg") -> String {
+        extensionFromPath(url.path) ?? fallback
+    }
+
     public nonisolated static func image(url: URL, data: Data, fallback: String = "jpg") -> String {
         if let extensionName = extensionFromPath(url.path) {
             return extensionName

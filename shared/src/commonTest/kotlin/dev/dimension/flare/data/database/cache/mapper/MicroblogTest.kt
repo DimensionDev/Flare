@@ -24,6 +24,7 @@ import dev.dimension.flare.data.database.cache.model.translationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationPayload
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
@@ -473,7 +474,7 @@ class MicroblogTest : RobolectricTest() {
                 ),
             )
 
-            val loader = TimelineDbPageLoader(db, "home")
+            val loader = TimelineDbPageLoader(db, "home", TimelineDbPageCache())
 
             assertEquals(
                 listOf(first.timeline.statusId),
@@ -573,10 +574,45 @@ class MicroblogTest : RobolectricTest() {
 
             val saved =
                 db.statusDao().get(withParents.statusKey, AccountType.Specific(accountKey)).first()
-            val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(saved).content)
+            val savedStatus = assertNotNull(saved)
+            val savedPost = assertIs<UiTimelineV2.Post>(savedStatus.content)
             assertTrue(savedPost.parents.isEmpty())
             assertEquals(1, savedPost.references.size)
             assertEquals(refPost.statusKey, savedPost.references.first().statusKey)
+            assertEquals(savedPost.renderHash, savedStatus.renderHash)
+        }
+
+    @Test
+    fun toDbStoresRenderHashForSanitizedContent() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account-render-hash", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-render-hash", host = "test.com"), "User")
+            val parent =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "parent-render-hash", host = "test.com"),
+                    text = "parent",
+                )
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "root-render-hash", host = "test.com"),
+                    text = "root",
+                    parents = listOf(parent),
+                )
+
+            val savedStatus =
+                TimelinePagingMapper
+                    .toDb(post, pagingKey = "home")
+                    .status.status.data
+            val savedPost = assertIs<UiTimelineV2.Post>(savedStatus.content)
+
+            assertTrue(savedPost.parents.isEmpty())
+            assertEquals(1, savedPost.references.size)
+            assertEquals(savedPost.renderHash, savedStatus.renderHash)
+            assertNotEquals(post.renderHash, savedStatus.renderHash)
         }
 
     @Test

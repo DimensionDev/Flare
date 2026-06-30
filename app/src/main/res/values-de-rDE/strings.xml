@@ -370,7 +370,7 @@
     <string name="media_menu_media_link">Medien-Link</string>
     <string name="status_menu_share_via_fxembed">Über FxEmbed teilen</string>
     <string name="status_menu_share_via_fixvx">Über Fixvx teilen</string>
-    <string name="media_save_success">In Downloads gespeichert</string>
+    <string name="media_save_success">Gespeichert</string>
     <string name="media_save_fail">Speichern fehlgeschlagen</string>
     <string name="media_alt_text">Alt-Text</string>
     <string name="media_is_downloading">Medien werden noch heruntergeladen. Versuche es gleich noch einmal.</string>

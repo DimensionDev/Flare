@@ -371,7 +371,7 @@
     <string name="media_menu_media_link">Link do mediów</string>
     <string name="status_menu_share_via_fxembed">Udostępnij przez FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Udostępnij przez Fixvx</string>
-    <string name="media_save_success">Zapisano w Pobranych</string>
+    <string name="media_save_success">Zapisano</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
     <string name="media_alt_text">Tekst alternatywny</string>
     <string name="media_is_downloading">Pobieranie mediów w toku. Spróbuj ponownie za chwilę.</string>

@@ -6,20 +6,24 @@ import FlareAppleCore
 private let statusMediaMaxVisibleMediaCount = 9
 
 struct StatusMediaView: View {
+    let post: UiTimelineV2.Post
     let data: [any UiMedia]
     let sensitive: Bool
     let onMediaClicked: (any UiMedia, Int) -> Void
     let cornerRadius: CGFloat
     @Environment(\.timelineAppearance.expandMediaSize) private var expandMediaSize
+    @Environment(\.timelineMediaActionHandler) private var timelineMediaActionHandler
     @State private var isBlur: Bool
 //    @State private var selectedIndex: Int? = nil
 
     init(
+        post: UiTimelineV2.Post,
         data: [any UiMedia],
         sensitive: Bool,
         cornerRadius: CGFloat,
         onMediaClicked: @escaping (any UiMedia, Int) -> Void
     ) {
+        self.post = post
         self.data = data
         self.sensitive = sensitive
         self.onMediaClicked = onMediaClicked
@@ -54,6 +58,18 @@ struct StatusMediaView: View {
                     .overlay(alignment: .bottomTrailing) {
                         if let alt = item.description_, !alt.isEmpty {
                             AltTextOverlay(altText: alt)
+                        }
+                    }
+                    .if(!isBlur && timelineMediaActionHandler != nil) { view in
+                        view.contextMenu {
+                            if let timelineMediaActionHandler {
+                                TimelineMediaContextMenu(
+                                    post: post,
+                                    media: item,
+                                    showsDownloadAll: data.count > 1,
+                                    actionHandler: timelineMediaActionHandler
+                                )
+                            }
                         }
                     }
             }
@@ -107,6 +123,59 @@ struct StatusMediaView: View {
             }
         }
         .clipShape(.rect(cornerRadius: cornerRadius))
+    }
+}
+
+private struct TimelineMediaContextMenu: View {
+    let post: UiTimelineV2.Post
+    let media: any UiMedia
+    let showsDownloadAll: Bool
+    let actionHandler: TimelineMediaActionHandler
+
+    var body: some View {
+        Button {
+            actionHandler(post, media, .download)
+        } label: {
+            Label {
+                Text("media_menu_download", bundle: FlareAppleUILocalization.bundle)
+            } icon: {
+                Image(fontAwesome: .download)
+            }
+        }
+
+        if showsDownloadAll {
+            Button {
+                actionHandler(post, media, .downloadAll)
+            } label: {
+                Label {
+                    Text("media_menu_download_all", bundle: FlareAppleUILocalization.bundle)
+                } icon: {
+                    Image(fontAwesome: .download)
+                }
+            }
+        }
+
+        if case .image = onEnum(of: media) {
+            Button {
+                actionHandler(post, media, .shareImage)
+            } label: {
+                Label {
+                    Text("media_menu_share_image", bundle: FlareAppleUILocalization.bundle)
+                } icon: {
+                    Image(fontAwesome: .shareNodes)
+                }
+            }
+        }
+
+        Button {
+            actionHandler(post, media, .copyLink)
+        } label: {
+            Label {
+                Text("media_menu_copy_link", bundle: FlareAppleUILocalization.bundle)
+            } icon: {
+                Image(systemName: "doc.on.doc")
+            }
+        }
     }
 }
 

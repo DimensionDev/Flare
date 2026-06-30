@@ -42,8 +42,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     @State private var showData = true
     @State private var protectInitialPagerSelection: Bool
     @State private var didApplyInitialSelection = false
-    @State private var shareFileURL: URL?
-    @State private var shareFileSourceURL: String?
+    @State private var isPreparingShare = false
     @State private var holdsPlaybackSession = false
     @State private var playbackRate: Float = 1
     @State private var isLandscapeViewing = false
@@ -77,6 +76,25 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             } else {
                 LazyPager(data: medias, page: pagerSelectedIndex) { media in
                     mediaContent(media)
+                        .contextMenu {
+                            MediaViewerContextMenu(
+                                media: media,
+                                showsDownloadAll: medias.count > 1,
+                                isPreparingShare: isPreparingShare,
+                                onDownload: {
+                                    saveMedia(media)
+                                },
+                                onDownloadAll: {
+                                    saveAllMedia()
+                                },
+                                onShareImage: {
+                                    shareSelectedImage(media)
+                                },
+                                onCopyLink: {
+                                    UIPasteboard.general.string = media.url
+                                }
+                            )
+                        }
                 }
                 .onDismiss(backgroundOpacity: $opacity) {
                     dismiss()
@@ -108,9 +126,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task(id: selectedShareFileIdentity) {
-            await loadShareFile(url: selectedImageURL, customHeaders: selectedImageCustomHeaders)
-        }
         .onAppear {
             applyInitialSelectionIfNeeded()
         }
@@ -163,30 +178,24 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                 if let selectedMedia, case .image = onEnum(of: selectedMedia) {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
-                            MediaSaver.shared.saveImage(url: selectedMedia.url, customHeaders: selectedMedia.customHeaders)
+                            saveMedia(selectedMedia)
                         } label: {
                             Image(fontAwesome: .download)
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        if let shareFileURL, shareFileSourceURL == selectedMedia.url {
-                            ShareLink(item: shareFileURL) {
-                                Image(fontAwesome: .shareNodes)
-                            }
-                            .accessibilityLabel("Share image")
-                        } else {
-                            Button {
-                            } label: {
-                                Image(fontAwesome: .shareNodes)
-                            }
-                            .disabled(true)
-                            .accessibilityLabel("Share image")
+                        Button {
+                            shareSelectedImage(selectedMedia)
+                        } label: {
+                            Image(fontAwesome: .shareNodes)
                         }
+                        .disabled(isPreparingShare)
+                        .accessibilityLabel("Share image")
                     }
-                } else if let selectedMedia, case .video(let video) = onEnum(of: selectedMedia) {
+                } else if let selectedMedia, case .video = onEnum(of: selectedMedia) {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
-                            MediaSaver.shared.saveVideo(url: video.url, customHeaders: video.customHeaders)
+                            saveMedia(selectedMedia)
                         } label: {
                             Image(fontAwesome: .download)
                         }
@@ -305,31 +314,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         return medias[selectedIndex]
     }
 
-    private var selectedImageURL: String? {
-        guard let selectedMedia else {
-            return nil
-        }
-
-        switch onEnum(of: selectedMedia) {
-        case .image(let image):
-            return image.url
-        case .video, .gif, .audio:
-            return nil
-        }
-    }
-
-    private var selectedImageCustomHeaders: [String: String]? {
-        selectedMedia?.customHeaders
-    }
-
-    private var selectedShareFileIdentity: String {
-        [
-            selectedImageURL,
-            shareContext?.statusKey,
-            shareContext?.userHandle,
-        ].compactMap { $0 }.joined(separator: "|")
-    }
-
     private var isVideoActivelyPlaying: Bool {
         if case .playing = videoState { return true }
         return false
@@ -379,31 +363,214 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         return min(max(index, 0), count - 1)
     }
 
-    private func loadShareFile(url: String?, customHeaders: [String: String]?) async {
-        shareFileURL = nil
-        shareFileSourceURL = url
+    private func saveMedia(
+        _ media: any UiMedia,
+        showsDownloadStarted: Bool = true,
+        showsSaveResult: Bool = true,
+        completion: (@Sendable (Bool) -> Void)? = nil
+    ) {
+        switch onEnum(of: media) {
+        case .image(let image):
+            MediaSaver.shared.saveImage(
+                url: image.url,
+                customHeaders: image.customHeaders,
+                showsDownloadStarted: showsDownloadStarted,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
+        case .gif(let gif):
+            MediaSaver.shared.saveImage(
+                url: gif.url,
+                customHeaders: gif.customHeaders,
+                showsDownloadStarted: showsDownloadStarted,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
+        case .video(let video):
+            MediaSaver.shared.saveVideo(
+                url: video.url,
+                customHeaders: video.customHeaders,
+                showsDownloadStarted: showsDownloadStarted,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
+        case .audio(let audio):
+            MediaSaver.shared.saveFile(
+                url: audio.url,
+                fileName: fileName(for: media),
+                customHeaders: audio.customHeaders,
+                showsDownloadStarted: showsDownloadStarted,
+                showsSaveResult: showsSaveResult,
+                completion: completion
+            )
+        }
+    }
 
-        guard let url else {
+    private func saveAllMedia() {
+        guard !medias.isEmpty else {
             return
         }
 
-        do {
-            let fileURL = try await OriginalImageShareFile.make(
-                url: url,
-                customHeaders: customHeaders,
-                statusKey: shareContext?.statusKey,
-                userHandle: shareContext?.userHandle
-            )
-            guard !Task.isCancelled, shareFileSourceURL == url else {
-                return
+        MediaSaver.shared.showDownloadStarted()
+        let tracker = MediaViewerBatchSaveTracker(count: medias.count)
+
+        let onComplete: @Sendable (Bool) -> Void = { success in
+            Task {
+                if let batchSuccess = await tracker.complete(success: success) {
+                    await MainActor.run {
+                        MediaSaver.shared.showBatchSaveResult(success: batchSuccess)
+                    }
+                }
             }
-            shareFileURL = fileURL
-        } catch {
-            guard !Task.isCancelled, shareFileSourceURL == url else {
-                return
-            }
-            shareFileURL = nil
         }
+
+        for media in medias {
+            saveMedia(
+                media,
+                showsDownloadStarted: false,
+                showsSaveResult: false,
+                completion: onComplete
+            )
+        }
+    }
+
+    private func fileName(for media: any UiMedia) -> String {
+        if let statusKey = shareContext?.statusKey {
+            return MediaFileNamePolicy.shared.statusMediaFileName(
+                statusKey: statusKey,
+                userHandle: shareContext?.userHandle ?? "unknown",
+                media: media
+            )
+        }
+        return MediaFileNamePolicy.shared.rawMediaFileName(media: media)
+    }
+
+    private func shareSelectedImage(_ media: any UiMedia) {
+        guard !isPreparingShare,
+              case .image(let image) = onEnum(of: media) else {
+            return
+        }
+
+        let sourceURL = image.url
+        let customHeaders = image.customHeaders
+        isPreparingShare = true
+        Task {
+            defer {
+                isPreparingShare = false
+            }
+            do {
+                let fileURL = try await OriginalImageShareFile.make(
+                    url: sourceURL,
+                    customHeaders: customHeaders,
+                    statusKey: shareContext?.statusKey,
+                    userHandle: shareContext?.userHandle,
+                    onPreparingNeeded: {
+                        MediaSaver.showPreparingMedia()
+                    }
+                )
+                guard !Task.isCancelled,
+                      selectedMedia?.url == sourceURL,
+                      let presenter = topViewController() else {
+                    return
+                }
+                let controller = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+                controller.popoverPresentationController?.sourceView = presenter.view
+                controller.popoverPresentationController?.sourceRect = presenter.view.bounds
+                presenter.present(controller, animated: true)
+            } catch {
+                return
+            }
+        }
+    }
+
+    private func topViewController() -> UIViewController? {
+        let rootViewController = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }?
+            .windows
+            .first { $0.isKeyWindow }?
+            .rootViewController
+        return topViewController(from: rootViewController)
+    }
+
+    private func topViewController(from viewController: UIViewController?) -> UIViewController? {
+        if let navigationController = viewController as? UINavigationController {
+            return topViewController(from: navigationController.visibleViewController)
+        }
+        if let tabBarController = viewController as? UITabBarController {
+            return topViewController(from: tabBarController.selectedViewController)
+        }
+        if let presentedViewController = viewController?.presentedViewController {
+            return topViewController(from: presentedViewController)
+        }
+        return viewController
+    }
+}
+
+private struct MediaViewerContextMenu: View {
+    let media: any UiMedia
+    let showsDownloadAll: Bool
+    let isPreparingShare: Bool
+    let onDownload: () -> Void
+    let onDownloadAll: () -> Void
+    let onShareImage: () -> Void
+    let onCopyLink: () -> Void
+
+    var body: some View {
+        Button(action: onDownload) {
+            Label {
+                Text("media_menu_download", bundle: .main)
+            } icon: {
+                Image(fontAwesome: .download)
+            }
+        }
+
+        if showsDownloadAll {
+            Button(action: onDownloadAll) {
+                Label {
+                    Text("media_menu_download_all", bundle: .main)
+                } icon: {
+                    Image(fontAwesome: .download)
+                }
+            }
+        }
+
+        if case .image = onEnum(of: media) {
+            Button(action: onShareImage) {
+                Label {
+                    Text("media_menu_share_image", bundle: .main)
+                } icon: {
+                    Image(fontAwesome: .shareNodes)
+                }
+            }
+            .disabled(isPreparingShare)
+        }
+
+        Button(action: onCopyLink) {
+            Label {
+                Text("media_menu_copy_link", bundle: .main)
+            } icon: {
+                Image(systemName: "doc.on.doc")
+            }
+        }
+    }
+}
+
+private actor MediaViewerBatchSaveTracker {
+    private var remainingCount: Int
+    private var hasFailure = false
+
+    init(count: Int) {
+        remainingCount = count
+    }
+
+    func complete(success: Bool) -> Bool? {
+        hasFailure = hasFailure || !success
+        remainingCount -= 1
+        guard remainingCount == 0 else {
+            return nil
+        }
+        return !hasFailure
     }
 }
 

@@ -70,8 +70,10 @@ import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.DesktopDownloadManager
+import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.common.FlareHardwareShortcutDetector
 import dev.dimension.flare.common.FlareHardwareShortcutsElement
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
@@ -83,7 +85,6 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.getFileName
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -122,7 +123,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import java.awt.FileDialog
 import kotlin.math.max
 import kotlin.math.roundToLong
 import kotlin.time.Duration.Companion.milliseconds
@@ -625,21 +625,22 @@ private fun presenter(
             val status = state.status.takeSuccess() as? UiTimelineV2.Post
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"
-                val fileName = item.getFileName(statusKey.toString(), userHandle)
-                FileDialog(window).apply {
-                    mode = FileDialog.SAVE
-                    file = fileName
-                    isVisible = true
-                    val dir = directory
-                    val file = file
-                    if (!dir.isNullOrEmpty() && !file.isNullOrEmpty()) {
-                        scope.launch {
-                            desktopDownloadManager.download(
-                                url = item.url,
-                                targetFile = java.io.File(dir, file),
-                            )
-                        }
-                    }
+                val fileName =
+                    MediaFileNamePolicy.statusMediaFileName(
+                        statusKey = statusKey.toString(),
+                        userHandle = userHandle,
+                        media = item,
+                    )
+                val targetFile =
+                    DesktopSaveDialog.chooseFile(
+                        window = window,
+                        defaultName = fileName,
+                    ) ?: return
+                scope.launch {
+                    desktopDownloadManager.download(
+                        url = item.url,
+                        targetFile = targetFile,
+                    )
                 }
             }
         }

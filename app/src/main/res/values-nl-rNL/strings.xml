@@ -362,7 +362,7 @@
     <string name="media_menu_media_link">Medialink</string>
     <string name="status_menu_share_via_fxembed">Delen via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Delen via Fixvx</string>
-    <string name="media_save_success">Opgeslagen in Downloads</string>
+    <string name="media_save_success">Opgeslagen</string>
     <string name="media_save_fail">Opslaan mislukt</string>
     <string name="media_alt_text">Alt-tekst</string>
     <string name="media_is_downloading">Media wordt nog gedownload. Probeer het over een moment opnieuw.</string>

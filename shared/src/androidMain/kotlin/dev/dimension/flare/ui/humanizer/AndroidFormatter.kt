@@ -17,18 +17,37 @@ import kotlin.time.Instant
 internal class AndroidFormatter(
     @Provided private val context: Context,
 ) : PlatformFormatter {
+    private val compactDecimalFormat = ThreadLocal<CompactDecimalFormatHolder>()
+
     override fun formatNumber(number: Long): String {
+        val locale = Locale.getDefault()
         val cdf =
-            CompactDecimalFormat.getInstance(
-                Locale.getDefault(),
-                CompactDecimalFormat.CompactStyle.SHORT,
-            )
-        cdf.maximumFractionDigits = 2
-        cdf.minimumFractionDigits = 0
-        cdf.roundingMode = RoundingMode.DOWN.ordinal
-        cdf.isGroupingUsed = false
+            compactDecimalFormat
+                .get()
+                ?.takeIf { it.locale == locale }
+                ?.formatter
+                ?: createCompactDecimalFormat(locale).also {
+                    compactDecimalFormat.set(CompactDecimalFormatHolder(locale, it))
+                }
         return cdf.format(number)
     }
+
+    private fun createCompactDecimalFormat(locale: Locale): CompactDecimalFormat =
+        CompactDecimalFormat
+            .getInstance(
+                locale,
+                CompactDecimalFormat.CompactStyle.SHORT,
+            ).apply {
+                maximumFractionDigits = 2
+                minimumFractionDigits = 0
+                roundingMode = RoundingMode.DOWN.ordinal
+                isGroupingUsed = false
+            }
+
+    private data class CompactDecimalFormatHolder(
+        val locale: Locale,
+        val formatter: CompactDecimalFormat,
+    )
 
     override fun formatRelativeInstant(instant: Instant): String {
         val compareTo = Clock.System.now()

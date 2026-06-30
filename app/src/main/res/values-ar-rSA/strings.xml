@@ -374,7 +374,7 @@
     <string name="media_menu_media_link">رابط الوسائط</string>
     <string name="status_menu_share_via_fxembed">مشاركة عبر FxEmbed</string>
     <string name="status_menu_share_via_fixvx">مشاركة عبر Fixvx</string>
-    <string name="media_save_success">تم الحفظ في التنزيلات</string>
+    <string name="media_save_success">تم الحفظ</string>
     <string name="media_save_fail">فشل الحفظ</string>
     <string name="media_alt_text">النص البديل</string>
     <string name="media_is_downloading">الوسائط لا تزال قيد التحميل. حاول مرة أخرى بعد قليل.</string>

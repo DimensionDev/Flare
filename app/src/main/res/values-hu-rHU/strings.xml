@@ -320,7 +320,7 @@
     <string name="media_menu_media_link">Média link</string>
     <string name="status_menu_share_via_fxembed">Megosztás FxEmbed-en keresztül</string>
     <string name="status_menu_share_via_fixvx">Megosztás Fixvx-en keresztül</string>
-    <string name="media_save_success">Mentve a Letöltések mappába</string>
+    <string name="media_save_success">Mentve</string>
     <string name="media_save_fail">Nem sikerült menteni</string>
     <string name="media_alt_text">Alternatív szöveg</string>
     <string name="media_is_downloading">A média még töltődik. Próbáld újra egy pillanat múlva.</string>

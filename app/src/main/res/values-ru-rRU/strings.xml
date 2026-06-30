@@ -368,7 +368,7 @@
     <string name="media_menu_media_link">Ссылка на медиа</string>
     <string name="status_menu_share_via_fxembed">Поделиться через FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Поделиться через Fixvx</string>
-    <string name="media_save_success">Сохранено в «Загрузки»</string>
+    <string name="media_save_success">Сохранено</string>
     <string name="media_save_fail">Не удалось сохранить</string>
     <string name="media_alt_text">Альт-текст</string>
     <string name="media_is_downloading">Медиа все еще загружается. Попробуйте еще раз через мгновение.</string>

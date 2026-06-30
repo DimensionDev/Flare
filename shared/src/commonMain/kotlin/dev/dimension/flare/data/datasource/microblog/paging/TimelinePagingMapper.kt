@@ -308,16 +308,19 @@ internal object TimelinePagingMapper {
     private fun uiTimelineToDbStatusWithUser(
         data: UiTimelineV2,
         sanitizePostReferences: Boolean,
-    ): DbStatusWithUser =
-        DbStatusWithUser(
+    ): DbStatusWithUser {
+        val content = if (sanitizePostReferences) data.sanitizeForDatabase() else data
+        return DbStatusWithUser(
             data =
                 DbStatus(
                     statusKey = data.statusKey,
-                    content = if (sanitizePostReferences) data.sanitizeForDatabase() else data,
+                    content = content,
+                    renderHash = content.renderHash,
                     accountType = data.accountType as DbAccountType,
-                    text = data.searchText,
+                    text = content.searchText,
                 ),
         )
+    }
 
     private fun UiTimelineV2.sanitizeForDatabase(): UiTimelineV2 =
         when (this) {

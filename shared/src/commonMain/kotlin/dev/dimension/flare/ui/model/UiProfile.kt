@@ -120,9 +120,15 @@ public data class UiProfile public constructor(
         val statusesCount: Long,
         val platformFansCount: String? = null,
     ) {
-        val fansCountHumanized: String = platformFansCount ?: fansCount.humanize()
-        val followsCountHumanized: String = followsCount.humanize()
-        val statusesCountHumanized: String = statusesCount.humanize()
+        val fansCountHumanized: String by lazy {
+            platformFansCount ?: fansCount.humanize()
+        }
+        val followsCountHumanized: String by lazy {
+            followsCount.humanize()
+        }
+        val statusesCountHumanized: String by lazy {
+            statusesCount.humanize()
+        }
     }
 
     val handleWithoutAt: String by lazy {

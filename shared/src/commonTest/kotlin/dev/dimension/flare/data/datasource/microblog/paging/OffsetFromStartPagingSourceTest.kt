@@ -93,4 +93,41 @@ class OffsetFromStartPagingSourceTest {
 
         assertEquals(OffsetFromStartPagingKey.Refresh(limit = 47), refreshKey)
     }
+
+    @Test
+    fun refreshKeyReturnsNullWhenThereIsNoAnchorPosition() {
+        val pagingSource =
+            OffsetFromStartPagingSource(
+                object : OffsetFromStartPageLoader<Int> {
+                    override suspend fun load(
+                        offset: Int,
+                        limit: Int,
+                    ): List<Int> = emptyList()
+                },
+            )
+
+        val refreshKey =
+            pagingSource.getRefreshKey(
+                PagingSource.LoadResult
+                    .Page<OffsetFromStartPagingKey, Int>(
+                        data = (0 until 120).toList(),
+                        prevKey = null,
+                        nextKey = OffsetFromStartPagingKey.Append(120),
+                    ).let { page ->
+                        androidx.paging.PagingState(
+                            pages = listOf(page),
+                            anchorPosition = null,
+                            config =
+                                androidx.paging.PagingConfig(
+                                    pageSize = 20,
+                                    prefetchDistance = 1,
+                                    initialLoadSize = 20,
+                                ),
+                            leadingPlaceholderCount = 0,
+                        )
+                    },
+            )
+
+        assertEquals(null, refreshKey)
+    }
 }

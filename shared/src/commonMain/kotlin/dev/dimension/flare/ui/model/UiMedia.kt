@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableMap
-import dev.dimension.flare.common.sanitizeFileName
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
@@ -91,29 +90,3 @@ public fun String?.toUiImage(customHeaders: SerializableImmutableMap<String, Str
                 customHeaders = customHeaders,
             )
         }
-
-@HiddenFromObjC
-public fun UiMedia.getFileName(
-    statusKey: String,
-    userHandle: String,
-): String {
-    val key = statusKey.sanitizeFileName()
-    val handle = userHandle.sanitizeFileName()
-    val path = url.substringBefore("?").substringBefore("#")
-    val originalName = path.substringAfterLast("/")
-    val lastDotIndex = originalName.lastIndexOf('.')
-    val lastAtIndex = originalName.lastIndexOf('@')
-    val separatorIndex = maxOf(lastDotIndex, lastAtIndex)
-    val extension =
-        if (separatorIndex >= 0 && separatorIndex < originalName.length - 1) {
-            originalName.substring(separatorIndex + 1)
-        } else {
-            when (this) {
-                is UiMedia.Audio -> "mp3"
-                is UiMedia.Gif -> "gif"
-                is UiMedia.Image -> "jpg"
-                is UiMedia.Video -> "mp4"
-            }
-        }
-    return "${key}_$handle.$extension"
-}

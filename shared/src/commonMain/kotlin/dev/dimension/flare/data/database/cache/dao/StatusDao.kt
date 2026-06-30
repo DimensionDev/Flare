@@ -46,11 +46,16 @@ internal interface StatusDao {
         accountType: DbAccountType,
     ): List<DbStatus>
 
-    @Query("UPDATE DbStatus SET content = :content WHERE statusKey = :statusKey AND accountType = :accountType")
+    @Query(
+        "UPDATE DbStatus SET content = :content, renderHash = :renderHash, text = :text " +
+            "WHERE statusKey = :statusKey AND accountType = :accountType",
+    )
     suspend fun update(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
         content: UiTimelineV2,
+        renderHash: Int,
+        text: String?,
     )
 
     @Query("DELETE FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")

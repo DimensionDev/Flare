@@ -42,5 +42,4 @@ public class DirectMessageAvailabilityPresenter : PresenterBase<DirectMessageAva
     ) : State
 }
 
-internal fun MicroblogDataSource.isDirectMessageCapableAccountService(): Boolean =
-    this is DirectMessageDataSource && this is UserDataSource
+internal fun MicroblogDataSource.isDirectMessageCapableAccountService(): Boolean = this is DirectMessageDataSource && this is UserDataSource

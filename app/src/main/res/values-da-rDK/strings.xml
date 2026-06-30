@@ -370,7 +370,7 @@
     <string name="media_menu_media_link">Medielink</string>
     <string name="status_menu_share_via_fxembed">Del via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Del via Fixvx</string>
-    <string name="media_save_success">Gemt i Overførsler</string>
+    <string name="media_save_success">Gemt</string>
     <string name="media_save_fail">Kunne ikke gemme</string>
     <string name="media_alt_text">Alternativ tekst</string>
     <string name="media_is_downloading">Mediet hentes stadig. Prøv igen om et øjeblik.</string>

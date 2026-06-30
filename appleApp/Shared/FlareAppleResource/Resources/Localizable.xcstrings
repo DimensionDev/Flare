@@ -20781,6 +20781,9 @@
         }
       }
     },
+    "Ask Every Time" : {
+
+    },
     "ask_ai" : {
       "localizations" : {
         "af" : {
@@ -28399,6 +28402,9 @@
         }
       }
     },
+    "Change" : {
+
+    },
     "channel_title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -28779,6 +28785,9 @@
           }
         }
       }
+    },
+    "Choose Folder" : {
+
     },
     "Choose how much effort the model spends on reasoning. Default uses the provider's default behavior." : {
       "localizations" : {
@@ -29352,6 +29361,9 @@
           }
         }
       }
+    },
+    "Choose where downloaded media is saved on this Mac." : {
+
     },
     "Choose which actions appear in the row, More menu, or stay hidden" : {
       "comment" : "A description of the toggle that lets you choose which actions appear in the row, More menu, or stay hidden.",
@@ -40573,6 +40585,9 @@
           }
         }
       }
+    },
+    "Failed to write media" : {
+
     },
     "fanbox_recommended_creators_title" : {
       "localizations" : {
@@ -55744,6 +55759,97 @@
     },
     "Media" : {
 
+    },
+    "Media save location" : {
+
+    },
+    "media_menu_copy_link" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy link"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制链接"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複製連結"
+          }
+        }
+      }
+    },
+    "media_menu_download" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下載"
+          }
+        }
+      }
+    },
+    "media_menu_download_all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download all"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载全部"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下載全部"
+          }
+        }
+      }
+    },
+    "media_menu_share_image" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share image"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享图片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享圖片"
+          }
+        }
+      }
     },
     "Medium" : {
       "localizations" : {
@@ -98726,6 +98832,7 @@
       }
     },
     "notification_download_started" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -98959,6 +99066,30 @@
         }
       }
     },
+    "notification_prepare_media_started" : {
+      "comment" : "Title of a notification that is displayed when media is being prepared for sharing.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Preparing media"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在准备媒体"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在準備媒體"
+          }
+        }
+      }
+    },
     "notification_save_file_error" : {
       "comment" : "Title of a notification when a file is not saved.",
       "extractionState" : "extracted_with_value",
@@ -98992,19 +99123,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved to Files"
+            "value" : "Saved"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已保存到文件"
+            "value" : "已保存"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已儲存到檔案"
+            "value" : "已儲存"
           }
         }
       }
@@ -99387,6 +99518,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "圖片已儲存到庫"
+          }
+        }
+      }
+    },
+    "notification_save_photo_album_success" : {
+      "comment" : "Title of a notification when media is saved to the photo library successfully.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Saved to Photos"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已保存到相册"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已儲存到相簿"
           }
         }
       }
@@ -106953,6 +107108,9 @@
           }
         }
       }
+    },
+    "Reset to Downloads" : {
+
     },
     "Retry translation" : {
       "extractionState" : "stale",

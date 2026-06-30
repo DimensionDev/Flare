@@ -156,7 +156,11 @@ enum Route: Hashable, Identifiable {
                 onDownloadFile: { block in
                     MediaSaver.shared.saveFile(
                         url: block.url,
-                        fileName: block.downloadFileName,
+                        fileName: MediaFileNamePolicy.shared.articleFileName(
+                            name: block.name,
+                            url: block.url,
+                            extensionName: block.extension
+                        ),
                         customHeaders: block.customHeaders
                     )
                 }

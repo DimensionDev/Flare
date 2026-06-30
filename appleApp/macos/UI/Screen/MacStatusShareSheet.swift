@@ -272,20 +272,11 @@ private enum MacStatusShareScreenshotRenderer {
             .appendingPathComponent("flare-status-share-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
 
-        let fileURL = directoryURL.appendingPathComponent(safeFileName(fileName))
+        let fileURL = directoryURL.appendingPathComponent(
+            MediaFileNamePolicy.shared.safeLocalFileName(value: fileName, fallback: "flare-status.png")
+        )
         try pngData.write(to: fileURL, options: .atomic)
         return fileURL
-    }
-
-    private static func safeFileName(_ value: String) -> String {
-        let invalidCharacters = CharacterSet(charactersIn: "/\\?%*|\"<>:")
-            .union(.newlines)
-            .union(.controlCharacters)
-        let fileName = value
-            .components(separatedBy: invalidCharacters)
-            .joined(separator: "-")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return fileName.isEmpty ? "flare-status.png" : fileName
     }
 }
 

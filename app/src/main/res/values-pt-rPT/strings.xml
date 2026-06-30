@@ -370,7 +370,7 @@
     <string name="media_menu_media_link">Hiperligação da multimédia</string>
     <string name="status_menu_share_via_fxembed">Partilhar via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Partilhar via Fixvx</string>
-    <string name="media_save_success">Guardado em Transferências</string>
+    <string name="media_save_success">Guardado</string>
     <string name="media_save_fail">Falha ao guardar</string>
     <string name="media_alt_text">Texto alternativo</string>
     <string name="media_is_downloading">A multimédia ainda está a ser transferida. Tente novamente daqui a pouco.</string>

@@ -357,7 +357,11 @@ private struct MacArticleScreen: View {
             do {
                 _ = try await MacMediaFileExporter.saveRemoteFile(
                     url: block.url,
-                    fileName: block.downloadFileName,
+                    fileName: MediaFileNamePolicy.shared.articleFileName(
+                        name: block.name,
+                        url: block.url,
+                        extensionName: block.extension
+                    ),
                     customHeaders: block.customHeaders
                 )
             } catch {

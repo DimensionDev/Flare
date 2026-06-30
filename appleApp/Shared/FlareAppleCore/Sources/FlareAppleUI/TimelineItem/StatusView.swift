@@ -4,15 +4,31 @@ import SwiftUIBackports
 import FlareAppleCore
 
 public typealias TimelineMediaOpenAction = (UiTimelineV2.Post, any UiMedia, Int) -> Void
+public enum TimelineMediaMenuAction {
+    case download
+    case downloadAll
+    case shareImage
+    case copyLink
+}
+public typealias TimelineMediaActionHandler = (UiTimelineV2.Post, any UiMedia, TimelineMediaMenuAction) -> Void
 
 private struct TimelineMediaOpenActionKey: EnvironmentKey {
     static let defaultValue: TimelineMediaOpenAction? = nil
+}
+
+private struct TimelineMediaActionHandlerKey: EnvironmentKey {
+    static let defaultValue: TimelineMediaActionHandler? = nil
 }
 
 public extension EnvironmentValues {
     var timelineMediaOpenAction: TimelineMediaOpenAction? {
         get { self[TimelineMediaOpenActionKey.self] }
         set { self[TimelineMediaOpenActionKey.self] = newValue }
+    }
+
+    var timelineMediaActionHandler: TimelineMediaActionHandler? {
+        get { self[TimelineMediaActionHandlerKey.self] }
+        set { self[TimelineMediaActionHandlerKey.self] = newValue }
     }
 }
 
@@ -257,7 +273,7 @@ public struct StatusView: View {
                         }
                         
                         if hasImages, showMedia {
-                            StatusMediaContent(data: images, sensitive: sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
+                            StatusMediaContent(post: data, data: images, sensitive: sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
                                 if let timelineMediaOpenAction {
                                     timelineMediaOpenAction(data, media, index)
                                 } else {
@@ -552,13 +568,14 @@ struct StatusMediaContent: View {
     @Environment(\.timelineAppearance.showMedia) private var showMedia
     @Environment(\.timelineAppearance.showSensitiveContent) private var showSensitiveContent
     @State private var expandMedia = false
+    let post: UiTimelineV2.Post
     let data: [any UiMedia]
     let sensitive: Bool
     let cornerRadius: CGFloat
     let onMediaClicked: (any UiMedia, Int) -> Void
     var body: some View {
         if showMedia || expandMedia {
-            StatusMediaView(data: data, sensitive: !(showSensitiveContent) && sensitive, cornerRadius: cornerRadius, onMediaClicked: onMediaClicked)
+            StatusMediaView(post: post, data: data, sensitive: !(showSensitiveContent) && sensitive, cornerRadius: cornerRadius, onMediaClicked: onMediaClicked)
         } else {
             Button {
                 withAnimation {

@@ -316,7 +316,7 @@
     <string name="media_menu_media_link">Media-skakel</string>
     <string name="status_menu_share_via_fxembed">Deel via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Deel via Fixvx</string>
-    <string name="media_save_success">Gestoor na Aflaaie</string>
+    <string name="media_save_success">Gestoor</string>
     <string name="media_save_fail">Kon nie stoor nie</string>
     <string name="media_alt_text">Alt-teks</string>
     <string name="media_is_downloading">Media laai nog af. Probeer weer oor \'n oomblik.</string>

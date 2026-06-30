@@ -1,28 +1,60 @@
+import FlareAppleCore
 import Foundation
 import Kingfisher
+import KotlinSharedUI
 
 struct OriginalImageShareFile {
     static func make(
         url: String,
         customHeaders: [String: String]?,
         statusKey: String? = nil,
-        userHandle: String? = nil
+        userHandle: String? = nil,
+        onPreparingNeeded: (@Sendable () -> Void)? = nil
     ) async throws -> URL {
         let imageURL = try makeImageURL(url)
+        if let cachedFileURL = cachedImageFileURL(for: imageURL) {
+            let data = try Data(contentsOf: cachedFileURL)
+            return try makeShareFile(
+                data: data,
+                url: imageURL,
+                statusKey: statusKey,
+                userHandle: userHandle
+            )
+        }
+
+        onPreparingNeeded?()
         let result = try await KingfisherManager.shared.downloader.downloadImage(
             with: imageURL,
             options: kingfisherOptions(customHeaders: customHeaders)
         )
-        let extensionName = fileExtension(url: imageURL, data: result.originalData)
-        let fileName = makeFileName(
+        return try makeShareFile(
+            data: result.originalData,
             url: imageURL,
+            statusKey: statusKey,
+            userHandle: userHandle
+        )
+    }
+
+    private static func cachedImageFileURL(for url: URL) -> URL? {
+        KingfisherManager.shared.cache.cacheFileURLIfOnDisk(forKey: url.cacheKey)
+    }
+
+    private static func makeShareFile(
+        data: Data,
+        url: URL,
+        statusKey: String?,
+        userHandle: String?
+    ) throws -> URL {
+        let extensionName = AppleMediaFileExtension.image(url: url, data: data)
+        let fileName = makeFileName(
+            url: url,
             statusKey: statusKey,
             userHandle: userHandle,
             extensionName: extensionName
         )
         let fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(fileName)
-        try result.originalData.write(to: fileURL, options: .atomic)
+        try data.write(to: fileURL, options: .atomic)
         return fileURL
     }
 
@@ -46,40 +78,6 @@ struct OriginalImageShareFile {
         })]
     }
 
-    private static func fileExtension(url: URL, data: Data) -> String {
-        let originalName = url.path
-            .split(separator: "/")
-            .last
-            .map(String.init) ?? ""
-        let lastDotIndex = originalName.lastIndex(of: ".")
-        let lastAtIndex = originalName.lastIndex(of: "@")
-        let separatorIndex = [lastDotIndex, lastAtIndex].compactMap { $0 }.max()
-
-        if let separatorIndex {
-            let nextIndex = originalName.index(after: separatorIndex)
-            if nextIndex < originalName.endIndex {
-                return String(originalName[nextIndex...])
-            }
-        }
-
-        if data.starts(with: [0xFF, 0xD8, 0xFF]) {
-            return "jpg"
-        }
-        if data.starts(with: [0x89, 0x50, 0x4E, 0x47]) {
-            return "png"
-        }
-        if data.starts(with: [0x47, 0x49, 0x46]) {
-            return "gif"
-        }
-        if data.starts(with: [0x52, 0x49, 0x46, 0x46]) {
-            return "webp"
-        }
-        if data.starts(with: [0x49, 0x49, 0x2A, 0x00]) || data.starts(with: [0x4D, 0x4D, 0x00, 0x2A]) {
-            return "tiff"
-        }
-        return "jpg"
-    }
-
     private static func makeFileName(
         url: URL,
         statusKey: String?,
@@ -87,21 +85,14 @@ struct OriginalImageShareFile {
         extensionName: String
     ) -> String {
         if let statusKey, let userHandle {
-            return "\(sanitizeFileName(statusKey))_\(sanitizeFileName(userHandle)).\(extensionName)"
+            let safeStatusKey = MediaFileNamePolicy.shared.sanitizeFileName(value: statusKey, fallback: "")
+            let safeUserHandle = MediaFileNamePolicy.shared.sanitizeFileName(value: userHandle, fallback: "")
+            return "\(safeStatusKey)_\(safeUserHandle).\(extensionName)"
         }
 
         let originalName = url.deletingPathExtension().lastPathComponent
         let baseName = originalName.isEmpty ? "flare-share-\(UUID().uuidString)" : originalName
-        return "\(sanitizeFileName(baseName)).\(extensionName)"
-    }
-
-    private static func sanitizeFileName(_ value: String) -> String {
-        value.map { character in
-            if character.isASCII,
-               character.isLetter || character.isNumber || character == "." || character == "_" || character == "-" {
-                return character
-            }
-            return "_"
-        }.map(String.init).joined()
+        let safeBaseName = MediaFileNamePolicy.shared.sanitizeFileName(value: baseName, fallback: "")
+        return "\(safeBaseName).\(extensionName)"
     }
 }

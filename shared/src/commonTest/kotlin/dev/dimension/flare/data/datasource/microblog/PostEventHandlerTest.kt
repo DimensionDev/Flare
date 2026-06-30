@@ -36,6 +36,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -93,6 +94,53 @@ class PostEventHandlerTest : RobolectricTest() {
             val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.updateKey == "like" }
             assertEquals(2, updatedLike.count?.value)
             assertEquals(1, fakeRemoteHandler.callCount)
+        }
+
+    @Test
+    fun updateActionMenuEventUpdatesTimelineIdentityRenderHash() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "like", count = 1)))
+            insertPost(original)
+            db.pagingTimelineDao().insertAll(
+                listOf(
+                    DbPagingTimeline(
+                        pagingKey = "home",
+                        statusId = DbStatus.createId(AccountType.Specific(accountKey), postKey),
+                        sortId = 1L,
+                    ),
+                ),
+            )
+            val beforeIdentity =
+                db
+                    .pagingTimelineDao()
+                    .getTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
+                    .single()
+
+            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
+            handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
+            advanceUntilIdle()
+
+            val saved = readStatus()
+            assertNotNull(saved)
+            val updatedPost = saved.content as UiTimelineV2.Post
+            val afterIdentity =
+                db
+                    .pagingTimelineDao()
+                    .getTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
+                    .single()
+            assertNotEquals(beforeIdentity.rootRenderHash, afterIdentity.rootRenderHash)
+            assertEquals(updatedPost.renderHash, saved.renderHash)
+            assertEquals(saved.renderHash, afterIdentity.rootRenderHash)
         }
 
     @Test
@@ -210,16 +258,20 @@ class PostEventHandlerTest : RobolectricTest() {
                 statusKey = postKey,
                 accountType = AccountType.Specific(accountKey),
                 content = post,
-                text = post.content.raw,
+                renderHash = post.renderHash,
+                text = post.searchText,
             ),
         )
     }
 
-    private suspend fun readPost(): UiTimelineV2.Post? =
+    private suspend fun readStatus(): DbStatus? =
         db
             .statusDao()
             .get(postKey, AccountType.Specific(accountKey))
             .first()
+
+    private suspend fun readPost(): UiTimelineV2.Post? =
+        readStatus()
             ?.content as? UiTimelineV2.Post
 
     private fun createPost(

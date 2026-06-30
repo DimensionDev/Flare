@@ -363,7 +363,7 @@
     <string name="media_menu_media_link">Median linkki</string>
     <string name="status_menu_share_via_fxembed">Jaa FxEmbedin kautta</string>
     <string name="status_menu_share_via_fixvx">Jaa Fixvx:n kautta</string>
-    <string name="media_save_success">Tallennettu latauksiin</string>
+    <string name="media_save_success">Tallennettu</string>
     <string name="media_save_fail">Tallentaminen epäonnistui</string>
     <string name="media_alt_text">Vaihtoehtoinen teksti</string>
     <string name="media_is_downloading">Mediaa ladataan vielä. Yritä hetken kuluttua uudelleen.</string>

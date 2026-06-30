@@ -597,20 +597,6 @@ private struct ArticleLoadingView: View {
     }
 }
 
-public extension UiArticleBlockFile {
-    var downloadFileName: String {
-        let sourceName = name.trimmedNonEmpty ?? url.fileNameFromPath ?? "file"
-        let rawExtension = self.extension?.trimmedNonEmpty
-        let extensionName = rawExtension.map { String($0.drop(while: { $0 == "." })) }?.trimmedNonEmpty
-        let fileName = if let extensionName, !sourceName.hasFileExtension {
-            "\(sourceName).\(extensionName)"
-        } else {
-            sourceName
-        }
-        return fileName.safeDownloadFileName
-    }
-}
-
 private extension View {
     @ViewBuilder
     func articleCardBlockOutline(cornerRadius: CGFloat = 12) -> some View {
@@ -640,34 +626,6 @@ private extension String {
         return value.isEmpty ? nil : value
     }
 
-    var fileNameFromPath: String? {
-        let path = components(separatedBy: CharacterSet(charactersIn: "?#")).first ?? self
-        return path
-            .split { $0 == "/" || $0 == "\\" }
-            .last
-            .map(String.init)?
-            .trimmedNonEmpty
-    }
-
-    var hasFileExtension: Bool {
-        let name = fileNameFromPath ?? self
-        guard let lastDotIndex = name.lastIndex(of: ".") else {
-            return false
-        }
-        return lastDotIndex > name.startIndex && name.index(after: lastDotIndex) < name.endIndex
-    }
-
-    var safeDownloadFileName: String {
-        let safeName = trimmingCharacters(in: .whitespacesAndNewlines).map { character -> Character in
-            if character == "/" ||
-                character == "\\" ||
-                character.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }) {
-                return "_"
-            }
-            return character
-        }
-        return String(safeName).trimmedNonEmpty ?? "file"
-    }
 }
 
 private func articleAspectRatio(_ value: Float) -> CGFloat {

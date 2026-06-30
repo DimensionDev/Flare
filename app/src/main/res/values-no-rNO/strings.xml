@@ -363,7 +363,7 @@
     <string name="media_menu_media_link">Medialenke</string>
     <string name="status_menu_share_via_fxembed">Del via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Del via Fixvx</string>
-    <string name="media_save_success">Lagret i Nedlastinger</string>
+    <string name="media_save_success">Lagret</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
     <string name="media_alt_text">Alt-tekst</string>
     <string name="media_is_downloading">Media laster fortsatt ned. Prøv igjen om et øyeblikk.</string>

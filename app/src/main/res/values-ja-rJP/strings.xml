@@ -350,7 +350,7 @@
     <string name="media_menu_media_link">メディアリンク</string>
     <string name="status_menu_share_via_fxembed">FxEmbed で共有</string>
     <string name="status_menu_share_via_fixvx">Fixvx で共有</string>
-    <string name="media_save_success">ダウンロードに保存しました</string>
+    <string name="media_save_success">保存しました</string>
     <string name="media_save_fail">保存に失敗しました</string>
     <string name="media_alt_text">代替テキスト</string>
     <string name="media_is_downloading">メディアをダウンロード中です。しばらくしてからもう一度お試しください。</string>

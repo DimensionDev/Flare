@@ -16,6 +16,7 @@ internal data class DbStatus(
     val accountType: DbAccountType,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val content: UiTimelineV2,
+    val renderHash: Int,
     val text: String?, // For Searching
     @PrimaryKey
     val id: String = createId(accountType = accountType, statusKey = statusKey),

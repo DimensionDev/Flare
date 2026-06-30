@@ -321,7 +321,7 @@
     <string name="media_menu_media_link">Линк медија</string>
     <string name="status_menu_share_via_fxembed">Подели преко FxEmbed-а</string>
     <string name="status_menu_share_via_fixvx">Подели преко Fixvx-а</string>
-    <string name="media_save_success">Сачувано у Преузимања</string>
+    <string name="media_save_success">Сачувано</string>
     <string name="media_save_fail">Чување није успело</string>
     <string name="media_alt_text">Алт текст</string>
     <string name="media_is_downloading">Медиј се још увек преузима. Покушајте поново за тренутак.</string>

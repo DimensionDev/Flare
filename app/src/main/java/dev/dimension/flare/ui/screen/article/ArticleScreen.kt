@@ -63,7 +63,8 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
-import dev.dimension.flare.common.VideoDownloadHelper
+import dev.dimension.flare.common.AndroidDownloadManager
+import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -129,7 +130,7 @@ internal fun ArticleScreen(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val downloadScope = koinInject<CoroutineScope>()
-    val videoDownloadHelper = koinInject<VideoDownloadHelper>()
+    val mediaDownloadManager = koinInject<AndroidDownloadManager>()
     val article = state.article.takeSuccess()
     val articleTitle = article?.title
     var titleHeightPx by remember(article?.key) { mutableIntStateOf(0) }
@@ -299,7 +300,7 @@ internal fun ArticleScreen(
                             block = file,
                             context = context,
                             scope = downloadScope,
-                            videoDownloadHelper = videoDownloadHelper,
+                            mediaDownloadManager = mediaDownloadManager,
                         )
                     },
                     onOpenMedia = { media ->
@@ -984,16 +985,21 @@ private fun downloadArticleFile(
     block: UiArticleBlock.File,
     context: Context,
     scope: CoroutineScope,
-    videoDownloadHelper: VideoDownloadHelper,
+    mediaDownloadManager: AndroidDownloadManager,
 ) {
     scope.launch {
         runCatching {
-            videoDownloadHelper.downloadVideo(
+            mediaDownloadManager.downloadMedia(
                 uri = block.url,
-                fileName = block.downloadFileName(),
+                fileName =
+                    MediaFileNamePolicy.articleFileName(
+                        name = block.name,
+                        url = block.url,
+                        extensionName = block.extension,
+                    ),
                 customHeaders = block.customHeaders,
                 callback =
-                    object : VideoDownloadHelper.DownloadCallback {
+                    object : AndroidDownloadManager.DownloadCallback {
                         override fun onDownloadStarted(downloadId: Long) {
                             context.showArticleDownloadToast(R.string.media_download_started)
                         }
@@ -1013,45 +1019,6 @@ private fun downloadArticleFile(
             }
         }
     }
-}
-
-private fun UiArticleBlock.File.downloadFileName(): String {
-    val sourceName =
-        name.trim().takeIf { it.isNotBlank() }
-            ?: url
-                .substringBefore("?")
-                .substringBefore("#")
-                .substringAfterLast("/")
-                .trim()
-                .takeIf { it.isNotBlank() }
-            ?: "file"
-    val extension = extension?.trim()?.trimStart('.')?.takeIf { it.isNotBlank() }
-    val fileName =
-        if (extension != null && !sourceName.hasFileExtension()) {
-            "$sourceName.$extension"
-        } else {
-            sourceName
-        }
-    return fileName.toSafeDownloadFileName()
-}
-
-private fun String.hasFileExtension(): Boolean {
-    val name = substringAfterLast('/').substringAfterLast('\\')
-    val lastDotIndex = name.lastIndexOf('.')
-    return lastDotIndex > 0 && lastDotIndex < name.length - 1
-}
-
-private fun String.toSafeDownloadFileName(): String {
-    val safeName =
-        trim()
-            .map { char ->
-                if (char == '/' || char == '\\' || char.code < 32 || char.code == 127) {
-                    '_'
-                } else {
-                    char
-                }
-            }.joinToString(separator = "")
-    return safeName.ifBlank { "file" }
 }
 
 private fun Context.showArticleDownloadToast(messageRes: Int) {

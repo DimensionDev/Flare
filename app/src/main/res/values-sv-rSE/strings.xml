@@ -370,7 +370,7 @@
     <string name="media_menu_media_link">Medialänk</string>
     <string name="status_menu_share_via_fxembed">Dela via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Dela via Fixvx</string>
-    <string name="media_save_success">Sparad till Nedladdningar</string>
+    <string name="media_save_success">Sparad</string>
     <string name="media_save_fail">Misslyckades med att spara</string>
     <string name="media_alt_text">Alt-text</string>
     <string name="media_is_downloading">Media laddas fortfarande ner. Försök igen om en stund.</string>

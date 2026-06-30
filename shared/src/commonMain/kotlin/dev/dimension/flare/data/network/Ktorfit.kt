@@ -52,6 +52,9 @@ public fun ktorClient(
         config.invoke(this)
         install(Logging) {
             logger = FlareLogger
+            filter {
+                BuildConfig.debug || DebugRepository.isEnabled
+            }
             level =
                 if (BuildConfig.debug) {
                     LogLevel.ALL

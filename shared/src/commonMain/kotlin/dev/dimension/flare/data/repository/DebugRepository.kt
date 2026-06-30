@@ -18,6 +18,8 @@ internal object DebugRepository {
 
     val enabled get() = _enabled.asSharedFlow()
     val messages get() = _messages.asSharedFlow()
+    internal val isEnabled: Boolean
+        get() = _enabled.value
 
     internal fun setEnabled(enabled: Boolean) {
         _enabled.value = enabled

@@ -39,6 +39,45 @@ class MediaFileNamePolicyTest {
     }
 
     @Test
+    fun statusMediaFileNamesAddsIndexSuffixes() {
+        val medias =
+            listOf(
+                UiMedia.Image(url = "https://example.com/image.png"),
+                UiMedia.Gif(
+                    url = "https://example.com/animation",
+                    previewUrl = "https://example.com/animation.jpg",
+                    description = null,
+                    height = 100f,
+                    width = 100f,
+                ),
+                UiMedia.Video(
+                    url = "https://example.com/video.mov",
+                    thumbnailUrl = "https://example.com/video.jpg",
+                    description = null,
+                    height = 1080f,
+                    width = 1920f,
+                ),
+            )
+
+        val mediaByFileName =
+            MediaFileNamePolicy.statusMediaFileNames(
+                statusKey = "post/123",
+                userHandle = "alice:bsky.social",
+                medias = medias,
+            )
+
+        assertEquals(
+            listOf(
+                "post_123_alice_bsky.social_01.png",
+                "post_123_alice_bsky.social_02.gif",
+                "post_123_alice_bsky.social_03.mov",
+            ),
+            mediaByFileName.keys.toList(),
+        )
+        assertEquals(medias, mediaByFileName.values.toList())
+    }
+
+    @Test
     fun rawMediaFileNameUsesUrlFileName() {
         val media = UiMedia.Image(url = "https://example.com/path/original@png?size=large")
 
@@ -81,6 +120,30 @@ class MediaFileNamePolicyTest {
         val fileName = MediaFileNamePolicy.rawMediaFileName(media)
 
         assertEquals("original.mp3", fileName)
+    }
+
+    @Test
+    fun rawMediaFileNamesAddsIndexSuffixes() {
+        val medias =
+            listOf(
+                UiMedia.Image(url = "https://example.com/path/original@png?size=large"),
+                UiMedia.Audio(
+                    url = "https://example.com/media/original",
+                    description = null,
+                    previewUrl = null,
+                ),
+            )
+
+        val mediaByFileName = MediaFileNamePolicy.rawMediaFileNames(medias)
+
+        assertEquals(
+            listOf(
+                "original_01.png",
+                "original_02.mp3",
+            ),
+            mediaByFileName.keys.toList(),
+        )
+        assertEquals(medias, mediaByFileName.values.toList())
     }
 
     @Test

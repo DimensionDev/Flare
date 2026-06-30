@@ -14,12 +14,25 @@ struct MacMediaExportSource: Identifiable, Hashable {
         case image
         case gif
         case video
+        case audio
     }
 
     let kind: Kind
     let url: String
     let customHeaders: [String: String]?
     let shareContext: MacMediaShareContext?
+
+    init(
+        kind: Kind,
+        url: String,
+        customHeaders: [String: String]?,
+        shareContext: MacMediaShareContext?
+    ) {
+        self.kind = kind
+        self.url = url
+        self.customHeaders = customHeaders
+        self.shareContext = shareContext
+    }
 
     var id: String {
         [
@@ -40,8 +53,44 @@ struct MacMediaExportSource: Identifiable, Hashable {
         switch kind {
         case .image, .gif:
             true
-        case .video:
+        case .video, .audio:
             false
+        }
+    }
+
+    init?(
+        media: any UiMedia,
+        shareContext: MacMediaShareContext?
+    ) {
+        switch onEnum(of: media) {
+        case .image(let image):
+            self.init(
+                kind: .image,
+                url: image.url,
+                customHeaders: image.customHeaders,
+                shareContext: shareContext
+            )
+        case .gif(let gif):
+            self.init(
+                kind: .gif,
+                url: gif.url,
+                customHeaders: gif.customHeaders,
+                shareContext: shareContext
+            )
+        case .video(let video):
+            self.init(
+                kind: .video,
+                url: video.url,
+                customHeaders: video.customHeaders,
+                shareContext: shareContext
+            )
+        case .audio(let audio):
+            self.init(
+                kind: .audio,
+                url: audio.url,
+                customHeaders: audio.customHeaders,
+                shareContext: shareContext
+            )
         }
     }
 }
@@ -85,6 +134,61 @@ enum MacMediaFileExporter {
 
         try copyReplacingItem(at: fileURL, to: destinationURL)
         return true
+    }
+
+    static func saveAll(
+        mediaByFileName: [String: any UiMedia]
+    ) async throws -> MacMediaBatchExportResult {
+        guard !mediaByFileName.isEmpty else {
+            return MacMediaBatchExportResult(succeededFileNames: [], failedFileNames: [])
+        }
+
+        guard let destinationDirectoryURL = await selectDestinationDirectoryURL() else {
+            return MacMediaBatchExportResult(succeededFileNames: [], failedFileNames: [])
+        }
+
+        let notification = MacMediaExportNotification()
+        let didAccess = destinationDirectoryURL.startAccessingSecurityScopedResource()
+        defer {
+            if didAccess {
+                destinationDirectoryURL.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        notification.progress()
+        var succeededFileNames: [String] = []
+        var failedFileNames: [String] = []
+
+        for (fileName, media) in mediaByFileName {
+            do {
+                guard let source = MacMediaExportSource(media: media, shareContext: nil) else {
+                    failedFileNames.append(fileName)
+                    continue
+                }
+                let downloadedURL = try await downloadFile(source: source)
+                let destinationURL = destinationDirectoryURL.appendingPathComponent(
+                    MediaFileNamePolicy.shared.safeLocalFileName(
+                        value: fileName,
+                        fallback: "media"
+                    )
+                )
+                try copyReplacingItem(at: downloadedURL, to: destinationURL)
+                succeededFileNames.append(fileName)
+            } catch {
+                failedFileNames.append(fileName)
+            }
+        }
+
+        if failedFileNames.isEmpty {
+            notification.success()
+        } else {
+            notification.error()
+        }
+
+        return MacMediaBatchExportResult(
+            succeededFileNames: succeededFileNames,
+            failedFileNames: failedFileNames
+        )
     }
 
     static func saveRemoteFile(
@@ -165,6 +269,22 @@ enum MacMediaFileExporter {
                 url: remoteURL,
                 shareContext: source.shareContext,
                 extensionName: extensionName
+            )
+            try copyReplacingItem(at: downloadedURL, to: fileURL)
+            return fileURL
+
+        case .audio:
+            let (downloadedURL, response) = try await downloadRemoteFile(
+                url: remoteURL,
+                customHeaders: source.customHeaders
+            )
+            guard isSuccessfulHTTPResponse(response) else {
+                throw MacMediaExportError.downloadFailed
+            }
+            let fileURL = temporaryFileURL(
+                url: remoteURL,
+                shareContext: source.shareContext,
+                extensionName: audioFileExtension(url: remoteURL, response: response)
             )
             try copyReplacingItem(at: downloadedURL, to: fileURL)
             return fileURL
@@ -262,6 +382,30 @@ enum MacMediaFileExporter {
         return (200..<300).contains(response.statusCode)
     }
 
+    private static func audioFileExtension(url: URL, response: URLResponse?, fallback: String = "mp3") -> String {
+        let pathExtension = url.pathExtension.lowercased()
+        if !pathExtension.isEmpty {
+            return pathExtension
+        }
+
+        switch response?.mimeType?.lowercased() {
+        case "audio/aac":
+            return "aac"
+        case "audio/mp4", "audio/x-m4a":
+            return "m4a"
+        case "audio/mpeg":
+            return "mp3"
+        case "audio/ogg":
+            return "ogg"
+        case "audio/wav", "audio/x-wav":
+            return "wav"
+        case "audio/webm":
+            return "webm"
+        default:
+            return fallback
+        }
+    }
+
     private static func copyReplacingItem(at sourceURL: URL, to destinationURL: URL) throws {
         let didAccess = destinationURL.startAccessingSecurityScopedResource()
         defer {
@@ -289,6 +433,31 @@ enum MacMediaFileExporter {
         }
     }
 
+    private static func selectDestinationDirectoryURL() async -> URL? {
+        await withCheckedContinuation { continuation in
+            let panel = NSOpenPanel()
+            panel.canChooseFiles = false
+            panel.canChooseDirectories = true
+            panel.canCreateDirectories = true
+            panel.allowsMultipleSelection = false
+            panel.begin { response in
+                continuation.resume(returning: response == .OK ? panel.url : nil)
+            }
+        }
+    }
+}
+
+struct MacMediaBatchExportResult {
+    let succeededFileNames: [String]
+    let failedFileNames: [String]
+
+    var totalCount: Int {
+        succeededFileNames.count + failedFileNames.count
+    }
+
+    var isSuccess: Bool {
+        failedFileNames.isEmpty
+    }
 }
 
 private enum MacMediaExportError: LocalizedError {

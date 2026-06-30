@@ -15,6 +15,19 @@ public object MediaFileNamePolicy {
         return "${key}_$handle.$extension"
     }
 
+    public fun statusMediaFileNames(
+        statusKey: String,
+        userHandle: String,
+        medias: List<UiMedia>,
+    ): Map<String, UiMedia> {
+        val key = sanitizeFileName(statusKey)
+        val handle = sanitizeFileName(userHandle)
+        return indexedMediaFileNames(medias) { media ->
+            val extension = extensionFromUrl(url = media.url, fallbackExtension = media.fallbackExtension)
+            "${key}_${handle}.$extension"
+        }
+    }
+
     public fun rawMediaFileName(media: UiMedia): String {
         val path = media.url.cleanUrlPath()
         var fileName = path.substringAfterLast("/").substringAfterLast("\\")
@@ -30,6 +43,9 @@ public object MediaFileNamePolicy {
             "$fileName.${media.fallbackExtension}"
         }
     }
+
+    public fun rawMediaFileNames(medias: List<UiMedia>): Map<String, UiMedia> =
+        indexedMediaFileNames(medias, ::rawMediaFileName)
 
     public fun articleFileName(
         name: String?,
@@ -129,6 +145,33 @@ public object MediaFileNamePolicy {
         val name = substringAfterLast("/").substringAfterLast("\\")
         val lastDotIndex = name.lastIndexOf('.')
         return lastDotIndex > 0 && lastDotIndex < name.length - 1
+    }
+
+    private fun indexedMediaFileNames(
+        medias: List<UiMedia>,
+        fileName: (UiMedia) -> String,
+    ): Map<String, UiMedia> {
+        val indexWidth = medias.size.toString().length.coerceAtLeast(2)
+        return medias
+            .mapIndexed { index, media ->
+                fileName(media).withIndexSuffix(
+                    index = index + 1,
+                    width = indexWidth,
+                ) to media
+            }.toMap()
+    }
+
+    private fun String.withIndexSuffix(
+        index: Int,
+        width: Int,
+    ): String {
+        val suffix = index.toString().padStart(width, '0')
+        val extensionIndex = lastIndexOf('.')
+        return if (extensionIndex > 0 && extensionIndex < length - 1) {
+            "${substring(0, extensionIndex)}_$suffix${substring(extensionIndex)}"
+        } else {
+            "${this}_$suffix"
+        }
     }
 
     private fun String.replaceUnsafeDownloadFileNameCharacters(): String =

@@ -5,6 +5,7 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.media_save_fail
 import dev.dimension.flare.media_save_success
 import dev.dimension.flare.ui.component.ComposeInAppNotification
+import dev.dimension.flare.ui.model.UiMedia
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.header
@@ -33,7 +34,8 @@ internal class DesktopDownloadManager(
         overwrite: Boolean = true,
         customHeaders: Map<String, String>? = null,
         onProgress: (DownloadProgress) -> Unit = {},
-    ) = withContext(Dispatchers.IO) {
+        notify: Boolean = true,
+    ): Boolean = withContext(Dispatchers.IO) {
         require(url.isNotBlank()) { "url must not be blank" }
         require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
         if (targetFile.exists() && !overwrite) {
@@ -61,14 +63,55 @@ internal class DesktopDownloadManager(
                     )
                 }
             moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
-            inAppNotification.message(Res.string.media_save_success)
+            if (notify) {
+                inAppNotification.message(Res.string.media_save_success)
+            }
+            true
         } catch (t: Exception) {
-            inAppNotification.message(
-                Res.string.media_save_fail,
-                success = false,
-            )
+            if (notify) {
+                inAppNotification.message(
+                    Res.string.media_save_fail,
+                    success = false,
+                )
+            }
             tempFile.delete()
+            false
         }
+    }
+
+    suspend fun downloadAll(
+        mediaByFileName: Map<String, UiMedia>,
+        targetDirectory: File,
+        overwrite: Boolean = true,
+    ): MediaDownloadBatchResult {
+        val succeededFileNames = mutableListOf<String>()
+        val failedFileNames = mutableListOf<String>()
+        mediaByFileName.forEach { (fileName, media) ->
+            val targetFile =
+                File(
+                    targetDirectory,
+                    MediaFileNamePolicy.safeLocalFileName(fileName, fallback = "media"),
+                )
+            val success =
+                runCatching {
+                    download(
+                        url = media.url,
+                        targetFile = targetFile,
+                        overwrite = overwrite,
+                        customHeaders = media.customHeaders,
+                        notify = false,
+                    )
+                }.getOrDefault(false)
+            if (success) {
+                succeededFileNames += fileName
+            } else {
+                failedFileNames += fileName
+            }
+        }
+        return MediaDownloadBatchResult(
+            succeededFileNames = succeededFileNames,
+            failedFileNames = failedFileNames,
+        )
     }
 
     override fun close() {

@@ -972,39 +972,6 @@ private extension UiMedia {
     }
 }
 
-private extension MacMediaExportSource {
-    init?(
-        media: any UiMedia,
-        shareContext: MacMediaShareContext?
-    ) {
-        switch onEnum(of: media) {
-        case .image(let image):
-            self.init(
-                kind: .image,
-                url: image.url,
-                customHeaders: image.customHeaders,
-                shareContext: shareContext
-            )
-        case .gif(let gif):
-            self.init(
-                kind: .gif,
-                url: gif.url,
-                customHeaders: gif.customHeaders,
-                shareContext: shareContext
-            )
-        case .video(let video):
-            self.init(
-                kind: .video,
-                url: video.url,
-                customHeaders: video.customHeaders,
-                shareContext: shareContext
-            )
-        case .audio:
-            return nil
-        }
-    }
-}
-
 private struct MacMediaExportAlert: Identifiable {
     let id = UUID()
     let title: String

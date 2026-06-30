@@ -16,6 +16,7 @@ import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSpec
 import dev.dimension.flare.ui.component.Media3VideoCacheManager
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Provided
@@ -110,6 +111,31 @@ internal class AndroidDownloadManager(
             }
         }
         return downloadId
+    }
+
+    suspend fun downloadAllMedia(mediaByFileName: Map<String, UiMedia>): MediaDownloadBatchResult {
+        val succeededFileNames = mutableListOf<String>()
+        val failedFileNames = mutableListOf<String>()
+        mediaByFileName.forEach { (fileName, media) ->
+            val success =
+                runCatching {
+                    saveMedia(
+                        uri = media.url,
+                        fileName = fileName,
+                        customHeaders = media.customHeaders,
+                        onDownloadStarted = {},
+                    )
+                }.getOrDefault(false)
+            if (success) {
+                succeededFileNames += fileName
+            } else {
+                failedFileNames += fileName
+            }
+        }
+        return MediaDownloadBatchResult(
+            succeededFileNames = succeededFileNames,
+            failedFileNames = failedFileNames,
+        )
     }
 
     /**

@@ -9,9 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
@@ -122,8 +122,16 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
         val accounts by accountsFlow.collectAsUiState()
         val selectedAccount by selectedAccountFlow.collectAsState()
         val selectedAccountType by selectedAccountTypeFlow.collectAsState(AccountType.Guest)
-        val users = usersFlow.cachePagingState()
-        val hashtags = hashtagsFlow.cachePagingState()
+        val users =
+            remember(usersFlow, scope) {
+                usersFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
+        val hashtags =
+            remember(hashtagsFlow, scope) {
+                hashtagsFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
         val status =
             remember {
                 statusFlow(scope)

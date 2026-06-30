@@ -9,11 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
@@ -120,11 +122,16 @@ public class SearchPresenter(
     @Composable
     override fun body(): SearchState {
         val scope = rememberCoroutineScope()
-        val users = usersFlow.cachePagingState()
+        val users =
+            remember(usersFlow, scope) {
+                usersFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
         val status =
             remember {
                 statusFlow(scope)
-            }.cachePagingState()
+            }.collectAsLazyPagingItems()
+                .toPagingState()
         val accounts by accountsFlow.collectAsUiState()
         val query by queryFlow.collectAsState()
         val selectedAccount by selectedAccountFlow.collectAsState()

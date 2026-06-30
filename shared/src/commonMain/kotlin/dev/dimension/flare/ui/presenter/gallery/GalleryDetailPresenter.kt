@@ -7,9 +7,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.emptyFlow
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
@@ -92,8 +94,16 @@ public class GalleryDetailPresenter(
     override fun body(): State {
         val scope = rememberCoroutineScope()
         val detail by detailCacheFlow.flattenUiState()
-        val comments = commentsFlow.cachePagingState(scope)
-        val recommendations = recommendationsFlow.cachePagingState(scope)
+        val comments =
+            remember(commentsFlow, scope) {
+                commentsFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
+        val recommendations =
+            remember(recommendationsFlow, scope) {
+                recommendationsFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
 
         remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()
 

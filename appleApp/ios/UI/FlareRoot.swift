@@ -68,30 +68,17 @@ struct FlareRoot: View {
             .backport
             .tabBarMinimizeBehavior(.onScrollDown)
             .background(Color(.systemGroupedBackground))
-            .overlay(alignment: .top) {
-                if let toast = inAppNotification.loginExpiredToast {
-                    LoginExpiredToastOverlay(
-                        toast: toast,
-                        onRelogin: {
-                            reloginRoute = .relogin(toast.accountKey, toast.platformType)
-                            inAppNotification.loginExpiredToast = nil
-                        },
-                        onDismiss: {
-                            inAppNotification.loginExpiredToast = nil
-                        }
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
-            }
-            .animation(.easeInOut(duration: 0.2), value: inAppNotification.loginExpiredToast?.id)
             .sheet(item: $reloginRoute) { route in
                 NavigationStack {
                     route.view(
                         onNavigate: { reloginRoute = $0 },
                         goBack: { reloginRoute = nil }
                     )
+                }
+            }
+            .onAppear {
+                inAppNotification.onRelogin = { toast in
+                    reloginRoute = .relogin(toast.accountKey, toast.platformType)
                 }
             }
         } loadingContent: {
@@ -167,24 +154,6 @@ struct BackportFlareRoot: View {
                 }
             }
             .background(Color(.systemGroupedBackground))
-            .overlay(alignment: .top) {
-                if let toast = inAppNotification.loginExpiredToast {
-                    LoginExpiredToastOverlay(
-                        toast: toast,
-                        onRelogin: {
-                            reloginRoute = .relogin(toast.accountKey, toast.platformType)
-                            inAppNotification.loginExpiredToast = nil
-                        },
-                        onDismiss: {
-                            inAppNotification.loginExpiredToast = nil
-                        }
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
-            }
-            .animation(.easeInOut(duration: 0.2), value: inAppNotification.loginExpiredToast?.id)
             .sheet(item: $reloginRoute) { route in
                 NavigationStack {
                     route.view(
@@ -193,46 +162,14 @@ struct BackportFlareRoot: View {
                     )
                 }
             }
+            .onAppear {
+                inAppNotification.onRelogin = { toast in
+                    reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                }
+            }
         } loadingContent: {
             SplashScreen()
         }
-    }
-}
-
-private struct LoginExpiredToastOverlay: View {
-    let toast: LoginExpiredToast
-    let onRelogin: () -> Void
-    let onDismiss: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "person.badge.shield.exclamationmark")
-                .font(.title3)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "login_expired", defaultValue: "Login session expired"))
-                    .font(.headline)
-                Text("\(toast.accountKey)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            Spacer()
-            Button {
-                onRelogin()
-            } label: {
-                Text(String(localized: "login_expired_relogin", defaultValue: "Log in again"))
-            }
-            .buttonStyle(.borderedProminent)
-            Button {
-                onDismiss()
-            } label: {
-                Image(systemName: "xmark")
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(radius: 12)
     }
 }
 

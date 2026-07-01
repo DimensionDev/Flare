@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 private const val LOGIN_ACTION = "login"
 
@@ -85,12 +86,30 @@ private class VVOWebCookieLoginHandler(
                         domain = vvoHost,
                     )
                 }.orEmpty()
-        _effects.emit(
-            LoginEffect.OpenWebCookieLogin(
-                url = "https://$vvoHost/message",
-                initialCookies = initialCookies,
-            ),
-        )
+        val accountKey = context.reloginTarget?.accountKey
+        if (accountKey != null) {
+            val service =
+                VVOService(
+                    accountService
+                        .credentialFlow<VVoCredential>(accountKey)
+                        .map { it.chocolate },
+                )
+            val config = service.config()
+            val loginUrl = config.data?.loginUrl ?: "https://$vvoHost/message"
+            _effects.emit(
+                LoginEffect.OpenWebCookieLogin(
+                    url = loginUrl,
+                    initialCookies = initialCookies,
+                ),
+            )
+        } else {
+            _effects.emit(
+                LoginEffect.OpenWebCookieLogin(
+                    url = "https://$vvoHost/message",
+                    initialCookies = initialCookies,
+                ),
+            )
+        }
     }
 
     override suspend fun resume(value: String) {

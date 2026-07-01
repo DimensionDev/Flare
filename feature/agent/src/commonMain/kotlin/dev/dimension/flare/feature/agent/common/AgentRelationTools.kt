@@ -459,9 +459,7 @@ private suspend fun AgentToolSession.availableRelationUsers(): List<UiProfile> =
 
                     is AgentMessagePart.Actions,
                     is AgentMessagePart.Text,
-                    -> {
-                        Unit
-                    }
+                    -> {}
                 }
             }
     }.distinctBy { it.platformType to it.key }

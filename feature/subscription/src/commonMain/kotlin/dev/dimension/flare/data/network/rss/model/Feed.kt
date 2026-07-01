@@ -271,7 +271,7 @@ internal sealed interface Feed {
             @XmlElement(true)
             val lastBuildDate: String? = null,
             @XmlElement(true)
-            val category: String? = null,
+            val category: List<String> = emptyList(),
             @XmlElement(true)
             val generator: String? = null,
             @XmlElement(true)
@@ -347,7 +347,7 @@ internal sealed interface Feed {
             @XmlElement(true)
             val author: String? = null,
             @XmlElement(true)
-            val category: String? = null,
+            val category: List<String> = emptyList(),
             @XmlElement(true)
             val comments: String? = null,
             @XmlElement(true)
@@ -363,7 +363,7 @@ internal sealed interface Feed {
             val source: Source? = null,
             @XmlElement(true)
             @XmlSerialName(value = "content", prefix = "media", namespace = "http://search.yahoo.com/mrss/")
-            val mediaContent: Media? = null,
+            val mediaContent: List<Media> = emptyList(),
         )
 
         @Serializable

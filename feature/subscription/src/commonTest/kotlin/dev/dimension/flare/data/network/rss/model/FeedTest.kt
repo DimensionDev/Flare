@@ -206,8 +206,8 @@ class FeedTest {
 }
 
 private val testXml =
-    XML {
-        defaultPolicy {
+    XML.v1 {
+        policy {
             autoPolymorphic = true
             ignoreUnknownChildren()
         }

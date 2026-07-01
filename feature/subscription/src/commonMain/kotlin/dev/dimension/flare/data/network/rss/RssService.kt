@@ -16,8 +16,8 @@ import nl.adaptivity.xmlutil.serialization.XML
 
 internal object RssService {
     private val xml by lazy {
-        XML {
-            defaultPolicy {
+        XML.v1 {
+            policy {
                 autoPolymorphic = true
                 ignoreUnknownChildren()
             }
@@ -158,8 +158,8 @@ private val HEADER_CHARSET_REGEX =
     Regex("""(?:^|;)\s*charset\s*=\s*"?([^";\s]+)""", RegexOption.IGNORE_CASE)
 
 private val RssServiceXml by lazy {
-    XML {
-        defaultPolicy {
+    XML.v1 {
+        policy {
             autoPolymorphic = true
             ignoreUnknownChildren()
         }

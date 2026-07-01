@@ -413,9 +413,7 @@ private fun RichTextScope.RenderNode(
             context.builder.append(node.text())
         }
 
-        else -> {
-            Unit
-        }
+        else -> {}
     }
 }
 

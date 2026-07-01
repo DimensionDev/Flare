@@ -73,20 +73,5 @@ kotlin {
     }
 }
 
-ktorfit {
-    compilerPluginVersion.set("2.3.4")
-}
 
-afterEvaluate {
-    val runKtlintFormatOverCommonMainSourceSet by tasks
-    val runKtlintCheckOverCommonMainSourceSet by tasks
-    runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    runKtlintCheckOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    tasks {
-        configureEach {
-            if (this.name != "kspCommonMainKotlinMetadata" && this.name.startsWith("ksp")) {
-                this.dependsOn("kspCommonMainKotlinMetadata")
-            }
-        }
-    }
-}
+

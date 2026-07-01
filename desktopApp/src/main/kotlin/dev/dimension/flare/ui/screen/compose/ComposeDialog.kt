@@ -229,9 +229,7 @@ fun ComposeDialog(
                         onBack?.invoke()
                     }
 
-                    ContentDialogButton.Close -> {
-                        Unit
-                    }
+                    ContentDialogButton.Close -> {}
                 }
             },
         )

@@ -828,9 +828,7 @@ private fun LazyStaggeredGridScope.compactCommentsPreviewItems(
                 }
             }
         }
-        onEmpty {
-            Unit
-        }
+        onEmpty {}
         onError { error ->
             item(span = StaggeredGridItemSpan.FullLine) {
                 SectionTitle("Comments")

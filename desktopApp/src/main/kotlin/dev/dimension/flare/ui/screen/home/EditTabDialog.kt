@@ -115,9 +115,7 @@ internal fun EditTabDialog(
                     }
                 }
 
-                ContentDialogButton.Secondary -> {
-                    Unit
-                }
+                ContentDialogButton.Secondary -> {}
 
                 ContentDialogButton.Close -> {
                     onDismissRequest()

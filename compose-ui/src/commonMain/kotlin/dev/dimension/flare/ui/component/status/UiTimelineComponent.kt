@@ -384,9 +384,7 @@ private fun UserContent(
                             )
                         }
 
-                        else -> {
-                            Unit
-                        }
+                        else -> {}
                     }
                 }
             }

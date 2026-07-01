@@ -69,8 +69,12 @@ public class ExportOPMLPresenter : PresenterBase<UiState<String>>() {
                     ),
             )
 
-        return XML {
-            indentString = "  "
-        }.encodeToString(Opml.serializer(), opml)
+        return XML
+            .v1 {
+                indentString = "  "
+            }.encodeToString(
+                Opml.serializer(),
+                opml,
+            )
     }
 }

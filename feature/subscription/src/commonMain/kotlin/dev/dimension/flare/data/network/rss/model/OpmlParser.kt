@@ -15,8 +15,8 @@ internal fun decodeOpml(opmlContent: String): Opml {
 }
 
 private val opmlXml =
-    XML {
-        defaultPolicy {
+    XML.v1 {
+        policy {
             autoPolymorphic = true
             ignoreUnknownChildren()
         }

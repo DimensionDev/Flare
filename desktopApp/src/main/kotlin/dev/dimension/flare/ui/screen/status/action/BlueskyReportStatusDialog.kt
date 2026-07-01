@@ -106,9 +106,7 @@ internal fun BlueskyReportStatusDialog(
                     }
                 }
 
-                ContentDialogButton.Secondary -> {
-                    Unit
-                }
+                ContentDialogButton.Secondary -> {}
 
                 ContentDialogButton.Close -> {
                     onBack.invoke()

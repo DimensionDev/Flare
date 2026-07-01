@@ -68,9 +68,7 @@ internal fun MisskeyReportDialog(
                     onBack()
                 }
 
-                ContentDialogButton.Secondary -> {
-                    Unit
-                }
+                ContentDialogButton.Secondary -> {}
 
                 ContentDialogButton.Close -> {
                     onBack()

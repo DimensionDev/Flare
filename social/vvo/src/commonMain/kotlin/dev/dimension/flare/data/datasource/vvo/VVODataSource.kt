@@ -289,9 +289,7 @@ internal class VVODataSource(
                         )
                     }
 
-                    PagingRequest.Refresh -> {
-                        Unit
-                    }
+                    PagingRequest.Refresh -> {}
                 }
 
                 val status = loadStatusDetail(statusKey)

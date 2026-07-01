@@ -203,9 +203,7 @@ public fun ImmutableList<ActionMenu>.applyPostActionLayout(config: PostActionLay
                 }
             }
 
-            ActionMenu.Divider -> {
-                Unit
-            }
+            ActionMenu.Divider -> {}
         }
     }
 

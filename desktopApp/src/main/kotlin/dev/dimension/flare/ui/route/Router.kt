@@ -655,11 +655,10 @@ internal fun Router(
                 entry<Route.ServiceSelect> {
                     ServiceSelectScreen(
                         onBack = onBack,
-                        onWebViewLogin = { url, initialCookies, callback ->
+                        onWebViewLogin = { url, callback ->
                             navigate(
                                 Route.WebViewLogin(
                                     url = url,
-                                    initialCookies = initialCookies,
                                     callback = callback,
                                 ),
                             )
@@ -671,11 +670,10 @@ internal fun Router(
                     ReloginScreen(
                         target = args.target,
                         onBack = onBack,
-                        onWebViewLogin = { url, initialCookies, callback ->
+                        onWebViewLogin = { url, callback ->
                             navigate(
                                 Route.WebViewLogin(
                                     url = url,
-                                    initialCookies = initialCookies,
                                     callback = callback,
                                 ),
                             )
@@ -1110,7 +1108,6 @@ internal fun Router(
                 entry<Route.WebViewLogin> { args ->
                     WebViewLoginScreen(
                         url = args.url,
-                        initialCookies = args.initialCookies,
                         callback = args.callback,
                         onBack = onBack,
                     )

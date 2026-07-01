@@ -7,7 +7,6 @@ import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
-import dev.dimension.flare.data.repository.credentialFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -21,9 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 
 private const val LOGIN_ACTION = "login"
 
@@ -72,44 +69,11 @@ private class VVOWebCookieLoginHandler(
 
     override suspend fun perform(actionId: String) {
         if (actionId != LOGIN_ACTION) return
-        val initialCookies =
-            context.reloginTarget
-                ?.accountKey
-                ?.let { accountKey ->
-                    accountService
-                        .credentialFlow<VVoCredential>(accountKey)
-                        .firstOrNull()
-                        ?.chocolate
-                }?.let { chocolate ->
-                    cookieHeaderToWebCookieSeeds(
-                        cookieHeader = chocolate,
-                        domain = vvoHost,
-                    )
-                }.orEmpty()
-        val accountKey = context.reloginTarget?.accountKey
-        if (accountKey != null) {
-            val service =
-                VVOService(
-                    accountService
-                        .credentialFlow<VVoCredential>(accountKey)
-                        .map { it.chocolate },
-                )
-            val config = service.config()
-            val loginUrl = config.data?.loginUrl ?: "https://$vvoHost/message"
-            _effects.emit(
-                LoginEffect.OpenWebCookieLogin(
-                    url = loginUrl,
-                    initialCookies = initialCookies,
-                ),
-            )
-        } else {
-            _effects.emit(
-                LoginEffect.OpenWebCookieLogin(
-                    url = "https://$vvoHost/message",
-                    initialCookies = initialCookies,
-                ),
-            )
-        }
+        _effects.emit(
+            LoginEffect.OpenWebCookieLogin(
+                url = "https://$vvoHost/message",
+            ),
+        )
     }
 
     override suspend fun resume(value: String) {

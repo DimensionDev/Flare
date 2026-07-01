@@ -99179,7 +99179,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved"
+            "value" : "Saved to Files"
           }
         },
         "zh-Hans" : {
@@ -104266,7 +104266,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Analyzing this profile..."
+            "value" : "Analyzing this profile…"
           }
         },
         "es" : {

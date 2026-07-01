@@ -425,7 +425,6 @@ private struct LoginFlowView: View {
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
-    @State private var webCookieInitialCookies: [WebCookieSeed] = []
 
     init(
         handler: @escaping () -> LoginMethodHandler,
@@ -488,7 +487,6 @@ private struct LoginFlowView: View {
                 }
             case .openWebCookieLogin(let webCookie):
                 webCookieUrl = webCookie.url
-                webCookieInitialCookies = webCookie.initialCookies
             }
         }
         .sheet(isPresented: Binding(
@@ -507,7 +505,7 @@ private struct LoginFlowView: View {
                         }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
-                    }, url: webCookieUrl, initialCookies: webCookieInitialCookies)
+                    }, url: webCookieUrl)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button {
@@ -747,10 +745,9 @@ private struct MacOSWebLoginScreen: View {
 
     init(
         onCookie: @escaping (String) -> Void,
-        url: String,
-        initialCookies: [WebCookieSeed] = []
+        url: String
     ) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url, initialCookies: initialCookies))
+        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
         self.url = url
     }
 
@@ -805,8 +802,7 @@ private final class MacOSWebLoginViewModel: ObservableObject {
 
     init(
         onCookie: @escaping (String) -> Void,
-        url: String,
-        initialCookies: [WebCookieSeed]
+        url: String
     ) {
         self.delegate = MacOSCookieNavigationDelegate {
             WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
@@ -814,7 +810,7 @@ private final class MacOSWebLoginViewModel: ObservableObject {
                 onCookie(cookieString)
             }
         }
-        clearCookie(initialCookies: initialCookies)
+        clearCookie()
     }
 
     var configuration: WKWebViewConfiguration {
@@ -823,16 +819,14 @@ private final class MacOSWebLoginViewModel: ObservableObject {
         return configuration
     }
 
-    private func clearCookie(initialCookies: [WebCookieSeed]) {
+    private func clearCookie() {
         let dataStore = WKWebsiteDataStore.default()
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             dataStore.removeData(
                 ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
                 for: records,
                 completionHandler: {
-                    dataStore.httpCookieStore.setCookies(initialCookies) {
-                        self.canShowWebView = true
-                    }
+                    self.canShowWebView = true
                 }
             )
         }
@@ -848,41 +842,6 @@ private final class MacOSWebLoginViewModel: ObservableObject {
             return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
         }
         return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
-}
-
-private extension WKHTTPCookieStore {
-    func setCookies(_ seeds: [WebCookieSeed], completion: @escaping () -> Void) {
-        guard !seeds.isEmpty else {
-            completion()
-            return
-        }
-        let group = DispatchGroup()
-        for seed in seeds {
-            guard let cookie = HTTPCookie(seed: seed) else {
-                continue
-            }
-            group.enter()
-            setCookie(cookie) {
-                group.leave()
-            }
-        }
-        group.notify(queue: .main, execute: completion)
-    }
-}
-
-private extension HTTPCookie {
-    convenience init?(seed: WebCookieSeed) {
-        var properties: [HTTPCookiePropertyKey: Any] = [
-            .name: seed.name,
-            .value: seed.value,
-            .domain: seed.domain,
-            .path: seed.path,
-        ]
-        if seed.secure {
-            properties[.secure] = "TRUE"
-        }
-        self.init(properties: properties)
     }
 }
 

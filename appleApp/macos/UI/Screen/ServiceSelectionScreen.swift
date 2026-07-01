@@ -393,8 +393,7 @@ struct ReloginScreen: View {
                 let handler = state.createLoginHandler(methodType: selectedMethod.wrappedValue)
                 LoginFlowView(
                     handler: handler,
-                    authenticateURL: authenticate(url:),
-                    autoStart: methods.count == 1
+                    authenticateURL: authenticate(url:)
                 )
                 .id("\(target.accountKey)-\(selectedMethod.wrappedValue)")
 
@@ -418,21 +417,17 @@ struct ReloginScreen: View {
 
 private struct LoginFlowView: View {
     let authenticateURL: (String) async -> String?
-    let autoStart: Bool
 
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
     @State private var webCookieInitialCookies: [WebCookieSeed] = []
-    @State private var didAutoStart = false
 
     init(
         handler: LoginMethodHandler,
-        authenticateURL: @escaping (String) async -> String?,
-        autoStart: Bool = false
+        authenticateURL: @escaping (String) async -> String?
     ) {
         self.authenticateURL = authenticateURL
-        self.autoStart = autoStart
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler)))
     }
 
@@ -491,12 +486,6 @@ private struct LoginFlowView: View {
                 webCookieUrl = webCookie.url
                 webCookieInitialCookies = webCookie.initialCookies
             }
-        }
-        .onAppear {
-            autoStartIfNeeded()
-        }
-        .onChange(of: flowAnimationKey) { _, _ in
-            autoStartIfNeeded()
         }
         .sheet(isPresented: Binding(
             get: { webCookieUrl != nil },
@@ -562,19 +551,6 @@ private struct LoginFlowView: View {
             flowState.error ?? "",
             qrContent ?? "",
         ].joined(separator: "|")
-    }
-
-    private func autoStartIfNeeded() {
-        guard autoStart,
-              !didAutoStart,
-              !presenter.state.flowState.loading,
-              presenter.state.flowState.fields.isEmpty,
-              let action = presenter.state.flowState.actions.first(where: { $0.enabled })
-        else {
-            return
-        }
-        didAutoStart = true
-        presenter.state.perform(actionId: action.id)
     }
 
     private func authenticate(url: String) {

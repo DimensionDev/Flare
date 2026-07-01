@@ -30,7 +30,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -320,12 +319,6 @@ public fun ReloginScreenContent(
         remember(handler) { LoginFlowPresenter(handler) }.body()
     }
     var qrContent by remember(handler) { mutableStateOf<String?>(null) }
-    var autoStarted by rememberSaveable(
-        target.accountKey.id,
-        target.accountKey.host,
-        target.platformType.name,
-        selectedMethod.name,
-    ) { mutableStateOf(false) }
 
     registerDeeplinkCallback {
         if (loginState.canResume(it)) {
@@ -359,21 +352,6 @@ public fun ReloginScreenContent(
                     }
                 }
             }
-        }
-    }
-    LaunchedEffect(
-        methods,
-        selectedMethod,
-        loginState.flowState.actions,
-        loginState.flowState.fields,
-        loginState.flowState.loading,
-    ) {
-        if (methods.size != 1 || autoStarted || loginState.flowState.loading || loginState.flowState.fields.isNotEmpty()) {
-            return@LaunchedEffect
-        }
-        loginState.flowState.actions.firstOrNull { it.enabled }?.let { action ->
-            autoStarted = true
-            loginState.perform(action.id)
         }
     }
 

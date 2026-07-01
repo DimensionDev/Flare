@@ -24,7 +24,10 @@ import dev.dimension.flare.common.Message
 import dev.dimension.flare.compose_notification_error
 import dev.dimension.flare.compose_notification_success
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.notification_login_expired
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
+import io.github.composefluent.component.Button
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarSeverity
 import io.github.composefluent.component.ProgressBar
@@ -51,6 +54,7 @@ internal sealed interface Notification {
         val messageId: StringResource,
         val success: Boolean,
         val args: List<Any> = emptyList(),
+        val reloginTarget: ReloginTarget? = null,
     ) : Notification
 }
 
@@ -89,6 +93,15 @@ internal class ComposeInAppNotification : InAppNotification {
                                 null
                             },
                         ),
+                    reloginTarget =
+                        if (throwable is LoginExpiredException) {
+                            ReloginTarget(
+                                accountKey = throwable.accountKey,
+                                platformType = throwable.platformType,
+                            )
+                        } else {
+                            null
+                        },
                 ),
             )
     }
@@ -119,6 +132,7 @@ private val Message.errorTitle
 internal fun InAppNotificationComponent(
     modifier: Modifier = Modifier,
     notification: ComposeInAppNotification = koinInject(),
+    onRelogin: (ReloginTarget) -> Unit = {},
 ) {
     val source by notification.source.collectAsState()
     val content = remember(source) { source.getContentIfNotHandled() }
@@ -161,6 +175,16 @@ internal fun InAppNotificationComponent(
                             )
                         },
                         message = {
+                            it.reloginTarget?.let { target ->
+                                Button(
+                                    onClick = {
+                                        showNotification = false
+                                        onRelogin(target)
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.login_expired_relogin))
+                                }
+                            }
                         },
                         severity =
                             if (it.success) {

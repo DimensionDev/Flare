@@ -258,14 +258,16 @@ private class BlueskyPasswordLoginHandler(
                 accessToken = response.accessJwt,
                 refreshToken = response.refreshJwt,
             )
+        val accountKey =
+            MicroBlogKey(
+                id = response.did.did,
+                host = Url(baseUrl).host,
+            )
+        context.requireReloginAccount(accountKey)
         accountService.addAccount(
             account =
                 UiAccount(
-                    accountKey =
-                        MicroBlogKey(
-                            id = response.did.did,
-                            host = Url(baseUrl).host,
-                        ),
+                    accountKey = accountKey,
                     platformType = PlatformType.Bluesky,
                 ),
             credential = credential,
@@ -503,14 +505,16 @@ private class BlueskyOAuthLoginHandler(
             }
             error("OAuth token is missing required scope(s): ${missingScopes.joinToString(" ")}")
         }
+        val accountKey =
+            MicroBlogKey(
+                id = token.subject.did,
+                host = host,
+            )
+        context.requireReloginAccount(accountKey)
         accountService.addAccount(
             account =
                 UiAccount(
-                    accountKey =
-                        MicroBlogKey(
-                            id = token.subject.did,
-                            host = host,
-                        ),
+                    accountKey = accountKey,
                     platformType = PlatformType.Bluesky,
                 ),
             credential = credential,

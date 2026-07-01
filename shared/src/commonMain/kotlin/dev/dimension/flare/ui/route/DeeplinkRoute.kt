@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.route
 
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromHexString
@@ -14,6 +15,12 @@ public const val APPSCHEMA: String = "flare"
 public sealed class DeeplinkRoute {
     @Serializable
     public data object Login : DeeplinkRoute()
+
+    @Serializable
+    public data class Relogin(
+        val accountKey: MicroBlogKey,
+        val platformType: PlatformType,
+    ) : DeeplinkRoute()
 
     @Serializable
     public sealed class Timeline : DeeplinkRoute() {

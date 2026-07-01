@@ -246,6 +246,7 @@ import dev.dimension.flare.ui.presenter.ImportDataPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.presenter.settings.AiAgentEnabledPresenter
 import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
 import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
@@ -300,6 +301,7 @@ import java.util.Locale
 @Composable
 internal fun SettingsScreen(
     toLogin: () -> Unit,
+    toRelogin: (ReloginTarget) -> Unit,
     toDraftBox: () -> Unit,
     toLocalCache: () -> Unit,
     toAgentHistory: () -> Unit,
@@ -394,6 +396,7 @@ internal fun SettingsScreen(
                                                     state.accountState.setActiveAccount(it)
                                                 },
                                                 toLogin = toLogin,
+                                                toRelogin = toRelogin,
                                                 trailingContent = { user ->
                                                     Row(
                                                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,

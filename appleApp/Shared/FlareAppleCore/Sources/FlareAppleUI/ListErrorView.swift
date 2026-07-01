@@ -23,7 +23,10 @@ public struct ListErrorView: View {
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
-                    if let url = URL(string: DeeplinkRoute.Login.shared.toUri()) {
+                    if let url = reloginURL(
+                        accountKey: expiredError.accountKey,
+                        platformType: expiredError.platformType
+                    ) {
                         openURL(url)
                     }
                 } label: {
@@ -31,7 +34,7 @@ public struct ListErrorView: View {
                 }
                 .backport
                 .glassProminentButtonStyle()
-            } else if error is RequireReLoginException {
+            } else if let reloginError = error as? RequireReLoginException {
                 Image(systemName: "person.badge.shield.exclamationmark")
                     .resizable()
                     .scaledToFit()
@@ -41,7 +44,10 @@ public struct ListErrorView: View {
                     .font(.headline)
                 Text("permission_denied_message", bundle: FlareAppleUILocalization.bundle)
                 Button {
-                    if let url = URL(string: DeeplinkRoute.Login.shared.toUri()) {
+                    if let url = reloginURL(
+                        accountKey: reloginError.accountKey,
+                        platformType: reloginError.platformType
+                    ) {
                         openURL(url)
                     }
                 } label: {
@@ -72,5 +78,14 @@ public struct ListErrorView: View {
             }
         }
         .padding()
+    }
+
+    private func reloginURL(accountKey: MicroBlogKey, platformType: PlatformType) -> URL? {
+        URL(
+            string: DeeplinkRoute.Relogin(
+                accountKey: accountKey,
+                platformType: platformType
+            ).toUri()
+        )
     }
 }

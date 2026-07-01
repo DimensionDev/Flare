@@ -508,6 +508,9 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             modifier =
                                 Modifier
                                     .align(Alignment.TopCenter),
+                            onRelogin = {
+                                state.navigate(Route.Relogin(it))
+                            },
                         )
                     }
                 }

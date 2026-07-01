@@ -52,6 +52,9 @@ internal fun AccountSelectionModal(
                         toLogin = {
                             navigate(Route.ServiceSelect.Selection)
                         },
+                        toRelogin = {
+                            navigate(Route.ServiceSelect.Relogin(it))
+                        },
                         trailingContent = { user ->
                             state.activeAccount.onSuccess {
                                 RadioButton(

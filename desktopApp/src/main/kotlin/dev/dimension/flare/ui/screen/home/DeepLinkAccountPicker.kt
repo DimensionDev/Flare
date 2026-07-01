@@ -59,6 +59,10 @@ internal fun DeepLinkAccountPicker(
                             onNavigate(route)
                         },
                         toLogin = {},
+                        toRelogin = {
+                            onDismissRequest()
+                            onNavigate(Route.Relogin(it))
+                        },
                     )
                 }
                 item {

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
+import android.net.Uri
 import android.view.ViewGroup.LayoutParams
 import android.webkit.CookieManager
 import android.webkit.WebSettings
@@ -16,30 +17,39 @@ import androidx.compose.ui.draw.alpha
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
-private val userAgent =
+private val USER_AGENT_HEADERS =
     mapOf(
-        "user-agent" to "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3",
+        "User-Agent" to "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3",
         "Pragma" to "no-cache",
         "Cache-Control" to "no-cache",
     )
 
+private const val ANDROID_USER_AGENT =
+    "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3"
+
 @Composable
 internal fun WebCookieLoginScreen(
     url: String,
+    initialCookies: List<WebCookieSeed>,
     callback: (String?) -> Boolean,
     onBack: () -> Unit,
 ) {
     val webViewState = rememberWebViewState(url)
     LaunchedEffect(url) {
+        val cookieManager = CookieManager.getInstance()
         while (true) {
             webViewState.lastLoadedUrl?.let { loadedUrl ->
                 val cookies =
-                    CookieManager
-                        .getInstance()
-                        .getCookie(loadedUrl)
+                    cookieManager.getCookieHeaderForUrls(
+                        cookieLookupUrls(
+                            loadedUrl = loadedUrl,
+                            originalUrl = url,
+                        ),
+                    )
                 if (callback(cookies)) {
                     onBack()
                     break
@@ -62,17 +72,73 @@ internal fun WebCookieLoginScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(it)
                     .fillMaxSize(),
-            onCreated = {
+            onCreated = { webView ->
                 WebStorage.getInstance().deleteAllData()
-                CookieManager.getInstance().removeAllCookies(null)
-                with(it.settings) {
-                    userAgentString = userAgent.toString()
+                val cookieManager = CookieManager.getInstance()
+                cookieManager.setAcceptCookie(true)
+                cookieManager.setAcceptThirdPartyCookies(webView, true)
+                with(webView.settings) {
+                    userAgentString = ANDROID_USER_AGENT
                     javaScriptEnabled = true
                     domStorageEnabled = true
                     javaScriptCanOpenWindowsAutomatically = false
                     cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
                 }
+                cookieManager.removeAllCookies {
+                    initialCookies.forEach { seed ->
+                        cookieManager.setCookie(
+                            seed.urlForCookieStore(),
+                            seed.toAndroidCookieHeader(),
+                        )
+                    }
+                    cookieManager.flush()
+                    webView.loadUrl(url, USER_AGENT_HEADERS)
+                }
             },
         )
     }
 }
+
+private fun cookieLookupUrls(
+    loadedUrl: String,
+    originalUrl: String,
+): List<String> {
+    val loadedHost = loadedUrl.hostOrNull()
+    val originalHost = originalUrl.hostOrNull()
+    return if (loadedHost != null && originalHost != null && loadedHost.equals(originalHost, ignoreCase = true)) {
+        listOf(loadedUrl)
+    } else {
+        listOf(loadedUrl, originalUrl)
+    }
+}
+
+private fun CookieManager.getCookieHeaderForUrls(urls: List<String>): String? =
+    urls
+        .distinct()
+        .flatMap { url ->
+            getCookie(url)
+                ?.split(";")
+                .orEmpty()
+        }.map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()
+        .joinToString("; ")
+        .takeIf { it.isNotBlank() }
+
+private fun String.hostOrNull(): String? = runCatching { Uri.parse(this).host }.getOrNull()
+
+private fun WebCookieSeed.urlForCookieStore(): String = "https://$domain$path"
+
+private fun WebCookieSeed.toAndroidCookieHeader(): String =
+    buildString {
+        append(name)
+        append("=")
+        append(value)
+        append("; Domain=")
+        append(domain)
+        append("; Path=")
+        append(path)
+        if (secure) {
+            append("; Secure")
+        }
+    }

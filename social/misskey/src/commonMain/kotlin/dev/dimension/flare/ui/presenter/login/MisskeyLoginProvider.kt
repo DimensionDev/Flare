@@ -168,13 +168,15 @@ private class MisskeyOAuthLoginHandler(
         val id = response.user?.id
         requireNotNull(id) { "No user id" }
         val nodeInfo = NodeInfoService.fetchNodeInfo(host)
+        val accountKey =
+            MicroBlogKey(
+                id = id,
+                host = host,
+            )
+        context.requireReloginAccount(accountKey)
         accountService.addAccount(
             UiAccount(
-                accountKey =
-                    MicroBlogKey(
-                        id = id,
-                        host = host,
-                    ),
+                accountKey = accountKey,
                 platformType = PlatformType.Misskey,
             ),
             credential =

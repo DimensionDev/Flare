@@ -87,6 +87,7 @@ import dev.dimension.flare.ui.screen.misskey.ChannelListScreen
 import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
 import dev.dimension.flare.ui.screen.rss.ImportOPMLScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
+import dev.dimension.flare.ui.screen.serviceselect.ReloginScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.settings.AgentChatScreen
@@ -654,10 +655,27 @@ internal fun Router(
                 entry<Route.ServiceSelect> {
                     ServiceSelectScreen(
                         onBack = onBack,
-                        onWebViewLogin = { url, callback ->
+                        onWebViewLogin = { url, initialCookies, callback ->
                             navigate(
                                 Route.WebViewLogin(
                                     url = url,
+                                    initialCookies = initialCookies,
+                                    callback = callback,
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.Relogin> { args ->
+                    ReloginScreen(
+                        target = args.target,
+                        onBack = onBack,
+                        onWebViewLogin = { url, initialCookies, callback ->
+                            navigate(
+                                Route.WebViewLogin(
+                                    url = url,
+                                    initialCookies = initialCookies,
                                     callback = callback,
                                 ),
                             )
@@ -669,6 +687,9 @@ internal fun Router(
                     SettingsScreen(
                         toLogin = {
                             navigate(Route.ServiceSelect)
+                        },
+                        toRelogin = {
+                            navigate(Route.Relogin(it))
                         },
                         toDraftBox = {
                             navigate(Route.DraftBox)
@@ -1089,6 +1110,7 @@ internal fun Router(
                 entry<Route.WebViewLogin> { args ->
                     WebViewLoginScreen(
                         url = args.url,
+                        initialCookies = args.initialCookies,
                         callback = args.callback,
                         onBack = onBack,
                     )

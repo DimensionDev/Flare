@@ -510,6 +510,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 }
                 InAppNotificationComponent(
                     modifier = Modifier.align(Alignment.TopCenter),
+                    onRelogin = {
+                        state.navigate(Route.ServiceSelect.Relogin(it))
+                    },
                 )
             }
         }.onLoading {

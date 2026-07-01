@@ -10,9 +10,7 @@ import KotlinSharedUI
 final class ListErrorUIView: UIView {
     var onOpenURL: ((URL) -> Void)?
     private var onRetry: (() -> Void)?
-    private var loginDeeplinkURL: URL? {
-        URL(string: DeeplinkRoute.Login.shared.toUri())
-    }
+    private var actionURL: URL?
 
     private let iconView: UIImageView = {
         let iv = UIImageView()
@@ -93,18 +91,21 @@ final class ListErrorUIView: UIView {
             iconView.image = UIImage(systemName: "person.badge.shield.exclamationmark")
             titleLabel.text = String(format: String(localized: "error_login_expired %@"), "\(expired.accountKey)")
             button.setTitle(String(localized: "error_login_expired_action"), for: .normal)
+            actionURL = reloginURL(accountKey: expired.accountKey, platformType: expired.platformType)
             mode = .openLogin
-        } else if error is RequireReLoginException {
+        } else if let reloginError = error as? RequireReLoginException {
             iconView.image = UIImage(systemName: "person.badge.shield.exclamationmark")
             titleLabel.text = String(localized: "permission_denied_title")
             messageLabel.text = String(localized: "permission_denied_message")
             messageLabel.isHidden = false
             button.setTitle(String(localized: "error_login_expired_action"), for: .normal)
+            actionURL = reloginURL(accountKey: reloginError.accountKey, platformType: reloginError.platformType)
             mode = .openLogin
         } else {
             iconView.image = UIImage(systemName: "exclamationmark.triangle.text.page")
             titleLabel.text = String(localized: "error")
             button.setTitle(String(localized: "action_retry"), for: .normal)
+            actionURL = nil
             mode = .retry
             if let message = error.message {
                 detailLabel.text = message
@@ -118,7 +119,16 @@ final class ListErrorUIView: UIView {
         case .retry:
             onRetry?()
         case .openLogin:
-            if let url = loginDeeplinkURL { onOpenURL?(url) }
+            if let url = actionURL { onOpenURL?(url) }
         }
+    }
+
+    private func reloginURL(accountKey: MicroBlogKey, platformType: PlatformType) -> URL? {
+        URL(
+            string: DeeplinkRoute.Relogin(
+                accountKey: accountKey,
+                platformType: platformType
+            ).toUri()
+        )
     }
 }

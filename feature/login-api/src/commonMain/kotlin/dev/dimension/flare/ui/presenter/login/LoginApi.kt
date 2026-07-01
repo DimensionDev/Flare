@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
@@ -60,6 +61,19 @@ public data class LoginFlowState(
     val error: String? = null,
 )
 
+public data class ReloginTarget(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+)
+
+public data class WebCookieSeed(
+    val name: String,
+    val value: String,
+    val domain: String,
+    val path: String = "/",
+    val secure: Boolean = true,
+)
+
 public sealed interface LoginEffect {
     public data class OpenUrl(
         val url: String,
@@ -71,6 +85,7 @@ public sealed interface LoginEffect {
 
     public data class OpenWebCookieLogin(
         val url: String,
+        val initialCookies: List<WebCookieSeed> = emptyList(),
     ) : LoginEffect
 }
 
@@ -94,7 +109,54 @@ public data class LoginContext(
     val methodType: LoginMethodType,
     val onSuccess: suspend () -> Unit,
     val redirectUri: String? = null,
+    val reloginTarget: ReloginTarget? = null,
 )
+
+public fun LoginContext.requireReloginAccount(accountKey: MicroBlogKey) {
+    val target = reloginTarget ?: return
+    if (accountKey != target.accountKey) {
+        throw ReloginAccountMismatchException(
+            expected = target.accountKey,
+            actual = accountKey,
+        )
+    }
+}
+
+public class ReloginAccountMismatchException(
+    public val expected: MicroBlogKey,
+    public val actual: MicroBlogKey,
+) : IllegalArgumentException(
+        "Relogin account mismatch: expected $expected, got $actual",
+    )
+
+public fun cookieHeaderToWebCookieSeeds(
+    cookieHeader: String,
+    domain: String,
+    path: String = "/",
+    secure: Boolean = true,
+): List<WebCookieSeed> =
+    cookieHeader
+        .split(";")
+        .mapNotNull { part ->
+            val trimmed = part.trim()
+            val separator = trimmed.indexOf('=')
+            if (separator <= 0) {
+                return@mapNotNull null
+            }
+            val name = trimmed.substring(0, separator).trim()
+            val value = trimmed.substring(separator + 1).trim()
+            if (name.isEmpty()) {
+                null
+            } else {
+                WebCookieSeed(
+                    name = name,
+                    value = value,
+                    domain = domain,
+                    path = path,
+                    secure = secure,
+                )
+            }
+        }
 
 public interface LoginMethodHandler : AutoCloseable {
     public val state: StateFlow<LoginFlowState>

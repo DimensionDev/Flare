@@ -70,6 +70,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toLogin = {
                 navigate(Route.ServiceSelect.Selection)
             },
+            toRelogin = {
+                navigate(Route.ServiceSelect.Relogin(it))
+            },
             toNostrRelays = {
                 navigate(Route.Settings.NostrRelays(it))
             }

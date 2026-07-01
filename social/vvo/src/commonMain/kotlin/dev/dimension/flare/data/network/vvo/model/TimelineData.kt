@@ -486,6 +486,7 @@ internal data class Config(
     val login: Boolean? = null,
     val st: String? = null,
     val uid: String? = null,
+    val loginUrl: String? = null,
 )
 
 internal object VVODateSerializer : KSerializer<Instant> {

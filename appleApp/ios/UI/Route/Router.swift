@@ -102,6 +102,7 @@ struct Router<Root: View>: View {
                 .composeQuote,
                 .composeReply,
                 .composeVVOReplyComment,
+                .relogin,
                 .tabSettings,
                 .statusBlueskyReport,
                 .statusMisskeyReport,

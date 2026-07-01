@@ -77,6 +77,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.presenter.settings.AccountsState.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
@@ -90,6 +91,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun AccountsScreen(
     onBack: () -> Unit,
     toLogin: () -> Unit,
+    toRelogin: (ReloginTarget) -> Unit,
     toNostrRelays: (MicroBlogKey) -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -196,6 +198,7 @@ internal fun AccountsScreen(
                                 showMenu = true
                             },
                             toLogin = toLogin,
+                            toRelogin = toRelogin,
                             trailingContent = { user ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -357,6 +360,7 @@ fun AccountItem(
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,
+    toRelogin: (ReloginTarget) -> Unit = { toLogin() },
     trailingContent: @Composable (UiProfile) -> Unit = { },
     headlineContent: @Composable (UiProfile) -> Unit = {
         RichText(text = it.name, maxLines = 1)
@@ -465,7 +469,16 @@ fun AccountItem(
                     trailingContent =
                         if (throwable is LoginExpiredException) {
                             {
-                                TextButton(onClick = toLogin) {
+                                TextButton(
+                                    onClick = {
+                                        toRelogin(
+                                            ReloginTarget(
+                                                accountKey = throwable.accountKey,
+                                                platformType = throwable.platformType,
+                                            ),
+                                        )
+                                    },
+                                ) {
                                     Text(text = stringResource(id = R.string.login_expired_relogin))
                                 }
                             }

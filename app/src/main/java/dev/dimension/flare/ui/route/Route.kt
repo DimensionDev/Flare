@@ -10,6 +10,8 @@ import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
+import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
@@ -202,8 +204,13 @@ internal sealed interface Route : NavKey {
     sealed interface ServiceSelect : Route {
         data object Selection : ServiceSelect
 
+        data class Relogin(
+            val target: ReloginTarget,
+        ) : ServiceSelect
+
         data class WebCookieLogin(
             val url: String,
+            val initialCookies: List<WebCookieSeed>,
             val callback: (cookies: String?) -> Boolean,
         ) : ServiceSelect
     }
@@ -546,6 +553,15 @@ internal sealed interface Route : NavKey {
 
                 is DeeplinkRoute.Login -> {
                     ServiceSelect.Selection
+                }
+
+                is DeeplinkRoute.Relogin -> {
+                    ServiceSelect.Relogin(
+                        ReloginTarget(
+                            accountKey = deeplinkRoute.accountKey,
+                            platformType = deeplinkRoute.platformType,
+                        ),
+                    )
                 }
 
                 is DeeplinkRoute.Compose.New -> {

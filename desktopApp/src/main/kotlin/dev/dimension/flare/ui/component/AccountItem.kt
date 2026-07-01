@@ -20,6 +20,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
@@ -30,6 +31,7 @@ fun AccountItem(
     userState: UiState<UiProfile>,
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
+    toRelogin: (ReloginTarget) -> Unit = { toLogin() },
     modifier: Modifier = Modifier,
     trailingContent: @Composable (UiProfile?) -> Unit = { },
     headlineContent: @Composable (UiProfile) -> Unit = {
@@ -108,7 +110,16 @@ fun AccountItem(
                 },
                 trailing = {
                     if (throwable is LoginExpiredException) {
-                        SubtleButton(onClick = toLogin) {
+                        SubtleButton(
+                            onClick = {
+                                toRelogin(
+                                    ReloginTarget(
+                                        accountKey = throwable.accountKey,
+                                        platformType = throwable.platformType,
+                                    ),
+                                )
+                            },
+                        ) {
                             Text(text = stringResource(Res.string.login_expired_relogin))
                         }
                     } else {

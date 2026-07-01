@@ -168,13 +168,14 @@ struct ServiceSelectionScreen: View {
                     .transition(ServiceSelectionAnimation.inline)
                 }
 
-                let handler = state.createLoginHandler(
-                    platformType: node.platformType,
-                    host: node.host,
-                    methodType: selectedMethod,
-                    redirectUri: nil,
-                )
-                LoginFlowView(handler: handler)
+                LoginFlowView {
+                    state.createLoginHandler(
+                        platformType: node.platformType,
+                        host: node.host,
+                        methodType: selectedMethod,
+                        redirectUri: nil,
+                    )
+                }
                     .id("\(key)-\(selectedMethod)")
                     .transition(ServiceSelectionAnimation.panel)
 
@@ -286,15 +287,112 @@ struct ServiceSelectionScreen: View {
     }
 }
 
+struct ReloginScreen: View {
+    let target: ReloginTarget
+    let toHome: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    @StateObject private var presenter: KotlinPresenter<ReloginState>
+    @State private var selectedMethod: LoginMethodType?
+
+    init(target: ReloginTarget, toHome: @escaping () -> Void) {
+        self.target = target
+        self.toHome = toHome
+        self._presenter = .init(wrappedValue: .init(presenter: ReloginPresenter(target: target, onSuccess: toHome)))
+    }
+
+    var body: some View {
+        List {
+            Section {
+                header
+                    .listRowBackground(Color.clear)
+            }
+
+            Section {
+                loginContent(state: presenter.state)
+                    .id("\(target.accountKey)-\(selectedMethod.map { String(describing: $0) } ?? "default")")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle(ServiceSelectCopy.loginExpired)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Label {
+                        Text("Cancel")
+                    } icon: {
+                        Image(fontAwesome: .xmark)
+                    }
+                }
+            }
+        }
+    }
+
+    private var header: some View {
+        VStack(spacing: 8) {
+            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 36, height: 36)
+            Text(ServiceSelectCopy.loginExpired)
+                .font(.title2.weight(.semibold))
+                .multilineTextAlignment(.center)
+            Text("\(target.accountKey.id)@\(target.accountKey.host)")
+                .font(.headline)
+                .multilineTextAlignment(.center)
+            Text(ServiceSelectCopy.loginExpiredMessage)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private func loginContent(state: ReloginState) -> some View {
+        let methods = state.methods
+        if let firstMethod = methods.first {
+            let selectedMethod = selectedMethod ?? firstMethod.type
+            VStack(spacing: 14) {
+                if methods.count > 1 {
+                    Picker("", selection: Binding(
+                        get: { selectedMethod },
+                        set: { method in
+                            withAnimation(ServiceSelectionAnimation.standard) {
+                                self.selectedMethod = method
+                            }
+                        }
+                    )) {
+                        ForEach(methods.indices, id: \.self) { index in
+                            Text(methods[index].title.text).tag(methods[index].type)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                LoginFlowView {
+                    state.createLoginHandler(methodType: selectedMethod)
+                }
+                    .id("\(target.accountKey)-\(selectedMethod)")
+
+                LoginAgreementView(urlString: state.agreementUrl())
+            }
+        }
+    }
+}
+
 private struct LoginFlowView: View {
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieInitialCookies: [WebCookieSeed] = []
 
-    init(handler: LoginMethodHandler) {
-        self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler)))
+    init(handler: @escaping () -> LoginMethodHandler) {
+        self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
     }
 
     var body: some View {
@@ -351,6 +449,7 @@ private struct LoginFlowView: View {
                 }
             case .openWebCookieLogin(let webCookie):
                 webCookieUrl = webCookie.url
+                webCookieInitialCookies = webCookie.initialCookies
             }
         }
         .sheet(isPresented: Binding(
@@ -367,13 +466,13 @@ private struct LoginFlowView: View {
                         guard presenter.state.canResume(value: cookie) else { return }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
-                    }, url: webCookieUrl)
+                    }, url: webCookieUrl, initialCookies: webCookieInitialCookies)
                 } else {
                     BackportWebLoginScreen(onCookie: { cookie in
                         guard presenter.state.canResume(value: cookie) else { return }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
-                    }, url: webCookieUrl)
+                    }, url: webCookieUrl, initialCookies: webCookieInitialCookies)
                 }
             }
         }
@@ -616,6 +715,8 @@ private enum ServiceSelectCopy {
     static let nostrQRLinkLabel = String(localized: "nostr_login_qr_link_label", defaultValue: "Nostr Connect link")
     static let eulaPrivacyPolicy = String(localized: "eula_privacy_policy", defaultValue: "EULA and Privacy Policy")
     static let loginAgreementPrefix = String(localized: "login_agreement_prefix", defaultValue: "By logging in, you agree to the ")
+    static let loginExpired = String(localized: "login_expired", defaultValue: "Login session expired")
+    static let loginExpiredMessage = String(localized: "login_expired_message", defaultValue: "Log in again to continue using this account.")
     static let search = String(localized: "search")
     static let clear = String(localized: "Clear")
 

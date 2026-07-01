@@ -89,7 +89,13 @@ private fun RequireReLoginError(
         modifier =
             modifier
                 .clickable {
-                    uriHandler.openUri(DeeplinkRoute.Login.toUri())
+                    uriHandler.openUri(
+                        DeeplinkRoute
+                            .Relogin(
+                                accountKey = error.accountKey,
+                                platformType = error.platformType,
+                            ).toUri(),
+                    )
                 },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
@@ -118,7 +124,13 @@ private fun LoginExpiredError(
         modifier =
             modifier
                 .clickable {
-                    uriHandler.openUri(DeeplinkRoute.Login.toUri())
+                    uriHandler.openUri(
+                        DeeplinkRoute
+                            .Relogin(
+                                accountKey = error.accountKey,
+                                platformType = error.platformType,
+                            ).toUri(),
+                    )
                 },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),

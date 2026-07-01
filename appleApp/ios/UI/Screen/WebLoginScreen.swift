@@ -8,8 +8,12 @@ struct WebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: WebLoginViewModel
     let url: String
-    init(onCookie: @escaping (String) -> Void, url: String) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
+    init(
+        onCookie: @escaping (String) -> Void,
+        url: String,
+        initialCookies: [WebCookieSeed] = []
+    ) {
+        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url, initialCookies: initialCookies))
         self.url = url
     }
     var body: some View {
@@ -76,6 +80,7 @@ class WebLoginViewModel: ObservableObject {
     init(
         onCookie: @escaping (String) -> Void,
         url: String,
+        initialCookies: [WebCookieSeed],
     ) {
         var conf = WebPage.Configuration()
         conf.defaultNavigationPreferences.allowsContentJavaScript = true
@@ -84,7 +89,7 @@ class WebLoginViewModel: ObservableObject {
         self.page = WebPage(configuration: conf, navigationDecider: decider)
         self.onCookie = onCookie
         self.page.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-        clearCookie()
+        clearCookie(initialCookies: initialCookies)
     }
     @Published
     var canShowWebView = false
@@ -98,16 +103,53 @@ class WebLoginViewModel: ObservableObject {
         }
     }
     
-    func clearCookie() {
+    func clearCookie(initialCookies: [WebCookieSeed]) {
         let dataStore = WKWebsiteDataStore.default()
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             dataStore.removeData(
                 ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
                 for: records,
                 completionHandler: {
-                    self.canShowWebView = true
+                    dataStore.httpCookieStore.setCookies(initialCookies) {
+                        self.canShowWebView = true
+                    }
                 }
             )
         }
+    }
+}
+
+private extension WKHTTPCookieStore {
+    func setCookies(_ seeds: [WebCookieSeed], completion: @escaping () -> Void) {
+        guard !seeds.isEmpty else {
+            completion()
+            return
+        }
+        let group = DispatchGroup()
+        for seed in seeds {
+            guard let cookie = HTTPCookie(seed: seed) else {
+                continue
+            }
+            group.enter()
+            setCookie(cookie) {
+                group.leave()
+            }
+        }
+        group.notify(queue: .main, execute: completion)
+    }
+}
+
+private extension HTTPCookie {
+    convenience init?(seed: WebCookieSeed) {
+        var properties: [HTTPCookiePropertyKey: Any] = [
+            .name: seed.name,
+            .value: seed.value,
+            .domain: seed.domain,
+            .path: seed.path,
+        ]
+        if seed.secure {
+            properties[.secure] = "TRUE"
+        }
+        self.init(properties: properties)
     }
 }

@@ -12,7 +12,9 @@ struct FlareRoot: View {
     @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @StateObject private var inAppNotification = SwiftInAppNotification.shared
     @State var selectedTab: String?
+    @State private var reloginRoute: Route?
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
@@ -66,6 +68,19 @@ struct FlareRoot: View {
             .backport
             .tabBarMinimizeBehavior(.onScrollDown)
             .background(Color(.systemGroupedBackground))
+            .sheet(item: $reloginRoute) { route in
+                NavigationStack {
+                    route.view(
+                        onNavigate: { reloginRoute = $0 },
+                        goBack: { reloginRoute = nil }
+                    )
+                }
+            }
+            .onAppear {
+                inAppNotification.onRelogin = { toast in
+                    reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                }
+            }
         } loadingContent: {
             SplashScreen()
         }
@@ -114,7 +129,9 @@ struct BackportFlareRoot: View {
     @Environment(\.globalAppearance) private var globalAppearance
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @StateObject private var inAppNotification = SwiftInAppNotification.shared
     @State var selectedTab: String?
+    @State private var reloginRoute: Route?
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
@@ -137,6 +154,19 @@ struct BackportFlareRoot: View {
                 }
             }
             .background(Color(.systemGroupedBackground))
+            .sheet(item: $reloginRoute) { route in
+                NavigationStack {
+                    route.view(
+                        onNavigate: { reloginRoute = $0 },
+                        goBack: { reloginRoute = nil }
+                    )
+                }
+            }
+            .onAppear {
+                inAppNotification.onRelogin = { toast in
+                    reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                }
+            }
         } loadingContent: {
             SplashScreen()
         }

@@ -79,11 +79,10 @@ private class RenderRunBuilder {
             }
 
             "span" -> {
-                if (element.classNames().contains("invisible")) {
-                    Unit
-                } else {
+                val classNames = element.classNames()
+                if (!classNames.contains("invisible")) {
                     renderChildren(element, style, block)
-                    if (element.classNames().contains("ellipsis")) {
+                    if (classNames.contains("ellipsis")) {
                         appendText("…", style, block)
                     }
                 }

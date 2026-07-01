@@ -131,22 +131,3 @@ kotlin {
 room3 {
     schemaDirectory("$projectDir/schemas")
 }
-
-ktorfit {
-    compilerPluginVersion.set("2.3.4")
-}
-
-afterEvaluate {
-//    val kspCommonMainKotlinMetadata by tasks
-    val runKtlintFormatOverCommonMainSourceSet by tasks
-    val runKtlintCheckOverCommonMainSourceSet by tasks
-    runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    runKtlintCheckOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    tasks {
-        configureEach {
-            if (this.name != "kspCommonMainKotlinMetadata" && this.name.startsWith("ksp")) {
-                this.dependsOn("kspCommonMainKotlinMetadata")
-            }
-        }
-    }
-}

@@ -188,9 +188,7 @@ internal class BlueskyDirectMessageLoader(
                             deletedMessageKeys += Bluesky.deletedMessageKey(accountKey, message.value)
                         }
 
-                        is LogCreateMessageMessageUnion.Unknown -> {
-                            Unit
-                        }
+                        is LogCreateMessageMessageUnion.Unknown -> {}
                     }
                 }
 
@@ -204,15 +202,11 @@ internal class BlueskyDirectMessageLoader(
                             deletedMessageKeys += Bluesky.deletedMessageKey(accountKey, message.value)
                         }
 
-                        is LogDeleteMessageMessageUnion.Unknown -> {
-                            Unit
-                        }
+                        is LogDeleteMessageMessageUnion.Unknown -> {}
                     }
                 }
 
-                else -> {
-                    Unit
-                }
+                else -> {}
             }
         }
         return DirectMessageDelta(

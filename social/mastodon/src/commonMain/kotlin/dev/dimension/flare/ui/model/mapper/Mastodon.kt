@@ -1027,9 +1027,7 @@ private fun updateHtmlTagToken(
                 )
             }
 
-            else -> {
-                Unit
-            }
+            else -> {}
         }
     }
     node.childNodes().forEach {

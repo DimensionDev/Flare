@@ -2114,9 +2114,7 @@ internal fun SettingsScreen(
                                 )
                             }
 
-                            TranslateProviderOption.GoogleWeb -> {
-                                Unit
-                            }
+                            TranslateProviderOption.GoogleWeb -> {}
                         }
                     }
                 }

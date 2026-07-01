@@ -199,9 +199,7 @@ private fun UiRichText.toProjectionBlocks(): List<TranslationProjectionBlock> =
         var nextBlockId = 0
         renderRuns.forEach { content ->
             when (content) {
-                is RenderContent.BlockImage -> {
-                    Unit
-                }
+                is RenderContent.BlockImage -> {}
 
                 is RenderContent.Text -> {
                     val pieces = content.toProjectionPieces()

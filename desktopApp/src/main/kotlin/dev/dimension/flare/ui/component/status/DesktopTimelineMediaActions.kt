@@ -61,9 +61,7 @@ internal fun ProvideDesktopTimelineMediaActions(content: @Composable () -> Unit)
                                 )
                             }
 
-                            TimelineMediaMenuAction.ShareImage -> {
-                                Unit
-                            }
+                            TimelineMediaMenuAction.ShareImage -> {}
 
                             TimelineMediaMenuAction.CopyLink -> {
                                 Toolkit.getDefaultToolkit().systemClipboard.setContents(

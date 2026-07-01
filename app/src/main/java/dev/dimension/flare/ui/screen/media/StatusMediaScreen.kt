@@ -1513,13 +1513,9 @@ private fun mediaViewerPresenter(
 
         fun shareMedia(data: UiMedia) {
             when (data) {
-                is UiMedia.Audio -> {
-                    Unit
-                }
+                is UiMedia.Audio -> {}
 
-                is UiMedia.Gif -> {
-                    Unit
-                }
+                is UiMedia.Gif -> {}
 
                 is UiMedia.Image -> {
                     scope.launch {
@@ -1531,9 +1527,7 @@ private fun mediaViewerPresenter(
                     }
                 }
 
-                is UiMedia.Video -> {
-                    Unit
-                }
+                is UiMedia.Video -> {}
             }
         }
 

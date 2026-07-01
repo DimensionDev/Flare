@@ -149,9 +149,7 @@ private fun DraftBoxItem(
         enabled = item.status != UiDraftStatus.SENDING,
         leadingContent = {
             when (item.status) {
-                UiDraftStatus.DRAFT -> {
-                    Unit
-                }
+                UiDraftStatus.DRAFT -> {}
 
                 UiDraftStatus.FAILED -> {
                     FAIcon(

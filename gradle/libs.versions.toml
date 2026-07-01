@@ -11,7 +11,7 @@ lifecycleViewmodelComposeVersion = "2.10.0"
 minSdk = "26"
 java = "25"
 agp = "9.2.1"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 core-ktx = "1.19.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
@@ -29,9 +29,8 @@ kotlinx-collections-immutable = "0.5.0"
 kotlinx-serialization = "1.11.0"
 kotlinx-browser = "0.5.0"
 coil3 = "3.5.0"
-ktorfit = "2.7.3"
-ktorfitConverters = "2.7.2"
-ktor = "3.5.0"
+ktorfit = "2.7.5"
+ktor = "3.5.1"
 prettytime = "5.0.9.Final"
 readability = "1.0.0"
 reorderable = "3.1.0"
@@ -179,7 +178,7 @@ zoomable = { group = "me.saket.telephoto", name = "zoomable", version.ref = "zoo
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
-ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfitConverters" }
+ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit" }
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
@@ -221,7 +220,7 @@ material-motion-compose = { module = "io.github.fornewid:material-motion-compose
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }
 
-xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.3" }
+xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "1.0.0" }
 
 fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
 

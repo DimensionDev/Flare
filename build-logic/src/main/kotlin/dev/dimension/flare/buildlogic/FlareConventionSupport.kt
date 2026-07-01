@@ -29,7 +29,7 @@ enum class FlarePlatform {
 }
 
 class FlareMultiplatformLibraryPlugin : Plugin<Project> {
-    override fun apply(target: Project) = Unit
+    override fun apply(target: Project) {}
 }
 
 class FlareAndroidApplicationPlugin : Plugin<Project> {
@@ -55,6 +55,9 @@ class FlareRootConventionsPlugin : Plugin<Project> {
                         }
                     }
                 }
+            }
+            subproject.tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
+                dependsOn(subproject.tasks.matching { it.name.startsWith("ksp") })
             }
         }
     }

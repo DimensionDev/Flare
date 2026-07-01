@@ -1104,9 +1104,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                             )
                         }
 
-                        TranslateProviderOption.GoogleWeb -> {
-                            Unit
-                        }
+                        TranslateProviderOption.GoogleWeb -> {}
                     }
                 }
             }

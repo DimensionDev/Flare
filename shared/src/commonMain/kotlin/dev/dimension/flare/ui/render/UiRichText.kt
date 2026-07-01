@@ -164,9 +164,7 @@ public fun UiRichText.toTranslatableText(): String {
     var appendedTextBlock = false
     renderRuns.forEach { content ->
         when (content) {
-            is RenderContent.BlockImage -> {
-                Unit
-            }
+            is RenderContent.BlockImage -> {}
 
             is RenderContent.Text -> {
                 val blockText = content.plainText().trim()

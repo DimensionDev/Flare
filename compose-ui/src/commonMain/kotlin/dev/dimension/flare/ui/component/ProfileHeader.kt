@@ -162,9 +162,7 @@ private fun ProfileHeaderSuccess(
             isMe.onSuccess {
                 if (!it) {
                     when (followButtonState) {
-                        is UiState.Error -> {
-                            Unit
-                        }
+                        is UiState.Error -> {}
 
                         is UiState.Loading -> {
                             PlatformFilledTonalButton(
@@ -382,9 +380,7 @@ private fun ProfileHeaderSuccess(
                     }
                 }
 
-                null -> {
-                    Unit
-                }
+                null -> {}
             }
             MatricesDisplay(
                 data = user.matrices,

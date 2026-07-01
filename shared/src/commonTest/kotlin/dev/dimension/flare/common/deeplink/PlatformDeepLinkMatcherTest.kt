@@ -86,12 +86,13 @@ class PlatformDeepLinkMatcherTest {
         val matches = PlatformDeepLinkMatcher.matches("https://mastodon.social/@alice", mapping)
 
         assertEquals(1, matches.size)
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(mastodonAccount.accountKey),
                 userName = "alice",
                 host = "mastodon.social",
             ),
+            "mastodon.social",
             matches[mastodonAccount],
         )
     }
@@ -113,20 +114,22 @@ class PlatformDeepLinkMatcherTest {
         val matches = PlatformDeepLinkMatcher.matches("https://mastodon.social/@alice", mapping)
 
         assertEquals(2, matches.size)
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(account1.accountKey),
                 userName = "alice",
                 host = "mastodon.social",
             ),
+            "mastodon.social",
             matches[account1],
         )
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(account2.accountKey),
                 userName = "alice",
                 host = "mastodon.social",
             ),
+            "mastodon.social",
             matches[account2],
         )
     }
@@ -141,17 +144,18 @@ class PlatformDeepLinkMatcherTest {
         val mapping = deepLinkMapping(account)
 
         val profileMatch = PlatformDeepLinkMatcher.matches("https://bsky.app/profile/example.com", mapping)
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(account.accountKey),
                 userName = "example.com",
                 host = "example.com",
             ),
+            "bsky.app",
             profileMatch[account],
         )
 
         val postMatch = PlatformDeepLinkMatcher.matches("https://bsky.app/profile/example.com/post/12345", mapping)
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(account.accountKey),
                 statusKey =
@@ -160,6 +164,7 @@ class PlatformDeepLinkMatcherTest {
                         host = "example.com",
                     ),
             ),
+            "bsky.app",
             postMatch[account],
         )
     }
@@ -202,50 +207,55 @@ class PlatformDeepLinkMatcherTest {
 
         val mapping = deepLinkMapping(mastodonAccount, misskeyAccount, bskyAccount, xAccount)
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(mastodonAccount.accountKey),
                 userName = "alice",
                 host = "mastodon.example",
             ),
+            "mastodon.example",
             PlatformDeepLinkMatcher.matches("https://mastodon.example/@alice", mapping)[mastodonAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(mastodonAccount.accountKey),
                 statusKey = MicroBlogKey("12345", "mastodon.example"),
             ),
+            "mastodon.example",
             PlatformDeepLinkMatcher.matches("https://mastodon.example/@alice/12345", mapping)[mastodonAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(misskeyAccount.accountKey),
                 userName = "bob",
                 host = "misskey.example",
             ),
+            "misskey.example",
             PlatformDeepLinkMatcher.matches("https://misskey.example/@bob", mapping)[misskeyAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(misskeyAccount.accountKey),
                 statusKey = MicroBlogKey("12345", "misskey.example"),
             ),
+            "misskey.example",
             PlatformDeepLinkMatcher.matches("https://misskey.example/notes/12345", mapping)[misskeyAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(bskyAccount.accountKey),
                 userName = "alice.bsky.social",
                 host = "bsky.example",
             ),
+            "bsky.example",
             PlatformDeepLinkMatcher.matches("https://bsky.example/profile/alice.bsky.social", mapping)[bskyAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(bskyAccount.accountKey),
                 statusKey =
@@ -254,36 +264,40 @@ class PlatformDeepLinkMatcherTest {
                         host = "bsky.example",
                     ),
             ),
+            "bsky.example",
             PlatformDeepLinkMatcher.matches(
                 "https://bsky.example/profile/alice.bsky.social/post/12345",
                 mapping,
             )[bskyAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(xAccount.accountKey),
                 userName = "alice",
                 host = xqtHost,
             ),
+            xqtHost,
             PlatformDeepLinkMatcher.matches("https://$xqtHost/alice", mapping)[xAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Status.Detail(
                 accountType = AccountType.Specific(xAccount.accountKey),
                 statusKey = MicroBlogKey("12345", xqtHost),
             ),
+            xqtHost,
             PlatformDeepLinkMatcher.matches("https://$xqtHost/alice/status/12345", mapping)[xAccount],
         )
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Media.StatusMedia(
                 accountType = AccountType.Specific(xAccount.accountKey),
                 statusKey = MicroBlogKey("12345", xqtHost),
                 index = 1,
                 preview = null,
             ),
+            xqtHost,
             PlatformDeepLinkMatcher.matches("https://$xqtHost/alice/status/12345/photo/1", mapping)[xAccount],
         )
     }
@@ -299,15 +313,25 @@ class PlatformDeepLinkMatcherTest {
 
         val matches = PlatformDeepLinkMatcher.matches("https://mastodon.social/@bob@misskey.io", mapping)
 
-        assertEquals(
+        assertMatch(
             DeeplinkRoute.Profile.UserNameWithHost(
                 accountType = AccountType.Specific(account.accountKey),
                 userName = "bob",
                 host = "misskey.io",
             ),
+            "mastodon.social",
             matches[account],
         )
     }
+}
+
+private fun assertMatch(
+    expectedRoute: DeeplinkRoute,
+    expectedHost: String,
+    actual: PlatformDeepLinkMatcher.Match?,
+) {
+    assertEquals(expectedRoute, actual?.route)
+    assertEquals(expectedHost, actual?.host)
 }
 
 private fun PlatformType.deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =

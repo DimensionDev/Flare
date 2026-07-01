@@ -13,6 +13,7 @@ plugins {
 val webPresenterManifest = layout.buildDirectory.file("generated/web-presenters/manifest/flare-web-presenters.json")
 val webPresenterTsDir = layout.buildDirectory.dir("generated/web-presenters/ts")
 val webPresenterTsGenerator = rootProject.layout.projectDirectory.file("web/scripts/generate-presenters.mjs")
+val webSharedTypeScriptDeclarations = layout.projectDirectory.file("src/wasmJsMain/types/flare.d.mts")
 
 kotlin {
     flare {
@@ -115,4 +116,24 @@ tasks.matching {
         it.name == "wasmJsBrowserProductionLibraryDistribution"
 }.configureEach {
     dependsOn(generateWebPresenterTs)
+}
+
+val copyDevelopmentLibraryTypeScriptDeclarations =
+    tasks.register<Copy>("copyDevelopmentLibraryTypeScriptDeclarations") {
+        from(webSharedTypeScriptDeclarations)
+        into(layout.buildDirectory.dir("dist/wasmJs/developmentLibrary"))
+    }
+
+val copyProductionLibraryTypeScriptDeclarations =
+    tasks.register<Copy>("copyProductionLibraryTypeScriptDeclarations") {
+        from(webSharedTypeScriptDeclarations)
+        into(layout.buildDirectory.dir("dist/wasmJs/productionLibrary"))
+    }
+
+tasks.named("wasmJsBrowserDevelopmentLibraryDistribution") {
+    finalizedBy(copyDevelopmentLibraryTypeScriptDeclarations)
+}
+
+tasks.named("wasmJsBrowserProductionLibraryDistribution") {
+    finalizedBy(copyProductionLibraryTypeScriptDeclarations)
 }

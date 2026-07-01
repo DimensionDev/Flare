@@ -289,6 +289,7 @@ struct ServiceSelectionScreen: View {
 struct ReloginScreen: View {
     let target: ReloginTarget
     let toHome: () -> Void
+    @Environment(\.dismiss) private var dismiss
 
     @StateObject private var presenter: KotlinPresenter<ReloginState>
     @State private var selectedMethod: LoginMethodType?
@@ -313,6 +314,19 @@ struct ReloginScreen: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle(ServiceSelectCopy.loginExpired)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Label {
+                        Text("Cancel")
+                    } icon: {
+                        Image(fontAwesome: .xmark)
+                    }
+                }
+            }
+        }
     }
 
     private var header: some View {

@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.network.vvo
 
+import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
+import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.network.ktorfit
+import dev.dimension.flare.data.network.nullableFallbackJson
 import dev.dimension.flare.data.network.vvo.api.ConfigApi
 import dev.dimension.flare.data.network.vvo.api.StatusApi
 import dev.dimension.flare.data.network.vvo.api.TimelineApi
@@ -15,10 +17,14 @@ import dev.dimension.flare.data.network.vvo.model.Config
 import dev.dimension.flare.data.network.vvo.model.EmojiData
 import dev.dimension.flare.data.network.vvo.model.UploadResponse
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
+import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.model.vvoHost
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.append
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -29,7 +35,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.core.writeFully
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -40,74 +45,69 @@ import kotlin.time.Duration.Companion.minutes
 private val baseUrl = "https://$vvoHost/"
 private val chocolateRefreshInterval = 1.days
 
+private typealias VVOHttpClientFactory = (HttpClientConfig<*>.() -> Unit) -> HttpClient
+
+private fun defaultVvoHttpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = ktorClient(config)
+
 private fun vvoKtorfit(
     url: String = baseUrl,
     chocolateProvider: suspend () -> String?,
-) = ktorfit(url) {
-    install(VVOHeaderPlugin) {
-        this.chocolateProvider = chocolateProvider
-    }
+    httpClientFactory: VVOHttpClientFactory,
+) = de.jensklingenberg.ktorfit.ktorfit {
+    baseUrl(url)
+    httpClient(
+        httpClientFactory {
+            install(ContentNegotiation) {
+                nullableFallbackJson(JSON)
+            }
+            install(VVOHeaderPlugin) {
+                this.chocolateProvider = chocolateProvider
+            }
+        },
+    )
+    converterFactories(ResponseConverterFactory())
 }
 
 private class VVOApis(
     chocolateProvider: suspend () -> String?,
+    httpClientFactory: VVOHttpClientFactory,
 ) {
-    private val ktorfit = vvoKtorfit(chocolateProvider = chocolateProvider)
+    private val ktorfit =
+        vvoKtorfit(
+            chocolateProvider = chocolateProvider,
+            httpClientFactory = httpClientFactory,
+        )
     val timelineApi: TimelineApi = ktorfit.createTimelineApi()
     val userApi: UserApi = ktorfit.createUserApi()
     val configApi: ConfigApi = ktorfit.createConfigApi()
     val statusApi: StatusApi = ktorfit.createStatusApi()
 }
 
-private class VVOChocolateState(
-    private val chocolateFlow: Flow<String>,
-    private val lastChocolateRefreshEpochMillisFlow: Flow<Long?>?,
-) {
-    private val refreshedChocolate = MutableStateFlow<String?>(null)
-    private val refreshedAt = MutableStateFlow<Long?>(null)
-    val refreshTrackingEnabled: Boolean = lastChocolateRefreshEpochMillisFlow != null
-
-    suspend fun currentChocolate(): String? = refreshedChocolate.value ?: chocolateFlow.firstOrNull()
-
-    suspend fun currentRefreshEpochMillis(): Long? = refreshedAt.value ?: lastChocolateRefreshEpochMillisFlow?.firstOrNull()
-
-    fun cache(
-        chocolate: String,
-        refreshedAtEpochMillis: Long,
-    ) {
-        refreshedChocolate.value = chocolate
-        refreshedAt.value = refreshedAtEpochMillis
-    }
-}
-
 internal class VVOService private constructor(
-    private val chocolateState: VVOChocolateState,
-    private val onChocolateRefreshed: suspend (String, Long) -> Unit,
+    private val credentialFlow: Flow<VVoCredential>,
+    private val refreshCookieWhenStale: Boolean,
+    private val onCredentialRefreshed: suspend (VVoCredential) -> Unit,
+    private val httpClientFactory: VVOHttpClientFactory,
     private val apis: VVOApis,
 ) : TimelineApi by apis.timelineApi,
     UserApi by apis.userApi,
     ConfigApi by apis.configApi,
     StatusApi by apis.statusApi {
     constructor(
-        chocolateFlow: Flow<String>,
-        lastChocolateRefreshEpochMillisFlow: Flow<Long?>? = null,
-        onChocolateRefreshed: suspend (String, Long) -> Unit = { _, _ -> },
+        credentialFlow: Flow<VVoCredential>,
+        refreshCookieWhenStale: Boolean = false,
+        onCredentialRefreshed: suspend (VVoCredential) -> Unit = {},
+        httpClientFactory: (HttpClientConfig<*>.() -> Unit) -> HttpClient = ::defaultVvoHttpClient,
     ) : this(
-        chocolateState =
-            VVOChocolateState(
-                chocolateFlow = chocolateFlow,
-                lastChocolateRefreshEpochMillisFlow = lastChocolateRefreshEpochMillisFlow,
+        credentialFlow = credentialFlow,
+        refreshCookieWhenStale = refreshCookieWhenStale,
+        onCredentialRefreshed = onCredentialRefreshed,
+        httpClientFactory = httpClientFactory,
+        apis =
+            VVOApis(
+                chocolateProvider = { credentialFlow.firstOrNull()?.chocolate },
+                httpClientFactory = httpClientFactory,
             ),
-        onChocolateRefreshed = onChocolateRefreshed,
-    )
-
-    private constructor(
-        chocolateState: VVOChocolateState,
-        onChocolateRefreshed: suspend (String, Long) -> Unit,
-    ) : this(
-        chocolateState = chocolateState,
-        onChocolateRefreshed = onChocolateRefreshed,
-        apis = VVOApis(chocolateState::currentChocolate),
     )
 
     private val refreshMutex = Mutex()
@@ -124,27 +124,28 @@ internal class VVOService private constructor(
     }
 
     override suspend fun config(): VVOResponse<Config> {
-        refreshChocolateIfNeeded()
+        val refreshedCredential = refreshChocolateIfNeeded()
+        val requestCredential = refreshedCredential ?: currentCredential()
 
-        val response = apis.configApi.config()
+        val response = configApi(refreshedCredential).config()
         if (response.data?.login == true) {
             return response
         }
 
-        val refreshedChocolate = refreshChocolate() ?: return response
-        return if (refreshedChocolate.isBlank()) {
+        val recoveredCredential = refreshChocolate(credentialToRefresh = requestCredential) ?: return response
+        return if (recoveredCredential.chocolate.isBlank()) {
             response
         } else {
-            apis.configApi.config()
+            configApi(recoveredCredential).config()
         }
     }
 
     suspend fun getUid(screenName: String): String? {
         val response =
-            ktorClient {
+            httpClientFactory {
                 followRedirects = false
                 install(VVOHeaderPlugin) {
-                    chocolateProvider = chocolateState::currentChocolate
+                    chocolateProvider = ::currentChocolate
                 }
             }.get("https://$vvoHost/n/$screenName")
         return response.headers["Location"]?.let {
@@ -159,14 +160,14 @@ internal class VVOService private constructor(
         xsrfToken: String = st,
         type: String = "json",
     ): UploadResponse =
-        ktorClient {
+        httpClientFactory {
             install(HttpTimeout) {
                 connectTimeoutMillis = 2.minutes.inWholeMilliseconds
                 requestTimeoutMillis = 2.minutes.inWholeMilliseconds
                 socketTimeoutMillis = 2.minutes.inWholeMilliseconds
             }
             install(VVOHeaderPlugin) {
-                chocolateProvider = chocolateState::currentChocolate
+                chocolateProvider = ::currentChocolate
             }
         }.submitFormWithBinaryData(
             url = "https://$vvoHost/api/statuses/uploadPic",
@@ -191,31 +192,75 @@ internal class VVOService private constructor(
         ).bodyAsText()
             .decodeJson<UploadResponse>()
 
-    suspend fun emojis(): EmojiData = ktorClient().get("https://flareapp.moe/emoji.json").body()
-
-    private suspend fun refreshChocolateIfNeeded() {
-        if (!chocolateState.refreshTrackingEnabled) {
-            return
-        }
-        val lastRefreshEpochMillis = chocolateState.currentRefreshEpochMillis()
-        val now = Clock.System.now().toEpochMilliseconds()
-        if (shouldRefreshVvoCookie(lastRefreshEpochMillis, now)) {
-            runCatching {
-                refreshChocolate(refreshedAtEpochMillis = now)
+    suspend fun emojis(): EmojiData =
+        httpClientFactory {
+            install(ContentNegotiation) {
+                nullableFallbackJson(JSON)
             }
+        }.get("https://flareapp.moe/emoji.json")
+            .body()
+
+    private fun configApi(credential: VVoCredential?): ConfigApi =
+        credential
+            ?.let {
+                VVOApis(
+                    chocolateProvider = { it.chocolate },
+                    httpClientFactory = httpClientFactory,
+                ).configApi
+            }
+            ?: apis.configApi
+
+    private suspend fun refreshChocolateIfNeeded(): VVoCredential? {
+        if (!refreshCookieWhenStale) {
+            return null
+        }
+        val lastRefreshEpochMillis = currentCredential()?.lastCookieRefreshEpochMillis
+        val now = Clock.System.now().toEpochMilliseconds()
+        return if (shouldRefreshVvoCookie(lastRefreshEpochMillis, now)) {
+            runCatching {
+                refreshChocolate(
+                    refreshedAtEpochMillis = now,
+                    refreshOnlyWhenStale = true,
+                )
+            }.getOrNull()
+        } else {
+            null
         }
     }
 
-    private suspend fun refreshChocolate(refreshedAtEpochMillis: Long = Clock.System.now().toEpochMilliseconds()): String? =
-        refreshMutex.withLock {
+    private suspend fun refreshChocolate(
+        refreshedAtEpochMillis: Long = Clock.System.now().toEpochMilliseconds(),
+        refreshOnlyWhenStale: Boolean = false,
+        credentialToRefresh: VVoCredential? = null,
+    ): VVoCredential? {
+        return refreshMutex.withLock {
+            val latestCredential = currentCredential()
+            val currentCredential =
+                credentialToRefresh
+                    ?.let { requestedCredential ->
+                        if (latestCredential != null && latestCredential.isRefreshedAfter(requestedCredential)) {
+                            return@withLock latestCredential
+                        }
+                        requestedCredential
+                    }
+                    ?: latestCredential
+                    ?: return@withLock null
+            if (refreshOnlyWhenStale &&
+                !shouldRefreshVvoCookie(
+                    lastRefreshEpochMillis = currentCredential.lastCookieRefreshEpochMillis,
+                    nowEpochMillis = refreshedAtEpochMillis,
+                )
+            ) {
+                return@withLock currentCredential
+            }
             val currentChocolate =
-                chocolateState
-                    .currentChocolate()
-                    ?.takeIf { it.isNotBlank() }
+                currentCredential
+                    .chocolate
+                    .takeIf { it.isNotBlank() }
                     ?: return@withLock null
 
             val response =
-                ktorClient {
+                httpClientFactory {
                     followRedirects = false
                     install(VVOHeaderPlugin) {
                         chocolateProvider = { currentChocolate }
@@ -228,13 +273,25 @@ internal class VVOService private constructor(
                     setCookieHeaders = response.headers.getAll(HttpHeaders.SetCookie).orEmpty(),
                 ) ?: currentChocolate
 
-            chocolateState.cache(
-                chocolate = refreshedChocolate,
-                refreshedAtEpochMillis = refreshedAtEpochMillis,
-            )
-            onChocolateRefreshed(refreshedChocolate, refreshedAtEpochMillis)
-            refreshedChocolate
+            currentCredential
+                .copy(
+                    chocolate = refreshedChocolate,
+                    lastCookieRefreshEpochMillis = refreshedAtEpochMillis,
+                ).also {
+                    onCredentialRefreshed(it)
+                }
         }
+    }
+
+    private suspend fun currentCredential(): VVoCredential? = credentialFlow.firstOrNull()
+
+    private suspend fun currentChocolate(): String? = currentCredential()?.chocolate
+}
+
+private fun VVoCredential.isRefreshedAfter(other: VVoCredential): Boolean {
+    val lastRefresh = lastCookieRefreshEpochMillis ?: return false
+    val otherLastRefresh = other.lastCookieRefreshEpochMillis
+    return this != other && (otherLastRefresh == null || lastRefresh > otherLastRefresh)
 }
 
 internal fun shouldRefreshVvoCookie(

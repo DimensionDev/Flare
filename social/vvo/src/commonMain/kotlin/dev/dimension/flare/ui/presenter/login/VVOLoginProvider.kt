@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 
 private const val LOGIN_ACTION = "login"
 
@@ -95,7 +94,14 @@ private class VVOWebCookieLoginHandler(
     }
 
     private suspend fun vvoLoginUseCase(chocolate: String) {
-        val service = VVOService(flowOf(chocolate))
+        val credentialState = MutableStateFlow(VVoCredential(chocolate = chocolate))
+        val service =
+            VVOService(
+                credentialFlow = credentialState,
+                onCredentialRefreshed = { credential ->
+                    credentialState.value = credential
+                },
+            )
         val config = service.config()
         val uid = config.data?.uid
         requireNotNull(uid) { "uid is null" }
@@ -115,9 +121,7 @@ private class VVOWebCookieLoginHandler(
                 platformType = PlatformType.VVo,
             ),
             credential =
-                VVoCredential(
-                    chocolate = chocolate,
-                ),
+                credentialState.value,
         )
     }
 

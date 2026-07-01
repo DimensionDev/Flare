@@ -76,15 +76,10 @@ internal class VVODataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         VVOService(
-            chocolateFlow = credentialFlow.map { it.chocolate },
-            lastChocolateRefreshEpochMillisFlow = credentialFlow.map { it.lastCookieRefreshEpochMillis },
-            onChocolateRefreshed = { chocolate, refreshedAt ->
-                updateCredential(
-                    VVoCredential(
-                        chocolate = chocolate,
-                        lastCookieRefreshEpochMillis = refreshedAt,
-                    ),
-                )
+            credentialFlow = credentialFlow,
+            refreshCookieWhenStale = true,
+            onCredentialRefreshed = { credential ->
+                updateCredential(credential)
             },
         )
     }

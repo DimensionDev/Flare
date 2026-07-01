@@ -359,8 +359,8 @@ fun AccountItem(
     userState: UiState<UiProfile>,
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
-    toRelogin: (ReloginTarget) -> Unit = { toLogin() },
     modifier: Modifier = Modifier,
+    toRelogin: (ReloginTarget) -> Unit = { toLogin() },
     trailingContent: @Composable (UiProfile) -> Unit = { },
     headlineContent: @Composable (UiProfile) -> Unit = {
         RichText(text = it.name, maxLines = 1)

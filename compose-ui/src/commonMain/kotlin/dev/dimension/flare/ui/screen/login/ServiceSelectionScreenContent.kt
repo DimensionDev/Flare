@@ -30,6 +30,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -54,6 +55,8 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
+import dev.dimension.flare.compose.ui.login_expired
+import dev.dimension.flare.compose.ui.login_expired_message
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
 import dev.dimension.flare.compose.ui.nostr_login_qr_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_hint
@@ -95,6 +98,9 @@ import dev.dimension.flare.ui.presenter.login.LoginField
 import dev.dimension.flare.ui.presenter.login.LoginFieldType
 import dev.dimension.flare.ui.presenter.login.LoginFlowPresenter
 import dev.dimension.flare.ui.presenter.login.LoginMethodSpec
+import dev.dimension.flare.ui.presenter.login.ReloginPresenter
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
+import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
@@ -105,7 +111,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun ServiceSelectionScreenContent(
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (url: String, initialCookies: List<WebCookieSeed>, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
@@ -290,12 +296,156 @@ public fun ServiceSelectionScreenContent(
 }
 
 @Composable
+public fun ReloginScreenContent(
+    target: ReloginTarget,
+    onWebViewLogin: (url: String, initialCookies: List<WebCookieSeed>, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onBack: (() -> Unit),
+    openUri: (String) -> Unit,
+    registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
+    contentPadding: PaddingValues,
+    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+) {
+    val state by producePresenter("relogin_${target.accountKey}_${target.platformType.name}") {
+        remember(target) { ReloginPresenter(target, onBack) }.body()
+    }
+    val methods = state.methods
+    if (methods.isEmpty()) return
+    var selectedMethod by remember(target) { mutableStateOf(methods.first().type) }
+    val selectedSpec = methods.firstOrNull { it.type == selectedMethod } ?: methods.first()
+    val handler =
+        remember(target, selectedMethod) {
+            state.createLoginHandler(selectedMethod)
+        }
+    val loginState by producePresenter("relogin_flow_${target.accountKey}_${target.platformType.name}_$selectedMethod") {
+        remember(handler) { LoginFlowPresenter(handler) }.body()
+    }
+    var qrContent by remember(handler) { mutableStateOf<String?>(null) }
+    var autoStarted by rememberSaveable(
+        target.accountKey.id,
+        target.accountKey.host,
+        target.platformType.name,
+        selectedMethod.name,
+    ) { mutableStateOf(false) }
+
+    registerDeeplinkCallback {
+        if (loginState.canResume(it)) {
+            loginState.resume(it)
+            true
+        } else {
+            false
+        }
+    }
+    LaunchedEffect(loginState.effects) {
+        loginState.effects.collect { effect ->
+            when (effect) {
+                is LoginEffect.OpenUrl -> {
+                    openUri(effect.url)
+                }
+
+                is LoginEffect.ShowQr -> {
+                    qrContent = effect.content
+                }
+
+                is LoginEffect.OpenWebCookieLogin -> {
+                    onWebViewLogin(effect.url, effect.initialCookies) { cookies ->
+                        if (cookies.isNullOrBlank()) {
+                            false
+                        } else if (!loginState.canResume(cookies)) {
+                            false
+                        } else {
+                            loginState.resume(cookies)
+                            true
+                        }
+                    }
+                }
+            }
+        }
+    }
+    LaunchedEffect(
+        methods,
+        selectedMethod,
+        loginState.flowState.actions,
+        loginState.flowState.fields,
+        loginState.flowState.loading,
+    ) {
+        if (methods.size != 1 || autoStarted || loginState.flowState.loading || loginState.flowState.fields.isNotEmpty()) {
+            return@LaunchedEffect
+        }
+        loginState.flowState.actions.firstOrNull { it.enabled }?.let { action ->
+            autoStarted = true
+            loginState.perform(action.id)
+        }
+    }
+
+    LazyStatusVerticalStaggeredGrid(
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        columns = StaggeredGridCells.Adaptive(300.dp),
+        contentPadding = contentPadding,
+        forceCardMode = true,
+    ) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Column(
+                modifier =
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                FAIcon(
+                    imageVector = state.platformIcon().toImageVector(),
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp),
+                )
+                PlatformText(
+                    text = stringResource(Res.string.login_expired),
+                    style = PlatformTheme.typography.headline,
+                    textAlign = TextAlign.Center,
+                )
+                PlatformText(
+                    text = "${target.accountKey.id}@${target.accountKey.host}",
+                    textAlign = TextAlign.Center,
+                    style = PlatformTheme.typography.title,
+                )
+                PlatformText(
+                    text = stringResource(Res.string.login_expired_message),
+                    textAlign = TextAlign.Center,
+                    style = PlatformTheme.typography.caption,
+                )
+                if (methods.size > 1) {
+                    LoginMethodPicker(
+                        methods = methods,
+                        selectedSpec = selectedSpec,
+                        onSelected = {
+                            selectedMethod = it.type
+                        },
+                    )
+                }
+                LoginFlowContent(
+                    state = loginState,
+                    qrContent = qrContent,
+                    onQrDismiss = {
+                        qrContent = null
+                    },
+                )
+                LoginAgreement(
+                    platformType = target.platformType,
+                    host = target.accountKey.host,
+                    agreementUrl = { _, _ -> state.agreementUrl() },
+                    openUri = openUri,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun GenericLoginContent(
     state: SelectionPresenter.State,
     platformType: PlatformType,
     host: String,
     openUri: (String) -> Unit,
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (url: String, initialCookies: List<WebCookieSeed>, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
 ) {
     val methods = state.loginMethods(platformType)
@@ -334,7 +484,7 @@ private fun GenericLoginContent(
                 }
 
                 is LoginEffect.OpenWebCookieLogin -> {
-                    onWebViewLogin(effect.url) { cookies ->
+                    onWebViewLogin(effect.url, effect.initialCookies) { cookies ->
                         if (cookies.isNullOrBlank()) {
                             false
                         } else if (!loginState.canResume(cookies)) {

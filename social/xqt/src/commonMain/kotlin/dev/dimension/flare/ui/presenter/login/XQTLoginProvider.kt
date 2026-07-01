@@ -9,6 +9,7 @@ import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
+import dev.dimension.flare.data.repository.credentialFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 
 private const val LOGIN_ACTION = "login"
@@ -89,7 +91,26 @@ private class XQTWebCookieLoginHandler(
 
     override suspend fun perform(actionId: String) {
         if (actionId != LOGIN_ACTION) return
-        _effects.emit(LoginEffect.OpenWebCookieLogin("https://$xqtHost/i/flow/login"))
+        val initialCookies =
+            context.reloginTarget
+                ?.accountKey
+                ?.let { accountKey ->
+                    accountService
+                        .credentialFlow<XQTCredential>(accountKey)
+                        .firstOrNull()
+                        ?.chocolate
+                }?.let { chocolate ->
+                    cookieHeaderToWebCookieSeeds(
+                        cookieHeader = chocolate,
+                        domain = xqtHost,
+                    )
+                }.orEmpty()
+        _effects.emit(
+            LoginEffect.OpenWebCookieLogin(
+                url = "https://$xqtHost/i/flow/login",
+                initialCookies = initialCookies,
+            ),
+        )
     }
 
     override suspend fun resume(value: String) {
@@ -123,13 +144,15 @@ private class XQTWebCookieLoginHandler(
                 ?.result
         requireNotNull(account)
         require(account is User)
+        val accountKey =
+            MicroBlogKey(
+                id = account.restId,
+                host = xqtHost,
+            )
+        context.requireReloginAccount(accountKey)
         accountService.addAccount(
             UiAccount(
-                accountKey =
-                    MicroBlogKey(
-                        id = account.restId,
-                        host = xqtHost,
-                    ),
+                accountKey = accountKey,
                 platformType = PlatformType.xQt,
             ),
             credential =

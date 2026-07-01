@@ -305,18 +305,134 @@ struct ServiceSelectionScreen: View {
     }
 }
 
+struct ReloginScreen: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
+
+    let target: ReloginTarget
+    let toHome: () -> Void
+
+    @StateObject private var presenter: KotlinPresenter<ReloginState>
+    @State private var selectedMethod: LoginMethodType?
+
+    init(target: ReloginTarget, toHome: @escaping () -> Void) {
+        self.target = target
+        self.toHome = toHome
+        self._presenter = .init(wrappedValue: .init(presenter: ReloginPresenter(target: target, onSuccess: toHome)))
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                header
+            }
+            Section {
+                loginContent(state: presenter.state)
+                    .id("\(target.accountKey)-\(selectedMethod.map { String(describing: $0) } ?? "default")")
+            }
+        }
+        .formStyle(.grouped)
+        .navigationTitle(ServiceSelectCopy.loginExpired)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Label {
+                        Text("Cancel")
+                    } icon: {
+                        Image(fontAwesome: .xmark)
+                    }
+                }
+            }
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 10) {
+            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 28, height: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(ServiceSelectCopy.loginExpired)
+                    .font(.title3.weight(.semibold))
+                Text("\(target.accountKey.id)@\(target.accountKey.host)")
+                    .font(.headline)
+                Text(ServiceSelectCopy.loginExpiredMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private func loginContent(state: ReloginState) -> some View {
+        let methods = state.methods
+        if let firstMethod = methods.first {
+            let selectedMethod = Binding<LoginMethodType>(
+                get: { self.selectedMethod ?? firstMethod.type },
+                set: { method in
+                    withAnimation(MacOSServiceSelectionAnimation.standard) {
+                        self.selectedMethod = method
+                    }
+                }
+            )
+            VStack(alignment: .leading, spacing: 12) {
+                if methods.count > 1 {
+                    Picker("", selection: selectedMethod) {
+                        ForEach(methods.indices, id: \.self) { index in
+                            Text(methods[index].title.text).tag(methods[index].type)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                }
+
+                let handler = state.createLoginHandler(methodType: selectedMethod.wrappedValue)
+                LoginFlowView(
+                    handler: handler,
+                    authenticateURL: authenticate(url:),
+                    autoStart: methods.count == 1
+                )
+                .id("\(target.accountKey)-\(selectedMethod.wrappedValue)")
+
+                LoginAgreementView(urlString: state.agreementUrl())
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func authenticate(url: String) async -> String? {
+        guard let authURL = URL(string: url) else {
+            return nil
+        }
+        let response = try? await webAuthenticationSession.authenticate(
+            using: authURL,
+            callbackURLScheme: authURL.isPixivOAuthUrl ? "pixiv" : APPSCHEMA
+        )
+        return response?.absoluteString
+    }
+}
+
 private struct LoginFlowView: View {
     let authenticateURL: (String) async -> String?
+    let autoStart: Bool
 
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieInitialCookies: [WebCookieSeed] = []
+    @State private var didAutoStart = false
 
     init(
         handler: LoginMethodHandler,
-        authenticateURL: @escaping (String) async -> String?
+        authenticateURL: @escaping (String) async -> String?,
+        autoStart: Bool = false
     ) {
         self.authenticateURL = authenticateURL
+        self.autoStart = autoStart
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler)))
     }
 
@@ -373,7 +489,14 @@ private struct LoginFlowView: View {
                 }
             case .openWebCookieLogin(let webCookie):
                 webCookieUrl = webCookie.url
+                webCookieInitialCookies = webCookie.initialCookies
             }
+        }
+        .onAppear {
+            autoStartIfNeeded()
+        }
+        .onChange(of: flowAnimationKey) { _, _ in
+            autoStartIfNeeded()
         }
         .sheet(isPresented: Binding(
             get: { webCookieUrl != nil },
@@ -391,7 +514,7 @@ private struct LoginFlowView: View {
                         }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
-                    }, url: webCookieUrl)
+                    }, url: webCookieUrl, initialCookies: webCookieInitialCookies)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button {
@@ -439,6 +562,19 @@ private struct LoginFlowView: View {
             flowState.error ?? "",
             qrContent ?? "",
         ].joined(separator: "|")
+    }
+
+    private func autoStartIfNeeded() {
+        guard autoStart,
+              !didAutoStart,
+              !presenter.state.flowState.loading,
+              presenter.state.flowState.fields.isEmpty,
+              let action = presenter.state.flowState.actions.first(where: { $0.enabled })
+        else {
+            return
+        }
+        didAutoStart = true
+        presenter.state.perform(actionId: action.id)
     }
 
     private func authenticate(url: String) {
@@ -629,8 +765,12 @@ private struct MacOSWebLoginScreen: View {
     @StateObject private var viewModel: MacOSWebLoginViewModel
     private let url: String
 
-    init(onCookie: @escaping (String) -> Void, url: String) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
+    init(
+        onCookie: @escaping (String) -> Void,
+        url: String,
+        initialCookies: [WebCookieSeed] = []
+    ) {
+        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url, initialCookies: initialCookies))
         self.url = url
     }
 
@@ -683,14 +823,18 @@ private final class MacOSWebLoginViewModel: ObservableObject {
 
     let delegate: MacOSCookieNavigationDelegate
 
-    init(onCookie: @escaping (String) -> Void, url: String) {
+    init(
+        onCookie: @escaping (String) -> Void,
+        url: String,
+        initialCookies: [WebCookieSeed]
+    ) {
         self.delegate = MacOSCookieNavigationDelegate {
             WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
                 let cookieString = MacOSWebLoginViewModel.cookieHeaderString(from: cookies, for: URL(string: url))
                 onCookie(cookieString)
             }
         }
-        clearCookie()
+        clearCookie(initialCookies: initialCookies)
     }
 
     var configuration: WKWebViewConfiguration {
@@ -699,14 +843,16 @@ private final class MacOSWebLoginViewModel: ObservableObject {
         return configuration
     }
 
-    private func clearCookie() {
+    private func clearCookie(initialCookies: [WebCookieSeed]) {
         let dataStore = WKWebsiteDataStore.default()
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             dataStore.removeData(
                 ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
                 for: records,
                 completionHandler: {
-                    self.canShowWebView = true
+                    dataStore.httpCookieStore.setCookies(initialCookies) {
+                        self.canShowWebView = true
+                    }
                 }
             )
         }
@@ -722,6 +868,41 @@ private final class MacOSWebLoginViewModel: ObservableObject {
             return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
         }
         return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+    }
+}
+
+private extension WKHTTPCookieStore {
+    func setCookies(_ seeds: [WebCookieSeed], completion: @escaping () -> Void) {
+        guard !seeds.isEmpty else {
+            completion()
+            return
+        }
+        let group = DispatchGroup()
+        for seed in seeds {
+            guard let cookie = HTTPCookie(seed: seed) else {
+                continue
+            }
+            group.enter()
+            setCookie(cookie) {
+                group.leave()
+            }
+        }
+        group.notify(queue: .main, execute: completion)
+    }
+}
+
+private extension HTTPCookie {
+    convenience init?(seed: WebCookieSeed) {
+        var properties: [HTTPCookiePropertyKey: Any] = [
+            .name: seed.name,
+            .value: seed.value,
+            .domain: seed.domain,
+            .path: seed.path,
+        ]
+        if seed.secure {
+            properties[.secure] = "TRUE"
+        }
+        self.init(properties: properties)
     }
 }
 
@@ -745,6 +926,8 @@ private enum ServiceSelectCopy {
     static let nostrQRLinkLabel = String(localized: "nostr_login_qr_link_label", defaultValue: "Nostr Connect link")
     static let eulaPrivacyPolicy = String(localized: "eula_privacy_policy", defaultValue: "EULA and Privacy Policy")
     static let loginAgreementPrefix = String(localized: "login_agreement_prefix", defaultValue: "By logging in, you agree to the ")
+    static let loginExpired = String(localized: "login_expired", defaultValue: "Login session expired")
+    static let loginExpiredMessage = String(localized: "login_expired_message", defaultValue: "Log in again to continue using this account.")
     static let search = String(localized: "search")
     static let clear = String(localized: "Clear")
 

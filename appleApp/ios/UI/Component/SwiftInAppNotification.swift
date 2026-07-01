@@ -1,12 +1,20 @@
 import FlareAppleCore
 import KotlinSharedUI
+import Combine
 import Drops
 import Foundation
 import SwiftUI
 
-class SwiftInAppNotification: InAppNotification {
+struct LoginExpiredToast: Identifiable {
+    let id = UUID()
+    let accountKey: MicroBlogKey
+    let platformType: PlatformType
+}
+
+final class SwiftInAppNotification: ObservableObject, InAppNotification {
     private init() {}
     static let shared = SwiftInAppNotification()
+    @Published var loginExpiredToast: LoginExpiredToast?
     
     func onError(message: Message, throwable: KotlinThrowable) {
         DispatchQueue.main.async {
@@ -21,12 +29,9 @@ class SwiftInAppNotification: InAppNotification {
                 )
             case .loginExpired:
                 if let expiredError = throwable as? LoginExpiredException {
-                    Drops.show(
-                        .init(
-                            title: .init(localized: "notification_login_expired"),
-                            subtitle: .init(localized: "error_login_expired \(expiredError.accountKey)"),
-                            icon: UIImage(systemName: "person.badge.shield.exclamationmark")
-                        )
+                    self.loginExpiredToast = LoginExpiredToast(
+                        accountKey: expiredError.accountKey,
+                        platformType: expiredError.platformType
                     )
                 } else {
                     Drops.show(.init(stringLiteral: .init(localized: "notification_login_expired")))

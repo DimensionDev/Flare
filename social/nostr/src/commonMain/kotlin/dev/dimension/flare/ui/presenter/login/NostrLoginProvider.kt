@@ -124,6 +124,7 @@ private class NostrCredentialLoginHandler(
         _state.value = state(loading = true)
         runCatching {
             loginWith(
+                context = context,
                 accountService = accountService,
                 imported =
                     NostrService.importAccount(
@@ -222,7 +223,7 @@ private class NostrQrLoginHandler(
                 _state.value = state(loading = true)
                 pendingQrLogin = null
                 waiting = false
-                loginWith(accountService, imported)
+                loginWith(context, accountService, imported)
                 session.close()
                 context.onSuccess()
             }
@@ -292,14 +293,16 @@ private class NostrExternalSignerLoginHandler(
                 runCatching {
                     NostrService.resolvePublicRelays(connection.pubkeyHex)
                 }.getOrDefault(defaultNostrRelays)
+            val accountKey =
+                MicroBlogKey(
+                    id = connection.pubkeyHex,
+                    host = NostrService.NOSTR_HOST,
+                )
+            context.requireReloginAccount(accountKey)
             accountService.addAccount(
                 account =
                     UiAccount(
-                        accountKey =
-                            MicroBlogKey(
-                                id = connection.pubkeyHex,
-                                host = NostrService.NOSTR_HOST,
-                            ),
+                        accountKey = accountKey,
                         platformType = PlatformType.Nostr,
                     ),
                 credential =
@@ -340,6 +343,7 @@ private class NostrExternalSignerLoginHandler(
 }
 
 private suspend fun loginWith(
+    context: LoginContext,
     accountService: AccountService,
     imported: NostrService.ImportedAccount,
 ) {
@@ -347,14 +351,16 @@ private suspend fun loginWith(
         runCatching {
             NostrService.resolvePublicRelays(imported.pubkeyHex)
         }.getOrDefault(defaultNostrRelays)
+    val accountKey =
+        MicroBlogKey(
+            id = imported.pubkeyHex,
+            host = NostrService.NOSTR_HOST,
+        )
+    context.requireReloginAccount(accountKey)
     accountService.addAccount(
         account =
             UiAccount(
-                accountKey =
-                    MicroBlogKey(
-                        id = imported.pubkeyHex,
-                        host = NostrService.NOSTR_HOST,
-                    ),
+                accountKey = accountKey,
                 platformType = PlatformType.Nostr,
             ),
         credential =

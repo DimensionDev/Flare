@@ -138,10 +138,12 @@ private class PixivOAuthLoginHandler(
                         redirectUri = request.redirectUri,
                     )
                 val credential = response.toCredential()
+                val accountKey = credential.accountKey()
+                context.requireReloginAccount(accountKey)
                 accountService.addAccount(
                     account =
                         UiAccount(
-                            accountKey = credential.accountKey(),
+                            accountKey = accountKey,
                             platformType = PlatformType.Pixiv,
                         ),
                     credential = credential,

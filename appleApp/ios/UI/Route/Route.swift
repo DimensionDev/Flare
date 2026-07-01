@@ -16,6 +16,10 @@ enum Route: Hashable, Identifiable {
             return lhsIndex == rhsIndex &&
                 lhsPreview == rhsPreview &&
                 lhsMedias.map { $0.url } == rhsMedias.map { $0.url }
+        case (.relogin(let lhsAccountKey, let lhsPlatformType), .relogin(let rhsAccountKey, let rhsPlatformType)):
+            return lhsAccountKey.id == rhsAccountKey.id &&
+                lhsAccountKey.host == rhsAccountKey.host &&
+                lhsPlatformType == rhsPlatformType
         default:
             return lhs.hashValue == rhs.hashValue
         }
@@ -31,6 +35,11 @@ enum Route: Hashable, Identifiable {
             hasher.combine(medias.map { $0.url })
             hasher.combine(selectedIndex)
             hasher.combine(preview)
+        case .relogin(let accountKey, let platformType):
+            hasher.combine("relogin")
+            hasher.combine(accountKey.id)
+            hasher.combine(accountKey.host)
+            hasher.combine(platformType)
         default:
             hasher.combine(String(describing: self))
         }
@@ -55,6 +64,11 @@ enum Route: Hashable, Identifiable {
                 .navigationTitle(item.title.text)
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { goBack() })
+        case .relogin(let accountKey, let platformType):
+            ReloginScreen(
+                target: ReloginTarget(accountKey: accountKey, platformType: platformType),
+                toHome: { goBack() }
+            )
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
         case .galleryDetail(let accountType, let statusKey):
@@ -274,6 +288,7 @@ enum Route: Hashable, Identifiable {
     case statusVVOStatus(AccountType, MicroBlogKey)
     case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
     case serviceSelect
+    case relogin(MicroBlogKey, PlatformType)
     case accountManagement
     case nostrRelays(MicroBlogKey)
     case localFilter
@@ -421,6 +436,8 @@ enum Route: Hashable, Identifiable {
             return Route.search(search.accountType, search.query)
         case .status(let status):
             return fromStatus(status)
+        case .relogin(let data):
+            return Route.relogin(data.accountKey, data.platformType)
         case .login:
             return Route.serviceSelect
         case .deepLinkAccountPicker(let picker):

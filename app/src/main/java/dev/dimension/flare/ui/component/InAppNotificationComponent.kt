@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,8 +33,11 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.CircleExclamation
+import dev.dimension.flare.R
 import dev.dimension.flare.common.ComposeInAppNotification
 import dev.dimension.flare.common.Notification
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,6 +47,7 @@ import kotlin.time.Duration.Companion.seconds
 internal fun InAppNotificationComponent(
     modifier: Modifier = Modifier,
     notification: ComposeInAppNotification = koinInject(),
+    onRelogin: (ReloginTarget) -> Unit = {},
 ) {
     val source by notification.source.collectAsState()
     val content = remember(source) { source.getContentIfNotHandled() }
@@ -74,7 +79,8 @@ internal fun InAppNotificationComponent(
                     showNotification,
                     modifier =
                         modifier
-                            .systemBarsPadding(),
+                            .systemBarsPadding()
+                            .padding(horizontal = screenHorizontalPadding),
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically(),
                 ) {
@@ -111,7 +117,20 @@ internal fun InAppNotificationComponent(
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
                                         stringResource(it.messageId, *it.args.toTypedArray()),
+                                        modifier = Modifier.weight(1f),
                                     )
+                                    it.reloginTarget?.let { target ->
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        TextButton(
+                                            onClick = {
+                                                showText = false
+                                                showNotification = false
+                                                onRelogin(target)
+                                            },
+                                        ) {
+                                            Text(stringResource(R.string.login_expired_relogin))
+                                        }
+                                    }
                                 }
                             }
                         }

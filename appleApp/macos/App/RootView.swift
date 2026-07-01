@@ -24,6 +24,7 @@ struct RootView: View {
     @State private var homeExpanded: Bool = true
     @State private var showDraftBoxPopover = false
     @State private var showLogin = false
+    @State private var reloginRoute: Route?
     @State private var homeSidebarTabEditor: HomeSidebarTabEditor?
 
     var body: some View {
@@ -188,6 +189,10 @@ struct RootView: View {
                     .overlay(alignment: .top) {
                         LoginExpiredToastOverlay(
                             toast: inAppNotification.loginExpiredToast,
+                            onRelogin: { toast in
+                                reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                                inAppNotification.dismissLoginExpiredToast(id: toast.id)
+                            },
                             onDismiss: { id in
                                 inAppNotification.dismissLoginExpiredToast(id: id)
                             }
@@ -205,6 +210,14 @@ struct RootView: View {
         .sheet(isPresented: $showLogin) {
             NavigationStack {
                 ServiceSelectionScreen(toHome: { showLogin = false })
+            }
+        }
+        .sheet(item: $reloginRoute) { route in
+            NavigationStack {
+                route.view(
+                    onNavigate: { reloginRoute = $0 },
+                    goBack: { reloginRoute = nil }
+                )
             }
         }
         .sheet(item: $homeSidebarTabEditor) { editor in
@@ -265,6 +278,7 @@ private struct HomeSidebarTabEditor: Identifiable {
 
 private struct LoginExpiredToastOverlay: View {
     let toast: LoginExpiredToast?
+    let onRelogin: (LoginExpiredToast) -> Void
     let onDismiss: (UUID) -> Void
 
     @State private var showNotification = false
@@ -272,11 +286,16 @@ private struct LoginExpiredToastOverlay: View {
     var body: some View {
         Group {
             if let toast, showNotification {
-                LoginExpiredToastView(accountKey: toast.accountKey)
+                LoginExpiredToastView(
+                    toast: toast,
+                    onRelogin: {
+                        onRelogin(toast)
+                    },
+                    onDismiss: {
+                        dismiss(toast)
+                    }
+                )
                 .transition(.move(edge: .top).combined(with: .opacity))
-                .onTapGesture {
-                    dismiss(toast)
-                }
             }
         }
         .padding(.top, 14)
@@ -311,18 +330,9 @@ private struct LoginExpiredToastOverlay: View {
 }
 
 private struct LoginExpiredToastView: View {
-    let accountKey: String?
-
-    private var message: String {
-        guard let accountKey, !accountKey.isEmpty else {
-            return NSLocalizedString("notification_login_expired", comment: "")
-        }
-
-        return String.localizedStringWithFormat(
-            NSLocalizedString("error_login_expired %@", comment: ""),
-            accountKey
-        )
-    }
+    let toast: LoginExpiredToast
+    let onRelogin: () -> Void
+    let onDismiss: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -331,15 +341,31 @@ private struct LoginExpiredToastView: View {
                 .foregroundStyle(.red)
                 .frame(width: 20, height: 20)
 
-            Text(message)
-                .font(.callout)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "login_expired", defaultValue: "Login session expired"))
+                    .font(.callout.weight(.semibold))
+                Text("\(toast.accountKey)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+            Button {
+                onRelogin()
+            } label: {
+                Text(String(localized: "login_expired_relogin", defaultValue: "Log in again"))
+            }
+            Button {
+                onDismiss()
+            } label: {
+                Image(fontAwesome: .xmark)
+            }
+            .buttonStyle(.plain)
         }
         .padding(12)
-        .frame(maxWidth: 420, alignment: .leading)
-        .background(.background, in: Capsule())
-        .contentShape(Capsule())
+        .frame(maxWidth: 520, alignment: .leading)
+        .background(.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .shadow(color: .black.opacity(0.18), radius: 8, y: 4)
     }
 }

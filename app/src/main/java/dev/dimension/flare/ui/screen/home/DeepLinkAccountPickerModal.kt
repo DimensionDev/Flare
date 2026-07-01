@@ -68,6 +68,10 @@ internal fun DeepLinkAccountPickerModal(
                     onNavigate(route)
                 },
                 toLogin = {},
+                toRelogin = {
+                    onDismissRequest()
+                    onNavigate(Route.ServiceSelect.Relogin(it))
+                },
                 modifier =
                     Modifier
                         .listCard(

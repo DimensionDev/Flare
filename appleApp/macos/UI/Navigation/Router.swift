@@ -259,6 +259,7 @@ struct Router: View {
     private func isSheetRoute(_ route: Route) -> Bool {
         switch route {
         case .serviceSelect,
+                .relogin,
                 .deepLinkAccountPicker,
                 .statusAddReaction,
                 .statusShareSheet,

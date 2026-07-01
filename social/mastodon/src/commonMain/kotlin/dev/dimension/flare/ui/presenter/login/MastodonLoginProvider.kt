@@ -230,6 +230,12 @@ private class MastodonOAuthLoginHandler(
         val id = user.id
         requireNotNull(id) { "Invalid user id" }
         val nodeInfo = NodeInfoService.fetchNodeInfo(host)
+        val accountKey =
+            MicroBlogKey(
+                id = id,
+                host = host,
+            )
+        context.requireReloginAccount(accountKey)
         val forkType =
             if (nodeInfo in NodeInfoService.pleromaNodeInfoName) {
                 MastodonCredential.ForkType.Pleroma
@@ -238,11 +244,7 @@ private class MastodonOAuthLoginHandler(
             }
         accountService.addAccount(
             UiAccount(
-                accountKey =
-                    MicroBlogKey(
-                        id = id,
-                        host = host,
-                    ),
+                accountKey = accountKey,
                 platformType = PlatformType.Mastodon,
             ),
             credential =

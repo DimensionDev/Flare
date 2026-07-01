@@ -3,6 +3,7 @@ package dev.dimension.flare.common
 import androidx.annotation.StringRes
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
@@ -22,6 +23,7 @@ internal sealed interface Notification {
         val messageId: Int,
         val success: Boolean,
         val args: List<Any> = emptyList(),
+        val reloginTarget: ReloginTarget? = null,
     ) : Notification
 }
 
@@ -66,6 +68,15 @@ internal class ComposeInAppNotification : InAppNotification {
                                 null
                             },
                         ),
+                    reloginTarget =
+                        if (throwable is LoginExpiredException) {
+                            ReloginTarget(
+                                accountKey = throwable.accountKey,
+                                platformType = throwable.platformType,
+                            )
+                        } else {
+                            null
+                        },
                 ),
             )
     }

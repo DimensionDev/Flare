@@ -194,6 +194,19 @@
         }
       }
     },
+    "%@" : {
+
+    },
+    "%@@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@@%2$@"
+          }
+        }
+      }
+    },
     "%d" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -50904,6 +50917,39 @@
         }
       }
     },
+    "login_expired" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Login session expired"
+          }
+        }
+      }
+    },
+    "login_expired_message" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Log in again to continue using this account."
+          }
+        }
+      }
+    },
+    "login_expired_relogin" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Log in again"
+          }
+        }
+      }
+    },
     "login_title" : {
       "localizations" : {
         "af" : {
@@ -99128,13 +99174,13 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "已保存"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "已儲存"
           }
         }

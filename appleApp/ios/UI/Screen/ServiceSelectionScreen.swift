@@ -168,13 +168,14 @@ struct ServiceSelectionScreen: View {
                     .transition(ServiceSelectionAnimation.inline)
                 }
 
-                let handler = state.createLoginHandler(
-                    platformType: node.platformType,
-                    host: node.host,
-                    methodType: selectedMethod,
-                    redirectUri: nil,
-                )
-                LoginFlowView(handler: handler)
+                LoginFlowView {
+                    state.createLoginHandler(
+                        platformType: node.platformType,
+                        host: node.host,
+                        methodType: selectedMethod,
+                        redirectUri: nil,
+                    )
+                }
                     .id("\(key)-\(selectedMethod)")
                     .transition(ServiceSelectionAnimation.panel)
 
@@ -371,8 +372,9 @@ struct ReloginScreen: View {
                     .pickerStyle(.segmented)
                 }
 
-                let handler = state.createLoginHandler(methodType: selectedMethod)
-                LoginFlowView(handler: handler)
+                LoginFlowView {
+                    state.createLoginHandler(methodType: selectedMethod)
+                }
                     .id("\(target.accountKey)-\(selectedMethod)")
 
                 LoginAgreementView(urlString: state.agreementUrl())
@@ -389,8 +391,8 @@ private struct LoginFlowView: View {
     @State private var webCookieUrl: String?
     @State private var webCookieInitialCookies: [WebCookieSeed] = []
 
-    init(handler: LoginMethodHandler) {
-        self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler)))
+    init(handler: @escaping () -> LoginMethodHandler) {
+        self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
     }
 
     var body: some View {

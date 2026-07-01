@@ -21,7 +21,7 @@ import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
-private val userAgent =
+private val USER_AGENT_HEADERS =
     mapOf(
         "User-Agent" to "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3",
         "Pragma" to "no-cache",
@@ -92,7 +92,7 @@ internal fun WebCookieLoginScreen(
                         )
                     }
                     cookieManager.flush()
-                    webView.loadUrl(url, userAgent)
+                    webView.loadUrl(url, USER_AGENT_HEADERS)
                 }
             },
         )

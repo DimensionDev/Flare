@@ -167,14 +167,17 @@ struct ServiceSelectionScreen: View {
                         .foregroundStyle(.secondary)
                 }
 
-                let handler = state.createLoginHandler(
-                    platformType: node.platformType,
-                    host: node.host,
-                    methodType: selectedMethod.wrappedValue,
-                    redirectUri: nil,
+                LoginFlowView(
+                    handler: {
+                        state.createLoginHandler(
+                            platformType: node.platformType,
+                            host: node.host,
+                            methodType: selectedMethod.wrappedValue,
+                            redirectUri: nil,
+                        )
+                    },
+                    authenticateURL: authenticate(url:)
                 )
-
-                LoginFlowView(handler: handler, authenticateURL: authenticate(url:))
                     .id("\(key)-\(selectedMethod.wrappedValue)")
 
                 LoginAgreementView(
@@ -390,9 +393,10 @@ struct ReloginScreen: View {
                     .labelsHidden()
                 }
 
-                let handler = state.createLoginHandler(methodType: selectedMethod.wrappedValue)
                 LoginFlowView(
-                    handler: handler,
+                    handler: {
+                        state.createLoginHandler(methodType: selectedMethod.wrappedValue)
+                    },
                     authenticateURL: authenticate(url:)
                 )
                 .id("\(target.accountKey)-\(selectedMethod.wrappedValue)")
@@ -424,11 +428,11 @@ private struct LoginFlowView: View {
     @State private var webCookieInitialCookies: [WebCookieSeed] = []
 
     init(
-        handler: LoginMethodHandler,
+        handler: @escaping () -> LoginMethodHandler,
         authenticateURL: @escaping (String) async -> String?
     ) {
         self.authenticateURL = authenticateURL
-        self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler)))
+        self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
     }
 
     var body: some View {

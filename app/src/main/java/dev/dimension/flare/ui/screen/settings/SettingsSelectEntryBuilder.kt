@@ -38,6 +38,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toAppearanceMedia = {
                 navigate(Route.Settings.AppearanceMedia)
             },
+            toBehavior = {
+                navigate(Route.Settings.Behavior)
+            },
             toStorage = {
                 navigate(Route.Settings.Storage)
             },
@@ -129,6 +132,29 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
     ) {
         AppearanceMediaScreen(
             onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.Behavior>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        BehaviorScreen(
+            toLinkOpenDefaults = {
+                navigate(Route.Settings.LinkOpenDefaults)
+            },
+            onBack = onBack,
+        )
+    }
+
+    entry<Route.Settings.LinkOpenDefaults>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
+        LinkOpenDefaultsScreen(
+            onBack = onBack,
         )
     }
 

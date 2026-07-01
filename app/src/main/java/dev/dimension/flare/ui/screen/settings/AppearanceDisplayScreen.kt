@@ -27,11 +27,11 @@ import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
@@ -43,7 +43,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { appearancePresenter() }
-    val globalAppearance = LocalGlobalAppearance.current
     val timelineAppearance = LocalTimelineAppearance.current
     FlareScaffold(
         topBar = {
@@ -132,7 +131,12 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                 onClick = {
                     state.update(AppearanceKeys.ShowLinkPreview, !timelineAppearance.showLinkPreview)
                 },
-                shapes = ListItemDefaults.item(),
+                shapes =
+                    if (timelineAppearance.showLinkPreview) {
+                        ListItemDefaults.item()
+                    } else {
+                        ListItemDefaults.last()
+                    },
                 content = {
                     Text(text = stringResource(id = R.string.settings_appearance_show_link_previews))
                 },
@@ -153,7 +157,7 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     onClick = {
                         state.update(AppearanceKeys.CompatLinkPreview, !timelineAppearance.compatLinkPreview)
                     },
-                    shapes = ListItemDefaults.item(),
+                    shapes = ListItemDefaults.last(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_appearance_compat_link_previews))
                     },
@@ -170,26 +174,6 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
                     },
                 )
             }
-            SegmentedListItem(
-                onClick = {
-                    state.update(AppearanceKeys.InAppBrowser, !globalAppearance.inAppBrowser)
-                },
-                shapes = ListItemDefaults.last(),
-                content = {
-                    Text(text = stringResource(id = R.string.settings_appearance_in_app_browser))
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_appearance_in_app_browser_description))
-                },
-                trailingContent = {
-                    Switch(
-                        checked = globalAppearance.inAppBrowser,
-                        onCheckedChange = {
-                            state.update(AppearanceKeys.InAppBrowser, it)
-                        },
-                    )
-                },
-            )
         }
     }
 }

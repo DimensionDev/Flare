@@ -154,7 +154,6 @@ public struct AppearanceDisplaySettingsSection: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     #if os(iOS)
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
-    @Environment(\.globalAppearance) private var globalAppearance
     #endif
     @Environment(\.timelineAppearance) private var timelineAppearance
 
@@ -201,6 +200,21 @@ public struct AppearanceDisplaySettingsSection: View {
                     Text("appearance_compat_link_preview_description", bundle: FlareAppleUILocalization.bundle)
                 }
             }
+        }
+    }
+}
+
+public struct BehaviorSettingsSection<LinkOpenDefaultsLink: View>: View {
+    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
+    @Environment(\.globalAppearance) private var globalAppearance
+    private let linkOpenDefaultsLink: () -> LinkOpenDefaultsLink
+
+    public init(@ViewBuilder linkOpenDefaultsLink: @escaping () -> LinkOpenDefaultsLink) {
+        self.linkOpenDefaultsLink = linkOpenDefaultsLink
+    }
+
+    public var body: some View {
+        Section {
             #if os(iOS)
             Toggle(isOn: Binding(get: {
                 globalAppearance.inAppBrowser
@@ -211,6 +225,92 @@ public struct AppearanceDisplaySettingsSection: View {
                 Text("appearance_in_app_browser_description", bundle: FlareAppleUILocalization.bundle)
             }
             #endif
+            linkOpenDefaultsLink()
+        }
+    }
+}
+
+public extension BehaviorSettingsSection where LinkOpenDefaultsLink == EmptyView {
+    init() {
+        self.init {
+            EmptyView()
+        }
+    }
+}
+
+public struct LinkOpenDefaultsSettingsSection: View {
+    @StateObject private var presenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
+
+    public init() {}
+
+    public var body: some View {
+        Section {
+            StateView(state: presenter.state.targets) { data in
+                let targets = data.cast(LinkOpenDefaultsPresenter.Target.self)
+                ForEach(targets, id: \.id) { target in
+                    LinkOpenDefaultSettingsPicker(
+                        target: target,
+                        state: presenter.state
+                    )
+                }
+            } loadingContent: {
+                EmptyView()
+            }
+        }
+    }
+}
+
+private struct LinkOpenDefaultSettingsPicker: View {
+    let target: LinkOpenDefaultsPresenter.Target
+    let state: LinkOpenDefaultsPresenterState
+
+    var body: some View {
+        Picker(selection: Binding(get: {
+            target.selectedOption.id
+        }, set: { newValue in
+            if let option = options.first(where: { $0.id == newValue }) {
+                state.select(target: target, option: option)
+            }
+        })) {
+            ForEach(options, id: \.id) { option in
+                LinkOpenDefaultOptionLabel(option: option)
+                    .tag(option.id)
+            }
+        } label: {
+            Text(target.title)
+            LinkOpenDefaultOptionLabel(option: target.selectedOption)
+        }
+    }
+
+    private var options: [any LinkOpenDefaultsPresenterOption] {
+        target.options
+    }
+}
+
+private struct LinkOpenDefaultOptionLabel: View {
+    let option: any LinkOpenDefaultsPresenterOption
+
+    var body: some View {
+        if option.isAsk {
+            Text("settings_link_open_default_ask_every_time", bundle: FlareAppleUILocalization.bundle)
+        } else if option.isBrowser {
+            Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle)
+        } else if let account = option.account {
+            LinkOpenDefaultAccountRow(account: account)
+        }
+    }
+}
+
+private struct LinkOpenDefaultAccountRow: View {
+    let account: LinkOpenDefaultsPresenter.Account
+
+    var body: some View {
+        StateView(state: account.profile) { user in
+            UserOnelineView(data: user)
+        } errorContent: { error in
+            Text(error.message ?? "Unknown error")
+        } loadingContent: {
+            Text("#loading", bundle: FlareAppleUILocalization.bundle)
         }
     }
 }

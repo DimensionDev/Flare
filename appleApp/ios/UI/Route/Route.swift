@@ -114,6 +114,10 @@ enum Route: Hashable, Identifiable {
             AppearanceDisplayScreen()
         case .appearanceMedia:
             AppearanceMediaScreen()
+        case .behavior:
+            BehaviorSettingsScreen()
+        case .linkOpenDefaults:
+            LinkOpenDefaultsSettingsScreen()
         case .appIconSettings:
             AppIconSettingsScreen()
         case .about:
@@ -290,6 +294,8 @@ enum Route: Hashable, Identifiable {
     case postActionLayout
     case appearanceDisplay
     case appearanceMedia
+    case behavior
+    case linkOpenDefaults
     case appIconSettings
     case settings
     case about

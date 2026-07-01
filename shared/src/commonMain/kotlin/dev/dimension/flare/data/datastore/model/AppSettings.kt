@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datastore.model
 
+import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,7 +10,32 @@ public data class AppSettings(
     val aiConfig: AiConfig = AiConfig(),
     val language: String = "",
     val translateConfig: TranslateConfig = TranslateConfig(),
+    val linkOpenDefaults: LinkOpenDefaults = LinkOpenDefaults(),
 ) {
+    @Serializable
+    public data class LinkOpenDefaults(
+        val rules: List<Rule> = emptyList(),
+    ) {
+        @Serializable
+        public data class Rule(
+            val host: String,
+            val method: Method,
+        )
+
+        @Serializable
+        public sealed interface Method {
+            @Serializable
+            @SerialName("Browser")
+            public data object Browser : Method
+
+            @Serializable
+            @SerialName("Account")
+            public data class Account(
+                val accountKey: MicroBlogKey,
+            ) : Method
+        }
+    }
+
     @Serializable
     public data class TranslateConfig(
         val preTranslate: Boolean = false,

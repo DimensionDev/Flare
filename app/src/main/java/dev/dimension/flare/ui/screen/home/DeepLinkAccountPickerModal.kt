@@ -8,13 +8,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
@@ -28,7 +33,9 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.LinkOpenDefaultsActionsPresenter
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -47,6 +54,12 @@ internal fun DeepLinkAccountPickerModal(
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboard.current
     val accounts by producePresenter { presenter(data) }
+    val defaultsActions by producePresenter("link_open_defaults_picker") {
+        remember(originalUrl) { LinkOpenDefaultsActionsPresenter(originalUrl) }.invoke()
+    }
+    var saveAsDefault by remember(defaultsActions.canSaveDefault) {
+        mutableStateOf(defaultsActions.canSaveDefault)
+    }
     LazyColumn(
         contentPadding =
             PaddingValues(
@@ -60,12 +73,15 @@ internal fun DeepLinkAccountPickerModal(
         item {
             Spacer(modifier = Modifier.height(12.dp))
         }
-        itemsIndexed(accounts) { index, (userState, route) ->
+        itemsIndexed(accounts) { index, item ->
             AccountItem(
-                userState.user,
+                item.userState.user,
                 onClick = {
+                    if (saveAsDefault && defaultsActions.canSaveDefault) {
+                        defaultsActions.setAccountDefault(item.accountKey)
+                    }
                     onDismissRequest()
-                    onNavigate(route)
+                    onNavigate(item.route)
                 },
                 toLogin = {},
                 modifier =
@@ -80,12 +96,12 @@ internal fun DeepLinkAccountPickerModal(
             val text = stringResource(R.string.media_menu_copy_link)
             ListItem(
                 headlineContent = {
-                    Text(stringResource(R.string.media_menu_copy_link))
+                    Text(text)
                 },
                 leadingContent = {
                     FAIcon(
                         FontAwesomeIcons.Solid.Globe,
-                        contentDescription = stringResource(R.string.media_menu_copy_link),
+                        contentDescription = text,
                     )
                 },
                 modifier =
@@ -109,20 +125,56 @@ internal fun DeepLinkAccountPickerModal(
                         },
             )
         }
+        if (defaultsActions.canSaveDefault) {
+            item {
+                ListItem(
+                    headlineContent = {
+                        Text(stringResource(R.string.deeplink_account_selection_save_default))
+                    },
+                    colors =
+                        ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                        ),
+                    trailingContent = {
+                        Checkbox(
+                            checked = saveAsDefault,
+                            onCheckedChange = {
+                                saveAsDefault = it
+                            },
+                        )
+                    },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                saveAsDefault = !saveAsDefault
+                            },
+                )
+            }
+        }
         item {
             Spacer(modifier = Modifier.height(14.dp))
         }
     }
 }
 
+private data class DeepLinkAccountItem(
+    val accountKey: MicroBlogKey,
+    val userState: UserState,
+    val route: Route,
+)
+
 @Composable
 private fun presenter(data: ImmutableMap<MicroBlogKey, Route>) =
     run {
         remember(data) {
-            data.map {
-                UserPresenter(AccountType.Specific(it.key), null) to it.value
+            data.map { (accountKey, route) ->
+                accountKey to (UserPresenter(AccountType.Specific(accountKey), null) to route)
             }
-        }.map {
-            it.first.invoke() to it.second
+        }.map { (accountKey, presenterAndRoute) ->
+            DeepLinkAccountItem(
+                accountKey = accountKey,
+                userState = presenterAndRoute.first.invoke(),
+                route = presenterAndRoute.second,
+            )
         }.toImmutableList()
     }

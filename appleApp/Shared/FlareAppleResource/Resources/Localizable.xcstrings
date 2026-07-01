@@ -10953,7 +10953,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timestamps, source badges, links, and browser behavior"
+            "value" : "Timestamps, source badges, and link previews"
           }
         },
         "es" : {
@@ -33198,6 +33198,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在瀏覽器中開啟"
+          }
+        }
+      }
+    },
+    "deep_link_account_picker_save_default" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always open this way"
           }
         }
       }
@@ -99128,13 +99138,13 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "已保存"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "已儲存"
           }
         }
@@ -115876,6 +115886,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "查看本機 Flare AI 聊天記錄"
+          }
+        }
+      }
+    },
+    "settings_behavior_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Browser and link handling preferences"
+          }
+        }
+      }
+    },
+    "settings_behavior_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behavior"
+          }
+        }
+      }
+    },
+    "settings_link_open_default_ask_every_time" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask every time"
+          }
+        }
+      }
+    },
+    "settings_link_open_default_description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose how supported links open when Flare can handle them"
+          }
+        }
+      }
+    },
+    "settings_link_open_default_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default for %@ links"
+          }
+        }
+      }
+    },
+    "settings_link_open_defaults_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose defaults for supported links by host"
+          }
+        }
+      }
+    },
+    "settings_link_open_defaults_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link opening"
           }
         }
       }

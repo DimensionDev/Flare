@@ -217,7 +217,9 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Timeline layout, navigation, and post actions</string>
     <string name="settings_appearance_display_group_title">Display</string>
-    <string name="settings_appearance_display_group_subtitle">Timestamps, source badges, links, and browser behavior</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, source badges, and link previews</string>
+    <string name="settings_behavior_title">Behavior</string>
+    <string name="settings_behavior_description">Browser and link handling preferences</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Media visibility, playback, and sensitive content</string>
     <string name="settings_storage_title">Storage</string>
@@ -557,6 +559,12 @@
     <string name="deeplink_account_selection_title">Select account</string>
     <string name="deeplink_account_selection_message">Select an account to open this link</string>
     <string name="deeplink_account_selection_browser">Open in browser</string>
+    <string name="deeplink_account_selection_save_default">Always open this way</string>
+    <string name="settings_link_open_defaults_title">Link opening</string>
+    <string name="settings_link_open_defaults_description">Choose defaults for supported links by host</string>
+    <string name="settings_link_open_default_title">Default for %1$s links</string>
+    <string name="settings_link_open_default_description">Choose how supported links open when Flare can handle them</string>
+    <string name="settings_link_open_default_ask_every_time">Ask every time</string>
 
     <string name="block_user_title">Block user</string>
     <string name="block_user_description">Are you sure you want to block this user?</string>

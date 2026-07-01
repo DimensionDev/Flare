@@ -11,18 +11,18 @@ internal object PlatformDeepLinkMatcher {
     fun matches(
         url: String,
         mapping: Map<UiAccount, List<PlatformDeepLink<*>>>,
-    ): ImmutableMap<UiAccount, DeeplinkRoute> {
+    ): ImmutableMap<UiAccount, Match> {
         val request = DeepLinkRequest(Url(url))
-        val resultBuilder = persistentMapOf<UiAccount, DeeplinkRoute>().builder()
+        val resultBuilder = persistentMapOf<UiAccount, Match>().builder()
 
         mapping.forEach { (account, deepLinks) ->
-            val route =
+            val match =
                 deepLinks.firstNotNullOfOrNull { deepLink ->
                     match(request, deepLink)
                 }
 
-            if (route != null) {
-                resultBuilder[account] = route
+            if (match != null) {
+                resultBuilder[account] = match
             }
         }
 
@@ -32,14 +32,23 @@ internal object PlatformDeepLinkMatcher {
     private fun <T> match(
         request: DeepLinkRequest,
         deepLink: PlatformDeepLink<T>,
-    ): DeeplinkRoute? {
+    ): Match? {
+        val uriPattern = Url(deepLink.uriPattern)
         val pattern =
             DeepLinkPattern(
                 serializer = deepLink.serializer,
-                uriPattern = Url(deepLink.uriPattern),
+                uriPattern = uriPattern,
             )
         val match = DeepLinkMatcher(request, pattern).match() ?: return null
         val data = KeyDecoder(match.args).decodeSerializableValue(match.serializer)
-        return deepLink.callback(data)
+        return Match(
+            route = deepLink.callback(data),
+            host = uriPattern.host,
+        )
     }
+
+    data class Match(
+        val route: DeeplinkRoute,
+        val host: String,
+    )
 }

@@ -35,6 +35,7 @@ import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.PhotoFilm
 import compose.icons.fontawesomeicons.solid.Robot
+import compose.icons.fontawesomeicons.solid.Sliders
 import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
@@ -84,6 +85,7 @@ internal fun SettingsScreen(
     toAppearanceLayout: () -> Unit,
     toAppearanceDisplay: () -> Unit,
     toAppearanceMedia: () -> Unit,
+    toBehavior: () -> Unit,
     toStorage: () -> Unit,
     toAbout: () -> Unit,
     toColorSpace: () -> Unit,
@@ -243,6 +245,26 @@ internal fun SettingsScreen(
                     )
                 }
             }
+
+            SegmentedListItem(
+                onClick = {
+                    toBehavior.invoke()
+                },
+                shapes = ListItemDefaults.single(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_behavior_title))
+                },
+                leadingContent = {
+                    ThemedIcon(
+                        imageVector = FontAwesomeIcons.Solid.Sliders,
+                        contentDescription = stringResource(id = R.string.settings_behavior_title),
+                        color = ThemeIconData.Color.SapphireBlue,
+                    )
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_behavior_description))
+                },
+            )
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),

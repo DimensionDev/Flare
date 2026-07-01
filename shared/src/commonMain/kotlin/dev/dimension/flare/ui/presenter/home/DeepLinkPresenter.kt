@@ -9,13 +9,17 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.PlatformDeepLinkMatcher
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datastore.model.LinkOpenDefaultMethod
+import dev.dimension.flare.data.datastore.model.methodFor
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.DeeplinkEvent
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.toImmutableMap
@@ -31,6 +35,7 @@ public class DeepLinkPresenter(
     private val accountRepository: AccountRepository by koinInject()
     private val preTranslationService: PreTranslationService by koinInject()
     private val platformRegistry: PlatformRegistry by koinInject()
+    private val settingsRepository: SettingsRepository by koinInject()
 
     @androidx.compose.runtime.Immutable
     public interface State {
@@ -122,20 +127,54 @@ public class DeepLinkPresenter(
                     }
                     pendingUrl = null
                 } else {
-                    deepLinkFlow.collect { deepLinks ->
-                        val matches = PlatformDeepLinkMatcher.matches(url, deepLinks)
-                        if (matches.isEmpty()) {
-                            withContext(Dispatchers.Main) {
-                                onLink.invoke(url)
+                    val deepLinks = deepLinkFlow.firstOrNull().orEmpty()
+                    val matches = PlatformDeepLinkMatcher.matches(url, deepLinks)
+                    if (matches.isEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            onLink.invoke(url)
+                        }
+                    } else {
+                        val defaultHost = matches.defaultHost()
+                        val defaultMethod =
+                            defaultHost?.let { host ->
+                                settingsRepository
+                                    .appSettings
+                                    .firstOrNull()
+                                    ?.linkOpenDefaults
+                                    ?.methodFor(host)
                             }
-                        } else {
+                        val defaultRoute =
+                            when (defaultMethod) {
+                                LinkOpenDefaultMethod.Browser -> {
+                                    withContext(Dispatchers.Main) {
+                                        onLink.invoke(url)
+                                    }
+                                    null
+                                }
+
+                                is LinkOpenDefaultMethod.Account -> {
+                                    matches.entries
+                                        .firstOrNull { it.key.accountKey == defaultMethod.accountKey }
+                                        ?.value
+                                        ?.route
+                                }
+
+                                null -> {
+                                    null
+                                }
+                            }
+                        if (defaultRoute != null) {
+                            withContext(Dispatchers.Main) {
+                                onRoute.invoke(defaultRoute)
+                            }
+                        } else if (defaultMethod !is LinkOpenDefaultMethod.Browser) {
                             val route =
                                 DeeplinkRoute.DeepLinkAccountPicker(
                                     originalUrl = url,
                                     data =
                                         matches
                                             .map {
-                                                it.key.accountKey to it.value
+                                                it.key.accountKey to it.value.route
                                             }.toMap()
                                             .toImmutableMap(),
                                 )
@@ -143,8 +182,8 @@ public class DeepLinkPresenter(
                                 onRoute.invoke(route)
                             }
                         }
-                        pendingUrl = null
                     }
+                    pendingUrl = null
                 }
             }
         }
@@ -155,4 +194,10 @@ public class DeepLinkPresenter(
             }
         }
     }
+}
+
+private fun Map<UiAccount, PlatformDeepLinkMatcher.Match>.defaultHost(): String? {
+    val hosts = values.map { it.host }.distinct()
+    if (hosts.size != 1) return null
+    return hosts.single()
 }

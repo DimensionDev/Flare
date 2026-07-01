@@ -65,6 +65,7 @@ import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.deeplink_account_selection_browser
 import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
@@ -195,10 +196,14 @@ import dev.dimension.flare.settings_appearance_timeline_display_mode_plain
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
 import dev.dimension.flare.settings_appearance_video_autoplay_description
+import dev.dimension.flare.settings_behavior_title
 import dev.dimension.flare.settings_draft_box_description
 import dev.dimension.flare.settings_draft_box_title
 import dev.dimension.flare.settings_language_description
 import dev.dimension.flare.settings_language_title
+import dev.dimension.flare.settings_link_open_default_ask_every_time
+import dev.dimension.flare.settings_link_open_defaults_description
+import dev.dimension.flare.settings_link_open_defaults_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_nostr_relays_manage
@@ -241,6 +246,7 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.ExportDataPresenter
 import dev.dimension.flare.ui.presenter.ImportDataPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
@@ -251,6 +257,7 @@ import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
 import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
 import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
+import dev.dimension.flare.ui.presenter.settings.LinkOpenDefaultsPresenter
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
@@ -340,6 +347,10 @@ internal fun SettingsScreen(
             },
         )
     }
+    val linkOpenDefaultsState by producePresenter("link_open_defaults_settings") {
+        remember { LinkOpenDefaultsPresenter() }.invoke()
+    }
+    val linkOpenTargets = linkOpenDefaultsState.targets.takeSuccessOr(persistentListOf())
     var pendingDeleteAccountKey by remember { mutableStateOf<MicroBlogKey?>(null) }
     var pendingDeleteAccountLabel by remember { mutableStateOf<String?>(null) }
 
@@ -1128,6 +1139,30 @@ internal fun SettingsScreen(
                         )
                     },
                 )
+            }
+
+            Header(stringResource(Res.string.settings_behavior_title))
+            var behaviorExpanded by remember { mutableStateOf(false) }
+            Expander(
+                icon = null,
+                expanded = behaviorExpanded,
+                onExpandedChanged = { behaviorExpanded = it },
+                heading = {
+                    Text(stringResource(Res.string.settings_link_open_defaults_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_link_open_defaults_description))
+                },
+            ) {
+                linkOpenTargets.forEachIndexed { index, target ->
+                    if (index > 0) {
+                        ExpanderItemSeparator()
+                    }
+                    LinkOpenDefaultSettingsItem(
+                        target = target,
+                        state = linkOpenDefaultsState,
+                    )
+                }
             }
 
             Header(stringResource(Res.string.settings_storage_title))
@@ -2580,6 +2615,97 @@ private data class LanguageOption(
     val tag: String,
     val label: String,
 )
+
+@Composable
+private fun LinkOpenDefaultSettingsItem(
+    target: LinkOpenDefaultsPresenter.Target,
+    state: LinkOpenDefaultsPresenter.State,
+) {
+    val askLabel = stringResource(Res.string.settings_link_open_default_ask_every_time)
+    val browserLabel = stringResource(Res.string.deeplink_account_selection_browser)
+    var isFlyoutVisible by remember { mutableStateOf(false) }
+    ExpanderItem(
+        heading = {
+            Text(target.title)
+        },
+        caption = {
+            LinkOpenDefaultOptionContent(
+                option = target.selectedOption,
+                askLabel = askLabel,
+                browserLabel = browserLabel,
+            )
+        },
+        trailing = {
+            MenuFlyoutContainer(
+                flyout = {
+                    target.options.forEach { option ->
+                        MenuFlyoutItem(
+                            onClick = {
+                                state.select(target, option)
+                                isFlyoutVisible = false
+                            },
+                            text = {
+                                LinkOpenDefaultOptionContent(
+                                    option = option,
+                                    askLabel = askLabel,
+                                    browserLabel = browserLabel,
+                                )
+                            },
+                        )
+                    }
+                },
+                content = {
+                    DropDownButton(
+                        onClick = { isFlyoutVisible = !isFlyoutVisible },
+                        content = {
+                            Text(stringResource(Res.string.edit))
+                        },
+                    )
+                },
+            )
+        },
+    )
+}
+
+@Composable
+private fun LinkOpenDefaultOptionContent(
+    option: LinkOpenDefaultsPresenter.Option,
+    askLabel: String,
+    browserLabel: String,
+) {
+    when {
+        option.isAsk -> Text(askLabel)
+        option.isBrowser -> Text(browserLabel)
+        option.account != null -> LinkOpenDefaultAccountOption(option.account!!)
+    }
+}
+
+@Composable
+private fun LinkOpenDefaultAccountOption(account: LinkOpenDefaultsPresenter.Account) {
+    account.profile
+        .onSuccess { user ->
+            Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                AvatarComponent(data = user.avatar, size = 24.dp)
+                Column {
+                    RichText(text = user.name, maxLines = 1)
+                    Text(text = user.handle.canonical, maxLines = 1)
+                }
+            }
+        }.onLoading {
+            Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                AvatarComponent(data = null, size = 24.dp)
+                Text(account.accountKey.toString())
+            }
+        }.onError {
+            Text(account.accountKey.toString())
+        }
+}
 
 private fun translationLanguageOptions(selectedLanguages: ImmutableList<String>): ImmutableList<LanguageOption> {
     val displayLocale = Locale.getDefault()

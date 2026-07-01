@@ -113,6 +113,12 @@ internal sealed interface Route : NavKey {
         data object AppearanceMedia : Settings
 
         @Serializable
+        data object Behavior : Settings
+
+        @Serializable
+        data object LinkOpenDefaults : Settings
+
+        @Serializable
         data object Storage : Settings
 
         @Serializable

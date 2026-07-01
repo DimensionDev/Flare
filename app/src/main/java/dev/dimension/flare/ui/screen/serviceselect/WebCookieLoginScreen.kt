@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
+import android.net.Uri
 import android.view.ViewGroup.LayoutParams
 import android.webkit.CookieManager
 import android.webkit.WebSettings
@@ -39,12 +40,16 @@ internal fun WebCookieLoginScreen(
 ) {
     val webViewState = rememberWebViewState(url)
     LaunchedEffect(url) {
+        val cookieManager = CookieManager.getInstance()
         while (true) {
             webViewState.lastLoadedUrl?.let { loadedUrl ->
                 val cookies =
-                    CookieManager
-                        .getInstance()
-                        .getCookie(loadedUrl)
+                    cookieManager.getCookieHeaderForUrls(
+                        cookieLookupUrls(
+                            loadedUrl = loadedUrl,
+                            originalUrl = url,
+                        ),
+                    )
                 if (callback(cookies)) {
                     onBack()
                     break
@@ -93,6 +98,34 @@ internal fun WebCookieLoginScreen(
         )
     }
 }
+
+private fun cookieLookupUrls(
+    loadedUrl: String,
+    originalUrl: String,
+): List<String> {
+    val loadedHost = loadedUrl.hostOrNull()
+    val originalHost = originalUrl.hostOrNull()
+    return if (loadedHost != null && originalHost != null && loadedHost.equals(originalHost, ignoreCase = true)) {
+        listOf(loadedUrl)
+    } else {
+        listOf(loadedUrl, originalUrl)
+    }
+}
+
+private fun CookieManager.getCookieHeaderForUrls(urls: List<String>): String? =
+    urls
+        .distinct()
+        .flatMap { url ->
+            getCookie(url)
+                ?.split(";")
+                .orEmpty()
+        }.map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()
+        .joinToString("; ")
+        .takeIf { it.isNotBlank() }
+
+private fun String.hostOrNull(): String? = runCatching { Uri.parse(this).host }.getOrNull()
 
 private fun WebCookieSeed.urlForCookieStore(): String = "https://$domain$path"
 

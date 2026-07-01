@@ -110,7 +110,7 @@ internal fun Feed.Rss20.Item.render(
             ?.select("img")
             ?.firstOrNull()
             ?.attr("src")
-            ?.takeIf { it.isNotEmpty() } ?: mediaContent?.url
+            ?.takeIf { it.isNotEmpty() } ?: mediaContent.firstOrNull()?.url
     return UiTimelineV2.Feed(
         title = title,
         description = descHtml?.text(),

@@ -309,7 +309,12 @@ internal fun ColorSpaceScreen(onBack: () -> Unit) {
                                 index = index,
                                 totalCount = colors.size, // Adjust this count base on the number of items
                             ),
-                    headlineContent = { Text(text = name) },
+                    overlineContent = {
+                        Text(
+                            text = "#${color.toArgb().toHexString().uppercase()}",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
                     supportingContent = {
                         Box(
                             modifier =
@@ -319,12 +324,8 @@ internal fun ColorSpaceScreen(onBack: () -> Unit) {
                                     .height(36.dp),
                         )
                     },
-                    overlineContent = {
-                        Text(
-                            text = "#${color.toArgb().toHexString().uppercase()}",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
+                    elevation = ListItemDefaults.elevation(),
+                    content = { Text(text = name) },
                 )
             }
         }

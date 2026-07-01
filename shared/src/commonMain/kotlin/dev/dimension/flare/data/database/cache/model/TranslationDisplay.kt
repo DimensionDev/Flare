@@ -73,12 +73,29 @@ internal fun UiTimelineV2.applyTranslation(
                     }
                 val menuAction =
                     when {
-                        translation?.status == TranslationStatus.Failed -> TranslationMenuAction.Retry
-                        shouldShowTranslated -> TranslationMenuAction.ShowOriginal
-                        translation?.status == TranslationStatus.Pending || translation?.status == TranslationStatus.Translating -> null
-                        PreTranslationStoreSupport.canRetrySkippedManually(translation) -> TranslationMenuAction.Translate
-                        translation?.status == TranslationStatus.Skipped -> null
-                        else -> TranslationMenuAction.Translate
+                        translation?.status == TranslationStatus.Failed -> {
+                            TranslationMenuAction.Retry
+                        }
+
+                        shouldShowTranslated -> {
+                            TranslationMenuAction.ShowOriginal
+                        }
+
+                        translation?.status == TranslationStatus.Pending || translation?.status == TranslationStatus.Translating -> {
+                            TranslationMenuAction.TranslateNoop
+                        }
+
+                        PreTranslationStoreSupport.canRetrySkippedManually(translation) -> {
+                            TranslationMenuAction.Translate
+                        }
+
+                        translation?.status == TranslationStatus.Skipped -> {
+                            null
+                        }
+
+                        else -> {
+                            TranslationMenuAction.Translate
+                        }
                     }
                 copy(
                     content = if (shouldShowTranslated) translatedPayload.content ?: content else content,
@@ -211,22 +228,50 @@ private fun ActionMenu.prependTranslationAction(
                             ActionMenu.Item.Text.Localized(
                                 when (translationAction) {
                                     TranslationMenuAction.Retry -> ActionMenu.Item.Text.Localized.Type.RetryTranslation
-                                    TranslationMenuAction.Translate -> ActionMenu.Item.Text.Localized.Type.Translate
+
+                                    TranslationMenuAction.Translate,
+                                    TranslationMenuAction.TranslateNoop,
+                                    -> ActionMenu.Item.Text.Localized.Type.Translate
+
                                     TranslationMenuAction.ShowOriginal -> ActionMenu.Item.Text.Localized.Type.ShowOriginal
                                 },
                             ),
                         clickEvent =
-                            ClickEvent.Deeplink(
-                                DeeplinkEvent(
-                                    accountKey = accountKey,
-                                    translationEvent =
-                                        when (translationAction) {
-                                            TranslationMenuAction.Retry -> DeeplinkEvent.TranslationEvent.RetryTranslation(statusKey)
-                                            TranslationMenuAction.Translate -> DeeplinkEvent.TranslationEvent.Translate(statusKey)
-                                            TranslationMenuAction.ShowOriginal -> DeeplinkEvent.TranslationEvent.ShowOriginal(statusKey)
-                                        },
-                                ),
-                            ),
+                            when (translationAction) {
+                                TranslationMenuAction.TranslateNoop -> {
+                                    ClickEvent.Noop
+                                }
+
+                                else -> {
+                                    ClickEvent.Deeplink(
+                                        DeeplinkEvent(
+                                            accountKey = accountKey,
+                                            translationEvent =
+                                                when (translationAction) {
+                                                    TranslationMenuAction.Retry -> {
+                                                        DeeplinkEvent.TranslationEvent.RetryTranslation(
+                                                            statusKey,
+                                                        )
+                                                    }
+
+                                                    TranslationMenuAction.Translate -> {
+                                                        DeeplinkEvent.TranslationEvent.Translate(statusKey)
+                                                    }
+
+                                                    TranslationMenuAction.ShowOriginal -> {
+                                                        DeeplinkEvent.TranslationEvent.ShowOriginal(
+                                                            statusKey,
+                                                        )
+                                                    }
+
+                                                    TranslationMenuAction.TranslateNoop -> {
+                                                        error("TranslateNoop should use ClickEvent.Noop")
+                                                    }
+                                                },
+                                        ),
+                                    )
+                                }
+                            },
                         icon = UiIcon.Translate,
                         actionFamily = PostActionFamily.Translate,
                     )
@@ -262,6 +307,7 @@ private fun ActionMenu.Item.Text?.isMoreMenuText(): Boolean =
 private enum class TranslationMenuAction {
     Retry,
     Translate,
+    TranslateNoop,
     ShowOriginal,
 }
 

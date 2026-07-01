@@ -9,4 +9,5 @@ import kotlinx.serialization.Serializable
 @SerialName("VVoCredential")
 internal data class VVoCredential(
     val chocolate: String,
+    val lastCookieRefreshEpochMillis: Long? = null,
 )

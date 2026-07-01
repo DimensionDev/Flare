@@ -774,16 +774,6 @@ internal fun MediaViewerScreen(
                 },
             ) {
                 ListItem(
-                    headlineContent = {
-                        Text(stringResource(id = R.string.media_menu_save))
-                    },
-                    leadingContent = {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.Download,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
                     modifier =
                         Modifier
                             .clickable {
@@ -802,24 +792,25 @@ internal fun MediaViewerScreen(
                                 }
                                 state.setShowSheet(false)
                             },
+                    leadingContent = {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    },
                     colors =
                         ListItemDefaults.colors(
                             containerColor = Color.Transparent,
                         ),
+                    elevation = ListItemDefaults.elevation(),
+                    content = {
+                        Text(stringResource(id = R.string.media_menu_save))
+                    },
                 )
                 state.medias.onSuccess { medias ->
                     if (medias.size > 1) {
                         ListItem(
-                            headlineContent = {
-                                Text(stringResource(id = R.string.media_menu_download_all))
-                            },
-                            leadingContent = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Download,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
                             modifier =
                                 Modifier
                                     .clickable {
@@ -834,19 +825,33 @@ internal fun MediaViewerScreen(
                                         }
                                         state.setShowSheet(false)
                                     },
+                            leadingContent = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Download,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
                             colors =
                                 ListItemDefaults.colors(
                                     containerColor = Color.Transparent,
                                 ),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(stringResource(id = R.string.media_menu_download_all))
+                            },
                         )
                     }
 
                     val current = medias.getOrNull(state.currentPage)
                     if (current is UiMedia.Image) {
                         ListItem(
-                            headlineContent = {
-                                Text(stringResource(id = R.string.media_menu_share_image))
-                            },
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        state.shareMedia(current)
+                                        state.setShowSheet(false)
+                                    },
                             leadingContent = {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.ShareNodes,
@@ -854,16 +859,14 @@ internal fun MediaViewerScreen(
                                     modifier = Modifier.size(24.dp),
                                 )
                             },
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        state.shareMedia(current)
-                                        state.setShowSheet(false)
-                                    },
                             colors =
                                 ListItemDefaults.colors(
                                     containerColor = Color.Transparent,
                                 ),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(stringResource(id = R.string.media_menu_share_image))
+                            },
                         )
                     }
                 }
@@ -872,16 +875,6 @@ internal fun MediaViewerScreen(
                     val label = stringResource(R.string.media_menu_media_link)
                     val current = medias.getOrNull(state.currentPage) ?: return@onSuccess
                     ListItem(
-                        headlineContent = {
-                            Text(stringResource(id = R.string.media_menu_copy_link))
-                        },
-                        leadingContent = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Copy,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        },
                         modifier =
                             Modifier
                                 .clickable {
@@ -898,10 +891,21 @@ internal fun MediaViewerScreen(
                                         state.setShowSheet(false)
                                     }
                                 },
+                        leadingContent = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.Copy,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
                         colors =
                             ListItemDefaults.colors(
                                 containerColor = Color.Transparent,
                             ),
+                        elevation = ListItemDefaults.elevation(),
+                        content = {
+                            Text(stringResource(id = R.string.media_menu_copy_link))
+                        },
                     )
                 }
             }

@@ -4,7 +4,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
+import dev.dimension.flare.ui.component.DialogSceneStrategy2
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.agent.AgentChatHistoryScreen
 import kotlin.time.Clock
@@ -260,7 +260,7 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
     }
 
     entry<Route.Settings.ColorPicker>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) {
         ColorPickerDialog(
             onBack = onBack

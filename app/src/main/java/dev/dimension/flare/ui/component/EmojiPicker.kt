@@ -98,7 +98,8 @@ internal fun EmojiPicker(
                                 ListItemDefaults.colors(
                                     containerColor = Color.Transparent,
                                 ),
-                            headlineContent = {
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
                                 Text(stringResource(R.string.emoji_picker_recent))
                             },
                         )

@@ -1,10 +1,36 @@
 package dev.dimension.flare.data.network.vvo
 
+import dev.dimension.flare.data.platform.VVoCredential
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
 
 class VVOCookieRefreshTest {
+    @Test
+    fun vvoCredentialDefaultsLastCookieRefreshToNull() {
+        val credential =
+            Json.decodeFromString(
+                VVoCredential.serializer(),
+                """{"chocolate":"MLOGIN=1"}""",
+            )
+
+        assertEquals("MLOGIN=1", credential.chocolate)
+        assertNull(credential.lastCookieRefreshEpochMillis)
+    }
+
+    @Test
+    fun shouldRefreshVvoCookieWhenMissingOrOlderThanOneDay() {
+        val now = 2.days.inWholeMilliseconds
+
+        assertTrue(shouldRefreshVvoCookie(lastRefreshEpochMillis = null, nowEpochMillis = now))
+        assertFalse(shouldRefreshVvoCookie(lastRefreshEpochMillis = now - 1.days.inWholeMilliseconds, nowEpochMillis = now))
+        assertTrue(shouldRefreshVvoCookie(lastRefreshEpochMillis = now - 1.days.inWholeMilliseconds - 1, nowEpochMillis = now))
+    }
+
     @Test
     fun mergeVvoCookieHeaderKeepsExistingCookiesMissingFromSetCookie() {
         val merged =

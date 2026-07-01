@@ -77,8 +77,14 @@ internal class VVODataSource(
     private val service by lazy {
         VVOService(
             chocolateFlow = credentialFlow.map { it.chocolate },
-            onChocolateRefreshed = { chocolate ->
-                updateCredential(VVoCredential(chocolate = chocolate))
+            lastChocolateRefreshEpochMillisFlow = credentialFlow.map { it.lastCookieRefreshEpochMillis },
+            onChocolateRefreshed = { chocolate, refreshedAt ->
+                updateCredential(
+                    VVoCredential(
+                        chocolate = chocolate,
+                        lastCookieRefreshEpochMillis = refreshedAt,
+                    ),
+                )
             },
         )
     }

@@ -214,6 +214,8 @@ targets:
         product: SwiftUIBackports
       - package: swiftui-introspect
         product: SwiftUIIntrospect
+      - package: SwiftUI-Flow
+        product: Flow
       - package: Textual
       - target: FlareAppleCore
         destinationFilters: [macOS]
@@ -314,6 +316,9 @@ targets:
         link: false
       - package: iOS-Backports
         product: SwiftUIBackports
+        link: false
+      - package: SwiftUI-Flow
+        product: Flow
         link: false
       - package: VideoPlayer
         destinationFilters: [iOS]

@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.screen.status
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.component.DialogSceneStrategy2
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.status.action.AddReactionSheet
 import dev.dimension.flare.ui.screen.status.action.AltTextSheet
@@ -64,7 +64,7 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     }
 
     entry<Route.Status.BlueskyReport>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) { args ->
         BlueskyReportStatusDialog(
             statusKey = args.statusKey,
@@ -74,7 +74,7 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     }
 
     entry<Route.Status.DeleteConfirm>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) { args ->
         DeleteStatusConfirmDialog(
             statusKey = args.statusKey,
@@ -84,7 +84,7 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     }
 
     entry<Route.Status.MastodonReport>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) { args ->
         MastodonReportDialog(
             userKey = args.userKey,
@@ -95,7 +95,7 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     }
 
     entry<Route.Status.MisskeyReport>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) { args ->
         MisskeyReportDialog(
             userKey = args.userKey,

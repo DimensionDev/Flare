@@ -99,13 +99,14 @@ internal fun BlueskyFeedsScreen(
                 ) {
                     item {
                         ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.feeds_my_feeds_title))
-                            },
                             colors =
                                 ListItemDefaults.colors(
                                     containerColor = Color.Transparent,
                                 ),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(text = stringResource(id = R.string.feeds_my_feeds_title))
+                            },
                         )
                     }
 
@@ -116,13 +117,14 @@ internal fun BlueskyFeedsScreen(
 
                     item {
                         ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.feeds_discover_feeds_title))
-                            },
                             colors =
                                 ListItemDefaults.colors(
                                     containerColor = Color.Transparent,
                                 ),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(text = stringResource(id = R.string.feeds_discover_feeds_title))
+                            },
                         )
                     }
                     popularBlueskyFeedWithTabs(

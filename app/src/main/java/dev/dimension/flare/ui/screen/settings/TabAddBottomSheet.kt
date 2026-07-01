@@ -291,13 +291,10 @@ internal fun ListTabItem(
     modifier: Modifier = Modifier,
 ) {
     ListItem(
-        headlineContent = {
-            UiText(data.title)
-        },
+        modifier = modifier,
         leadingContent = {
             TabIcon(data)
         },
-        modifier = modifier,
         trailingContent = {
             if (isAdded) {
                 FAIcon(
@@ -310,6 +307,10 @@ internal fun ListTabItem(
                     contentDescription = stringResource(id = R.string.tab_settings_add),
                 )
             }
+        },
+        elevation = ListItemDefaults.elevation(),
+        content = {
+            UiText(data.title)
         },
     )
 }

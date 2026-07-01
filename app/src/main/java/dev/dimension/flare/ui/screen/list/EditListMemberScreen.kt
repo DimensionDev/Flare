@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -178,23 +179,25 @@ internal fun EditListMemberScreen(
                     }.onEmpty {
                         item {
                             ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(id = R.string.edit_list_member_search_empty))
-                                },
                                 modifier =
                                     Modifier
                                         .listCard(),
+                                elevation = ListItemDefaults.elevation(),
+                                content = {
+                                    Text(text = stringResource(id = R.string.edit_list_member_search_empty))
+                                },
                             )
                         }
                     }.onError {
                         item {
                             ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(id = R.string.edit_list_member_search_error))
-                                },
                                 modifier =
                                     Modifier
                                         .listCard(),
+                                elevation = ListItemDefaults.elevation(),
+                                content = {
+                                    Text(text = stringResource(id = R.string.edit_list_member_search_error))
+                                },
                             )
                         }
                     }

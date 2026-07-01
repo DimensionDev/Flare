@@ -5,7 +5,7 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
+import dev.dimension.flare.ui.component.DialogSceneStrategy2
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
@@ -75,7 +75,7 @@ internal fun EntryProviderScope<NavKey>.listEntryBuilder(
     }
 
     entry<Route.Lists.Create>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) { args ->
         CreateListDialog(
             accountType = args.accountType,
@@ -111,7 +111,7 @@ internal fun EntryProviderScope<NavKey>.listEntryBuilder(
     }
 
     entry<Route.Lists.Delete>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = DialogSceneStrategy2.dialog()
     ) { args ->
         DeleteListDialog(
             accountType = args.accountType,

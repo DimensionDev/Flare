@@ -31,14 +31,13 @@ struct HomeSidebarTabsSection: View {
         }
         .onAppear {
             editableTabs = liveTabs
-            if selectedTab == nil, let first = liveTabs.first {
-                selectedTab = .timeline(first)
-            }
+            normalizeSelection(previousHomeTabIDs: nil)
         }
-        .onChange(of: liveTabs.map(\.id)) { _, _ in
+        .onChange(of: liveTabs.map(\.id)) { oldValue, _ in
             if !isCustomizing {
                 editableTabs = liveTabs
             }
+            normalizeSelection(previousHomeTabIDs: oldValue)
         }
     }
 
@@ -213,6 +212,27 @@ struct HomeSidebarTabsSection: View {
 
     private func persist() {
         settingsPresenter.state.replaceHomeTimelineTabs(tabs: editableTabs)
+    }
+
+    private func normalizeSelection(previousHomeTabIDs: [String]?) {
+        guard let currentSelection = selectedTab else {
+            selectedTab = liveTabs.first.map { .timeline($0) }
+            return
+        }
+
+        guard case .timeline(let selectedTimeline) = currentSelection else {
+            return
+        }
+
+        let selectedTimelineID = selectedTimeline.id
+        let currentHomeTabIDs = Set(liveTabs.map(\.id))
+        guard !currentHomeTabIDs.contains(selectedTimelineID),
+              previousHomeTabIDs?.contains(selectedTimelineID) == true
+        else {
+            return
+        }
+
+        selectedTab = liveTabs.first.map { .timeline($0) }
     }
 }
 

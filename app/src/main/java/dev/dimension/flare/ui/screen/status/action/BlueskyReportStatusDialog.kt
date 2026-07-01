@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -77,12 +78,6 @@ internal fun BlueskyReportStatusDialog(
                                     state.selectReason(it)
                                 },
                             ),
-                        headlineContent = {
-                            Text(text = stringResource(id = it.stringRes))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = it.descriptionRes))
-                        },
                         leadingContent = {
                             RadioButton(
                                 selected = state.reason == it,
@@ -91,6 +86,13 @@ internal fun BlueskyReportStatusDialog(
                                     state.selectReason(it)
                                 },
                             )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = it.descriptionRes))
+                        },
+                        elevation = ListItemDefaults.elevation(),
+                        content = {
+                            Text(text = stringResource(id = it.stringRes))
                         },
                     )
                 }

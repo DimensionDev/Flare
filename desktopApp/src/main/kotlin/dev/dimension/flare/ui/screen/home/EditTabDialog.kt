@@ -17,6 +17,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.all_rss_feeds_title
 import dev.dimension.flare.antenna_title
 import dev.dimension.flare.bluesky_login_2fa
+import dev.dimension.flare.bluesky_login_fix_delegation_scopes_button
 import dev.dimension.flare.bluesky_login_oauth_button
 import dev.dimension.flare.bluesky_login_password
 import dev.dimension.flare.bluesky_login_use_password_button
@@ -249,6 +250,7 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.Password -> Res.string.bluesky_login_password
             UiStrings.Otp -> Res.string.bluesky_login_2fa
             UiStrings.OAuthLogin -> Res.string.bluesky_login_oauth_button
+            UiStrings.BlueskyFixDelegationScopes -> Res.string.bluesky_login_fix_delegation_scopes_button
             UiStrings.PasswordLogin -> Res.string.bluesky_login_use_password_button
             UiStrings.QrConnect -> Res.string.ok
             UiStrings.CredentialImport -> Res.string.ok

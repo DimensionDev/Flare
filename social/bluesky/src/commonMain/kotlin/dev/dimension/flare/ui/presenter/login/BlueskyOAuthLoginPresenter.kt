@@ -8,7 +8,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.datastore.PlatformOAuthPending
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
+import dev.dimension.flare.data.network.bluesky.FLARE_BLUESKY_OAUTH_SCOPES
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
+import dev.dimension.flare.data.network.bluesky.requireFlareOAuthScopes
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.AccountService
@@ -26,7 +28,6 @@ import kotlinx.coroutines.withContext
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
-import sh.christian.ozone.oauth.OAuthScope
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -134,12 +135,7 @@ internal class BlueskyOAuthLoginPresenter(
     ): OAuthAuthorizationRequest =
         createOAuthApi(host).buildAuthorizationRequest(
             oauthClient = oauthClient,
-            scopes =
-                listOf(
-                    OAuthScope("atproto"),
-                    OAuthScope("transition:chat.bsky"),
-                    OAuthScope("transition:generic"),
-                ),
+            scopes = FLARE_BLUESKY_OAUTH_SCOPES,
             loginHandleHint = userName.takeIf { !it.contains('@') && it.contains('.') },
         )
 
@@ -165,6 +161,7 @@ internal class BlueskyOAuthLoginPresenter(
                 nonce = request.nonce,
                 codeVerifier = request.codeVerifier,
             )
+        token.requireFlareOAuthScopes()
         val credential: BlueskyCredential =
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,

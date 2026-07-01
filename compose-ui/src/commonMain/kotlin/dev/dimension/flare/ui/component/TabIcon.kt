@@ -20,6 +20,7 @@ import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
 import dev.dimension.flare.compose.ui.bluesky_login_auth_factor_token_hint
+import dev.dimension.flare.compose.ui.bluesky_login_fix_delegation_scopes_button
 import dev.dimension.flare.compose.ui.bluesky_login_oauth_button
 import dev.dimension.flare.compose.ui.bluesky_login_password_hint
 import dev.dimension.flare.compose.ui.bluesky_login_use_password_button
@@ -326,4 +327,5 @@ internal val UiStrings.res: StringResource
             UiStrings.FanboxRecommendedCreators -> Res.string.fanbox_recommended_creators_title
             UiStrings.PixivPrivateFollowing -> Res.string.pixiv_private_following_title
             UiStrings.PixivPrivateBookmarks -> Res.string.pixiv_private_bookmarks_title
+            UiStrings.BlueskyFixDelegationScopes -> Res.string.bluesky_login_fix_delegation_scopes_button
         }

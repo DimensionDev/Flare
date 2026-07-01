@@ -201,6 +201,7 @@ private val UiStrings.androidStringRes: Int
             UiStrings.Password -> R.string.bluesky_login_password_hint
             UiStrings.Otp -> R.string.bluesky_login_auth_factor_token_hint
             UiStrings.OAuthLogin -> R.string.bluesky_login_oauth_button
+            UiStrings.BlueskyFixDelegationScopes -> R.string.bluesky_login_fix_delegation_scopes_button
             UiStrings.PasswordLogin -> R.string.bluesky_login_use_password_button
             UiStrings.QrConnect -> R.string.login_button
             UiStrings.CredentialImport -> R.string.login_button

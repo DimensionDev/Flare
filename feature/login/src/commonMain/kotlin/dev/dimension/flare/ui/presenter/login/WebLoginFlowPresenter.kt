@@ -160,5 +160,6 @@ private fun UiStrings.webLabel(): String =
         UiStrings.CredentialImport -> "Import key"
         UiStrings.ExternalSigner -> "External signer"
         UiStrings.WebCookieLogin -> "Cookie login"
+        UiStrings.BlueskyFixDelegationScopes -> "Fix Tranquil permissions"
         else -> name
     }

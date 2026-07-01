@@ -244,6 +244,7 @@
     <string name="bluesky_login_password_hint">Password</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA token</string>
     <string name="bluesky_login_oauth_button">Log in with OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil permissions</string>
     <string name="bluesky_login_use_password_button">Use password</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth may still be unstable. If you run into issues, use password login instead.</string>
 

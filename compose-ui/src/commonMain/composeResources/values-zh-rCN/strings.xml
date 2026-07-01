@@ -363,6 +363,7 @@
     <string name="bluesky_login_password_hint">密码</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA 令牌</string>
     <string name="bluesky_login_oauth_button">使用 OAuth 登录</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">修复 Tranquil 权限</string>
     <string name="bluesky_login_use_password_button">使用密码</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth 可能仍不稳定。如果遇到问题，请改用密码登录。</string>
     <string name="login_button">登录</string>

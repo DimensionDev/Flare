@@ -33,6 +33,7 @@ struct MacSettingsScreen: View {
 private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case accountManagement
     case appearance
+    case behavior
     case localFilter
     case storage
     case aiConfig
@@ -47,6 +48,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "account_management_title"
         case .appearance:
             "appearance_title"
+        case .behavior:
+            "settings_behavior_title"
         case .localFilter:
             "local_filter_title"
         case .storage:
@@ -66,6 +69,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "account_management_description"
         case .appearance:
             "appearance_description"
+        case .behavior:
+            "settings_behavior_description"
         case .localFilter:
             "local_filter_description"
         case .storage:
@@ -85,6 +90,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             .circleUser
         case .appearance:
             .palette
+        case .behavior:
+            .sliders
         case .localFilter:
             .filter
         case .storage:
@@ -105,6 +112,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             MacAccountManagementSettingsPane()
         case .appearance:
             MacAppearanceSettingsPane()
+        case .behavior:
+            MacBehaviorSettingsPane()
         case .localFilter:
             MacLocalFilterSettingsPane()
         case .storage:
@@ -531,6 +540,175 @@ private struct MacAppearanceSettingsPane: View {
                 MacPostActionLayoutScreen()
             }
             .frame(width: 920, height: 620)
+        }
+    }
+}
+
+private struct MacBehaviorSettingsPane: View {
+    @StateObject private var linkOpenDefaultsPresenter = KotlinPresenter(presenter: LinkOpenDefaultsPresenter())
+
+    var body: some View {
+        MacSettingsForm(
+            title: "settings_behavior_title",
+            subtitle: "settings_behavior_description"
+        ) {
+            MacLinkOpenDefaultsInlineSection(presenter: linkOpenDefaultsPresenter)
+        }
+    }
+}
+
+private struct MacLinkOpenDefaultsInlineSection: View {
+    @ObservedObject var presenter: KotlinPresenter<LinkOpenDefaultsPresenterState>
+
+    var body: some View {
+        Section {
+            StateView(state: presenter.state.targets) { data in
+                let targets = data.cast(LinkOpenDefaultsPresenter.Target.self)
+                if targets.isEmpty {
+                    ContentUnavailableView(
+                        "settings_link_open_defaults_title",
+                        systemImage: "link",
+                        description: Text("settings_link_open_defaults_description")
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ForEach(targets, id: \.id) { target in
+                        MacLinkOpenDefaultInlineRow(
+                            target: target,
+                            state: presenter.state
+                        )
+                    }
+                }
+            } loadingContent: {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        } header: {
+            Text("settings_link_open_defaults_title")
+        } footer: {
+            Text("settings_link_open_defaults_description")
+        }
+    }
+}
+
+private struct MacLinkOpenDefaultInlineRow: View {
+    @State private var isPopoverPresented = false
+
+    let target: LinkOpenDefaultsPresenter.Target
+    let state: LinkOpenDefaultsPresenterState
+
+    var body: some View {
+        Button {
+            isPopoverPresented = true
+        } label: {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(verbatim: target.title)
+                    MacLinkOpenDefaultOptionLabel(option: target.selectedOption)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Image(systemName: "chevron.down")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $isPopoverPresented, arrowEdge: .trailing) {
+            MacLinkOpenDefaultOptionsPopover(
+                target: target,
+                state: state,
+                onSelect: {
+                    isPopoverPresented = false
+                }
+            )
+        }
+    }
+}
+
+private struct MacLinkOpenDefaultOptionsPopover: View {
+    let target: LinkOpenDefaultsPresenter.Target
+    let state: LinkOpenDefaultsPresenterState
+    let onSelect: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(options, id: \.id) { option in
+                MacLinkOpenDefaultOptionRow(
+                    isSelected: option.id == target.selectedOption.id,
+                    action: {
+                        state.select(target: target, option: option)
+                        onSelect()
+                    }
+                ) {
+                    MacLinkOpenDefaultOptionLabel(option: option)
+                }
+            }
+        }
+        .padding(8)
+        .frame(width: 320)
+    }
+
+    private var options: [any LinkOpenDefaultsPresenterOption] {
+        target.options
+    }
+}
+
+private struct MacLinkOpenDefaultOptionRow<Content: View>: View {
+    let isSelected: Bool
+    let action: () -> Void
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
+                    .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                    .frame(width: 18)
+
+                content()
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(
+            isSelected ? Color.accentColor.opacity(0.12) : Color.clear,
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
+    }
+}
+
+private struct MacLinkOpenDefaultOptionLabel: View {
+    let option: any LinkOpenDefaultsPresenterOption
+
+    var body: some View {
+        if option.isAsk {
+            Text("settings_link_open_default_ask_every_time")
+        } else if option.isBrowser {
+            Text("deep_link_account_picker_open_in_browser")
+        } else if let account = option.account {
+            MacLinkOpenDefaultAccountRadioLabel(account: account)
+        }
+    }
+}
+
+private struct MacLinkOpenDefaultAccountRadioLabel: View {
+    let account: LinkOpenDefaultsPresenter.Account
+
+    var body: some View {
+        StateView(state: account.profile) { user in
+            UserOnelineView(data: user)
+        } errorContent: { _ in
+            Text(verbatim: account.accountKey.description())
+        } loadingContent: {
+            Text(verbatim: account.accountKey.description())
         }
     }
 }

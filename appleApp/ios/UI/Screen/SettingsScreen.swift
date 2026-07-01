@@ -81,6 +81,17 @@ struct SettingsScreen: View {
             }
 
             Section {
+                NavigationLink(value: Route.behavior) {
+                    Label {
+                        Text("settings_behavior_title")
+                        Text("settings_behavior_description")
+                    } icon: {
+                        Image(fontAwesome: .sliders)
+                    }
+                }
+            }
+
+            Section {
                 NavigationLink(value: Route.localFilter) {
                     Label {
                         Text("local_filter_title")
@@ -131,5 +142,30 @@ struct SettingsScreen: View {
             }
         }
         .navigationTitle("settings_title")
+    }
+}
+
+struct BehaviorSettingsScreen: View {
+    var body: some View {
+        List {
+            BehaviorSettingsSection {
+                NavigationLink(value: Route.linkOpenDefaults) {
+                    VStack(alignment: .leading) {
+                        Text("settings_link_open_defaults_title")
+                        Text("settings_link_open_defaults_description")
+                    }
+                }
+            }
+        }
+        .navigationTitle("settings_behavior_title")
+    }
+}
+
+struct LinkOpenDefaultsSettingsScreen: View {
+    var body: some View {
+        List {
+            LinkOpenDefaultsSettingsSection()
+        }
+        .navigationTitle("settings_link_open_defaults_title")
     }
 }

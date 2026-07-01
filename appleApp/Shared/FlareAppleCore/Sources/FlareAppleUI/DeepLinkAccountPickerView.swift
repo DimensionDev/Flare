@@ -5,6 +5,8 @@ import SwiftUI
 public struct DeepLinkAccountPickerView<Route>: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @StateObject private var defaultsActions: KotlinPresenter<LinkOpenDefaultsActionsPresenterState>
+    @State private var saveAsDefault: Bool
 
     private let originalUrl: String
     private let data: [MicroBlogKey: Route]
@@ -18,36 +20,52 @@ public struct DeepLinkAccountPickerView<Route>: View {
         self.originalUrl = originalUrl
         self.data = data
         self.onNavigate = onNavigate
+        _defaultsActions = StateObject(wrappedValue: KotlinPresenter(presenter: LinkOpenDefaultsActionsPresenter(originalUrl: originalUrl)))
+        _saveAsDefault = State(initialValue: true)
     }
 
     public var body: some View {
         List {
-            ForEach(data.keys.sorted(by: { $0.id < $1.id }), id: \.self) { userKey in
-                if let route = data[userKey] {
-                    Button {
-                        onNavigate(route)
-                        dismiss()
-                    } label: {
-                        DeepLinkAccountRow(userKey: userKey)
+            Section {
+                ForEach(data.keys.sorted(by: { $0.id < $1.id }), id: \.self) { userKey in
+                    if let route = data[userKey] {
+                        Button {
+                            if saveAsDefault, defaultsActions.state.canSaveDefault {
+                                defaultsActions.state.setAccountDefault(accountKey: userKey)
+                            }
+                            onNavigate(route)
+                            dismiss()
+                        } label: {
+                            DeepLinkAccountRow(userKey: userKey)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
-            }
 
-            Button {
-                let routeLink = DeeplinkRoute.OpenLinkDirectly(url: originalUrl).toUri()
-                if let url = URL(string: routeLink) {
-                    openURL(url)
+                Button {
+                    if saveAsDefault, defaultsActions.state.canSaveDefault {
+                        defaultsActions.state.setBrowserDefault()
+                    }
+                    let routeLink = DeeplinkRoute.OpenLinkDirectly(url: originalUrl).toUri()
+                    if let url = URL(string: routeLink) {
+                        openURL(url)
+                    }
+                    dismiss()
+                } label: {
+                    Label {
+                        Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle)
+                    } icon: {
+                        Image(systemName: "globe")
+                    }
                 }
-                dismiss()
-            } label: {
-                Label {
-                    Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle)
-                } icon: {
-                    Image(systemName: "globe")
+                .buttonStyle(.plain)
+            } footer: {
+                if defaultsActions.state.canSaveDefault {
+                    Toggle(isOn: $saveAsDefault) {
+                        Text("deep_link_account_picker_save_default", bundle: FlareAppleUILocalization.bundle)
+                    }
                 }
             }
-            .buttonStyle(.plain)
         }
         .navigationTitle(Text("deep_link_account_picker_title", bundle: FlareAppleUILocalization.bundle))
         .toolbar {

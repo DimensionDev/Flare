@@ -165,6 +165,7 @@
     <string name="bluesky_login_password">密码</string>
     <string name="bluesky_login_2fa">2FA 验证码</string>
     <string name="bluesky_login_oauth_button">使用 OAuth 登录</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">修复 Tranquil 权限</string>
     <string name="bluesky_login_use_password_button">使用密码</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth 可能仍不稳定。如果您遇到问题，请改用密码登录。</string>
     <string name="login_expired">登录会话已过期</string>

@@ -6,7 +6,11 @@ import dev.dimension.flare.data.datastore.PlatformOAuthPending
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.FLARE_BLUESKY_OAUTH_SCOPES
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
+import dev.dimension.flare.data.network.bluesky.delegationControllerDidOrNull
+import dev.dimension.flare.data.network.bluesky.missingFlareOAuthScopes
+import dev.dimension.flare.data.network.bluesky.repairTranquilDelegationScopes
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.platform.BlueskyCredential
@@ -33,13 +37,13 @@ import sh.christian.ozone.api.response.AtpResponse
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
-import sh.christian.ozone.oauth.OAuthScope
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val CLIENT_METADATA = "https://flareapp.moe/client-metadata.json"
 private const val REDIRECT_URI = "https://flareapp.moe/callback"
 private const val LOGIN_ACTION = "login"
+private const val FIX_TRANQUIL_DELEGATION_ACTION = "fix_tranquil_delegation"
 private const val USERNAME_FIELD = "username"
 private const val PASSWORD_FIELD = "password"
 private const val OTP_FIELD = "otp"
@@ -277,6 +281,7 @@ private class BlueskyOAuthLoginHandler(
     private val pendingRepository: PlatformOAuthPendingRepository by koinInject()
     private val values = mutableMapOf<String, String>()
     private var request: OAuthAuthorizationRequest? = null
+    private var pendingRepair: PendingTranquilDelegationRepair? = null
 
     private fun oauthClient(redirectUri: String) =
         OAuthClient(
@@ -299,9 +304,16 @@ private class BlueskyOAuthLoginHandler(
     }
 
     override suspend fun perform(actionId: String) {
-        if (actionId != LOGIN_ACTION) return
+        when (actionId) {
+            LOGIN_ACTION -> startOAuthLogin()
+            FIX_TRANQUIL_DELEGATION_ACTION -> repairDelegationAndRestartOAuth()
+        }
+    }
+
+    private suspend fun startOAuthLogin() {
         _state.value = oauthState(loading = true)
         request = null
+        pendingRepair = null
         runCatching {
             val redirectUri = context.redirectUri ?: REDIRECT_URI
             request =
@@ -321,7 +333,39 @@ private class BlueskyOAuthLoginHandler(
             require(authorizeUrl.isNotEmpty()) { "Invalid authorization request URL" }
             _effects.emit(LoginEffect.OpenUrl(authorizeUrl))
         }.onFailure {
-            _state.value = oauthState(error = it.message)
+            _state.value = oauthState(error = errorMessage(it))
+        }
+    }
+
+    private suspend fun repairDelegationAndRestartOAuth() {
+        val repair = pendingRepair ?: return
+        _state.value = oauthState(loading = true)
+        runCatching {
+            repairTranquilDelegationScopes(
+                credential = repair.credential,
+                controllerDid = repair.controllerDid,
+            )
+            pendingRepair = null
+            request =
+                login(
+                    host = repair.host,
+                    userName = repair.userName,
+                    redirectUri = repair.redirectUri,
+                )
+            val request = request ?: error("No authorization request")
+            pendingRepository.save(
+                request.toPlatformOAuthPending(
+                    host = repair.host,
+                    redirectUri = repair.redirectUri,
+                ),
+            )
+            val authorizeUrl = request.authorizeRequestUrl
+            require(authorizeUrl.isNotEmpty()) { "Invalid authorization request URL" }
+            _effects.emit(LoginEffect.OpenUrl(authorizeUrl))
+        }.onSuccess {
+            _state.value = oauthState()
+        }.onFailure {
+            _state.value = oauthState(error = errorMessage(it))
         }
     }
 
@@ -338,17 +382,28 @@ private class BlueskyOAuthLoginHandler(
                 url = value,
                 request = pending.toBlueskyAuthorizationRequest(),
                 redirectUri = pending.attributes["redirect_uri"] ?: REDIRECT_URI,
-            )
-            pendingRepository.clear(pending)
-            context.onSuccess()
+            ).let { result ->
+                pendingRepository.clear(pending)
+                when (result) {
+                    OAuthResumeResult.Success -> {
+                        context.onSuccess()
+                    }
+
+                    is OAuthResumeResult.NeedsTranquilDelegationRepair -> {
+                        pendingRepair = result.repair
+                        _state.value = oauthState(error = result.message)
+                    }
+                }
+            }
         }.onFailure {
-            _state.value = oauthState(error = it.message)
+            _state.value = oauthState(error = errorMessage(it))
         }
     }
 
     override fun clear() {
         values.clear()
         request = null
+        pendingRepair = null
         _state.value = oauthState()
     }
 
@@ -368,13 +423,24 @@ private class BlueskyOAuthLoginHandler(
                     ),
                 ),
             actions =
-                listOf(
-                    LoginAction(
-                        id = LOGIN_ACTION,
-                        label = UiStrings.Login,
-                        enabled = !loading && username.isNotBlank(),
-                    ),
-                ),
+                buildList {
+                    if (pendingRepair != null) {
+                        add(
+                            LoginAction(
+                                id = FIX_TRANQUIL_DELEGATION_ACTION,
+                                label = UiStrings.BlueskyFixDelegationScopes,
+                                enabled = !loading,
+                            ),
+                        )
+                    }
+                    add(
+                        LoginAction(
+                            id = LOGIN_ACTION,
+                            label = UiStrings.Login,
+                            enabled = !loading && username.isNotBlank(),
+                        ),
+                    )
+                },
             loading = loading,
             error = error,
         )
@@ -387,12 +453,7 @@ private class BlueskyOAuthLoginHandler(
     ): OAuthAuthorizationRequest =
         createOAuthApi(host).buildAuthorizationRequest(
             oauthClient = oauthClient(redirectUri),
-            scopes =
-                listOf(
-                    OAuthScope("atproto"),
-                    OAuthScope("transition:chat.bsky"),
-                    OAuthScope("transition:generic"),
-                ),
+            scopes = FLARE_BLUESKY_OAUTH_SCOPES,
             loginHandleHint = userName.takeIf { !it.contains('@') && it.contains('.') },
         )
 
@@ -400,7 +461,7 @@ private class BlueskyOAuthLoginHandler(
         url: String,
         request: OAuthAuthorizationRequest,
         redirectUri: String,
-    ) {
+    ): OAuthResumeResult {
         val parsedUrl = Url(url)
         val code = parsedUrl.parameters["code"]
         val state = parsedUrl.parameters["state"]
@@ -419,11 +480,29 @@ private class BlueskyOAuthLoginHandler(
                 nonce = request.nonce,
                 codeVerifier = request.codeVerifier,
             )
-        val credential: BlueskyCredential =
+        val credential =
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
                 oAuthToken = token,
             )
+        val missingScopes = token.missingFlareOAuthScopes()
+        if (missingScopes.isNotEmpty()) {
+            val controllerDid = token.delegationControllerDidOrNull()
+            if (controllerDid != null) {
+                return OAuthResumeResult.NeedsTranquilDelegationRepair(
+                    repair =
+                        PendingTranquilDelegationRepair(
+                            credential = credential,
+                            controllerDid = controllerDid,
+                            host = context.host,
+                            userName = values[USERNAME_FIELD].orEmpty(),
+                            redirectUri = redirectUri,
+                        ),
+                    message = tranquilDelegationRepairMessage(missingScopes),
+                )
+            }
+            error("OAuth token is missing required scope(s): ${missingScopes.joinToString(" ")}")
+        }
         accountService.addAccount(
             account =
                 UiAccount(
@@ -437,8 +516,31 @@ private class BlueskyOAuthLoginHandler(
             credential = credential,
             serializer = BlueskyCredential.serializer(),
         )
+        return OAuthResumeResult.Success
     }
 }
+
+private sealed interface OAuthResumeResult {
+    data object Success : OAuthResumeResult
+
+    data class NeedsTranquilDelegationRepair(
+        val repair: PendingTranquilDelegationRepair,
+        val message: String,
+    ) : OAuthResumeResult
+}
+
+private data class PendingTranquilDelegationRepair(
+    val credential: BlueskyCredential.OAuthCredential,
+    val controllerDid: String,
+    val host: String,
+    val userName: String,
+    val redirectUri: String,
+)
+
+private fun tranquilDelegationRepairMessage(missingScopes: List<String>): String =
+    "This Tranquil delegated account did not grant Flare the required Bluesky API scope(s): " +
+        missingScopes.joinToString(" ") +
+        ". Tap Fix Tranquil permissions, then authorize Flare again."
 
 private fun createOAuthApi(host: String): OAuthApi =
     OAuthApi(

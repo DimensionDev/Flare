@@ -150,9 +150,11 @@ struct BehaviorSettingsScreen: View {
         List {
             BehaviorSettingsSection {
                 NavigationLink(value: Route.linkOpenDefaults) {
-                    VStack(alignment: .leading) {
+                    Label {
                         Text("settings_link_open_defaults_title")
                         Text("settings_link_open_defaults_description")
+                    } icon: {
+                        EmptyView()
                     }
                 }
             }

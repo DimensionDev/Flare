@@ -389,7 +389,6 @@ private struct LoginFlowView: View {
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
-    @State private var webCookieInitialCookies: [WebCookieSeed] = []
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -449,7 +448,6 @@ private struct LoginFlowView: View {
                 }
             case .openWebCookieLogin(let webCookie):
                 webCookieUrl = webCookie.url
-                webCookieInitialCookies = webCookie.initialCookies
             }
         }
         .sheet(isPresented: Binding(
@@ -466,13 +464,13 @@ private struct LoginFlowView: View {
                         guard presenter.state.canResume(value: cookie) else { return }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
-                    }, url: webCookieUrl, initialCookies: webCookieInitialCookies)
+                    }, url: webCookieUrl)
                 } else {
                     BackportWebLoginScreen(onCookie: { cookie in
                         guard presenter.state.canResume(value: cookie) else { return }
                         presenter.state.resume(value: cookie)
                         self.webCookieUrl = nil
-                    }, url: webCookieUrl, initialCookies: webCookieInitialCookies)
+                    }, url: webCookieUrl)
                 }
             }
         }

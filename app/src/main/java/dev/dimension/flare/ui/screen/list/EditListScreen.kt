@@ -22,6 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -232,9 +233,12 @@ internal fun EditListScreen(
             }
             stickyHeader {
                 ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = R.string.list_edit_members))
-                    },
+                    modifier =
+                        Modifier
+                            .listCard(
+                                index = 0,
+                                totalCount = 2,
+                            ),
                     trailingContent = {
                         IconButton(onClick = {
                             toEditUser.invoke()
@@ -245,12 +249,10 @@ internal fun EditListScreen(
                             )
                         }
                     },
-                    modifier =
-                        Modifier
-                            .listCard(
-                                index = 0,
-                                totalCount = 2,
-                            ),
+                    elevation = ListItemDefaults.elevation(),
+                    content = {
+                        Text(text = stringResource(id = R.string.list_edit_members))
+                    },
                 )
             }
             state.memberInfo
@@ -331,29 +333,31 @@ internal fun EditListScreen(
                 }.onEmpty {
                     item {
                         ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.list_edit_no_members))
-                            },
                             modifier =
                                 Modifier
                                     .listCard(
                                         index = 1,
                                         totalCount = 2,
                                     ),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(text = stringResource(id = R.string.list_edit_no_members))
+                            },
                         )
                     }
                 }.onError {
                     item {
                         ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.list_edit_members_error))
-                            },
                             modifier =
                                 Modifier
                                     .listCard(
                                         index = 1,
                                         totalCount = 2,
                                     ),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(text = stringResource(id = R.string.list_edit_members_error))
+                            },
                         )
                     }
                 }

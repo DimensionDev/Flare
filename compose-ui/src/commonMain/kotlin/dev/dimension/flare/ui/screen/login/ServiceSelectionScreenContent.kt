@@ -99,7 +99,6 @@ import dev.dimension.flare.ui.presenter.login.LoginFlowPresenter
 import dev.dimension.flare.ui.presenter.login.LoginMethodSpec
 import dev.dimension.flare.ui.presenter.login.ReloginPresenter
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
-import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
@@ -110,7 +109,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun ServiceSelectionScreenContent(
-    onWebViewLogin: (url: String, initialCookies: List<WebCookieSeed>, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
@@ -297,7 +296,7 @@ public fun ServiceSelectionScreenContent(
 @Composable
 public fun ReloginScreenContent(
     target: ReloginTarget,
-    onWebViewLogin: (url: String, initialCookies: List<WebCookieSeed>, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
@@ -340,7 +339,7 @@ public fun ReloginScreenContent(
                 }
 
                 is LoginEffect.OpenWebCookieLogin -> {
-                    onWebViewLogin(effect.url, effect.initialCookies) { cookies ->
+                    onWebViewLogin(effect.url) { cookies ->
                         if (cookies.isNullOrBlank()) {
                             false
                         } else if (!loginState.canResume(cookies)) {
@@ -423,7 +422,7 @@ private fun GenericLoginContent(
     platformType: PlatformType,
     host: String,
     openUri: (String) -> Unit,
-    onWebViewLogin: (url: String, initialCookies: List<WebCookieSeed>, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
 ) {
     val methods = state.loginMethods(platformType)
@@ -462,7 +461,7 @@ private fun GenericLoginContent(
                 }
 
                 is LoginEffect.OpenWebCookieLogin -> {
-                    onWebViewLogin(effect.url, effect.initialCookies) { cookies ->
+                    onWebViewLogin(effect.url) { cookies ->
                         if (cookies.isNullOrBlank()) {
                             false
                         } else if (!loginState.canResume(cookies)) {

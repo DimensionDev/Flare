@@ -1,4 +1,5 @@
 import FlareAppleCore
+import Flow
 @preconcurrency import KotlinSharedUI
 import SwiftUI
 
@@ -394,13 +395,9 @@ private struct DiscoverHashtagSection: View {
     let hashtagsState: PagingStateSuccess<UiHashtag>
     let onSelect: (String) -> Void
 
-    private let columns = [
-        GridItem(.adaptive(minimum: 96), spacing: 8, alignment: .leading)
-    ]
-
     var body: some View {
         Section {
-            LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
+            HFlow(spacing: 8) {
                 ForEach(0..<Int(hashtagsState.itemCount), id: \.self) { index in
                     if let item = hashtagsState.peek(index: Int32(index)) {
                         Button {
@@ -408,7 +405,6 @@ private struct DiscoverHashtagSection: View {
                         } label: {
                             Text(item.hashtag)
                                 .lineLimit(1)
-                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                         }
@@ -423,7 +419,6 @@ private struct DiscoverHashtagSection: View {
                     } else {
                         Text("#loading", bundle: FlareAppleUILocalization.bundle)
                             .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(

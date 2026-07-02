@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.route
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -14,9 +13,9 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.component.DialogSceneStrategy2
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.screen.article.articleEntryBuilder
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
@@ -40,7 +39,6 @@ import soup.compose.material.motion.animation.materialSharedAxisZ
 import soup.compose.material.motion.animation.translateXIn
 import soup.compose.material.motion.animation.translateXOut
 
-@SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
@@ -58,7 +56,7 @@ internal fun Router(
         sceneStrategies =
             remember {
                 listOf(
-                    DialogSceneStrategy(),
+                    DialogSceneStrategy2(),
                     BottomSheetSceneStrategy(),
                     listDetailStrategy,
                 )

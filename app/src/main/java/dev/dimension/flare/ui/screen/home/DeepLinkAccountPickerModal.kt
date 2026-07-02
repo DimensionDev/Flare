@@ -99,15 +99,6 @@ internal fun DeepLinkAccountPickerModal(
         item {
             val text = stringResource(R.string.media_menu_copy_link)
             ListItem(
-                headlineContent = {
-                    Text(text)
-                },
-                leadingContent = {
-                    FAIcon(
-                        FontAwesomeIcons.Solid.Globe,
-                        contentDescription = text,
-                    )
-                },
                 modifier =
                     Modifier
                         .listCard(
@@ -127,18 +118,26 @@ internal fun DeepLinkAccountPickerModal(
                                 onDismissRequest.invoke()
                             }
                         },
+                leadingContent = {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Globe,
+                        contentDescription = text,
+                    )
+                },
+                elevation = ListItemDefaults.elevation(),
+                content = {
+                    Text(text)
+                },
             )
         }
         if (defaultsActions.canSaveDefault) {
             item {
                 ListItem(
-                    headlineContent = {
-                        Text(stringResource(R.string.deeplink_account_selection_save_default))
-                    },
-                    colors =
-                        ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                        ),
+                    modifier =
+                        Modifier
+                            .clickable {
+                                saveAsDefault = !saveAsDefault
+                            },
                     trailingContent = {
                         Checkbox(
                             checked = saveAsDefault,
@@ -147,11 +146,14 @@ internal fun DeepLinkAccountPickerModal(
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .clickable {
-                                saveAsDefault = !saveAsDefault
-                            },
+                    colors =
+                        ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                        ),
+                    elevation = ListItemDefaults.elevation(),
+                    content = {
+                        Text(stringResource(R.string.deeplink_account_selection_save_default))
+                    },
                 )
             }
         }

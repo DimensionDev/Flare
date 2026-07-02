@@ -16,11 +16,12 @@ internal actual fun PlatformListItem(
     trailingContent: @Composable (() -> Unit),
 ) {
     ListItem(
-        headlineContent = headlineContent,
         modifier = modifier,
         leadingContent = leadingContent,
-        supportingContent = supportingContent,
         trailingContent = trailingContent,
+        supportingContent = supportingContent,
+        elevation = ListItemDefaults.elevation(),
+        content = headlineContent,
     )
 }
 

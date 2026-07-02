@@ -73,6 +73,12 @@ public data object VvoPlatformSpec :
         VVODataSource(
             accountKey = context.accountKey,
             credentialFlow = context.credentialFlow(VVoCredential.serializer()),
+            updateCredential = { credential ->
+                context.updateCredential(
+                    serializer = VVoCredential.serializer(),
+                    credential = credential,
+                )
+            },
         )
 
     override fun guestDataSource(

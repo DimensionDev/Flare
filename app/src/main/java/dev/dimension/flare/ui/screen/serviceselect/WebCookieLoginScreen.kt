@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.alpha
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -34,7 +33,6 @@ private const val ANDROID_USER_AGENT =
 @Composable
 internal fun WebCookieLoginScreen(
     url: String,
-    initialCookies: List<WebCookieSeed>,
     callback: (String?) -> Boolean,
     onBack: () -> Unit,
 ) {
@@ -85,12 +83,6 @@ internal fun WebCookieLoginScreen(
                     cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
                 }
                 cookieManager.removeAllCookies {
-                    initialCookies.forEach { seed ->
-                        cookieManager.setCookie(
-                            seed.urlForCookieStore(),
-                            seed.toAndroidCookieHeader(),
-                        )
-                    }
                     cookieManager.flush()
                     webView.loadUrl(url, USER_AGENT_HEADERS)
                 }
@@ -126,19 +118,3 @@ private fun CookieManager.getCookieHeaderForUrls(urls: List<String>): String? =
         .takeIf { it.isNotBlank() }
 
 private fun String.hostOrNull(): String? = runCatching { Uri.parse(this).host }.getOrNull()
-
-private fun WebCookieSeed.urlForCookieStore(): String = "https://$domain$path"
-
-private fun WebCookieSeed.toAndroidCookieHeader(): String =
-    buildString {
-        append(name)
-        append("=")
-        append(value)
-        append("; Domain=")
-        append(domain)
-        append("; Path=")
-        append(path)
-        if (secure) {
-            append("; Secure")
-        }
-    }

@@ -32,9 +32,9 @@ private class BottomSheetScene<T : Any>(
                     if (properties.expandFully) SheetValue.Expanded else SheetValue.PartiallyExpanded,
                 enabledValues =
                     if (properties.expandFully) {
-                        setOf(SheetValue.Expanded, SheetValue.Hidden)
+                        setOf(SheetValue.Hidden, SheetValue.Expanded)
                     } else {
-                        setOf(SheetValue.PartiallyExpanded, SheetValue.Expanded, SheetValue.Hidden)
+                        setOf(SheetValue.Hidden, SheetValue.PartiallyExpanded, SheetValue.Expanded)
                     },
             )
         ModalBottomSheet(

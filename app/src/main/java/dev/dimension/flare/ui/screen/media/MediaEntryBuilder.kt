@@ -5,7 +5,7 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
+import dev.dimension.flare.ui.component.DialogSceneStrategy2
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
@@ -16,7 +16,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
     uriHandler: UriHandler,
 ) {
     entry<Route.Media.Image>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 usePlatformDefaultWidth = false,
                 decorFitsSystemWindows = false,
@@ -35,7 +35,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
     }
 
     entry<Route.Media.RawMedia>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 usePlatformDefaultWidth = false,
                 decorFitsSystemWindows = false,
@@ -55,7 +55,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
     }
 
     entry<Route.Media.StatusMedia>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 usePlatformDefaultWidth = false,
                 decorFitsSystemWindows = false,

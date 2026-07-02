@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.map
 internal class VVODataSource(
     override val accountKey: MicroBlogKey,
     credentialFlow: Flow<VVoCredential>,
+    private val updateCredential: suspend (VVoCredential) -> Unit = {},
 ) : AuthenticatedMicroblogDataSource,
     NotificationTimelineDataSource,
     ComposeDataSource,
@@ -75,7 +76,11 @@ internal class VVODataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         VVOService(
-            chocolateFlow = credentialFlow.map { it.chocolate },
+            credentialFlow = credentialFlow,
+            refreshCookieWhenStale = true,
+            onCredentialRefreshed = { credential ->
+                updateCredential(credential)
+            },
         )
     }
 

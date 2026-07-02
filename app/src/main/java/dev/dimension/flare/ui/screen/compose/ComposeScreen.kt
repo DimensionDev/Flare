@@ -889,37 +889,53 @@ internal fun ComposeScreen(
                                     LazyColumn {
                                         items(languageState.allLanguage) { (locale, tag) ->
                                             ListItem(
-                                                headlineContent = {
-                                                    Text(locale.displayName)
-                                                },
-                                                trailingContent = {
-                                                    if (languageState.allowMultiple) {
-                                                        Checkbox(
-                                                            checked = languageState.selectedLanguage.contains(tag),
-                                                            onCheckedChange = {
-                                                                languageState.selectLanguage(tag)
-                                                            },
-                                                            enabled =
-                                                                languageState.canSelect || languageState.selectedLanguage.contains(tag),
-                                                        )
-                                                    } else {
-                                                        RadioButton(
-                                                            selected = languageState.selectedLanguage.contains(tag),
-                                                            onClick = {
-                                                                languageState.selectLanguage(tag)
-                                                            },
-                                                        )
-                                                    }
-                                                },
                                                 modifier =
                                                     Modifier
                                                         .clickable {
                                                             languageState.selectLanguage(tag)
                                                         },
+                                                trailingContent = {
+                                                    if (languageState.allowMultiple) {
+                                                        Checkbox(
+                                                            checked =
+                                                                languageState.selectedLanguage
+                                                                    .contains(
+                                                                        tag,
+                                                                    ),
+                                                            onCheckedChange = {
+                                                                languageState.selectLanguage(
+                                                                    tag,
+                                                                )
+                                                            },
+                                                            enabled =
+                                                                languageState.canSelect ||
+                                                                    languageState.selectedLanguage.contains(
+                                                                        tag,
+                                                                    ),
+                                                        )
+                                                    } else {
+                                                        RadioButton(
+                                                            selected =
+                                                                languageState.selectedLanguage
+                                                                    .contains(
+                                                                        tag,
+                                                                    ),
+                                                            onClick = {
+                                                                languageState.selectLanguage(
+                                                                    tag,
+                                                                )
+                                                            },
+                                                        )
+                                                    }
+                                                },
                                                 colors =
                                                     ListItemDefaults.colors(
                                                         containerColor = Color.Transparent,
                                                     ),
+                                                elevation = ListItemDefaults.elevation(),
+                                                content = {
+                                                    Text(locale.displayName)
+                                                },
                                             )
                                         }
                                     }

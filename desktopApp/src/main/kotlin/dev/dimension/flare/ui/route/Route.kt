@@ -9,7 +9,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
-import dev.dimension.flare.ui.presenter.login.WebCookieSeed
 import dev.dimension.flare.ui.route.Route.Compose.New
 import dev.dimension.flare.ui.route.Route.Compose.Quote
 import dev.dimension.flare.ui.route.Route.Compose.Reply
@@ -294,7 +293,6 @@ internal sealed interface Route : NavKey {
 
     data class WebViewLogin(
         val url: String,
-        val initialCookies: List<WebCookieSeed>,
         val callback: (cookies: String?) -> Boolean,
     ) : ScreenRoute
 

@@ -49,24 +49,6 @@ class LoginContextTest {
         context.requireReloginAccount(MicroBlogKey(id = "any-user", host = "example.com"))
     }
 
-    @Test
-    fun cookieHeaderToSeedsSplitsNameValuePairs() {
-        val seeds =
-            cookieHeaderToWebCookieSeeds(
-                cookieHeader = "auth_token=abc; ct0=def=ghi; empty=; invalid",
-                domain = "x.com",
-            )
-
-        assertEquals(
-            listOf(
-                WebCookieSeed(name = "auth_token", value = "abc", domain = "x.com"),
-                WebCookieSeed(name = "ct0", value = "def=ghi", domain = "x.com"),
-                WebCookieSeed(name = "empty", value = "", domain = "x.com"),
-            ),
-            seeds,
-        )
-    }
-
     private fun loginContext(reloginTarget: ReloginTarget?): LoginContext =
         LoginContext(
             host = "example.com",

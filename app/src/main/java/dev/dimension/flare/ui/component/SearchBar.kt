@@ -160,15 +160,11 @@ private fun SearchContent(
                     items(history.size) { index ->
                         val item = history[index]
                         ListItem(
-                            headlineContent = {
-                                Text(text = item.keyword)
-                            },
                             modifier =
                                 Modifier
                                     .clickable {
                                         onSearch(item.keyword)
                                     },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             trailingContent = {
                                 IconButton(onClick = {
                                     onDelete.invoke(item)
@@ -178,6 +174,11 @@ private fun SearchContent(
                                         contentDescription = stringResource(R.string.delete),
                                     )
                                 }
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            elevation = ListItemDefaults.elevation(),
+                            content = {
+                                Text(text = item.keyword)
                             },
                         )
                     }
@@ -208,14 +209,15 @@ internal fun LazyStaggeredGridScope.searchContent(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
                 ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(R.string.search_users))
-                    },
                     colors =
                         ListItemDefaults
                             .colors(
                                 containerColor = Color.Transparent,
                             ),
+                    elevation = ListItemDefaults.elevation(),
+                    content = {
+                        Text(text = stringResource(R.string.search_users))
+                    },
                 )
             }
             item(
@@ -262,14 +264,15 @@ internal fun LazyStaggeredGridScope.searchContent(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
                 ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(R.string.search_users))
-                    },
                     colors =
                         ListItemDefaults
                             .colors(
                                 containerColor = Color.Transparent,
                             ),
+                    elevation = ListItemDefaults.elevation(),
+                    content = {
+                        Text(text = stringResource(R.string.search_users))
+                    },
                 )
             }
             items(10) {
@@ -290,14 +293,15 @@ internal fun LazyStaggeredGridScope.searchContent(
             span = StaggeredGridItemSpan.FullLine,
         ) {
             ListItem(
-                headlineContent = {
-                    Text(text = stringResource(R.string.search_status))
-                },
                 colors =
                     ListItemDefaults
                         .colors(
                             containerColor = Color.Transparent,
                         ),
+                elevation = ListItemDefaults.elevation(),
+                content = {
+                    Text(text = stringResource(R.string.search_status))
+                },
             )
         }
         status(searchStatus)

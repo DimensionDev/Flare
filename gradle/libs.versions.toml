@@ -18,7 +18,7 @@ androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
 lifecycle-runtime-ktx = "2.11.0"
 activity-compose = "1.13.0"
-compose-bom = "2026.06.00"
+compose-bom = "2026.06.01"
 ksp = "2.3.9"
 koog = "1.0.1-SNAPSHOT"
 nucleus = "1.15.7"
@@ -59,10 +59,10 @@ firebase-bom = "34.15.0"
 google-services = "4.5.0"
 firebase-crashlytics = "3.0.7"
 materialKolor = "4.1.1"
-room = "3.0.0-rc01"
-sqlite = "2.7.0-rc01"
+room = "3.0.0"
+sqlite = "2.7.0"
 compose-multiplatform = "1.11.1"
-navigation3 = "1.2.0-alpha04"
+navigation3 = "1.1.4"
 zoomable = "0.19.0"
 cupertino = "2.3.1"
 robolectric = "4.16.1"
@@ -113,7 +113,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha22" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha23" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }

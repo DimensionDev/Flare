@@ -245,14 +245,15 @@ internal fun DiscoverScreen(
                                 span = StaggeredGridItemSpan.FullLine,
                             ) {
                                 ListItem(
-                                    headlineContent = {
-                                        Text(text = stringResource(R.string.discover_users))
-                                    },
                                     colors =
                                         ListItemDefaults
                                             .colors(
                                                 containerColor = Color.Transparent,
                                             ),
+                                    elevation = ListItemDefaults.elevation(),
+                                    content = {
+                                        Text(text = stringResource(R.string.discover_users))
+                                    },
                                 )
                             }
                             item(
@@ -314,14 +315,15 @@ internal fun DiscoverScreen(
                                 span = StaggeredGridItemSpan.FullLine,
                             ) {
                                 ListItem(
-                                    headlineContent = {
-                                        Text(text = stringResource(R.string.discover_hashtags))
-                                    },
                                     colors =
                                         ListItemDefaults
                                             .colors(
                                                 containerColor = Color.Transparent,
                                             ),
+                                    elevation = ListItemDefaults.elevation(),
+                                    content = {
+                                        Text(text = stringResource(R.string.discover_hashtags))
+                                    },
                                 )
                             }
                             item(
@@ -391,14 +393,15 @@ internal fun DiscoverScreen(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
                                     ListItem(
-                                        headlineContent = {
-                                            Text(text = stringResource(R.string.discover_status))
-                                        },
                                         colors =
                                             ListItemDefaults
                                                 .colors(
                                                     containerColor = Color.Transparent,
                                                 ),
+                                        elevation = ListItemDefaults.elevation(),
+                                        content = {
+                                            Text(text = stringResource(R.string.discover_status))
+                                        },
                                     )
                                 }
                                 status(state.status)
@@ -407,14 +410,15 @@ internal fun DiscoverScreen(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
                                     ListItem(
-                                        headlineContent = {
-                                            Text(text = stringResource(R.string.discover_status))
-                                        },
                                         colors =
                                             ListItemDefaults
                                                 .colors(
                                                     containerColor = Color.Transparent,
                                                 ),
+                                        elevation = ListItemDefaults.elevation(),
+                                        content = {
+                                            Text(text = stringResource(R.string.discover_status))
+                                        },
                                     )
                                 }
                                 status(state.status)

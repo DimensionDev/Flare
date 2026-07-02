@@ -4,11 +4,9 @@ import dev.dimension.flare.data.network.fanbox.FanboxPlatformDetector
 import dev.dimension.flare.data.network.fanbox.FanboxService
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.platform.FANBOX_HOST
-import dev.dimension.flare.data.platform.FANBOX_WEB_HOST
 import dev.dimension.flare.data.platform.FanboxCredential
 import dev.dimension.flare.data.platform.FanboxPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
-import dev.dimension.flare.data.repository.credentialFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -26,7 +24,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
@@ -97,28 +94,9 @@ private class FanboxWebCookieLoginHandler(
 
     override suspend fun perform(actionId: String) {
         if (actionId != LOGIN_ACTION) return
-        val initialCookies =
-            context.reloginTarget
-                ?.accountKey
-                ?.let { accountKey ->
-                    accountService
-                        .credentialFlow<FanboxCredential>(accountKey)
-                        .firstOrNull()
-                        ?.sessionId
-                }?.takeIf { it.isNotBlank() }
-                ?.let { sessionId ->
-                    listOf(
-                        WebCookieSeed(
-                            name = FANBOX_SESSION_COOKIE,
-                            value = sessionId,
-                            domain = FANBOX_WEB_HOST,
-                        ),
-                    )
-                }.orEmpty()
         _effects.emit(
             LoginEffect.OpenWebCookieLogin(
                 url = FANBOX_LOGIN_URL,
-                initialCookies = initialCookies,
             ),
         )
     }

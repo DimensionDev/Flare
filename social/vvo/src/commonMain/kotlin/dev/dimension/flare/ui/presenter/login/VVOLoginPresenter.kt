@@ -17,7 +17,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 internal class VVOLoginPresenter(
@@ -60,7 +60,14 @@ internal class VVOLoginPresenter(
         chocolate: String,
         accountService: AccountService,
     ) {
-        val service = VVOService(flowOf(chocolate))
+        val credentialState = MutableStateFlow(VVoCredential(chocolate = chocolate))
+        val service =
+            VVOService(
+                credentialFlow = credentialState,
+                onCredentialRefreshed = { credential ->
+                    credentialState.value = credential
+                },
+            )
         val config = service.config()
         val uid = config.data?.uid
         requireNotNull(uid) { "uid is null" }
@@ -78,9 +85,7 @@ internal class VVOLoginPresenter(
                 platformType = PlatformType.VVo,
             ),
             credential =
-                VVoCredential(
-                    chocolate = chocolate,
-                ),
+                credentialState.value,
         )
     }
 }

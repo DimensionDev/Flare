@@ -4,7 +4,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
+import dev.dimension.flare.ui.component.DialogSceneStrategy2
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.route.Route
@@ -15,7 +15,7 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     onBack: () -> Unit,
 ) {
     entry<Route.Compose.New>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 dismissOnClickOutside = false,
             )
@@ -31,7 +31,7 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.Draft>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 dismissOnClickOutside = false,
             )
@@ -48,7 +48,7 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.Reply>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 dismissOnClickOutside = false,
             )
@@ -65,7 +65,7 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.Quote>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 dismissOnClickOutside = false,
             )
@@ -82,7 +82,7 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     }
 
     entry<Route.Compose.VVOReplyComment>(
-        metadata = DialogSceneStrategy.dialog(
+        metadata = DialogSceneStrategy2.dialog(
             dialogProperties = DialogProperties(
                 dismissOnClickOutside = false,
             )

@@ -1528,6 +1528,9 @@ internal fun SettingsScreen(
                 val modelTitle = stringResource(Res.string.settings_ai_config_model)
                 val modelPlaceholder = stringResource(Res.string.settings_ai_config_model_select)
                 val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
+                val shouldShowAiAgentSwitch =
+                    state.aiConfigState.aiType == AiTypeOption.OpenAI &&
+                        state.aiConfigState.openAIModel.isNotBlank()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_type))
@@ -1779,24 +1782,26 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                     }
                 }
-                ExpanderItem(
-                    heading = {
-                        Text(stringResource(Res.string.settings_ai_config_enable_agent))
-                    },
-                    caption = {
-                        Text(stringResource(Res.string.settings_ai_config_agent_description))
-                    },
-                    trailing = {
-                        Switcher(
-                            checked = state.aiConfigState.aiAgent,
-                            {
-                                state.aiConfigState.setAIAgent(it)
-                            },
-                            textBefore = true,
-                        )
-                    },
-                )
-                ExpanderItemSeparator()
+                if (shouldShowAiAgentSwitch) {
+                    ExpanderItem(
+                        heading = {
+                            Text(stringResource(Res.string.settings_ai_config_enable_agent))
+                        },
+                        caption = {
+                            Text(stringResource(Res.string.settings_ai_config_agent_description))
+                        },
+                        trailing = {
+                            Switcher(
+                                checked = state.aiConfigState.aiAgent,
+                                {
+                                    state.aiConfigState.setAIAgent(it)
+                                },
+                                textBefore = true,
+                            )
+                        },
+                    )
+                    ExpanderItemSeparator()
+                }
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_enable_tldr))

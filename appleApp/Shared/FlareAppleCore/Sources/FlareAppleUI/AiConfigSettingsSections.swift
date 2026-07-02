@@ -1,5 +1,6 @@
 import Combine
 import FlareAppleCore
+import Foundation
 import KotlinSharedUI
 import SwiftUI
 
@@ -154,17 +155,19 @@ private struct AiConfigSettingsSectionsContent: View {
                 }
             }
 
-            Section {
-                Toggle(
-                    isOn: Binding(
-                        get: { state.presenter.state.aiAgent },
-                        set: { newValue in
-                            state.presenter.state.setAIAgent(value: newValue)
-                        }
-                    )
-                ) {
-                    Text("ai_config_post_insight", bundle: FlareAppleUILocalization.bundle)
-                    Text("ai_config_post_insight_description", bundle: FlareAppleUILocalization.bundle)
+            if shouldShowAiAgentToggle {
+                Section {
+                    Toggle(
+                        isOn: Binding(
+                            get: { state.presenter.state.aiAgent },
+                            set: { newValue in
+                                state.presenter.state.setAIAgent(value: newValue)
+                            }
+                        )
+                    ) {
+                        Text("ai_config_post_insight", bundle: FlareAppleUILocalization.bundle)
+                        Text("ai_config_post_insight_description", bundle: FlareAppleUILocalization.bundle)
+                    }
                 }
             }
 
@@ -187,6 +190,7 @@ private struct AiConfigSettingsSectionsContent: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.aiType == .openAi)
+        .animation(.easeInOut(duration: 0.2), value: shouldShowAiAgentToggle)
         .animation(.easeInOut(duration: 0.2), value: state.presenter.state.aiTldr)
     }
 
@@ -244,6 +248,11 @@ private struct AiConfigSettingsSectionsContent: View {
             let models = (data.data as NSArray).cast(NSString.self).map(String.init)
             return models.isEmpty
         }
+    }
+
+    private var shouldShowAiAgentToggle: Bool {
+        state.presenter.state.aiType == .openAi
+            && !state.presenter.state.openAIModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
 

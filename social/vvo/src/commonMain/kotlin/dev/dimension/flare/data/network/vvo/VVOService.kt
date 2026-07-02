@@ -34,16 +34,21 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.core.writeFully
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 private val baseUrl = "https://$vvoHost/"
 private val chocolateRefreshInterval = 1.days
+private val defaultConfigLoginRetryDelay = 500.milliseconds
+private const val configLoginRetryLimit = 5
 
 private typealias VVOHttpClientFactory = (HttpClientConfig<*>.() -> Unit) -> HttpClient
 
@@ -86,6 +91,7 @@ private class VVOApis(
 internal class VVOService private constructor(
     private val credentialFlow: Flow<VVoCredential>,
     private val refreshCookieWhenStale: Boolean,
+    private val configLoginRetryDelay: Duration,
     private val onCredentialRefreshed: suspend (VVoCredential) -> Unit,
     private val httpClientFactory: VVOHttpClientFactory,
     private val apis: VVOApis,
@@ -96,11 +102,13 @@ internal class VVOService private constructor(
     constructor(
         credentialFlow: Flow<VVoCredential>,
         refreshCookieWhenStale: Boolean = false,
+        configLoginRetryDelay: Duration = defaultConfigLoginRetryDelay,
         onCredentialRefreshed: suspend (VVoCredential) -> Unit = {},
         httpClientFactory: (HttpClientConfig<*>.() -> Unit) -> HttpClient = ::defaultVvoHttpClient,
     ) : this(
         credentialFlow = credentialFlow,
         refreshCookieWhenStale = refreshCookieWhenStale,
+        configLoginRetryDelay = configLoginRetryDelay,
         onCredentialRefreshed = onCredentialRefreshed,
         httpClientFactory = httpClientFactory,
         apis =
@@ -125,19 +133,27 @@ internal class VVOService private constructor(
 
     override suspend fun config(): VVOResponse<Config> {
         val refreshedCredential = refreshChocolateIfNeeded()
-        val requestCredential = refreshedCredential ?: currentCredential()
+        var requestCredential = refreshedCredential ?: currentCredential()
 
-        val response = configApi(refreshedCredential).config()
+        var response = configApi(refreshedCredential).config()
         if (response.data?.login == true) {
             return response
         }
 
-        val recoveredCredential = refreshChocolate(credentialToRefresh = requestCredential) ?: return response
-        return if (recoveredCredential.chocolate.isBlank()) {
-            response
-        } else {
-            configApi(recoveredCredential).config()
+        repeat(configLoginRetryLimit) {
+            val recoveredCredential = refreshChocolate(credentialToRefresh = requestCredential) ?: return response
+            if (recoveredCredential.chocolate.isBlank()) {
+                return response
+            }
+            requestCredential = recoveredCredential
+            delayConfigLoginRetry()
+            response = configApi(recoveredCredential).config()
+            if (response.data?.login == true) {
+                return response
+            }
         }
+
+        return response
     }
 
     suspend fun getUid(screenName: String): String? {
@@ -199,6 +215,12 @@ internal class VVOService private constructor(
             }
         }.get("https://flareapp.moe/emoji.json")
             .body()
+
+    private suspend fun delayConfigLoginRetry() {
+        if (configLoginRetryDelay > Duration.ZERO) {
+            delay(configLoginRetryDelay)
+        }
+    }
 
     private fun configApi(credential: VVoCredential?): ConfigApi =
         credential

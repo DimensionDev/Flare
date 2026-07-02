@@ -13,6 +13,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class VVOCookieRefreshTest {
     @Test
     fun configRefreshesStaleCookieBeforeRequestAndPersistsCredential() =
@@ -129,6 +132,164 @@ class VVOCookieRefreshTest {
             assertEquals(oldCookie, credentialFlow.value.chocolate)
             assertEquals(refreshedCookie, refreshedCredential?.chocolate)
             assertTrue(refreshedCredential?.lastCookieRefreshEpochMillis != null)
+        }
+
+    @Test
+    fun configKeepsRefreshingUntilLoginRecoversWithinRetryLimit() =
+        runTest {
+            val oldCookie = "MLOGIN=1; SUB=old-sub"
+            val recoveredCookie = "MLOGIN=1; SUB=retry-3"
+            val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
+            var refreshCalls = 0
+            val configCookies = mutableListOf<String?>()
+
+            val service =
+                VVOService(
+                    credentialFlow = credentialFlow,
+                    refreshCookieWhenStale = false,
+                    onCredentialRefreshed = { credential ->
+                        credentialFlow.value = credential
+                    },
+                    httpClientFactory =
+                        mockHttpClientFactory { request ->
+                            when (request.url.encodedPath) {
+                                "/" -> {
+                                    refreshCalls += 1
+                                    setCookieResponse("SUB=retry-$refreshCalls; Path=/; Domain=.weibo.cn; HttpOnly")
+                                }
+
+                                "/api/config" -> {
+                                    val cookie = request.headers[HttpHeaders.Cookie]
+                                    configCookies += cookie
+                                    configResponse(login = cookie == recoveredCookie)
+                                }
+
+                                else -> {
+                                    error("Unexpected request path: ${request.url.encodedPath}")
+                                }
+                            }
+                        },
+                )
+
+            val response = service.config()
+
+            assertEquals(true, response.data?.login)
+            assertEquals(3, refreshCalls)
+            assertEquals(
+                listOf<String?>(
+                    oldCookie,
+                    "MLOGIN=1; SUB=retry-1",
+                    "MLOGIN=1; SUB=retry-2",
+                    recoveredCookie,
+                ),
+                configCookies,
+            )
+            assertEquals(recoveredCookie, credentialFlow.value.chocolate)
+        }
+
+    @Test
+    fun configReturnsLoginFalseAfterRetryLimitIsExhausted() =
+        runTest {
+            val oldCookie = "MLOGIN=1; SUB=old-sub"
+            val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
+            var refreshCalls = 0
+            val configCookies = mutableListOf<String?>()
+
+            val service =
+                VVOService(
+                    credentialFlow = credentialFlow,
+                    refreshCookieWhenStale = false,
+                    onCredentialRefreshed = { credential ->
+                        credentialFlow.value = credential
+                    },
+                    httpClientFactory =
+                        mockHttpClientFactory { request ->
+                            when (request.url.encodedPath) {
+                                "/" -> {
+                                    refreshCalls += 1
+                                    setCookieResponse("SUB=retry-$refreshCalls; Path=/; Domain=.weibo.cn; HttpOnly")
+                                }
+
+                                "/api/config" -> {
+                                    configCookies += request.headers[HttpHeaders.Cookie]
+                                    configResponse(login = false)
+                                }
+
+                                else -> {
+                                    error("Unexpected request path: ${request.url.encodedPath}")
+                                }
+                            }
+                        },
+                )
+
+            val response = service.config()
+
+            assertEquals(false, response.data?.login)
+            assertEquals(5, refreshCalls)
+            assertEquals(
+                listOf<String?>(
+                    oldCookie,
+                    "MLOGIN=1; SUB=retry-1",
+                    "MLOGIN=1; SUB=retry-2",
+                    "MLOGIN=1; SUB=retry-3",
+                    "MLOGIN=1; SUB=retry-4",
+                    "MLOGIN=1; SUB=retry-5",
+                ),
+                configCookies,
+            )
+            assertEquals("MLOGIN=1; SUB=retry-5", credentialFlow.value.chocolate)
+        }
+
+    @Test
+    fun configDelaysBeforeEachLoginRetry() =
+        runTest {
+            val oldCookie = "MLOGIN=1; SUB=old-sub"
+            val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
+            var refreshCalls = 0
+            val configRequestTimes = mutableListOf<Long>()
+
+            val service =
+                VVOService(
+                    credentialFlow = credentialFlow,
+                    refreshCookieWhenStale = false,
+                    configLoginRetryDelay = 500.milliseconds,
+                    onCredentialRefreshed = { credential ->
+                        credentialFlow.value = credential
+                    },
+                    httpClientFactory =
+                        mockHttpClientFactory { request ->
+                            when (request.url.encodedPath) {
+                                "/" -> {
+                                    refreshCalls += 1
+                                    setCookieResponse("SUB=retry-$refreshCalls; Path=/; Domain=.weibo.cn; HttpOnly")
+                                }
+
+                                "/api/config" -> {
+                                    configRequestTimes += testScheduler.currentTime
+                                    configResponse(login = false)
+                                }
+
+                                else -> {
+                                    error("Unexpected request path: ${request.url.encodedPath}")
+                                }
+                            }
+                        },
+                )
+
+            val response = service.config()
+
+            assertEquals(false, response.data?.login)
+            assertEquals(
+                listOf(
+                    0L,
+                    500L,
+                    1_000L,
+                    1_500L,
+                    2_000L,
+                    2_500L,
+                ),
+                configRequestTimes,
+            )
         }
 
     @Test

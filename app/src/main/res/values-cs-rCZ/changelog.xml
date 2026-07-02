@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">Vítejte zpět!</string>
     <string name="changelog_message">Od posledního přihlášení jsme provedli nějaké změny. Zde jsou detaily:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>Verze %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
                 <li>Přidán Flare AI Agent s chatem, přehledy příspěvků a přehledy profilů.</li>
                 <li>Přidána podpora Pixiv a nové zobrazení detailu galerie.</li>

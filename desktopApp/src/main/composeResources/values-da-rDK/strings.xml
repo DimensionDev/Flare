@@ -35,6 +35,9 @@
     <string name="profile_tab_timeline_with_reply">Opslag og svar</string>
     <string name="profile_tab_likes">Synes godt om</string>
     <string name="profile_tab_media">Medier</string>
+    <string name="profile_blocked_gate_title">Blokeret profil</string>
+    <string name="profile_blocked_gate_description">Du blokerede denne bruger. Deres faner og tidslinje er skjult, indtil du vælger at vise dem.</string>
+    <string name="profile_blocked_gate_show">Vis</string>
     <string name="illustrations_title">Illustrationer</string>
     <string name="manga_title">Manga</string>
     <string name="pixiv_ranking_week_title">Ugentlig Rangering</string>
@@ -44,6 +47,8 @@
     <string name="pixiv_ranking_week_original_title">Oprindelig Rangering</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat Følger</string>
+    <string name="pixiv_private_bookmarks_title">Private Bogmærker</string>
     <string name="report_title">Anmeld</string>
     <string name="report_description">Hvad er der galt med dette opslag?</string>
     <string name="report_reason_spam_title">Spam</string>
@@ -92,11 +97,13 @@
     <string name="status_share_via_fxembed">Del via FxEmbed</string>
     <string name="status_share_via_fixvx">Del via Fixvx</string>
     <string name="status_insight_title">Indsend indsigt</string>
+    <string name="profile_insight_title">Profilindsigt</string>
     <string name="agent_chat_title">AI Chat</string>
     <string name="agent_chat_input_placeholder">Spørg noget…</string>
     <string name="agent_chat_send">Send</string>
     <string name="agent_chat_thinking">Tænker…</string>
     <string name="status_insight_analyzing">Analyserer dette indlæg…</string>
+    <string name="profile_insight_analyzing">Analyserer denne profil…</string>
     <string name="status_insight_error">Kan ikke analysere dette indlæg.</string>
     <string name="status_insight_trace_loading_post_context">Indlæser post kontekst…</string>
     <string name="status_insight_trace_post_context_loaded">Indlæg kontekst indlæst</string>
@@ -171,6 +178,7 @@
     <string name="bluesky_login_password">Adgangskode</string>
     <string name="bluesky_login_2fa">2FA-token</string>
     <string name="bluesky_login_oauth_button">Log ind med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil tilladelser</string>
     <string name="bluesky_login_use_password_button">Brug adgangskode</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan stadig være ustabil. Hvis du støder på problemer, så brug login med adgangskode i stedet.</string>
     <string name="login_expired">Loginsessionen er udløbet</string>
@@ -192,6 +200,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tidslinjelayout, navigation og opslagshandlinger</string>
     <string name="settings_appearance_display_group_title">Visning</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemærkater, links og browseradfærd</string>
+    <string name="settings_behavior_title">Adfærd</string>
+    <string name="settings_behavior_description">Browser og link håndtering præferencer</string>
     <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Mediesynlighed, afspilning og følsomt indhold</string>
     <string name="settings_storage_title">Lager</string>
@@ -424,6 +434,9 @@
     <string name="rss_detail_tldr">Opsummer</string>
     <string name="rss_detail_tldr_error">Kunne ikke opsummere</string>
     <string name="rss_detail_copy_link">Kopiér link</string>
+    <string name="article_content_gate_subscription_title">Support påkrævet</string>
+    <string name="article_content_gate_subscription_description">Denne artikel er kun tilgængelig for supportere. Åbn den i browseren for at støtte skaberen og læse det fulde indhold.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Denne artikel er kun tilgængelig for tilhængere fra -%1$d. Åbn den i browseren for at understøtte skaberen og læse det fulde indhold.</string>
     <string name="mastodon_available_timelines">Tilgængelige tidslinjer</string>
     <string name="mastodon_trending_statuses">Trending statusser</string>
     <string name="mastodon_federated_timeline">Fødereret tidslinje</string>
@@ -505,6 +518,12 @@
     <string name="deeplink_account_selection_title">Vælg konto</string>
     <string name="deeplink_account_selection_message">Vælg en konto for at åbne dette link</string>
     <string name="deeplink_account_selection_browser">Åbn i browser</string>
+    <string name="deeplink_account_selection_save_default">Åbn altid på denne måde</string>
+    <string name="settings_link_open_defaults_title">Link åbning</string>
+    <string name="settings_link_open_defaults_description">Vælg standardindstillinger for understøttede links af vært</string>
+    <string name="settings_link_open_default_title">Standard for %1$s links</string>
+    <string name="settings_link_open_default_description">Vælg hvordan understøttede links åbne, når Flare kan håndtere dem</string>
+    <string name="settings_link_open_default_ask_every_time">Spørg hver gang</string>
     <string name="block_user_title">Bloker bruger</string>
     <string name="block_user_description">Er du sikker på, at du vil blokere denne bruger?</string>
     <string name="unblock_user_title">Fjern blokering af bruger</string>
@@ -533,16 +552,13 @@
     <string name="misskey_channel_tab_featured">Fremhævet</string>
     <string name="media_save_success">Gemt til Overførsler</string>
     <string name="media_save_fail">Kunne ikke gemme</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilindsigt</string>
-    <string name="profile_insight_analyzing">Analyserer denne profil…</string>
-    <string name="settings_about_discord" translatable="false">Uenighed</string>
+    <string name="media_download_started">Download startet</string>
     <string name="agent_compose_confirmation_prompt">Send opslag?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Annuller</string>
+    <string name="agent_ui_confirm_execute">Bekræft</string>
+    <string name="agent_ui_confirm_save_subscription">Gem</string>
     <string name="agent_ui_cancel_save_subscription">Annuller: gem</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Slet</string>
     <string name="agent_ui_cancel_delete_subscription">Annuller: slet</string>
     <string name="agent_ui_confirm_send_post">Send</string>
     <string name="agent_ui_cancel_send_post">Annuller: send</string>
@@ -565,7 +581,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Send indhold - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden opslag - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren opslag - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlatform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Vælg: opslag (bewerken)</string>
     <string name="agent_ui_select_post_action">Vælg: actie (opslag)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Indtast: doelbericht attachmentRef / statusKey…</string>
@@ -588,4 +604,6 @@
     <string name="agent_ui_select_followers_user">Vælg: bruger (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Vælg: bruger (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Indtast: bruger link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Understøttede indlæg</string>
+    <string name="fanbox_recommended_creators_title">Anbefalede skabere</string>
 </resources>

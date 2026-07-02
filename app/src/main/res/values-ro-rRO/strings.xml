@@ -43,10 +43,16 @@
     <string name="compose_save_draft">Salvează</string>
     <string name="compose_close_discard">Renunță</string>
     <string name="status_insight_title">Postaţi vederea</string>
+    <string name="profile_insight_title">Informații despre profil</string>
+    <string name="profile_blocked_gate_title">Profil blocat</string>
+    <string name="profile_blocked_gate_description">Ați blocat acest profil. Tab-urile și cronologia lor sunt ascunse până când alegeți să le afișați.</string>
+    <string name="profile_blocked_gate_show">Afișează</string>
     <string name="status_insight_input_placeholder">Întreabă un follow-up…</string>
     <string name="status_insight_send">Trimite</string>
     <string name="status_insight_analyzing">Se analizează această postare…</string>
+    <string name="profile_insight_analyzing">Se analizează acest profil…</string>
     <string name="status_insight_error">Nu se poate analiza acest post.</string>
+    <string name="profile_insight_error">Nu se poate analiza acest profil.</string>
     <string name="status_insight_trace_loading_post_context">Se încarcă contextul postării…</string>
     <string name="status_insight_trace_post_context_loaded">Contextul postării încărcat</string>
     <string name="status_insight_trace_preparing_images">Se pregătesc imaginile…</string>
@@ -88,6 +94,7 @@
     <string name="agent_chat_input_placeholder">Întreabă orice…</string>
     <string name="agent_chat_send">Trimite</string>
     <string name="agent_chat_thinking">Gândire…</string>
+    <string name="agent_compose_confirmation_prompt">Trimitere postare?</string>
     <string name="draft_box_title">Ciorne</string>
     <string name="draft_box_empty">Nicio ciornă momentan</string>
     <string name="draft_box_edit">Editează</string>
@@ -105,6 +112,8 @@
     <string name="settings_appearance_layout_group_subtitle">Aspect cronologie, navigare și acțiuni postări</string>
     <string name="settings_appearance_display_group_title">Afișaj</string>
     <string name="settings_appearance_display_group_subtitle">Timestamp-uri, ecusoane sursă, link-uri și comportament browser</string>
+    <string name="settings_behavior_title">Comportament</string>
+    <string name="settings_behavior_description">Browser și preferințe pentru manipularea link-urilor</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Vizibilitate media, redare și conținut sensibil</string>
     <string name="settings_storage_title">Stocare</string>
@@ -223,6 +232,7 @@
     <string name="bluesky_login_password_hint">Parolă</string>
     <string name="bluesky_login_auth_factor_token_hint">Cod 2FA</string>
     <string name="bluesky_login_oauth_button">Autentificare cu OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Repară permisiunile tranzitorii</string>
     <string name="bluesky_login_use_password_button">Folosește parola</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth poate fi încă instabil. Dacă ai probleme, folosește autentificarea cu parolă.</string>
     <string name="report_title">Raportează</string>
@@ -262,6 +272,10 @@
     <string name="settings_appearance_post_action_style_stretch">Întins</string>
     <string name="settings_appearance_post_action_layout">Personalizează acțiunile</string>
     <string name="settings_appearance_post_action_layout_description">Alege ordinea și vizibilitatea butoanelor de acțiune ale postării</string>
+    <string name="settings_appearance_show_media">Arată media</string>
+    <string name="settings_appearance_show_media_description">Arată fișierele media atașate postărilor</string>
+    <string name="settings_appearance_show_numbers">Arată numerele</string>
+    <string name="settings_appearance_show_numbers_description">Arată contorizările sub fiecare postare</string>
     <string name="settings_post_action_layout_title">Acțiuni postare</string>
     <string name="settings_post_action_layout_enable">Personalizează acțiunile</string>
     <string name="settings_post_action_layout_enable_description">Alege ce acțiuni apar pe rând, în meniul Mai multe sau rămân ascunse</string>
@@ -289,16 +303,20 @@
     <string name="settings_post_action_family_report">Raportează</string>
     <string name="settings_post_action_family_mute_user">Ignoră</string>
     <string name="settings_post_action_family_block_user">Blochează</string>
-    <string name="settings_appearance_show_media">Arată media</string>
-    <string name="settings_appearance_show_media_description">Arată fișierele media atașate postărilor</string>
-    <string name="settings_appearance_show_numbers">Arată numerele</string>
-    <string name="settings_appearance_show_numbers_description">Arată contorizările sub fiecare postare</string>
     <string name="settings_appearance_show_cw_img">Arată conținutul sensibil</string>
     <string name="settings_appearance_show_cw_img_description">Dezvăluie întotdeauna media sensibilă în postări</string>
     <string name="settings_appearance_expand_content_warning">Arată conținut în spatele avertismentelor de conținut</string>
     <string name="settings_appearance_expand_content_warning_description">Descoperă întotdeauna conținutul postărilor ascuns de avertismentele conținutului</string>
     <string name="settings_appearance_expand_media">Păstrează raportul de aspect media</string>
     <string name="settings_appearance_expand_media_description">Arată media la raportul de aspect original în cronologii</string>
+    <string name="gallery_detail_tab_info">Info</string>
+    <string name="gallery_detail_tab_comments">Comentarii</string>
+    <string name="gallery_detail_tab_recommend">Recomandare</string>
+    <string name="gallery_detail_comments_title">Comentarii</string>
+    <string name="gallery_detail_recommendations_title">Recomandări</string>
+    <string name="gallery_detail_view_more">Vezi mai multe</string>
+    <string name="gallery_detail_share_content_description">Distribuie</string>
+    <string name="gallery_detail_expand_content_description">Extinde</string>
     <string name="settings_appearance_video_autoplay">Redare automată video</string>
     <string name="settings_appearance_video_autoplay_description">Redă automat videoclipurile în postări</string>
     <string name="settings_appearance_video_autoplay_wifi">Doar prin Wi-Fi</string>
@@ -359,6 +377,13 @@
     <string name="settings_storage_clear_database_description">Elimină %1$s utilizatori și %2$s postări stocate în cache</string>
     <string name="settings_storage_app_log">Log-uri aplicație</string>
     <string name="settings_storage_app_log_description">Vezi, salvează sau șterge log-urile aplicației</string>
+    <string name="settings_media_save_location">Locație salvare media</string>
+    <string name="settings_media_save_location_description">Alegeți unde sunt salvate fișierele media descărcate pe acest dispozitiv.</string>
+    <string name="settings_media_save_location_downloads">Descărcări</string>
+    <string name="settings_media_save_location_custom_folder">Dosar personalizat</string>
+    <string name="settings_media_save_location_choose_folder">Alege Dosar</string>
+    <string name="settings_media_save_location_reset_downloads">Resetare la descărcări</string>
+    <string name="settings_media_save_location_ask_every_time">Întreabă de fiecare dată</string>
     <string name="service_select_instance_input_placeholder">URL instanță</string>
     <string name="service_select_next_button">Înainte</string>
     <string name="service_select_empty_message">Nicio instanță găsită</string>
@@ -366,6 +391,7 @@
     <string name="settings_accounts_remove">Elimină</string>
     <string name="settings_accounts_remove_confirm">Sigur vrei să elimini contul %1$s de pe acest dispozitiv?</string>
     <string name="media_menu_save">Salvează imaginea</string>
+    <string name="media_menu_download_all">Descarcă toate</string>
     <string name="media_menu_share_image">Distribuie imaginea</string>
     <string name="media_menu_copy_link">Copiază link-ul</string>
     <string name="media_menu_media_link">Link media</string>
@@ -373,6 +399,8 @@
     <string name="status_menu_share_via_fixvx">Distribuie prin Fixvx</string>
     <string name="media_save_success">Salvat</string>
     <string name="media_save_fail">Eroare la salvare</string>
+    <string name="media_download_started">Descărcare începută.</string>
+    <string name="media_prepare_started">Se pregătește media...</string>
     <string name="media_alt_text">Text alternativ</string>
     <string name="media_is_downloading">Media se descarcă încă. Reîncearcă imediat.</string>
     <string name="settings_side_panel_empty">Implicit, panoul lateral urmează platforma contului curent.</string>
@@ -454,6 +482,8 @@
     <string name="pixiv_ranking_week_original_title">Clasament original</string>
     <string name="pixiv_ranking_week_rookie_title">Clasament Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat de urmărire</string>
+    <string name="pixiv_private_bookmarks_title">Marcaje private</string>
     <string name="tab_settings_title">Setări tab-uri</string>
     <string name="dm_list_title">Mesaje directe</string>
     <string name="dm_list_empty">Niciun mesaj direct</string>
@@ -504,6 +534,9 @@
     <string name="rss_detail_tldr_loading">Se sumează…</string>
     <string name="rss_detail_translate">Tradu</string>
     <string name="rss_detail_translate_error">Eroare la traducere</string>
+    <string name="article_content_gate_subscription_title">Suport necesar</string>
+    <string name="article_content_gate_subscription_description">Acest articol este disponibil doar pentru suporteri. Deschide-l în browser pentru a sprijini creatorul și a citi întregul conținut.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Acest articol este disponibil doar pentru suporterii de la%1$d. Deschide-l în browser pentru a susține creatorul și a citi întregul conținut.</string>
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Caută</string>
     <string name="podcast_host">Gazdă</string>
@@ -532,6 +565,12 @@
     <string name="deeplink_account_selection_title">Selectează contul</string>
     <string name="deeplink_account_selection_message">Selectează un cont pentru a deschide acest link</string>
     <string name="deeplink_account_selection_browser">Deschide în browser</string>
+    <string name="deeplink_account_selection_save_default">Deschideți întotdeauna în acest mod</string>
+    <string name="settings_link_open_defaults_title">Deschidere link</string>
+    <string name="settings_link_open_defaults_description">Alege implicitele pentru link-urile acceptate în funcție de gazdă</string>
+    <string name="settings_link_open_default_title">Implicit pentru link-urile %1$s</string>
+    <string name="settings_link_open_default_description">Alegeți cum se deschid link-urile acceptate când Flare le poate manipula</string>
+    <string name="settings_link_open_default_ask_every_time">Întreabă de fiecare dată</string>
     <string name="block_user_title">Blochează utilizatorul</string>
     <string name="block_user_description">Sigur vrei să blochezi acest utilizator?</string>
     <string name="unblock_user_title">Deblochează utilizatorul</string>
@@ -582,20 +621,13 @@
     <string name="channel_item_unfollow">Nu mai urmări</string>
     <string name="channel_item_favourite">Adaugă la favorite</string>
     <string name="channel_item_unfavourite">Elimină din favorite</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Informații despre profil</string>
-    <string name="profile_insight_analyzing">Se analizează acest profil…</string>
-    <string name="profile_insight_error">Nu se poate analiza acest profil.</string>
-    <string name="agent_compose_confirmation_prompt">Trimitere postare?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Anulează</string>
+    <string name="agent_ui_confirm_execute">Confirmare</string>
+    <string name="agent_ui_confirm_save_subscription">Salvează</string>
     <string name="agent_ui_cancel_save_subscription">Anulați: salvare</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Șterge</string>
     <string name="agent_ui_cancel_delete_subscription">Anulați: ștergere</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Trimite</string>
     <string name="agent_ui_cancel_send_post">Anulați: trimitere</string>
     <string name="agent_ui_select_load_subscription_source">Selectați: sursă de abonament (încărcare)</string>
     <string name="agent_ui_select_delete_subscription_source">Selectați: sursă de abonament (ștergere)</string>
@@ -616,7 +648,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Trimitere conținut - cont?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Rispondere postare - cont?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citare postare - cont?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nCont: %2$s\nPlatformă: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Selectați: postare (operare)</string>
     <string name="agent_ui_select_post_action">Selectați: azione (postare)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Introduceți: post di destinazione attachmentRef / statusKey…</string>
@@ -639,4 +671,6 @@
     <string name="agent_ui_select_followers_user">Selectați: utilizator (vedere follower)</string>
     <string name="agent_ui_select_profile_tabs_user">Selectați: utilizator (vedere schede del profilo)</string>
     <string name="agent_ui_status_insight_user_placeholder">Introduceți: utilizator link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Posturi acceptate</string>
+    <string name="fanbox_recommended_creators_title">Creatori recomandați</string>
 </resources>

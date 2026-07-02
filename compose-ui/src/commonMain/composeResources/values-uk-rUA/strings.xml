@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Контент чутливого характеру</string>
     <string name="show_media">Показати медіа</string>
     <string name="hide_media">Приховати медіа</string>
+    <string name="media_menu_download">Звантажити</string>
+    <string name="media_menu_download_all">Звантажити все</string>
+    <string name="media_menu_share_image">Поділитися зображенням</string>
+    <string name="media_menu_copy_link">Копіювати посилання</string>
     <string name="login_expired">Сесія входу закінчилася</string>
     <string name="login_expired_message">Торкніться, щоб увійти знову</string>
     <string name="login_expired_relogin">Увійти знову</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Пароль</string>
     <string name="bluesky_login_auth_factor_token_hint">Токен 2FA</string>
     <string name="bluesky_login_oauth_button">Увійти через OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Виправити права доступу на Tranquil</string>
     <string name="bluesky_login_use_password_button">Використовувати пароль</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth все ще може бути нестабільним. Якщо виникнуть проблеми, скористайтеся входом за паролем.</string>
     <string name="login_button">Увійти</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Оригінальний рейтинг</string>
     <string name="pixiv_ranking_week_rookie_title">Рейтинг Нових Очків</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Приватні підписки</string>
+    <string name="pixiv_private_bookmarks_title">Приватні закладки</string>
     <string name="illustrations_title">Ілюстрації</string>
     <string name="manga_title">Манґа</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Матеріали, що підтримуються</string>
+    <string name="fanbox_recommended_creators_title">Рекомендовані автори</string>
 </resources>

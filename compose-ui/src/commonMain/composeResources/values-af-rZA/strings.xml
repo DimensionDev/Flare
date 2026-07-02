@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Plasings</string>
     <string name="profile_misskey_header_status_count">%1$s Plasings</string>
     <string name="profile_header_button_follow">Volg</string>
+    <string name="profile_header_button_request_follow">Versoek volg</string>
     <string name="profile_header_button_following">Volg tans</string>
     <string name="profile_header_button_requested">Aangevra</string>
     <string name="profile_header_button_blocked">Geblokkeer</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">Sensitiewe media</string>
     <string name="show_media">Wys media</string>
     <string name="hide_media">Versteek media</string>
+    <string name="media_menu_share_image">Deel beeld</string>
+    <string name="media_menu_copy_link">Kopieer skakel</string>
     <string name="login_expired">Aanmeld-sessie het verval</string>
     <string name="login_expired_message">Tik om weer aan te meld</string>
     <string name="login_expired_relogin">Meld weer aan</string>
@@ -398,18 +401,16 @@
     <string name="home_tab_feeds_title">Strome</string>
     <string name="dm_list_title">Direkte Boodskappe</string>
     <string name="social_title">Sosiaal</string>
+    <string name="antenna_title">Antennes</string>
     <string name="mixed_timeline_title">Gemeng</string>
     <string name="liked_title">Hou van</string>
     <string name="all_rss_feeds_title">Alle Subskripsies</string>
     <string name="posts_title">Plasings</string>
+    <string name="posts_with_replies_title">Plasings en antwoorde</string>
     <string name="media_title">Media</string>
     <string name="settings_appearance_absolute_timestamp">Absoluut tydstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Wys presiese tydstempels op plasings</string>
     <string name="channel_title">Kanaal</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Versoek volg</string>
-    <string name="antenna_title">Antennes</string>
-    <string name="posts_with_replies_title">Plasings en antwoorde</string>
     <string name="pixiv_ranking_week_title">Weeklikse ranglys</string>
     <string name="pixiv_ranking_month_title">Maandelikse ranglys</string>
     <string name="pixiv_ranking_day_male_title">Manlike ranglys</string>
@@ -418,5 +419,4 @@
     <string name="pixiv_ranking_week_rookie_title">Nuwelingranglys</string>
     <string name="pixiv_ranking_day_manga_title">Manga-ranglys</string>
     <string name="illustrations_title">Illustrasies</string>
-    <string name="manga_title">Manga</string>
 </resources>

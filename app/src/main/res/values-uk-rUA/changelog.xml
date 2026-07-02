@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">З поверненням!</string>
     <string name="changelog_message">Ми внесли деякі зміни після моменту, коли ви увійшли в систему. Детальніше:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>Версія %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Версія %1$s:</span>
             <ul>
                 <li>Додано Flare AI Agent із чатом, аналізом дописів і аналізом профілів.</li>
                 <li>Додано підтримку Pixiv і новий екран деталей галереї.</li>

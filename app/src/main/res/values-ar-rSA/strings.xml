@@ -46,10 +46,16 @@
     <string name="compose_save_draft">حفظ</string>
     <string name="compose_close_discard">تجاهل</string>
     <string name="status_insight_title">نشر التبصر</string>
+    <string name="profile_insight_title">رؤى الملف الشخصي</string>
+    <string name="profile_blocked_gate_title">الملف الشخصي المحظور</string>
+    <string name="profile_blocked_gate_description">قمت بحظر هذا الملف الشخصي. يتم إخفاء علامات التبويب والخط الزمني إلى أن تختار إظهارهما.</string>
+    <string name="profile_blocked_gate_show">عرض</string>
     <string name="status_insight_input_placeholder">اطلب متابعة…</string>
     <string name="status_insight_send">إرسال</string>
     <string name="status_insight_analyzing">تحليل هذا المنشور…</string>
+    <string name="profile_insight_analyzing">جارٍ تحليل هذا الملف الشخصي…</string>
     <string name="status_insight_error">غير قادر على تحليل هذه المشاركة.</string>
+    <string name="profile_insight_error">تعذّر تحليل هذا الملف الشخصي.</string>
     <string name="status_insight_trace_loading_post_context">تحميل سياق المشاركة…</string>
     <string name="status_insight_trace_post_context_loaded">تم تحميل سياق المشاركة</string>
     <string name="status_insight_trace_preparing_images">جارٍ إعداد الصور…</string>
@@ -91,6 +97,7 @@
     <string name="agent_chat_input_placeholder">اسأل عن أي شيء…</string>
     <string name="agent_chat_send">إرسال</string>
     <string name="agent_chat_thinking">التفكير…</string>
+    <string name="agent_compose_confirmation_prompt">إرسال منشور?</string>
     <string name="draft_box_title">المسودات</string>
     <string name="draft_box_empty">لا توجد مسودات بعد</string>
     <string name="draft_box_edit">تعديل</string>
@@ -108,6 +115,8 @@
     <string name="settings_appearance_layout_group_subtitle">تخطيط الجدول الزمني، التنقل، وإجراءات المنشور</string>
     <string name="settings_appearance_display_group_title">العرض</string>
     <string name="settings_appearance_display_group_subtitle">الطوابع الزمنية، شارات المصدر، الروابط، وسلوك المتصفح</string>
+    <string name="settings_behavior_title">السلوك</string>
+    <string name="settings_behavior_description">تفضيلات التعامل مع المتصفح والربط</string>
     <string name="settings_appearance_media_group_title">الوسائط</string>
     <string name="settings_appearance_media_group_subtitle">ظهور الوسائط، التشغيل، والمحتوى الحساس</string>
     <string name="settings_storage_title">التخزين</string>
@@ -226,6 +235,7 @@
     <string name="bluesky_login_password_hint">كلمة المرور</string>
     <string name="bluesky_login_auth_factor_token_hint">رمز التحقق الثنائي (2FA)</string>
     <string name="bluesky_login_oauth_button">تسجيل الدخول عبر OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">إصلاح أذونات الإحالة</string>
     <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
     <string name="bluesky_login_oauth_hint">قد لا يزال Bluesky OAuth غير مستقر. إذا واجهت مشاكل، استخدم تسجيل الدخول بكلمة المرور.</string>
     <string name="report_title">إبلاغ</string>
@@ -265,6 +275,10 @@
     <string name="settings_appearance_post_action_style_stretch">تمديد</string>
     <string name="settings_appearance_post_action_layout">تخصيص الإجراءات</string>
     <string name="settings_appearance_post_action_layout_description">اختر ترتيب أزرار إجراءات المنشور وإمكانية ظهورها</string>
+    <string name="settings_appearance_show_media">إظهار الوسائط</string>
+    <string name="settings_appearance_show_media_description">إظهار مرفقات الوسائط في المنشورات</string>
+    <string name="settings_appearance_show_numbers">إظهار الأرقام</string>
+    <string name="settings_appearance_show_numbers_description">إظهار الأعداد أسفل كل منشور</string>
     <string name="settings_post_action_layout_title">إجراءات المنشور</string>
     <string name="settings_post_action_layout_enable">تخصيص الإجراءات</string>
     <string name="settings_post_action_layout_enable_description">اختر الإجراءات التي تظهر في صف الأزرار أو قائمة المزيد أو تبقى مخفية</string>
@@ -292,16 +306,20 @@
     <string name="settings_post_action_family_report">إبلاغ</string>
     <string name="settings_post_action_family_mute_user">كتم</string>
     <string name="settings_post_action_family_block_user">حظر</string>
-    <string name="settings_appearance_show_media">إظهار الوسائط</string>
-    <string name="settings_appearance_show_media_description">إظهار مرفقات الوسائط في المنشورات</string>
-    <string name="settings_appearance_show_numbers">إظهار الأرقام</string>
-    <string name="settings_appearance_show_numbers_description">إظهار الأعداد أسفل كل منشور</string>
     <string name="settings_appearance_show_cw_img">إظهار المحتوى الحساس</string>
     <string name="settings_appearance_show_cw_img_description">كشف الوسائط الحساسة دائمًا في المنشورات</string>
     <string name="settings_appearance_expand_content_warning">إظهار المحتوى خلف تحذيرات المحتوى</string>
     <string name="settings_appearance_expand_content_warning_description">يكشف دائما محتوى المنشور مخفي بواسطة تحذيرات المحتوى</string>
     <string name="settings_appearance_expand_media">الحفاظ على نسبة أبعاد الوسائط</string>
     <string name="settings_appearance_expand_media_description">إظهار الوسائط بنسبتها الأصلية في الجداول الزمنية</string>
+    <string name="gallery_detail_tab_info">معلومات</string>
+    <string name="gallery_detail_tab_comments">التعليقات</string>
+    <string name="gallery_detail_tab_recommend">موصى</string>
+    <string name="gallery_detail_comments_title">التعليقات</string>
+    <string name="gallery_detail_recommendations_title">التوصيات</string>
+    <string name="gallery_detail_view_more">عرض المزيد</string>
+    <string name="gallery_detail_share_content_description">مشاركة</string>
+    <string name="gallery_detail_expand_content_description">توسيع</string>
     <string name="settings_appearance_video_autoplay">تشغيل الفيديو تلقائيًا</string>
     <string name="settings_appearance_video_autoplay_description">تشغيل الفيديوهات تلقائيًا في المنشورات</string>
     <string name="settings_appearance_video_autoplay_wifi">واي فاي فقط</string>
@@ -362,6 +380,13 @@
     <string name="settings_storage_clear_database_description">إزالة %1$s مستخدم و %2$s منشور مخزن مؤقتًا</string>
     <string name="settings_storage_app_log">سجلات التطبيق</string>
     <string name="settings_storage_app_log_description">عرض أو حفظ أو مسح سجلات التطبيق</string>
+    <string name="settings_media_save_location">موقع حفظ الوسائط</string>
+    <string name="settings_media_save_location_description">اختر مكان حفظ الوسائط التي تم تنزيلها على هذا الجهاز.</string>
+    <string name="settings_media_save_location_downloads">التنزيلات</string>
+    <string name="settings_media_save_location_custom_folder">مجلد مخصص</string>
+    <string name="settings_media_save_location_choose_folder">اختيار مجلد</string>
+    <string name="settings_media_save_location_reset_downloads">إعادة تعيين إلى التنزيلات</string>
+    <string name="settings_media_save_location_ask_every_time">اسأل كل مرة</string>
     <string name="service_select_instance_input_placeholder">رابط الخادم (Instance URL)</string>
     <string name="service_select_next_button">التالي</string>
     <string name="service_select_empty_message">لم يتم العثور على خوادم</string>
@@ -369,6 +394,7 @@
     <string name="settings_accounts_remove">إزالة</string>
     <string name="settings_accounts_remove_confirm">هل أنت متأكد أنك تريد إزالة الحساب %1$s من هذا الجهاز؟</string>
     <string name="media_menu_save">حفظ الصورة</string>
+    <string name="media_menu_download_all">تحميل الكل</string>
     <string name="media_menu_share_image">مشاركة الصورة</string>
     <string name="media_menu_copy_link">نسخ الرابط</string>
     <string name="media_menu_media_link">رابط الوسائط</string>
@@ -376,6 +402,8 @@
     <string name="status_menu_share_via_fixvx">مشاركة عبر Fixvx</string>
     <string name="media_save_success">تم الحفظ</string>
     <string name="media_save_fail">فشل الحفظ</string>
+    <string name="media_download_started">بدأ التنزيل.</string>
+    <string name="media_prepare_started">جارٍ إعداد الوسائط...</string>
     <string name="media_alt_text">النص البديل</string>
     <string name="media_is_downloading">الوسائط لا تزال قيد التحميل. حاول مرة أخرى بعد قليل.</string>
     <string name="settings_side_panel_empty">بشكل افتراضي، تتبع اللوحة الجانبية منصة الحساب الحالي.</string>
@@ -457,6 +485,8 @@
     <string name="pixiv_ranking_week_original_title">الترتيب الأصلي</string>
     <string name="pixiv_ranking_week_rookie_title">تصنيف الروكيه</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">متابعة خاصة</string>
+    <string name="pixiv_private_bookmarks_title">المفضلة الخاصة</string>
     <string name="tab_settings_title">إعدادات التبويب</string>
     <string name="dm_list_title">الرسائل المباشرة</string>
     <string name="dm_list_empty">لا توجد رسائل مباشرة</string>
@@ -507,6 +537,9 @@
     <string name="rss_detail_tldr_loading">جاري التلخيص…</string>
     <string name="rss_detail_translate">ترجمة</string>
     <string name="rss_detail_translate_error">فشل الترجمة</string>
+    <string name="article_content_gate_subscription_title">الدعم مطلوب</string>
+    <string name="article_content_gate_subscription_description">هذه المقالة متاحة فقط للمؤيدين. قم بفتحها في المتصفح لدعم المنشئ وقراءة المحتوى الكامل.</string>
+    <string name="article_content_gate_subscription_description_with_fee">هذه المقالة متاحة فقط للمؤيدين من &lt;unk&gt;%1$d. فتحها في المتصفح لدعم المنشئ وقراءة المحتوى الكامل.</string>
     <string name="emoji_picker_recent">الأخيرة</string>
     <string name="emoji_picker_search">بحث</string>
     <string name="podcast_host">المضيف</string>
@@ -535,6 +568,12 @@
     <string name="deeplink_account_selection_title">اختر الحساب</string>
     <string name="deeplink_account_selection_message">اختر حسابًا لفتح هذا الرابط</string>
     <string name="deeplink_account_selection_browser">فتح في المتصفح</string>
+    <string name="deeplink_account_selection_save_default">فتح هذه الطريقة دائمًا</string>
+    <string name="settings_link_open_defaults_title">فتح الرابط</string>
+    <string name="settings_link_open_defaults_description">اختر الافتراضي للروابط المدعومة من قبل المضيف</string>
+    <string name="settings_link_open_default_title">الافتراضي لروابط %1$s</string>
+    <string name="settings_link_open_default_description">اختر كيف تفتح الروابط المدعومة عندما يستطيع Felle التعامل معها</string>
+    <string name="settings_link_open_default_ask_every_time">اسأل في كل مرة</string>
     <string name="block_user_title">حظر المستخدم</string>
     <string name="block_user_description">هل أنت متأكد أنك تريد حظر هذا المستخدم؟</string>
     <string name="unblock_user_title">إلغاء حظر المستخدم</string>
@@ -585,20 +624,13 @@
     <string name="channel_item_unfollow">إلغاء المتابعة</string>
     <string name="channel_item_favourite">تفضيل</string>
     <string name="channel_item_unfavourite">إلغاء التفضيل</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">رؤى الملف الشخصي</string>
-    <string name="profile_insight_analyzing">جارٍ تحليل هذا الملف الشخصي…</string>
-    <string name="profile_insight_error">تعذّر تحليل هذا الملف الشخصي.</string>
-    <string name="agent_compose_confirmation_prompt">إرسال منشور?</string>
-    <string name="settings_about_discord" translatable="false">ديسكورد</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">إلغاء</string>
+    <string name="agent_ui_confirm_execute">تأكيد</string>
+    <string name="agent_ui_confirm_save_subscription">حفظ</string>
     <string name="agent_ui_cancel_save_subscription">إلغاء: حفظ</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">حذف</string>
     <string name="agent_ui_cancel_delete_subscription">إلغاء: حذف</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">إرسال</string>
     <string name="agent_ui_cancel_send_post">إلغاء: إرسال</string>
     <string name="agent_ui_select_load_subscription_source">اختر: مصدر الاشتراك (تحميل)</string>
     <string name="agent_ui_select_delete_subscription_source">اختر: مصدر الاشتراك (حذف)</string>
@@ -619,7 +651,7 @@
     <string name="agent_ui_compose_send_confirmation_title">إرسال محتوى - حساب?</string>
     <string name="agent_ui_compose_reply_confirmation_title">رد منشور - حساب?</string>
     <string name="agent_ui_compose_quote_confirmation_title">اقتباس منشور - حساب?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nالحساب: %2$s\nالمنصة: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">اختر: منشور (تنفيذ)</string>
     <string name="agent_ui_select_post_action">اختر: إجراء (منشور)</string>
     <string name="agent_ui_post_action_target_post_placeholder">أدخل: المنشور الهدف attachmentRef / statusKey…</string>
@@ -642,4 +674,6 @@
     <string name="agent_ui_select_followers_user">اختر: مستخدم (عرض المتابعون)</string>
     <string name="agent_ui_select_profile_tabs_user">اختر: مستخدم (عرض تبويبات الملف الشخصي)</string>
     <string name="agent_ui_status_insight_user_placeholder">أدخل: مستخدم رابط, handle, userKey…</string>
+    <string name="fanbox_supported_title">الوظائف المدعومة</string>
+    <string name="fanbox_recommended_creators_title">المبدعين الموصى بهم</string>
 </resources>

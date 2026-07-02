@@ -42,10 +42,16 @@
     <string name="compose_save_draft">Spara</string>
     <string name="compose_close_discard">Släng</string>
     <string name="status_insight_title">Inlägg insikt</string>
+    <string name="profile_insight_title">Profilinsikt</string>
+    <string name="profile_blocked_gate_title">Blockerad profil</string>
+    <string name="profile_blocked_gate_description">Du blockerade denna profil. Deras flikar och tidslinje är dolda tills du väljer att visa dem.</string>
+    <string name="profile_blocked_gate_show">Visa</string>
     <string name="status_insight_input_placeholder">Fråga en uppföljning…</string>
     <string name="status_insight_send">Skicka</string>
     <string name="status_insight_analyzing">Analyserar detta inlägg…</string>
+    <string name="profile_insight_analyzing">Analyserar den här profilen…</string>
     <string name="status_insight_error">Det går inte att analysera detta inlägg.</string>
+    <string name="profile_insight_error">Det går inte att analysera den här profilen.</string>
     <string name="status_insight_trace_loading_post_context">Laddar inlägg sammanhang…</string>
     <string name="status_insight_trace_post_context_loaded">Inläggskontext laddad</string>
     <string name="status_insight_trace_preparing_images">Förbereder bilder…</string>
@@ -87,6 +93,7 @@
     <string name="agent_chat_input_placeholder">Fråga vad som helst…</string>
     <string name="agent_chat_send">Skicka</string>
     <string name="agent_chat_thinking">Tänker…</string>
+    <string name="agent_compose_confirmation_prompt">Skicka inlägg?</string>
     <string name="draft_box_title">Utkast</string>
     <string name="draft_box_empty">Inga utkast ännu</string>
     <string name="draft_box_edit">Redigera</string>
@@ -104,6 +111,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tidslinjelayout, navigering och inläggsåtgärder</string>
     <string name="settings_appearance_display_group_title">Skärm</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstämplar, källmärken, länkar och webbläsarbeteende</string>
+    <string name="settings_behavior_title">Beteende</string>
+    <string name="settings_behavior_description">Webbläsare och länkhanteringsinställningar</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Mediasynlighet, uppspelning och känsligt innehåll</string>
     <string name="settings_storage_title">Lagring</string>
@@ -222,6 +231,7 @@
     <string name="bluesky_login_password_hint">Lösenord</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-kod</string>
     <string name="bluesky_login_oauth_button">Logga in med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fixa fridfulla behörigheter</string>
     <string name="bluesky_login_use_password_button">Använd lösenord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortfarande vara instabilt. Om du stöter på problem, använd lösenordsinloggning istället.</string>
     <string name="report_title">Rapportera</string>
@@ -261,6 +271,10 @@
     <string name="settings_appearance_post_action_style_stretch">Sträck ut</string>
     <string name="settings_appearance_post_action_layout">Anpassa åtgärder</string>
     <string name="settings_appearance_post_action_layout_description">Välj ordning och synlighet för inläggets åtgärdsknappar</string>
+    <string name="settings_appearance_show_media">Visa media</string>
+    <string name="settings_appearance_show_media_description">Visa mediabilagor i inlägg</string>
+    <string name="settings_appearance_show_numbers">Visa siffror</string>
+    <string name="settings_appearance_show_numbers_description">Visa antal under varje inlägg</string>
     <string name="settings_post_action_layout_title">Inläggsåtgärder</string>
     <string name="settings_post_action_layout_enable">Anpassa åtgärder</string>
     <string name="settings_post_action_layout_enable_description">Välj vilka åtgärder som visas i raden, menyn Mer eller förblir dolda</string>
@@ -288,16 +302,20 @@
     <string name="settings_post_action_family_report">Rapportera</string>
     <string name="settings_post_action_family_mute_user">Tysta</string>
     <string name="settings_post_action_family_block_user">Blockera</string>
-    <string name="settings_appearance_show_media">Visa media</string>
-    <string name="settings_appearance_show_media_description">Visa mediabilagor i inlägg</string>
-    <string name="settings_appearance_show_numbers">Visa siffror</string>
-    <string name="settings_appearance_show_numbers_description">Visa antal under varje inlägg</string>
     <string name="settings_appearance_show_cw_img">Visa känsligt innehåll</string>
     <string name="settings_appearance_show_cw_img_description">Visa alltid känslig media i inlägg</string>
     <string name="settings_appearance_expand_content_warning">Visa innehåll bakom innehållsvarningar</string>
     <string name="settings_appearance_expand_content_warning_description">Avslöja alltid inläggets innehåll dolt av innehållsvarningar</string>
     <string name="settings_appearance_expand_media">Bevara medians bildförhållande</string>
     <string name="settings_appearance_expand_media_description">Visa media med dess ursprungliga bildförhållande i tidslinjer</string>
+    <string name="gallery_detail_tab_info">Information</string>
+    <string name="gallery_detail_tab_comments">Kommentarer</string>
+    <string name="gallery_detail_tab_recommend">Rekommendera</string>
+    <string name="gallery_detail_comments_title">Kommentarer</string>
+    <string name="gallery_detail_recommendations_title">Rekommendationer</string>
+    <string name="gallery_detail_view_more">Visa mer</string>
+    <string name="gallery_detail_share_content_description">Dela</string>
+    <string name="gallery_detail_expand_content_description">Expandera</string>
     <string name="settings_appearance_video_autoplay">Automatisk videouppspelning</string>
     <string name="settings_appearance_video_autoplay_description">Spela upp videor i inlägg automatiskt</string>
     <string name="settings_appearance_video_autoplay_wifi">Endast Wi-Fi</string>
@@ -358,6 +376,13 @@
     <string name="settings_storage_clear_database_description">Ta bort %1$s cachade användare och %2$s cachade inlägg</string>
     <string name="settings_storage_app_log">Apploggar</string>
     <string name="settings_storage_app_log_description">Visa, spara eller rensa apploggar</string>
+    <string name="settings_media_save_location">Media spara plats</string>
+    <string name="settings_media_save_location_description">Välj var nedladdade medier sparas på den här enheten.</string>
+    <string name="settings_media_save_location_downloads">Nedladdningar</string>
+    <string name="settings_media_save_location_custom_folder">Anpassad mapp</string>
+    <string name="settings_media_save_location_choose_folder">Välj mapp</string>
+    <string name="settings_media_save_location_reset_downloads">Återställ till Nedladdningar</string>
+    <string name="settings_media_save_location_ask_every_time">Fråga varje gång</string>
     <string name="service_select_instance_input_placeholder">Instans-URL</string>
     <string name="service_select_next_button">Nästa</string>
     <string name="service_select_empty_message">Inga instanser hittades</string>
@@ -365,6 +390,7 @@
     <string name="settings_accounts_remove">Ta bort</string>
     <string name="settings_accounts_remove_confirm">Är du säker på att du vill ta bort kontot %1$s från denna enhet?</string>
     <string name="media_menu_save">Spara bild</string>
+    <string name="media_menu_download_all">Ladda ner alla</string>
     <string name="media_menu_share_image">Dela bild</string>
     <string name="media_menu_copy_link">Kopiera länk</string>
     <string name="media_menu_media_link">Medialänk</string>
@@ -372,6 +398,8 @@
     <string name="status_menu_share_via_fixvx">Dela via Fixvx</string>
     <string name="media_save_success">Sparad</string>
     <string name="media_save_fail">Misslyckades med att spara</string>
+    <string name="media_download_started">Nedladdningen startade.</string>
+    <string name="media_prepare_started">Förbereder media...</string>
     <string name="media_alt_text">Alt-text</string>
     <string name="media_is_downloading">Media laddas fortfarande ner. Försök igen om en stund.</string>
     <string name="settings_side_panel_empty">Som standard följer sidopanelen det nuvarande kontots plattform.</string>
@@ -453,6 +481,8 @@
     <string name="pixiv_ranking_week_original_title">Ursprunglig Rankning</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat Följer</string>
+    <string name="pixiv_private_bookmarks_title">Privata bokmärken</string>
     <string name="tab_settings_title">Flikinställningar</string>
     <string name="dm_list_title">Direktmeddelanden</string>
     <string name="dm_list_empty">Inga direktmeddelanden</string>
@@ -503,6 +533,9 @@
     <string name="rss_detail_tldr_loading">Sammanfattar…</string>
     <string name="rss_detail_translate">Översätt</string>
     <string name="rss_detail_translate_error">Misslyckades med att översätta</string>
+    <string name="article_content_gate_subscription_title">Stöd krävs</string>
+    <string name="article_content_gate_subscription_description">Denna artikel är endast tillgänglig för supportrar. Öppna den i webbläsaren för att stödja skaparen och läsa hela innehållet.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Denna artikel är endast tillgänglig för supportrar från ♥️%1$d. Öppna den i webbläsaren för att stödja skaparen och läsa hela innehållet.</string>
     <string name="emoji_picker_recent">Senaste</string>
     <string name="emoji_picker_search">Sök</string>
     <string name="podcast_host">Värd</string>
@@ -531,6 +564,12 @@
     <string name="deeplink_account_selection_title">Välj konto</string>
     <string name="deeplink_account_selection_message">Välj ett konto för att öppna denna länk</string>
     <string name="deeplink_account_selection_browser">Öppna i webbläsare</string>
+    <string name="deeplink_account_selection_save_default">Öppna alltid detta sätt</string>
+    <string name="settings_link_open_defaults_title">Länk öppning</string>
+    <string name="settings_link_open_defaults_description">Välj standardinställningar för länkar som stöds av värd</string>
+    <string name="settings_link_open_default_title">Standard för %1$s länkar</string>
+    <string name="settings_link_open_default_description">Välj hur länkar som stöds öppnas när Flare kan hantera dem</string>
+    <string name="settings_link_open_default_ask_every_time">Fråga varje gång</string>
     <string name="block_user_title">Blockera användare</string>
     <string name="block_user_description">Är du säker på att du vill blockera denna användare?</string>
     <string name="unblock_user_title">Avblockera användare</string>
@@ -581,20 +620,13 @@
     <string name="channel_item_unfollow">Sluta följa</string>
     <string name="channel_item_favourite">Favoritmarkera</string>
     <string name="channel_item_unfavourite">Ta bort favoritmarkering</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilinsikt</string>
-    <string name="profile_insight_analyzing">Analyserar den här profilen…</string>
-    <string name="profile_insight_error">Det går inte att analysera den här profilen.</string>
-    <string name="agent_compose_confirmation_prompt">Skicka inlägg?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Avbryt</string>
+    <string name="agent_ui_confirm_execute">Bekräfta</string>
+    <string name="agent_ui_confirm_save_subscription">Spara</string>
     <string name="agent_ui_cancel_save_subscription">Avbryt: spara</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Ta bort</string>
     <string name="agent_ui_cancel_delete_subscription">Avbryt: ta bort</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Skicka</string>
     <string name="agent_ui_cancel_send_post">Avbryt: skicka</string>
     <string name="agent_ui_select_load_subscription_source">Välj: prenumerationskälla (ladda)</string>
     <string name="agent_ui_select_delete_subscription_source">Välj: prenumerationskälla (ta bort)</string>
@@ -615,7 +647,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Skicka innehåll - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden inlägg - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren inlägg - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlattform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Välj: inlägg (bewerken)</string>
     <string name="agent_ui_select_post_action">Välj: actie (inlägg)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Ange: doelbericht attachmentRef / statusKey…</string>
@@ -638,4 +670,6 @@
     <string name="agent_ui_select_followers_user">Välj: användare (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Välj: användare (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Ange: användare link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Inlägg som stöds</string>
+    <string name="fanbox_recommended_creators_title">Rekommenderade skapare</string>
 </resources>

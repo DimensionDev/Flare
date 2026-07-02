@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[
-            <span>Versió %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Versió %1$s:</span>
             <ul>
                 <li>S’ha afegit Flare AI Agent amb xat, informació de publicacions i informació de perfils.</li>
                 <li>S’ha afegit compatibilitat amb Pixiv i una nova vista de detall de galeria.</li>

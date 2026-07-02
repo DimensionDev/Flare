@@ -421,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">原始排名</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">私人关注</string>
+    <string name="pixiv_private_bookmarks_title">私有书签</string>
     <string name="illustrations_title">插画</string>
     <string name="manga_title">漫画</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">支持的帖子</string>
+    <string name="fanbox_recommended_creators_title">推荐的作者</string>
 </resources>

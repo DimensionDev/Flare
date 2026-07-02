@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Objave</string>
     <string name="profile_misskey_header_status_count">%1$s Objave</string>
     <string name="profile_header_button_follow">Prati</string>
+    <string name="profile_header_button_request_follow">Затражи праћење</string>
     <string name="profile_header_button_following">Pratite</string>
     <string name="profile_header_button_requested">Poslat zahtev</string>
     <string name="profile_header_button_blocked">Blokirano</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">Osetljiv sadržaj</string>
     <string name="show_media">Prikaži medij</string>
     <string name="hide_media">Sakrij medij</string>
+    <string name="media_menu_share_image">Подели слику</string>
+    <string name="media_menu_copy_link">Kopiraj link</string>
     <string name="login_expired">Sesija prijavljivanja je istekla</string>
     <string name="login_expired_message">Dodirnite da biste se ponovo prijavili</string>
     <string name="login_expired_relogin">Prijavite se ponovo</string>
@@ -371,6 +374,7 @@
     <string name="nostr_login_qr_button">Poveži putem QR-a</string>
     <string name="nostr_login_qr_hint">Skenirajte pomoću Amber-a, Alby-ja ili drugog Nostr Connect signera.</string>
     <string name="nostr_login_qr_waiting">Čekanje na odobrenje signera…</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect веза</string>
     <string name="cancel_button">Otkaži</string>
     <string name="nostr_login_generate_button">Generiši i prijavi se</string>
     <string name="nostr_login_npub_hint">npub ili hex javni ključ (opciono ako je nsec postavljen)</string>
@@ -402,14 +406,11 @@
     <string name="liked_title">Sviđa mi se</string>
     <string name="all_rss_feeds_title">Sve pretplate</string>
     <string name="posts_title">Objave</string>
+    <string name="posts_with_replies_title">Објаве и одговори</string>
     <string name="media_title">Медији</string>
     <string name="settings_appearance_absolute_timestamp">Apsolutno vreme</string>
     <string name="settings_appearance_absolute_timestamp_description">Prikaži tačno vreme na objavama</string>
     <string name="channel_title">Kanal</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Затражи праћење</string>
-    <string name="nostr_login_qr_link_label">Nostr Connect веза</string>
-    <string name="posts_with_replies_title">Објаве и одговори</string>
     <string name="pixiv_ranking_week_title">Недељна ранг-листа</string>
     <string name="pixiv_ranking_month_title">Месечна ранг-листа</string>
     <string name="pixiv_ranking_day_male_title">Мушка ранг-листа</string>

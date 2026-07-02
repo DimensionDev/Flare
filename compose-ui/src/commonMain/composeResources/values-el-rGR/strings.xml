@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Ευαίσθητο περιεχόμενο</string>
     <string name="show_media">Εμφάνιση πολυμέσων</string>
     <string name="hide_media">Απόκρυψη πολυμέσων</string>
+    <string name="media_menu_download">Λήψη</string>
+    <string name="media_menu_download_all">Λήψη όλων</string>
+    <string name="media_menu_share_image">Κοινοποίηση εικόνας</string>
+    <string name="media_menu_copy_link">Αντιγραφή συνδέσμου</string>
     <string name="login_expired">Η συνεδρία σύνδεσης έληξε</string>
     <string name="login_expired_message">Πατήστε για να συνδεθείτε ξανά</string>
     <string name="login_expired_relogin">Σύνδεση ξανά</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Κωδικός πρόσβασης</string>
     <string name="bluesky_login_auth_factor_token_hint">Διακριτικό 2FA</string>
     <string name="bluesky_login_oauth_button">Σύνδεση με OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Διόρθωση δικαιωμάτων Tranquil</string>
     <string name="bluesky_login_use_password_button">Χρήση κωδικού πρόσβασης</string>
     <string name="bluesky_login_oauth_hint">Το Bluesky OAuth μπορεί να είναι ακόμα ασταθές. Εάν αντιμετωπίσετε προβλήματα, χρησιμοποιήστε τη σύνδεση με κωδικό πρόσβασης.</string>
     <string name="login_button">Σύνδεση</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Αρχική Κατάταξη</string>
     <string name="pixiv_ranking_week_rookie_title">Κατάταξη Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Προσωπικά Ακολουθία</string>
+    <string name="pixiv_private_bookmarks_title">Ιδιωτικοί Σελιδοδείκτες</string>
     <string name="illustrations_title">Εικονογραφήσεις</string>
     <string name="manga_title">Μάνγκα</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Υποστηριζόμενες αναρτήσεις</string>
+    <string name="fanbox_recommended_creators_title">Προτεινόμενοι δημιουργοί</string>
 </resources>

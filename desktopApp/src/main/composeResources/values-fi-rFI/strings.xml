@@ -35,6 +35,9 @@
     <string name="profile_tab_timeline_with_reply">Postaukset ja vastaukset</string>
     <string name="profile_tab_likes">Tykkäykset</string>
     <string name="profile_tab_media">Media</string>
+    <string name="profile_blocked_gate_title">Estetty profiili</string>
+    <string name="profile_blocked_gate_description">Estit tämän käyttäjän. Heidän välilehtensä ja aikajanansa piilotetaan, kunnes päätät näyttää heille.</string>
+    <string name="profile_blocked_gate_show">Näytä</string>
     <string name="illustrations_title">Kuvitukset</string>
     <string name="manga_title">Manga</string>
     <string name="pixiv_ranking_week_title">Viikoittainen Sijoitus</string>
@@ -44,6 +47,8 @@
     <string name="pixiv_ranking_week_original_title">Alkuperäinen Sijoitus</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Yksityinen Seuraaminen</string>
+    <string name="pixiv_private_bookmarks_title">Yksityiset Kirjanmerkit</string>
     <string name="report_title">Raportoi</string>
     <string name="report_description">Mikä tässä postauksessa on vikana?</string>
     <string name="report_reason_spam_title">Roskaposti</string>
@@ -92,10 +97,17 @@
     <string name="status_share_via_fxembed">Jaa FxEmbedin kautta</string>
     <string name="status_share_via_fixvx">Jaa Fixvx:n kautta</string>
     <string name="status_insight_title">Viestin käsitys</string>
+    <string name="profile_insight_title">Profiilinäkymä</string>
     <string name="agent_chat_title">Ai Keskustelu</string>
+    <string name="agent_chat_input_placeholder">Kysy mitään...</string>
     <string name="agent_chat_send">Lähetä</string>
+    <string name="agent_chat_thinking">Ajatellaan...</string>
+    <string name="status_insight_analyzing">Analysoidaan viestiä...</string>
+    <string name="profile_insight_analyzing">Analysoidaan tätä profiilia…</string>
     <string name="status_insight_error">Tätä viestiä ei voi analysoida.</string>
+    <string name="status_insight_trace_loading_post_context">Ladataan sisältöä...</string>
     <string name="status_insight_trace_post_context_loaded">Viestin konteksti ladattu</string>
+    <string name="status_insight_trace_preparing_images">Valmistellaan kuvia...</string>
     <string name="status_insight_trace_images_unsupported_fallback">Kuvia ei tueta. Yritä uudelleen tekstillä…</string>
     <string name="status_insight_trace_agent_started">Aloitetaan analyysiä…</string>
     <string name="status_insight_trace_strategy_started">Suunnitteluanalyysi…</string>
@@ -116,6 +128,7 @@
     <string name="status_insight_trace_tool_call_completed">%1$s</string>
     <string name="status_insight_trace_tool_validation_failed">%1$s</string>
     <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Ladataan sisältöä...</string>
     <string name="status_insight_trace_tool_load_status_context_completed">Viestin konteksti ladattu</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Viestin kontekstin syöte hylättiin</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Viestin kontekstin lataaminen epäonnistui</string>
@@ -123,6 +136,7 @@
     <string name="status_insight_trace_tool_search_status_completed">Haku suoritettu</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Hakusyöte hylättiin</string>
     <string name="status_insight_trace_tool_search_status_failed">Haku epäonnistui</string>
+    <string name="status_insight_trace_agent_completed">Viimeistellään analyysiä...</string>
     <string name="status_insight_trace_agent_failed">Analyysi epäonnistui</string>
     <string name="status_insight_trace_agent_closing">Loppuanalyysi…</string>
     <string name="ask_ai">Kysy AI</string>
@@ -164,6 +178,7 @@
     <string name="bluesky_login_password">Salasana</string>
     <string name="bluesky_login_2fa">2FA-koodi</string>
     <string name="bluesky_login_oauth_button">Kirjaudu OAuthilla</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Korjaa Tranquil oikeudet</string>
     <string name="bluesky_login_use_password_button">Käytä salasanaa</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth voi olla vielä epävakaa. Jos ilmenee ongelmia, käytä salasanakirjautumista.</string>
     <string name="login_expired">Kirjautumisistunto vanhentunut</string>
@@ -185,6 +200,8 @@
     <string name="settings_appearance_layout_group_subtitle">Aikajanan asettelu, navigointi ja postauksen toiminnot</string>
     <string name="settings_appearance_display_group_title">Näyttö</string>
     <string name="settings_appearance_display_group_subtitle">Aikaleimat, lähdemerkinnät, linkit ja selaimen toiminta</string>
+    <string name="settings_behavior_title">Toiminta</string>
+    <string name="settings_behavior_description">Selain ja linkin käsittelyasetukset</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Median näkyvyys, toisto ja arkaluonteinen sisältö</string>
     <string name="settings_storage_title">Tallennustila</string>
@@ -417,6 +434,9 @@
     <string name="rss_detail_tldr">Tiivistä</string>
     <string name="rss_detail_tldr_error">Tiivistäminen epäonnistui</string>
     <string name="rss_detail_copy_link">Kopioi linkki</string>
+    <string name="article_content_gate_subscription_title">Tuki tarvitaan</string>
+    <string name="article_content_gate_subscription_description">Tämä artikkeli on saatavilla vain tukijoille. Avaa se selaimessa tukemaan luojaa ja lukemaan koko sisältöä.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Tämä artikkeli on saatavilla vain kannattajille, jotka toimittavat%1$d. Avaa se selaimessa tukeaksesi luojaa ja lukeaksesi koko sisällön.</string>
     <string name="mastodon_available_timelines">Käytettävissä olevat aikajanat</string>
     <string name="mastodon_trending_statuses">Nousevat postaukset</string>
     <string name="mastodon_federated_timeline">Federoidun verkon aikajana</string>
@@ -498,6 +518,12 @@
     <string name="deeplink_account_selection_title">Valitse tili</string>
     <string name="deeplink_account_selection_message">Valitse tili, jolla linkki avataan</string>
     <string name="deeplink_account_selection_browser">Avaa selaimessa</string>
+    <string name="deeplink_account_selection_save_default">Avaa aina tämä tapa</string>
+    <string name="settings_link_open_defaults_title">Linkin avaaminen</string>
+    <string name="settings_link_open_defaults_description">Valitse oletusarvot ylläpitäjän tukemille linkeille</string>
+    <string name="settings_link_open_default_title">Oletus %1$s linkeille</string>
+    <string name="settings_link_open_default_description">Valitse, miten tuetut linkit avataan, kun Flare pystyy käsittelemään niitä</string>
+    <string name="settings_link_open_default_ask_every_time">Kysy joka kerta</string>
     <string name="block_user_title">Estä käyttäjä</string>
     <string name="block_user_description">Haluatko varmasti estää tämän käyttäjän?</string>
     <string name="unblock_user_title">Poista esto</string>
@@ -526,25 +552,15 @@
     <string name="misskey_channel_tab_featured">Suositellut</string>
     <string name="media_save_success">Tallennettu ladattuihin tiedostoihin</string>
     <string name="media_save_fail">Tallentaminen epäonnistui</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profiilinäkymä</string>
-    <string name="agent_chat_input_placeholder">Kysy mitään...</string>
-    <string name="agent_chat_thinking">Ajatellaan...</string>
-    <string name="status_insight_analyzing">Analysoidaan viestiä...</string>
-    <string name="profile_insight_analyzing">Analysoidaan tätä profiilia…</string>
-    <string name="status_insight_trace_loading_post_context">Ladataan sisältöä...</string>
-    <string name="status_insight_trace_preparing_images">Valmistellaan kuvia...</string>
-    <string name="status_insight_trace_tool_load_status_context_started">Ladataan sisältöä...</string>
-    <string name="status_insight_trace_agent_completed">Viimeistellään analyysiä...</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="media_download_started">Lataus aloitettu</string>
     <string name="agent_compose_confirmation_prompt">Lähetä julkaisu?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Peruuta</string>
+    <string name="agent_ui_confirm_execute">Vahvista</string>
+    <string name="agent_ui_confirm_save_subscription">Tallenna</string>
     <string name="agent_ui_cancel_save_subscription">Peruuta: tallenna</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Poista</string>
     <string name="agent_ui_cancel_delete_subscription">Peruuta: poista</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Lähetä</string>
     <string name="agent_ui_cancel_send_post">Peruuta: lähetä</string>
     <string name="agent_ui_select_load_subscription_source">Valitse: tilauslähde (lataa)</string>
     <string name="agent_ui_select_delete_subscription_source">Valitse: tilauslähde (poista)</string>
@@ -565,7 +581,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Lähetä sisältö - tili?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden julkaisu - tili?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren julkaisu - tili?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nTili: %2$s\nAlusta: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Valitse: julkaisu (bewerken)</string>
     <string name="agent_ui_select_post_action">Valitse: actie (julkaisu)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Syötä: doelbericht attachmentRef / statusKey…</string>
@@ -588,4 +604,6 @@
     <string name="agent_ui_select_followers_user">Valitse: käyttäjä (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Valitse: käyttäjä (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Syötä: käyttäjä link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Tuetut viestit</string>
+    <string name="fanbox_recommended_creators_title">Suositellut luojat</string>
 </resources>

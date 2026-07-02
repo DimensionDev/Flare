@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Gevoelige media</string>
     <string name="show_media">Toon media</string>
     <string name="hide_media">Verberg media</string>
+    <string name="media_menu_download">downloaden</string>
+    <string name="media_menu_download_all">Alles downloaden</string>
+    <string name="media_menu_share_image">Afbeelding delen</string>
+    <string name="media_menu_copy_link">Link kopiëren</string>
     <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Tik om opnieuw in te loggen</string>
     <string name="login_expired_relogin">Opnieuw inloggen</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Wachtwoord</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-token</string>
     <string name="bluesky_login_oauth_button">Inloggen met OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil permissies herstellen</string>
     <string name="bluesky_login_use_password_button">Gebruik wachtwoord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan nog onstabiel zijn. Als je problemen ondervindt, gebruik dan wachtwoordinloggen.</string>
     <string name="login_button">Inloggen</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Originele Rang</string>
     <string name="pixiv_ranking_week_rookie_title">Beginner Rang</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privé volgers</string>
+    <string name="pixiv_private_bookmarks_title">Privébladwijzers</string>
     <string name="illustrations_title">Illustraties</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Ondersteunde berichten</string>
+    <string name="fanbox_recommended_creators_title">Aanbevolen makers</string>
 </resources>

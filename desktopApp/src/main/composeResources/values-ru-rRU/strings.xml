@@ -37,6 +37,9 @@
     <string name="profile_tab_timeline_with_reply">Записи и ответы</string>
     <string name="profile_tab_likes">Лайки</string>
     <string name="profile_tab_media">Медиа</string>
+    <string name="profile_blocked_gate_title">Заблокированный профиль</string>
+    <string name="profile_blocked_gate_description">Вы заблокировали этого пользователя. Его вкладки и хронология скрыты, пока вы не выберете показать его.</string>
+    <string name="profile_blocked_gate_show">Показать</string>
     <string name="illustrations_title">Иллюстрации</string>
     <string name="manga_title">Манга</string>
     <string name="pixiv_ranking_week_title">Рейтинг за неделю</string>
@@ -46,6 +49,8 @@
     <string name="pixiv_ranking_week_original_title">Оригинальный Рейтинг</string>
     <string name="pixiv_ranking_week_rookie_title">Рейтинг Новобранцев</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Частная подписка</string>
+    <string name="pixiv_private_bookmarks_title">Приватные закладки</string>
     <string name="report_title">Пожаловаться</string>
     <string name="report_description">В чем проблема с этим сообщением?</string>
     <string name="report_reason_spam_title">Спам</string>
@@ -94,11 +99,13 @@
     <string name="status_share_via_fxembed">Поделиться через FxEmbed</string>
     <string name="status_share_via_fixvx">Поделиться через Fixvx</string>
     <string name="status_insight_title">Пост пронзание</string>
+    <string name="profile_insight_title">Анализ профиля</string>
     <string name="agent_chat_title">AI Чат</string>
     <string name="agent_chat_input_placeholder">Спросите что-нибудь…</string>
     <string name="agent_chat_send">Отправить</string>
     <string name="agent_chat_thinking">Думаю…</string>
     <string name="status_insight_analyzing">Анализ этого сообщения…</string>
+    <string name="profile_insight_analyzing">Анализ профиля…</string>
     <string name="status_insight_error">Не удалось проанализировать это сообщение.</string>
     <string name="status_insight_trace_loading_post_context">Загрузка контекста поста…</string>
     <string name="status_insight_trace_post_context_loaded">Пост контекст загружен</string>
@@ -169,6 +176,7 @@
     <string name="bluesky_login_password">Пароль</string>
     <string name="bluesky_login_2fa">Код двухфакторной аутентификации</string>
     <string name="bluesky_login_oauth_button">Войти с OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Исправить разрешения Tranquil</string>
     <string name="bluesky_login_use_password_button">Использовать пароль</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth может быть нестабилен, пожалуйста используйте логин с помощью пароля, если вы столкнетесь с какими-либо проблемами.</string>
     <string name="login_expired">Сессия входа истекла</string>
@@ -190,6 +198,8 @@
     <string name="settings_appearance_layout_group_subtitle">Лента времени и макет записей</string>
     <string name="settings_appearance_display_group_title">Отображение</string>
     <string name="settings_appearance_display_group_subtitle">Отметки времени, предпросмотры и логотипы платформы</string>
+    <string name="settings_behavior_title">Поведение</string>
+    <string name="settings_behavior_description">Браузер и ссылки на настройки обработки</string>
     <string name="settings_appearance_media_group_title">Медиа</string>
     <string name="settings_appearance_media_group_subtitle">Изображения, конфиденциальный контент и видео</string>
     <string name="settings_storage_title">Хранилище</string>
@@ -422,6 +432,9 @@
     <string name="rss_detail_tldr">Пересказать</string>
     <string name="rss_detail_tldr_error">Не удалось пересказать</string>
     <string name="rss_detail_copy_link">Копировать ссылку</string>
+    <string name="article_content_gate_subscription_title">Требуется поддержка</string>
+    <string name="article_content_gate_subscription_description">Эта статья доступна только для сторонников. Откройте ее в браузере, чтобы поддержать создателя и прочитать весь контент.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Эта статья доступна только для сторонников из ¥%1$d. Откройте ее в браузере, чтобы поддержать создателя и прочитать весь контент.</string>
     <string name="mastodon_available_timelines">Доступные графики</string>
     <string name="mastodon_trending_statuses">Trending statuses</string>
     <string name="mastodon_federated_timeline">Федеративная шкала времени</string>
@@ -503,6 +516,12 @@
     <string name="deeplink_account_selection_title">Выберите аккаунт</string>
     <string name="deeplink_account_selection_message">Выберите аккаунт, чтобы открыть эту ссылку</string>
     <string name="deeplink_account_selection_browser">Открыть в браузере</string>
+    <string name="deeplink_account_selection_save_default">Всегда открывать таким образом</string>
+    <string name="settings_link_open_defaults_title">Открытие ссылки</string>
+    <string name="settings_link_open_defaults_description">Выберите стандартные для поддерживаемых ссылок хостом</string>
+    <string name="settings_link_open_default_title">По умолчанию для ссылок %1$s</string>
+    <string name="settings_link_open_default_description">Выберите, как открываются поддерживаемые ссылки, когда сигнал может управлять ими</string>
+    <string name="settings_link_open_default_ask_every_time">Спрашивать каждый раз</string>
     <string name="block_user_title">Заблокировать пользователя</string>
     <string name="block_user_description">Вы уверены, что хотите заблокировать этого пользователя?</string>
     <string name="unblock_user_title">Разблокировать пользователя</string>
@@ -531,22 +550,15 @@
     <string name="misskey_channel_tab_featured">Избранные</string>
     <string name="media_save_success">Сохранено в Загрузках</string>
     <string name="media_save_fail">Не удалось сохранить</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Анализ профиля</string>
-    <string name="profile_insight_analyzing">Анализ профиля…</string>
-    <string name="status_insight_trace_tool_call_started">%1$s</string>
-    <string name="status_insight_trace_tool_call_completed">%1$s</string>
-    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
-    <string name="status_insight_trace_tool_call_failed">%1$s</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="media_download_started">Загрузка начата</string>
     <string name="agent_compose_confirmation_prompt">Отправку пост?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Отмена</string>
+    <string name="agent_ui_confirm_execute">Подтвердить</string>
+    <string name="agent_ui_confirm_save_subscription">Сохранить</string>
     <string name="agent_ui_cancel_save_subscription">Отменить: сохранение</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Удалить</string>
     <string name="agent_ui_cancel_delete_subscription">Отменить: удаление</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Отправить</string>
     <string name="agent_ui_cancel_send_post">Отменить: отправку</string>
     <string name="agent_ui_select_load_subscription_source">Выберите: источник подписки (загрузить)</string>
     <string name="agent_ui_select_delete_subscription_source">Выберите: источник подписки (удаление)</string>
@@ -567,7 +579,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Отправку содержимое - аккаунт?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Ответить пост - аккаунт?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Цитировать пост - аккаунт?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nАккаунт: %2$s\nПлатформа: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Выберите: пост (выполнить действие)</string>
     <string name="agent_ui_select_post_action">Выберите: действие (пост)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Введите: целевой пост attachmentRef / statusKey…</string>
@@ -590,4 +602,6 @@
     <string name="agent_ui_select_followers_user">Выберите: пользователь (посмотреть подписчиков)</string>
     <string name="agent_ui_select_profile_tabs_user">Выберите: пользователь (посмотреть вкладки профиля)</string>
     <string name="agent_ui_status_insight_user_placeholder">Введите: пользователь ссылка, handle, userKey…</string>
+    <string name="fanbox_supported_title">Поддерживаемые записи</string>
+    <string name="fanbox_recommended_creators_title">Рекомендованные авторы</string>
 </resources>

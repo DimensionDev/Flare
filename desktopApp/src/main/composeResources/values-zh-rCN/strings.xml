@@ -46,6 +46,8 @@
     <string name="pixiv_ranking_week_original_title">原始排名</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">私人关注</string>
+    <string name="pixiv_private_bookmarks_title">私有书签</string>
     <string name="report_title">举报</string>
     <string name="report_description">此内容有什么问题？</string>
     <string name="report_reason_spam_title">垃圾内容</string>
@@ -94,11 +96,17 @@
     <string name="status_share_via_fxembed">通过 FxEmbed 分享</string>
     <string name="status_share_via_fixvx">通过 Fixvx 分享</string>
     <string name="status_insight_title">帖子视图</string>
+    <string name="profile_insight_title">个人资料洞察</string>
     <string name="agent_chat_title">AI 聊天</string>
     <string name="agent_chat_input_placeholder">询问任何…</string>
     <string name="agent_chat_send">发送</string>
+    <string name="agent_chat_thinking">正在思考…</string>
+    <string name="status_insight_analyzing">正在分析此帖子...</string>
+    <string name="profile_insight_analyzing">正在分析此个人资料…</string>
     <string name="status_insight_error">无法分析此帖子。</string>
+    <string name="status_insight_trace_loading_post_context">正在加载帖子上下文...</string>
     <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>
+    <string name="status_insight_trace_preparing_images">正在准备图像...</string>
     <string name="status_insight_trace_images_unsupported_fallback">图像不被支持；重试文本…</string>
     <string name="status_insight_trace_agent_started">开始分析…</string>
     <string name="status_insight_trace_strategy_started">规划分析…</string>
@@ -106,7 +114,10 @@
     <string name="status_insight_trace_subgraph_started">进入分析阶段…</string>
     <string name="status_insight_trace_subgraph_completed">分析阶段已完成</string>
     <string name="status_insight_trace_subgraph_failed">分析阶段失败</string>
+    <string name="status_insight_trace_asking_model">正在询问 %1$s...</string>
     <string name="status_insight_trace_model_response_received">正在读取模型响应…</string>
+    <string name="status_insight_trace_streaming_started">从 %1$s 串流...</string>
+    <string name="status_insight_trace_streaming_response">正在接收响应...</string>
     <string name="status_insight_trace_streaming_completed">响应流完成</string>
     <string name="status_insight_trace_streaming_failed">响应流失败</string>
     <string name="status_insight_trace_running_step">运行分析步骤…</string>
@@ -116,6 +127,7 @@
     <string name="status_insight_trace_tool_call_completed">%1$s</string>
     <string name="status_insight_trace_tool_validation_failed">%1$s</string>
     <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">正在加载帖子上下文...</string>
     <string name="status_insight_trace_tool_load_status_context_completed">帖子上下文已加载</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">帖子上下文输入被拒绝</string>
     <string name="status_insight_trace_tool_load_status_context_failed">加载帖子上下文失败</string>
@@ -187,6 +199,8 @@
     <string name="settings_appearance_layout_group_subtitle">时间轴布局、导航栏和动作栏</string>
     <string name="settings_appearance_display_group_title">显示</string>
     <string name="settings_appearance_display_group_subtitle">时间戳、来源徽章、链接和浏览器行为</string>
+    <string name="settings_behavior_title">行为</string>
+    <string name="settings_behavior_description">浏览器和链接处理首选项</string>
     <string name="settings_appearance_media_group_title">媒体</string>
     <string name="settings_appearance_media_group_subtitle">媒体可见性、播放和敏感内容</string>
     <string name="settings_storage_title">存储</string>
@@ -419,6 +433,9 @@
     <string name="rss_detail_tldr">总结</string>
     <string name="rss_detail_tldr_error">总结失败</string>
     <string name="rss_detail_copy_link">复制链接</string>
+    <string name="article_content_gate_subscription_title">需要支持</string>
+    <string name="article_content_gate_subscription_description">此文章仅供支持者使用。在浏览器中打开以支持创建者并阅读全部内容。</string>
+    <string name="article_content_gate_subscription_description_with_fee">这篇文章只能提供给来自礼包%1$d的支持者。在浏览器中打开它来支持创建者并阅读全部内容。</string>
     <string name="mastodon_available_timelines">可用时间轴</string>
     <string name="mastodon_trending_statuses">热榜动态</string>
     <string name="mastodon_federated_timeline">跨站时间轴</string>
@@ -500,6 +517,12 @@
     <string name="deeplink_account_selection_title">选择账户</string>
     <string name="deeplink_account_selection_message">选择一个账户以打开此链接</string>
     <string name="deeplink_account_selection_browser">在浏览器中打开</string>
+    <string name="deeplink_account_selection_save_default">总是以此方式打开</string>
+    <string name="settings_link_open_defaults_title">链接打开</string>
+    <string name="settings_link_open_defaults_description">按主机选择支持链接的默认值</string>
+    <string name="settings_link_open_default_title">%1$s 链接的默认值</string>
+    <string name="settings_link_open_default_description">选择当闪光灯可以处理它们时支持的链接打开</string>
+    <string name="settings_link_open_default_ask_every_time">每次询问</string>
     <string name="block_user_title">屏蔽用户</string>
     <string name="block_user_description">确定要屏蔽此用户吗？</string>
     <string name="unblock_user_title">取消屏蔽</string>
@@ -528,26 +551,15 @@
     <string name="misskey_channel_tab_featured">精选</string>
     <string name="media_save_success">已保存到下载目录</string>
     <string name="media_save_fail">保存失败</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">个人资料洞察</string>
-    <string name="agent_chat_thinking">正在思考…</string>
-    <string name="status_insight_analyzing">正在分析此帖子...</string>
-    <string name="profile_insight_analyzing">正在分析此个人资料…</string>
-    <string name="status_insight_trace_loading_post_context">正在加载帖子上下文...</string>
-    <string name="status_insight_trace_preparing_images">正在准备图像...</string>
-    <string name="status_insight_trace_asking_model">正在询问 %1$s...</string>
-    <string name="status_insight_trace_streaming_started">从 %1$s 串流...</string>
-    <string name="status_insight_trace_streaming_response">正在接收响应...</string>
-    <string name="status_insight_trace_tool_load_status_context_started">正在加载帖子上下文...</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="media_download_started">下载已开始</string>
     <string name="agent_compose_confirmation_prompt">发送 帖子?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">取消</string>
+    <string name="agent_ui_confirm_execute">确认</string>
+    <string name="agent_ui_confirm_save_subscription">保存</string>
     <string name="agent_ui_cancel_save_subscription">取消: 保存</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">删除</string>
     <string name="agent_ui_cancel_delete_subscription">取消: 删除</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">发送</string>
     <string name="agent_ui_cancel_send_post">取消: 发送</string>
     <string name="agent_ui_select_load_subscription_source">选择: 订阅源 (加载)</string>
     <string name="agent_ui_select_delete_subscription_source">选择: 订阅源 (删除)</string>
@@ -568,7 +580,7 @@
     <string name="agent_ui_compose_send_confirmation_title">发送 内容 - 账号?</string>
     <string name="agent_ui_compose_reply_confirmation_title">回复 帖子 - 账号?</string>
     <string name="agent_ui_compose_quote_confirmation_title">引用 帖子 - 账号?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\n账户： %2$s\n平台： %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">选择: 帖子 (操作)</string>
     <string name="agent_ui_select_post_action">选择: 操作 (帖子)</string>
     <string name="agent_ui_post_action_target_post_placeholder">输入: 目标帖子 attachmentRef / statusKey…</string>
@@ -591,4 +603,6 @@
     <string name="agent_ui_select_followers_user">选择: 用户 (查看 粉丝)</string>
     <string name="agent_ui_select_profile_tabs_user">选择: 用户 (查看 个人资料标签页)</string>
     <string name="agent_ui_status_insight_user_placeholder">输入: 用户 链接, handle, userKey…</string>
+    <string name="fanbox_supported_title">支持的帖子</string>
+    <string name="fanbox_recommended_creators_title">推荐的作者</string>
 </resources>

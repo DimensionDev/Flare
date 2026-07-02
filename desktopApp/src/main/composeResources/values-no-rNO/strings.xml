@@ -35,6 +35,9 @@
     <string name="profile_tab_timeline_with_reply">Innlegg og svar</string>
     <string name="profile_tab_likes">Liker</string>
     <string name="profile_tab_media">Medier</string>
+    <string name="profile_blocked_gate_title">Blokkert profil</string>
+    <string name="profile_blocked_gate_description">Du blokkerte denne brukeren. Fanene og tidslinjen er skjult inntil du velger å vise dem.</string>
+    <string name="profile_blocked_gate_show">Vis</string>
     <string name="illustrations_title">Illustrasjoner</string>
     <string name="manga_title">Manga</string>
     <string name="pixiv_ranking_week_title">Ukentlig rangering</string>
@@ -44,6 +47,8 @@
     <string name="pixiv_ranking_week_original_title">Opprinnelig plassering</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie rangering</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Private Følger</string>
+    <string name="pixiv_private_bookmarks_title">Private bokmerker</string>
     <string name="report_title">Rapporter</string>
     <string name="report_description">Hva er galt med dette innlegget?</string>
     <string name="report_reason_spam_title">Søppelpost</string>
@@ -92,10 +97,13 @@
     <string name="status_share_via_fxembed">Del via FxEmbed</string>
     <string name="status_share_via_fixvx">Del via Fixvx</string>
     <string name="status_insight_title">Post innsikt</string>
+    <string name="profile_insight_title">Profilinnsikt</string>
     <string name="agent_chat_title">AI chat</string>
+    <string name="agent_chat_input_placeholder">Spør noe...</string>
     <string name="agent_chat_send">Sende</string>
     <string name="agent_chat_thinking">Tenker…</string>
     <string name="status_insight_analyzing">Analyserer dette innlegget…</string>
+    <string name="profile_insight_analyzing">Analyserer denne profilen…</string>
     <string name="status_insight_error">Kunne ikke analysere innlegget.</string>
     <string name="status_insight_trace_loading_post_context">Henter post kontekst…</string>
     <string name="status_insight_trace_post_context_loaded">Post sammenheng lastet</string>
@@ -107,6 +115,7 @@
     <string name="status_insight_trace_subgraph_started">Legger til analysestase…</string>
     <string name="status_insight_trace_subgraph_completed">Analyseringsstadium er fullført</string>
     <string name="status_insight_trace_subgraph_failed">Analyseringsfasen mislyktes</string>
+    <string name="status_insight_trace_asking_model">Spør %1$s...</string>
     <string name="status_insight_trace_model_response_received">Leser modelrespons…</string>
     <string name="status_insight_trace_streaming_started">Strømmer fra %1$s…</string>
     <string name="status_insight_trace_streaming_response">Mottar svar…</string>
@@ -119,6 +128,7 @@
     <string name="status_insight_trace_tool_load_status_context_completed">Post sammenheng lastet</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Inndata i postkonteksten ble avvist</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Kan ikke laste innlegg kontekst</string>
+    <string name="status_insight_trace_tool_search_status_started">Søker...</string>
     <string name="status_insight_trace_tool_search_status_completed">Søk fullført</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Søkeinndata ble avvist</string>
     <string name="status_insight_trace_tool_search_status_failed">Søket mislyktes</string>
@@ -164,6 +174,7 @@
     <string name="bluesky_login_password">Passord</string>
     <string name="bluesky_login_2fa">2FA-token</string>
     <string name="bluesky_login_oauth_button">Logg inn med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil-tillatelser</string>
     <string name="bluesky_login_use_password_button">Bruk passord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortsatt være ustabil. Hvis du opplever problemer, bruk pålogging med passord i stedet.</string>
     <string name="login_expired">Innloggingsøkten er utløpt</string>
@@ -185,6 +196,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tidslinje-layout, navigasjon og handlinger for innlegg</string>
     <string name="settings_appearance_display_group_title">Skjerm</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemerker, lenker og nettleseroppførsel</string>
+    <string name="settings_behavior_title">Oppførsel</string>
+    <string name="settings_behavior_description">Nettleser og link håndterings innstillinger</string>
     <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Mediesynlighet, avspilling og sensitivt innhold</string>
     <string name="settings_storage_title">Lagring</string>
@@ -417,6 +430,9 @@
     <string name="rss_detail_tldr">Oppsummer</string>
     <string name="rss_detail_tldr_error">Kunne ikke oppsummere</string>
     <string name="rss_detail_copy_link">Kopier lenke</string>
+    <string name="article_content_gate_subscription_title">Støtte kreves</string>
+    <string name="article_content_gate_subscription_description">Denne artikkelen er bare tilgjengelig for supportere. Åpne den i nettleseren for å støtte forfatteren og lese hele innholdet.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Denne artikkelen er bare tilgjengelig for supportere fra 99/1%1$d. Åpne den i nettleseren for å støtte skaperen og les hele innholdet.</string>
     <string name="mastodon_available_timelines">Tilgjengelige tidslinjer</string>
     <string name="mastodon_trending_statuses">Trender nå</string>
     <string name="mastodon_federated_timeline">Federert tidslinje</string>
@@ -498,6 +514,12 @@
     <string name="deeplink_account_selection_title">Velg konto</string>
     <string name="deeplink_account_selection_message">Velg en konto for å åpne denne lenken</string>
     <string name="deeplink_account_selection_browser">Åpne i nettleser</string>
+    <string name="deeplink_account_selection_save_default">Alltid åpne denne måten</string>
+    <string name="settings_link_open_defaults_title">Åpning av lenke</string>
+    <string name="settings_link_open_defaults_description">Velg standardverdier for koblingene som støttes av verten</string>
+    <string name="settings_link_open_default_title">Standard for %1$s linker</string>
+    <string name="settings_link_open_default_description">Velg hvor støttede lenker åpne når Flare kan håndtere dem</string>
+    <string name="settings_link_open_default_ask_every_time">Spør hver gang</string>
     <string name="block_user_title">Blokker bruker</string>
     <string name="block_user_description">Er du sikker på at du vil blokkere denne brukeren?</string>
     <string name="unblock_user_title">Fjern blokkering</string>
@@ -526,25 +548,15 @@
     <string name="misskey_channel_tab_featured">Fremhevet</string>
     <string name="media_save_success">Lagret i Nedlastinger</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilinnsikt</string>
-    <string name="agent_chat_input_placeholder">Spør noe...</string>
-    <string name="profile_insight_analyzing">Analyserer denne profilen…</string>
-    <string name="status_insight_trace_asking_model">Spør %1$s...</string>
-    <string name="status_insight_trace_tool_call_started">%1$s</string>
-    <string name="status_insight_trace_tool_call_completed">%1$s</string>
-    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
-    <string name="status_insight_trace_tool_call_failed">%1$s</string>
-    <string name="status_insight_trace_tool_search_status_started">Søker...</string>
-    <string name="settings_about_discord" translatable="false">Splid</string>
+    <string name="media_download_started">Nedlastingen har startet</string>
     <string name="agent_compose_confirmation_prompt">Send innlegg?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Avbryt</string>
+    <string name="agent_ui_confirm_execute">Bekreft</string>
+    <string name="agent_ui_confirm_save_subscription">Lagre</string>
     <string name="agent_ui_cancel_save_subscription">Avbryt: lagre</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Slett</string>
     <string name="agent_ui_cancel_delete_subscription">Avbryt: slett</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Sende</string>
     <string name="agent_ui_cancel_send_post">Avbryt: send</string>
     <string name="agent_ui_select_load_subscription_source">Velg: abonnementskilde (last)</string>
     <string name="agent_ui_select_delete_subscription_source">Velg: abonnementskilde (slett)</string>
@@ -565,7 +577,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Send innhold - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden innlegg - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren innlegg - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlattform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Velg: innlegg (bewerken)</string>
     <string name="agent_ui_select_post_action">Velg: actie (innlegg)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Angi: doelbericht attachmentRef / statusKey…</string>
@@ -588,4 +600,6 @@
     <string name="agent_ui_select_followers_user">Velg: bruker (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Velg: bruker (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Angi: bruker link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Støttede innlegg</string>
+    <string name="fanbox_recommended_creators_title">Anbefalte skapere</string>
 </resources>

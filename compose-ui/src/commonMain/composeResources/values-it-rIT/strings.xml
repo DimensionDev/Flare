@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Contenuti sensibili</string>
     <string name="show_media">Mostra media</string>
     <string name="hide_media">Nascondi media</string>
+    <string name="media_menu_download">Scarica</string>
+    <string name="media_menu_download_all">Scarica tutto</string>
+    <string name="media_menu_share_image">Condividi immagine</string>
+    <string name="media_menu_copy_link">Copia link</string>
     <string name="login_expired">Sessione di accesso scaduta</string>
     <string name="login_expired_message">Tocca per accedere di nuovo</string>
     <string name="login_expired_relogin">Accedi di nuovo</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Password</string>
     <string name="bluesky_login_auth_factor_token_hint">Token 2FA</string>
     <string name="bluesky_login_oauth_button">Accedi con OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Correggi le autorizzazioni Tranquil</string>
     <string name="bluesky_login_use_password_button">Usa password</string>
     <string name="bluesky_login_oauth_hint">L\'OAuth di Bluesky potrebbe essere ancora instabile. In caso di problemi, usa l\'accesso con password.</string>
     <string name="login_button">Accedi</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Classifica Originale</string>
     <string name="pixiv_ranking_week_rookie_title">Classifica Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Seguito Privato</string>
+    <string name="pixiv_private_bookmarks_title">Segnalibri Privati</string>
     <string name="illustrations_title">Illustrazioni</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Post supportati</string>
+    <string name="fanbox_recommended_creators_title">Creatori consigliati</string>
 </resources>

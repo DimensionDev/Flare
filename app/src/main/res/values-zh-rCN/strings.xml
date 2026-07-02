@@ -41,12 +41,19 @@
     <string name="compose_save_draft">保存</string>
     <string name="compose_close_discard">舍弃</string>
     <string name="status_insight_title">帖子视图</string>
+    <string name="profile_insight_title">个人资料洞察</string>
     <string name="profile_blocked_gate_title">已拉黑该用户</string>
     <string name="profile_blocked_gate_description">你已拉黑该用户。个人资料标签和时间线会先隐藏，选择显示后才会展开。</string>
     <string name="profile_blocked_gate_show">显示</string>
+    <string name="status_insight_input_placeholder">继续提问…</string>
     <string name="status_insight_send">发送</string>
+    <string name="status_insight_analyzing">正在分析此帖子...</string>
+    <string name="profile_insight_analyzing">正在分析此个人资料…</string>
     <string name="status_insight_error">无法分析此帖子。</string>
+    <string name="profile_insight_error">无法分析此个人资料。</string>
+    <string name="status_insight_trace_loading_post_context">正在加载帖子上下文...</string>
     <string name="status_insight_trace_post_context_loaded">帖子上下文已加载</string>
+    <string name="status_insight_trace_preparing_images">正在准备图像...</string>
     <string name="status_insight_trace_images_unsupported_fallback">图像不被支持；重试文本…</string>
     <string name="status_insight_trace_agent_started">开始分析…</string>
     <string name="status_insight_trace_strategy_started">规划分析…</string>
@@ -54,7 +61,10 @@
     <string name="status_insight_trace_subgraph_started">进入分析阶段…</string>
     <string name="status_insight_trace_subgraph_completed">分析阶段已完成</string>
     <string name="status_insight_trace_subgraph_failed">分析阶段失败</string>
+    <string name="status_insight_trace_asking_model">正在询问 %1$s...</string>
     <string name="status_insight_trace_model_response_received">正在读取模型响应…</string>
+    <string name="status_insight_trace_streaming_started">从 %1$s 串流...</string>
+    <string name="status_insight_trace_streaming_response">正在接收响应...</string>
     <string name="status_insight_trace_streaming_completed">响应流完成</string>
     <string name="status_insight_trace_streaming_failed">响应流失败</string>
     <string name="status_insight_trace_running_step">运行分析步骤…</string>
@@ -64,6 +74,7 @@
     <string name="status_insight_trace_tool_call_completed">%1$s</string>
     <string name="status_insight_trace_tool_validation_failed">%1$s</string>
     <string name="status_insight_trace_tool_call_failed">%1$s</string>
+    <string name="status_insight_trace_tool_load_status_context_started">正在加载帖子上下文...</string>
     <string name="status_insight_trace_tool_load_status_context_completed">帖子上下文已加载</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">帖子上下文输入被拒绝</string>
     <string name="status_insight_trace_tool_load_status_context_failed">加载帖子上下文失败</string>
@@ -81,6 +92,7 @@
     <string name="agent_chat_input_placeholder">想问什么都可以…</string>
     <string name="agent_chat_send">发送</string>
     <string name="agent_chat_thinking">正在思考…</string>
+    <string name="agent_compose_confirmation_prompt">发送 帖子?</string>
     <string name="draft_box_title">草稿箱</string>
     <string name="draft_box_empty">暂无草稿</string>
     <string name="draft_box_edit">编辑</string>
@@ -98,6 +110,8 @@
     <string name="settings_appearance_layout_group_subtitle">时间轴布局、导航和动态操作</string>
     <string name="settings_appearance_display_group_title">显示</string>
     <string name="settings_appearance_display_group_subtitle">时间戳、来源标识、链接和浏览器行为</string>
+    <string name="settings_behavior_title">行为</string>
+    <string name="settings_behavior_description">浏览器和链接处理首选项</string>
     <string name="settings_appearance_media_group_title">媒体</string>
     <string name="settings_appearance_media_group_subtitle">媒体可见性、播放和敏感内容</string>
     <string name="settings_storage_title">存储</string>
@@ -256,6 +270,10 @@
     <string name="settings_appearance_post_action_style_stretch">铺满</string>
     <string name="settings_appearance_post_action_layout">自定义操作</string>
     <string name="settings_appearance_post_action_layout_description">选择动态操作按钮的顺序和可见性</string>
+    <string name="settings_appearance_show_media">显示媒体</string>
+    <string name="settings_appearance_show_media_description">在动态中显示媒体附件</string>
+    <string name="settings_appearance_show_numbers">显示计数</string>
+    <string name="settings_appearance_show_numbers_description">在每条动态下方显示计数</string>
     <string name="settings_post_action_layout_title">动态操作</string>
     <string name="settings_post_action_layout_enable">自定义操作</string>
     <string name="settings_post_action_layout_enable_description">选择哪些操作显示在按钮行、更多菜单或保持隐藏</string>
@@ -283,16 +301,20 @@
     <string name="settings_post_action_family_report">举报</string>
     <string name="settings_post_action_family_mute_user">静音用户</string>
     <string name="settings_post_action_family_block_user">屏蔽用户</string>
-    <string name="settings_appearance_show_media">显示媒体</string>
-    <string name="settings_appearance_show_media_description">在动态中显示媒体附件</string>
-    <string name="settings_appearance_show_numbers">显示计数</string>
-    <string name="settings_appearance_show_numbers_description">在每条动态下方显示计数</string>
     <string name="settings_appearance_show_cw_img">显示敏感内容</string>
     <string name="settings_appearance_show_cw_img_description">始终显示动态中的敏感媒体</string>
     <string name="settings_appearance_expand_content_warning">显示内容警告背后的内容</string>
     <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保留媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中以原始宽高比显示媒体</string>
+    <string name="gallery_detail_tab_info">信息</string>
+    <string name="gallery_detail_tab_comments">评论</string>
+    <string name="gallery_detail_tab_recommend">推荐中</string>
+    <string name="gallery_detail_comments_title">评论</string>
+    <string name="gallery_detail_recommendations_title">建议</string>
+    <string name="gallery_detail_view_more">查看更多</string>
+    <string name="gallery_detail_share_content_description">分享</string>
+    <string name="gallery_detail_expand_content_description">扩展</string>
     <string name="settings_appearance_video_autoplay">视频自动播放</string>
     <string name="settings_appearance_video_autoplay_description">自动播放动态中的视频</string>
     <string name="settings_appearance_video_autoplay_wifi">仅限 Wi-Fi</string>
@@ -353,6 +375,13 @@
     <string name="settings_storage_clear_database_description">移除 %1$s 个缓存用户和 %2$s 条缓存动态</string>
     <string name="settings_storage_app_log">应用日志</string>
     <string name="settings_storage_app_log_description">查看、保存或清除应用日志</string>
+    <string name="settings_media_save_location">媒体保存位置</string>
+    <string name="settings_media_save_location_description">选择在此设备上保存下载的媒体。</string>
+    <string name="settings_media_save_location_downloads">下载</string>
+    <string name="settings_media_save_location_custom_folder">自定义文件夹</string>
+    <string name="settings_media_save_location_choose_folder">选择文件夹</string>
+    <string name="settings_media_save_location_reset_downloads">重置为下载</string>
+    <string name="settings_media_save_location_ask_every_time">每次询问一次</string>
     <string name="service_select_instance_input_placeholder">实例 URL</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">未找到实例</string>
@@ -451,6 +480,8 @@
     <string name="pixiv_ranking_week_original_title">原始排名</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie 排名</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">私人关注</string>
+    <string name="pixiv_private_bookmarks_title">私有书签</string>
     <string name="tab_settings_title">选项卡设置</string>
     <string name="dm_list_title">私信</string>
     <string name="dm_list_empty">暂无私信</string>
@@ -532,6 +563,12 @@
     <string name="deeplink_account_selection_title">选择账户</string>
     <string name="deeplink_account_selection_message">选择一个账户来打开此链接</string>
     <string name="deeplink_account_selection_browser">在浏览器中打开</string>
+    <string name="deeplink_account_selection_save_default">总是以此方式打开</string>
+    <string name="settings_link_open_defaults_title">链接打开</string>
+    <string name="settings_link_open_defaults_description">按主机选择支持链接的默认值</string>
+    <string name="settings_link_open_default_title">%1$s 链接的默认值</string>
+    <string name="settings_link_open_default_description">选择当闪光灯可以处理它们时支持的链接打开</string>
+    <string name="settings_link_open_default_ask_every_time">每次询问</string>
     <string name="block_user_title">屏蔽用户</string>
     <string name="block_user_description">您确定要屏蔽此用户吗？</string>
     <string name="unblock_user_title">取消屏蔽用户</string>
@@ -582,28 +619,13 @@
     <string name="channel_item_unfollow">取消关注</string>
     <string name="channel_item_favourite">收藏</string>
     <string name="channel_item_unfavourite">取消收藏</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">个人资料洞察</string>
-    <string name="status_insight_input_placeholder">继续提问…</string>
-    <string name="status_insight_analyzing">正在分析此帖子...</string>
-    <string name="profile_insight_analyzing">正在分析此个人资料…</string>
-    <string name="profile_insight_error">无法分析此个人资料。</string>
-    <string name="status_insight_trace_loading_post_context">正在加载帖子上下文...</string>
-    <string name="status_insight_trace_preparing_images">正在准备图像...</string>
-    <string name="status_insight_trace_asking_model">正在询问 %1$s...</string>
-    <string name="status_insight_trace_streaming_started">从 %1$s 串流...</string>
-    <string name="status_insight_trace_streaming_response">正在接收响应...</string>
-    <string name="status_insight_trace_tool_load_status_context_started">正在加载帖子上下文...</string>
-    <string name="agent_compose_confirmation_prompt">发送 帖子?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">取消</string>
+    <string name="agent_ui_confirm_execute">确认</string>
+    <string name="agent_ui_confirm_save_subscription">保存</string>
     <string name="agent_ui_cancel_save_subscription">取消: 保存</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">删除</string>
     <string name="agent_ui_cancel_delete_subscription">取消: 删除</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">发送</string>
     <string name="agent_ui_cancel_send_post">取消: 发送</string>
     <string name="agent_ui_select_load_subscription_source">选择: 订阅源 (加载)</string>
     <string name="agent_ui_select_delete_subscription_source">选择: 订阅源 (删除)</string>
@@ -624,7 +646,7 @@
     <string name="agent_ui_compose_send_confirmation_title">发送 内容 - 账号?</string>
     <string name="agent_ui_compose_reply_confirmation_title">回复 帖子 - 账号?</string>
     <string name="agent_ui_compose_quote_confirmation_title">引用 帖子 - 账号?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\n账户： %2$s\n平台： %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">选择: 帖子 (操作)</string>
     <string name="agent_ui_select_post_action">选择: 操作 (帖子)</string>
     <string name="agent_ui_post_action_target_post_placeholder">输入: 目标帖子 attachmentRef / statusKey…</string>
@@ -647,4 +669,6 @@
     <string name="agent_ui_select_followers_user">选择: 用户 (查看 粉丝)</string>
     <string name="agent_ui_select_profile_tabs_user">选择: 用户 (查看 个人资料标签页)</string>
     <string name="agent_ui_status_insight_user_placeholder">输入: 用户 链接, handle, userKey…</string>
+    <string name="fanbox_supported_title">支持的帖子</string>
+    <string name="fanbox_recommended_creators_title">推荐的作者</string>
 </resources>

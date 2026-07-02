@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s 게시물</string>
     <string name="profile_misskey_header_status_count">%1$s 게시물</string>
     <string name="profile_header_button_follow">팔로우</string>
+    <string name="profile_header_button_request_follow">팔로우 요청</string>
     <string name="profile_header_button_following">팔로잉</string>
     <string name="profile_header_button_requested">요청됨</string>
     <string name="profile_header_button_blocked">차단됨</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">민감한 미디어</string>
     <string name="show_media">미디어 보기</string>
     <string name="hide_media">미디어 숨기기</string>
+    <string name="media_menu_share_image">이미지 공유</string>
+    <string name="media_menu_copy_link">링크 복사</string>
     <string name="login_expired">로그인 세션이 만료되었습니다</string>
     <string name="login_expired_message">다시 로그인하려면 탭하세요</string>
     <string name="login_expired_relogin">다시 로그인</string>
@@ -403,13 +406,11 @@
     <string name="liked_title">좋아요 표시함</string>
     <string name="all_rss_feeds_title">모든 구독</string>
     <string name="posts_title">게시물</string>
+    <string name="posts_with_replies_title">게시물 및 답글</string>
     <string name="media_title">미디어</string>
     <string name="settings_appearance_absolute_timestamp">절대 타임스탬프</string>
     <string name="settings_appearance_absolute_timestamp_description">게시물에 정확한 타임스탬프 표시</string>
     <string name="channel_title">채널</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">팔로우 요청</string>
-    <string name="posts_with_replies_title">게시물 및 답글</string>
     <string name="pixiv_ranking_week_title">주간 랭킹</string>
     <string name="pixiv_ranking_month_title">월간 랭킹</string>
     <string name="pixiv_ranking_day_male_title">남성 랭킹</string>

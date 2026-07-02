@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[
-            <span>版本 %1$s：</span>
+    <string name="changelog_current"><![CDATA[            <span>版本 %1$s：</span>
             <ul>
                 <li>新增 Flare AI Agent，支援聊天、貼文洞察和個人資料洞察。</li>
                 <li>新增 Pixiv 支援和圖庫詳情頁。</li>

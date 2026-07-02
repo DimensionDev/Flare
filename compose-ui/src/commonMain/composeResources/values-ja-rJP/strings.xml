@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">閲覧注意のメディア</string>
     <string name="show_media">表示</string>
     <string name="hide_media">隠す</string>
+    <string name="media_menu_download">ダウンロード</string>
+    <string name="media_menu_download_all">すべてダウンロード</string>
+    <string name="media_menu_share_image">画像を共有</string>
+    <string name="media_menu_copy_link">リンクをコピー</string>
     <string name="login_expired">ログインセッションが切れました</string>
     <string name="login_expired_message">タップして再度ログインしてください</string>
     <string name="login_expired_relogin">再ログイン</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">パスワード</string>
     <string name="bluesky_login_auth_factor_token_hint">2段階認証トークン</string>
     <string name="bluesky_login_oauth_button">OAuthでログイン</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Transquilの権限を修正</string>
     <string name="bluesky_login_use_password_button">パスワードを使用</string>
     <string name="bluesky_login_oauth_hint">BlueskyのOAuthはまだ不安定な場合があります。問題が発生した場合はパスワードログインを使用してください。</string>
     <string name="login_button">ログイン</string>
@@ -404,6 +409,7 @@
     <string name="liked_title">いいねした投稿</string>
     <string name="all_rss_feeds_title">すべての購読</string>
     <string name="posts_title">投稿</string>
+    <string name="posts_with_replies_title">投稿と返信</string>
     <string name="media_title">メディア</string>
     <string name="settings_appearance_absolute_timestamp">絶対時刻表示</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に正確な日時を表示します</string>
@@ -415,8 +421,10 @@
     <string name="pixiv_ranking_week_original_title">元のランキング</string>
     <string name="pixiv_ranking_week_rookie_title">ルーキーランキング</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">プライベートフォロー中</string>
+    <string name="pixiv_private_bookmarks_title">プライベートブックマーク</string>
     <string name="illustrations_title">イラスト</string>
     <string name="manga_title">マンガ</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="posts_with_replies_title">投稿と返信</string>
+    <string name="fanbox_supported_title">サポートされている投稿</string>
+    <string name="fanbox_recommended_creators_title">おすすめのクリエイター</string>
 </resources>

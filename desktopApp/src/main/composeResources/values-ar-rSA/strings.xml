@@ -39,6 +39,9 @@
     <string name="profile_tab_timeline_with_reply">المنشورات والردود</string>
     <string name="profile_tab_likes">الإعجابات</string>
     <string name="profile_tab_media">الوسائط</string>
+    <string name="profile_blocked_gate_title">الملف الشخصي المحظور</string>
+    <string name="profile_blocked_gate_description">قمت بحظر هذا المستخدم. يتم إخفاء علامات التبويب والخط الزمني الخاص بهم حتى تختار إظهارهم.</string>
+    <string name="profile_blocked_gate_show">عرض</string>
     <string name="illustrations_title">الرسوم التوضيحية</string>
     <string name="manga_title">مانغا</string>
     <string name="pixiv_ranking_week_title">الترتيب الأسبوعي</string>
@@ -48,6 +51,8 @@
     <string name="pixiv_ranking_week_original_title">الترتيب الأصلي</string>
     <string name="pixiv_ranking_week_rookie_title">تصنيف الروكيه</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">متابعة خاصة</string>
+    <string name="pixiv_private_bookmarks_title">المفضلة الخاصة</string>
     <string name="report_title">إبلاغ</string>
     <string name="report_description">ما المشكلة في هذا المنشور؟</string>
     <string name="report_reason_spam_title">بريد مزعج (Spam)</string>
@@ -96,11 +101,13 @@
     <string name="status_share_via_fxembed">مشاركة عبر FxEmbed</string>
     <string name="status_share_via_fixvx">مشاركة عبر Fixvx</string>
     <string name="status_insight_title">نشر التبصر</string>
+    <string name="profile_insight_title">رؤى الملف الشخصي</string>
     <string name="agent_chat_title">دردشة AI</string>
     <string name="agent_chat_input_placeholder">اسأل عن أي شيء…</string>
     <string name="agent_chat_send">إرسال</string>
     <string name="agent_chat_thinking">التفكير…</string>
     <string name="status_insight_analyzing">تحليل هذا المنشور…</string>
+    <string name="profile_insight_analyzing">جارٍ تحليل هذا الملف الشخصي…</string>
     <string name="status_insight_error">غير قادر على تحليل هذه المشاركة.</string>
     <string name="status_insight_trace_loading_post_context">تحميل سياق المشاركة…</string>
     <string name="status_insight_trace_post_context_loaded">تم تحميل سياق المشاركة</string>
@@ -175,6 +182,7 @@
     <string name="bluesky_login_password">كلمة المرور</string>
     <string name="bluesky_login_2fa">رمز المصادقة الثنائية (2FA)</string>
     <string name="bluesky_login_oauth_button">تسجيل الدخول عبر OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">إصلاح أذونات الإحالة</string>
     <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
     <string name="bluesky_login_oauth_hint">قد لا تزال خدمة Bluesky OAuth غير مستقرة. إذا واجهت مشاكل، استخدم تسجيل الدخول بكلمة المرور بدلاً من ذلك.</string>
     <string name="login_expired">انتهت جلسة تسجيل الدخول</string>
@@ -196,6 +204,8 @@
     <string name="settings_appearance_layout_group_subtitle">تخطيط الجدول الزمني، والتنقل، وإجراءات المنشور</string>
     <string name="settings_appearance_display_group_title">العرض</string>
     <string name="settings_appearance_display_group_subtitle">الطوابع الزمنية، وشارات المصدر، والروابط، وسلوك المتصفح</string>
+    <string name="settings_behavior_title">السلوك</string>
+    <string name="settings_behavior_description">تفضيلات التعامل مع المتصفح والربط</string>
     <string name="settings_appearance_media_group_title">الوسائط</string>
     <string name="settings_appearance_media_group_subtitle">رؤية الوسائط، والتشغيل، والمحتوى الحساس</string>
     <string name="settings_storage_title">التخزين</string>
@@ -428,6 +438,9 @@
     <string name="rss_detail_tldr">تلخيص</string>
     <string name="rss_detail_tldr_error">فشل التلخيص</string>
     <string name="rss_detail_copy_link">نسخ الرابط</string>
+    <string name="article_content_gate_subscription_title">الدعم مطلوب</string>
+    <string name="article_content_gate_subscription_description">هذه المقالة متاحة فقط للمؤيدين. قم بفتحها في المتصفح لدعم المنشئ وقراءة المحتوى الكامل.</string>
+    <string name="article_content_gate_subscription_description_with_fee">هذه المقالة متاحة فقط للمؤيدين من &lt;unk&gt;%1$d. فتحها في المتصفح لدعم المنشئ وقراءة المحتوى الكامل.</string>
     <string name="mastodon_available_timelines">الجداول الزمنية المتاحة</string>
     <string name="mastodon_trending_statuses">الحالات المتداولة</string>
     <string name="mastodon_federated_timeline">الجدول الزمني الموحد</string>
@@ -509,6 +522,12 @@
     <string name="deeplink_account_selection_title">اختر حسابًا</string>
     <string name="deeplink_account_selection_message">اختر حسابًا لفتح هذا الرابط</string>
     <string name="deeplink_account_selection_browser">فتح في المتصفح</string>
+    <string name="deeplink_account_selection_save_default">فتح هذه الطريقة دائمًا</string>
+    <string name="settings_link_open_defaults_title">فتح الرابط</string>
+    <string name="settings_link_open_defaults_description">اختر الافتراضي للروابط المدعومة من قبل المضيف</string>
+    <string name="settings_link_open_default_title">الافتراضي لروابط %1$s</string>
+    <string name="settings_link_open_default_description">اختر كيف تفتح الروابط المدعومة عندما يستطيع Felle التعامل معها</string>
+    <string name="settings_link_open_default_ask_every_time">اسأل في كل مرة</string>
     <string name="block_user_title">حظر المستخدم</string>
     <string name="block_user_description">هل أنت متأكد أنك تريد حظر هذا المستخدم؟</string>
     <string name="unblock_user_title">إلغاء حظر المستخدم</string>
@@ -537,18 +556,15 @@
     <string name="misskey_channel_tab_featured">المميزة</string>
     <string name="media_save_success">تم الحفظ في التنزيلات</string>
     <string name="media_save_fail">فشل الحفظ</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">رؤى الملف الشخصي</string>
-    <string name="profile_insight_analyzing">جارٍ تحليل هذا الملف الشخصي…</string>
-    <string name="settings_about_discord" translatable="false">ديسكورد</string>
+    <string name="media_download_started">بدأ التحميل</string>
     <string name="agent_compose_confirmation_prompt">إرسال منشور?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">إلغاء</string>
+    <string name="agent_ui_confirm_execute">تأكيد</string>
+    <string name="agent_ui_confirm_save_subscription">حفظ</string>
     <string name="agent_ui_cancel_save_subscription">إلغاء: حفظ</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">حذف</string>
     <string name="agent_ui_cancel_delete_subscription">إلغاء: حذف</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">إرسال</string>
     <string name="agent_ui_cancel_send_post">إلغاء: إرسال</string>
     <string name="agent_ui_select_load_subscription_source">اختر: مصدر الاشتراك (تحميل)</string>
     <string name="agent_ui_select_delete_subscription_source">اختر: مصدر الاشتراك (حذف)</string>
@@ -569,7 +585,7 @@
     <string name="agent_ui_compose_send_confirmation_title">إرسال محتوى - حساب?</string>
     <string name="agent_ui_compose_reply_confirmation_title">رد منشور - حساب?</string>
     <string name="agent_ui_compose_quote_confirmation_title">اقتباس منشور - حساب?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nالحساب: %2$s\nالمنصة: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">اختر: منشور (تنفيذ)</string>
     <string name="agent_ui_select_post_action">اختر: إجراء (منشور)</string>
     <string name="agent_ui_post_action_target_post_placeholder">أدخل: المنشور الهدف attachmentRef / statusKey…</string>
@@ -592,4 +608,6 @@
     <string name="agent_ui_select_followers_user">اختر: مستخدم (عرض المتابعون)</string>
     <string name="agent_ui_select_profile_tabs_user">اختر: مستخدم (عرض تبويبات الملف الشخصي)</string>
     <string name="agent_ui_status_insight_user_placeholder">أدخل: مستخدم رابط, handle, userKey…</string>
+    <string name="fanbox_supported_title">الوظائف المدعومة</string>
+    <string name="fanbox_recommended_creators_title">المبدعين الموصى بهم</string>
 </resources>

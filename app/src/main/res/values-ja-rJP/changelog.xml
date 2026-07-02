@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">おかえりなさい！</string>
     <string name="changelog_message">最後にログインしてからいくつかの変更がありました。詳細は次のとおりです:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>バージョン %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>バージョン %1$s:</span>
             <ul>
                 <li>チャット、投稿インサイト、プロフィールインサイトに対応した Flare AI Agent を追加しました。</li>
                 <li>Pixiv 対応と新しいギャラリー詳細画面を追加しました。</li>

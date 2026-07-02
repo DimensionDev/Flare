@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">Velkommen tilbake!</string>
     <string name="changelog_message">Vi har gjort noen endringer siden sist du logget inn. Her er detaljer:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>Versjon %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
                 <li>Lagt til Flare AI Agent med chat, innleggsinnsikt og profilinnsikt.</li>
                 <li>Lagt til Pixiv-støtte og en ny visning for galleridetaljer.</li>

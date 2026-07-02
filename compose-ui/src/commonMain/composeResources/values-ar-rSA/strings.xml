@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">محتوى حساس</string>
     <string name="show_media">عرض الوسائط</string>
     <string name="hide_media">إخفاء الوسائط</string>
+    <string name="media_menu_download">تنزيل</string>
+    <string name="media_menu_download_all">تحميل الكل</string>
+    <string name="media_menu_share_image">مشاركة الصورة</string>
+    <string name="media_menu_copy_link">نسخ الرابط</string>
     <string name="login_expired">انتهت جلسة تسجيل الدخول</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
     <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">كلمة المرور</string>
     <string name="bluesky_login_auth_factor_token_hint">رمز 2FA</string>
     <string name="bluesky_login_oauth_button">تسجيل الدخول باستخدام OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">إصلاح أذونات الإحالة</string>
     <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
     <string name="bluesky_login_oauth_hint">قد لا يزال Bluesky OAuth غير مستقر. إذا واجهت مشكلات، استخدم تسجيل الدخول بكلمة المرور بدلاً من ذلك.</string>
     <string name="login_button">تسجيل الدخول</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">الترتيب الأصلي</string>
     <string name="pixiv_ranking_week_rookie_title">تصنيف الروكيه</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">متابعة خاصة</string>
+    <string name="pixiv_private_bookmarks_title">المفضلة الخاصة</string>
     <string name="illustrations_title">الرسوم التوضيحية</string>
     <string name="manga_title">مانغا</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">الوظائف المدعومة</string>
+    <string name="fanbox_recommended_creators_title">المبدعين الموصى بهم</string>
 </resources>

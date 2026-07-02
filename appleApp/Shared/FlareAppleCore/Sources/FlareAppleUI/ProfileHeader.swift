@@ -14,7 +14,7 @@ private extension FollowButtonState {
         case .blocked:
             "relation_blocked"
         case .following:
-            "matrix_following"
+            "relation_following"
         case .requested:
             "relation_requested"
         case .requestFollow:

@@ -140,7 +140,7 @@
     <string name="settings_appearance_layout_group_title">Uitleg</string>
     <string name="settings_appearance_layout_group_subtitle">Tydlynuitleg, navigasie en plasingaksies</string>
     <string name="settings_appearance_display_group_title">Vertoning</string>
-    <string name="settings_appearance_display_group_subtitle">Tydstempels, bronkentekens, skakels en blaaiergedrag</string>
+    <string name="settings_appearance_display_group_subtitle">Tydstempels, bronkentekens en skakelvoorskoue</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Media-sigbaarheid, terugspeel en sensitiewe inhoud</string>
     <string name="settings_storage_title">Stoorplek</string>

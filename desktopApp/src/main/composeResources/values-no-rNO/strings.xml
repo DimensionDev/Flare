@@ -184,7 +184,7 @@
     <string name="settings_appearance_layout_group_title">Oppsett</string>
     <string name="settings_appearance_layout_group_subtitle">Tidslinje-layout, navigasjon og handlinger for innlegg</string>
     <string name="settings_appearance_display_group_title">Skjerm</string>
-    <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemerker, lenker og nettleseroppførsel</string>
+    <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemerker og lenkeforhåndsvisninger</string>
     <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Mediesynlighet, avspilling og sensitivt innhold</string>
     <string name="settings_storage_title">Lagring</string>

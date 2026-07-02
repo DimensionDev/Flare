@@ -184,7 +184,7 @@
     <string name="settings_appearance_layout_group_title">Asettelu</string>
     <string name="settings_appearance_layout_group_subtitle">Aikajanan asettelu, navigointi ja postauksen toiminnot</string>
     <string name="settings_appearance_display_group_title">Näyttö</string>
-    <string name="settings_appearance_display_group_subtitle">Aikaleimat, lähdemerkinnät, linkit ja selaimen toiminta</string>
+    <string name="settings_appearance_display_group_subtitle">Aikaleimat, alustamerkit ja linkkien esikatselut</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Median näkyvyys, toisto ja arkaluonteinen sisältö</string>
     <string name="settings_storage_title">Tallennustila</string>

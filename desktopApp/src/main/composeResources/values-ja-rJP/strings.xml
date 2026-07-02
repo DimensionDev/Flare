@@ -172,7 +172,7 @@
     <string name="settings_appearance_layout_group_title">レイアウト</string>
     <string name="settings_appearance_layout_group_subtitle">タイムライン、ナビゲーション、投稿アクション</string>
     <string name="settings_appearance_display_group_title">表示</string>
-    <string name="settings_appearance_display_group_subtitle">タイムスタンプ、ソースバッジ、リンク、ブラウザ設定</string>
+    <string name="settings_appearance_display_group_subtitle">タイムスタンプ、ソースバッジ、リンクプレビュー</string>
     <string name="settings_appearance_media_group_title">メディア</string>
     <string name="settings_appearance_media_group_subtitle">メディアの表示、再生、閲覧注意コンテンツ</string>
     <string name="settings_storage_title">ストレージ</string>

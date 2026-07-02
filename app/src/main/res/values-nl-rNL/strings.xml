@@ -95,9 +95,9 @@
     <string name="settings_appearance_layout_group_title">Indeling</string>
     <string name="settings_appearance_layout_group_subtitle">Tijdlijnindeling, navigatie en berichtacties</string>
     <string name="settings_appearance_display_group_title">Weergave</string>
-    <string name="settings_appearance_display_group_subtitle">Tijdstempels, bronbadges, links en browsergedrag</string>
+    <string name="settings_appearance_display_group_subtitle">Tijdstempels, bronbadges en linkvoorbeelden</string>
     <string name="settings_appearance_media_group_title">Medium</string>
-    <string name="settings_appearance_media_group_subtitle">Mediazichtbaarheid, afspelen en gevoelige inhoud</string>
+    <string name="settings_appearance_media_group_subtitle">Mediazichtbaarheid, afspelen, gevoelige inhoud en opslaglocatie</string>
     <string name="settings_storage_title">Opslag</string>
     <string name="settings_storage_subtitle">Beheer gecachte bestanden, logs en back-ups</string>
     <string name="settings_about_title">Over</string>

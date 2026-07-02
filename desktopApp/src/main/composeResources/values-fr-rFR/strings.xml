@@ -186,7 +186,7 @@
     <string name="settings_appearance_layout_group_title">Mise en page</string>
     <string name="settings_appearance_layout_group_subtitle">Mise en page du fil d\'actualité, navigation et actions sur les messages</string>
     <string name="settings_appearance_display_group_title">Affichage</string>
-    <string name="settings_appearance_display_group_subtitle">Horodatage, badges de source, liens et comportement du navigateur</string>
+    <string name="settings_appearance_display_group_subtitle">Horodatage, badges de plateforme et aperçus de liens</string>
     <string name="settings_appearance_media_group_title">Médias</string>
     <string name="settings_appearance_media_group_subtitle">Visibilité des médias, lecture et contenu sensible</string>
     <string name="settings_storage_title">Stockage</string>

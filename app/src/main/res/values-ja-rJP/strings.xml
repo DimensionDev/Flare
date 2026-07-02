@@ -83,9 +83,9 @@
     <string name="settings_appearance_layout_group_title">レイアウト</string>
     <string name="settings_appearance_layout_group_subtitle">タイムライン、ナビゲーション、投稿アクション</string>
     <string name="settings_appearance_display_group_title">表示</string>
-    <string name="settings_appearance_display_group_subtitle">タイムスタンプ、ソース、リンク、ブラウザの動作</string>
+    <string name="settings_appearance_display_group_subtitle">タイムスタンプ、ソースバッジ、リンクプレビュー</string>
     <string name="settings_appearance_media_group_title">メディア</string>
-    <string name="settings_appearance_media_group_subtitle">表示設定、再生、不適切なコンテンツ</string>
+    <string name="settings_appearance_media_group_subtitle">メディアの表示、再生、センシティブなコンテンツ、保存場所</string>
     <string name="settings_storage_title">ストレージ</string>
     <string name="settings_storage_subtitle">キャッシュ、ログ、バックアップの管理</string>
     <string name="settings_about_title">このアプリについて</string>

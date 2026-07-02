@@ -193,7 +193,7 @@
     <string name="settings_appearance_layout_group_title">Rozvržení</string>
     <string name="settings_appearance_layout_group_subtitle">Rozvržení časové osy, navigace a akce u příspěvků</string>
     <string name="settings_appearance_display_group_title">Zobrazení</string>
-    <string name="settings_appearance_display_group_subtitle">Časová razítka, odznaky zdroje, odkazy a chování prohlížeče</string>
+    <string name="settings_appearance_display_group_subtitle">Časová razítka, odznaky zdrojů a náhledy odkazů</string>
     <string name="settings_appearance_media_group_title">Média</string>
     <string name="settings_appearance_media_group_subtitle">Viditelnost médií, přehrávání a citlivý obsah</string>
     <string name="settings_storage_title">Úložiště</string>

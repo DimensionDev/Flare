@@ -141,7 +141,7 @@
     <string name="settings_appearance_layout_group_title">Düzen</string>
     <string name="settings_appearance_layout_group_subtitle">Zaman tüneli düzeni, navigasyon ve gönderi eylemleri</string>
     <string name="settings_appearance_display_group_title">Ekran</string>
-    <string name="settings_appearance_display_group_subtitle">Zaman damgaları, kaynak rozetleri, bağlantılar ve tarayıcı davranışı</string>
+    <string name="settings_appearance_display_group_subtitle">Zaman damgaları, kaynak rozetleri ve bağlantı önizlemeleri</string>
     <string name="settings_appearance_media_group_title">Medya</string>
     <string name="settings_appearance_media_group_subtitle">Medya görünürlüğü, oynatma ve hassas içerik</string>
     <string name="settings_storage_title">Depolama</string>

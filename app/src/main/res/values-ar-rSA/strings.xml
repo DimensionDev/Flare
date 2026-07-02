@@ -107,9 +107,9 @@
     <string name="settings_appearance_layout_group_title">التخطيط</string>
     <string name="settings_appearance_layout_group_subtitle">تخطيط الجدول الزمني، التنقل، وإجراءات المنشور</string>
     <string name="settings_appearance_display_group_title">العرض</string>
-    <string name="settings_appearance_display_group_subtitle">الطوابع الزمنية، شارات المصدر، الروابط، وسلوك المتصفح</string>
+    <string name="settings_appearance_display_group_subtitle">الطوابع الزمنية، شارات المصدر، ومعاينات الروابط</string>
     <string name="settings_appearance_media_group_title">الوسائط</string>
-    <string name="settings_appearance_media_group_subtitle">ظهور الوسائط، التشغيل، والمحتوى الحساس</string>
+    <string name="settings_appearance_media_group_subtitle">ظهور الوسائط، التشغيل، المحتوى الحساس، وموقع الحفظ</string>
     <string name="settings_storage_title">التخزين</string>
     <string name="settings_storage_subtitle">إدارة الملفات المؤقتة والسجلات والنسخ الاحتياطي</string>
     <string name="settings_about_title">حول</string>

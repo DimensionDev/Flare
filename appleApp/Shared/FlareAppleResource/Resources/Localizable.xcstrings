@@ -11791,49 +11791,49 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tydstempels, bronkentekens, skakels en blaaiergedrag"
+            "value" : "Tydstempels, bronkentekens en skakelvoorskoue"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الطوابع الزمنية وشارات المصدر والروابط وسلوك المتصفح"
+            "value" : "الطوابع الزمنية، شارات المصدر، ومعاينات الروابط"
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Времеви клейма, значки на източника, връзки и поведение на браузъра"
+            "value" : "Времеви клейма, значки за източник и прегледи на връзки"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marques horàries, insígnies de font, enllaços i comportament del navegador"
+            "value" : "Marques de temps, icones de plataforma i previsualitzacions d’enllaços"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Časová razítka, odznaky zdroje, odkazy a chování prohlížeče"
+            "value" : "Časová razítka, odznaky zdrojů a náhledy odkazů"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tidsstempler, kildemærker, links og browseradfærd"
+            "value" : "Tidsstempler, kilde-badges og linkforhåndsvisninger"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zeitstempel, Quell-Badges, Links und Browserverhalten"
+            "value" : "Zeitstempel, Quell-Badges und Link-Vorschauen"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Χρονικές σημάνσεις, εμβλήματα πηγής, σύνδεσμοι και συμπεριφορά προγράμματος περιήγησης"
+            "value" : "Χρονικές σημάνσεις, εικονίδια πηγής και προεπισκοπήσεις συνδέσμων"
           }
         },
         "en" : {
@@ -11845,127 +11845,127 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aikaleimat, lähdemerkit, linkit ja selaimen toiminta"
+            "value" : "Aikaleimat, alustamerkit ja linkkien esikatselut"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Horodatages, badges de source, liens et comportement du navigateur"
+            "value" : "Horodatage, badges de plateforme et aperçus de liens"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "חותמות זמן, תגי מקור, קישורים והתנהגות דפדפן"
+            "value" : "חותמות זמן, תגי מקור ותצוגות מקדימות של קישורים"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Időbélyegek, forrásjelvények, linkek és böngésző viselkedése"
+            "value" : "Időbélyegek, forrásjelvények és linkelőnézetek"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timestamp, badge sorgente, link e comportamento del browser"
+            "value" : "Timestamp, badge sorgente e anteprime dei link"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "タイムスタンプ、ソースバッジ、リンク、およびブラウザの動作"
+            "value" : "タイムスタンプ、ソースバッジ、リンクプレビュー"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "타임스탬프, 소스 배지, 링크 및 브라우저 동작"
+            "value" : "타임스탬프, 소스 배지 및 링크 미리보기"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tidsstempler, kildemerker, lenker og nettleser"
+            "value" : "Tidsstempler, kildemerker og lenkeforhåndsvisninger"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tijdstempels, bronbadges, links en browsergedrag"
+            "value" : "Tijdstempels, bronbadges en linkvoorbeelden"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Znaczniki czasu, odznaki źródła, linki i zachowanie przeglądarki"
+            "value" : "Znaczniki czasu, plakietki źródła i podglądy linków"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carimbos de data/hora, crachás de origem, links e comportamento do navegador"
+            "value" : "Carimbos temporais, selos de origem e pré-visualizações de hiperligações"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carimbos de data/hora, selos de origem, links e comportamento do navegador"
+            "value" : "Carimbos de data/hora, selos de origem e prévias de links"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcaje temporale, insigne sursă, linkuri și comportamentul browserului"
+            "value" : "Timestamp-uri, ecusoane sursă și previzualizări de linkuri"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Метки времени, значки источника, ссылки и поведение браузера"
+            "value" : "Метки времени, значки платформ и предпросмотр ссылок"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Временске ознаке, ознаке извора, везе и понашање прегледача"
+            "value" : "Временске ознаке, ознаке извора и прегледи линкова"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tidsstämplar, källmärken, länkar och webbläsarbeteende"
+            "value" : "Tidsstämplar, källmärken och länkförhandsvisningar"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zaman damgaları, kaynak rozetleri, bağlantılar ve tarayıcı davranışı"
+            "value" : "Zaman damgaları, kaynak rozetleri ve bağlantı önizlemeleri"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Мітки часу, значки джерела, посилання та поведінка браузера"
+            "value" : "Мітки часу, значки джерел і попередній перегляд посилань"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dấu thời gian, huy hiệu nguồn, liên kết và hành vi trình duyệt"
+            "value" : "Dấu thời gian, nhãn nền tảng và bản xem trước liên kết"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "时间戳、来源徽标、链接和浏览器行为"
+            "value" : "时间戳、来源标识和链接预览"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "時間戳記、來源徽章、連結和瀏覽器行為"
+            "value" : "時間戳記、來源標籤與連結預覽"
           }
         }
       }

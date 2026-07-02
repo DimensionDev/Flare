@@ -58,9 +58,9 @@
     <string name="settings_appearance_layout_group_title">레이아웃</string>
     <string name="settings_appearance_layout_group_subtitle">타임라인 레이아웃, 내비게이션 및 게시물 동작</string>
     <string name="settings_appearance_display_group_title">디스플레이</string>
-    <string name="settings_appearance_display_group_subtitle">타임스탬프, 소스 배지, 링크 및 브라우저 동작</string>
+    <string name="settings_appearance_display_group_subtitle">타임스탬프, 소스 배지 및 링크 미리보기</string>
     <string name="settings_appearance_media_group_title">미디어</string>
-    <string name="settings_appearance_media_group_subtitle">미디어 가시성, 재생 및 민감한 콘텐츠</string>
+    <string name="settings_appearance_media_group_subtitle">미디어 표시, 재생, 민감한 콘텐츠 및 저장 위치</string>
     <string name="settings_storage_title">저장공간</string>
     <string name="settings_storage_subtitle">캐시된 파일, 로그 및 백업 관리</string>
     <string name="settings_about_title">정보</string>

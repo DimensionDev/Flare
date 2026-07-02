@@ -192,7 +192,7 @@
     <string name="settings_appearance_layout_group_title">Aranjament</string>
     <string name="settings_appearance_layout_group_subtitle">Aranjament cronologie, navigare și acțiuni postări</string>
     <string name="settings_appearance_display_group_title">Afișaj</string>
-    <string name="settings_appearance_display_group_subtitle">Marcaje temporale, insigne sursă, linkuri și comportament browser</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamp-uri, ecusoane sursă și previzualizări de linkuri</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Vizibilitate media, redare și conținut sensibil</string>
     <string name="settings_storage_title">Stocare</string>

@@ -183,7 +183,7 @@
     <string name="settings_appearance_layout_group_title">Макет</string>
     <string name="settings_appearance_layout_group_subtitle">Макет стрічки, навігація та дії дописів</string>
     <string name="settings_appearance_display_group_title">Відображення</string>
-    <string name="settings_appearance_display_group_subtitle">Мітки часу, значки джерел, посилання та поведінка браузера</string>
+    <string name="settings_appearance_display_group_subtitle">Мітки часу, значки джерел і попередній перегляд посилань</string>
     <string name="settings_appearance_media_group_title">Медіа</string>
     <string name="settings_appearance_media_group_subtitle">Видимість медіа, відтворення та чутливий вміст</string>
     <string name="settings_storage_title">Сховище</string>

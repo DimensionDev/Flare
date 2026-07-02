@@ -103,9 +103,9 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Tidslinje-layout, navigation og indlægshandlinger</string>
     <string name="settings_appearance_display_group_title">Visning</string>
-    <string name="settings_appearance_display_group_subtitle">Tidsstempler, kilde-badges, links og browseradfærd</string>
+    <string name="settings_appearance_display_group_subtitle">Tidsstempler, kilde-badges og linkforhåndsvisninger</string>
     <string name="settings_appearance_media_group_title">Medier</string>
-    <string name="settings_appearance_media_group_subtitle">Mediesynlighed, afspilning og følsomt indhold</string>
+    <string name="settings_appearance_media_group_subtitle">Mediesynlighed, afspilning, følsomt indhold og gemmeplacering</string>
     <string name="settings_storage_title">Lager</string>
     <string name="settings_storage_subtitle">Administrer cachede filer, logs og sikkerhedskopier</string>
     <string name="settings_about_title">Om</string>

@@ -103,9 +103,9 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Tidslinjelayout, navigering och inläggsåtgärder</string>
     <string name="settings_appearance_display_group_title">Skärm</string>
-    <string name="settings_appearance_display_group_subtitle">Tidsstämplar, källmärken, länkar och webbläsarbeteende</string>
+    <string name="settings_appearance_display_group_subtitle">Tidsstämplar, källmärken och länkförhandsvisningar</string>
     <string name="settings_appearance_media_group_title">Media</string>
-    <string name="settings_appearance_media_group_subtitle">Mediasynlighet, uppspelning och känsligt innehåll</string>
+    <string name="settings_appearance_media_group_subtitle">Mediasynlighet, uppspelning, känsligt innehåll och sparplats</string>
     <string name="settings_storage_title">Lagring</string>
     <string name="settings_storage_subtitle">Hantera cachade filer, loggar och säkerhetskopior</string>
     <string name="settings_about_title">Om</string>

@@ -101,9 +101,9 @@
     <string name="settings_appearance_layout_group_title">Макет</string>
     <string name="settings_appearance_layout_group_subtitle">Макет ленты, навигация и действия с постами</string>
     <string name="settings_appearance_display_group_title">Отображение</string>
-    <string name="settings_appearance_display_group_subtitle">Метки времени, значки платформ, ссылки и поведение браузера</string>
+    <string name="settings_appearance_display_group_subtitle">Метки времени, значки платформ и предпросмотр ссылок</string>
     <string name="settings_appearance_media_group_title">Медиа</string>
-    <string name="settings_appearance_media_group_subtitle">Видимость медиа, воспроизведение и чувствительный контент</string>
+    <string name="settings_appearance_media_group_subtitle">Видимость медиа, воспроизведение, чувствительный контент и место сохранения</string>
     <string name="settings_storage_title">Хранилище</string>
     <string name="settings_storage_subtitle">Управление кешем, логами и резервными копиями</string>
     <string name="settings_about_title">О приложении</string>

@@ -59,9 +59,9 @@
     <string name="settings_appearance_layout_group_title">Disseny</string>
     <string name="settings_appearance_layout_group_subtitle">Disseny de la línia de temps, navegació i accions de publicació</string>
     <string name="settings_appearance_display_group_title">Pantalla</string>
-    <string name="settings_appearance_display_group_subtitle">Marques de temps, icones de plataforma, enllaços i comportament del navegador</string>
+    <string name="settings_appearance_display_group_subtitle">Marques de temps, icones de plataforma i previsualitzacions d’enllaços</string>
     <string name="settings_appearance_media_group_title">Contingut multimèdia</string>
-    <string name="settings_appearance_media_group_subtitle">Visibilitat del contingut multimèdia, reproducció i contingut sensible</string>
+    <string name="settings_appearance_media_group_subtitle">Visibilitat del contingut multimèdia, reproducció, contingut sensible i ubicació de desament</string>
     <string name="settings_storage_title">Emmagatzematge</string>
     <string name="settings_storage_subtitle">Gestiona els fitxers a la memòria cau, els registres i les còpies de seguretat</string>
     <string name="settings_about_title">Sobre l\'aplicació</string>

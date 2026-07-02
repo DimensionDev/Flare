@@ -121,7 +121,7 @@
     <string name="settings_behavior_title">Behavior</string>
     <string name="settings_behavior_description">Browser and link handling preferences</string>
     <string name="settings_appearance_media_group_title">Media</string>
-    <string name="settings_appearance_media_group_subtitle">Media visibility, playback, and sensitive content</string>
+    <string name="settings_appearance_media_group_subtitle">Media visibility, playback, sensitive content, and save location</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_storage_subtitle">Manage cached files, logs, and backups</string>
     <string name="settings_about_title">About</string>

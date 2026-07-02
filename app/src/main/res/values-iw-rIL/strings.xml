@@ -61,9 +61,9 @@
     <string name="settings_appearance_layout_group_title">פריסה</string>
     <string name="settings_appearance_layout_group_subtitle">פריסת ציר זמן, ניווט ופעולות פוסט</string>
     <string name="settings_appearance_display_group_title">תצוגה</string>
-    <string name="settings_appearance_display_group_subtitle">חותמות זמן, תגי מקור, קישורים והתנהגות דפדפן</string>
+    <string name="settings_appearance_display_group_subtitle">חותמות זמן, תגי מקור ותצוגות מקדימות של קישורים</string>
     <string name="settings_appearance_media_group_title">מדיה</string>
-    <string name="settings_appearance_media_group_subtitle">נראות מדיה, השמעה ותוכן רגיש</string>
+    <string name="settings_appearance_media_group_subtitle">נראות מדיה, השמעה, תוכן רגיש ומיקום שמירה</string>
     <string name="settings_storage_title">אחסון</string>
     <string name="settings_storage_subtitle">נהל קבצים במטמון, לוגים וגיבויים</string>
     <string name="settings_about_title">אודות</string>

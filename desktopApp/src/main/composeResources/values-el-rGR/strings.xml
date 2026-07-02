@@ -176,7 +176,7 @@
     <string name="settings_appearance_layout_group_title">Διάταξη</string>
     <string name="settings_appearance_layout_group_subtitle">Διάταξη χρονολογίου, πλοήγηση και ενέργειες δημοσιεύσεων</string>
     <string name="settings_appearance_display_group_title">Προβολή</string>
-    <string name="settings_appearance_display_group_subtitle">Χρονικές σημάνσεις, σήματα πηγής, σύνδεσμοι και συμπεριφορά προγράμματος περιήγησης</string>
+    <string name="settings_appearance_display_group_subtitle">Χρονικές σημάνσεις, εικονίδια πηγής και προεπισκοπήσεις συνδέσμων</string>
     <string name="settings_appearance_media_group_title">Πολυμέσα</string>
     <string name="settings_appearance_media_group_subtitle">Ορατότητα πολυμέσων, αναπαραγωγή και ευαίσθητο περιεχόμενο</string>
     <string name="settings_storage_title">Αποθηκευτικός χώρος</string>

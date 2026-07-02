@@ -105,9 +105,9 @@
     <string name="settings_appearance_layout_group_title">Rozvržení</string>
     <string name="settings_appearance_layout_group_subtitle">Rozvržení časové osy, navigace a akce příspěvků</string>
     <string name="settings_appearance_display_group_title">Zobrazení</string>
-    <string name="settings_appearance_display_group_subtitle">Časová razítka, odznaky zdrojů, odkazy a chování prohlížeče</string>
+    <string name="settings_appearance_display_group_subtitle">Časová razítka, odznaky zdrojů a náhledy odkazů</string>
     <string name="settings_appearance_media_group_title">Média</string>
-    <string name="settings_appearance_media_group_subtitle">Viditelnost médií, přehrávání a citlivý obsah</string>
+    <string name="settings_appearance_media_group_subtitle">Viditelnost médií, přehrávání, citlivý obsah a umístění pro ukládání</string>
     <string name="settings_storage_title">Úložiště</string>
     <string name="settings_storage_subtitle">Spravovat mezipaměť, protokoly a zálohy</string>
     <string name="settings_about_title">O aplikaci</string>

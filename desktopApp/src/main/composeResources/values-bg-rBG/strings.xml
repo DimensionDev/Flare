@@ -141,7 +141,7 @@
     <string name="settings_appearance_layout_group_title">Оформление</string>
     <string name="settings_appearance_layout_group_subtitle">Оформление на времевата линия, навигация и действия за публикации</string>
     <string name="settings_appearance_display_group_title">Дисплей</string>
-    <string name="settings_appearance_display_group_subtitle">Времеви клейма, икони за източник, връзки и поведение на браузъра</string>
+    <string name="settings_appearance_display_group_subtitle">Времеви клейма, значки за източник и прегледи на връзки</string>
     <string name="settings_appearance_media_group_title">Медия</string>
     <string name="settings_appearance_media_group_subtitle">Видимост на медията, възпроизвеждане и чувствително съдържание</string>
     <string name="settings_storage_title">Съхранение</string>

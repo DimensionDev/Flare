@@ -189,7 +189,7 @@
     <string name="settings_appearance_layout_group_title">Макет</string>
     <string name="settings_appearance_layout_group_subtitle">Лента времени и макет записей</string>
     <string name="settings_appearance_display_group_title">Отображение</string>
-    <string name="settings_appearance_display_group_subtitle">Отметки времени, предпросмотры и логотипы платформы</string>
+    <string name="settings_appearance_display_group_subtitle">Метки времени, значки платформ и предпросмотр ссылок</string>
     <string name="settings_appearance_media_group_title">Медиа</string>
     <string name="settings_appearance_media_group_subtitle">Изображения, конфиденциальный контент и видео</string>
     <string name="settings_storage_title">Хранилище</string>

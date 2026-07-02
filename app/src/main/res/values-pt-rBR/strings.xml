@@ -103,9 +103,9 @@
     <string name="settings_appearance_layout_group_title">Disposição</string>
     <string name="settings_appearance_layout_group_subtitle">Layout da linha do tempo, navegação e ações de postagem</string>
     <string name="settings_appearance_display_group_title">Exibição</string>
-    <string name="settings_appearance_display_group_subtitle">Carimbos de data/hora, selos de origem, links e comportamento do navegador</string>
+    <string name="settings_appearance_display_group_subtitle">Carimbos de data/hora, selos de origem e prévias de links</string>
     <string name="settings_appearance_media_group_title">Mídia</string>
-    <string name="settings_appearance_media_group_subtitle">Visibilidade de mídia, reprodução e conteúdo sensível</string>
+    <string name="settings_appearance_media_group_subtitle">Visibilidade de mídia, reprodução, conteúdo sensível e local de salvamento</string>
     <string name="settings_storage_title">Armazenamento</string>
     <string name="settings_storage_subtitle">Gerenciar arquivos em cache, logs e backups</string>
     <string name="settings_about_title">Sobre</string>

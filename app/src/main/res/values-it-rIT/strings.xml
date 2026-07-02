@@ -103,9 +103,9 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Layout della timeline, navigazione e azioni</string>
     <string name="settings_appearance_display_group_title">Visualizzazione</string>
-    <string name="settings_appearance_display_group_subtitle">Timestamp, badge sorgente, link e browser</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamp, badge sorgente e anteprime dei link</string>
     <string name="settings_appearance_media_group_title">Media</string>
-    <string name="settings_appearance_media_group_subtitle">Visibilità media, riproduzione e contenuti sensibili</string>
+    <string name="settings_appearance_media_group_subtitle">Visibilità media, riproduzione, contenuti sensibili e posizione di salvataggio</string>
     <string name="settings_storage_title">Archiviazione</string>
     <string name="settings_storage_subtitle">Gestisci cache, log e backup</string>
     <string name="settings_about_title">Info</string>

@@ -104,9 +104,9 @@
     <string name="settings_appearance_layout_group_title">Układ</string>
     <string name="settings_appearance_layout_group_subtitle">Układ osi czasu, nawigacja i akcje wpisów</string>
     <string name="settings_appearance_display_group_title">Wyświetlanie</string>
-    <string name="settings_appearance_display_group_subtitle">Znaczniki czasu, plakietki źródła, linki i zachowanie przeglądarki</string>
+    <string name="settings_appearance_display_group_subtitle">Znaczniki czasu, plakietki źródła i podglądy linków</string>
     <string name="settings_appearance_media_group_title">Multimedia</string>
-    <string name="settings_appearance_media_group_subtitle">Widoczność mediów, odtwarzanie i wrażliwe treści</string>
+    <string name="settings_appearance_media_group_subtitle">Widoczność mediów, odtwarzanie, wrażliwe treści i miejsce zapisu</string>
     <string name="settings_storage_title">Magazyn</string>
     <string name="settings_storage_subtitle">Zarządzaj plikami pamięci podręcznej, logami i kopiami zapasowymi</string>
     <string name="settings_about_title">O aplikacji</string>

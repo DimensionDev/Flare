@@ -191,7 +191,7 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Timeline-Layout, Navigation und Beitragsaktionen</string>
     <string name="settings_appearance_display_group_title">Anzeige</string>
-    <string name="settings_appearance_display_group_subtitle">Zeitstempel, Quell-Badges, Links und Browser-Verhalten</string>
+    <string name="settings_appearance_display_group_subtitle">Zeitstempel, Quell-Badges und Link-Vorschauen</string>
     <string name="settings_appearance_media_group_title">Medien</string>
     <string name="settings_appearance_media_group_subtitle">Medien-Sichtbarkeit, Wiedergabe und sensible Inhalte</string>
     <string name="settings_storage_title">Speicher</string>

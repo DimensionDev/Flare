@@ -60,9 +60,9 @@
     <string name="settings_appearance_layout_group_title">Распоред</string>
     <string name="settings_appearance_layout_group_subtitle">Распоред временске линије, навигација и акције објаве</string>
     <string name="settings_appearance_display_group_title">Приказ</string>
-    <string name="settings_appearance_display_group_subtitle">Временске ознаке, ознаке извора, линкови и понашање прегледача</string>
+    <string name="settings_appearance_display_group_subtitle">Временске ознаке, ознаке извора и прегледи линкова</string>
     <string name="settings_appearance_media_group_title">Медији</string>
-    <string name="settings_appearance_media_group_subtitle">Видљивост медија, репродукција и осетљив садржај</string>
+    <string name="settings_appearance_media_group_subtitle">Видљивост медија, репродукција, осетљив садржај и локација чувања</string>
     <string name="settings_storage_title">Складиште</string>
     <string name="settings_storage_subtitle">Управљајте кешираним датотекама, дневницима и резервним копијама</string>
     <string name="settings_about_title">О апликацији</string>

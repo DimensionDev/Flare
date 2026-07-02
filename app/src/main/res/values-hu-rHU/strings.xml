@@ -59,9 +59,9 @@
     <string name="settings_appearance_layout_group_title">Elrendezés</string>
     <string name="settings_appearance_layout_group_subtitle">Idővonal elrendezése, navigáció és műveletek</string>
     <string name="settings_appearance_display_group_title">Kijelző</string>
-    <string name="settings_appearance_display_group_subtitle">Időbélyegek, forrásjelvények, linkek és böngésző</string>
+    <string name="settings_appearance_display_group_subtitle">Időbélyegek, forrásjelvények és linkelőnézetek</string>
     <string name="settings_appearance_media_group_title">Média</string>
-    <string name="settings_appearance_media_group_subtitle">Média láthatósága, lejátszás és érzékeny tartalom</string>
+    <string name="settings_appearance_media_group_subtitle">Média láthatósága, lejátszás, érzékeny tartalom és mentési hely</string>
     <string name="settings_storage_title">Tárhely</string>
     <string name="settings_storage_subtitle">Gyorsítótár, naplók és biztonsági mentések</string>
     <string name="settings_about_title">Névjegy</string>

@@ -186,7 +186,7 @@
     <string name="settings_appearance_layout_group_title">布局</string>
     <string name="settings_appearance_layout_group_subtitle">时间轴布局、导航栏和动作栏</string>
     <string name="settings_appearance_display_group_title">显示</string>
-    <string name="settings_appearance_display_group_subtitle">时间戳、来源徽章、链接和浏览器行为</string>
+    <string name="settings_appearance_display_group_subtitle">时间戳、来源标识和链接预览</string>
     <string name="settings_appearance_media_group_title">媒体</string>
     <string name="settings_appearance_media_group_subtitle">媒体可见性、播放和敏感内容</string>
     <string name="settings_storage_title">存储</string>

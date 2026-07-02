@@ -96,9 +96,9 @@
     <string name="settings_appearance_layout_group_title">Asettelu</string>
     <string name="settings_appearance_layout_group_subtitle">Aikajanan asettelu, navigointi ja julkaisutoiminnot</string>
     <string name="settings_appearance_display_group_title">Näyttö</string>
-    <string name="settings_appearance_display_group_subtitle">Aikaleimat, alustamerkit, linkit ja selaimen toiminta</string>
+    <string name="settings_appearance_display_group_subtitle">Aikaleimat, alustamerkit ja linkkien esikatselut</string>
     <string name="settings_appearance_media_group_title">Media</string>
-    <string name="settings_appearance_media_group_subtitle">Median näkyvyys, toisto ja arkaluonteinen sisältö</string>
+    <string name="settings_appearance_media_group_subtitle">Median näkyvyys, toisto, arkaluonteinen sisältö ja tallennussijainti</string>
     <string name="settings_storage_title">Tallennustila</string>
     <string name="settings_storage_subtitle">Hallitse välimuistia, lokeja ja varmuuskopioita</string>
     <string name="settings_about_title">Tietoja</string>

@@ -191,7 +191,7 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Layout della timeline, navigazione e azioni sui post</string>
     <string name="settings_appearance_display_group_title">Visualizzazione</string>
-    <string name="settings_appearance_display_group_subtitle">Timestamp, badge della sorgente, link e comportamento del browser</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamp, badge sorgente e anteprime dei link</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Visibilità dei media, riproduzione e contenuti sensibili</string>
     <string name="settings_storage_title">Archiviazione</string>

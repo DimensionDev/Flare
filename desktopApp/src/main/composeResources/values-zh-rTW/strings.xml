@@ -143,7 +143,7 @@
     <string name="settings_appearance_layout_group_title">佈局</string>
     <string name="settings_appearance_layout_group_subtitle">時間軸佈局、導航和貼文動作</string>
     <string name="settings_appearance_display_group_title">顯示</string>
-    <string name="settings_appearance_display_group_subtitle">時間戳記、來源徽章、連結和瀏覽器行為</string>
+    <string name="settings_appearance_display_group_subtitle">時間戳記、來源標籤與連結預覽</string>
     <string name="settings_appearance_media_group_title">媒體</string>
     <string name="settings_appearance_media_group_subtitle">媒體可見性、播放和敏感內容</string>
     <string name="settings_storage_title">儲存空間</string>

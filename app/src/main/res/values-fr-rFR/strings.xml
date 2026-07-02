@@ -97,9 +97,9 @@
     <string name="settings_appearance_layout_group_title">Mise en page</string>
     <string name="settings_appearance_layout_group_subtitle">Disposition du fil, navigation et actions de post</string>
     <string name="settings_appearance_display_group_title">Affichage</string>
-    <string name="settings_appearance_display_group_subtitle">Horodatage, badges de plateforme, liens et comportement du navigateur</string>
+    <string name="settings_appearance_display_group_subtitle">Horodatage, badges de plateforme et aperçus de liens</string>
     <string name="settings_appearance_media_group_title">Médias</string>
-    <string name="settings_appearance_media_group_subtitle">Visibilité des médias, lecture et contenu sensible</string>
+    <string name="settings_appearance_media_group_subtitle">Visibilité des médias, lecture, contenu sensible et emplacement d’enregistrement</string>
     <string name="settings_storage_title">Stockage</string>
     <string name="settings_storage_subtitle">Gérer le cache, les journaux et les sauvegardes</string>
     <string name="settings_about_title">À propos</string>

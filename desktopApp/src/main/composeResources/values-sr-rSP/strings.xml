@@ -142,7 +142,7 @@
     <string name="settings_appearance_layout_group_title">Raspored</string>
     <string name="settings_appearance_layout_group_subtitle">Raspored vremenske linije, navigacija i akcije objava</string>
     <string name="settings_appearance_display_group_title">Prikaz</string>
-    <string name="settings_appearance_display_group_subtitle">Vremenske oznake, oznake izvora, linkovi i ponašanje pretraživača</string>
+    <string name="settings_appearance_display_group_subtitle">Временске ознаке, ознаке извора и прегледи линкова</string>
     <string name="settings_appearance_media_group_title">Mediji</string>
     <string name="settings_appearance_media_group_subtitle">Vidljivost medija, reprodukcija i osetljiv sadržaj</string>
     <string name="settings_storage_title">Skladište</string>

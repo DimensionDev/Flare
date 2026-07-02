@@ -58,9 +58,9 @@
     <string name="settings_appearance_layout_group_title">Bố cục</string>
     <string name="settings_appearance_layout_group_subtitle">Bố cục dòng thời gian, điều hướng và các hành động bài đăng</string>
     <string name="settings_appearance_display_group_title">Hiển thị</string>
-    <string name="settings_appearance_display_group_subtitle">Dấu thời gian, nhãn nền tảng, liên kết và hành vi trình duyệt</string>
+    <string name="settings_appearance_display_group_subtitle">Dấu thời gian, nhãn nền tảng và bản xem trước liên kết</string>
     <string name="settings_appearance_media_group_title">Phương tiện</string>
-    <string name="settings_appearance_media_group_subtitle">Khả năng hiển thị phương tiện, phát lại và nội dung nhạy cảm</string>
+    <string name="settings_appearance_media_group_subtitle">Khả năng hiển thị phương tiện, phát lại, nội dung nhạy cảm và vị trí lưu</string>
     <string name="settings_storage_title">Lưu trữ</string>
     <string name="settings_storage_subtitle">Quản lý tệp lưu tạm, nhật ký và bản sao lưu</string>
     <string name="settings_about_title">Giới thiệu</string>

@@ -195,7 +195,7 @@
     <string name="settings_appearance_layout_group_title">التخطيط</string>
     <string name="settings_appearance_layout_group_subtitle">تخطيط الجدول الزمني، والتنقل، وإجراءات المنشور</string>
     <string name="settings_appearance_display_group_title">العرض</string>
-    <string name="settings_appearance_display_group_subtitle">الطوابع الزمنية، وشارات المصدر، والروابط، وسلوك المتصفح</string>
+    <string name="settings_appearance_display_group_subtitle">الطوابع الزمنية، شارات المصدر، ومعاينات الروابط</string>
     <string name="settings_appearance_media_group_title">الوسائط</string>
     <string name="settings_appearance_media_group_subtitle">رؤية الوسائط، والتشغيل، والمحتوى الحساس</string>
     <string name="settings_storage_title">التخزين</string>

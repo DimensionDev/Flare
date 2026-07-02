@@ -463,8 +463,8 @@
     <string name="save_error">내보내기 실패</string>
     <string name="import_completed">가져오기 완료</string>
     <string name="import_error">가져오기 실패</string>
-    <string name="import_confirmation_title">가져오기 확인</string>
-    <string name="import_confirmation_message">선택한 파일에서 데이터를 가져옵니다. 일치하는 ID를 가진 기존 레코드는 교체됩니다. 계속하시겠습니까?</string>
+    <string name="import_confirmation_title">백업 가져오기</string>
+    <string name="import_confirmation_message">선택한 백업 파일에서 데이터를 가져옵니다. 일치하는 ID를 가진 기존 레코드는 교체됩니다. 계속하시겠습니까?</string>
     <string name="channel_title">채널</string>
     <string name="misskey_channel_tab_following">팔로잉</string>
     <string name="misskey_channel_tab_favorites">즐겨찾기</string>
@@ -528,8 +528,8 @@
     <string name="settings_agent_history_title">Flare AI</string>
     <string name="settings_agent_history_description">로컬 Flare AI 채팅 기록 보기</string>
     <string name="agent_history_empty">아직 AI 채팅 기록이 없습니다.</string>
-    <string name="settings_ai_config_enable_agent">Enable AI agent</string>
-    <string name="settings_ai_config_agent_description">Show AI agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
+    <string name="settings_ai_config_enable_agent">AI Agent 활성화</string>
+    <string name="settings_ai_config_agent_description">활성화하면 OpenAI 호환 모델이 설정된 경우 앱의 관련 위치에 AI Agent 기능이 표시됩니다.</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
@@ -587,4 +587,24 @@
     <string name="agent_ui_select_followers_user">선택: 사용자 (보기 팔로워)</string>
     <string name="agent_ui_select_profile_tabs_user">선택: 사용자 (보기 프로필 탭)</string>
     <string name="agent_ui_status_insight_user_placeholder">입력: 사용자 링크, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">차단된 프로필</string>
+    <string name="profile_blocked_gate_description">이 사용자를 차단했습니다. 표시를 선택할 때까지 탭과 타임라인이 숨겨집니다.</string>
+    <string name="profile_blocked_gate_show">표시</string>
+    <string name="pixiv_private_following_title">비공개 팔로잉</string>
+    <string name="pixiv_private_bookmarks_title">비공개 북마크</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil 권한 수정</string>
+    <string name="settings_behavior_title">동작</string>
+    <string name="settings_behavior_description">브라우저 및 링크 처리 설정</string>
+    <string name="article_content_gate_subscription_title">후원이 필요함</string>
+    <string name="article_content_gate_subscription_description">이 글은 후원자만 볼 수 있습니다. 브라우저에서 열어 크리에이터를 후원하고 전체 내용을 읽어보세요.</string>
+    <string name="article_content_gate_subscription_description_with_fee">이 글은 ¥%1$d 이상 후원자만 볼 수 있습니다. 브라우저에서 열어 크리에이터를 후원하고 전체 내용을 읽어보세요.</string>
+    <string name="deeplink_account_selection_save_default">항상 이 방식으로 열기</string>
+    <string name="settings_link_open_defaults_title">링크 열기</string>
+    <string name="settings_link_open_defaults_description">호스트별 지원 링크 기본값 선택</string>
+    <string name="settings_link_open_default_title">%1$s 링크 기본값</string>
+    <string name="settings_link_open_default_description">Flare가 처리할 수 있는 지원 링크를 여는 방법을 선택하세요</string>
+    <string name="settings_link_open_default_ask_every_time">항상 묻기</string>
+    <string name="media_download_started">다운로드를 시작했습니다</string>
+    <string name="fanbox_supported_title">지원 중</string>
+    <string name="fanbox_recommended_creators_title">추천 크리에이터</string>
 </resources>

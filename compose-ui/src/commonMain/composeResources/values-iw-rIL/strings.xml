@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">דירוג מנגה</string>
     <string name="illustrations_title">איורים</string>
     <string name="manga_title">מנגה</string>
+    <string name="media_menu_download">הורד</string>
+    <string name="media_menu_download_all">הורד הכל</string>
+    <string name="media_menu_share_image">שתף תמונה</string>
+    <string name="media_menu_copy_link">העתק קישור</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">תקן הרשאות Tranquil</string>
+    <string name="pixiv_private_following_title">מעקב פרטי</string>
+    <string name="pixiv_private_bookmarks_title">סימניות פרטיות</string>
+    <string name="fanbox_supported_title">נתמך</string>
+    <string name="fanbox_recommended_creators_title">יוצרים מומלצים</string>
 </resources>

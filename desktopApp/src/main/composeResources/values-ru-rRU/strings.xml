@@ -245,8 +245,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Нажмите, чтобы изменить</string>
     <string name="settings_ai_config_entable_translation">Включить перевод ИИ</string>
     <string name="settings_ai_config_translation_description">Замена перевода Google с помощью ИИ перевода, может занять больше времени</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">Включить AI Agent</string>
+    <string name="settings_ai_config_agent_description">После включения функция AI Agent появится в соответствующих местах приложения, если настроена модель, совместимая с OpenAI.</string>
     <string name="settings_ai_config_enable_pre_translation">Включить автоперевод</string>
     <string name="settings_ai_config_pre_translation_description">Автоматически переводить и кэшировать вновь загруженную ленту времени и содержимое профиля в фоновом режиме. Это может потреблять большое количество токенов.</string>
     <string name="settings_ai_config_enable_tldr">Включить пересказ с помощью ИИ</string>
@@ -522,8 +522,8 @@
     <string name="save_error">Не удалось сохранить данные</string>
     <string name="import_completed">Импорт завершён</string>
     <string name="import_error">Не удалось импортировать данные</string>
-    <string name="import_confirmation_title">Подтвердить импорт</string>
-    <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
+    <string name="import_confirmation_title">Импорт резервной копии</string>
+    <string name="import_confirmation_message">Это импортирует данные из выбранного файла резервной копии. Существующие записи с совпадающими ID будут заменены. Продолжить?</string>
     <string name="channel_title">Канал</string>
     <string name="misskey_channel_tab_following">Подписки</string>
     <string name="misskey_channel_tab_favorites">Избранное</string>
@@ -590,4 +590,24 @@
     <string name="agent_ui_select_followers_user">Выберите: пользователь (посмотреть подписчиков)</string>
     <string name="agent_ui_select_profile_tabs_user">Выберите: пользователь (посмотреть вкладки профиля)</string>
     <string name="agent_ui_status_insight_user_placeholder">Введите: пользователь ссылка, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">Заблокированный профиль</string>
+    <string name="profile_blocked_gate_description">Вы заблокировали этого пользователя. Его вкладки и лента скрыты, пока вы не решите их показать.</string>
+    <string name="profile_blocked_gate_show">Показать</string>
+    <string name="pixiv_private_following_title">Приватные подписки</string>
+    <string name="pixiv_private_bookmarks_title">Приватные закладки</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Исправить разрешения Tranquil</string>
+    <string name="settings_behavior_title">Поведение</string>
+    <string name="settings_behavior_description">Настройки браузера и обработки ссылок</string>
+    <string name="article_content_gate_subscription_title">Требуется поддержка</string>
+    <string name="article_content_gate_subscription_description">Эта статья доступна только для поддерживающих пользователей. Откройте её в браузере, чтобы поддержать автора и прочитать полный текст.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Эта статья доступна только для поддерживающих пользователей от ¥%1$d. Откройте её в браузере, чтобы поддержать автора и прочитать полный текст.</string>
+    <string name="deeplink_account_selection_save_default">Всегда открывать так</string>
+    <string name="settings_link_open_defaults_title">Открытие ссылок</string>
+    <string name="settings_link_open_defaults_description">Выберите значения по умолчанию для поддерживаемых ссылок по хосту</string>
+    <string name="settings_link_open_default_title">По умолчанию для ссылок %1$s</string>
+    <string name="settings_link_open_default_description">Выберите, как открывать поддерживаемые ссылки, когда Flare может их обработать</string>
+    <string name="settings_link_open_default_ask_every_time">Спрашивать каждый раз</string>
+    <string name="media_download_started">Загрузка началась</string>
+    <string name="fanbox_supported_title">Поддерживаю</string>
+    <string name="fanbox_recommended_creators_title">Рекомендуемые авторы</string>
 </resources>

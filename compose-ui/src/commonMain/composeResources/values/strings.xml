@@ -536,6 +536,6 @@
     <string name="pixiv_private_bookmarks_title">Private Bookmarks</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
-    <string name="fanbox_supported_title">Supported posts</string>
+    <string name="fanbox_supported_title">Supporting</string>
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

@@ -419,4 +419,13 @@
     <string name="illustrations_title">Kuvitukset</string>
     <string name="manga_title">Manga</string>
     <string name="app_name" translatable="false">Flare</string>
+    <string name="media_menu_download">Lataa</string>
+    <string name="media_menu_download_all">Lataa kaikki</string>
+    <string name="media_menu_share_image">Jaa kuva</string>
+    <string name="media_menu_copy_link">Kopioi linkki</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Korjaa Tranquil-oikeudet</string>
+    <string name="pixiv_private_following_title">Yksityiset seuratut</string>
+    <string name="pixiv_private_bookmarks_title">Yksityiset kirjanmerkit</string>
+    <string name="fanbox_supported_title">Tuetaan</string>
+    <string name="fanbox_recommended_creators_title">Suositellut tekijät</string>
 </resources>

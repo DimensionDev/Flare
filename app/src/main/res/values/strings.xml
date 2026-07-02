@@ -182,8 +182,8 @@
     <string name="settings_ai_config_tap_to_edit">Tap to edit</string>
     <string name="settings_ai_config_entable_translation">Enable AI translation</string>
     <string name="settings_ai_config_translation_description">Use AI instead of Google Translate. Translations may take longer.</string>
-    <string name="settings_ai_config_enable_agent">Enable AI agent</string>
-    <string name="settings_ai_config_agent_description">Show AI agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
+    <string name="settings_ai_config_enable_agent">Enable AI Agent</string>
+    <string name="settings_ai_config_agent_description">Show AI Agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
     <string name="settings_ai_config_enable_tldr">Enable AI summaries</string>
     <string name="settings_ai_config_tldr_description">Summarize long posts with AI. Available for posts longer than 500 characters.</string>
     <string name="settings_ai_config_enable_pre_translation">Enable auto-translate</string>
@@ -653,8 +653,8 @@
     <string name="save_error">Export failed</string>
     <string name="import_completed">Import complete</string>
     <string name="import_error">Import failed</string>
-    <string name="import_confirmation_title">Confirm import</string>
-    <string name="import_confirmation_message">This will import data from the selected file. Existing records with matching IDs will be replaced. Continue?</string>
+    <string name="import_confirmation_title">Import backup</string>
+    <string name="import_confirmation_message">This will import data from the selected backup file. Existing records with matching IDs will be replaced. Continue?</string>
 
     <string name="tab_settings_add_group">Add group</string>
     <string name="tab_settings_add_tab">Add tab</string>
@@ -736,6 +736,6 @@
     <string name="agent_ui_select_followers_user">Select a user to view their followers.</string>
     <string name="agent_ui_select_profile_tabs_user">Select a user to view profile tabs.</string>
     <string name="agent_ui_status_insight_user_placeholder">You can also enter a user link, handle, or userKey…</string>
-    <string name="fanbox_supported_title">Supported posts</string>
+    <string name="fanbox_supported_title">Supporting</string>
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

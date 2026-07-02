@@ -9,4 +9,6 @@
                 <li>Amélioration des notifications, des fils RSS, de la lecture vidéo et de la stabilité du fil.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Bon retour !</string>
+    <string name="changelog_message">Nous avons apporté quelques changements depuis votre dernière connexion. Voici les détails :</string>
 </resources>

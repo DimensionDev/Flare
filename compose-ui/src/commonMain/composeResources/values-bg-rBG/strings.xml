@@ -401,9 +401,9 @@
     <string name="channel_title">Канал</string>
     <string name="app_name" translatable="false">Flare</string>
     <string name="profile_header_button_request_follow">Заявка за последване</string>
-    <string name="date_format_year_month_day">yyyy年M月d日</string>
-    <string name="date_format_month_day">M月d日</string>
-    <string name="date_format_full">yyyy年M月d日 HH:mm</string>
+    <string name="date_format_year_month_day">d.MM.yyyy</string>
+    <string name="date_format_month_day">d.MM</string>
+    <string name="date_format_full">d.MM.yyyy HH:mm</string>
     <string name="misskey_achievement_login30_title">30 дни влизане</string>
     <string name="misskey_achievement_login60_title">60 дни влизане</string>
     <string name="misskey_achievement_login100_title">100 дни влизане</string>
@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Манга класация</string>
     <string name="illustrations_title">Илюстрации</string>
     <string name="manga_title">Манга</string>
+    <string name="media_menu_download">Изтегляне</string>
+    <string name="media_menu_download_all">Изтегляне на всички</string>
+    <string name="media_menu_share_image">Споделяне на изображението</string>
+    <string name="media_menu_copy_link">Копиране на връзката</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Поправяне на разрешенията за Tranquil</string>
+    <string name="pixiv_private_following_title">Лични следвани</string>
+    <string name="pixiv_private_bookmarks_title">Лични отметки</string>
+    <string name="fanbox_supported_title">Подкрепям</string>
+    <string name="fanbox_recommended_creators_title">Препоръчани автори</string>
 </resources>

@@ -9,4 +9,6 @@
                 <li>שופרו התראות, צירי זמן של RSS, ניגון וידאו ויציבות צירי הזמן.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">ברוך שובך!</string>
+    <string name="changelog_message">ביצענו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:</string>
 </resources>

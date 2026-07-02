@@ -9,4 +9,6 @@
                 <li>Cải thiện thông báo, dòng thời gian RSS, phát video và độ ổn định của dòng thời gian.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Chào mừng trở lại!</string>
+    <string name="changelog_message">Chúng tôi đã thực hiện một số thay đổi kể từ lần đăng nhập trước của bạn. Chi tiết như sau:</string>
 </resources>

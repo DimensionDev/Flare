@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Xếp hạng manga</string>
     <string name="illustrations_title">Minh họa</string>
     <string name="manga_title">Manga</string>
+    <string name="media_menu_download">Tải xuống</string>
+    <string name="media_menu_download_all">Tải xuống tất cả</string>
+    <string name="media_menu_share_image">Chia sẻ ảnh</string>
+    <string name="media_menu_copy_link">Sao chép liên kết</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Sửa quyền Tranquil</string>
+    <string name="pixiv_private_following_title">Đang theo dõi riêng tư</string>
+    <string name="pixiv_private_bookmarks_title">Dấu trang riêng tư</string>
+    <string name="fanbox_supported_title">Đang hỗ trợ</string>
+    <string name="fanbox_recommended_creators_title">Nhà sáng tạo được đề xuất</string>
 </resources>

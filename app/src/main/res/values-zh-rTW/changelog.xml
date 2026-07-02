@@ -9,4 +9,6 @@
                 <li>改進通知、RSS 時間軸、影片播放和時間軸穩定性。</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">歡迎回來！</string>
+    <string name="changelog_message">自你上次登入以來我們做了一些變更。詳情如下：</string>
 </resources>

@@ -419,4 +419,13 @@
     <string name="illustrations_title">Εικονογραφήσεις</string>
     <string name="manga_title">Μάνγκα</string>
     <string name="app_name" translatable="false">Flare</string>
+    <string name="media_menu_download">Λήψη</string>
+    <string name="media_menu_download_all">Λήψη όλων</string>
+    <string name="media_menu_share_image">Κοινοποίηση εικόνας</string>
+    <string name="media_menu_copy_link">Αντιγραφή συνδέσμου</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Διόρθωση δικαιωμάτων Tranquil</string>
+    <string name="pixiv_private_following_title">Ιδιωτικές ακολουθήσεις</string>
+    <string name="pixiv_private_bookmarks_title">Ιδιωτικοί σελιδοδείκτες</string>
+    <string name="fanbox_supported_title">Υποστηρίζω</string>
+    <string name="fanbox_recommended_creators_title">Προτεινόμενοι δημιουργοί</string>
 </resources>

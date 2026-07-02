@@ -9,4 +9,6 @@
                 <li>Improved notifications, RSS timelines, video playback, and timeline stability.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Welcome back!</string>
+    <string name="changelog_message">We have made some changes since you last logged in. Here are the details:</string>
 </resources>

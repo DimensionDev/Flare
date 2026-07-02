@@ -419,4 +419,13 @@
     <string name="illustrations_title">Ilustrace</string>
     <string name="manga_title">Manga</string>
     <string name="app_name" translatable="false">Flare</string>
+    <string name="media_menu_download">Stáhnout</string>
+    <string name="media_menu_download_all">Stáhnout vše</string>
+    <string name="media_menu_share_image">Sdílet obrázek</string>
+    <string name="media_menu_copy_link">Kopírovat odkaz</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Opravit oprávnění Tranquil</string>
+    <string name="pixiv_private_following_title">Soukromé sledování</string>
+    <string name="pixiv_private_bookmarks_title">Soukromé záložky</string>
+    <string name="fanbox_supported_title">Podporováno</string>
+    <string name="fanbox_recommended_creators_title">Doporučení tvůrci</string>
 </resources>

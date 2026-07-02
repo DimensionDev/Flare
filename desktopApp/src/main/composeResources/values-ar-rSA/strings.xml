@@ -251,8 +251,8 @@
     <string name="settings_ai_config_value_empty_placeholder">غير محدد</string>
     <string name="settings_ai_config_entable_translation">تفعيل ترجمة الذكاء الاصطناعي</string>
     <string name="settings_ai_config_translation_description">استخدم الذكاء الاصطناعي بدلاً من ترجمة جوجل. قد تستغرق الترجمة وقتًا أطول.</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">تفعيل وكيل الذكاء الاصطناعي</string>
+    <string name="settings_ai_config_agent_description">بعد التفعيل، ستظهر ميزة وكيل الذكاء الاصطناعي في المواضع المناسبة داخل التطبيق عند إعداد نموذج متوافق مع OpenAI.</string>
     <string name="settings_ai_config_enable_pre_translation">تفعيل الترجمة التلقائية</string>
     <string name="settings_ai_config_pre_translation_description">ترجمة محتوى الجدول الزمني والملف الشخصي المحمل حديثًا في الخلفية وتخزين النتائج مؤقتًا. قد يستهلك هذا عددًا كبيرًا من الرموز (tokens).</string>
     <string name="settings_ai_config_enable_tldr">تفعيل ملخصات الذكاء الاصطناعي</string>
@@ -528,8 +528,8 @@
     <string name="save_error">فشل التصدير</string>
     <string name="import_completed">اكتمل الاستيراد</string>
     <string name="import_error">فشل الاستيراد</string>
-    <string name="import_confirmation_title">تأكيد الاستيراد</string>
-    <string name="import_confirmation_message">سيؤدي هذا إلى استيراد البيانات من الملف المحدد. سيتم استبدال السجلات الموجودة ذات المعرفات المطابقة. هل تريد الاستمرار؟</string>
+    <string name="import_confirmation_title">استيراد نسخة احتياطية</string>
+    <string name="import_confirmation_message">سيؤدي هذا إلى استيراد البيانات من ملف النسخة الاحتياطية المحدد. سيتم استبدال السجلات الموجودة ذات المعرفات المطابقة. هل تريد الاستمرار؟</string>
     <string name="channel_title">القناة</string>
     <string name="misskey_channel_tab_following">متابعون</string>
     <string name="misskey_channel_tab_favorites">المفضلات</string>
@@ -592,4 +592,24 @@
     <string name="agent_ui_select_followers_user">اختر: مستخدم (عرض المتابعون)</string>
     <string name="agent_ui_select_profile_tabs_user">اختر: مستخدم (عرض تبويبات الملف الشخصي)</string>
     <string name="agent_ui_status_insight_user_placeholder">أدخل: مستخدم رابط, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">ملف شخصي محظور</string>
+    <string name="profile_blocked_gate_description">لقد حظرت هذا المستخدم. سيتم إخفاء تبويباته وخطه الزمني حتى تختار إظهارها.</string>
+    <string name="profile_blocked_gate_show">عرض</string>
+    <string name="pixiv_private_following_title">المتابَعون الخاصون</string>
+    <string name="pixiv_private_bookmarks_title">الإشارات المرجعية الخاصة</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">إصلاح أذونات Tranquil</string>
+    <string name="settings_behavior_title">السلوك</string>
+    <string name="settings_behavior_description">تفضيلات المتصفح والتعامل مع الروابط</string>
+    <string name="article_content_gate_subscription_title">الدعم مطلوب</string>
+    <string name="article_content_gate_subscription_description">هذه المقالة متاحة للداعمين فقط. افتحها في المتصفح لدعم المنشئ وقراءة المحتوى كاملًا.</string>
+    <string name="article_content_gate_subscription_description_with_fee">هذه المقالة متاحة للداعمين ابتداءً من ¥%1$d فقط. افتحها في المتصفح لدعم المنشئ وقراءة المحتوى كاملًا.</string>
+    <string name="deeplink_account_selection_save_default">افتح بهذه الطريقة دائمًا</string>
+    <string name="settings_link_open_defaults_title">فتح الروابط</string>
+    <string name="settings_link_open_defaults_description">اختر الإعدادات الافتراضية للروابط المدعومة حسب المضيف</string>
+    <string name="settings_link_open_default_title">الإعداد الافتراضي لروابط %1$s</string>
+    <string name="settings_link_open_default_description">اختر كيف تُفتح الروابط المدعومة عندما يستطيع Flare التعامل معها</string>
+    <string name="settings_link_open_default_ask_every_time">السؤال في كل مرة</string>
+    <string name="media_download_started">بدأ التنزيل</string>
+    <string name="fanbox_supported_title">قيد الدعم</string>
+    <string name="fanbox_recommended_creators_title">منشئون موصى بهم</string>
 </resources>

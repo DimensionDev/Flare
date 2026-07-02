@@ -9,4 +9,6 @@
                 <li>Bildirimler, RSS zaman akışları, video oynatma ve zaman akışı kararlılığı iyileştirildi.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Tekrar hoş geldiniz!</string>
+    <string name="changelog_message">Son girişinizden bu yana bazı değişiklikler yaptık. Ayrıntılar:</string>
 </resources>

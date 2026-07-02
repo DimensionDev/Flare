@@ -9,4 +9,6 @@
                 <li>알림, RSS 타임라인, 동영상 재생, 타임라인 안정성을 개선했습니다.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">다시 오신 것을 환영합니다!</string>
+    <string name="changelog_message">마지막 로그인 이후 몇 가지 변경 사항이 있습니다. 자세한 내용은 다음과 같습니다:</string>
 </resources>

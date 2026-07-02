@@ -9,4 +9,6 @@
                 <li>S’han millorat les notificacions, les línies de temps RSS, la reproducció de vídeo i l’estabilitat de les línies de temps.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Et donem la benvinguda de nou!</string>
+    <string name="changelog_message">Hem fet alguns canvis des de l\'última vegada que vas iniciar sessió. Aquests són els detalls:</string>
 </resources>

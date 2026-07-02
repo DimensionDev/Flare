@@ -9,4 +9,6 @@
                 <li>Javultak az értesítések, az RSS-idővonalak, a videólejátszás és az idővonalak stabilitása.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Üdv újra!</string>
+    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
 </resources>

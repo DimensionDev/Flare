@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Rànquing de manga</string>
     <string name="illustrations_title">Il·lustracions</string>
     <string name="manga_title">Manga</string>
+    <string name="media_menu_download">Baixa</string>
+    <string name="media_menu_download_all">Baixa-ho tot</string>
+    <string name="media_menu_share_image">Comparteix la imatge</string>
+    <string name="media_menu_copy_link">Copia l\\'enllaç</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corregeix els permisos de Tranquil</string>
+    <string name="pixiv_private_following_title">Seguiments privats</string>
+    <string name="pixiv_private_bookmarks_title">Marcadors privats</string>
+    <string name="fanbox_supported_title">Donant suport</string>
+    <string name="fanbox_recommended_creators_title">Creadors recomanats</string>
 </resources>

@@ -9,4 +9,6 @@
                 <li>Migliorati notifiche, timeline RSS, riproduzione video e stabilità delle timeline.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Bentornato!</string>
+    <string name="changelog_message">Abbiamo apportato alcune modifiche dall’ultimo accesso. Ecco i dettagli:</string>
 </resources>

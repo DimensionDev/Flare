@@ -419,4 +419,13 @@
     <string name="illustrations_title">Illustrationer</string>
     <string name="manga_title">Manga</string>
     <string name="app_name" translatable="false">Flare</string>
+    <string name="media_menu_download">Download</string>
+    <string name="media_menu_download_all">Download alle</string>
+    <string name="media_menu_share_image">Del billede</string>
+    <string name="media_menu_copy_link">Kopiér link</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Ret Tranquil-tilladelser</string>
+    <string name="pixiv_private_following_title">Private følger</string>
+    <string name="pixiv_private_bookmarks_title">Private bogmærker</string>
+    <string name="fanbox_supported_title">Støtter</string>
+    <string name="fanbox_recommended_creators_title">Anbefalede skabere</string>
 </resources>

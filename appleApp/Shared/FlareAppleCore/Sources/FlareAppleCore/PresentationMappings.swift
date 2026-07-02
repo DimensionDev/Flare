@@ -124,7 +124,7 @@ public extension UiStrings {
         case .manga:
             localizedPresentationString("manga_title", fallback: "Manga")
         case .fanboxSupported:
-            localizedPresentationString("fanbox_supported_title", fallback: "Supported posts")
+            localizedPresentationString("fanbox_supported_title", fallback: "Supporting")
         case .fanboxRecommendedCreators:
             localizedPresentationString("fanbox_recommended_creators_title", fallback: "Recommended creators")
         case .following:

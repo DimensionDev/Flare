@@ -1,0 +1,4 @@
+#include "../fdroid.properties"
+
+MARKETING_VERSION = $(versionName)
+CURRENT_PROJECT_VERSION = $(versionCode)

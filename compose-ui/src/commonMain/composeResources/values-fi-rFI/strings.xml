@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Arkaluonteista sisältöä</string>
     <string name="show_media">Näytä media</string>
     <string name="hide_media">Piilota media</string>
+    <string name="media_menu_download">Lataa</string>
+    <string name="media_menu_download_all">Lataa kaikki</string>
+    <string name="media_menu_share_image">Jaa kuva</string>
+    <string name="media_menu_copy_link">Kopioi linkki</string>
     <string name="login_expired">Kirjautumisistunto vanhentunut</string>
     <string name="login_expired_message">Kirjaudu uudelleen napauttamalla</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Salasana</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-tunniste</string>
     <string name="bluesky_login_oauth_button">Kirjaudu OAuth-tunnuksilla</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Korjaa Tranquil oikeudet</string>
     <string name="bluesky_login_use_password_button">Käytä salasanaa</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth voi edelleen olla epävakaa. Jos kohtaat ongelmia, käytä salasanakirjautumista.</string>
     <string name="login_button">Kirjaudu sisään</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Alkuperäinen Sijoitus</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Yksityinen Seuraaminen</string>
+    <string name="pixiv_private_bookmarks_title">Yksityiset Kirjanmerkit</string>
     <string name="illustrations_title">Kuvitukset</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Tuetut viestit</string>
+    <string name="fanbox_recommended_creators_title">Suositellut luojat</string>
 </resources>

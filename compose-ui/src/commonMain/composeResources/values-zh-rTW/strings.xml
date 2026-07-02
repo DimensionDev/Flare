@@ -408,12 +408,11 @@
     <string name="liked_title">已讚</string>
     <string name="all_rss_feeds_title">所有訂閱</string>
     <string name="posts_title">貼文</string>
+    <string name="posts_with_replies_title">貼文和回覆</string>
     <string name="media_title">媒體</string>
     <string name="settings_appearance_absolute_timestamp">絕對時間戳記</string>
     <string name="settings_appearance_absolute_timestamp_description">在貼文上顯示確切的時間戳記</string>
     <string name="channel_title">頻道</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="posts_with_replies_title">貼文和回覆</string>
     <string name="pixiv_ranking_week_title">週排名</string>
     <string name="pixiv_ranking_month_title">月排名</string>
     <string name="pixiv_ranking_day_male_title">男性排名</string>

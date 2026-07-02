@@ -44,10 +44,16 @@
     <string name="compose_save_draft">Uložit</string>
     <string name="compose_close_discard">Zahodit</string>
     <string name="status_insight_title">Poslat přehled</string>
+    <string name="profile_insight_title">Přehled profilu</string>
+    <string name="profile_blocked_gate_title">Blokovaný profil</string>
+    <string name="profile_blocked_gate_description">Zablokovali jste tento profil. Jejich panely a časová osa jsou skryty, dokud se nerozhodnete je zobrazit.</string>
+    <string name="profile_blocked_gate_show">Zobrazit</string>
     <string name="status_insight_input_placeholder">Zeptat se na následná opatření…</string>
     <string name="status_insight_send">Odeslat</string>
     <string name="status_insight_analyzing">Analyzuji tento příspěvek…</string>
+    <string name="profile_insight_analyzing">Analyzuje se tento profil…</string>
     <string name="status_insight_error">Nelze analyzovat tento příspěvek.</string>
+    <string name="profile_insight_error">Tento profil nelze analyzovat.</string>
     <string name="status_insight_trace_loading_post_context">Načítání kontextu příspěvku…</string>
     <string name="status_insight_trace_post_context_loaded">Napsat kontext načten</string>
     <string name="status_insight_trace_preparing_images">Příprava obrázků…</string>
@@ -89,6 +95,7 @@
     <string name="agent_chat_input_placeholder">Zeptejte se něčeho…</string>
     <string name="agent_chat_send">Odeslat</string>
     <string name="agent_chat_thinking">Uvažuji…</string>
+    <string name="agent_compose_confirmation_prompt">Odeslání příspěvek?</string>
     <string name="draft_box_title">Koncepty</string>
     <string name="draft_box_empty">Zatím žádné koncepty</string>
     <string name="draft_box_edit">Upravit</string>
@@ -106,6 +113,8 @@
     <string name="settings_appearance_layout_group_subtitle">Rozvržení časové osy, navigace a akce příspěvků</string>
     <string name="settings_appearance_display_group_title">Zobrazení</string>
     <string name="settings_appearance_display_group_subtitle">Časová razítka, odznaky zdrojů, odkazy a chování prohlížeče</string>
+    <string name="settings_behavior_title">Chování</string>
+    <string name="settings_behavior_description">Nastavení zpracování prohlížeče a odkazů</string>
     <string name="settings_appearance_media_group_title">Média</string>
     <string name="settings_appearance_media_group_subtitle">Viditelnost médií, přehrávání a citlivý obsah</string>
     <string name="settings_storage_title">Úložiště</string>
@@ -224,6 +233,7 @@
     <string name="bluesky_login_password_hint">Heslo</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA kód</string>
     <string name="bluesky_login_oauth_button">Přihlásit se přes OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Opravit oprávnění Tranquil</string>
     <string name="bluesky_login_use_password_button">Použít heslo</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth může být stále nestabilní. Pokud narazíte na problémy, použijte přihlášení pomocí hesla.</string>
     <string name="report_title">Nahlásit</string>
@@ -263,6 +273,10 @@
     <string name="settings_appearance_post_action_style_stretch">Roztažené</string>
     <string name="settings_appearance_post_action_layout">Přizpůsobit akce</string>
     <string name="settings_appearance_post_action_layout_description">Zvolte pořadí a viditelnost tlačítek akcí příspěvku</string>
+    <string name="settings_appearance_show_media">Zobrazit média</string>
+    <string name="settings_appearance_show_media_description">Zobrazit mediální přílohy v příspěvcích</string>
+    <string name="settings_appearance_show_numbers">Zobrazit čísla</string>
+    <string name="settings_appearance_show_numbers_description">Zobrazit počty pod každým příspěvkem</string>
     <string name="settings_post_action_layout_title">Akce příspěvku</string>
     <string name="settings_post_action_layout_enable">Přizpůsobit akce</string>
     <string name="settings_post_action_layout_enable_description">Zvolte, které akce se zobrazí v řádku, v nabídce Další nebo zůstanou skryté</string>
@@ -290,16 +304,20 @@
     <string name="settings_post_action_family_report">Nahlásit</string>
     <string name="settings_post_action_family_mute_user">Skrýt</string>
     <string name="settings_post_action_family_block_user">Blokovat</string>
-    <string name="settings_appearance_show_media">Zobrazit média</string>
-    <string name="settings_appearance_show_media_description">Zobrazit mediální přílohy v příspěvcích</string>
-    <string name="settings_appearance_show_numbers">Zobrazit čísla</string>
-    <string name="settings_appearance_show_numbers_description">Zobrazit počty pod každým příspěvkem</string>
     <string name="settings_appearance_show_cw_img">Zobrazit citlivý obsah</string>
     <string name="settings_appearance_show_cw_img_description">Vždy odkrývat citlivá média v příspěvcích</string>
     <string name="settings_appearance_expand_content_warning">Zobrazit obsah za obsahem varování</string>
     <string name="settings_appearance_expand_content_warning_description">Vždy zobrazovat obsah příspěvku skrytý varováním obsahu</string>
     <string name="settings_appearance_expand_media">Zachovat poměr stran médií</string>
     <string name="settings_appearance_expand_media_description">Zobrazovat média v jejich původním poměru stran v časových osách</string>
+    <string name="gallery_detail_tab_info">Info</string>
+    <string name="gallery_detail_tab_comments">Komentáře</string>
+    <string name="gallery_detail_tab_recommend">Doporučit</string>
+    <string name="gallery_detail_comments_title">Komentáře</string>
+    <string name="gallery_detail_recommendations_title">Doporučení</string>
+    <string name="gallery_detail_view_more">Zobrazit více</string>
+    <string name="gallery_detail_share_content_description">Sdílet</string>
+    <string name="gallery_detail_expand_content_description">Rozbalit</string>
     <string name="settings_appearance_video_autoplay">Automatické přehrávání videa</string>
     <string name="settings_appearance_video_autoplay_description">Automaticky přehrávat videa v příspěvcích</string>
     <string name="settings_appearance_video_autoplay_wifi">Pouze přes Wi-Fi</string>
@@ -360,6 +378,13 @@
     <string name="settings_storage_clear_database_description">Odstranit %1$s uživatelů a %2$s příspěvků z mezipaměti</string>
     <string name="settings_storage_app_log">Protokoly aplikace</string>
     <string name="settings_storage_app_log_description">Zobrazit, uložit nebo vymazat protokoly aplikace</string>
+    <string name="settings_media_save_location">Poloha uložení médií</string>
+    <string name="settings_media_save_location_description">Vyberte místo, kde jsou stažená média uložena na tomto zařízení.</string>
+    <string name="settings_media_save_location_downloads">Stahování</string>
+    <string name="settings_media_save_location_custom_folder">Vlastní složka</string>
+    <string name="settings_media_save_location_choose_folder">Vybrat složku</string>
+    <string name="settings_media_save_location_reset_downloads">Resetovat na stahování</string>
+    <string name="settings_media_save_location_ask_every_time">Pokaždé se zeptat</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>
     <string name="service_select_empty_message">Žádné instance nebyly nalezeny</string>
@@ -367,6 +392,7 @@
     <string name="settings_accounts_remove">Odstranit</string>
     <string name="settings_accounts_remove_confirm">Opravdu chcete odstranit účet %1$s z tohoto zařízení?</string>
     <string name="media_menu_save">Uložit obrázek</string>
+    <string name="media_menu_download_all">Stáhnout vše</string>
     <string name="media_menu_share_image">Sdílet obrázek</string>
     <string name="media_menu_copy_link">Kopírovat odkaz</string>
     <string name="media_menu_media_link">Odkaz na média</string>
@@ -374,6 +400,8 @@
     <string name="status_menu_share_via_fixvx">Sdílet přes Fixvx</string>
     <string name="media_save_success">Uloženo</string>
     <string name="media_save_fail">Ukládání se nezdařilo</string>
+    <string name="media_download_started">Stahování začalo.</string>
+    <string name="media_prepare_started">Příprava médií...</string>
     <string name="media_alt_text">Alternativní text</string>
     <string name="media_is_downloading">Média se stále stahují. Zkuste to znovu za chvíli.</string>
     <string name="settings_side_panel_empty">Ve výchozím nastavení postranní panel sleduje platformu aktuálního účtu.</string>
@@ -455,6 +483,8 @@
     <string name="pixiv_ranking_week_original_title">Původní hodnocení</string>
     <string name="pixiv_ranking_week_rookie_title">Hodnocení Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Soukromé sledování</string>
+    <string name="pixiv_private_bookmarks_title">Soukromé záložky</string>
     <string name="tab_settings_title">Nastavení karet</string>
     <string name="dm_list_title">Soukromé zprávy</string>
     <string name="dm_list_empty">Žádné soukromé zprávy</string>
@@ -505,6 +535,9 @@
     <string name="rss_detail_tldr_loading">Probíhá shrnutí…</string>
     <string name="rss_detail_translate">Přeložit</string>
     <string name="rss_detail_translate_error">Překlad se nezdařilo</string>
+    <string name="article_content_gate_subscription_title">Je vyžadována podpora</string>
+    <string name="article_content_gate_subscription_description">Tento článek je dostupný pouze pro podporovatele. Otevřete jej v prohlížeči, abyste podpořili tvůrce a přečetli si celý obsah.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Tento článek je dostupný pouze pro podporovatele z &lt;unk&gt;%1$d. Otevřete jej v prohlížeči, abyste podpořili tvůrce a přečetli si celý obsah.</string>
     <string name="emoji_picker_recent">Nedávné</string>
     <string name="emoji_picker_search">Hledat</string>
     <string name="podcast_host">Hostitel</string>
@@ -533,6 +566,12 @@
     <string name="deeplink_account_selection_title">Vybrat účet</string>
     <string name="deeplink_account_selection_message">Vyberte účet, ve kterém chcete tento odkaz otevřít</string>
     <string name="deeplink_account_selection_browser">Otevřít v prohlížeči</string>
+    <string name="deeplink_account_selection_save_default">Vždy otevřít tuto cestu</string>
+    <string name="settings_link_open_defaults_title">Otevření odkazu</string>
+    <string name="settings_link_open_defaults_description">Vyberte výchozí nastavení pro podporované odkazy od hostitele</string>
+    <string name="settings_link_open_default_title">Výchozí pro odkazy %1$s</string>
+    <string name="settings_link_open_default_description">Zvolte, jak jsou podporované odkazy otevřené, když je Flare zvládne</string>
+    <string name="settings_link_open_default_ask_every_time">Ptát se pokaždé</string>
     <string name="block_user_title">Zablokovat uživatele</string>
     <string name="block_user_description">Opravdu chcete tohoto uživatele zablokovat?</string>
     <string name="unblock_user_title">Odblokovat uživatele</string>
@@ -583,20 +622,13 @@
     <string name="channel_item_unfollow">Zrušit sledování</string>
     <string name="channel_item_favourite">Přidat k oblíbeným</string>
     <string name="channel_item_unfavourite">Odebrat z oblíbených</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Přehled profilu</string>
-    <string name="profile_insight_analyzing">Analyzuje se tento profil…</string>
-    <string name="profile_insight_error">Tento profil nelze analyzovat.</string>
-    <string name="agent_compose_confirmation_prompt">Odeslání příspěvek?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Zrušit</string>
+    <string name="agent_ui_confirm_execute">Potvrdit</string>
+    <string name="agent_ui_confirm_save_subscription">Uložit</string>
     <string name="agent_ui_cancel_save_subscription">Zrušit: uložení</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Smazat</string>
     <string name="agent_ui_cancel_delete_subscription">Zrušit: smazání</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Odeslat</string>
     <string name="agent_ui_cancel_send_post">Zrušit: odeslání</string>
     <string name="agent_ui_select_load_subscription_source">Vyberte: zdroj odběru (načíst)</string>
     <string name="agent_ui_select_delete_subscription_source">Vyberte: zdroj odběru (smazání)</string>
@@ -617,7 +649,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Odeslání obsah - účet?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Ответить příspěvek - účet?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Цитировать příspěvek - účet?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\núčet: %2$s\nplatforma: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Vyberte: příspěvek (выполнить действие)</string>
     <string name="agent_ui_select_post_action">Vyberte: действие (příspěvek)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Zadejte: целевой пост attachmentRef / statusKey…</string>
@@ -640,4 +672,6 @@
     <string name="agent_ui_select_followers_user">Vyberte: uživatel (посмотреть подписчиков)</string>
     <string name="agent_ui_select_profile_tabs_user">Vyberte: uživatel (посмотреть вкладки профиля)</string>
     <string name="agent_ui_status_insight_user_placeholder">Zadejte: uživatel ссылка, handle, userKey…</string>
+    <string name="fanbox_supported_title">Podporované příspěvky</string>
+    <string name="fanbox_recommended_creators_title">Doporučení tvůrci</string>
 </resources>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[
-            <span>Sürüm %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Sürüm %1$s:</span>
             <ul>
                 <li>Sohbet, gönderi içgörüsü ve profil içgörüsü sunan Flare AI Agent eklendi.</li>
                 <li>Pixiv desteği ve yeni galeri ayrıntı görünümü eklendi.</li>

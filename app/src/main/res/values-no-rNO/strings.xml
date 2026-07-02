@@ -42,10 +42,16 @@
     <string name="compose_save_draft">Lagre</string>
     <string name="compose_close_discard">Forkast</string>
     <string name="status_insight_title">Post innsikt</string>
+    <string name="profile_insight_title">Profilinnsikt</string>
+    <string name="profile_blocked_gate_title">Blokkert profil</string>
+    <string name="profile_blocked_gate_description">Du har blokkert denne profilen. Fanebladene og tidslinjen er skjult inntil du velger å vise dem.</string>
+    <string name="profile_blocked_gate_show">Vis</string>
     <string name="status_insight_input_placeholder">Spør om oppfølging…</string>
     <string name="status_insight_send">Sende</string>
     <string name="status_insight_analyzing">Analyserer dette innlegget…</string>
+    <string name="profile_insight_analyzing">Analyserer denne profilen…</string>
     <string name="status_insight_error">Kunne ikke analysere innlegget.</string>
+    <string name="profile_insight_error">Kan ikke analysere denne profilen.</string>
     <string name="status_insight_trace_loading_post_context">Henter post kontekst…</string>
     <string name="status_insight_trace_post_context_loaded">Post sammenheng lastet</string>
     <string name="status_insight_trace_preparing_images">Forbereder bilder…</string>
@@ -56,6 +62,7 @@
     <string name="status_insight_trace_subgraph_started">Legger til analysestase…</string>
     <string name="status_insight_trace_subgraph_completed">Analyseringsstadium er fullført</string>
     <string name="status_insight_trace_subgraph_failed">Analyseringsfasen mislyktes</string>
+    <string name="status_insight_trace_asking_model">Spør %1$s...</string>
     <string name="status_insight_trace_model_response_received">Leser modelrespons…</string>
     <string name="status_insight_trace_streaming_started">Strømmer fra %1$s…</string>
     <string name="status_insight_trace_streaming_response">Mottar svar…</string>
@@ -68,6 +75,7 @@
     <string name="status_insight_trace_tool_load_status_context_completed">Post sammenheng lastet</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Inndata i postkonteksten ble avvist</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Kan ikke laste innlegg kontekst</string>
+    <string name="status_insight_trace_tool_search_status_started">Søker...</string>
     <string name="status_insight_trace_tool_search_status_completed">Søk fullført</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Søkeinndata ble avvist</string>
     <string name="status_insight_trace_tool_search_status_failed">Søket mislyktes</string>
@@ -78,8 +86,10 @@
     <string name="agent_chat_title">AI chat</string>
     <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">Ingen agent samtalelogg enda.</string>
+    <string name="agent_chat_input_placeholder">Spør noe...</string>
     <string name="agent_chat_send">Sende</string>
     <string name="agent_chat_thinking">Tenker…</string>
+    <string name="agent_compose_confirmation_prompt">Send innlegg?</string>
     <string name="draft_box_title">Utkast</string>
     <string name="draft_box_empty">Ingen utkast ennå</string>
     <string name="draft_box_edit">Rediger</string>
@@ -97,6 +107,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tidslinjeoppsett, navigasjon og handlinger</string>
     <string name="settings_appearance_display_group_title">Skjerm</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstempler, kildemerker, lenker og nettleser</string>
+    <string name="settings_behavior_title">Oppførsel</string>
+    <string name="settings_behavior_description">Nettleser og link håndterings innstillinger</string>
     <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Synlighet, avspilling og sensitivt innhold</string>
     <string name="settings_storage_title">Lagring</string>
@@ -215,6 +227,7 @@
     <string name="bluesky_login_password_hint">Passord</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-kode</string>
     <string name="bluesky_login_oauth_button">Logg inn med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil-tillatelser</string>
     <string name="bluesky_login_use_password_button">Bruk passord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortsatt være ustabil. Hvis du opplever problemer, bruk passordinnlogging i stedet.</string>
     <string name="report_title">Rapporter</string>
@@ -254,6 +267,10 @@
     <string name="settings_appearance_post_action_style_stretch">Strekk</string>
     <string name="settings_appearance_post_action_layout">Tilpass handlinger</string>
     <string name="settings_appearance_post_action_layout_description">Velg rekkefølge og synlighet for handlingsknapper på innlegg</string>
+    <string name="settings_appearance_show_media">Vis media</string>
+    <string name="settings_appearance_show_media_description">Vis medievedlegg i innlegg</string>
+    <string name="settings_appearance_show_numbers">Vis antall</string>
+    <string name="settings_appearance_show_numbers_description">Vis antall (liker, delinger osv.) under hvert innlegg</string>
     <string name="settings_post_action_layout_title">Innleggshandlinger</string>
     <string name="settings_post_action_layout_enable">Tilpass handlinger</string>
     <string name="settings_post_action_layout_enable_description">Velg hvilke handlinger som vises i raden, Mer-menyen eller holdes skjult</string>
@@ -281,16 +298,20 @@
     <string name="settings_post_action_family_report">Rapporter</string>
     <string name="settings_post_action_family_mute_user">Demp</string>
     <string name="settings_post_action_family_block_user">Blokker</string>
-    <string name="settings_appearance_show_media">Vis media</string>
-    <string name="settings_appearance_show_media_description">Vis medievedlegg i innlegg</string>
-    <string name="settings_appearance_show_numbers">Vis antall</string>
-    <string name="settings_appearance_show_numbers_description">Vis antall (liker, delinger osv.) under hvert innlegg</string>
     <string name="settings_appearance_show_cw_img">Vis sensitivt innhold</string>
     <string name="settings_appearance_show_cw_img_description">Vis alltid sensitive media i innlegg</string>
     <string name="settings_appearance_expand_content_warning">Vis innhold bak innholdsvarsler</string>
     <string name="settings_appearance_expand_content_warning_description">Alltid avsløre innleggsinnhold skjult av innholdsadvarsler</string>
     <string name="settings_appearance_expand_media">Bevar bildeformat for media</string>
     <string name="settings_appearance_expand_media_description">Vis media i sitt originale format i tidslinjer</string>
+    <string name="gallery_detail_tab_info">Informasjon</string>
+    <string name="gallery_detail_tab_comments">Kommentarer</string>
+    <string name="gallery_detail_tab_recommend">Anbefal</string>
+    <string name="gallery_detail_comments_title">Kommentarer</string>
+    <string name="gallery_detail_recommendations_title">Anbefalinger</string>
+    <string name="gallery_detail_view_more">Vis mer</string>
+    <string name="gallery_detail_share_content_description">Del</string>
+    <string name="gallery_detail_expand_content_description">Utvid</string>
     <string name="settings_appearance_video_autoplay">Auto-avspilling av video</string>
     <string name="settings_appearance_video_autoplay_description">Spill av videoer i innlegg automatisk</string>
     <string name="settings_appearance_video_autoplay_wifi">Kun på Wi-Fi</string>
@@ -351,6 +372,13 @@
     <string name="settings_storage_clear_database_description">Fjern %1$s lagrede brukere og %2$s lagrede innlegg</string>
     <string name="settings_storage_app_log">Applogger</string>
     <string name="settings_storage_app_log_description">Se, lagre eller tøm applogger</string>
+    <string name="settings_media_save_location">Lagre media plassering</string>
+    <string name="settings_media_save_location_description">Velg hvor nedlastede media er lagret på denne enheten.</string>
+    <string name="settings_media_save_location_downloads">Nedlastinger</string>
+    <string name="settings_media_save_location_custom_folder">Egendefinert mappe</string>
+    <string name="settings_media_save_location_choose_folder">Velg mappe</string>
+    <string name="settings_media_save_location_reset_downloads">Tilbakestill til nedlastinger</string>
+    <string name="settings_media_save_location_ask_every_time">Spør hver gang</string>
     <string name="service_select_instance_input_placeholder">Instans-URL</string>
     <string name="service_select_next_button">Neste</string>
     <string name="service_select_empty_message">Fant ingen instanser</string>
@@ -358,6 +386,7 @@
     <string name="settings_accounts_remove">Fjern</string>
     <string name="settings_accounts_remove_confirm">Er du sikker på at du vil fjerne kontoen %1$s fra denne enheten?</string>
     <string name="media_menu_save">Lagre bilde</string>
+    <string name="media_menu_download_all">Last ned alt</string>
     <string name="media_menu_share_image">Del bilde</string>
     <string name="media_menu_copy_link">Kopier lenke</string>
     <string name="media_menu_media_link">Medialenke</string>
@@ -365,6 +394,8 @@
     <string name="status_menu_share_via_fixvx">Del via Fixvx</string>
     <string name="media_save_success">Lagret</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
+    <string name="media_download_started">Nedlasting startet.</string>
+    <string name="media_prepare_started">Forbereder medie...</string>
     <string name="media_alt_text">Alt-tekst</string>
     <string name="media_is_downloading">Media laster fortsatt ned. Prøv igjen om et øyeblikk.</string>
     <string name="settings_side_panel_empty">Som standard følger sidepanelet gjeldende kontos plattform.</string>
@@ -446,6 +477,8 @@
     <string name="pixiv_ranking_week_original_title">Opprinnelig plassering</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie rangering</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Private Følger</string>
+    <string name="pixiv_private_bookmarks_title">Private bokmerker</string>
     <string name="tab_settings_title">Faneinnstillinger</string>
     <string name="dm_list_title">Direktemeldinger</string>
     <string name="dm_list_empty">Ingen direktemeldinger</string>
@@ -496,6 +529,9 @@
     <string name="rss_detail_tldr_loading">Oppsummerer…</string>
     <string name="rss_detail_translate">Oversett</string>
     <string name="rss_detail_translate_error">Kunne ikke oversette</string>
+    <string name="article_content_gate_subscription_title">Støtte kreves</string>
+    <string name="article_content_gate_subscription_description">Denne artikkelen er bare tilgjengelig for supportere. Åpne den i nettleseren for å støtte forfatteren og lese hele innholdet.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Denne artikkelen er bare tilgjengelig for supportere fra 99/1%1$d. Åpne den i nettleseren for å støtte skaperen og les hele innholdet.</string>
     <string name="emoji_picker_recent">Nylige</string>
     <string name="emoji_picker_search">Søk</string>
     <string name="podcast_host">Vert</string>
@@ -524,6 +560,12 @@
     <string name="deeplink_account_selection_title">Velg konto</string>
     <string name="deeplink_account_selection_message">Velg en konto for å åpne denne lenken</string>
     <string name="deeplink_account_selection_browser">Åpne i nettleser</string>
+    <string name="deeplink_account_selection_save_default">Alltid åpne denne måten</string>
+    <string name="settings_link_open_defaults_title">Åpning av lenke</string>
+    <string name="settings_link_open_defaults_description">Velg standardverdier for koblingene som støttes av verten</string>
+    <string name="settings_link_open_default_title">Standard for %1$s linker</string>
+    <string name="settings_link_open_default_description">Velg hvor støttede lenker åpne når Flare kan håndtere dem</string>
+    <string name="settings_link_open_default_ask_every_time">Spør hver gang</string>
     <string name="block_user_title">Blokker bruker</string>
     <string name="block_user_description">Er du sikker på at du vil blokkere denne brukeren?</string>
     <string name="unblock_user_title">Opphev blokkering</string>
@@ -574,27 +616,13 @@
     <string name="channel_item_unfollow">Slutt å følge</string>
     <string name="channel_item_favourite">Favoritt</string>
     <string name="channel_item_unfavourite">Fjern fra favoritter</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilinnsikt</string>
-    <string name="profile_insight_analyzing">Analyserer denne profilen…</string>
-    <string name="profile_insight_error">Kan ikke analysere denne profilen.</string>
-    <string name="status_insight_trace_asking_model">Spør %1$s...</string>
-    <string name="status_insight_trace_tool_call_started">%1$s</string>
-    <string name="status_insight_trace_tool_call_completed">%1$s</string>
-    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
-    <string name="status_insight_trace_tool_call_failed">%1$s</string>
-    <string name="status_insight_trace_tool_search_status_started">Søker...</string>
-    <string name="agent_chat_input_placeholder">Spør noe...</string>
-    <string name="agent_compose_confirmation_prompt">Send innlegg?</string>
-    <string name="settings_about_discord" translatable="false">Splid</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Avbryt</string>
+    <string name="agent_ui_confirm_execute">Bekreft</string>
+    <string name="agent_ui_confirm_save_subscription">Lagre</string>
     <string name="agent_ui_cancel_save_subscription">Avbryt: lagre</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Slett</string>
     <string name="agent_ui_cancel_delete_subscription">Avbryt: slett</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Sende</string>
     <string name="agent_ui_cancel_send_post">Avbryt: send</string>
     <string name="agent_ui_select_load_subscription_source">Velg: abonnementskilde (last)</string>
     <string name="agent_ui_select_delete_subscription_source">Velg: abonnementskilde (slett)</string>
@@ -615,7 +643,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Send innhold - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden innlegg - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren innlegg - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlattform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Velg: innlegg (bewerken)</string>
     <string name="agent_ui_select_post_action">Velg: actie (innlegg)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Angi: doelbericht attachmentRef / statusKey…</string>
@@ -638,4 +666,6 @@
     <string name="agent_ui_select_followers_user">Velg: bruker (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Velg: bruker (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Angi: bruker link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Støttede innlegg</string>
+    <string name="fanbox_recommended_creators_title">Anbefalte skapere</string>
 </resources>

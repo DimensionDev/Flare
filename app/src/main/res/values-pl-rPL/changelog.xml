@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">Witaj ponownie!</string>
     <string name="changelog_message">Wprowadziliśmy pewne zmiany od ostatniego logowania. Oto szczegóły:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>Wersja %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
                 <li>Dodano Flare AI Agent z czatem, analizą postów i analizą profili.</li>
                 <li>Dodano obsługę Pixiv i nowy widok szczegółów galerii.</li>

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="changelog_title">Добре дошли отново!</string>
-    <string name="changelog_current"><![CDATA[
-            <span>Версия %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
                 <li>Добавен е Flare AI Agent с чат, анализ на публикации и анализ на профили.</li>
                 <li>Добавена е поддръжка на Pixiv и нов изглед с подробности за галерията.</li>

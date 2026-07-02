@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Contenu sensible</string>
     <string name="show_media">Afficher le contenu</string>
     <string name="hide_media">Masquer le contenu</string>
+    <string name="media_menu_download">Télécharger</string>
+    <string name="media_menu_download_all">Télécharger tout</string>
+    <string name="media_menu_share_image">Partager l\'image</string>
+    <string name="media_menu_copy_link">Copier le lien</string>
     <string name="login_expired">Session de connexion expirée</string>
     <string name="login_expired_message">Appuyez pour vous reconnecter</string>
     <string name="login_expired_relogin">Se reconnecter</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Mot de passe</string>
     <string name="bluesky_login_auth_factor_token_hint">Jeton 2FA</string>
     <string name="bluesky_login_oauth_button">Se connecter avec OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corriger les permissions de Tranquil</string>
     <string name="bluesky_login_use_password_button">Utiliser un mot de passe</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth peut encore être instable. Si vous rencontrez des problèmes, utilisez la connexion par mot de passe.</string>
     <string name="login_button">Se connecter</string>
@@ -404,6 +409,7 @@
     <string name="liked_title">Aimé</string>
     <string name="all_rss_feeds_title">Tous les abonnements</string>
     <string name="posts_title">Publications</string>
+    <string name="posts_with_replies_title">Publications &amp; Réponses</string>
     <string name="media_title">Médias</string>
     <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
     <string name="settings_appearance_absolute_timestamp_description">Afficher l\'heure exacte sur les publications</string>
@@ -415,8 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Classement original</string>
     <string name="pixiv_ranking_week_rookie_title">Classement des Rookies</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Abonnements privés</string>
+    <string name="pixiv_private_bookmarks_title">Signets privés</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="posts_with_replies_title">Publications &amp; Réponses</string>
+    <string name="fanbox_supported_title">Messages pris en charge</string>
+    <string name="fanbox_recommended_creators_title">Créateurs recommandés</string>
 </resources>

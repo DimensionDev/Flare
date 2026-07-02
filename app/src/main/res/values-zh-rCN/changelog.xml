@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">欢迎回来！</string>
     <string name="changelog_message">自您上次登录以来，我们已经做了一些更改。以下是详细信息：</string>
-    <string name="changelog_current"><![CDATA[
-            <span>版本 %1$s：</span>
+    <string name="changelog_current"><![CDATA[            <span>版本 %1$s：</span>
             <ul>
                 <li>新增 Flare AI Agent，支持聊天、动态洞察和资料洞察。</li>
                 <li>新增 Pixiv 支持和画廊详情页。</li>

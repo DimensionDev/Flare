@@ -44,10 +44,16 @@
     <string name="compose_save_draft">Zapisz</string>
     <string name="compose_close_discard">Odrzuć</string>
     <string name="status_insight_title">Wgląd postów</string>
+    <string name="profile_insight_title">Wgląd w profil</string>
+    <string name="profile_blocked_gate_title">Profil zablokowany</string>
+    <string name="profile_blocked_gate_description">Zablokowałeś ten profil. Ich karty i oś czasu są ukryte, dopóki nie zdecydujesz się je pokazać.</string>
+    <string name="profile_blocked_gate_show">Pokaż</string>
     <string name="status_insight_input_placeholder">Poproś o kontynuację…</string>
     <string name="status_insight_send">Wyślij</string>
     <string name="status_insight_analyzing">Analizowanie tego posta…</string>
+    <string name="profile_insight_analyzing">Analizowanie tego profilu…</string>
     <string name="status_insight_error">Nie można przeanalizować tego posta.</string>
+    <string name="profile_insight_error">Nie można przeanalizować tego profilu.</string>
     <string name="status_insight_trace_loading_post_context">Wczytywanie kontekstu postu…</string>
     <string name="status_insight_trace_post_context_loaded">Kontekst postu załadowany</string>
     <string name="status_insight_trace_preparing_images">Przygotowywanie obrazów…</string>
@@ -58,6 +64,7 @@
     <string name="status_insight_trace_subgraph_started">Wejście do etapu analizy…</string>
     <string name="status_insight_trace_subgraph_completed">Etap analizy zakończony</string>
     <string name="status_insight_trace_subgraph_failed">Etap analizy nie powiódł się</string>
+    <string name="status_insight_trace_asking_model">Pytanie %1$s...</string>
     <string name="status_insight_trace_model_response_received">Czytanie odpowiedzi modelu…</string>
     <string name="status_insight_trace_streaming_started">Strumieniowanie z %1$s…</string>
     <string name="status_insight_trace_streaming_response">Otrzymywanie odpowiedzi…</string>
@@ -88,6 +95,7 @@
     <string name="agent_chat_input_placeholder">Pytaj cokolwiek…</string>
     <string name="agent_chat_send">Wyślij</string>
     <string name="agent_chat_thinking">Myślenie…</string>
+    <string name="agent_compose_confirmation_prompt">Wysłanie wpis?</string>
     <string name="draft_box_title">Szkice</string>
     <string name="draft_box_empty">Brak szkiców</string>
     <string name="draft_box_edit">Edytuj</string>
@@ -105,6 +113,8 @@
     <string name="settings_appearance_layout_group_subtitle">Układ osi czasu, nawigacja i akcje wpisów</string>
     <string name="settings_appearance_display_group_title">Wyświetlanie</string>
     <string name="settings_appearance_display_group_subtitle">Znaczniki czasu, plakietki źródła, linki i zachowanie przeglądarki</string>
+    <string name="settings_behavior_title">Zachowanie</string>
+    <string name="settings_behavior_description">Ustawienia obsługi przeglądarki i linków</string>
     <string name="settings_appearance_media_group_title">Multimedia</string>
     <string name="settings_appearance_media_group_subtitle">Widoczność mediów, odtwarzanie i wrażliwe treści</string>
     <string name="settings_storage_title">Magazyn</string>
@@ -223,6 +233,7 @@
     <string name="bluesky_login_password_hint">Hasło</string>
     <string name="bluesky_login_auth_factor_token_hint">Token 2FA</string>
     <string name="bluesky_login_oauth_button">Zaloguj przez OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Napraw uprawnienia Tranquil</string>
     <string name="bluesky_login_use_password_button">Użyj hasła</string>
     <string name="bluesky_login_oauth_hint">OAuth w Bluesky może być jeszcze niestabilny. Jeśli masz problemy, użyj logowania hasłem.</string>
     <string name="report_title">Zgłoś</string>
@@ -262,6 +273,10 @@
     <string name="settings_appearance_post_action_style_stretch">Rozciągnięte</string>
     <string name="settings_appearance_post_action_layout">Dostosuj akcje</string>
     <string name="settings_appearance_post_action_layout_description">Wybierz kolejność i widoczność przycisków akcji wpisu</string>
+    <string name="settings_appearance_show_media">Pokaż multimedia</string>
+    <string name="settings_appearance_show_media_description">Pokazuj załączniki multimedialne we wpisach</string>
+    <string name="settings_appearance_show_numbers">Pokaż liczby</string>
+    <string name="settings_appearance_show_numbers_description">Pokazuj liczniki pod każdym wpisem</string>
     <string name="settings_post_action_layout_title">Akcje wpisu</string>
     <string name="settings_post_action_layout_enable">Dostosuj akcje</string>
     <string name="settings_post_action_layout_enable_description">Wybierz, które akcje pojawią się w wierszu, menu Więcej albo pozostaną ukryte</string>
@@ -289,16 +304,20 @@
     <string name="settings_post_action_family_report">Zgłoś</string>
     <string name="settings_post_action_family_mute_user">Wycisz</string>
     <string name="settings_post_action_family_block_user">Zablokuj</string>
-    <string name="settings_appearance_show_media">Pokaż multimedia</string>
-    <string name="settings_appearance_show_media_description">Pokazuj załączniki multimedialne we wpisach</string>
-    <string name="settings_appearance_show_numbers">Pokaż liczby</string>
-    <string name="settings_appearance_show_numbers_description">Pokazuj liczniki pod każdym wpisem</string>
     <string name="settings_appearance_show_cw_img">Pokaż wrażliwe treści</string>
     <string name="settings_appearance_show_cw_img_description">Zawsze pokazuj wrażliwe multimedia we wpisach</string>
     <string name="settings_appearance_expand_content_warning">Pokaż zawartość za ostrzeżeniami o treści</string>
     <string name="settings_appearance_expand_content_warning_description">Zawsze ujawniaj zawartość postów ukrytą przez ostrzeżenia o treściach</string>
     <string name="settings_appearance_expand_media">Zachowaj proporcje mediów</string>
     <string name="settings_appearance_expand_media_description">Pokazuj multimedia w ich oryginalnych proporcjach na osi czasu</string>
+    <string name="gallery_detail_tab_info">Informacje</string>
+    <string name="gallery_detail_tab_comments">Komentarze</string>
+    <string name="gallery_detail_tab_recommend">Poleć</string>
+    <string name="gallery_detail_comments_title">Komentarze</string>
+    <string name="gallery_detail_recommendations_title">Zalecenia</string>
+    <string name="gallery_detail_view_more">Zobacz więcej</string>
+    <string name="gallery_detail_share_content_description">Udostępnij</string>
+    <string name="gallery_detail_expand_content_description">Rozwiń</string>
     <string name="settings_appearance_video_autoplay">Automatyczne odtwarzanie wideo</string>
     <string name="settings_appearance_video_autoplay_description">Automatycznie odtwarzaj wideo we wpisach</string>
     <string name="settings_appearance_video_autoplay_wifi">Tylko Wi-Fi</string>
@@ -359,6 +378,13 @@
     <string name="settings_storage_clear_database_description">Usuń %1$s zapisanych użytkowników i %2$s zapisanych wpisów</string>
     <string name="settings_storage_app_log">Logi aplikacji</string>
     <string name="settings_storage_app_log_description">Przeglądaj, zapisuj lub czyść logi aplikacji</string>
+    <string name="settings_media_save_location">Lokalizacja zapisu mediów</string>
+    <string name="settings_media_save_location_description">Wybierz, gdzie pobrane media są zapisywane na tym urządzeniu.</string>
+    <string name="settings_media_save_location_downloads">Pobrania</string>
+    <string name="settings_media_save_location_custom_folder">Katalog niestandardowy</string>
+    <string name="settings_media_save_location_choose_folder">Wybierz folder</string>
+    <string name="settings_media_save_location_reset_downloads">Zresetuj do pobrania</string>
+    <string name="settings_media_save_location_ask_every_time">Pytaj za każdym razem</string>
     <string name="service_select_instance_input_placeholder">URL instancji</string>
     <string name="service_select_next_button">Dalej</string>
     <string name="service_select_empty_message">Nie znaleziono instancji</string>
@@ -366,6 +392,7 @@
     <string name="settings_accounts_remove">Usuń</string>
     <string name="settings_accounts_remove_confirm">Czy na pewno chcesz usunąć konto %1$s z tego urządzenia?</string>
     <string name="media_menu_save">Zapisz obraz</string>
+    <string name="media_menu_download_all">Pobierz wszystko</string>
     <string name="media_menu_share_image">Udostępnij obraz</string>
     <string name="media_menu_copy_link">Kopiuj link</string>
     <string name="media_menu_media_link">Link do mediów</string>
@@ -373,6 +400,8 @@
     <string name="status_menu_share_via_fixvx">Udostępnij przez Fixvx</string>
     <string name="media_save_success">Zapisano</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
+    <string name="media_download_started">Pobieranie rozpoczęte.</string>
+    <string name="media_prepare_started">Przygotowywanie mediów...</string>
     <string name="media_alt_text">Tekst alternatywny</string>
     <string name="media_is_downloading">Pobieranie mediów w toku. Spróbuj ponownie za chwilę.</string>
     <string name="settings_side_panel_empty">Domyślnie panel boczny zależy od platformy obecnego konta.</string>
@@ -454,6 +483,8 @@
     <string name="pixiv_ranking_week_original_title">Oryginalny Ranking</string>
     <string name="pixiv_ranking_week_rookie_title">Ranking Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Prywatne obserwowanie</string>
+    <string name="pixiv_private_bookmarks_title">Prywatne zakładki</string>
     <string name="tab_settings_title">Ustawienia kart</string>
     <string name="dm_list_title">Wiadomości bezpośrednie</string>
     <string name="dm_list_empty">Brak wiadomości bezpośrednich</string>
@@ -504,6 +535,9 @@
     <string name="rss_detail_tldr_loading">Podsumowywanie…</string>
     <string name="rss_detail_translate">Tłumacz</string>
     <string name="rss_detail_translate_error">Nie udało się przetłumaczyć</string>
+    <string name="article_content_gate_subscription_title">Wymagane wsparcie</string>
+    <string name="article_content_gate_subscription_description">Ten artykuł jest dostępny tylko dla zwolenników. Otwórz go w przeglądarce, aby wesprzeć twórcę i przeczytać całą zawartość.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Ten artykuł jest dostępny tylko dla zwolenników z rzędu%1$d. Otwórz go w przeglądarce, aby wesprzeć twórcę i przeczytać całą zawartość.</string>
     <string name="emoji_picker_recent">Ostatnie</string>
     <string name="emoji_picker_search">Szukaj</string>
     <string name="podcast_host">Host</string>
@@ -532,6 +566,12 @@
     <string name="deeplink_account_selection_title">Wybierz konto</string>
     <string name="deeplink_account_selection_message">Wybierz konto, aby otworzyć ten link</string>
     <string name="deeplink_account_selection_browser">Otwórz w przeglądarce</string>
+    <string name="deeplink_account_selection_save_default">Zawsze otwieraj w ten sposób</string>
+    <string name="settings_link_open_defaults_title">Otwieranie linków</string>
+    <string name="settings_link_open_defaults_description">Wybierz domyślne linki obsługiwane przez hosta</string>
+    <string name="settings_link_open_default_title">Domyślnie dla linków %1$s</string>
+    <string name="settings_link_open_default_description">Wybierz sposób otwierania obsługiwanych linków, gdy Flara może je obsłużyć</string>
+    <string name="settings_link_open_default_ask_every_time">Pytaj za każdym razem</string>
     <string name="block_user_title">Zablokuj użytkownika</string>
     <string name="block_user_description">Czy na pewno chcesz zablokować tego użytkownika?</string>
     <string name="unblock_user_title">Odblokuj użytkownika</string>
@@ -582,21 +622,13 @@
     <string name="channel_item_unfollow">Przestań obserwować</string>
     <string name="channel_item_favourite">Dodaj do ulubionych</string>
     <string name="channel_item_unfavourite">Usuń z ulubionych</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Wgląd w profil</string>
-    <string name="profile_insight_analyzing">Analizowanie tego profilu…</string>
-    <string name="profile_insight_error">Nie można przeanalizować tego profilu.</string>
-    <string name="status_insight_trace_asking_model">Pytanie %1$s...</string>
-    <string name="agent_compose_confirmation_prompt">Wysłanie wpis?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Anuluj</string>
+    <string name="agent_ui_confirm_execute">Potwierdź</string>
+    <string name="agent_ui_confirm_save_subscription">Zapisz</string>
     <string name="agent_ui_cancel_save_subscription">Anuluj: zapis</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Usuń</string>
     <string name="agent_ui_cancel_delete_subscription">Anuluj: usunięcie</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Wyślij</string>
     <string name="agent_ui_cancel_send_post">Anuluj: wysłanie</string>
     <string name="agent_ui_select_load_subscription_source">Wybierz: źródło subskrypcji (wczytać)</string>
     <string name="agent_ui_select_delete_subscription_source">Wybierz: źródło subskrypcji (usunięcie)</string>
@@ -617,7 +649,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Wysłanie treść - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Ответить wpis - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Цитировать wpis - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlatform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Wybierz: wpis (выполнить действие)</string>
     <string name="agent_ui_select_post_action">Wybierz: действие (wpis)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Wpisz: целевой пост attachmentRef / statusKey…</string>
@@ -640,4 +672,6 @@
     <string name="agent_ui_select_followers_user">Wybierz: użytkownik (посмотреть подписчиков)</string>
     <string name="agent_ui_select_profile_tabs_user">Wybierz: użytkownik (посмотреть вкладки профиля)</string>
     <string name="agent_ui_status_insight_user_placeholder">Wpisz: użytkownik ссылка, handle, userKey…</string>
+    <string name="fanbox_supported_title">Wspierane posty</string>
+    <string name="fanbox_recommended_creators_title">Polecani twórcy</string>
 </resources>

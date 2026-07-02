@@ -35,6 +35,9 @@
     <string name="profile_tab_timeline_with_reply">Messages et réponses</string>
     <string name="profile_tab_likes">J\'aime</string>
     <string name="profile_tab_media">Médias</string>
+    <string name="profile_blocked_gate_title">Profil bloqué</string>
+    <string name="profile_blocked_gate_description">Vous avez bloqué cet utilisateur. Leurs onglets et leur timeline sont cachés jusqu\'à ce que vous choisissiez de les afficher.</string>
+    <string name="profile_blocked_gate_show">Afficher</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
     <string name="pixiv_ranking_week_title">Classement hebdomadaire</string>
@@ -44,6 +47,8 @@
     <string name="pixiv_ranking_week_original_title">Classement original</string>
     <string name="pixiv_ranking_week_rookie_title">Classement des Rookies</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Abonnements privés</string>
+    <string name="pixiv_private_bookmarks_title">Signets privés</string>
     <string name="report_title">Signaler</string>
     <string name="report_description">Quel est le problème avec ce message ?</string>
     <string name="report_reason_spam_title">Spam</string>
@@ -92,24 +97,31 @@
     <string name="status_share_via_fxembed">Partager via FxEmbed</string>
     <string name="status_share_via_fixvx">Partager via Fixvx</string>
     <string name="status_insight_title">Aperçu du post</string>
+    <string name="profile_insight_title">Aperçu du profil</string>
     <string name="agent_chat_title">Chat IA</string>
     <string name="agent_chat_input_placeholder">Demander quoi que ce soit…</string>
     <string name="agent_chat_send">Envoyer</string>
     <string name="agent_chat_thinking">Penser à…</string>
     <string name="status_insight_analyzing">Analyse de ce message…</string>
+    <string name="profile_insight_analyzing">Analyse de ce profil…</string>
     <string name="status_insight_error">Impossible d\'analyser ce message.</string>
     <string name="status_insight_trace_loading_post_context">Chargement du contexte de publication…</string>
     <string name="status_insight_trace_post_context_loaded">Contexte de l\'article chargé</string>
     <string name="status_insight_trace_preparing_images">Préparation des images…</string>
     <string name="status_insight_trace_images_unsupported_fallback">Les images ne sont pas prises en charge; nouvelle tentative avec le texte…</string>
+    <string name="status_insight_trace_agent_started">Démarrage de l\'analyse...</string>
+    <string name="status_insight_trace_strategy_started">Analyse de la planification...</string>
     <string name="status_insight_trace_strategy_completed">Plan d\'analyse terminé</string>
+    <string name="status_insight_trace_subgraph_started">Saisie de l\'étape de l\'analyse...</string>
     <string name="status_insight_trace_subgraph_completed">Phase d\'analyse terminée</string>
     <string name="status_insight_trace_subgraph_failed">La phase d\'analyse a échoué</string>
     <string name="status_insight_trace_asking_model">Demande à %1$s…</string>
     <string name="status_insight_trace_model_response_received">Lecture de la réponse du modèle…</string>
     <string name="status_insight_trace_streaming_started">Streaming depuis %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Réception de la réponse...</string>
     <string name="status_insight_trace_streaming_completed">Flux de réponse terminé</string>
     <string name="status_insight_trace_streaming_failed">Échec du flux de réponse</string>
+    <string name="status_insight_trace_running_step">Étape d\'analyse en cours...</string>
     <string name="status_insight_trace_step_completed">Étape d\'analyse terminée</string>
     <string name="status_insight_trace_step_failed">L\'étape d\'analyse a échoué</string>
     <string name="status_insight_trace_tool_call_started">%1$s</string>
@@ -166,6 +178,7 @@
     <string name="bluesky_login_password">Mot de passe</string>
     <string name="bluesky_login_2fa">Jeton 2FA</string>
     <string name="bluesky_login_oauth_button">Se connecter avec OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corriger les permissions de Tranquil</string>
     <string name="bluesky_login_use_password_button">Utiliser un mot de passe</string>
     <string name="bluesky_login_oauth_hint">L\'OAuth de Bluesky peut encore être instable. Si vous rencontrez des problèmes, utilisez la connexion par mot de passe.</string>
     <string name="login_expired">Session de connexion expirée</string>
@@ -187,6 +200,8 @@
     <string name="settings_appearance_layout_group_subtitle">Mise en page du fil d\'actualité, navigation et actions sur les messages</string>
     <string name="settings_appearance_display_group_title">Affichage</string>
     <string name="settings_appearance_display_group_subtitle">Horodatage, badges de source, liens et comportement du navigateur</string>
+    <string name="settings_behavior_title">Comportement</string>
+    <string name="settings_behavior_description">Préférences de gestion du navigateur et des liens</string>
     <string name="settings_appearance_media_group_title">Médias</string>
     <string name="settings_appearance_media_group_subtitle">Visibilité des médias, lecture et contenu sensible</string>
     <string name="settings_storage_title">Stockage</string>
@@ -419,6 +434,9 @@
     <string name="rss_detail_tldr">Résumer</string>
     <string name="rss_detail_tldr_error">Échec du résumé</string>
     <string name="rss_detail_copy_link">Copier le lien</string>
+    <string name="article_content_gate_subscription_title">Support requis</string>
+    <string name="article_content_gate_subscription_description">Cet article n\'est disponible que pour les supporters. Ouvrez-le dans le navigateur pour supporter le créateur et lire le contenu complet.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Cet article n\'est disponible que pour les supporteurs d\'%1$d. Ouvrez-le dans le navigateur pour supporter le créateur et lire le contenu complet.</string>
     <string name="mastodon_available_timelines">Fils d\'actualité disponibles</string>
     <string name="mastodon_trending_statuses">Messages populaires</string>
     <string name="mastodon_federated_timeline">Fil d\'actualité fédéré</string>
@@ -500,6 +518,12 @@
     <string name="deeplink_account_selection_title">Sélectionner un compte</string>
     <string name="deeplink_account_selection_message">Sélectionnez un compte pour ouvrir ce lien</string>
     <string name="deeplink_account_selection_browser">Ouvrir dans le navigateur</string>
+    <string name="deeplink_account_selection_save_default">Toujours ouvrir de cette façon</string>
+    <string name="settings_link_open_defaults_title">Ouverture du lien</string>
+    <string name="settings_link_open_defaults_description">Choisir les liens supportés par l\'hôte par défaut</string>
+    <string name="settings_link_open_default_title">Par défaut pour les liens %1$s</string>
+    <string name="settings_link_open_default_description">Choisir comment les liens supportés s\'ouvrent lorsque Flare peut les gérer</string>
+    <string name="settings_link_open_default_ask_every_time">Demander à chaque fois</string>
     <string name="block_user_title">Bloquer l\'utilisateur</string>
     <string name="block_user_description">Êtes-vous sûr de vouloir bloquer cet utilisateur ?</string>
     <string name="unblock_user_title">Débloquer l\'utilisateur</string>
@@ -528,23 +552,15 @@
     <string name="misskey_channel_tab_featured">Mis en avant</string>
     <string name="media_save_success">Enregistré dans Téléchargements</string>
     <string name="media_save_fail">Échec de l\'enregistrement</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Aperçu du profil</string>
-    <string name="profile_insight_analyzing">Analyse de ce profil…</string>
-    <string name="status_insight_trace_agent_started">Démarrage de l\'analyse...</string>
-    <string name="status_insight_trace_strategy_started">Analyse de la planification...</string>
-    <string name="status_insight_trace_subgraph_started">Saisie de l\'étape de l\'analyse...</string>
-    <string name="status_insight_trace_streaming_response">Réception de la réponse...</string>
-    <string name="status_insight_trace_running_step">Étape d\'analyse en cours...</string>
-    <string name="settings_about_discord" translatable="false">Discord.</string>
+    <string name="media_download_started">Téléchargement démarré</string>
     <string name="agent_compose_confirmation_prompt">Envoi publication?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Annuler</string>
+    <string name="agent_ui_confirm_execute">Valider</string>
+    <string name="agent_ui_confirm_save_subscription">Enregistrer</string>
     <string name="agent_ui_cancel_save_subscription">Annuler: enregistrement</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Supprimer</string>
     <string name="agent_ui_cancel_delete_subscription">Annuler: suppression</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Envoyer</string>
     <string name="agent_ui_cancel_send_post">Annuler: envoi</string>
     <string name="agent_ui_select_load_subscription_source">Sélectionner: source d’abonnement (charger)</string>
     <string name="agent_ui_select_delete_subscription_source">Sélectionner: source d’abonnement (suppression)</string>
@@ -565,7 +581,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Envoi contenu - compte?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Répondre publication - compte?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citer publication - compte?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nCompte : %2$s\nPlateforme : %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Sélectionner: publication (agir sur)</string>
     <string name="agent_ui_select_post_action">Sélectionner: action (publication)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Saisir: publication cible attachmentRef / statusKey…</string>
@@ -588,4 +604,6 @@
     <string name="agent_ui_select_followers_user">Sélectionner: utilisateur (voir abonnés)</string>
     <string name="agent_ui_select_profile_tabs_user">Sélectionner: utilisateur (voir onglets du profil)</string>
     <string name="agent_ui_status_insight_user_placeholder">Saisir: utilisateur lien, handle, userKey…</string>
+    <string name="fanbox_supported_title">Messages pris en charge</string>
+    <string name="fanbox_recommended_creators_title">Créateurs recommandés</string>
 </resources>

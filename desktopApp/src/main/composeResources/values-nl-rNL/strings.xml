@@ -35,6 +35,9 @@
     <string name="profile_tab_timeline_with_reply">Berichten en reacties</string>
     <string name="profile_tab_likes">Vind-ik-leuk</string>
     <string name="profile_tab_media">Medium</string>
+    <string name="profile_blocked_gate_title">Geblokkeerd profiel</string>
+    <string name="profile_blocked_gate_description">Je hebt deze gebruiker geblokkeerd. De tabbladen en tijdlijn zijn verborgen totdat je ze wilt laten zien.</string>
+    <string name="profile_blocked_gate_show">Toon</string>
     <string name="illustrations_title">Illustraties</string>
     <string name="manga_title">Manga</string>
     <string name="pixiv_ranking_week_title">Wekelijkse Ranglijst</string>
@@ -44,6 +47,8 @@
     <string name="pixiv_ranking_week_original_title">Originele Rang</string>
     <string name="pixiv_ranking_week_rookie_title">Beginner Rang</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privé volgers</string>
+    <string name="pixiv_private_bookmarks_title">Privébladwijzers</string>
     <string name="report_title">Rapporteren</string>
     <string name="report_description">Wat is er mis met dit bericht?</string>
     <string name="report_reason_spam_title">Spam</string>
@@ -92,15 +97,22 @@
     <string name="status_share_via_fxembed">Delen via FxEmbed</string>
     <string name="status_share_via_fixvx">Delen via Fixvx</string>
     <string name="status_insight_title">Post inzicht</string>
+    <string name="profile_insight_title">Profielinzicht</string>
     <string name="agent_chat_title">AI chat</string>
+    <string name="agent_chat_input_placeholder">Vraag iets...</string>
     <string name="agent_chat_send">Versturen</string>
+    <string name="agent_chat_thinking">Denken...</string>
     <string name="status_insight_analyzing">Analyseren van dit bericht…</string>
+    <string name="profile_insight_analyzing">Dit profiel analyseren…</string>
     <string name="status_insight_error">Kan dit bericht niet analyseren.</string>
     <string name="status_insight_trace_loading_post_context">Laden van berichtcontext…</string>
     <string name="status_insight_trace_post_context_loaded">Post context geladen</string>
+    <string name="status_insight_trace_preparing_images">Afbeeldingen voorbereiden...</string>
     <string name="status_insight_trace_images_unsupported_fallback">Afbeeldingen worden niet ondersteund; opnieuw proberen met tekst…</string>
     <string name="status_insight_trace_agent_started">Starten van analyse…</string>
+    <string name="status_insight_trace_strategy_started">Planning analyse...</string>
     <string name="status_insight_trace_strategy_completed">Analyseplan voltooid</string>
+    <string name="status_insight_trace_subgraph_started">Analyse-fase invoeren...</string>
     <string name="status_insight_trace_subgraph_completed">Analyse fase voltooid</string>
     <string name="status_insight_trace_subgraph_failed">Analyse fase mislukt</string>
     <string name="status_insight_trace_asking_model">Vragen %1$s…</string>
@@ -109,6 +121,7 @@
     <string name="status_insight_trace_streaming_response">Antwoord ontvangen…</string>
     <string name="status_insight_trace_streaming_completed">Antwoord-stream voltooid</string>
     <string name="status_insight_trace_streaming_failed">Reactie stream mislukt</string>
+    <string name="status_insight_trace_running_step">Lopende analyse stap...</string>
     <string name="status_insight_trace_step_completed">Analyse stap voltooid</string>
     <string name="status_insight_trace_step_failed">Analyse stap mislukt</string>
     <string name="status_insight_trace_tool_call_started">%1$s</string>
@@ -119,9 +132,11 @@
     <string name="status_insight_trace_tool_load_status_context_completed">Post context geladen</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Post context invoer is geweigerd</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Fout bij het laden van post context</string>
+    <string name="status_insight_trace_tool_search_status_started">Zoeken...</string>
     <string name="status_insight_trace_tool_search_status_completed">Zoeken voltooid</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Zoekinvoer is geweigerd</string>
     <string name="status_insight_trace_tool_search_status_failed">Zoeken mislukt</string>
+    <string name="status_insight_trace_agent_completed">Analyse voltooien...</string>
     <string name="status_insight_trace_agent_failed">Analyse mislukt</string>
     <string name="status_insight_trace_agent_closing">Afsluitende analyse…</string>
     <string name="ask_ai">Vraag AI</string>
@@ -163,6 +178,7 @@
     <string name="bluesky_login_password">Wachtwoord</string>
     <string name="bluesky_login_2fa">2FA-token</string>
     <string name="bluesky_login_oauth_button">Inloggen met OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil permissies herstellen</string>
     <string name="bluesky_login_use_password_button">Wachtwoord gebruiken</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan nog onstabiel zijn. Als je problemen ondervindt, gebruik dan wachtwoord-inloggen.</string>
     <string name="login_expired">Inlogsessie verlopen</string>
@@ -184,6 +200,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tijdlijn-layout, navigatie en berichtacties</string>
     <string name="settings_appearance_display_group_title">Weergave</string>
     <string name="settings_appearance_display_group_subtitle">Tijdstempels, bron-badges, links en browsergedrag</string>
+    <string name="settings_behavior_title">Gedrag</string>
+    <string name="settings_behavior_description">Voorkeuren voor het afhandelen van browser en koppelen</string>
     <string name="settings_appearance_media_group_title">Medium</string>
     <string name="settings_appearance_media_group_subtitle">Media-zichtbaarheid, afspelen en gevoelige inhoud</string>
     <string name="settings_storage_title">Opslag</string>
@@ -416,6 +434,9 @@
     <string name="rss_detail_tldr">Samenvatten</string>
     <string name="rss_detail_tldr_error">Samenvatten mislukt</string>
     <string name="rss_detail_copy_link">Link kopiëren</string>
+    <string name="article_content_gate_subscription_title">Ondersteuning vereist</string>
+    <string name="article_content_gate_subscription_description">Dit artikel is alleen beschikbaar voor supporters. Open het in de browser om de maker te ondersteunen en de volledige inhoud te lezen.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Dit artikel is alleen beschikbaar voor supporters van +unnamed@@0%1$d. Open het in de browser om de maker te ondersteunen en de volledige inhoud te lezen.</string>
     <string name="mastodon_available_timelines">Beschikbare tijdlijnen</string>
     <string name="mastodon_trending_statuses">Trending berichten</string>
     <string name="mastodon_federated_timeline">Gefedereerde tijdlijn</string>
@@ -497,6 +518,12 @@
     <string name="deeplink_account_selection_title">Account selecteren</string>
     <string name="deeplink_account_selection_message">Selecteer een account om deze link te openen</string>
     <string name="deeplink_account_selection_browser">Openen in browser</string>
+    <string name="deeplink_account_selection_save_default">Altijd deze manier openen</string>
+    <string name="settings_link_open_defaults_title">Link openen</string>
+    <string name="settings_link_open_defaults_description">Kies standaard voor ondersteunde links door host</string>
+    <string name="settings_link_open_default_title">Standaard voor %1$s links</string>
+    <string name="settings_link_open_default_description">Kiezen hoe ondersteunde links openen wanneer het apparaat kan verhandelen</string>
+    <string name="settings_link_open_default_ask_every_time">Telkens vragen</string>
     <string name="block_user_title">Gebruiker blokkeren</string>
     <string name="block_user_description">Weet je zeker dat je deze gebruiker wilt blokkeren?</string>
     <string name="unblock_user_title">Gebruiker deblokkeren</string>
@@ -525,26 +552,15 @@
     <string name="misskey_channel_tab_featured">Uitgelicht</string>
     <string name="media_save_success">Opgeslagen in Downloads</string>
     <string name="media_save_fail">Opslaan mislukt</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profielinzicht</string>
-    <string name="agent_chat_input_placeholder">Vraag iets...</string>
-    <string name="agent_chat_thinking">Denken...</string>
-    <string name="profile_insight_analyzing">Dit profiel analyseren…</string>
-    <string name="status_insight_trace_preparing_images">Afbeeldingen voorbereiden...</string>
-    <string name="status_insight_trace_strategy_started">Planning analyse...</string>
-    <string name="status_insight_trace_subgraph_started">Analyse-fase invoeren...</string>
-    <string name="status_insight_trace_running_step">Lopende analyse stap...</string>
-    <string name="status_insight_trace_tool_search_status_started">Zoeken...</string>
-    <string name="status_insight_trace_agent_completed">Analyse voltooien...</string>
-    <string name="settings_about_discord" translatable="false">Onenigheid</string>
+    <string name="media_download_started">Download gestart</string>
     <string name="agent_compose_confirmation_prompt">Verzenden bericht?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Annuleren</string>
+    <string name="agent_ui_confirm_execute">Bevestigen</string>
+    <string name="agent_ui_confirm_save_subscription">Opslaan</string>
     <string name="agent_ui_cancel_save_subscription">Annuleren: opslaan</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Verwijderen</string>
     <string name="agent_ui_cancel_delete_subscription">Annuleren: verwijderen</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Versturen</string>
     <string name="agent_ui_cancel_send_post">Annuleren: verzenden</string>
     <string name="agent_ui_select_load_subscription_source">Selecteren: abonnementsbron (laden)</string>
     <string name="agent_ui_select_delete_subscription_source">Selecteren: abonnementsbron (verwijderen)</string>
@@ -565,7 +581,6 @@
     <string name="agent_ui_compose_send_confirmation_title">Verzenden inhoud - account?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden bericht - account?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren bericht - account?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Selecteren: bericht (bewerken)</string>
     <string name="agent_ui_select_post_action">Selecteren: actie (bericht)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Invoeren: doelbericht attachmentRef / statusKey…</string>
@@ -588,4 +603,6 @@
     <string name="agent_ui_select_followers_user">Selecteren: gebruiker (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Selecteren: gebruiker (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Invoeren: gebruiker link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Ondersteunde berichten</string>
+    <string name="fanbox_recommended_creators_title">Aanbevolen makers</string>
 </resources>

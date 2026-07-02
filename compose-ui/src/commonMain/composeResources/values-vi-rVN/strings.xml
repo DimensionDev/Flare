@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Bài đăng</string>
     <string name="profile_misskey_header_status_count">%1$s Bài đăng</string>
     <string name="profile_header_button_follow">Theo dõi</string>
+    <string name="profile_header_button_request_follow">Yêu cầu theo dõi</string>
     <string name="profile_header_button_following">Đang theo dõi</string>
     <string name="profile_header_button_requested">Đã gửi yêu cầu</string>
     <string name="profile_header_button_blocked">Đã chặn</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">Nội dung nhạy cảm</string>
     <string name="show_media">Hiện phương tiện</string>
     <string name="hide_media">Ẩn phương tiện</string>
+    <string name="media_menu_share_image">Chia sẻ ảnh</string>
+    <string name="media_menu_copy_link">Sao chép liên kết</string>
     <string name="login_expired">Phiên đăng nhập đã hết hạn</string>
     <string name="login_expired_message">Nhấn để đăng nhập lại</string>
     <string name="login_expired_relogin">Đăng nhập lại</string>
@@ -403,13 +406,11 @@
     <string name="liked_title">Đã thích</string>
     <string name="all_rss_feeds_title">Tất cả đăng ký</string>
     <string name="posts_title">Bài đăng</string>
+    <string name="posts_with_replies_title">Bài viết và trả lời</string>
     <string name="media_title">Phương tiện</string>
     <string name="settings_appearance_absolute_timestamp">Dấu thời gian tuyệt đối</string>
     <string name="settings_appearance_absolute_timestamp_description">Hiển thị thời gian chính xác trên bài đăng</string>
     <string name="channel_title">Kênh</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Yêu cầu theo dõi</string>
-    <string name="posts_with_replies_title">Bài viết và trả lời</string>
     <string name="pixiv_ranking_week_title">Xếp hạng tuần</string>
     <string name="pixiv_ranking_month_title">Xếp hạng tháng</string>
     <string name="pixiv_ranking_day_male_title">Xếp hạng nam</string>
@@ -418,5 +419,4 @@
     <string name="pixiv_ranking_week_rookie_title">Xếp hạng tân binh</string>
     <string name="pixiv_ranking_day_manga_title">Xếp hạng manga</string>
     <string name="illustrations_title">Minh họa</string>
-    <string name="manga_title">Manga</string>
 </resources>

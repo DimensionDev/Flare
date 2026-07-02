@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[
-            <span>גרסה %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>גרסה %1$s:</span>
             <ul>
                 <li>נוסף Flare AI Agent עם צ׳אט, תובנות פוסטים ותובנות פרופילים.</li>
                 <li>נוספה תמיכה ב-Pixiv ותצוגת פרטי גלריה חדשה.</li>

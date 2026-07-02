@@ -44,10 +44,16 @@
     <string name="compose_save_draft">Сохранить</string>
     <string name="compose_close_discard">Удалить</string>
     <string name="status_insight_title">Пост пронзание</string>
+    <string name="profile_insight_title">Анализ профиля</string>
+    <string name="profile_blocked_gate_title">Заблокированный профиль</string>
+    <string name="profile_blocked_gate_description">Вы заблокировали этот профиль. Его вкладки и лента времени скрыты, пока вы не выберете показать их.</string>
+    <string name="profile_blocked_gate_show">Показать</string>
     <string name="status_insight_input_placeholder">Спросите последующую справку…</string>
     <string name="status_insight_send">Отправить</string>
     <string name="status_insight_analyzing">Анализ этого сообщения…</string>
+    <string name="profile_insight_analyzing">Анализ профиля…</string>
     <string name="status_insight_error">Не удалось проанализировать это сообщение.</string>
+    <string name="profile_insight_error">Не удалось проанализировать этот профиль.</string>
     <string name="status_insight_trace_loading_post_context">Загрузка контекста поста…</string>
     <string name="status_insight_trace_post_context_loaded">Пост контекст загружен</string>
     <string name="status_insight_trace_preparing_images">Подготовка изображений…</string>
@@ -85,6 +91,7 @@
     <string name="agent_chat_input_placeholder">Спросите что-нибудь…</string>
     <string name="agent_chat_send">Отправить</string>
     <string name="agent_chat_thinking">Думаю…</string>
+    <string name="agent_compose_confirmation_prompt">Отправку пост?</string>
     <string name="draft_box_title">Черновики</string>
     <string name="draft_box_empty">Черновиков пока нет</string>
     <string name="draft_box_edit">Изменить</string>
@@ -102,6 +109,8 @@
     <string name="settings_appearance_layout_group_subtitle">Макет ленты, навигация и действия с постами</string>
     <string name="settings_appearance_display_group_title">Отображение</string>
     <string name="settings_appearance_display_group_subtitle">Метки времени, значки платформ, ссылки и поведение браузера</string>
+    <string name="settings_behavior_title">Поведение</string>
+    <string name="settings_behavior_description">Браузер и ссылки на настройки обработки</string>
     <string name="settings_appearance_media_group_title">Медиа</string>
     <string name="settings_appearance_media_group_subtitle">Видимость медиа, воспроизведение и чувствительный контент</string>
     <string name="settings_storage_title">Хранилище</string>
@@ -220,6 +229,7 @@
     <string name="bluesky_login_password_hint">Пароль</string>
     <string name="bluesky_login_auth_factor_token_hint">Токен 2FA</string>
     <string name="bluesky_login_oauth_button">Войти через OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Исправить разрешения Tranquil</string>
     <string name="bluesky_login_use_password_button">Использовать пароль</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth может работать нестабильно. Если возникнут проблемы, используйте вход по паролю.</string>
     <string name="report_title">Жалоба</string>
@@ -259,6 +269,10 @@
     <string name="settings_appearance_post_action_style_stretch">Растянуть</string>
     <string name="settings_appearance_post_action_layout">Настроить действия</string>
     <string name="settings_appearance_post_action_layout_description">Выберите порядок и видимость кнопок действий поста</string>
+    <string name="settings_appearance_show_media">Показывать медиа</string>
+    <string name="settings_appearance_show_media_description">Показывать медиавложения в постах</string>
+    <string name="settings_appearance_show_numbers">Показывать числа</string>
+    <string name="settings_appearance_show_numbers_description">Показывать счетчики под каждым постом</string>
     <string name="settings_post_action_layout_title">Действия поста</string>
     <string name="settings_post_action_layout_enable">Настроить действия</string>
     <string name="settings_post_action_layout_enable_description">Выберите, какие действия будут в строке, меню Ещё или останутся скрытыми</string>
@@ -286,16 +300,20 @@
     <string name="settings_post_action_family_report">Пожаловаться</string>
     <string name="settings_post_action_family_mute_user">Игнорировать</string>
     <string name="settings_post_action_family_block_user">Заблокировать</string>
-    <string name="settings_appearance_show_media">Показывать медиа</string>
-    <string name="settings_appearance_show_media_description">Показывать медиавложения в постах</string>
-    <string name="settings_appearance_show_numbers">Показывать числа</string>
-    <string name="settings_appearance_show_numbers_description">Показывать счетчики под каждым постом</string>
     <string name="settings_appearance_show_cw_img">Показывать чувствительный контент</string>
     <string name="settings_appearance_show_cw_img_description">Всегда открывать чувствительные медиа в постах</string>
     <string name="settings_appearance_expand_content_warning">Показывать содержимое за предупреждениями о контенте</string>
     <string name="settings_appearance_expand_content_warning_description">Всегда показывать контент сообщений, скрытый предупреждениями</string>
     <string name="settings_appearance_expand_media">Сохранять соотношение сторон медиа</string>
     <string name="settings_appearance_expand_media_description">Показывать медиа с оригинальным соотношением сторон в лентах</string>
+    <string name="gallery_detail_tab_info">Инфо</string>
+    <string name="gallery_detail_tab_comments">Комментарии</string>
+    <string name="gallery_detail_tab_recommend">Рекомендовать</string>
+    <string name="gallery_detail_comments_title">Комментарии</string>
+    <string name="gallery_detail_recommendations_title">Рекомендации</string>
+    <string name="gallery_detail_view_more">Подробнее</string>
+    <string name="gallery_detail_share_content_description">Поделиться</string>
+    <string name="gallery_detail_expand_content_description">Развернуть</string>
     <string name="settings_appearance_video_autoplay">Автозапуск видео</string>
     <string name="settings_appearance_video_autoplay_description">Автоматически воспроизводить видео в постах</string>
     <string name="settings_appearance_video_autoplay_wifi">Только через Wi-Fi</string>
@@ -356,6 +374,13 @@
     <string name="settings_storage_clear_database_description">Удалить %1$s закешированных пользователей и %2$s закешированных постов</string>
     <string name="settings_storage_app_log">Логи приложения</string>
     <string name="settings_storage_app_log_description">Просмотр, сохранение или очистка логов приложения</string>
+    <string name="settings_media_save_location">Место сохранения медиа</string>
+    <string name="settings_media_save_location_description">Выберите, где загруженные файлы сохраняются на этом устройстве.</string>
+    <string name="settings_media_save_location_downloads">Загрузки</string>
+    <string name="settings_media_save_location_custom_folder">Пользовательская папка</string>
+    <string name="settings_media_save_location_choose_folder">Выберите папку</string>
+    <string name="settings_media_save_location_reset_downloads">Сброс загрузки</string>
+    <string name="settings_media_save_location_ask_every_time">Спрашивать каждый раз</string>
     <string name="service_select_instance_input_placeholder">URL инстанса</string>
     <string name="service_select_next_button">Далее</string>
     <string name="service_select_empty_message">Инстансы не найдены</string>
@@ -363,6 +388,7 @@
     <string name="settings_accounts_remove">Удалить</string>
     <string name="settings_accounts_remove_confirm">Вы уверены, что хотите удалить аккаунт %1$s с этого устройства?</string>
     <string name="media_menu_save">Сохранить изображение</string>
+    <string name="media_menu_download_all">Скачать все</string>
     <string name="media_menu_share_image">Поделиться изображением</string>
     <string name="media_menu_copy_link">Копировать ссылку</string>
     <string name="media_menu_media_link">Ссылка на медиа</string>
@@ -370,6 +396,8 @@
     <string name="status_menu_share_via_fixvx">Поделиться через Fixvx</string>
     <string name="media_save_success">Сохранено</string>
     <string name="media_save_fail">Не удалось сохранить</string>
+    <string name="media_download_started">Загрузка начата.</string>
+    <string name="media_prepare_started">Подготовка медиа...</string>
     <string name="media_alt_text">Альт-текст</string>
     <string name="media_is_downloading">Медиа все еще загружается. Попробуйте еще раз через мгновение.</string>
     <string name="settings_side_panel_empty">По умолчанию боковая панель соответствует платформе текущего аккаунта.</string>
@@ -451,6 +479,8 @@
     <string name="pixiv_ranking_week_original_title">Оригинальный Рейтинг</string>
     <string name="pixiv_ranking_week_rookie_title">Рейтинг Новобранцев</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Частная подписка</string>
+    <string name="pixiv_private_bookmarks_title">Приватные закладки</string>
     <string name="tab_settings_title">Настройки вкладок</string>
     <string name="dm_list_title">Личные сообщения</string>
     <string name="dm_list_empty">Нет личных сообщений</string>
@@ -501,6 +531,9 @@
     <string name="rss_detail_tldr_loading">Создание краткого содержания…</string>
     <string name="rss_detail_translate">Перевести</string>
     <string name="rss_detail_translate_error">Не удалось перевести</string>
+    <string name="article_content_gate_subscription_title">Требуется поддержка</string>
+    <string name="article_content_gate_subscription_description">Эта статья доступна только для сторонников. Откройте ее в браузере, чтобы поддержать создателя и прочитать весь контент.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Эта статья доступна только для сторонников из ¥%1$d. Откройте ее в браузере, чтобы поддержать создателя и прочитать весь контент.</string>
     <string name="emoji_picker_recent">Недавние</string>
     <string name="emoji_picker_search">Поиск</string>
     <string name="podcast_host">Ведущий</string>
@@ -529,6 +562,12 @@
     <string name="deeplink_account_selection_title">Выбор аккаунта</string>
     <string name="deeplink_account_selection_message">Выберите аккаунт, чтобы открыть эту ссылку</string>
     <string name="deeplink_account_selection_browser">Открыть в браузере</string>
+    <string name="deeplink_account_selection_save_default">Всегда открывать таким образом</string>
+    <string name="settings_link_open_defaults_title">Открытие ссылки</string>
+    <string name="settings_link_open_defaults_description">Выберите стандартные для поддерживаемых ссылок хостом</string>
+    <string name="settings_link_open_default_title">По умолчанию для ссылок %1$s</string>
+    <string name="settings_link_open_default_description">Выберите, как открываются поддерживаемые ссылки, когда сигнал может управлять ими</string>
+    <string name="settings_link_open_default_ask_every_time">Спрашивать каждый раз</string>
     <string name="block_user_title">Заблокировать пользователя</string>
     <string name="block_user_description">Вы уверены, что хотите заблокировать этого пользователя?</string>
     <string name="unblock_user_title">Разблокировать пользователя</string>
@@ -579,24 +618,13 @@
     <string name="channel_item_unfollow">Отписаться</string>
     <string name="channel_item_favourite">В избранное</string>
     <string name="channel_item_unfavourite">Из избранного</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Анализ профиля</string>
-    <string name="profile_insight_analyzing">Анализ профиля…</string>
-    <string name="profile_insight_error">Не удалось проанализировать этот профиль.</string>
-    <string name="status_insight_trace_tool_call_started">%1$s</string>
-    <string name="status_insight_trace_tool_call_completed">%1$s</string>
-    <string name="status_insight_trace_tool_validation_failed">%1$s</string>
-    <string name="status_insight_trace_tool_call_failed">%1$s</string>
-    <string name="agent_compose_confirmation_prompt">Отправку пост?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Отмена</string>
+    <string name="agent_ui_confirm_execute">Подтвердить</string>
+    <string name="agent_ui_confirm_save_subscription">Сохранить</string>
     <string name="agent_ui_cancel_save_subscription">Отменить: сохранение</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Удалить</string>
     <string name="agent_ui_cancel_delete_subscription">Отменить: удаление</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Отправить</string>
     <string name="agent_ui_cancel_send_post">Отменить: отправку</string>
     <string name="agent_ui_select_load_subscription_source">Выберите: источник подписки (загрузить)</string>
     <string name="agent_ui_select_delete_subscription_source">Выберите: источник подписки (удаление)</string>
@@ -617,7 +645,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Отправку содержимое - аккаунт?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Ответить пост - аккаунт?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Цитировать пост - аккаунт?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nАккаунт: %2$s\nПлатформа: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Выберите: пост (выполнить действие)</string>
     <string name="agent_ui_select_post_action">Выберите: действие (пост)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Введите: целевой пост attachmentRef / statusKey…</string>
@@ -640,4 +668,6 @@
     <string name="agent_ui_select_followers_user">Выберите: пользователь (посмотреть подписчиков)</string>
     <string name="agent_ui_select_profile_tabs_user">Выберите: пользователь (посмотреть вкладки профиля)</string>
     <string name="agent_ui_status_insight_user_placeholder">Введите: пользователь ссылка, handle, userKey…</string>
+    <string name="fanbox_supported_title">Поддерживаемые записи</string>
+    <string name="fanbox_recommended_creators_title">Рекомендованные авторы</string>
 </resources>

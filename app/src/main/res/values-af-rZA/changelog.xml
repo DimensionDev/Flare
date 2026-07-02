@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[
-            <span>Weergawe %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Weergawe %1$s:</span>
             <ul>
                 <li>Flare AI Agent bygevoeg met klets, plasingsinsig en profielinsig.</li>
                 <li>Pixiv-ondersteuning en ’n nuwe galerydetailaansig bygevoeg.</li>

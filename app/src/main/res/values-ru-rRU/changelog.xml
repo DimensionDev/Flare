@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">С возвращением!</string>
     <string name="changelog_message">Мы внесли некоторые изменения с момента последнего входа. Ниже приведены подробности:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>Версия %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
                 <li>Добавлен Flare AI Agent с чатом, анализом постов и анализом профилей.</li>
                 <li>Добавлена поддержка Pixiv и новый экран деталей галереи.</li>

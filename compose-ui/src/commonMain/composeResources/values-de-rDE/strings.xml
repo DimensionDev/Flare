@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Sensible Medien</string>
     <string name="show_media">Medien anzeigen</string>
     <string name="hide_media">Medien ausblenden</string>
+    <string name="media_menu_download">Download</string>
+    <string name="media_menu_download_all">Alle herunterladen</string>
+    <string name="media_menu_share_image">Bild teilen</string>
+    <string name="media_menu_copy_link">Link kopieren</string>
     <string name="login_expired">Anmeldesitzung abgelaufen</string>
     <string name="login_expired_message">Tippen, um dich erneut anzumelden</string>
     <string name="login_expired_relogin">Erneut anmelden</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Passwort</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-Token</string>
     <string name="bluesky_login_oauth_button">Mit OAuth anmelden</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Löschberechtigungen korrigieren</string>
     <string name="bluesky_login_use_password_button">Passwort verwenden</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kann noch instabil sein. Falls Probleme auftreten, nutze stattdessen die Anmeldung per Passwort.</string>
     <string name="login_button">Anmelden</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Ursprüngliche Rangliste</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat folgen</string>
+    <string name="pixiv_private_bookmarks_title">Private Lesezeichen</string>
     <string name="illustrations_title">Illustrationen</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Unterstützte Beiträge</string>
+    <string name="fanbox_recommended_creators_title">Empfohlene Ersteller</string>
 </resources>

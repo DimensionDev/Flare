@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Känsligt innehåll</string>
     <string name="show_media">Visa media</string>
     <string name="hide_media">Dölj media</string>
+    <string name="media_menu_download">Hämta</string>
+    <string name="media_menu_download_all">Ladda ner alla</string>
+    <string name="media_menu_share_image">Dela bild</string>
+    <string name="media_menu_copy_link">Kopiera länk</string>
     <string name="login_expired">Inloggningssessionen har gått ut</string>
     <string name="login_expired_message">Tryck för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Lösenord</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-kod</string>
     <string name="bluesky_login_oauth_button">Logga in med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fixa fridfulla behörigheter</string>
     <string name="bluesky_login_use_password_button">Använd lösenord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortfarande vara instabilt. Om du stöter på problem, använd lösenordsinloggning istället.</string>
     <string name="login_button">Logga in</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Ursprunglig Rankning</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat Följer</string>
+    <string name="pixiv_private_bookmarks_title">Privata bokmärken</string>
     <string name="illustrations_title">Illustrationer</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Inlägg som stöds</string>
+    <string name="fanbox_recommended_creators_title">Rekommenderade skapare</string>
 </resources>

@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Контент деликатного характера</string>
     <string name="show_media">Показать медиа</string>
     <string name="hide_media">Скрыть медиа</string>
+    <string name="media_menu_download">Скачать</string>
+    <string name="media_menu_download_all">Скачать все</string>
+    <string name="media_menu_share_image">Поделиться изображением</string>
+    <string name="media_menu_copy_link">Копировать ссылку</string>
     <string name="login_expired">Сессия истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Пароль</string>
     <string name="bluesky_login_auth_factor_token_hint">Код 2FA</string>
     <string name="bluesky_login_oauth_button">Войти через OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Исправить разрешения Tranquil</string>
     <string name="bluesky_login_use_password_button">Использовать пароль</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth может работать нестабильно. Если возникнут проблемы, используйте вход по паролю.</string>
     <string name="login_button">Войти</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Оригинальный Рейтинг</string>
     <string name="pixiv_ranking_week_rookie_title">Рейтинг Новобранцев</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Частная подписка</string>
+    <string name="pixiv_private_bookmarks_title">Приватные закладки</string>
     <string name="illustrations_title">Иллюстрации</string>
     <string name="manga_title">Манга</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Поддерживаемые записи</string>
+    <string name="fanbox_recommended_creators_title">Рекомендованные авторы</string>
 </resources>

@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Citlivý obsah</string>
     <string name="show_media">Zobrazit média</string>
     <string name="hide_media">Skrýt média</string>
+    <string name="media_menu_download">Stáhnout</string>
+    <string name="media_menu_download_all">Stáhnout vše</string>
+    <string name="media_menu_share_image">Sdílet obrázek</string>
+    <string name="media_menu_copy_link">Kopírovat odkaz</string>
     <string name="login_expired">Platnost přihlášení vypršela</string>
     <string name="login_expired_message">Klepnutím se znovu přihlaste</string>
     <string name="login_expired_relogin">Znovu se přihlásit</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Heslo</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA kód</string>
     <string name="bluesky_login_oauth_button">Přihlásit se přes OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Opravit oprávnění Tranquil</string>
     <string name="bluesky_login_use_password_button">Použít heslo</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth může být stále nestabilní. Pokud narazíte na problémy, použijte místo toho přihlášení heslem.</string>
     <string name="login_button">Přihlásit se</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Původní hodnocení</string>
     <string name="pixiv_ranking_week_rookie_title">Hodnocení Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Soukromé sledování</string>
+    <string name="pixiv_private_bookmarks_title">Soukromé záložky</string>
     <string name="illustrations_title">Ilustrace</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Podporované příspěvky</string>
+    <string name="fanbox_recommended_creators_title">Doporučení tvůrci</string>
 </resources>

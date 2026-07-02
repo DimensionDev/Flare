@@ -2,8 +2,7 @@
 <resources>
     <string name="changelog_title">مرحبا بعودتك!</string>
     <string name="changelog_message">لقد قمنا ببعض التغييرات منذ آخر تسجيل دخولك. وفيما يلي التفاصيل:</string>
-    <string name="changelog_current"><![CDATA[
-            <span>الإصدار %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
                 <li>تمت إضافة Flare AI Agent مع الدردشة ورؤى المنشورات ورؤى الملفات الشخصية.</li>
                 <li>تمت إضافة دعم Pixiv وتجربة تفاصيل معرض جديدة.</li>

@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Publicacions</string>
     <string name="profile_misskey_header_status_count">%1$s Publicacions</string>
     <string name="profile_header_button_follow">Segueix</string>
+    <string name="profile_header_button_request_follow">Sol·licita seguir</string>
     <string name="profile_header_button_following">Seguint</string>
     <string name="profile_header_button_requested">Sol·licitat</string>
     <string name="profile_header_button_blocked">Bloquejat</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">Contingut sensible</string>
     <string name="show_media">Mostra contingut multimèdia</string>
     <string name="hide_media">Amaga contingut multimèdia</string>
+    <string name="media_menu_share_image">Comparteix la imatge</string>
+    <string name="media_menu_copy_link">Copia l\'enllaç</string>
     <string name="login_expired">La sessió ha caducat</string>
     <string name="login_expired_message">Toca per tornar a iniciar la sessió</string>
     <string name="login_expired_relogin">Torna a iniciar la sessió</string>
@@ -402,14 +405,11 @@
     <string name="liked_title">M\'agrada</string>
     <string name="all_rss_feeds_title">Totes les subscripcions</string>
     <string name="posts_title">Publicacions</string>
+    <string name="posts_with_replies_title">Publicacions i respostes</string>
     <string name="media_title">Contingut multimèdia</string>
     <string name="settings_appearance_absolute_timestamp">Marca de temps absoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra marques de temps exactes a les publicacions</string>
     <string name="channel_title">Canal</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Sol·licita seguir</string>
-    <string name="social_title">Social</string>
-    <string name="posts_with_replies_title">Publicacions i respostes</string>
     <string name="pixiv_ranking_week_title">Rànquing setmanal</string>
     <string name="pixiv_ranking_month_title">Rànquing mensual</string>
     <string name="pixiv_ranking_day_male_title">Rànquing masculí</string>
@@ -418,5 +418,4 @@
     <string name="pixiv_ranking_week_rookie_title">Rànquing de debutants</string>
     <string name="pixiv_ranking_day_manga_title">Rànquing de manga</string>
     <string name="illustrations_title">Il·lustracions</string>
-    <string name="manga_title">Manga</string>
 </resources>

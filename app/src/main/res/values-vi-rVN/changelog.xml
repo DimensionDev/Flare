@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="changelog_current"><![CDATA[
-            <span>Phiên bản %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Phiên bản %1$s:</span>
             <ul>
                 <li>Đã thêm Flare AI Agent với trò chuyện, thông tin chi tiết bài đăng và thông tin chi tiết hồ sơ.</li>
                 <li>Đã thêm hỗ trợ Pixiv và màn hình chi tiết bộ sưu tập mới.</li>

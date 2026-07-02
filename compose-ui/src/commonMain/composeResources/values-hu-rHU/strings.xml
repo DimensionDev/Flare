@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Bejegyzés</string>
     <string name="profile_misskey_header_status_count">%1$s Bejegyzés</string>
     <string name="profile_header_button_follow">Követés</string>
+    <string name="profile_header_button_request_follow">Követés kérése</string>
     <string name="profile_header_button_following">Követve</string>
     <string name="profile_header_button_requested">Kérve</string>
     <string name="profile_header_button_blocked">Tiltva</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">Érzékeny tartalom</string>
     <string name="show_media">Média megjelenítése</string>
     <string name="hide_media">Média elrejtése</string>
+    <string name="media_menu_share_image">Kép megosztása</string>
+    <string name="media_menu_copy_link">Link másolása</string>
     <string name="login_expired">A bejelentkezési munkamenet lejárt</string>
     <string name="login_expired_message">Koppints az ismételt bejelentkezéshez</string>
     <string name="login_expired_relogin">Bejelentkezés újra</string>
@@ -371,6 +374,7 @@
     <string name="nostr_login_qr_button">Csatlakozás QR-kóddal</string>
     <string name="nostr_login_qr_hint">Szkenneld be Amberrel, Albyval vagy más Nostr Connect aláíróval.</string>
     <string name="nostr_login_qr_waiting">Várakozás az aláíró jóváhagyására…</string>
+    <string name="nostr_login_qr_link_label">Nostr Connect-hivatkozás</string>
     <string name="cancel_button">Mégse</string>
     <string name="nostr_login_generate_button">Létrehozás és bejelentkezés</string>
     <string name="nostr_login_npub_hint">npub vagy hex pubkey (opcionális, ha az nsec be van állítva)</string>
@@ -402,14 +406,11 @@
     <string name="liked_title">Kedvelt</string>
     <string name="all_rss_feeds_title">Minden feliratkozás</string>
     <string name="posts_title">Bejegyzések</string>
+    <string name="posts_with_replies_title">Bejegyzések és válaszok</string>
     <string name="media_title">Média</string>
     <string name="settings_appearance_absolute_timestamp">Abszolút időbélyeg</string>
     <string name="settings_appearance_absolute_timestamp_description">Pontos időbélyeg megjelenítése a bejegyzéseken</string>
     <string name="channel_title">Csatorna</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Követés kérése</string>
-    <string name="nostr_login_qr_link_label">Nostr Connect-hivatkozás</string>
-    <string name="posts_with_replies_title">Bejegyzések és válaszok</string>
     <string name="pixiv_ranking_week_title">Heti rangsor</string>
     <string name="pixiv_ranking_month_title">Havi rangsor</string>
     <string name="pixiv_ranking_day_male_title">Férfi rangsor</string>
@@ -418,5 +419,4 @@
     <string name="pixiv_ranking_week_rookie_title">Újonc rangsor</string>
     <string name="pixiv_ranking_day_manga_title">Manga rangsor</string>
     <string name="illustrations_title">Illusztrációk</string>
-    <string name="manga_title">Manga</string>
 </resources>

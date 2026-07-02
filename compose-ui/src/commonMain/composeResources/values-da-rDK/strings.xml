@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Følsomt medie</string>
     <string name="show_media">Vis medie</string>
     <string name="hide_media">Skjul medie</string>
+    <string name="media_menu_download">Hent</string>
+    <string name="media_menu_download_all">Download alle</string>
+    <string name="media_menu_share_image">Del billede</string>
+    <string name="media_menu_copy_link">Kopiér link</string>
     <string name="login_expired">Login-session udløbet</string>
     <string name="login_expired_message">Tryk for at logge ind igen</string>
     <string name="login_expired_relogin">Log ind igen</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Adgangskode</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-token</string>
     <string name="bluesky_login_oauth_button">Log ind med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil tilladelser</string>
     <string name="bluesky_login_use_password_button">Brug adgangskode</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan stadig være ustabilt. Hvis du støder på problemer, så brug adgangskode-login i stedet.</string>
     <string name="login_button">Log ind</string>
@@ -416,7 +421,10 @@
     <string name="pixiv_ranking_week_original_title">Oprindelig Rangering</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat Følger</string>
+    <string name="pixiv_private_bookmarks_title">Private Bogmærker</string>
     <string name="illustrations_title">Illustrationer</string>
     <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
+    <string name="fanbox_supported_title">Understøttede indlæg</string>
+    <string name="fanbox_recommended_creators_title">Anbefalede skabere</string>
 </resources>

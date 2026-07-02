@@ -42,10 +42,16 @@
     <string name="compose_save_draft">Gem</string>
     <string name="compose_close_discard">Kassér</string>
     <string name="status_insight_title">Indsend indsigt</string>
+    <string name="profile_insight_title">Profilindsigt</string>
+    <string name="profile_blocked_gate_title">Blokeret profil</string>
+    <string name="profile_blocked_gate_description">Du blokerede denne profil. Deres faner og tidslinje er skjult, indtil du vælger at vise dem.</string>
+    <string name="profile_blocked_gate_show">Vis</string>
     <string name="status_insight_input_placeholder">Spørg en opfølgning…</string>
     <string name="status_insight_send">Send</string>
     <string name="status_insight_analyzing">Analyserer dette indlæg…</string>
+    <string name="profile_insight_analyzing">Analyserer denne profil…</string>
     <string name="status_insight_error">Kan ikke analysere dette indlæg.</string>
+    <string name="profile_insight_error">Denne profil kan ikke analyseres.</string>
     <string name="status_insight_trace_loading_post_context">Indlæser post kontekst…</string>
     <string name="status_insight_trace_post_context_loaded">Indlæg kontekst indlæst</string>
     <string name="status_insight_trace_preparing_images">Forbereder billeder…</string>
@@ -87,6 +93,7 @@
     <string name="agent_chat_input_placeholder">Spørg noget…</string>
     <string name="agent_chat_send">Send</string>
     <string name="agent_chat_thinking">Tænker…</string>
+    <string name="agent_compose_confirmation_prompt">Send opslag?</string>
     <string name="draft_box_title">Klader</string>
     <string name="draft_box_empty">Ingen klader endnu</string>
     <string name="draft_box_edit">Redigér</string>
@@ -104,6 +111,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tidslinje-layout, navigation og indlægshandlinger</string>
     <string name="settings_appearance_display_group_title">Visning</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstempler, kilde-badges, links og browseradfærd</string>
+    <string name="settings_behavior_title">Adfærd</string>
+    <string name="settings_behavior_description">Browser og link håndtering præferencer</string>
     <string name="settings_appearance_media_group_title">Medier</string>
     <string name="settings_appearance_media_group_subtitle">Mediesynlighed, afspilning og følsomt indhold</string>
     <string name="settings_storage_title">Lager</string>
@@ -222,6 +231,7 @@
     <string name="bluesky_login_password_hint">Adgangskode</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-token</string>
     <string name="bluesky_login_oauth_button">Log ind med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil tilladelser</string>
     <string name="bluesky_login_use_password_button">Brug adgangskode</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan stadig være ustabil. Hvis du oplever problemer, så brug adgangskode-login i stedet.</string>
     <string name="report_title">Anmeld</string>
@@ -261,6 +271,10 @@
     <string name="settings_appearance_post_action_style_stretch">Stræk</string>
     <string name="settings_appearance_post_action_layout">Tilpas handlinger</string>
     <string name="settings_appearance_post_action_layout_description">Vælg rækkefølge og synlighed for handlingsknapper til indlæg</string>
+    <string name="settings_appearance_show_media">Vis medier</string>
+    <string name="settings_appearance_show_media_description">Vis medievedhæftninger i indlæg</string>
+    <string name="settings_appearance_show_numbers">Vis tal</string>
+    <string name="settings_appearance_show_numbers_description">Vis tællere under hvert indlæg</string>
     <string name="settings_post_action_layout_title">Indlægshandlinger</string>
     <string name="settings_post_action_layout_enable">Tilpas handlinger</string>
     <string name="settings_post_action_layout_enable_description">Vælg hvilke handlinger der vises i rækken, menuen Mere eller forbliver skjult</string>
@@ -288,16 +302,20 @@
     <string name="settings_post_action_family_report">Anmeld</string>
     <string name="settings_post_action_family_mute_user">Lydløs</string>
     <string name="settings_post_action_family_block_user">Bloker</string>
-    <string name="settings_appearance_show_media">Vis medier</string>
-    <string name="settings_appearance_show_media_description">Vis medievedhæftninger i indlæg</string>
-    <string name="settings_appearance_show_numbers">Vis tal</string>
-    <string name="settings_appearance_show_numbers_description">Vis tællere under hvert indlæg</string>
     <string name="settings_appearance_show_cw_img">Vis følsomt indhold</string>
     <string name="settings_appearance_show_cw_img_description">Afslør altid følsomme medier i indlæg</string>
     <string name="settings_appearance_expand_content_warning">Vis indhold bag indholdsadvarsler</string>
     <string name="settings_appearance_expand_content_warning_description">Vis altid indhold skjult af indholdsadvarsler</string>
     <string name="settings_appearance_expand_media">Bevar mediernes aspektforhold</string>
     <string name="settings_appearance_expand_media_description">Vis medier i deres originale aspektforhold i tidslinjer</string>
+    <string name="gallery_detail_tab_info">Info</string>
+    <string name="gallery_detail_tab_comments">Kommentarer</string>
+    <string name="gallery_detail_tab_recommend">Anbefal</string>
+    <string name="gallery_detail_comments_title">Kommentarer</string>
+    <string name="gallery_detail_recommendations_title">Anbefalinger</string>
+    <string name="gallery_detail_view_more">Se mere</string>
+    <string name="gallery_detail_share_content_description">Del</string>
+    <string name="gallery_detail_expand_content_description">Udvid</string>
     <string name="settings_appearance_video_autoplay">Video-autoafspilning</string>
     <string name="settings_appearance_video_autoplay_description">Afspil automatisk videoer i indlæg</string>
     <string name="settings_appearance_video_autoplay_wifi">Kun Wi-Fi</string>
@@ -358,6 +376,13 @@
     <string name="settings_storage_clear_database_description">Fjern %1$s cachede brugere og %2$s cachede indlæg</string>
     <string name="settings_storage_app_log">App-logs</string>
     <string name="settings_storage_app_log_description">Se, gem eller ryd app-logs</string>
+    <string name="settings_media_save_location">Lagring af medie</string>
+    <string name="settings_media_save_location_description">Vælg, hvor downloadede medier er gemt på denne enhed.</string>
+    <string name="settings_media_save_location_downloads">Downloads</string>
+    <string name="settings_media_save_location_custom_folder">Brugerdefineret mappe</string>
+    <string name="settings_media_save_location_choose_folder">Vælg Mappe</string>
+    <string name="settings_media_save_location_reset_downloads">Nulstil til Downloads</string>
+    <string name="settings_media_save_location_ask_every_time">Spørg Hver Gang</string>
     <string name="service_select_instance_input_placeholder">Instans-URL</string>
     <string name="service_select_next_button">Næste</string>
     <string name="service_select_empty_message">Ingen instanser fundet</string>
@@ -365,6 +390,7 @@
     <string name="settings_accounts_remove">Fjern</string>
     <string name="settings_accounts_remove_confirm">Er du sikker på, at du vil fjerne kontoen %1$s fra denne enhed?</string>
     <string name="media_menu_save">Gem billede</string>
+    <string name="media_menu_download_all">Download alle</string>
     <string name="media_menu_share_image">Del billede</string>
     <string name="media_menu_copy_link">Kopiér link</string>
     <string name="media_menu_media_link">Medielink</string>
@@ -372,6 +398,8 @@
     <string name="status_menu_share_via_fixvx">Del via Fixvx</string>
     <string name="media_save_success">Gemt</string>
     <string name="media_save_fail">Kunne ikke gemme</string>
+    <string name="media_download_started">Download startet.</string>
+    <string name="media_prepare_started">Forbereder medier...</string>
     <string name="media_alt_text">Alternativ tekst</string>
     <string name="media_is_downloading">Mediet hentes stadig. Prøv igen om et øjeblik.</string>
     <string name="settings_side_panel_empty">Som standard følger sidepanelet den aktuelle kontos platform.</string>
@@ -453,6 +481,8 @@
     <string name="pixiv_ranking_week_original_title">Oprindelig Rangering</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat Følger</string>
+    <string name="pixiv_private_bookmarks_title">Private Bogmærker</string>
     <string name="tab_settings_title">Faneindstillinger</string>
     <string name="dm_list_title">Direkte beskeder</string>
     <string name="dm_list_empty">Ingen direkte beskeder</string>
@@ -503,6 +533,9 @@
     <string name="rss_detail_tldr_loading">Opsummerer…</string>
     <string name="rss_detail_translate">Oversæt</string>
     <string name="rss_detail_translate_error">Kunne ikke oversætte</string>
+    <string name="article_content_gate_subscription_title">Support påkrævet</string>
+    <string name="article_content_gate_subscription_description">Denne artikel er kun tilgængelig for supportere. Åbn den i browseren for at støtte skaberen og læse det fulde indhold.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Denne artikel er kun tilgængelig for tilhængere fra -%1$d. Åbn den i browseren for at understøtte skaberen og læse det fulde indhold.</string>
     <string name="emoji_picker_recent">Seneste</string>
     <string name="emoji_picker_search">Søg</string>
     <string name="podcast_host">Vært</string>
@@ -531,6 +564,12 @@
     <string name="deeplink_account_selection_title">Vælg konto</string>
     <string name="deeplink_account_selection_message">Vælg en konto til at åbne dette link</string>
     <string name="deeplink_account_selection_browser">Åbn i browser</string>
+    <string name="deeplink_account_selection_save_default">Åbn altid på denne måde</string>
+    <string name="settings_link_open_defaults_title">Link åbning</string>
+    <string name="settings_link_open_defaults_description">Vælg standardindstillinger for understøttede links af vært</string>
+    <string name="settings_link_open_default_title">Standard for %1$s links</string>
+    <string name="settings_link_open_default_description">Vælg hvordan understøttede links åbne, når Flare kan håndtere dem</string>
+    <string name="settings_link_open_default_ask_every_time">Spørg hver gang</string>
     <string name="block_user_title">Blokér bruger</string>
     <string name="block_user_description">Er du sikker på, at du vil blokere denne bruger?</string>
     <string name="unblock_user_title">Fjern blokering af bruger</string>
@@ -581,18 +620,11 @@
     <string name="channel_item_unfollow">Følg ikke længere</string>
     <string name="channel_item_favourite">Favorit</string>
     <string name="channel_item_unfavourite">Fjern fra favoritter</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilindsigt</string>
-    <string name="profile_insight_analyzing">Analyserer denne profil…</string>
-    <string name="profile_insight_error">Denne profil kan ikke analyseres.</string>
-    <string name="agent_compose_confirmation_prompt">Send opslag?</string>
-    <string name="settings_about_discord" translatable="false">Uenighed</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Annuller</string>
+    <string name="agent_ui_confirm_execute">Bekræft</string>
+    <string name="agent_ui_confirm_save_subscription">Gem</string>
     <string name="agent_ui_cancel_save_subscription">Annuller: gem</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Slet</string>
     <string name="agent_ui_cancel_delete_subscription">Annuller: slet</string>
     <string name="agent_ui_confirm_send_post">Send</string>
     <string name="agent_ui_cancel_send_post">Annuller: send</string>
@@ -615,7 +647,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Send indhold - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden opslag - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren opslag - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlatform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Vælg: opslag (bewerken)</string>
     <string name="agent_ui_select_post_action">Vælg: actie (opslag)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Indtast: doelbericht attachmentRef / statusKey…</string>
@@ -638,4 +670,6 @@
     <string name="agent_ui_select_followers_user">Vælg: bruger (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Vælg: bruger (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Indtast: bruger link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Understøttede indlæg</string>
+    <string name="fanbox_recommended_creators_title">Anbefalede skabere</string>
 </resources>

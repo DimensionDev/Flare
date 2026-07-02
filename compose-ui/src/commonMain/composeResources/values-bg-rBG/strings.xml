@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Публикации</string>
     <string name="profile_misskey_header_status_count">%1$s Публикации</string>
     <string name="profile_header_button_follow">Последване</string>
+    <string name="profile_header_button_request_follow">Заявка за последване</string>
     <string name="profile_header_button_following">Следване</string>
     <string name="profile_header_button_requested">Заявено</string>
     <string name="profile_header_button_blocked">Блокиран</string>
@@ -77,6 +78,8 @@
     <string name="status_sensitive_media">Чувствително съдържание</string>
     <string name="show_media">Покажи медия</string>
     <string name="hide_media">Скрий медия</string>
+    <string name="media_menu_share_image">Споделяне на изображението</string>
+    <string name="media_menu_copy_link">Копиране на връзка</string>
     <string name="login_expired">Сесията за влизане изтече</string>
     <string name="login_expired_message">Докоснете, за да влезете отново</string>
     <string name="login_expired_relogin">Влезте отново</string>
@@ -131,6 +134,9 @@
     <string name="translation_badge_failed">Преводът е неуспешен</string>
     <string name="translation_retry">Повторен опит за превод</string>
     <string name="translation_show_original">Покажи оригинала</string>
+    <string name="date_format_year_month_day">yyyy年M月d日</string>
+    <string name="date_format_month_day">M月d日</string>
+    <string name="date_format_full">yyyy年M月d日 HH:mm</string>
     <string name="vvo_notification_like">Хареса публикацията ви</string>
     <string name="user_follow_edit_list">Добави/Премахни от списък</string>
     <string name="list_empty">Няма списъци</string>
@@ -177,8 +183,11 @@
     <string name="misskey_achievement_login7_flavor">Вече се чувствате сякаш сте му хванали цаката?</string>
     <string name="misskey_achievement_login15_title">Начинаещ III</string>
     <string name="misskey_achievement_login15_description">Влезте общо за 15 дни</string>
+    <string name="misskey_achievement_login30_title">30 дни влизане</string>
     <string name="misskey_achievement_login30_description">Влезте общо за 30 дни</string>
+    <string name="misskey_achievement_login60_title">60 дни влизане</string>
     <string name="misskey_achievement_login60_description">Влезте общо за 60 дни</string>
+    <string name="misskey_achievement_login100_title">100 дни влизане</string>
     <string name="misskey_achievement_login100_description">Влезте общо за 100 дни</string>
     <string name="misskey_achievement_login100_flavor">Яростен Misskist</string>
     <string name="misskey_achievement_login200_title">Редовен I</string>
@@ -293,10 +302,12 @@
     <string name="misskey_achievement_cookie_clicked_flavor">Чакай, на правилния уебсайт ли си?</string>
     <string name="misskey_achievement_brain_diver_title">Гмуркач в мозъка</string>
     <string name="misskey_achievement_brain_diver_description">Публикувайте връзката към Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_flavor">Виждам всичко.</string>
     <string name="misskey_achievement_smash_test_notification_button_title">Препълване на тестове</string>
     <string name="misskey_achievement_smash_test_notification_button_description">Задействайте тестовото известие многократно за изключително кратко време</string>
     <string name="misskey_achievement_tutorial_completed_title">Диплома за начален курс на Misskey</string>
     <string name="misskey_achievement_tutorial_completed_description">Ръководството е завършено</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_title">Експлодираща глава</string>
     <string name="misskey_achievement_bubble_game_exploding_head_description">Най-големият обект в играта с мехурчета</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_title">Двойно🤯</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два от най-големите обекти в играта с мехурчета едновременно</string>
@@ -395,21 +406,11 @@
     <string name="liked_title">Харесано</string>
     <string name="all_rss_feeds_title">Всички абонаменти</string>
     <string name="posts_title">Публикации</string>
+    <string name="posts_with_replies_title">Публикации и отговори</string>
     <string name="media_title">Медия</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютно клеймо за време</string>
     <string name="settings_appearance_absolute_timestamp_description">Показвай точното време на публикациите</string>
     <string name="channel_title">Канал</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Заявка за последване</string>
-    <string name="date_format_year_month_day">yyyy年M月d日</string>
-    <string name="date_format_month_day">M月d日</string>
-    <string name="date_format_full">yyyy年M月d日 HH:mm</string>
-    <string name="misskey_achievement_login30_title">30 дни влизане</string>
-    <string name="misskey_achievement_login60_title">60 дни влизане</string>
-    <string name="misskey_achievement_login100_title">100 дни влизане</string>
-    <string name="misskey_achievement_brain_diver_flavor">Виждам всичко.</string>
-    <string name="misskey_achievement_bubble_game_exploding_head_title">Експлодираща глава</string>
-    <string name="posts_with_replies_title">Публикации и отговори</string>
     <string name="pixiv_ranking_week_title">Седмична класация</string>
     <string name="pixiv_ranking_month_title">Месечна класация</string>
     <string name="pixiv_ranking_day_male_title">Мъжка класация</string>

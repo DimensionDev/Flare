@@ -42,10 +42,16 @@
     <string name="compose_save_draft">Speichern</string>
     <string name="compose_close_discard">Verwerfen</string>
     <string name="status_insight_title">Einsicht posten</string>
+    <string name="profile_insight_title">Profileinblick</string>
+    <string name="profile_blocked_gate_title">Gesperrtes Profil</string>
+    <string name="profile_blocked_gate_description">Du hast dieses Profil blockiert. Die Tabs und die Zeitleiste sind versteckt, bis du sie angezeigt hast.</string>
+    <string name="profile_blocked_gate_show">Anzeigen</string>
     <string name="status_insight_input_placeholder">Frag eine Follow-…</string>
     <string name="status_insight_send">Senden</string>
     <string name="status_insight_analyzing">Diesen Beitrag wird analysiert…</string>
+    <string name="profile_insight_analyzing">Analysiere dieses Profil…</string>
     <string name="status_insight_error">Dieser Beitrag kann nicht analysiert werden.</string>
+    <string name="profile_insight_error">Dieses Profil kann nicht analysiert werden.</string>
     <string name="status_insight_trace_loading_post_context">Beitragskontext wird geladen…</string>
     <string name="status_insight_trace_post_context_loaded">Beitragskontext geladen</string>
     <string name="status_insight_trace_preparing_images">Bilder werden vorbereitet…</string>
@@ -87,6 +93,7 @@
     <string name="agent_chat_input_placeholder">Fragen Sie irgendetwas…</string>
     <string name="agent_chat_send">Senden</string>
     <string name="agent_chat_thinking">Denken…</string>
+    <string name="agent_compose_confirmation_prompt">Senden Beitrag?</string>
     <string name="draft_box_title">Entwürfe</string>
     <string name="draft_box_empty">Noch keine Entwürfe</string>
     <string name="draft_box_edit">Bearbeiten</string>
@@ -104,6 +111,8 @@
     <string name="settings_appearance_layout_group_subtitle">Timeline-Layout, Navigation und Beitragsaktionen</string>
     <string name="settings_appearance_display_group_title">Anzeige</string>
     <string name="settings_appearance_display_group_subtitle">Zeitstempel, Quell-Badges, Links und Browser-Verhalten</string>
+    <string name="settings_behavior_title">Verhalten</string>
+    <string name="settings_behavior_description">Browser- und Linkverwaltungseinstellungen</string>
     <string name="settings_appearance_media_group_title">Medien</string>
     <string name="settings_appearance_media_group_subtitle">Medien-Sichtbarkeit, Wiedergabe und sensible Inhalte</string>
     <string name="settings_storage_title">Speicher</string>
@@ -222,6 +231,7 @@
     <string name="bluesky_login_password_hint">Passwort</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA-Token</string>
     <string name="bluesky_login_oauth_button">Mit OAuth anmelden</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Löschberechtigungen korrigieren</string>
     <string name="bluesky_login_use_password_button">Passwort verwenden</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kann noch instabil sein. Falls Probleme auftreten, verwende stattdessen die Passwort-Anmeldung.</string>
     <string name="report_title">Melden</string>
@@ -261,6 +271,10 @@
     <string name="settings_appearance_post_action_style_stretch">Gestreckt</string>
     <string name="settings_appearance_post_action_layout">Aktionen anpassen</string>
     <string name="settings_appearance_post_action_layout_description">Reihenfolge und Sichtbarkeit der Beitragsaktions-Schaltflächen wählen</string>
+    <string name="settings_appearance_show_media">Medien anzeigen</string>
+    <string name="settings_appearance_show_media_description">Medienanhänge in Beiträgen anzeigen</string>
+    <string name="settings_appearance_show_numbers">Zahlen anzeigen</string>
+    <string name="settings_appearance_show_numbers_description">Zähler unter jedem Beitrag anzeigen</string>
     <string name="settings_post_action_layout_title">Beitragsaktionen</string>
     <string name="settings_post_action_layout_enable">Aktionen anpassen</string>
     <string name="settings_post_action_layout_enable_description">Wähle, welche Aktionen in der Zeile, im Mehr-Menü oder ausgeblendet bleiben</string>
@@ -288,16 +302,20 @@
     <string name="settings_post_action_family_report">Melden</string>
     <string name="settings_post_action_family_mute_user">Stummschalten</string>
     <string name="settings_post_action_family_block_user">Blockieren</string>
-    <string name="settings_appearance_show_media">Medien anzeigen</string>
-    <string name="settings_appearance_show_media_description">Medienanhänge in Beiträgen anzeigen</string>
-    <string name="settings_appearance_show_numbers">Zahlen anzeigen</string>
-    <string name="settings_appearance_show_numbers_description">Zähler unter jedem Beitrag anzeigen</string>
     <string name="settings_appearance_show_cw_img">Sensible Inhalte anzeigen</string>
     <string name="settings_appearance_show_cw_img_description">Sensible Medien in Beiträgen immer enthüllen</string>
     <string name="settings_appearance_expand_content_warning">Inhalt hinter Inhaltswarnungen anzeigen</string>
     <string name="settings_appearance_expand_content_warning_description">Inhalt immer durch Inhaltswarnungen versteckt anzeigen</string>
     <string name="settings_appearance_expand_media">Seitenverhältnis der Medien beibehalten</string>
     <string name="settings_appearance_expand_media_description">Medien in ihrem Original-Seitenverhältnis in Timelines anzeigen</string>
+    <string name="gallery_detail_tab_info">Info</string>
+    <string name="gallery_detail_tab_comments">Kommentare</string>
+    <string name="gallery_detail_tab_recommend">Empfohlen</string>
+    <string name="gallery_detail_comments_title">Kommentare</string>
+    <string name="gallery_detail_recommendations_title">Empfehlungen</string>
+    <string name="gallery_detail_view_more">Mehr anzeigen</string>
+    <string name="gallery_detail_share_content_description">Teilen</string>
+    <string name="gallery_detail_expand_content_description">Erweitern</string>
     <string name="settings_appearance_video_autoplay">Automatische Videowiedergabe</string>
     <string name="settings_appearance_video_autoplay_description">Videos in Beiträgen automatisch abspielen</string>
     <string name="settings_appearance_video_autoplay_wifi">Nur WLAN</string>
@@ -358,6 +376,13 @@
     <string name="settings_storage_clear_database_description">%1$s zwischengespeicherte Benutzer und %2$s Beiträge entfernen</string>
     <string name="settings_storage_app_log">App-Protokolle</string>
     <string name="settings_storage_app_log_description">App-Protokolle ansehen, speichern oder löschen</string>
+    <string name="settings_media_save_location">Speicherort der Medien</string>
+    <string name="settings_media_save_location_description">Wählen Sie, wo heruntergeladene Medien auf diesem Gerät gespeichert werden.</string>
+    <string name="settings_media_save_location_downloads">Downloads</string>
+    <string name="settings_media_save_location_custom_folder">Benutzerdefinierter Ordner</string>
+    <string name="settings_media_save_location_choose_folder">Ordner auswählen</string>
+    <string name="settings_media_save_location_reset_downloads">Auf Downloads zurücksetzen</string>
+    <string name="settings_media_save_location_ask_every_time">Jedes Mal fragen</string>
     <string name="service_select_instance_input_placeholder">Instanz-URL</string>
     <string name="service_select_next_button">Weiter</string>
     <string name="service_select_empty_message">Keine Instanzen gefunden</string>
@@ -365,6 +390,7 @@
     <string name="settings_accounts_remove">Entfernen</string>
     <string name="settings_accounts_remove_confirm">Möchtest du das Konto %1$s wirklich von diesem Gerät entfernen?</string>
     <string name="media_menu_save">Bild speichern</string>
+    <string name="media_menu_download_all">Alle herunterladen</string>
     <string name="media_menu_share_image">Bild teilen</string>
     <string name="media_menu_copy_link">Link kopieren</string>
     <string name="media_menu_media_link">Medien-Link</string>
@@ -372,6 +398,8 @@
     <string name="status_menu_share_via_fixvx">Über Fixvx teilen</string>
     <string name="media_save_success">Gespeichert</string>
     <string name="media_save_fail">Speichern fehlgeschlagen</string>
+    <string name="media_download_started">Download gestartet.</string>
+    <string name="media_prepare_started">Medien werden vorbereitet...</string>
     <string name="media_alt_text">Alt-Text</string>
     <string name="media_is_downloading">Medien werden noch heruntergeladen. Versuche es gleich noch einmal.</string>
     <string name="settings_side_panel_empty">Standardmäßig folgt die Seitenleiste der Plattform des aktuellen Kontos.</string>
@@ -453,6 +481,8 @@
     <string name="pixiv_ranking_week_original_title">Ursprüngliche Rangliste</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat folgen</string>
+    <string name="pixiv_private_bookmarks_title">Private Lesezeichen</string>
     <string name="tab_settings_title">Tab-Einstellungen</string>
     <string name="dm_list_title">Direktnachrichten</string>
     <string name="dm_list_empty">Keine Direktnachrichten</string>
@@ -503,6 +533,9 @@
     <string name="rss_detail_tldr_loading">Zusammenfassen…</string>
     <string name="rss_detail_translate">Übersetzen</string>
     <string name="rss_detail_translate_error">Übersetzung fehlgeschlagen</string>
+    <string name="article_content_gate_subscription_title">Unterstützung erforderlich</string>
+    <string name="article_content_gate_subscription_description">Dieser Artikel ist nur für Unterstützer verfügbar. Öffnen Sie ihn im Browser, um den Ersteller zu unterstützen und den vollständigen Inhalt zu lesen.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Dieser Artikel ist nur verfügbar für Unterstützer von &lt;unk&gt;%1$d. Öffne ihn im Browser, um den Schöpfer zu unterstützen und den vollständigen Inhalt zu lesen.</string>
     <string name="emoji_picker_recent">Zuletzt benutzt</string>
     <string name="emoji_picker_search">Suche</string>
     <string name="podcast_host">Host</string>
@@ -531,6 +564,12 @@
     <string name="deeplink_account_selection_title">Konto auswählen</string>
     <string name="deeplink_account_selection_message">Konto auswählen, um diesen Link zu öffnen</string>
     <string name="deeplink_account_selection_browser">Im Browser öffnen</string>
+    <string name="deeplink_account_selection_save_default">Diesen Weg immer öffnen</string>
+    <string name="settings_link_open_defaults_title">Link öffnen</string>
+    <string name="settings_link_open_defaults_description">Standardwerte für unterstützte Links vom Host auswählen</string>
+    <string name="settings_link_open_default_title">Standard für %1$s Links</string>
+    <string name="settings_link_open_default_description">Wählen Sie, wie unterstützte Links geöffnet werden, wenn Flare mit ihnen umgehen kann</string>
+    <string name="settings_link_open_default_ask_every_time">Jedes Mal fragen</string>
     <string name="block_user_title">Benutzer blockieren</string>
     <string name="block_user_description">Möchtest du diesen Benutzer wirklich blockieren?</string>
     <string name="unblock_user_title">Benutzer entsperren</string>
@@ -581,20 +620,13 @@
     <string name="channel_item_unfollow">Entfolgen</string>
     <string name="channel_item_favourite">Favorisieren</string>
     <string name="channel_item_unfavourite">Favorisierung aufheben</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profileinblick</string>
-    <string name="profile_insight_analyzing">Analysiere dieses Profil…</string>
-    <string name="profile_insight_error">Dieses Profil kann nicht analysiert werden.</string>
-    <string name="agent_compose_confirmation_prompt">Senden Beitrag?</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
-    <string name="settings_about_line" translatable="false">Line</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Abbrechen</string>
+    <string name="agent_ui_confirm_execute">Bestätigen</string>
+    <string name="agent_ui_confirm_save_subscription">Speichern</string>
     <string name="agent_ui_cancel_save_subscription">Abbrechen: Speichern</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Löschen</string>
     <string name="agent_ui_cancel_delete_subscription">Abbrechen: Löschen</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Senden</string>
     <string name="agent_ui_cancel_send_post">Abbrechen: Senden</string>
     <string name="agent_ui_select_load_subscription_source">Auswählen: Abonnementquelle (laden)</string>
     <string name="agent_ui_select_delete_subscription_source">Auswählen: Abonnementquelle (Löschen)</string>
@@ -615,7 +647,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Senden Inhalt - Konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Antworten Beitrag - Konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Zitieren Beitrag - Konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlattform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Auswählen: Beitrag (bearbeiten)</string>
     <string name="agent_ui_select_post_action">Auswählen: Aktion (Beitrag)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Eingeben: Zielbeitrag attachmentRef / statusKey…</string>
@@ -638,4 +670,6 @@
     <string name="agent_ui_select_followers_user">Auswählen: Benutzer (anzeigen Follower)</string>
     <string name="agent_ui_select_profile_tabs_user">Auswählen: Benutzer (anzeigen Profil-Tabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Eingeben: Benutzer Link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Unterstützte Beiträge</string>
+    <string name="fanbox_recommended_creators_title">Empfohlene Ersteller</string>
 </resources>

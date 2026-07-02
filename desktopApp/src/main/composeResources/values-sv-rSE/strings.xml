@@ -35,6 +35,9 @@
     <string name="profile_tab_timeline_with_reply">Inlägg och svar</string>
     <string name="profile_tab_likes">Gilla-markeringar</string>
     <string name="profile_tab_media">Media</string>
+    <string name="profile_blocked_gate_title">Blockerad profil</string>
+    <string name="profile_blocked_gate_description">Du blockerade den här användaren. Deras flikar och tidslinje är dolda tills du väljer att visa dem.</string>
+    <string name="profile_blocked_gate_show">Visa</string>
     <string name="illustrations_title">Illustrationer</string>
     <string name="manga_title">Manga</string>
     <string name="pixiv_ranking_week_title">Veckovis Ranking</string>
@@ -44,6 +47,8 @@
     <string name="pixiv_ranking_week_original_title">Ursprunglig Rankning</string>
     <string name="pixiv_ranking_week_rookie_title">Rookie Ranking</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
+    <string name="pixiv_private_following_title">Privat Följer</string>
+    <string name="pixiv_private_bookmarks_title">Privata bokmärken</string>
     <string name="report_title">Rapportera</string>
     <string name="report_description">Vad är fel med det här inlägget?</string>
     <string name="report_reason_spam_title">Skräppost</string>
@@ -92,11 +97,13 @@
     <string name="status_share_via_fxembed">Dela via FxEmbed</string>
     <string name="status_share_via_fixvx">Dela via Fixvx</string>
     <string name="status_insight_title">Inlägg insikt</string>
+    <string name="profile_insight_title">Profilinsikt</string>
     <string name="agent_chat_title">AI Chatt</string>
     <string name="agent_chat_input_placeholder">Fråga vad som helst…</string>
     <string name="agent_chat_send">Skicka</string>
     <string name="agent_chat_thinking">Tänker…</string>
     <string name="status_insight_analyzing">Analyserar detta inlägg…</string>
+    <string name="profile_insight_analyzing">Analyserar den här profilen…</string>
     <string name="status_insight_error">Det går inte att analysera detta inlägg.</string>
     <string name="status_insight_trace_loading_post_context">Laddar inlägg sammanhang…</string>
     <string name="status_insight_trace_post_context_loaded">Inläggskontext laddad</string>
@@ -171,6 +178,7 @@
     <string name="bluesky_login_password">Lösenord</string>
     <string name="bluesky_login_2fa">2FA-kod</string>
     <string name="bluesky_login_oauth_button">Logga in med OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fixa fridfulla behörigheter</string>
     <string name="bluesky_login_use_password_button">Använd lösenord</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth kan fortfarande vara instabilt. Om du stöter på problem, använd lösenordsinloggning istället.</string>
     <string name="login_expired">Inloggningssessionen har gått ut</string>
@@ -192,6 +200,8 @@
     <string name="settings_appearance_layout_group_subtitle">Tidslinjelayout, navigering och inläggsåtgärder</string>
     <string name="settings_appearance_display_group_title">Visa</string>
     <string name="settings_appearance_display_group_subtitle">Tidsstämplar, källmärken, länkar och webbläsarbeteende</string>
+    <string name="settings_behavior_title">Beteende</string>
+    <string name="settings_behavior_description">Webbläsare och länkhanteringsinställningar</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Mediesynlighet, uppspelning och känsligt innehåll</string>
     <string name="settings_storage_title">Lagring</string>
@@ -424,6 +434,9 @@
     <string name="rss_detail_tldr">Sammanfatta</string>
     <string name="rss_detail_tldr_error">Misslyckades med att sammanfatta</string>
     <string name="rss_detail_copy_link">Kopiera länk</string>
+    <string name="article_content_gate_subscription_title">Stöd krävs</string>
+    <string name="article_content_gate_subscription_description">Denna artikel är endast tillgänglig för supportrar. Öppna den i webbläsaren för att stödja skaparen och läsa hela innehållet.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Denna artikel är endast tillgänglig för supportrar från ♥️%1$d. Öppna den i webbläsaren för att stödja skaparen och läsa hela innehållet.</string>
     <string name="mastodon_available_timelines">Tillgängliga tidslinjer</string>
     <string name="mastodon_trending_statuses">Trendande inlägg</string>
     <string name="mastodon_federated_timeline">Federerad tidslinje</string>
@@ -505,6 +518,12 @@
     <string name="deeplink_account_selection_title">Välj konto</string>
     <string name="deeplink_account_selection_message">Välj ett konto för att öppna länken</string>
     <string name="deeplink_account_selection_browser">Öppna i webbläsare</string>
+    <string name="deeplink_account_selection_save_default">Öppna alltid detta sätt</string>
+    <string name="settings_link_open_defaults_title">Länk öppning</string>
+    <string name="settings_link_open_defaults_description">Välj standardinställningar för länkar som stöds av värd</string>
+    <string name="settings_link_open_default_title">Standard för %1$s länkar</string>
+    <string name="settings_link_open_default_description">Välj hur länkar som stöds öppnas när Flare kan hantera dem</string>
+    <string name="settings_link_open_default_ask_every_time">Fråga varje gång</string>
     <string name="block_user_title">Blockera användare</string>
     <string name="block_user_description">Är du säker på att du vill blockera den här användaren?</string>
     <string name="unblock_user_title">Avblockera användare</string>
@@ -533,18 +552,15 @@
     <string name="misskey_channel_tab_featured">Utvalda</string>
     <string name="media_save_success">Sparad till Hämtade filer</string>
     <string name="media_save_fail">Misslyckades med att spara</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_insight_title">Profilinsikt</string>
-    <string name="profile_insight_analyzing">Analyserar den här profilen…</string>
-    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="media_download_started">Nedladdningen startad</string>
     <string name="agent_compose_confirmation_prompt">Skicka inlägg?</string>
-    <string name="agent_ui_cancel">Cancel</string>
-    <string name="agent_ui_confirm_execute">Confirm</string>
-    <string name="agent_ui_confirm_save_subscription">Save</string>
+    <string name="agent_ui_cancel">Avbryt</string>
+    <string name="agent_ui_confirm_execute">Bekräfta</string>
+    <string name="agent_ui_confirm_save_subscription">Spara</string>
     <string name="agent_ui_cancel_save_subscription">Avbryt: spara</string>
-    <string name="agent_ui_confirm_delete_subscription">Delete</string>
+    <string name="agent_ui_confirm_delete_subscription">Ta bort</string>
     <string name="agent_ui_cancel_delete_subscription">Avbryt: ta bort</string>
-    <string name="agent_ui_confirm_send_post">Send</string>
+    <string name="agent_ui_confirm_send_post">Skicka</string>
     <string name="agent_ui_cancel_send_post">Avbryt: skicka</string>
     <string name="agent_ui_select_load_subscription_source">Välj: prenumerationskälla (ladda)</string>
     <string name="agent_ui_select_delete_subscription_source">Välj: prenumerationskälla (ta bort)</string>
@@ -565,7 +581,7 @@
     <string name="agent_ui_compose_send_confirmation_title">Skicka innehåll - konto?</string>
     <string name="agent_ui_compose_reply_confirmation_title">Beantwoorden inlägg - konto?</string>
     <string name="agent_ui_compose_quote_confirmation_title">Citeren inlägg - konto?</string>
-    <string name="agent_ui_compose_confirmation_message">%1$s\n\nAccount: %2$s\nPlatform: %3$s\n\n%4$s</string>
+    <string name="agent_ui_compose_confirmation_message">%1$s\n\nKonto: %2$s\nPlattform: %3$s\n\n%4$s</string>
     <string name="agent_ui_select_post_action_post">Välj: inlägg (bewerken)</string>
     <string name="agent_ui_select_post_action">Välj: actie (inlägg)</string>
     <string name="agent_ui_post_action_target_post_placeholder">Ange: doelbericht attachmentRef / statusKey…</string>
@@ -588,4 +604,6 @@
     <string name="agent_ui_select_followers_user">Välj: användare (bekijken volgers)</string>
     <string name="agent_ui_select_profile_tabs_user">Välj: användare (bekijken profieltabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Ange: användare link, handle, userKey…</string>
+    <string name="fanbox_supported_title">Inlägg som stöds</string>
+    <string name="fanbox_recommended_creators_title">Rekommenderade skapare</string>
 </resources>

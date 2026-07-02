@@ -48,7 +48,7 @@ import kotlin.time.Duration.Companion.minutes
 private val baseUrl = "https://$vvoHost/"
 private val chocolateRefreshInterval = 1.days
 private val defaultConfigLoginRetryDelay = 500.milliseconds
-private const val configLoginRetryLimit = 5
+private const val CONFIG_LOGIN_RETRY_LIMIT = 5
 
 private typealias VVOHttpClientFactory = (HttpClientConfig<*>.() -> Unit) -> HttpClient
 
@@ -140,7 +140,7 @@ internal class VVOService private constructor(
             return response
         }
 
-        repeat(configLoginRetryLimit) {
+        repeat(CONFIG_LOGIN_RETRY_LIMIT) {
             val recoveredCredential = refreshChocolate(credentialToRefresh = requestCredential) ?: return response
             if (recoveredCredential.chocolate.isBlank()) {
                 return response

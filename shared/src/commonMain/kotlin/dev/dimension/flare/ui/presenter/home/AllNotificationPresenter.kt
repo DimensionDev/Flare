@@ -51,6 +51,57 @@ public data class NotificationAccountItem(
     val badge: Int,
 )
 
+internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flow<ImmutableList<NotificationAccountItem>> =
+    allAccountServicesFlow(accountRepository)
+        .map {
+            it
+                .filterIsInstance<UserDataSource>()
+                .filterIsInstance<AuthenticatedMicroblogDataSource>()
+                .filterIsInstance<NotificationTimelineDataSource>()
+        }.map { accounts ->
+            accounts.map { dataSource ->
+                when (dataSource) {
+                    !is UserDataSource -> {
+                        flowOf(null)
+                    }
+
+                    !is NotificationDataSource -> {
+                        dataSource.userHandler.userById(dataSource.accountKey.id).toUi().map {
+                            it.map {
+                                it to 0
+                            }
+                        }
+                    }
+
+                    else -> {
+                        combine(
+                            dataSource.userHandler.userById(dataSource.accountKey.id).toUi(),
+                            dataSource.notificationHandler.notificationBadgeCount.toUi(),
+                        ) { user, badge ->
+                            user.flatMap { profile ->
+                                badge.map { count ->
+                                    profile to count
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.combineLatestFlowLists()
+        .map {
+            it
+                .mapNotNull { it?.takeSuccess() }
+                .sortedWith(
+                    compareByDescending { it.second },
+                ).map { (profile, badge) ->
+                    NotificationAccountItem(
+                        stableKey = "${profile.key.host}:${profile.key.id}",
+                        profile = profile,
+                        badge = badge,
+                    )
+                }.toImmutableList()
+        }
+
 @WebPresenter("notifications")
 public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.State>() {
     private val accountRepository: AccountRepository by koinInject()
@@ -77,55 +128,7 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
     }
 
     private val accountsNotificationFlow by lazy {
-        allAccountServicesFlow(accountRepository)
-            .map {
-                it
-                    .filterIsInstance<UserDataSource>()
-                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                    .filterIsInstance<NotificationTimelineDataSource>()
-            }.map { accounts ->
-                accounts.map { dataSource ->
-                    when (dataSource) {
-                        !is UserDataSource -> {
-                            flowOf(null)
-                        }
-
-                        !is NotificationDataSource -> {
-                            dataSource.userHandler.userById(dataSource.accountKey.id).toUi().map {
-                                it.map {
-                                    it to 0
-                                }
-                            }
-                        }
-
-                        else -> {
-                            combine(
-                                dataSource.userHandler.userById(dataSource.accountKey.id).toUi(),
-                                dataSource.notificationHandler.notificationBadgeCount.toUi(),
-                            ) { user, badge ->
-                                user.flatMap { profile ->
-                                    badge.map { count ->
-                                        profile to count
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }.combineLatestFlowLists()
-            .map {
-                it
-                    .mapNotNull { it?.takeSuccess() }
-                    .sortedWith(
-                        compareByDescending { it.second },
-                    ).map { (profile, badge) ->
-                        NotificationAccountItem(
-                            stableKey = "${profile.key.host}:${profile.key.id}",
-                            profile = profile,
-                            badge = badge,
-                        )
-                    }.toImmutableList()
-            }
+        notificationAccountsFlow(accountRepository)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
-import android.net.Uri
 import android.view.ViewGroup.LayoutParams
 import android.webkit.CookieManager
 import android.webkit.WebSettings
@@ -20,15 +19,12 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
-private val USER_AGENT_HEADERS =
+private val userAgent =
     mapOf(
-        "User-Agent" to "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3",
+        "user-agent" to "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3",
         "Pragma" to "no-cache",
         "Cache-Control" to "no-cache",
     )
-
-private const val ANDROID_USER_AGENT =
-    "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.3"
 
 @Composable
 internal fun WebCookieLoginScreen(
@@ -38,16 +34,12 @@ internal fun WebCookieLoginScreen(
 ) {
     val webViewState = rememberWebViewState(url)
     LaunchedEffect(url) {
-        val cookieManager = CookieManager.getInstance()
         while (true) {
             webViewState.lastLoadedUrl?.let { loadedUrl ->
                 val cookies =
-                    cookieManager.getCookieHeaderForUrls(
-                        cookieLookupUrls(
-                            loadedUrl = loadedUrl,
-                            originalUrl = url,
-                        ),
-                    )
+                    CookieManager
+                        .getInstance()
+                        .getCookie(loadedUrl)
                 if (callback(cookies)) {
                     onBack()
                     break
@@ -70,51 +62,17 @@ internal fun WebCookieLoginScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(it)
                     .fillMaxSize(),
-            onCreated = { webView ->
+            onCreated = {
                 WebStorage.getInstance().deleteAllData()
-                val cookieManager = CookieManager.getInstance()
-                cookieManager.setAcceptCookie(true)
-                cookieManager.setAcceptThirdPartyCookies(webView, true)
-                with(webView.settings) {
-                    userAgentString = ANDROID_USER_AGENT
+                CookieManager.getInstance().removeAllCookies(null)
+                with(it.settings) {
+                    userAgentString = userAgent.toString()
                     javaScriptEnabled = true
                     domStorageEnabled = true
                     javaScriptCanOpenWindowsAutomatically = false
                     cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
                 }
-                cookieManager.removeAllCookies {
-                    cookieManager.flush()
-                    webView.loadUrl(url, USER_AGENT_HEADERS)
-                }
             },
         )
     }
 }
-
-private fun cookieLookupUrls(
-    loadedUrl: String,
-    originalUrl: String,
-): List<String> {
-    val loadedHost = loadedUrl.hostOrNull()
-    val originalHost = originalUrl.hostOrNull()
-    return if (loadedHost != null && originalHost != null && loadedHost.equals(originalHost, ignoreCase = true)) {
-        listOf(loadedUrl)
-    } else {
-        listOf(loadedUrl, originalUrl)
-    }
-}
-
-private fun CookieManager.getCookieHeaderForUrls(urls: List<String>): String? =
-    urls
-        .distinct()
-        .flatMap { url ->
-            getCookie(url)
-                ?.split(";")
-                .orEmpty()
-        }.map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .distinct()
-        .joinToString("; ")
-        .takeIf { it.isNotBlank() }
-
-private fun String.hostOrNull(): String? = runCatching { Uri.parse(this).host }.getOrNull()

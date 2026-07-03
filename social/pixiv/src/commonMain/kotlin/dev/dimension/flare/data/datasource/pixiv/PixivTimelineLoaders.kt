@@ -68,8 +68,8 @@ internal class PixivDiscoverTimelineLoader(
     override val pagingKey: String = "pixiv_discover_$accountKey"
 
     override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse =
-        service.rankingIllusts(
-            mode = PixivRankingMode.Day,
+        service.recommendedIllusts(
+            includeRankingIllusts = true,
         )
 }
 

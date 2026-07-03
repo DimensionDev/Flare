@@ -7,8 +7,13 @@ struct AppearanceLayoutScreen: View {
             AppearanceLayoutSettingsSection {
                 NavigationLink(value: Route.postActionLayout) {
                     VStack(alignment: .leading) {
-                        Text("Customize actions")
-                        Text("Choose the order and visibility of post action buttons")
+                        Label {
+                            Text("Customize actions")
+                            Text("Choose the order and visibility of post action buttons")
+                        } icon: {
+                            EmptyView()
+                        }
+
                     }
                 }
             }

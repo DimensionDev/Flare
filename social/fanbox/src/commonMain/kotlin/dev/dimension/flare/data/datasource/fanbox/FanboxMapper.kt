@@ -32,11 +32,13 @@ import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.render.RenderTextStyle
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -51,6 +53,8 @@ internal fun fanboxCommentKey(
 ): MicroBlogKey = MicroBlogKey(id = "${postKey.id}:comment:$id", host = FANBOX_HOST)
 
 private val FANBOX_ARTICLE_VIDEO_EXTENSIONS = setOf("mp4", "webm", "mov", "m4v")
+
+private val FANBOX_ARTICLE_URL_REGEX = Regex("""https?://\S+""")
 
 internal suspend fun FanboxService.fanboxImageHeaders(): ImmutableMap<String, String> = currentCredential().toFanboxImageHeaders()
 
@@ -423,10 +427,44 @@ private fun String.toArticleTextBlock(
         key = key,
         content =
             RenderContent.Text(
-                runs = persistentListOf(RenderRun.Text(text = this)),
+                runs = toArticleTextRuns().toImmutableList(),
                 block = RenderBlockStyle(headingLevel = headingLevel),
             ),
     )
+
+private fun String.toArticleTextRuns(): List<RenderRun.Text> =
+    buildList {
+        var previousEnd = 0
+        FANBOX_ARTICLE_URL_REGEX.findAll(this@toArticleTextRuns).forEach { match ->
+            if (match.range.first > previousEnd) {
+                add(RenderRun.Text(text = substring(previousEnd, match.range.first)))
+            }
+            val rawUrl = match.value
+            val url = rawUrl.trimEndUrlPunctuation()
+            if (url.isNotEmpty()) {
+                add(
+                    RenderRun.Text(
+                        text = url,
+                        style = RenderTextStyle(link = url),
+                    ),
+                )
+            }
+            val suffix = rawUrl.removePrefix(url)
+            if (suffix.isNotEmpty()) {
+                add(RenderRun.Text(text = suffix))
+            }
+            previousEnd = match.range.last + 1
+        }
+        if (previousEnd < this@toArticleTextRuns.length) {
+            add(RenderRun.Text(text = substring(previousEnd)))
+        }
+        if (isEmpty()) {
+            add(RenderRun.Text(text = this@toArticleTextRuns))
+        }
+    }
+
+private fun String.trimEndUrlPunctuation(): String =
+    trimEnd('.', ',', '!', '?', ';', ':', ')', ']', '}', '>', '。', '、', '，', '！', '？', '；', '：')
 
 private fun String.toArticleHeadingLevel(): Int? =
     when (this) {

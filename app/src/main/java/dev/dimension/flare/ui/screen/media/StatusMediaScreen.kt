@@ -91,7 +91,6 @@ import coil3.imageLoader
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 import coil3.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -1336,7 +1335,7 @@ private fun ImageItem(
                 .Builder(LocalContext.current)
                 .data(url)
                 .placeholderMemoryCacheKey(previewUrl)
-                .crossfade(1_000)
+//                .crossfade(1_000)
                 .size(Size.ORIGINAL)
                 .let { builder ->
                     if (customHeaders.isNullOrEmpty()) {

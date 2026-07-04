@@ -461,8 +461,12 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
         guard let data, !isHidden, window != nil else { return [] }
-        guard case .post = onEnum(of: data) else { return [] }
-        return statusView.autoplayCandidates(prefix: prefix)
+        switch onEnum(of: data) {
+        case .post, .timelinePostItem:
+            return statusView.autoplayCandidates(prefix: prefix)
+        default:
+            return []
+        }
     }
 
 }

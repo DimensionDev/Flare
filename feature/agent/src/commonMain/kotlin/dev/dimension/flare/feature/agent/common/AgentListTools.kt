@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.serialization.Serializable
 
 internal class ListListsTool(
@@ -140,7 +141,7 @@ internal class LoadListTimelineTool(
             targets.map { target ->
                 target to runCatching { target.loadListTimeline(listId, maxItems) }.getOrElse { emptyList() }
             }
-        session.messagePartStore.addPosts(results.flatMap { it.second }.filterIsInstance<UiTimelineV2.Post>())
+        session.messagePartStore.addPosts(results.flatMap { it.second }.mapNotNull { it.contentPostOrNull() })
         return buildString {
             appendLine("List timeline")
             appendLine("listId: $listId")

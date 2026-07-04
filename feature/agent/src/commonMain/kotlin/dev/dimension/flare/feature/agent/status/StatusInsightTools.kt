@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -55,7 +56,7 @@ internal class LoadStatusContextTool(
                     pageSize = STATUS_CONTEXT_PAGE_SIZE,
                     request = PagingRequest.Refresh,
                 ).data
-                .filterIsInstance<UiTimelineV2.Post>()
+                .mapNotNull { it.contentPostOrNull() }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Status context",
@@ -827,7 +828,7 @@ private suspend fun List<AgentSearchTarget>.loadPosts(
                             pageSize = POST_TOOL_PAGE_SIZE,
                             request = PagingRequest.Refresh,
                         ).data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.contentPostOrNull() }
                 }.getOrElse { emptyList() }
             }
         }.awaitAll()
@@ -925,7 +926,7 @@ private suspend fun List<Pair<AgentSearchTarget, ProfileTab>>.loadProfileTabPost
                             pageSize = POST_TOOL_PAGE_SIZE,
                             request = PagingRequest.Refresh,
                         ).data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.contentPostOrNull() }
                 }.getOrElse { emptyList() }
             }
         }.awaitAll()
@@ -983,7 +984,7 @@ private suspend fun List<AgentSearchTarget>.searchPosts(query: String): List<UiT
                             pageSize = STATUS_SEARCH_PAGE_SIZE,
                             request = PagingRequest.Refresh,
                         ).data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.contentPostOrNull() }
                 }.getOrElse { emptyList() }
             }
         }.awaitAll()

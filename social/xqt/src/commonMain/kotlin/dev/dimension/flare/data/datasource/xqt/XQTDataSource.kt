@@ -74,6 +74,7 @@ import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.renderArticle
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -474,7 +475,7 @@ internal class XQTDataSource(
         val quoteUserName =
             quoteId
                 ?.let { statusKey ->
-                    loader.status(statusKey) as? UiTimelineV2.Post
+                    loader.status(statusKey).contentPostOrNull()
                 }?.user
                 ?.handle
                 ?.normalizedRaw

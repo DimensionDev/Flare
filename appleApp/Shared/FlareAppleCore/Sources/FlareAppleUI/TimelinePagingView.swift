@@ -208,6 +208,12 @@ public struct TimelineGalleryItemView: View {
                 switch onEnum(of: item) {
                 case .post(let post):
                     postTile(post)
+                case .timelinePostItem:
+                    if let post = item.timelineContentPost {
+                        postTile(post)
+                    } else {
+                        fallbackTile(item)
+                    }
                 case .feed(let feed):
                     feedTile(feed)
                 default:

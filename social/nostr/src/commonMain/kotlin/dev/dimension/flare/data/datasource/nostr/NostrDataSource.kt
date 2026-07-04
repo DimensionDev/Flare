@@ -44,6 +44,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -208,7 +209,7 @@ internal class NostrDataSource(
                     }
                 val nextKey =
                     data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.asTimelinePostItem() }
                         .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
                         ?.takeIf { data.isNotEmpty() }
                         ?.toString()
@@ -259,7 +260,7 @@ internal class NostrDataSource(
                     }
                 val nextKey =
                     data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.asTimelinePostItem() }
                         .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
                         ?.takeIf { data.isNotEmpty() }
                         ?.toString()
@@ -305,7 +306,7 @@ internal class NostrDataSource(
                     }
                 val nextKey =
                     data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.asTimelinePostItem() }
                         .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
                         ?.takeIf { data.isNotEmpty() }
                         ?.toString()
@@ -387,7 +388,7 @@ internal class NostrDataSource(
                     }
                 val nextKey =
                     data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.asTimelinePostItem() }
                         .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
                         ?.takeIf { data.isNotEmpty() }
                         ?.toString()

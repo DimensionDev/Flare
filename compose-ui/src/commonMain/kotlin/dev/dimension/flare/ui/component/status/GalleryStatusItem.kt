@@ -51,6 +51,10 @@ public fun GalleryTimelineItem(
             GalleryPostTile(post = item, modifier = modifier)
         }
 
+        is UiTimelineV2.TimelinePostItem -> {
+            GalleryPostTile(post = item.displayPost, modifier = modifier)
+        }
+
         is UiTimelineV2.Feed -> {
             GalleryFeedTile(feed = item, modifier = modifier)
         }

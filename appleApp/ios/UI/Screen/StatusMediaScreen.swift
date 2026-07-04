@@ -31,7 +31,7 @@ struct StatusMediaScreen: View {
             showsSupplementaryOverlay: true
         ) { _ in
             StateView(state: presenter.state.status) { timeline in
-                if let content = timeline as? UiTimelineV2.Post {
+                if let content = timeline.timelineContentPost {
                     StatusView(
                         data: content,
                         isQuote: true,
@@ -54,7 +54,7 @@ struct StatusMediaScreen: View {
     private func syncMediasIfNeeded(animated: Bool) {
         if medias.isEmpty,
            case .success(let success) = onEnum(of: presenter.state.status),
-           let content = success.data as? UiTimelineV2.Post {
+           let content = success.data.timelineContentPost {
             if animated {
                 withAnimation {
                     medias = Array(content.images)
@@ -67,7 +67,7 @@ struct StatusMediaScreen: View {
 
     private var statusUserHandle: String {
         if case .success(let success) = onEnum(of: presenter.state.status),
-           let content = success.data as? UiTimelineV2.Post {
+           let content = success.data.timelineContentPost {
             return content.user?.handle.canonical ?? "unknown"
         }
         return "unknown"

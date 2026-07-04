@@ -17,6 +17,10 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -37,6 +41,7 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
@@ -284,6 +289,83 @@ class PostHandlerTest : RobolectricTest() {
                 assertEquals(postKey, post.statusKey)
                 assertEquals(listOf(media.url), post.images.map { it.url })
             }
+        }
+
+    @Test
+    fun postCacheEmitsOptimisticActionMenuUpdates() =
+        runTest {
+            startTestKoin(this@runTest)
+
+            val original =
+                createPost(statusKey = postKey).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.vvoLike(
+                                statusKey = postKey,
+                                liked = false,
+                                count = 1,
+                                accountKey = accountKey,
+                            ),
+                        ),
+                )
+            db.statusDao().insert(
+                DbStatus(
+                    statusKey = postKey,
+                    accountType = accountType,
+                    content = original,
+                    renderHash = original.renderHash,
+                    text = original.searchText,
+                ),
+            )
+
+            val cacheable = PostHandler(accountType = accountType, loader = fakeLoader).post(postKey)
+            val initial =
+                cacheable.data
+                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                    .map { it.data as UiTimelineV2.Post }
+                    .first()
+            val initialLike = initial.actions.filterIsInstance<ActionMenu.Item>().first { it.actionFamily == PostActionFamily.Like }
+            assertEquals(1, initialLike.count?.value)
+            assertNull(initialLike.color)
+
+            val updatedDeferred =
+                async {
+                    cacheable.data
+                        .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                        .map { it.data as UiTimelineV2.Post }
+                        .first { post ->
+                            val like =
+                                post.actions
+                                    .filterIsInstance<ActionMenu.Item>()
+                                    .first { it.actionFamily == PostActionFamily.Like }
+                            like.count?.value == 2L && like.color == ActionMenu.Item.Color.Red
+                        }
+                }
+            val eventHandler =
+                PostEventHandler(
+                    accountType = accountType,
+                    handler =
+                        object : PostEventHandler.Handler {
+                            override suspend fun handle(
+                                event: PostEvent,
+                                updater: DatabaseUpdater,
+                            ) = Unit
+                        },
+                )
+            eventHandler.handleEvent(
+                PostEvent.VVO.Like(
+                    postKey = postKey,
+                    liked = false,
+                    count = 1,
+                    accountKey = accountKey,
+                ),
+            )
+            advanceUntilIdle()
+
+            val updated = assertNotNull(withTimeoutOrNull(1_000) { updatedDeferred.await() })
+            val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.actionFamily == PostActionFamily.Like }
+            assertEquals(2, updatedLike.count?.value)
+            assertEquals(ActionMenu.Item.Color.Red, updatedLike.color)
         }
 
     @Test

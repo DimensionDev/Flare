@@ -488,6 +488,14 @@ private enum MacTimelineMasonryColumnBuilder {
                 return 48 + columnWidth / CGFloat(max(media.aspectRatio ?? 1, 0.3))
             }
             return 140 + min(CGFloat(post.content.raw.count) * 0.35, 120)
+        case .timelinePostItem:
+            guard let post = item.timelineContentPost else {
+                return 180
+            }
+            if let media = post.images.first {
+                return 48 + columnWidth / CGFloat(max(media.aspectRatio ?? 1, 0.3))
+            }
+            return 140 + min(CGFloat(post.content.raw.count) * 0.35, 120)
         case .feed(let feed):
             if let media = feed.media {
                 return 48 + columnWidth / CGFloat(max(media.aspectRatio, 0.3))

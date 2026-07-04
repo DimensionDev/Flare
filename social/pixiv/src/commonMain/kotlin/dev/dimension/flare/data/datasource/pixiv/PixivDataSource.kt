@@ -43,6 +43,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -326,7 +327,7 @@ internal class PixivDataSource(
     @Suppress("UNCHECKED_CAST")
     override fun galleryDetail(statusKey: MicroBlogKey): Cacheable<GalleryDetail> =
         postHandler.post(statusKey).map {
-            val post = it as? UiTimelineV2.Post ?: error("Gallery detail should be a post")
+            val post = it.contentPostOrNull() ?: error("Gallery detail should be a post")
             val actionItems = post.actions.filterIsInstance<ActionMenu.Item>()
             val bookmarkAction =
                 actionItems.firstOrNull { action ->

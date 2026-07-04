@@ -81,7 +81,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -882,9 +881,9 @@ internal fun MediaViewerScreen(
                                         val url = current.url
                                         clipboard.setClipEntry(
                                             ClipEntry(
-                                                ClipData.newRawUri(
+                                                ClipData.newPlainText(
                                                     label,
-                                                    url.toUri(),
+                                                    url,
                                                 ),
                                             ),
                                         )

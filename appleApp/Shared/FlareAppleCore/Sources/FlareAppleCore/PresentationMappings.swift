@@ -10,6 +10,19 @@ public func localizedPresentationString(
     FlareAppleCoreLocalization.string(key, fallback: fallback, arguments: arguments)
 }
 
+public extension UiTimelineV2 {
+    var timelineContentPost: UiTimelineV2.Post? {
+        switch onEnum(of: self) {
+        case .post(let post):
+            return post
+        case .timelinePostItem(let item):
+            return item.presentation.repost ?? item.post
+        default:
+            return nil
+        }
+    }
+}
+
 public extension UiText {
     var text: String {
         switch onEnum(of: self) {

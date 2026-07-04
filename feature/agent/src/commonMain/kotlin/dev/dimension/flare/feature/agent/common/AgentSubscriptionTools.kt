@@ -13,6 +13,7 @@ import dev.dimension.flare.data.repository.SubscriptionSourceInput
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -122,7 +123,7 @@ internal class LoadSubscriptionTimelineTool(
                 .load(pageSize = pageSize, request = PagingRequest.Refresh)
                 .data
                 .take(pageSize)
-        session.messagePartStore.addPosts(items.filterIsInstance<UiTimelineV2.Post>())
+        session.messagePartStore.addPosts(items.mapNotNull { it.contentPostOrNull() })
         session.subscriptionItemStore.addFeeds(items.filterIsInstance<UiTimelineV2.Feed>())
 
         return buildString {

@@ -38,6 +38,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
@@ -227,9 +228,8 @@ public class ComposePresenter(
             val statusPlatform =
                 status
                     .takeSuccess()
-                    ?.let {
-                        it as? UiTimelineV2.Post
-                    }?.platformType
+                    ?.contentPostOrNull()
+                    ?.platformType
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
@@ -264,9 +264,8 @@ public class ComposePresenter(
             val statusPlatform =
                 status
                     .takeSuccess()
-                    ?.let {
-                        it as? UiTimelineV2.Post
-                    }?.platformType
+                    ?.contentPostOrNull()
+                    ?.platformType
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }

@@ -22,7 +22,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.UiRichText
@@ -90,7 +89,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                 )
             } else {
                 UiMedia.Image(
-                    url = url,
+                    url = url.replace("mw2000", "large"),
                     width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
                     height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
                     previewUrl = (it.url ?: url).replace("orj360", "mw600"),

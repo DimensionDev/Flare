@@ -721,6 +721,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         case .post(let post):
             sizingPostTile.configure(post: post, appearance: appearance, loadsRemoteImages: false)
             measuredHeight = measuredTileHeight(sizingPostTile, width: width)
+        case .timelinePostItem:
+            if let post = item.timelineContentPost {
+                sizingPostTile.configure(post: post, appearance: appearance, loadsRemoteImages: false)
+                measuredHeight = measuredTileHeight(sizingPostTile, width: width)
+            } else {
+                measuredHeight = 180
+            }
         case .feed(let feed):
             sizingFeedTile.configure(feed: feed, appearance: appearance, loadsRemoteImages: false)
             measuredHeight = measuredTileHeight(sizingFeedTile, width: width)
@@ -908,6 +915,13 @@ private final class GalleryTimelineTileUIView: UIView {
         case .post(let post):
             postTile.configure(post: post, appearance: appearance)
             setInstalledTile(postTile)
+        case .timelinePostItem:
+            if let post = item.timelineContentPost {
+                postTile.configure(post: post, appearance: appearance)
+                setInstalledTile(postTile)
+            } else {
+                setInstalledTile(nil)
+            }
         case .feed(let feed):
             feedTile.configure(feed: feed, appearance: appearance)
             setInstalledTile(feedTile)

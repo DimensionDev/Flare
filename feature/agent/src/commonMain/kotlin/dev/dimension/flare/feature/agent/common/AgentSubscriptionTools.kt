@@ -754,6 +754,7 @@ private fun List<UiTimelineV2>.toSubscriptionTimelineToolText(
 private fun UiTimelineV2.toSubscriptionTimelineItemToolText(): String =
     when (this) {
         is UiTimelineV2.Feed -> toSubscriptionFeedToolText()
+        is UiTimelineV2.TimelinePostItem -> displayPost.toSubscriptionPostToolText()
         is UiTimelineV2.Post -> toSubscriptionPostToolText()
         is UiTimelineV2.User -> "itemType: user\nsearchText: ${searchText.orEmpty().take(MAX_SUBSCRIPTION_ITEM_TEXT_LENGTH)}"
         is UiTimelineV2.UserList -> "itemType: user_list\nsearchText: ${searchText.orEmpty().take(MAX_SUBSCRIPTION_ITEM_TEXT_LENGTH)}"

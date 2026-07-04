@@ -279,13 +279,11 @@ class PostEventHandlerTest : RobolectricTest() {
         poll: UiPoll? = null,
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            message = null,
             platformType = PlatformType.Mastodon,
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,
             user = createProfile(),
-            quote = persistentListOf(),
             content = "post content".toUiPlainText(),
             actions = actions,
             poll = poll,
@@ -297,7 +295,6 @@ class PostEventHandlerTest : RobolectricTest() {
             visibility = null,
             replyToHandle = null,
             references = persistentListOf(),
-            parents = persistentListOf(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),
         )

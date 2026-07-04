@@ -146,6 +146,7 @@ import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -159,6 +160,7 @@ public fun CommonStatusComponent(
     showMedia: Boolean = true,
     maxLines: Int? = null,
     showExpandButton: Boolean = true,
+    quotes: ImmutableList<UiTimelineV2.Post> = persistentListOf(),
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalTimelineAppearance.current
@@ -373,7 +375,7 @@ public fun CommonStatusComponent(
                 )
             }
             item.card?.let { card ->
-                if (appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty()) {
+                if (appearanceSettings.showLinkPreview && item.images.isEmpty() && quotes.isEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusCardComponent(
                         card = card,
@@ -402,10 +404,10 @@ public fun CommonStatusComponent(
                     )
                 }
             }
-            if (item.quote.isNotEmpty() && !isQuote) {
+            if (quotes.isNotEmpty() && !isQuote) {
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusQuoteComponent(
-                    quotes = item.quote,
+                    quotes = quotes,
                 )
             }
 

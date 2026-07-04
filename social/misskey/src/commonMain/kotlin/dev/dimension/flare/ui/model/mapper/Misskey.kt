@@ -20,6 +20,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiEmoji
@@ -287,7 +288,15 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                     it
                 }
             }?.renderStatus(accountKey)
-    return status?.copy(message = message)
+    return status?.let {
+        UiTimelineV2.TimelinePostItem(
+            post = it,
+            presentation =
+                UiTimelineV2.PostPresentation(
+                    message = message,
+                ),
+        )
+    }
         ?: if (user != null) {
             UiTimelineV2.User(
                 message = message,
@@ -418,13 +427,34 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
         } else {
             null
         }
-    return if (actualStatus !== this) {
-        wrapperStatus.copy(
+    val quoteStatus =
+        when {
+            actualStatus === this && renote != null -> renote.renderStatus(accountKey)
+            actualStatus !== this && actualStatus.renote != null -> actualStatus.renote.renderStatus(accountKey)
+            else -> null
+        }
+    val presentation =
+        UiTimelineV2.PostPresentation(
             message = topMessage,
-            internalRepost = actualStatus.renderStatus(accountKey),
+            quotes = listOfNotNull(quoteStatus).toImmutableList(),
+            repost =
+                if (actualStatus !== this) {
+                    actualStatus.renderStatus(accountKey)
+                } else {
+                    null
+                },
+        )
+    return if (
+        presentation.message != null ||
+        presentation.quotes.isNotEmpty() ||
+        presentation.repost != null
+    ) {
+        UiTimelineV2.TimelinePostItem(
+            post = wrapperStatus,
+            presentation = presentation,
         )
     } else {
-        wrapperStatus.copy(message = topMessage)
+        wrapperStatus
     }
 }
 
@@ -504,10 +534,6 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             }
         }
     return UiTimelineV2.Post(
-        parents =
-            listOfNotNull(
-                parent?.renderStatus(accountKey),
-            ).toPersistentList(),
         images =
             files
                 ?.mapNotNull { file ->
@@ -520,12 +546,32 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 null
             },
         user = user,
-        quote =
+        references =
             listOfNotNull(
-                if (text != null || !files.isNullOrEmpty() || cw != null || poll != null) {
-                    renote?.renderStatus(accountKey)
-                } else {
-                    null
+                parent?.let { parentNote ->
+                    UiTimelineV2.Post.Reference(
+                        statusKey =
+                            MicroBlogKey(
+                                parentNote.id,
+                                parentNote.user.host?.takeIf { host -> host.isNotEmpty() } ?: accountKey.host,
+                            ),
+                        type = ReferenceType.Reply,
+                    )
+                },
+                renote?.let { renoteNote ->
+                    UiTimelineV2.Post.Reference(
+                        statusKey =
+                            MicroBlogKey(
+                                renoteNote.id,
+                                renoteNote.user.host?.takeIf { host -> host.isNotEmpty() } ?: accountKey.host,
+                            ),
+                        type =
+                            if (text != null || !files.isNullOrEmpty() || cw != null || poll != null) {
+                                ReferenceType.Quote
+                            } else {
+                                ReferenceType.Retweet
+                            },
+                    )
                 },
             ).toImmutableList(),
         content =

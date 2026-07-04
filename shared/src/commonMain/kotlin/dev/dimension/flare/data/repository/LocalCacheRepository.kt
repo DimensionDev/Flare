@@ -4,6 +4,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 
@@ -41,8 +42,10 @@ internal class DatabaseLocalCacheRepository(
             .searchCachedStatuses(
                 query = normalizedQuery.toLikePattern(),
                 limit = limit.normalizedLocalCacheLimit(),
-            ).mapNotNull { it.status.data.content as? UiTimelineV2.Post }
-            .distinctBy { it.platformType to it.statusKey }
+            ).mapNotNull {
+                it.status.data.content
+                    .contentPostOrNull()
+            }.distinctBy { it.platformType to it.statusKey }
     }
 
     override suspend fun listViewedPosts(limit: Int): List<UiTimelineV2.Post> =
@@ -51,8 +54,10 @@ internal class DatabaseLocalCacheRepository(
             .getStatusHistoryPage(
                 pagingKey = STATUS_HISTORY_PAGING_KEY,
                 limit = limit.normalizedLocalCacheLimit(),
-            ).mapNotNull { it.status.data.content as? UiTimelineV2.Post }
-            .distinctBy { it.platformType to it.statusKey }
+            ).mapNotNull {
+                it.status.status.data.content
+                    .contentPostOrNull()
+            }.distinctBy { it.platformType to it.statusKey }
 
     override suspend fun searchUsers(
         query: String,

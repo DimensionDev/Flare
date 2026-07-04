@@ -9,6 +9,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
@@ -249,12 +250,15 @@ class MicroblogTest : RobolectricTest() {
             val mainUser =
                 createUser(MicroBlogKey(id = "main-user", host = "test.com"), "Main User")
             val mainPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = mainUser,
-                    statusKey = MicroBlogKey(id = "main-status", host = "test.com"),
-                    text = "main status",
-                    parents = persistentListOf(refPost),
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = mainUser,
+                            statusKey = MicroBlogKey(id = "main-status", host = "test.com"),
+                            text = "main status",
+                        ),
+                    inlineParents = listOf(refPost),
                 )
 
             val timelineItem = TimelinePagingMapper.toDb(mainPost, pagingKey = "home")
@@ -263,8 +267,7 @@ class MicroblogTest : RobolectricTest() {
             val savedMainStatus =
                 db.statusDao().get(mainPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedMainStatus)
-            val savedMainPost = assertIs<UiTimelineV2.Post>(savedMainStatus.content)
-            assertTrue(savedMainPost.parents.isEmpty())
+            val savedMainPost = rootPostOf(savedMainStatus.content)
             assertEquals(1, savedMainPost.references.size)
             assertEquals(ReferenceType.Reply, savedMainPost.references.first().type)
             assertEquals(refPost.statusKey, savedMainPost.references.first().statusKey)
@@ -304,29 +307,37 @@ class MicroblogTest : RobolectricTest() {
                     user = parentUser,
                     statusKey = MicroBlogKey(id = "parent-status", host = "test.com"),
                     text = "parent status",
-                    quote = listOf(quotedPost),
                 )
             val childPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = childUser,
-                    statusKey = MicroBlogKey(id = "child-status", host = "test.com"),
-                    text = "child status",
-                    parents = listOf(parentPost),
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = childUser,
+                            statusKey = MicroBlogKey(id = "child-status", host = "test.com"),
+                            text = "child status",
+                        ),
+                    inlineParents = listOf(parentPost),
+                    quotes = listOf(quotedPost),
                 )
 
             val mapped = TimelinePagingMapper.toDb(childPost, pagingKey = "home")
             val rendered =
                 TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
-                    as UiTimelineV2.Post
-            val renderedParent = rendered.parents.single()
+                    as UiTimelineV2.TimelinePostItem
+            val renderedParent = rendered.presentation.inlineParents.single()
 
             assertEquals(parentPost.statusKey, renderedParent.statusKey)
-            assertEquals(1, renderedParent.quote.size)
-            assertEquals(quotedPost.statusKey, renderedParent.quote.first().statusKey)
+            assertEquals(1, rendered.presentation.quotes.size)
+            assertEquals(
+                quotedPost.statusKey,
+                rendered.presentation.quotes
+                    .first()
+                    .statusKey,
+            )
             assertEquals(
                 "quoted status",
-                renderedParent.quote
+                rendered.presentation.quotes
                     .first()
                     .content.raw,
             )
@@ -420,19 +431,19 @@ class MicroblogTest : RobolectricTest() {
                     .size,
             )
 
-            val withoutRef = withRef.copy(parents = persistentListOf())
+            val withoutRef = withRef.copy(references = persistentListOf())
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutRef, pagingKey = "home")))
 
             val refsAfter =
                 db.statusReferenceDao().getByStatusId(
                     DbStatus.createId(AccountType.Specific(accountKey), withRef.statusKey),
                 )
-            assertEquals(1, refsAfter.size)
+            assertEquals(0, refsAfter.size)
 
             val paging = db.pagingTimelineDao().getPagingSource("home")
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
-            assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(refreshResult)
+            assertPage(refreshResult)
         }
 
     @Test
@@ -478,15 +489,15 @@ class MicroblogTest : RobolectricTest() {
 
             assertEquals(
                 listOf(first.timeline.statusId),
-                loader.load(offset = 0, limit = 1).map { it.status.data.id },
+                loader.load(offset = 0, limit = 1).map { it.status.status.data.id },
             )
             assertEquals(
                 listOf(second.timeline.statusId),
-                loader.load(offset = 1, limit = 1).map { it.status.data.id },
+                loader.load(offset = 1, limit = 1).map { it.status.status.data.id },
             )
             assertEquals(
                 emptyList(),
-                loader.load(offset = 2, limit = 1).map { it.status.data.id },
+                loader.load(offset = 2, limit = 1).map { it.status.status.data.id },
             )
         }
 
@@ -525,7 +536,7 @@ class MicroblogTest : RobolectricTest() {
                     .size,
             )
 
-            val withoutQuote = withQuote.copy(quote = persistentListOf())
+            val withoutQuote = withQuote.copy(references = persistentListOf())
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutQuote, pagingKey = "home")))
 
             val refsAfter =
@@ -561,12 +572,11 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withParents, pagingKey = "home")))
-            val withoutParents = withParents.copy(parents = persistentListOf())
             saveToDatabase(
                 db,
                 listOf(
                     TimelinePagingMapper.toDb(
-                        withoutParents,
+                        withParents,
                         pagingKey = "post_only_${withParents.statusKey}",
                     ),
                 ),
@@ -575,8 +585,7 @@ class MicroblogTest : RobolectricTest() {
             val saved =
                 db.statusDao().get(withParents.statusKey, AccountType.Specific(accountKey)).first()
             val savedStatus = assertNotNull(saved)
-            val savedPost = assertIs<UiTimelineV2.Post>(savedStatus.content)
-            assertTrue(savedPost.parents.isEmpty())
+            val savedPost = rootPostOf(savedStatus.content)
             assertEquals(1, savedPost.references.size)
             assertEquals(refPost.statusKey, savedPost.references.first().statusKey)
             assertEquals(savedPost.renderHash, savedStatus.renderHash)
@@ -594,22 +603,21 @@ class MicroblogTest : RobolectricTest() {
                     statusKey = MicroBlogKey(id = "parent-render-hash", host = "test.com"),
                     text = "parent",
                 )
-            val post =
+            val rootPost =
                 createPost(
                     accountKey = accountKey,
                     user = user,
                     statusKey = MicroBlogKey(id = "root-render-hash", host = "test.com"),
                     text = "root",
-                    parents = listOf(parent),
                 )
+            val post = timelinePostItem(rootPost, inlineParents = listOf(parent))
 
             val savedStatus =
                 TimelinePagingMapper
                     .toDb(post, pagingKey = "home")
                     .status.status.data
-            val savedPost = assertIs<UiTimelineV2.Post>(savedStatus.content)
+            val savedPost = rootPostOf(savedStatus.content)
 
-            assertTrue(savedPost.parents.isEmpty())
             assertEquals(1, savedPost.references.size)
             assertEquals(savedPost.renderHash, savedStatus.renderHash)
             assertNotEquals(post.renderHash, savedStatus.renderHash)
@@ -631,12 +639,15 @@ class MicroblogTest : RobolectricTest() {
                     text = "parent",
                 )
             val rootPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = rootUser,
-                    statusKey = MicroBlogKey(id = "root-status", host = "test.com"),
-                    text = "root",
-                    parents = listOf(parentPost),
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = rootUser,
+                            statusKey = MicroBlogKey(id = "root-status", host = "test.com"),
+                            text = "root",
+                        ),
+                    inlineParents = listOf(parentPost),
                 )
 
             val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
@@ -673,13 +684,15 @@ class MicroblogTest : RobolectricTest() {
                     text = "repost",
                 )
             val wrapperPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = wrapperUser,
-                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
-                    text = "wrapper",
-                ).copy(
-                    internalRepost = repostPost,
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = wrapperUser,
+                            statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                            text = "wrapper",
+                        ),
+                    repost = repostPost,
                 )
 
             val mapped = TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home")
@@ -712,12 +725,15 @@ class MicroblogTest : RobolectricTest() {
                     text = "parent",
                 )
             val rootPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = rootUser,
-                    statusKey = MicroBlogKey(id = "root-status", host = "test.com"),
-                    text = "root",
-                    parents = listOf(parentPost),
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = rootUser,
+                            statusKey = MicroBlogKey(id = "root-status", host = "test.com"),
+                            text = "root",
+                        ),
+                    inlineParents = listOf(parentPost),
                 )
 
             val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
@@ -727,11 +743,21 @@ class MicroblogTest : RobolectricTest() {
                     pagingKey = "home",
                     translationDisplayOptions = translationDisplayOptions(),
                 )
-            val post = assertIs<UiTimelineV2.Post>(ui)
+            val post = assertIs<UiTimelineV2.TimelinePostItem>(ui)
             assertEquals("home_${mapped.status.status.data.id}", post.itemKey)
-            assertEquals(1, post.parents.size)
-            assertEquals("home_${mapped.status.references.first().status?.data?.id}", post.parents.first().itemKey)
-            assertEquals(parentPost.statusKey, post.parents.first().statusKey)
+            assertEquals(1, post.presentation.inlineParents.size)
+            assertEquals(
+                "home_${mapped.presentationReferences.first().status?.data?.id}",
+                post.presentation.inlineParents
+                    .first()
+                    .itemKey,
+            )
+            assertEquals(
+                parentPost.statusKey,
+                post.presentation.inlineParents
+                    .first()
+                    .statusKey,
+            )
         }
 
     @Test
@@ -756,12 +782,15 @@ class MicroblogTest : RobolectricTest() {
                     text = "parent original",
                 )
             val rootPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = rootUser,
-                    statusKey = MicroBlogKey(id = "root-status-translated", host = "test.com"),
-                    text = "root original",
-                    parents = listOf(parentPost),
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = rootUser,
+                            statusKey = MicroBlogKey(id = "root-status-translated", host = "test.com"),
+                            text = "root original",
+                        ),
+                    inlineParents = listOf(parentPost),
                 )
 
             val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
@@ -805,7 +834,7 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                assertPage(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
@@ -816,13 +845,13 @@ class MicroblogTest : RobolectricTest() {
                     pagingKey = "home",
                     translationDisplayOptions = translationDisplayOptions(),
                 )
-            val post = assertIs<UiTimelineV2.Post>(ui)
+            val post = assertIs<UiTimelineV2.TimelinePostItem>(ui)
 
-            assertEquals("根帖子", post.content.raw)
-            assertEquals(1, post.parents.size)
+            assertEquals("根帖子", post.post.content.raw)
+            assertEquals(1, post.presentation.inlineParents.size)
             assertEquals(
                 "父帖子",
-                post.parents
+                post.presentation.inlineParents
                     .first()
                     .content.raw,
             )
@@ -835,12 +864,14 @@ class MicroblogTest : RobolectricTest() {
             val postUser =
                 createUser(MicroBlogKey(id = "post-user", host = "test.com"), "Post User")
             val post =
-                createPost(
-                    accountKey = accountKey,
-                    user = postUser,
-                    statusKey = MicroBlogKey(id = "post-status", host = "test.com"),
-                    text = "post content",
-                ).copy(
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = postUser,
+                            statusKey = MicroBlogKey(id = "post-status", host = "test.com"),
+                            text = "post content",
+                        ),
                     message =
                         UiTimelineV2.Message(
                             user = null,
@@ -859,8 +890,8 @@ class MicroblogTest : RobolectricTest() {
             val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
             val roundTrip =
                 TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
-            val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
-            val message = assertNotNull(rendered.message)
+            val rendered = assertIs<UiTimelineV2.TimelinePostItem>(roundTrip)
+            val message = assertNotNull(rendered.presentation.message)
             val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
 
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
@@ -893,18 +924,18 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                assertPage(
                     refreshResult,
                 )
             val dbItem =
                 assertNotNull(
                     page.data.firstOrNull {
-                        it.status.data.statusKey == post.statusKey
+                        it.status.status.data.statusKey == post.statusKey
                     },
                 )
 
             val rendered =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         dbItem,
                         pagingKey = "home",
@@ -943,14 +974,16 @@ class MicroblogTest : RobolectricTest() {
                     accountType = AccountType.Specific(accountKey),
                 )
             val wrapperPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = wrapperUser,
-                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
-                    text = "wrapper content",
-                ).copy(
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = wrapperUser,
+                            statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                            text = "wrapper content",
+                        ),
                     message = repostMessage,
-                    internalRepost = repostPost,
+                    repost = repostPost,
                 )
 
             val mapped = TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home")
@@ -962,25 +995,22 @@ class MicroblogTest : RobolectricTest() {
                 db.statusDao().get(repostPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedWrapper)
             assertNotNull(savedRepost)
-            val savedWrapperPost = assertIs<UiTimelineV2.Post>(savedWrapper.content)
-            assertTrue(savedWrapperPost.quote.isEmpty())
-            assertTrue(savedWrapperPost.parents.isEmpty())
-            kotlin.test.assertNull(savedWrapperPost.internalRepost)
+            val savedWrapperPost = rootPostOf(savedWrapper.content)
             assertEquals(1, savedWrapperPost.references.size)
             assertEquals(ReferenceType.Retweet, savedWrapperPost.references.first().type)
 
             val roundTrip =
                 TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
-            val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
-            val internalRepost = assertNotNull(rendered.internalRepost)
+            val rendered = assertIs<UiTimelineV2.TimelinePostItem>(roundTrip)
+            val internalRepost = assertNotNull(rendered.presentation.repost)
 
-            assertEquals(wrapperPost.statusKey, rendered.statusKey)
+            assertEquals(wrapperPost.statusKey, rendered.post.statusKey)
             assertEquals(repostPost.statusKey, internalRepost.statusKey)
-            assertEquals(repostPost.content.raw, rendered.content.raw)
-            assertEquals(repostPost.user?.key, rendered.user?.key)
+            assertEquals(repostPost.content.raw, rendered.displayPost.content.raw)
+            assertEquals(repostPost.user?.key, rendered.displayPost.user?.key)
             assertEquals(repostPost.content.raw, internalRepost.content.raw)
 
-            val message = assertNotNull(rendered.message)
+            val message = assertNotNull(rendered.presentation.message)
             val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         }
@@ -1015,14 +1045,16 @@ class MicroblogTest : RobolectricTest() {
                     accountType = AccountType.Specific(accountKey),
                 )
             val wrapperPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = wrapperUser,
-                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
-                    text = "wrapper content",
-                ).copy(
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = wrapperUser,
+                            statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                            text = "wrapper content",
+                        ),
                     message = repostMessage,
-                    internalRepost = originalPost,
+                    repost = originalPost,
                 )
 
             saveToDatabase(
@@ -1037,25 +1069,25 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                assertPage(
                     refreshResult,
                 )
 
             val originalDbItem =
                 assertNotNull(
                     page.data.firstOrNull {
-                        it.status.data.statusKey == originalPost.statusKey
+                        it.status.status.data.statusKey == originalPost.statusKey
                     },
                 )
             val wrapperDbItem =
                 assertNotNull(
                     page.data.firstOrNull {
-                        it.status.data.statusKey == wrapperPost.statusKey
+                        it.status.status.data.statusKey == wrapperPost.statusKey
                     },
                 )
 
             val renderedOriginal =
-                assertIs<UiTimelineV2.Post>(
+                assertIs<UiTimelineV2.TimelinePostItem>(
                     TimelinePagingMapper.toUi(
                         item = originalDbItem,
                         pagingKey = "home",
@@ -1063,7 +1095,7 @@ class MicroblogTest : RobolectricTest() {
                     ),
                 )
             val renderedWrapper =
-                assertIs<UiTimelineV2.Post>(
+                assertIs<UiTimelineV2.TimelinePostItem>(
                     TimelinePagingMapper.toUi(
                         item = wrapperDbItem,
                         pagingKey = "home",
@@ -1071,8 +1103,8 @@ class MicroblogTest : RobolectricTest() {
                     ),
                 )
 
-            assertEquals(originalPost.statusKey, renderedOriginal.statusKey)
-            assertEquals(wrapperPost.statusKey, renderedWrapper.statusKey)
+            assertEquals(originalPost.statusKey, renderedOriginal.post.statusKey)
+            assertEquals(wrapperPost.statusKey, renderedWrapper.post.statusKey)
             assertNotEquals(renderedOriginal.itemKey, renderedWrapper.itemKey)
         }
 
@@ -1100,13 +1132,16 @@ class MicroblogTest : RobolectricTest() {
                     quote = listOf(postC),
                 )
             val postA =
-                createPost(
-                    accountKey = accountKey,
-                    user = userA,
-                    statusKey = MicroBlogKey(id = "status-a", host = "test.com"),
-                    text = "content-a",
-                ).copy(
-                    internalRepost = postB,
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = userA,
+                            statusKey = MicroBlogKey(id = "status-a", host = "test.com"),
+                            text = "content-a",
+                        ),
+                    repost = postB,
+                    quotes = listOf(postC),
                     message =
                         UiTimelineV2.Message(
                             user = userA,
@@ -1148,28 +1183,26 @@ class MicroblogTest : RobolectricTest() {
 
             val ui =
                 TimelinePagingMapper.toUi(mapped, pagingKey = "home", translationDisplayOptions())
-            val rendered = assertIs<UiTimelineV2.Post>(ui)
-            val repost = assertNotNull(rendered.internalRepost)
+            val rendered = assertIs<UiTimelineV2.TimelinePostItem>(ui)
+            val repost = assertNotNull(rendered.presentation.repost)
 
-            assertEquals(postA.statusKey, rendered.statusKey)
-            assertEquals("content-b", rendered.content.raw)
+            assertEquals(postA.statusKey, rendered.post.statusKey)
+            assertEquals("content-b", rendered.displayPost.content.raw)
             assertEquals("content-b", repost.content.raw)
             assertEquals(postB.statusKey, repost.statusKey)
-            assertEquals(1, rendered.quote.size)
+            assertEquals(1, rendered.presentation.quotes.size)
             assertEquals(
                 "content-c",
-                rendered.quote
+                rendered.presentation.quotes
                     .first()
                     .content.raw,
             )
-            assertEquals(1, repost.quote.size)
             assertEquals(
-                "content-c",
-                repost.quote
+                postC.statusKey,
+                rendered.presentation.quotes
                     .first()
-                    .content.raw,
+                    .statusKey,
             )
-            assertEquals(postC.statusKey, repost.quote.first().statusKey)
         }
 
     @Test
@@ -1215,14 +1248,17 @@ class MicroblogTest : RobolectricTest() {
                     accountType = AccountType.Specific(accountKey),
                 )
             val wrapperPost =
-                createPost(
-                    accountKey = accountKey,
-                    user = wrapperUser,
-                    statusKey = MicroBlogKey(id = "wrapper-status-with-quote", host = "test.com"),
-                    text = "wrapper content",
-                ).copy(
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = wrapperUser,
+                            statusKey = MicroBlogKey(id = "wrapper-status-with-quote", host = "test.com"),
+                            text = "wrapper content",
+                        ),
                     message = repostMessage,
-                    internalRepost = repostPost,
+                    repost = repostPost,
+                    quotes = listOf(quotePost),
                 )
 
             val mapped = TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home")
@@ -1232,33 +1268,38 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                assertPage(
                     refreshResult,
                 )
             val dbItem =
                 assertNotNull(
                     page.data.firstOrNull {
-                        it.status.data.statusKey == wrapperPost.statusKey
+                        it.status.status.data.statusKey == wrapperPost.statusKey
                     },
                 )
             val rendered =
-                assertIs<UiTimelineV2.Post>(
+                assertIs<UiTimelineV2.TimelinePostItem>(
                     TimelinePagingMapper.toUi(
                         dbItem,
                         pagingKey = "home",
                         translationDisplayOptions(),
                     ),
                 )
-            val internalRepost = assertNotNull(rendered.internalRepost)
+            val internalRepost = assertNotNull(rendered.presentation.repost)
 
-            assertEquals(wrapperPost.statusKey, rendered.statusKey)
-            assertEquals(repostPost.content.raw, rendered.content.raw)
+            assertEquals(wrapperPost.statusKey, rendered.post.statusKey)
+            assertEquals(repostPost.content.raw, rendered.displayPost.content.raw)
             assertEquals(repostPost.statusKey, internalRepost.statusKey)
-            assertEquals(1, internalRepost.quote.size)
-            assertEquals(quotePost.statusKey, internalRepost.quote.first().statusKey)
+            assertEquals(1, rendered.presentation.quotes.size)
+            assertEquals(
+                quotePost.statusKey,
+                rendered.presentation.quotes
+                    .first()
+                    .statusKey,
+            )
             assertEquals(
                 "quoted content",
-                internalRepost.quote
+                rendered.presentation.quotes
                     .first()
                     .content.raw,
             )
@@ -1300,9 +1341,10 @@ class MicroblogTest : RobolectricTest() {
                     accountType = AccountType.Specific(accountKey),
                 )
             val retweetItem =
-                original.copy(
-                    statusKey = retweetMessage.statusKey,
+                timelinePostItem(
+                    post = original.copy(statusKey = retweetMessage.statusKey),
                     message = retweetMessage,
+                    repost = original,
                 )
 
             val items =
@@ -1312,15 +1354,24 @@ class MicroblogTest : RobolectricTest() {
                 )
             saveToDatabase(db, items)
 
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page =
+                assertPage(
+                    refreshResult,
+                )
             val savedRetweet =
-                db
-                    .statusDao()
-                    .get(
-                        retweetMessage.statusKey,
-                        AccountType.Specific(accountKey),
-                    ).first()
-            val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(savedRetweet).content)
-            val savedMessage = assertNotNull(savedPost.message)
+                assertNotNull(
+                    page.data.firstOrNull {
+                        it.status.status.data.statusKey == retweetMessage.statusKey
+                    },
+                )
+            val savedPost =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(savedRetweet, "home", translationDisplayOptions()),
+                )
+            val savedMessage = assertNotNull(savedPost.presentation.message)
             val savedType = assertIs<UiTimelineV2.Message.Type.Localized>(savedMessage.type)
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, savedType.data)
             assertEquals(retweetMessage.statusKey, savedPost.statusKey)
@@ -1355,11 +1406,12 @@ class MicroblogTest : RobolectricTest() {
                     accountType = AccountType.Specific(accountKey),
                 )
             val homeRetweetView =
-                original.copy(
-                    statusKey = retweetMessage.statusKey,
+                timelinePostItem(
+                    post = original.copy(statusKey = retweetMessage.statusKey),
                     message = retweetMessage,
+                    repost = original,
                 )
-            val detailView = original.copy(message = null)
+            val detailView = original
 
             saveToDatabase(
                 db,
@@ -1370,13 +1422,24 @@ class MicroblogTest : RobolectricTest() {
                 listOf(TimelinePagingMapper.toDb(detailView, pagingKey = "post_only_$statusKey")),
             )
 
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page =
+                assertPage(
+                    refreshResult,
+                )
             val saved =
-                db
-                    .statusDao()
-                    .get(retweetMessage.statusKey, AccountType.Specific(accountKey))
-                    .first()
-            val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(saved).content)
-            val savedMessage = assertNotNull(savedPost.message)
+                assertNotNull(
+                    page.data.firstOrNull {
+                        it.status.status.data.statusKey == retweetMessage.statusKey
+                    },
+                )
+            val savedPost =
+                assertIs<UiTimelineV2.TimelinePostItem>(
+                    TimelinePagingMapper.toUi(saved, "home", translationDisplayOptions()),
+                )
+            val savedMessage = assertNotNull(savedPost.presentation.message)
             val savedType = assertIs<UiTimelineV2.Message.Type.Localized>(savedMessage.type)
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, savedType.data)
         }
@@ -1487,7 +1550,7 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                assertPage(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
@@ -1505,8 +1568,8 @@ class MicroblogTest : RobolectricTest() {
                     translationDisplayOptions = translationDisplayOptions(),
                 )
 
-            assertEquals("长文译文", assertIs<UiTimelineV2.Post>(timelineUi).content.raw)
-            assertEquals("长文译文", assertIs<UiTimelineV2.Post>(detailUi).content.raw)
+            assertEquals("长文译文", rootPostOf(timelineUi).content.raw)
+            assertEquals("长文译文", rootPostOf(detailUi).content.raw)
         }
 
     @Test
@@ -1548,7 +1611,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                        assertPage(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1558,7 +1621,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             val timelineUi =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
@@ -1637,13 +1700,13 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             val page =
-                assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                assertPage(
                     refreshResult,
                 )
             val dbItem = assertNotNull(page.data.firstOrNull())
 
             val timelineUi =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
@@ -1705,7 +1768,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                        assertPage(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1715,7 +1778,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             val timelineUi =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
@@ -1782,7 +1845,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                        assertPage(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1792,7 +1855,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             val timelineUi =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
@@ -1859,7 +1922,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                        assertPage(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1869,7 +1932,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             val timelineUi =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
@@ -1941,7 +2004,7 @@ class MicroblogTest : RobolectricTest() {
             val dbItem =
                 assertNotNull(
                     (
-                        assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+                        assertPage(
                             TestPager(
                                 config = PagingConfig(pageSize = 20),
                                 db.pagingTimelineDao().getPagingSource("home"),
@@ -1951,7 +2014,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             val timelineUi =
-                assertIs<UiTimelineV2.Post>(
+                rootPostOf(
                     TimelinePagingMapper.toUi(
                         item = dbItem,
                         pagingKey = "home",
@@ -2074,28 +2137,17 @@ class MicroblogTest : RobolectricTest() {
                         previousKey = it.statusKey
                     }
                 }
-            val rootStatus = TimelinePagingMapper.toDb(posts.last(), pagingKey = "home").status.status
             val cached =
-                DbStatusWithReference(
-                    status = rootStatus,
-                    references =
-                        posts.dropLast(1).map { post ->
-                            val dbPost = TimelinePagingMapper.toDb(post, pagingKey = "home").status.status
-                            DbStatusReferenceWithStatus(
-                                reference =
-                                    DbStatusReference(
-                                        _id = "${rootStatus.data.id}_${post.statusKey}",
-                                        referenceType = ReferenceType.Reply,
-                                        statusId = rootStatus.data.id,
-                                        referenceStatusId = DbStatus.createId(accountType, post.statusKey),
-                                    ),
-                                status = dbPost,
-                            )
-                        },
+                TimelinePagingMapper.toDb(
+                    timelinePostItem(
+                        post = posts.last(),
+                        inlineParents = posts.dropLast(1),
+                    ),
+                    pagingKey = "home",
                 )
 
             val resolved =
-                assertIs<UiTimelineV2.Post>(
+                assertIs<UiTimelineV2.TimelinePostItem>(
                     TimelinePagingMapper.toUi(
                         item = cached,
                         pagingKey = "home",
@@ -2104,7 +2156,7 @@ class MicroblogTest : RobolectricTest() {
                 )
 
             assertEquals(posts.last().statusKey, resolved.statusKey)
-            assertEquals(listOf(posts[posts.lastIndex - 1].statusKey), resolved.parents.map { it.statusKey })
+            assertEquals(posts.dropLast(1).map { it.statusKey }, resolved.presentation.inlineParents.map { it.statusKey })
         }
 
     @Test
@@ -2123,37 +2175,21 @@ class MicroblogTest : RobolectricTest() {
                     )
                 }
             val root =
-                createPost(
-                    accountKey = accountKey,
-                    user = user,
-                    statusKey = MicroBlogKey(id = "leaf", host = "test.com"),
-                    text = "Leaf",
-                    parents = parents,
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = user,
+                            statusKey = MicroBlogKey(id = "leaf", host = "test.com"),
+                            text = "Leaf",
+                        ),
+                    inlineParents = parents,
                 )
-            val rootStatus = TimelinePagingMapper.toDb(root, pagingKey = "home").status.status
             val cached =
-                DbStatusWithReference(
-                    status = rootStatus,
-                    references =
-                        listOf(4, 0, 1, 2, 3).map { index ->
-                            val parent = parents[index]
-                            val dbPost = TimelinePagingMapper.toDb(parent, pagingKey = "home").status.status
-                            DbStatusReferenceWithStatus(
-                                reference =
-                                    DbStatusReference(
-                                        _id = "${rootStatus.data.id}_${parent.statusKey}",
-                                        referenceType = ReferenceType.Reply,
-                                        statusId = rootStatus.data.id,
-                                        referenceStatusId = DbStatus.createId(accountType, parent.statusKey),
-                                        referenceOrder = index,
-                                    ),
-                                status = dbPost,
-                            )
-                        },
-                )
+                TimelinePagingMapper.toDb(root, pagingKey = "home")
 
             val resolved =
-                assertIs<UiTimelineV2.Post>(
+                assertIs<UiTimelineV2.TimelinePostItem>(
                     TimelinePagingMapper.toUi(
                         item = cached,
                         pagingKey = "home",
@@ -2163,7 +2199,7 @@ class MicroblogTest : RobolectricTest() {
 
             assertEquals(
                 listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
-                resolved.parents.map { it.statusKey.id },
+                resolved.presentation.inlineParents.map { it.statusKey.id },
             )
         }
 
@@ -2182,32 +2218,35 @@ class MicroblogTest : RobolectricTest() {
                     )
                 }
             val leaf =
-                createPost(
-                    accountKey = accountKey,
-                    user = user,
-                    statusKey = MicroBlogKey(id = "leaf", host = "test.com"),
-                    text = "Leaf",
-                    parents = parents,
-                    references =
-                        listOf(
-                            UiTimelineV2.Post.Reference(
-                                statusKey = parents.last().statusKey,
-                                type = ReferenceType.Reply,
-                            ),
+                timelinePostItem(
+                    post =
+                        createPost(
+                            accountKey = accountKey,
+                            user = user,
+                            statusKey = MicroBlogKey(id = "leaf", host = "test.com"),
+                            text = "Leaf",
+                            references =
+                                listOf(
+                                    UiTimelineV2.Post.Reference(
+                                        statusKey = parents.last().statusKey,
+                                        type = ReferenceType.Reply,
+                                    ),
+                                ),
                         ),
+                    inlineParents = parents,
                 )
-            val saved = TimelinePagingMapper.toDb(leaf, pagingKey = "home").status
-            val savedRoot = saved.status.data.content as UiTimelineV2.Post
+            val saved = TimelinePagingMapper.toDb(leaf, pagingKey = "home")
+            val savedRoot = saved.status.status.data.content as UiTimelineV2.Post
 
             assertEquals(
-                listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
+                listOf("parent-4"),
                 savedRoot.references
                     .filter { it.type == ReferenceType.Reply }
                     .map { it.statusKey.id },
             )
 
             val resolved =
-                assertIs<UiTimelineV2.Post>(
+                assertIs<UiTimelineV2.TimelinePostItem>(
                     TimelinePagingMapper.toUi(
                         item = saved,
                         pagingKey = "home",
@@ -2217,7 +2256,7 @@ class MicroblogTest : RobolectricTest() {
 
             assertEquals(
                 listOf("parent-0", "parent-1", "parent-2", "parent-3", "parent-4"),
-                resolved.parents.map { it.statusKey.id },
+                resolved.presentation.inlineParents.map { it.statusKey.id },
             )
         }
 
@@ -2259,13 +2298,13 @@ class MicroblogTest : RobolectricTest() {
         val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
         val refreshResult = pager.refresh()
         val page =
-            assertIs<PagingSource.LoadResult.Page<Int, DbStatusWithReference>>(
+            assertPage(
                 refreshResult,
             )
         val dbItem = assertNotNull(page.data.firstOrNull())
 
         val timelineUi =
-            assertIs<UiTimelineV2.Post>(
+            rootPostOf(
                 TimelinePagingMapper.toUi(
                     item = dbItem,
                     pagingKey = "home",
@@ -2292,6 +2331,22 @@ class MicroblogTest : RobolectricTest() {
                 ),
             actions = actions.toPersistentList(),
         )
+
+    private fun rootPostOf(item: UiTimelineV2): UiTimelineV2.Post =
+        when (item) {
+            is UiTimelineV2.TimelinePostItem -> item.post
+            is UiTimelineV2.Post -> item
+            else -> error("Expected post timeline item, got ${item::class}")
+        }
+
+    private fun assertPage(
+        result: PagingSource.LoadResult<Int, DbPagingTimelineWithStatus>,
+    ): PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus> =
+        when (result) {
+            is PagingSource.LoadResult.Page -> result
+            is PagingSource.LoadResult.Error -> throw result.throwable
+            is PagingSource.LoadResult.Invalid -> error("Paging source returned Invalid")
+        }
 
     private fun createUser(
         key: MicroBlogKey,
@@ -2329,15 +2384,31 @@ class MicroblogTest : RobolectricTest() {
         quote: List<UiTimelineV2.Post> = emptyList(),
         parents: List<UiTimelineV2.Post> = emptyList(),
         references: List<UiTimelineV2.Post.Reference> = emptyList(),
-    ): UiTimelineV2.Post =
-        UiTimelineV2.Post(
-            message = null,
+    ): UiTimelineV2.Post {
+        val semanticReferences =
+            (
+                references +
+                    parents
+                        .lastOrNull()
+                        ?.let {
+                            UiTimelineV2.Post.Reference(
+                                statusKey = it.statusKey,
+                                type = ReferenceType.Reply,
+                            )
+                        }.let(::listOfNotNull) +
+                    quote.map {
+                        UiTimelineV2.Post.Reference(
+                            statusKey = it.statusKey,
+                            type = ReferenceType.Quote,
+                        )
+                    }
+            ).distinctBy { it.type to it.statusKey }
+        return UiTimelineV2.Post(
             platformType = dev.dimension.flare.model.PlatformType.Mastodon,
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,
             user = user,
-            quote = quote.toPersistentList(),
             content = text.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
@@ -2348,9 +2419,53 @@ class MicroblogTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
-            references = references.toPersistentList(),
-            parents = parents.toPersistentList(),
+            references = semanticReferences.toPersistentList(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),
         )
+    }
+
+    private fun timelinePostItem(
+        post: UiTimelineV2.Post,
+        message: UiTimelineV2.Message? = null,
+        inlineParents: List<UiTimelineV2.Post> = emptyList(),
+        quotes: List<UiTimelineV2.Post> = emptyList(),
+        repost: UiTimelineV2.Post? = null,
+    ): UiTimelineV2.TimelinePostItem {
+        val semanticReferences =
+            (
+                post.references +
+                    inlineParents
+                        .lastOrNull()
+                        ?.let {
+                            UiTimelineV2.Post.Reference(
+                                statusKey = it.statusKey,
+                                type = ReferenceType.Reply,
+                            )
+                        }.let(::listOfNotNull) +
+                    quotes.map {
+                        UiTimelineV2.Post.Reference(
+                            statusKey = it.statusKey,
+                            type = ReferenceType.Quote,
+                        )
+                    } +
+                    repost
+                        ?.let {
+                            UiTimelineV2.Post.Reference(
+                                statusKey = it.statusKey,
+                                type = ReferenceType.Retweet,
+                            )
+                        }.let(::listOfNotNull)
+            ).distinctBy { it.type to it.statusKey }
+        return UiTimelineV2.TimelinePostItem(
+            post = post.copy(references = semanticReferences.toPersistentList()),
+            presentation =
+                UiTimelineV2.PostPresentation(
+                    message = message,
+                    inlineParents = inlineParents.toPersistentList(),
+                    quotes = quotes.toPersistentList(),
+                    repost = repost,
+                ),
+        )
+    }
 }

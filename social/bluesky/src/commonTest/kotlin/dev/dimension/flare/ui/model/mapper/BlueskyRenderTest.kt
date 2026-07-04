@@ -81,7 +81,7 @@ class BlueskyRenderTest {
                     ),
             )
 
-        val rendered = post.render(accountKey)
+        val rendered = rootPostOf(post.render(accountKey))
         assertEquals(1, rendered.images.size)
         val media = assertIs<UiMedia.Image>(rendered.images.first())
         assertEquals("https://cdn.example.com/full.jpg", media.url)
@@ -114,17 +114,17 @@ class BlueskyRenderTest {
                     ),
             )
 
-        val rendered = mainPost.render(accountKey)
-        assertEquals(1, rendered.quote.size)
+        val rendered = timelinePostItemOf(listOf(FeedViewPost(post = mainPost)).render(accountKey).single())
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
         assertEquals(
             "at://did:plc:quoted/app.bsky.feed.post/2",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .statusKey.id,
         )
@@ -155,17 +155,17 @@ class BlueskyRenderTest {
             )
 
         val rendered = listOf(feed).render(accountKey)
-        val post = assertIs<UiTimelineV2.Post>(rendered.single())
-        assertEquals(1, post.parents.size)
+        val post = timelinePostItemOf(rendered.single())
+        assertEquals(1, post.presentation.inlineParents.size)
         assertEquals(
             "at://did:plc:parent/app.bsky.feed.post/10",
-            post.parents
+            post.presentation.inlineParents
                 .first()
                 .statusKey.id,
         )
         assertEquals(
             "parent content",
-            post.parents
+            post.presentation.inlineParents
                 .first()
                 .content.innerText,
         )
@@ -193,15 +193,20 @@ class BlueskyRenderTest {
                     ),
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(listOf(feed).render(accountKey).single())
-        val message = assertNotNull(rendered.message)
-        val repost = assertNotNull(rendered.internalRepost)
+        val rendered = timelinePostItemOf(listOf(feed).render(accountKey).single())
+        val message = assertNotNull(rendered.presentation.message)
+        val repost = assertNotNull(rendered.presentation.repost)
 
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("did:plc:reposter", message.user?.key?.id)
-        assertEquals("did:plc:original", rendered.user?.key?.id)
-        assertEquals("original post content", rendered.content.innerText)
+        assertEquals(
+            "did:plc:reposter",
+            rendered.post.user
+                ?.key
+                ?.id,
+        )
+        assertEquals("", rendered.post.content.innerText)
         assertEquals(message.statusKey.id, rendered.statusKey.id)
         assertEquals("original post content", repost.content.innerText)
         assertEquals("did:plc:original", repost.user?.key?.id)
@@ -241,29 +246,22 @@ class BlueskyRenderTest {
                     ),
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(listOf(feed).render(accountKey).single())
-        val message = assertNotNull(rendered.message)
-        val repost = assertNotNull(rendered.internalRepost)
+        val rendered = timelinePostItemOf(listOf(feed).render(accountKey).single())
+        val message = assertNotNull(rendered.presentation.message)
+        val repost = assertNotNull(rendered.presentation.repost)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
-        assertEquals("original payload", rendered.content.innerText)
+        assertEquals("", rendered.post.content.innerText)
         assertEquals(message.statusKey.id, rendered.statusKey.id)
-        assertEquals(1, rendered.quote.size)
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted payload",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
         assertEquals("original payload", repost.content.innerText)
-        assertEquals(1, repost.quote.size)
-        assertEquals(
-            "quoted payload",
-            repost.quote
-                .first()
-                .content.innerText,
-        )
         assertEquals("did:plc:reposter", message.user?.key?.id)
     }
 
@@ -298,4 +296,13 @@ class BlueskyRenderTest {
                 put("text", JsonPrimitive(text))
             },
         )
+
+    private fun rootPostOf(item: UiTimelineV2): UiTimelineV2.Post =
+        when (item) {
+            is UiTimelineV2.TimelinePostItem -> item.post
+            is UiTimelineV2.Post -> item
+            else -> error("Expected post timeline item, got ${item::class.simpleName}")
+        }
+
+    private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
 }

@@ -20,6 +20,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.renderVVOText
@@ -80,13 +81,7 @@ public class VVOStatusDetailPresenter(
                 service.statusRepost(statusKey = statusKey).toPagingSource()
             }.flow.map { data ->
                 data.map { item ->
-                    if (item is UiTimelineV2.Post) {
-                        item.copy(
-                            quote = persistentListOf(),
-                        )
-                    } else {
-                        item
-                    }
+                    item.withoutVvoQuotes()
                 }
             }
         }
@@ -126,4 +121,14 @@ public interface VVOStatusDetailState {
     public val status: UiState<UiTimelineV2>
     public val comment: PagingState<UiTimelineV2>
     public val repost: PagingState<UiTimelineV2>
+}
+
+private fun UiTimelineV2.withoutVvoQuotes(): UiTimelineV2 {
+    val item = asTimelinePostItem() ?: return this
+    return item.copy(
+        presentation =
+            item.presentation.copy(
+                quotes = persistentListOf(),
+            ),
+    )
 }

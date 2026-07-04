@@ -277,15 +277,13 @@ internal class StatusInsightAgentUseCase(
             appendLine("cardTitle: ${card?.title.orEmpty()}")
             appendLine("cardDescription: ${card?.description.orEmpty()}")
             appendLine("cardUrl: ${card?.url.orEmpty()}")
-            appendLine("quotes:")
-            quote.take(MAX_RELATED_POSTS).forEachIndexed { index, quotedPost ->
-                appendLine("- #$index ${quotedPost.user?.handle?.raw.orEmpty()}: ${quotedPost.content.raw.take(MAX_RELATED_TEXT_LENGTH)}")
-            }
-            appendLine("parents:")
-            parents.take(MAX_RELATED_POSTS).forEachIndexed { index, parentPost ->
-                appendLine("- #$index ${parentPost.user?.handle?.raw.orEmpty()}: ${parentPost.content.raw.take(MAX_RELATED_TEXT_LENGTH)}")
-            }
             appendLine("referencesCount: ${references.size}")
+            if (references.isNotEmpty()) {
+                appendLine("references:")
+                references.take(MAX_RELATED_POSTS).forEachIndexed { index, reference ->
+                    appendLine("- #$index ${reference.type.name}: ${reference.statusKey}")
+                }
+            }
             appendLine("actions:")
             actions.flattenItems().forEach { item ->
                 appendLine("- ${item.promptLabel()}: ${item.count?.value ?: 0}")

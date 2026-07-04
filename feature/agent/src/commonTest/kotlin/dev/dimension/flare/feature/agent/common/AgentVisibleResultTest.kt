@@ -111,13 +111,11 @@ internal class AgentVisibleResultTest {
 
 private fun createTestPost(): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        message = null,
         platformType = PlatformType.Mastodon,
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,
         user = null,
-        quote = persistentListOf(),
         content = "content".toUiPlainText(),
         actions = persistentListOf(),
         poll = null,
@@ -131,7 +129,6 @@ private fun createTestPost(): UiTimelineV2.Post =
         sourceChannel = null,
         visibility = null,
         replyToHandle = null,
-        parents = persistentListOf(),
         clickEvent = ClickEvent.Noop,
         accountType = AccountType.Specific(MicroBlogKey("viewer", "example.social")),
     )

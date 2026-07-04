@@ -6,17 +6,20 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 internal object InitialTextResolver {
     fun resolve(
         post: UiTimelineV2.Post,
+        quotes: ImmutableList<UiTimelineV2.Post> = persistentListOf(),
         composeStatus: ComposeStatus,
         currentUserHandle: UiHandle,
         selectedAccountKey: MicroBlogKey?,
     ): InitialText? =
         when (post.platformType) {
             PlatformType.VVo -> {
-                resolveVVo(post, composeStatus)
+                resolveVVo(post, quotes, composeStatus)
             }
 
             PlatformType.Mastodon, PlatformType.Misskey -> {
@@ -30,9 +33,10 @@ internal object InitialTextResolver {
 
     private fun resolveVVo(
         post: UiTimelineV2.Post,
+        quotes: ImmutableList<UiTimelineV2.Post>,
         composeStatus: ComposeStatus,
     ): InitialText? {
-        if (post.quote.any() && composeStatus is ComposeStatus.Quote) {
+        if (quotes.any() && composeStatus is ComposeStatus.Quote) {
             return InitialText(
                 text = "//@${post.user?.name?.raw}:${post.content.raw}",
                 cursorPosition = 0,

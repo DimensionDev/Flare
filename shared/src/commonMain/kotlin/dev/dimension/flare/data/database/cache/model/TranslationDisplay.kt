@@ -28,6 +28,39 @@ internal fun UiTimelineV2.applyTranslation(
     if (!options.translationEnabled) {
         return this
     }
+    if (this is UiTimelineV2.TimelinePostItem) {
+        return copy(
+            post =
+                post.applyTranslation(
+                    options = options,
+                    translations = translations,
+                ) as UiTimelineV2.Post,
+            presentation =
+                presentation.copy(
+                    inlineParents =
+                        presentation.inlineParents
+                            .map {
+                                it.applyTranslation(
+                                    options = options,
+                                    translations = translations,
+                                ) as UiTimelineV2.Post
+                            }.toPersistentList(),
+                    quotes =
+                        presentation.quotes
+                            .map {
+                                it.applyTranslation(
+                                    options = options,
+                                    translations = translations,
+                                ) as UiTimelineV2.Post
+                            }.toPersistentList(),
+                    repost =
+                        presentation.repost?.applyTranslation(
+                            options = options,
+                            translations = translations,
+                        ) as? UiTimelineV2.Post,
+                ),
+        )
+    }
     val payload = translationPayload() ?: return this
     val translation =
         translations.firstOrNull {
@@ -154,6 +187,10 @@ internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
                 content = content,
                 contentWarning = contentWarning,
             )
+        }
+
+        is UiTimelineV2.TimelinePostItem -> {
+            displayPost.translationPayload()
         }
 
         is UiTimelineV2.Message -> {

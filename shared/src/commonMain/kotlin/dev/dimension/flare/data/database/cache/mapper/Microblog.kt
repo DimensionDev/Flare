@@ -4,144 +4,52 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
-import dev.dimension.flare.model.DbAccountType
-import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 
 internal suspend fun saveToDatabase(
     database: CacheDatabase,
     items: List<DbPagingTimelineWithStatus>,
 ) {
     val rootStatusIds = items.map { it.status.status.data.id }.distinct()
-    val rootsWithIncomingReplyReferences =
-        items
-            .asSequence()
-            .filter { item ->
-                item.status.references.any { it.reference.referenceType == ReferenceType.Reply }
-            }.map { it.status.status.data.id }
-            .distinct()
-            .toList()
     val statuses =
         items.map { it.status.status.data } +
             items
                 .flatMap { it.status.references }
+                .mapNotNull { it.status?.data } +
+            items
+                .flatMap { it.presentationReferences }
                 .mapNotNull { it.status?.data }
     val users = statuses.flatMap { it.content.usersInContent() }.distinctBy { it.key }
     database.upsertUsers(users.map { it.toDbUser() })
-    val mergedStatuses = mergeWithExistingPostParents(database, statuses)
-    val changedStatuses = loadChangedStatuses(database, mergedStatuses)
+    val changedStatuses = loadChangedStatuses(database, statuses)
     if (changedStatuses.isNotEmpty()) {
         database.statusDao().insertAll(changedStatuses)
     }
     if (rootStatusIds.isNotEmpty()) {
-        database.statusReferenceDao().delete(
-            rootStatusIds,
-            ReferenceType.entries.filterNot { it == ReferenceType.Reply },
-        )
-    }
-    if (rootsWithIncomingReplyReferences.isNotEmpty()) {
-        database.statusReferenceDao().delete(
-            rootsWithIncomingReplyReferences,
-            listOf(ReferenceType.Reply),
-        )
+        database.statusReferenceDao().delete(rootStatusIds)
     }
     items.flatMap { it.status.references }.map { it.reference }.let {
         database.statusReferenceDao().insertAll(it)
+    }
+    items
+        .groupBy { it.timeline.pagingKey }
+        .forEach { (pagingKey, rows) ->
+            val statusIds = rows.map { it.timeline.statusId }.distinct()
+            if (statusIds.isNotEmpty()) {
+                database.pagingTimelineDao().deletePresentationReferences(
+                    pagingKey = pagingKey,
+                    statusIds = statusIds,
+                )
+            }
+        }
+    items.flatMap { it.presentationReferences }.map { it.reference }.let {
+        database.pagingTimelineDao().insertPresentationReferences(it)
     }
     val changedTimeline = loadChangedTimeline(database, items.map { it.timeline })
     if (changedTimeline.isNotEmpty()) {
         database.pagingTimelineDao().insertAll(changedTimeline)
     }
-}
-
-private suspend fun mergeWithExistingPostParents(
-    database: CacheDatabase,
-    incoming: List<DbStatus>,
-): List<DbStatus> {
-    if (incoming.isEmpty()) {
-        return incoming
-    }
-
-    val candidatesByAccount =
-        incoming
-            .asSequence()
-            .mapNotNull { item ->
-                val post = item.content as? UiTimelineV2.Post ?: return@mapNotNull null
-                if (post.parents.isNotEmpty() || post.references.any { it.type == ReferenceType.Reply }) {
-                    return@mapNotNull null
-                }
-                item.accountType to item.statusKey
-            }.groupBy(
-                keySelector = { it.first },
-                valueTransform = { it.second },
-            )
-    if (candidatesByAccount.isEmpty()) {
-        return incoming
-    }
-
-    val existingReplyReferencesByStatus = loadExistingPostReplyReferences(database, candidatesByAccount)
-    return incoming.map { item ->
-        val post = item.content as? UiTimelineV2.Post ?: return@map item
-        if (post.parents.isNotEmpty() || post.references.any { it.type == ReferenceType.Reply }) {
-            return@map item
-        }
-        val existingReplyReferences = existingReplyReferencesByStatus[item.accountType to item.statusKey] ?: return@map item
-        item.withContent(
-            post.copy(
-                references =
-                    (
-                        post.references +
-                            existingReplyReferences
-                    ).distinctBy { it.type to it.statusKey }
-                        .toImmutableList(),
-            ),
-        )
-    }
-}
-
-private fun DbStatus.withContent(content: UiTimelineV2): DbStatus =
-    copy(
-        content = content,
-        renderHash = content.renderHash,
-        text = content.searchText,
-    )
-
-private suspend fun loadExistingPostReplyReferences(
-    database: CacheDatabase,
-    candidatesByAccount: Map<DbAccountType, List<MicroBlogKey>>,
-): Map<Pair<DbAccountType, MicroBlogKey>, ImmutableList<UiTimelineV2.Post.Reference>> {
-    val result =
-        mutableMapOf<
-            Pair<DbAccountType, MicroBlogKey>,
-            ImmutableList<UiTimelineV2.Post.Reference>,
-        >()
-    candidatesByAccount.forEach { (accountType, keys) ->
-        keys.distinct().chunked(SQL_IN_BATCH_SIZE).forEach { chunk ->
-            database.statusDao().getByKeys(statusKeys = chunk, accountType = accountType).forEach { existing ->
-                val existingPost = existing.content as? UiTimelineV2.Post ?: return@forEach
-                val replyReferences =
-                    (
-                        existingPost.references.filter { it.type == ReferenceType.Reply } +
-                            existingPost.parents.map {
-                                UiTimelineV2.Post.Reference(
-                                    statusKey = it.statusKey,
-                                    type = ReferenceType.Reply,
-                                )
-                            }
-                    ).distinctBy { it.type to it.statusKey }
-                        .toImmutableList()
-                if (replyReferences.isEmpty()) {
-                    return@forEach
-                }
-                result[accountType to existing.statusKey] = replyReferences
-            }
-        }
-    }
-    return result
 }
 
 private const val SQL_IN_BATCH_SIZE = 500
@@ -194,10 +102,15 @@ private suspend fun loadChangedTimeline(
 private fun UiTimelineV2.usersInContent(): List<UiProfile> =
     when (this) {
         is UiTimelineV2.Post -> {
-            listOfNotNull(user, message?.user) +
-                quote.flatMap { it.usersInContent() } +
-                parents.flatMap { it.usersInContent() } +
-                listOfNotNull(internalRepost).flatMap { it.usersInContent() }
+            listOfNotNull(user)
+        }
+
+        is UiTimelineV2.TimelinePostItem -> {
+            post.usersInContent() +
+                listOfNotNull(presentation.message?.user) +
+                presentation.inlineParents.flatMap { it.usersInContent() } +
+                presentation.quotes.flatMap { it.usersInContent() } +
+                listOfNotNull(presentation.repost).flatMap { it.usersInContent() }
         }
 
         is UiTimelineV2.User -> {

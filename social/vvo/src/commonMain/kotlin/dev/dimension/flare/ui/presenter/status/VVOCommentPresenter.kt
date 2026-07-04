@@ -20,6 +20,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
@@ -43,13 +44,7 @@ public class VVOCommentPresenter(
             require(service is VVODataSource)
             service.comment(commentKey).toUi().map { state ->
                 state.map {
-                    if (it is UiTimelineV2.Post) {
-                        it.copy(
-                            quote = persistentListOf(),
-                        )
-                    } else {
-                        it
-                    }
+                    it.withoutVvoQuotes()
                 }
             }
         }
@@ -90,4 +85,14 @@ public interface VVOCommentState {
     public val list: PagingState<UiTimelineV2>
 
     public suspend fun refresh()
+}
+
+private fun UiTimelineV2.withoutVvoQuotes(): UiTimelineV2 {
+    val item = asTimelinePostItem() ?: return this
+    return item.copy(
+        presentation =
+            item.presentation.copy(
+                quotes = persistentListOf(),
+            ),
+    )
 }

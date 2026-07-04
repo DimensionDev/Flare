@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
-import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -9,14 +8,16 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
+import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
+import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReferenceWithStatus
+import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.model.DbAccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.withItemKey
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.uuid.Uuid
 
@@ -26,50 +27,42 @@ internal object TimelinePagingMapper {
         pagingKey: String,
         sortId: Long? = null,
     ): DbPagingTimelineWithStatus {
-        val rootStatus = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true)
+        val root = data.rootTimelineForDatabase()
+        val timelineItem = data.asTimelinePostItem()
+        val presentation = timelineItem?.presentation
+        val rootStatus = uiTimelineToDbStatusWithUser(root)
         return DbPagingTimelineWithStatus(
             timeline =
                 DbPagingTimeline(
                     pagingKey = pagingKey,
                     statusId = rootStatus.data.id,
                     sortId = sortId ?: SnowflakeIdGenerator.nextId(),
+                    message = presentation?.message,
                 ),
             status =
                 DbStatusWithReference(
                     status = rootStatus,
                     references =
-                        when (data) {
-                            is UiTimelineV2.Feed -> {
-                                emptyList()
-                            }
-
-                            is UiTimelineV2.Message -> {
-                                emptyList()
-                            }
-
-                            is UiTimelineV2.Post -> {
-                                collectPostReferences(data, rootStatus.data.id)
-                            }
-
-                            is UiTimelineV2.User -> {
-                                emptyList()
-                            }
-
-                            is UiTimelineV2.UserList -> {
-                                data.post
-                                    ?.let {
-                                        listOf(
-                                            uiTimelineToDbStatusReferenceWithStatus(
-                                                data = it,
-                                                referenceType = ReferenceType.Quote,
-                                                rootStatusId = rootStatus.data.id,
-                                                referenceOrder = 0,
-                                            ),
-                                        ) + collectPostReferences(it, rootStatus.data.id)
-                                    }.orEmpty()
-                            }
+                        when (root) {
+                            is UiTimelineV2.Post -> collectPostReferences(root, presentation, rootStatus.data.id)
+                            is UiTimelineV2.UserList -> collectUserListReferences(root, rootStatus.data.id)
+                            else -> emptyList()
                         },
                 ),
+            presentationReferences =
+                when {
+                    root is UiTimelineV2.Post && presentation != null -> {
+                        collectPresentationReferences(
+                            pagingKey = pagingKey,
+                            rootStatusId = rootStatus.data.id,
+                            presentation = presentation,
+                        )
+                    }
+
+                    else -> {
+                        emptyList()
+                    }
+                },
         )
     }
 
@@ -77,12 +70,28 @@ internal object TimelinePagingMapper {
         item: DbPagingTimelineWithStatus,
         pagingKey: String,
         translationDisplayOptions: TranslationDisplayOptions,
-    ): UiTimelineV2 =
-        toUi(
-            item = item.status,
-            pagingKey = pagingKey,
-            translationDisplayOptions = translationDisplayOptions,
-        )
+    ): UiTimelineV2 {
+        val root =
+            toUi(
+                item = item.status,
+                pagingKey = pagingKey,
+                translationDisplayOptions = translationDisplayOptions,
+            )
+        return if (root is UiTimelineV2.Post) {
+            UiTimelineV2.TimelinePostItem(
+                post = root,
+                presentation =
+                    buildPresentation(
+                        item = item,
+                        pagingKey = pagingKey,
+                        translationDisplayOptions = translationDisplayOptions,
+                    ),
+                itemKey = "${pagingKey}_${item.status.status.data.id}",
+            )
+        } else {
+            root
+        }
+    }
 
     fun toUi(
         item: DbStatusWithReference,
@@ -95,166 +104,170 @@ internal object TimelinePagingMapper {
                 pagingKey = pagingKey,
                 translationDisplayOptions = translationDisplayOptions,
             )
+        return when (root) {
+            is UiTimelineV2.TimelinePostItem -> {
+                root.post
+            }
+
+            is UiTimelineV2.UserList -> {
+                val references =
+                    item.references
+                        .sortedBy { it.reference.referenceOrder }
+                        .mapNotNull { reference ->
+                            reference.status?.let {
+                                dbStatusWithUserToUiTimeline(
+                                    data = it,
+                                    pagingKey = pagingKey,
+                                    translationDisplayOptions = translationDisplayOptions,
+                                ) as? UiTimelineV2.Post
+                            }
+                        }
+                root.copy(
+                    post = root.post?.let { post -> references.find { it.statusKey == post.statusKey } ?: post },
+                )
+            }
+
+            else -> {
+                root
+            }
+        }
+    }
+
+    private fun buildPresentation(
+        item: DbPagingTimelineWithStatus,
+        pagingKey: String,
+        translationDisplayOptions: TranslationDisplayOptions,
+    ): UiTimelineV2.PostPresentation {
         val references =
-            item.references
+            item.presentationReferences
                 .sortedBy { it.reference.referenceOrder }
                 .mapNotNull { reference ->
                     reference.status?.let {
-                        reference.reference.referenceType to
+                        reference.reference.presentationType to
                             dbStatusWithUserToUiTimeline(
                                 data = it,
                                 pagingKey = pagingKey,
                                 translationDisplayOptions = translationDisplayOptions,
-                            )
+                            ) as? UiTimelineV2.Post
                     }
                 }
-        return when (root) {
-            is UiTimelineV2.Feed -> {
-                root
-            }
-
-            is UiTimelineV2.Message -> {
-                root
-            }
-
-            is UiTimelineV2.Post -> {
-                val referenceResolver = ReferenceResolver(references)
-                val resolvedRoot =
-                    referenceResolver.resolve(root)
-                val repost =
-                    (references.find { it.first == ReferenceType.Retweet }?.second as? UiTimelineV2.Post)
-                        ?: resolvedRoot.internalRepost
-                val resolvedRepost =
-                    repost?.let(referenceResolver::resolve)
-                if (resolvedRepost != null) {
-                    resolvedRepost.copy(
-                        internalRepost = resolvedRepost,
-                        statusKey = resolvedRoot.statusKey,
-                        message = resolvedRoot.message,
-                        itemKey = resolvedRoot.itemKey,
-                    )
-                } else {
-                    resolvedRoot
-                }
-            }
-
-            is UiTimelineV2.User -> {
-                root
-            }
-
-            is UiTimelineV2.UserList -> {
-                root.copy(
-                    post =
-                        root.post?.let { post ->
-                            references.map { it.second }.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
-                        },
-                )
-            }
-        }
-    }
-
-    private class ReferenceResolver(
-        references: List<Pair<ReferenceType, UiTimelineV2>>,
-    ) {
-        private val referencePosts =
-            references
-                .mapNotNull { (type, timeline) ->
-                    (timeline as? UiTimelineV2.Post)?.let { post ->
-                        type to post.statusKey to post
-                    }
-                }.toMap()
-        private val resolvedPosts = mutableMapOf<MicroBlogKey, UiTimelineV2.Post>()
-        private val resolvingKeys = mutableSetOf<MicroBlogKey>()
-
-        fun resolve(post: UiTimelineV2.Post): UiTimelineV2.Post {
-            resolvedPosts[post.statusKey]?.let {
-                return it
-            }
-
-            val stack = mutableListOf(ResolveFrame(post))
-            while (stack.isNotEmpty()) {
-                val frame = stack.last()
-                val current = frame.post
-                val currentKey = current.statusKey
-                resolvedPosts[currentKey]?.let {
-                    resolvingKeys -= currentKey
-                    stack.removeAt(stack.lastIndex)
-                    continue
-                }
-
-                if (!frame.expanded) {
-                    if (!resolvingKeys.add(currentKey)) {
-                        stack.removeAt(stack.lastIndex)
-                        continue
-                    }
-                    frame.expanded = true
-                    current
-                        .directReferencePosts()
-                        .asReversed()
-                        .forEach { referencedPost ->
-                            val referencedKey = referencedPost.statusKey
-                            if (referencedKey !in resolvedPosts && referencedKey !in resolvingKeys) {
-                                stack += ResolveFrame(referencedPost)
-                            }
-                        }
-                    continue
-                }
-
-                val resolved =
-                    current.copy(
-                        parents = current.resolveReferencePosts(ReferenceType.Reply),
-                        quote = current.resolveReferencePosts(ReferenceType.Quote),
-                        internalRepost = current.resolveReferencePosts(ReferenceType.Retweet).firstOrNull(),
-                    )
-                resolvedPosts[currentKey] = resolved
-                resolvingKeys -= currentKey
-                stack.removeAt(stack.lastIndex)
-            }
-
-            return resolvedPosts[post.statusKey] ?: post
-        }
-
-        private fun UiTimelineV2.Post.resolveReferencePosts(type: ReferenceType): SerializableImmutableList<UiTimelineV2.Post> =
-            directReferencePosts(type)
-                .map { referencedPost ->
-                    resolvedPosts[referencedPost.statusKey] ?: referencedPost
-                }.toImmutableList()
-
-        private fun UiTimelineV2.Post.directReferencePosts(): List<UiTimelineV2.Post> =
-            directReferencePosts(ReferenceType.Reply) +
-                directReferencePosts(ReferenceType.Quote) +
-                directReferencePosts(ReferenceType.Retweet)
-
-        private fun UiTimelineV2.Post.directReferencePosts(type: ReferenceType): List<UiTimelineV2.Post> {
-            val current =
-                when (type) {
-                    ReferenceType.Reply -> parents
-                    ReferenceType.Quote -> quote
-                    ReferenceType.Retweet -> internalRepost?.let(::listOf).orEmpty()
-                    ReferenceType.Notification -> emptyList()
-                }
-            return if (current.isNotEmpty()) {
-                current.map { currentPost ->
-                    referencePosts[type to currentPost.statusKey] ?: currentPost
-                }
-            } else {
+        return UiTimelineV2.PostPresentation(
+            message = item.timeline.message,
+            inlineParents =
                 references
-                    .asSequence()
-                    .filter { it.type == type }
-                    .mapNotNull { reference ->
-                        referencePosts[type to reference.statusKey]
-                    }.toList()
-            }
-        }
-
-        private data class ResolveFrame(
-            val post: UiTimelineV2.Post,
-            var expanded: Boolean = false,
+                    .filter { it.first == DbTimelineItemPresentationType.InlineParent }
+                    .mapNotNull { it.second }
+                    .toImmutableList(),
+            quotes =
+                references
+                    .filter { it.first == DbTimelineItemPresentationType.Quote }
+                    .mapNotNull { it.second }
+                    .toImmutableList(),
+            repost =
+                references
+                    .firstOrNull { it.first == DbTimelineItemPresentationType.Repost }
+                    ?.second,
         )
     }
 
-    private fun uiTimelineToDbStatusReferenceWithStatus(
-        data: UiTimelineV2,
+    private fun UiTimelineV2.rootTimelineForDatabase(): UiTimelineV2 =
+        when (this) {
+            is UiTimelineV2.TimelinePostItem -> post.normalizedPost()
+            is UiTimelineV2.Post -> normalizedPost()
+            else -> this
+        }
+
+    private fun UiTimelineV2.Post.normalizedPost(): UiTimelineV2.Post =
+        copy(
+            references = references.distinctBy { it.type to it.statusKey }.toImmutableList(),
+        )
+
+    private fun collectUserListReferences(
+        data: UiTimelineV2.UserList,
+        rootStatusId: String,
+    ): List<DbStatusReferenceWithStatus> =
+        data.post
+            ?.let {
+                listOf(
+                    dbStatusReferenceWithStatus(
+                        post = it,
+                        referenceType = ReferenceType.Quote,
+                        rootStatusId = rootStatusId,
+                        referenceOrder = 0,
+                    ),
+                )
+            }.orEmpty()
+
+    private fun collectPostReferences(
+        root: UiTimelineV2.Post,
+        presentation: UiTimelineV2.PostPresentation?,
+        rootStatusId: String,
+    ): List<DbStatusReferenceWithStatus> {
+        val presentationPosts =
+            buildMap {
+                presentation?.quotes?.forEach {
+                    put(ReferenceType.Quote to it.statusKey, it)
+                }
+                presentation?.repost?.let {
+                    put(ReferenceType.Retweet to it.statusKey, it)
+                }
+            }
+        val semanticReferences =
+            (
+                root.references +
+                    presentationPosts.map { (key, _) ->
+                        UiTimelineV2.Post.Reference(
+                            statusKey = key.second,
+                            type = key.first,
+                        )
+                    }
+            ).distinctBy { it.type to it.statusKey }
+        return semanticReferences
+            .mapIndexed { index, reference ->
+                val post = presentationPosts[reference.type to reference.statusKey]
+                if (post != null) {
+                    dbStatusReferenceWithStatus(
+                        post = post,
+                        referenceType = reference.type,
+                        rootStatusId = rootStatusId,
+                        referenceOrder = index,
+                    )
+                } else {
+                    dbStatusReferenceWithStatus(
+                        reference = reference,
+                        accountType = root.accountType as DbAccountType,
+                        rootStatusId = rootStatusId,
+                        referenceOrder = index,
+                    )
+                }
+            }.distinctBy {
+                it.reference.referenceType to it.reference.referenceStatusId
+            }
+    }
+
+    private fun collectPresentationReferences(
+        pagingKey: String,
+        rootStatusId: String,
+        presentation: UiTimelineV2.PostPresentation,
+    ): List<DbTimelineItemPresentationReferenceWithStatus> {
+        var order = 0
+        return buildList {
+            presentation.inlineParents.forEach { post ->
+                add(presentationReferenceWithStatus(pagingKey, rootStatusId, post, DbTimelineItemPresentationType.InlineParent, order++))
+            }
+            presentation.quotes.forEach { post ->
+                add(presentationReferenceWithStatus(pagingKey, rootStatusId, post, DbTimelineItemPresentationType.Quote, order++))
+            }
+            presentation.repost?.let { post ->
+                add(presentationReferenceWithStatus(pagingKey, rootStatusId, post, DbTimelineItemPresentationType.Repost, order++))
+            }
+        }.distinctBy {
+            it.reference.presentationType to it.reference.referenceStatusId
+        }
+    }
+
+    private fun dbStatusReferenceWithStatus(
+        post: UiTimelineV2.Post,
         referenceType: ReferenceType,
         rootStatusId: String,
         referenceOrder: Int,
@@ -263,106 +276,60 @@ internal object TimelinePagingMapper {
             DbStatusReference(
                 referenceType = referenceType,
                 statusId = rootStatusId,
-                referenceStatusId = DbStatus.createId(data.accountType as DbAccountType, data.statusKey),
+                referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
                 referenceOrder = referenceOrder,
                 _id = Uuid.random().toString(),
             ),
-        status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true),
+        status = uiTimelineToDbStatusWithUser(post.normalizedPost()),
     )
 
-    private fun collectPostReferences(
-        data: UiTimelineV2.Post,
+    private fun dbStatusReferenceWithStatus(
+        reference: UiTimelineV2.Post.Reference,
+        accountType: DbAccountType,
         rootStatusId: String,
-    ): List<DbStatusReferenceWithStatus> {
-        val visited = mutableSetOf<MicroBlogKey>()
-        var referenceOrder = 0
+        referenceOrder: Int,
+    ) = DbStatusReferenceWithStatus(
+        reference =
+            DbStatusReference(
+                referenceType = reference.type,
+                statusId = rootStatusId,
+                referenceStatusId = DbStatus.createId(accountType, reference.statusKey),
+                referenceOrder = referenceOrder,
+                _id = Uuid.random().toString(),
+            ),
+        status = null,
+    )
 
-        fun visit(post: UiTimelineV2.Post): List<DbStatusReferenceWithStatus> =
-            post.directReferencePosts().flatMap { (referenceType, referencedPost) ->
-                listOf(
-                    uiTimelineToDbStatusReferenceWithStatus(
-                        data = referencedPost,
-                        referenceType = referenceType,
-                        rootStatusId = rootStatusId,
-                        referenceOrder = referenceOrder++,
-                    ),
-                ) +
-                    if (visited.add(referencedPost.statusKey)) {
-                        visit(referencedPost)
-                    } else {
-                        emptyList()
-                    }
-            }
+    private fun presentationReferenceWithStatus(
+        pagingKey: String,
+        rootStatusId: String,
+        post: UiTimelineV2.Post,
+        type: DbTimelineItemPresentationType,
+        referenceOrder: Int,
+    ) = DbTimelineItemPresentationReferenceWithStatus(
+        reference =
+            DbTimelineItemPresentationReference(
+                pagingKey = pagingKey,
+                statusId = rootStatusId,
+                referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
+                presentationType = type,
+                referenceOrder = referenceOrder,
+                _id = Uuid.random().toString(),
+            ),
+        status = uiTimelineToDbStatusWithUser(post.normalizedPost()),
+    )
 
-        return visit(data)
-            .distinctBy {
-                it.reference.referenceType to it.reference.referenceStatusId
-            }
-    }
-
-    private fun UiTimelineV2.Post.directReferencePosts(): List<Pair<ReferenceType, UiTimelineV2.Post>> =
-        quote.map { ReferenceType.Quote to it } +
-            parents.map { ReferenceType.Reply to it } +
-            listOfNotNull(internalRepost?.let { ReferenceType.Retweet to it })
-
-    private fun uiTimelineToDbStatusWithUser(
-        data: UiTimelineV2,
-        sanitizePostReferences: Boolean,
-    ): DbStatusWithUser {
-        val content = if (sanitizePostReferences) data.sanitizeForDatabase() else data
-        return DbStatusWithUser(
+    private fun uiTimelineToDbStatusWithUser(data: UiTimelineV2): DbStatusWithUser =
+        DbStatusWithUser(
             data =
                 DbStatus(
                     statusKey = data.statusKey,
-                    content = content,
-                    renderHash = content.renderHash,
+                    content = data,
+                    renderHash = data.renderHash,
                     accountType = data.accountType as DbAccountType,
-                    text = content.searchText,
+                    text = data.searchText,
                 ),
         )
-    }
-
-    private fun UiTimelineV2.sanitizeForDatabase(): UiTimelineV2 =
-        when (this) {
-            is UiTimelineV2.Post -> {
-                copy(
-                    references = directReferences(),
-                    quote = persistentListOf(),
-                    parents = persistentListOf(),
-                    internalRepost = null,
-                )
-            }
-
-            else -> {
-                this
-            }
-        }
-
-    private fun UiTimelineV2.Post.directReferences() =
-        buildList {
-            quote.mapTo(this) {
-                UiTimelineV2.Post.Reference(
-                    statusKey = it.statusKey,
-                    type = ReferenceType.Quote,
-                )
-            }
-            parents.mapTo(this) {
-                UiTimelineV2.Post.Reference(
-                    statusKey = it.statusKey,
-                    type = ReferenceType.Reply,
-                )
-            }
-            internalRepost?.let {
-                add(
-                    UiTimelineV2.Post.Reference(
-                        statusKey = it.statusKey,
-                        type = ReferenceType.Retweet,
-                    ),
-                )
-            }
-            addAll(references)
-        }.distinctBy { it.type to it.statusKey }
-            .toImmutableList()
 
     private fun dbStatusWithUserToUiTimeline(
         data: DbStatusWithUser,

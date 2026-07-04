@@ -64,7 +64,7 @@ class XQTRenderTest {
                     ),
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(status.render(accountKey))
+        val rendered = rootPostOf(status.render(accountKey))
         assertEquals(2, rendered.images.size)
 
         val image = assertIs<UiMedia.Image>(rendered.images[0])
@@ -96,11 +96,11 @@ class XQTRenderTest {
                 quotedStatus = quoted,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(status.render(accountKey))
-        assertEquals(1, rendered.quote.size)
+        val rendered = timelinePostItemOf(status.render(accountKey))
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
@@ -122,22 +122,24 @@ class XQTRenderTest {
             )
 
         val rendered =
-            assertIs<UiTimelineV2.Post>(
-                createTimeline(
-                    tweet = child,
-                    parents = listOf(createTimeline(parent)),
-                ).render(accountKey),
+            timelinePostItemOf(
+                assertNotNull(
+                    createTimeline(
+                        tweet = child,
+                        parents = listOf(createTimeline(parent)),
+                    ).render(accountKey),
+                ),
             )
-        assertEquals(1, rendered.parents.size)
+        assertEquals(1, rendered.presentation.inlineParents.size)
         assertEquals(
             "parent content",
-            rendered.parents
+            rendered.presentation.inlineParents
                 .first()
                 .content.innerText,
         )
         assertEquals(
             "status-parent",
-            rendered.parents
+            rendered.presentation.inlineParents
                 .first()
                 .statusKey.id,
         )
@@ -159,15 +161,20 @@ class XQTRenderTest {
                 retweetedStatus = original,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(createTimeline(repostWrapper).render(accountKey))
-        val message = assertNotNull(rendered.message)
+        val rendered = timelinePostItemOf(assertNotNull(createTimeline(repostWrapper).render(accountKey)))
+        val message = assertNotNull(rendered.presentation.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
-        val repostInternal = assertNotNull(rendered.internalRepost)
+        val repostInternal = assertNotNull(rendered.presentation.repost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("user-reposter", message.user?.key?.id)
-        assertEquals("wrapper content", rendered.content.innerText)
-        assertEquals("user-reposter", rendered.user?.key?.id)
+        assertEquals("wrapper content", rendered.post.content.innerText)
+        assertEquals(
+            "user-reposter",
+            rendered.post.user
+                ?.key
+                ?.id,
+        )
         assertEquals("status-repost-wrapper", rendered.statusKey.id)
         assertEquals("original content", repostInternal.content.innerText)
         assertEquals("user-original", repostInternal.user?.key?.id)
@@ -197,20 +204,19 @@ class XQTRenderTest {
                 retweetedStatus = original,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(createTimeline(repostWrapper).render(accountKey))
-        val message = assertNotNull(rendered.message)
+        val rendered = timelinePostItemOf(assertNotNull(createTimeline(repostWrapper).render(accountKey)))
+        val message = assertNotNull(rendered.presentation.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
-        val repostInternal = assertNotNull(rendered.internalRepost)
+        val repostInternal = assertNotNull(rendered.presentation.repost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("status-repost-wrapper-2", rendered.statusKey.id)
-        assertEquals("wrapper payload", rendered.content.innerText)
-        assertEquals(1, rendered.quote.size)
+        assertEquals("wrapper payload", rendered.post.content.innerText)
         assertEquals("original payload", repostInternal.content.innerText)
-        assertEquals(1, repostInternal.quote.size)
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted payload",
-            repostInternal.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
@@ -232,11 +238,16 @@ class XQTRenderTest {
                 retweetedStatus = original,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(createTimeline(repostWrapper).render(accountKey))
-        val message = assertNotNull(rendered.message)
-        val repostInternal = assertNotNull(rendered.internalRepost)
+        val rendered = timelinePostItemOf(assertNotNull(createTimeline(repostWrapper).render(accountKey)))
+        val message = assertNotNull(rendered.presentation.message)
+        val repostInternal = assertNotNull(rendered.presentation.repost)
 
-        assertEquals("128843027", rendered.user?.key?.id)
+        assertEquals(
+            "128843027",
+            rendered.post.user
+                ?.key
+                ?.id,
+        )
         assertEquals("128843027", message.user?.key?.id)
         assertEquals("3656078773", repostInternal.user?.key?.id)
         assertEquals("2029691916246515890", rendered.statusKey.id)
@@ -317,6 +328,15 @@ class XQTRenderTest {
             type = Media.Type.photo,
             url = mediaUrl,
         )
+
+    private fun rootPostOf(item: UiTimelineV2): UiTimelineV2.Post =
+        when (item) {
+            is UiTimelineV2.TimelinePostItem -> item.post
+            is UiTimelineV2.Post -> item
+            else -> error("Expected post timeline item, got ${item::class.simpleName}")
+        }
+
+    private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
 
     private fun createVideoMedia(
         id: String,

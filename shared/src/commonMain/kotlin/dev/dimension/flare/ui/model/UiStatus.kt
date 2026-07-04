@@ -16,13 +16,11 @@ import kotlin.time.Clock
 @HiddenFromObjC
 public fun createSampleStatus(user: UiProfile): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        message = null,
         platformType = user.platformType,
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,
         user = user,
-        quote = persistentListOf(),
         content =
             Element("body")
                 .apply {
@@ -75,7 +73,6 @@ public fun createSampleStatus(user: UiProfile): UiTimelineV2.Post =
         sourceChannel = null,
         visibility = null,
         replyToHandle = null,
-        parents = persistentListOf(),
         clickEvent = ClickEvent.Noop,
         accountType = AccountType.Specific(user.key),
     )

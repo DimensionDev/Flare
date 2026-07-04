@@ -8,6 +8,7 @@ import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -70,7 +71,7 @@ class MisskeyRenderTest {
                     ),
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(note.render(accountKey))
+        val rendered = rootPostOf(note.render(accountKey))
         assertEquals(2, rendered.images.size)
 
         val image = assertIs<UiMedia.Image>(rendered.images[0])
@@ -103,11 +104,11 @@ class MisskeyRenderTest {
                 renote = quoted,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(note.render(accountKey))
-        assertEquals(1, rendered.quote.size)
+        val rendered = timelinePostItemOf(note.render(accountKey))
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
@@ -130,19 +131,12 @@ class MisskeyRenderTest {
                 replyId = parent.id,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(child.render(accountKey))
-        assertEquals(1, rendered.parents.size)
+        val rendered = rootPostOf(child.render(accountKey))
         assertEquals(
-            "parent content",
-            rendered.parents
-                .first()
-                .content.innerText,
-        )
-        assertEquals(
-            "note-parent",
-            rendered.parents
-                .first()
-                .statusKey.id,
+            listOf("note-parent"),
+            rendered.references
+                .filter { it.type == ReferenceType.Reply }
+                .map { it.statusKey.id },
         )
     }
 
@@ -162,14 +156,17 @@ class MisskeyRenderTest {
                 renote = original,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(repost.render(accountKey))
-        val message = assertNotNull(rendered.message)
+        val rendered = timelinePostItemOf(repost.render(accountKey))
+        val message = assertNotNull(rendered.presentation.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
-        val repostInternal = assertNotNull(rendered.internalRepost)
+        val repostInternal = assertNotNull(rendered.presentation.repost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("user-reposter", message.user?.key?.id)
-        assertTrue(rendered.content.innerText.isBlank())
+        assertTrue(
+            rendered.post.content.innerText
+                .isBlank(),
+        )
         assertEquals("note-repost-wrapper", rendered.statusKey.id)
         assertEquals("original content", repostInternal.content.innerText)
         assertEquals("note-original", repostInternal.statusKey.id)
@@ -198,20 +195,22 @@ class MisskeyRenderTest {
                 renote = original,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(repost.render(accountKey))
-        val message = assertNotNull(rendered.message)
+        val rendered = timelinePostItemOf(repost.render(accountKey))
+        val message = assertNotNull(rendered.presentation.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
-        val repostInternal = assertNotNull(rendered.internalRepost)
+        val repostInternal = assertNotNull(rendered.presentation.repost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
-        assertTrue(rendered.content.innerText.isBlank())
+        assertTrue(
+            rendered.post.content.innerText
+                .isBlank(),
+        )
         assertEquals("note-repost-wrapper-2", rendered.statusKey.id)
-        assertTrue(rendered.quote.isEmpty())
         assertEquals("original payload", repostInternal.content.innerText)
-        assertEquals(1, repostInternal.quote.size)
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted payload",
-            repostInternal.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
@@ -226,7 +225,7 @@ class MisskeyRenderTest {
                 text = "before\n\n> quoted\n\nafter",
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(note.render(accountKey))
+        val rendered = rootPostOf(note.render(accountKey))
 
         assertEquals("beforequotedafter", rendered.content.innerText)
     }
@@ -261,7 +260,9 @@ class MisskeyRenderTest {
                 when (rendered) {
                     is UiTimelineV2.Message -> rendered
 
-                    is UiTimelineV2.Post -> assertNotNull(rendered.message)
+                    is UiTimelineV2.TimelinePostItem -> assertNotNull(rendered.presentation.message)
+
+                    is UiTimelineV2.Post -> error("Expected post notification to carry a presentation message")
 
                     is UiTimelineV2.User -> assertNotNull(rendered.message)
 
@@ -331,4 +332,13 @@ class MisskeyRenderTest {
             renote = renote,
             files = files,
         )
+
+    private fun rootPostOf(item: UiTimelineV2): UiTimelineV2.Post =
+        when (item) {
+            is UiTimelineV2.TimelinePostItem -> item.post
+            is UiTimelineV2.Post -> item
+            else -> error("Expected post timeline item, got ${item::class.simpleName}")
+        }
+
+    private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
 }

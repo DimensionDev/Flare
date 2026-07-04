@@ -4,7 +4,7 @@ import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
 import dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
-import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -41,7 +41,7 @@ internal class TimelineDbPageCache {
         pagingKey: String,
         offset: Int,
         limit: Int,
-    ): List<DbStatusWithReference> =
+    ): List<DbPagingTimelineWithStatus> =
         mutex.withLock {
             val identityRows =
                 dao.getTimelinePageIdentities(
@@ -107,7 +107,7 @@ internal class TimelineDbPageCache {
     private data class Snapshot(
         val loaded: Boolean = false,
         val identities: List<DbTimelinePageIdentity> = emptyList(),
-        val data: List<DbStatusWithReference> = emptyList(),
+        val data: List<DbPagingTimelineWithStatus> = emptyList(),
         val nextIdentity: DbTimelinePageIdentity? = null,
     ) {
         fun reusablePrefix(newIdentities: List<DbTimelinePageIdentity>): Int {
@@ -126,11 +126,11 @@ internal class TimelineDbPageLoader(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val pageCache: TimelineDbPageCache,
-) : OffsetFromStartPageLoader<DbStatusWithReference> {
+) : OffsetFromStartPageLoader<DbPagingTimelineWithStatus> {
     override suspend fun load(
         offset: Int,
         limit: Int,
-    ): List<DbStatusWithReference> =
+    ): List<DbPagingTimelineWithStatus> =
         pageCache.load(
             dao = database.pagingTimelineDao(),
             pagingKey = pagingKey,
@@ -149,6 +149,7 @@ internal class TimelineDbPageLoader(
                         "DbPagingTimeline",
                         "DbStatus",
                         "status_reference",
+                        "timeline_item_presentation_reference",
                         "DbTranslation",
                         emitInitialState = true,
                     ).collect {

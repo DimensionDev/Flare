@@ -15,7 +15,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
@@ -93,69 +92,10 @@ internal class StatusDetailRemoteMediator(
     }
 }
 
-internal fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKey): List<UiTimelineV2> {
-    val renderedPosts = mutableListOf<Pair<Long, UiTimelineV2.Post>>()
-    val stack = mutableListOf<Pair<Long, UiTimelineV2.Post>>()
-
+internal fun List<GetPostThreadV2ThreadItem>.renderThread(accountKey: MicroBlogKey): List<UiTimelineV2> =
     mapNotNull { item ->
         when (val value = item.value) {
-            is GetPostThreadV2ThreadItemValueUnion.Post -> item.depth to value.value.post
+            is GetPostThreadV2ThreadItemValueUnion.Post -> listOf(FeedViewPost(value.value.post)).render(accountKey).firstOrNull()
             else -> null
         }
-    }.forEach { (depth, post) ->
-        while (stack.lastOrNull()?.first?.let { it >= depth } == true) {
-            stack.removeAt(stack.lastIndex)
-        }
-        val parents =
-            when {
-                depth <= 0L -> stack.map { it.second }
-                else -> stack.filter { it.first >= 0L }.map { it.second }
-            }
-        val current =
-            post
-                .render(accountKey)
-                .copy(
-                    parents = parents.toPersistentList(),
-                )
-        renderedPosts += depth to current
-        stack += depth to current
     }
-
-    val protectedKeys =
-        renderedPosts
-            .filter { it.first <= 0L }
-            .map { it.second.statusKey }
-            .toSet()
-    val descendantKeys =
-        renderedPosts
-            .filter { it.first > 0L }
-            .map { it.second.statusKey }
-            .toSet()
-    val descendantParentKeys =
-        renderedPosts
-            .filter { it.first > 0L }
-            .flatMap { (_, post) ->
-                post.parents.map { it.statusKey }
-            }.filter { it in descendantKeys }
-            .toSet()
-    val visiblePosts =
-        renderedPosts
-            .filterNot { (depth, post) ->
-                depth > 0L && post.statusKey in descendantParentKeys
-            }.map { it.second }
-    val visiblePostKeys = visiblePosts.map { it.statusKey }.toSet()
-
-    return visiblePosts.map { post ->
-        post.copy(
-            parents =
-                post.parents
-                    .filterNot {
-                        it.statusKey in protectedKeys ||
-                            (
-                                it.statusKey in visiblePostKeys &&
-                                    it.statusKey !in descendantParentKeys
-                            )
-                    }.toPersistentList(),
-        )
-    }
-}

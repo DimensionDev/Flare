@@ -148,6 +148,7 @@ public class ProfilePresenter(
             service
                 .profileTabs(actualUserKey)
                 .map { tab ->
+                    val tabId = "${accountType}_${actualUserKey}_${tab.id}"
                     val timelinePresenter =
                         object : TimelinePresenter() {
                             override val loader: Flow<RemoteLoader<UiTimelineV2>>
@@ -156,6 +157,7 @@ public class ProfilePresenter(
                     when (tab.displayType) {
                         ProfileTab.DisplayType.Timeline -> {
                             ProfileState.Tab.Timeline(
+                                id = tabId,
                                 name = tab.name,
                                 presenter = timelinePresenter,
                             )
@@ -163,6 +165,7 @@ public class ProfilePresenter(
 
                         ProfileTab.DisplayType.Gallery -> {
                             ProfileState.Tab.Media(
+                                id = tabId,
                                 name = tab.name,
                                 presenter =
                                     ProfileMediaPresenter(
@@ -455,16 +458,19 @@ public abstract class ProfileState(
 
     @Immutable
     public sealed class Tab {
+        public abstract val id: String
         public abstract val name: UiStrings
 
         @Immutable
         public data class Timeline(
+            override val id: String,
             override val name: UiStrings,
             val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
         public data class Media(
+            override val id: String,
             override val name: UiStrings,
             val presenter: ProfileMediaPresenter,
         ) : Tab()

@@ -114,11 +114,11 @@ class VVORenderTest {
                 retweetedStatus = quoted,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(status.render(accountKey))
-        assertEquals(1, rendered.quote.size)
+        val rendered = assertIs<UiTimelineV2.TimelinePostItem>(status.render(accountKey))
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )

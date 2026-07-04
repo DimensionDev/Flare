@@ -65,17 +65,42 @@ internal class LoadNotificationsTool(
         val pageSize = args.maxItems.coerceIn(1, MAX_NOTIFICATION_TOOL_ITEMS)
         val results = targets.loadNotifications(filter = filter, pageSize = pageSize)
         val items = results.flatMap { it.items }
-        session.messagePartStore.addPosts(items.filterIsInstance<UiTimelineV2.Post>())
+        session.messagePartStore.addPosts(items.mapNotNull { it.notificationPostOrNull() })
         session.messagePartStore.addUsers(
-            items.flatMap { item ->
-                when (item) {
-                    is UiTimelineV2.User -> listOf(item.value)
-                    is UiTimelineV2.UserList -> item.users
-                    is UiTimelineV2.Message -> listOfNotNull(item.user)
-                    is UiTimelineV2.Post -> listOfNotNull(item.user)
-                    is UiTimelineV2.Feed -> emptyList()
-                }
-            },
+            items
+                .flatMap { item ->
+                    when (item) {
+                        is UiTimelineV2.TimelinePostItem -> {
+                            listOfNotNull(
+                                item.post.user,
+                                item.displayPost.user,
+                                item.presentation.message?.user,
+                            ) +
+                                item.presentation.inlineParents.mapNotNull { it.user } +
+                                item.presentation.quotes.mapNotNull { it.user }
+                        }
+
+                        is UiTimelineV2.User -> {
+                            listOf(item.value)
+                        }
+
+                        is UiTimelineV2.UserList -> {
+                            item.users
+                        }
+
+                        is UiTimelineV2.Message -> {
+                            listOfNotNull(item.user)
+                        }
+
+                        is UiTimelineV2.Post -> {
+                            listOfNotNull(item.user)
+                        }
+
+                        is UiTimelineV2.Feed -> {
+                            emptyList()
+                        }
+                    }
+                }.distinctBy { it.key },
         )
 
         return buildString {
@@ -184,6 +209,7 @@ private fun String.toNotificationFilterOrNull(): NotificationFilter? {
 
 private fun UiTimelineV2.toNotificationItemToolText(): String =
     when (this) {
+        is UiTimelineV2.TimelinePostItem -> toNotificationPostToolText()
         is UiTimelineV2.Post -> toNotificationPostToolText()
         is UiTimelineV2.Message -> toNotificationMessageToolText()
         is UiTimelineV2.User -> toNotificationUserToolText()
@@ -191,9 +217,14 @@ private fun UiTimelineV2.toNotificationItemToolText(): String =
         is UiTimelineV2.Feed -> toNotificationFeedToolText()
     }
 
+private fun UiTimelineV2.TimelinePostItem.toNotificationPostToolText(): String =
+    buildString {
+        presentation.message?.let { append(it.toNotificationMessageSummary()) }
+        append(displayPost.toNotificationPostToolText())
+    }
+
 private fun UiTimelineV2.Post.toNotificationPostToolText(): String =
     buildString {
-        message?.let { append(it.toNotificationMessageSummary()) }
         appendLine("itemType: post")
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
         appendLine("platform: ${platformType.name}")
@@ -202,6 +233,13 @@ private fun UiTimelineV2.Post.toNotificationPostToolText(): String =
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
         appendLine("authorHandle: ${user?.handle?.raw.orEmpty()}")
         appendLine("content: ${content.raw.take(MAX_NOTIFICATION_TEXT_LENGTH)}")
+    }
+
+private fun UiTimelineV2.notificationPostOrNull(): UiTimelineV2.Post? =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> displayPost
+        is UiTimelineV2.Post -> this
+        else -> null
     }
 
 private fun UiTimelineV2.Message.toNotificationMessageToolText(): String =

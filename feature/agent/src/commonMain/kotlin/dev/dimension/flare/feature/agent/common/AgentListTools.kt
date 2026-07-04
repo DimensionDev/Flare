@@ -644,11 +644,18 @@ private fun List<UiTimelineV2>.toTimelineToolText(maxItems: Int): String {
 
 private fun UiTimelineV2.toTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.TimelinePostItem -> toListPostToolText()
         is UiTimelineV2.Post -> toListPostToolText()
         is UiTimelineV2.User -> value.toListUserToolText(message)
         is UiTimelineV2.UserList -> "itemType: user_list\nstatusKey: $statusKey\nusers: ${users.joinToString { it.handle.raw }}\n"
         is UiTimelineV2.Message -> "itemType: message\nstatusKey: $statusKey\ncreatedAt: ${createdAt.value}\n"
         is UiTimelineV2.Feed -> "itemType: feed\ntitle: ${title.orEmpty()}\nurl: $url\n"
+    }
+
+private fun UiTimelineV2.TimelinePostItem.toListPostToolText(): String =
+    buildString {
+        presentation.message?.let { appendLine("messageStatusKey: ${it.statusKey}") }
+        append(displayPost.toListPostToolText())
     }
 
 private fun UiTimelineV2.Post.toListPostToolText(): String =

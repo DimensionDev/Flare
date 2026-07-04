@@ -215,9 +215,9 @@ class BlueskyNotificationRenderTest {
                     accountKey = accountKey,
                     references = persistentMapOf(uri to post),
                 )
-            val renderedPost = assertIs<UiTimelineV2.Post>(result.single())
-            assertEquals("post-$index", renderedPost.content.innerText)
-            val message = assertNotNull(renderedPost.message)
+            val renderedPost = assertIs<UiTimelineV2.TimelinePostItem>(result.single())
+            assertEquals("post-$index", renderedPost.post.content.innerText)
+            val message = assertNotNull(renderedPost.presentation.message)
             assertEquals(
                 "did:plc:author$index",
                 message.user

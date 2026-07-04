@@ -26,6 +26,8 @@ internal class StatusDetailRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val collapseReplyChains: Boolean = false
+
     override val pagingKey: String =
         buildString {
             append("status_detail_")

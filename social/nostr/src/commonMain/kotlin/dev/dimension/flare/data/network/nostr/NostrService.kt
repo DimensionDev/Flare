@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.toUiImage
@@ -838,7 +839,7 @@ internal class NostrService(
     internal suspend fun loadStatusContext(
         statusKey: MicroBlogKey,
         pageSize: Int,
-    ): List<UiTimelineV2.Post> {
+    ): List<UiTimelineV2> {
         val event =
             loadEvent(
                 statusKey = statusKey,
@@ -1619,7 +1620,7 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
         renderContexts: Map<String, NostrTextRenderContext> = emptyMap(),
-    ): List<UiTimelineV2.Post> {
+    ): List<UiTimelineV2> {
         val cache = mutableMapOf<String, UiTimelineV2.Post>()
 
         fun resolve(
@@ -1650,21 +1651,11 @@ internal class NostrService(
                     }
 
                     is RepostEvent -> {
-                        event.toUiRepost(
-                            profiles = profiles,
-                            eventsById = eventsById,
-                            visited = nextVisited,
-                            resolveEvent = ::resolve,
-                        )
+                        event.resolvedBoostedEvent(eventsById)?.let { resolve(it, nextVisited) }
                     }
 
                     is GenericRepostEvent -> {
-                        event.toUiGenericRepost(
-                            profiles = profiles,
-                            eventsById = eventsById,
-                            visited = nextVisited,
-                            resolveEvent = ::resolve,
-                        )
+                        event.resolvedBoostedEvent(eventsById)?.let { resolve(it, nextVisited) }
                     }
 
                     else -> {
@@ -1678,7 +1669,45 @@ internal class NostrService(
         }
 
         return mapNotNull { event ->
-            resolve(event, emptySet())
+            when (event) {
+                is TextNoteEvent -> {
+                    event.toUiTimelineItem(
+                        profile =
+                            profiles[event.pubKey] ?: profileOf(
+                                event.pubKey,
+                                null,
+                            ),
+                        eventsById = eventsById,
+                        profiles = profiles,
+                        interactionStats = interactionStats,
+                        renderContext = renderContexts[event.id],
+                        visited = setOf(event.id),
+                        resolveEvent = ::resolve,
+                    )
+                }
+
+                is RepostEvent -> {
+                    event.toUiRepost(
+                        profiles = profiles,
+                        eventsById = eventsById,
+                        visited = setOf(event.id),
+                        resolveEvent = ::resolve,
+                    )
+                }
+
+                is GenericRepostEvent -> {
+                    event.toUiGenericRepost(
+                        profiles = profiles,
+                        eventsById = eventsById,
+                        visited = setOf(event.id),
+                        resolveEvent = ::resolve,
+                    )
+                }
+
+                else -> {
+                    null
+                }
+            }
         }
     }
 
@@ -1688,7 +1717,7 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
         renderContexts: Map<String, NostrTextRenderContext> = emptyMap(),
-    ): List<UiTimelineV2.Post> {
+    ): List<UiTimelineV2> {
         val cache = mutableMapOf<String, UiTimelineV2.Post>()
 
         fun resolve(
@@ -1719,21 +1748,11 @@ internal class NostrService(
                     }
 
                     is RepostEvent -> {
-                        event.toUiRepost(
-                            profiles = profiles,
-                            eventsById = eventsById,
-                            visited = nextVisited,
-                            resolveEvent = ::resolve,
-                        )
+                        event.resolvedBoostedEvent(eventsById)?.let { resolve(it, nextVisited) }
                     }
 
                     is GenericRepostEvent -> {
-                        event.toUiGenericRepost(
-                            profiles = profiles,
-                            eventsById = eventsById,
-                            visited = nextVisited,
-                            resolveEvent = ::resolve,
-                        )
+                        event.resolvedBoostedEvent(eventsById)?.let { resolve(it, nextVisited) }
                     }
 
                     else -> {
@@ -1771,7 +1790,6 @@ internal class NostrService(
         val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
         val contentWarning = contentWarningReason()?.toUiPlainText()
         return UiTimelineV2.Post(
-            message = null,
             platformType = PlatformType.Nostr,
             images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
@@ -1935,35 +1953,6 @@ internal class NostrService(
                             }
                 ).distinctBy { it.type to it.statusKey }
                     .toImmutableList(),
-            parents =
-                parentEventIds()
-                    .mapNotNull { parentId ->
-                        parentId
-                            .takeUnless { it in visited }
-                            ?.let(eventsById::get)
-                            ?.let { resolveEvent(it, visited) }
-                    }.toImmutableList(),
-            quote =
-                (
-                    quoteEventIds()
-                        .mapNotNull { quoteId ->
-                            quoteId
-                                .takeUnless { it in visited }
-                                ?.let(eventsById::get)
-                                ?.let { resolveEvent(it, visited) }
-                        } +
-                        quoteAddressReferences()
-                            .mapNotNull { address ->
-                                resolveAddressReference(
-                                    address,
-                                    eventsById,
-                                    visited,
-                                    resolveEvent,
-                                )
-                            }
-                ).distinctBy { it.statusKey }
-                    .toImmutableList(),
-            internalRepost = null,
             clickEvent =
                 ClickEvent.Deeplink(
                     DeeplinkRoute.Status.Detail(
@@ -1973,6 +1962,67 @@ internal class NostrService(
                 ),
             accountType = AccountType.Specific(accountKey),
         )
+    }
+
+    private fun TextNoteEvent.toUiTimelineItem(
+        profile: UiProfile,
+        eventsById: Map<String, Event>,
+        profiles: Map<String, UiProfile>,
+        interactionStats: Map<String, InteractionStats>,
+        renderContext: NostrTextRenderContext?,
+        visited: Set<String>,
+        resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
+    ): UiTimelineV2 {
+        val post =
+            toUi(
+                profile = profile,
+                eventsById = eventsById,
+                profiles = profiles,
+                interactionStats = interactionStats,
+                renderContext = renderContext,
+                visited = visited,
+                resolveEvent = resolveEvent,
+            )
+        val inlineParents =
+            parentEventIds()
+                .mapNotNull { parentId ->
+                    parentId
+                        .takeUnless { it in visited }
+                        ?.let(eventsById::get)
+                        ?.let { resolveEvent(it, visited) }
+                }.toImmutableList()
+        val quotes =
+            (
+                quoteEventIds()
+                    .mapNotNull { quoteId ->
+                        quoteId
+                            .takeUnless { it in visited }
+                            ?.let(eventsById::get)
+                            ?.let { resolveEvent(it, visited) }
+                    } +
+                    quoteAddressReferences()
+                        .mapNotNull { address ->
+                            resolveAddressReference(
+                                address,
+                                eventsById,
+                                visited,
+                                resolveEvent,
+                            )
+                        }
+            ).distinctBy { it.statusKey }
+                .toImmutableList()
+        return if (inlineParents.isNotEmpty() || quotes.isNotEmpty()) {
+            UiTimelineV2.TimelinePostItem(
+                post = post,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = inlineParents,
+                        quotes = quotes,
+                    ),
+            )
+        } else {
+            post
+        }
     }
 
     private fun statusShareUrl(eventIdHex: String): String = "https://nostter.app/${eventId(eventIdHex).toBech32()}"
@@ -2155,18 +2205,24 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         visited: Set<String>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
-    ): UiTimelineV2.Post? {
+    ): UiTimelineV2? {
         val boostedEvent = resolvedBoostedEvent(eventsById)
         val boostedPost = boostedEvent?.let { resolveEvent(it, visited) } ?: return null
-        return boostedPost.copy(
-            message =
-                repostMessage(
-                    actor = profiles[pubKey] ?: profileOf(pubKey, null),
-                    statusKey = MicroBlogKey(id, NOSTR_HOST),
-                    createdAt = createdAt,
+        val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+        val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
+        val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey)
+        return UiTimelineV2.TimelinePostItem(
+            post = wrapperPost,
+            presentation =
+                UiTimelineV2.PostPresentation(
+                    message =
+                        repostMessage(
+                            actor = actor,
+                            statusKey = wrapperStatusKey,
+                            createdAt = createdAt,
+                        ),
+                    repost = boostedPost,
                 ),
-            statusKey = MicroBlogKey(id, NOSTR_HOST),
-            internalRepost = boostedPost,
         )
     }
 
@@ -2175,20 +2231,47 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         visited: Set<String>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
-    ): UiTimelineV2.Post? {
+    ): UiTimelineV2? {
         val boostedEvent = resolvedBoostedEvent(eventsById)
         val boostedPost = boostedEvent?.let { resolveEvent(it, visited) } ?: return null
-        return boostedPost.copy(
-            message =
-                repostMessage(
-                    actor = profiles[pubKey] ?: profileOf(pubKey, null),
-                    statusKey = MicroBlogKey(id, NOSTR_HOST),
-                    createdAt = createdAt,
+        val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+        val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
+        val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey)
+        return UiTimelineV2.TimelinePostItem(
+            post = wrapperPost,
+            presentation =
+                UiTimelineV2.PostPresentation(
+                    message =
+                        repostMessage(
+                            actor = actor,
+                            statusKey = wrapperStatusKey,
+                            createdAt = createdAt,
+                        ),
+                    repost = boostedPost,
                 ),
-            statusKey = MicroBlogKey(id, NOSTR_HOST),
-            internalRepost = boostedPost,
         )
     }
+
+    private fun UiTimelineV2.Post.toRepostWrapperPost(
+        actor: UiProfile,
+        wrapperStatusKey: MicroBlogKey,
+    ): UiTimelineV2.Post =
+        copy(
+            statusKey = wrapperStatusKey,
+            user = actor,
+            images = persistentListOf(),
+            contentWarning = null,
+            content = uiRichTextOf(emptyList()),
+            poll = null,
+            card = null,
+            references =
+                listOf(
+                    UiTimelineV2.Post.Reference(
+                        statusKey = statusKey,
+                        type = ReferenceType.Retweet,
+                    ),
+                ).toImmutableList(),
+        )
 
     private fun RepostEvent.resolvedBoostedEvent(eventsById: Map<String, Event>): Event? =
         containedPost()
@@ -2229,6 +2312,16 @@ internal class NostrService(
             accountType = AccountType.Specific(accountKey),
         )
 
+    private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message): UiTimelineV2 {
+        val post = asTimelinePostItem() ?: return this
+        return post.copy(
+            presentation =
+                post.presentation.copy(
+                    message = message,
+                ),
+        )
+    }
+
     private fun resolveAddressReference(
         address: Address,
         eventsById: Map<String, Event>,
@@ -2246,11 +2339,11 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
-    ): UiTimelineV2.Post? =
+    ): UiTimelineV2? =
         when (this) {
             is TextNoteEvent -> {
                 val post =
-                    toUi(
+                    toUiTimelineItem(
                         profile = profiles[pubKey] ?: profileOf(pubKey, null),
                         eventsById = eventsById,
                         profiles = profiles,
@@ -2260,26 +2353,25 @@ internal class NostrService(
                         resolveEvent = { event, visited -> resolveEvent(event, visited) },
                     )
                 val hasParent = parentEventIds().isNotEmpty()
-                post.copy(
-                    message =
-                        notificationMessage(
-                            actor =
-                                post.user ?: profiles[pubKey] ?: profileOf(
-                                    pubKey,
-                                    null,
-                                ),
-                            statusKey = MicroBlogKey(id, NOSTR_HOST),
-                            createdAt = createdAt,
-                            icon = if (hasParent) UiIcon.Reply else UiIcon.Mention,
-                            type =
-                                UiTimelineV2.Message.Type.Localized(
-                                    if (hasParent) {
-                                        UiTimelineV2.Message.Type.Localized.MessageId.Reply
-                                    } else {
-                                        UiTimelineV2.Message.Type.Localized.MessageId.Mention
-                                    },
-                                ),
-                        ),
+                post.withPresentationMessage(
+                    notificationMessage(
+                        actor =
+                            post.asTimelinePostItem()?.displayPost?.user ?: profiles[pubKey] ?: profileOf(
+                                pubKey,
+                                null,
+                            ),
+                        statusKey = MicroBlogKey(id, NOSTR_HOST),
+                        createdAt = createdAt,
+                        icon = if (hasParent) UiIcon.Reply else UiIcon.Mention,
+                        type =
+                            UiTimelineV2.Message.Type.Localized(
+                                if (hasParent) {
+                                    UiTimelineV2.Message.Type.Localized.MessageId.Reply
+                                } else {
+                                    UiTimelineV2.Message.Type.Localized.MessageId.Mention
+                                },
+                            ),
+                    ),
                 )
             }
 
@@ -2294,18 +2386,17 @@ internal class NostrService(
                 val target =
                     eventsById[targetId]?.let { resolveEvent(it, setOf(id)) }
                         ?: return null
-                target.copy(
-                    message =
-                        notificationMessage(
-                            actor = profiles[pubKey] ?: profileOf(pubKey, null),
-                            statusKey = MicroBlogKey(id, NOSTR_HOST),
-                            createdAt = createdAt,
-                            icon = UiIcon.Like,
-                            type =
-                                UiTimelineV2.Message.Type.Localized(
-                                    UiTimelineV2.Message.Type.Localized.MessageId.Like,
-                                ),
-                        ),
+                target.withPresentationMessage(
+                    notificationMessage(
+                        actor = profiles[pubKey] ?: profileOf(pubKey, null),
+                        statusKey = MicroBlogKey(id, NOSTR_HOST),
+                        createdAt = createdAt,
+                        icon = UiIcon.Like,
+                        type =
+                            UiTimelineV2.Message.Type.Localized(
+                                UiTimelineV2.Message.Type.Localized.MessageId.Like,
+                            ),
+                    ),
                 )
             }
 
@@ -2316,20 +2407,25 @@ internal class NostrService(
                 val boosted =
                     resolvedBoostedEvent(eventsById)?.let { resolveEvent(it, setOf(id)) }
                         ?: return null
-                boosted.copy(
-                    message =
-                        notificationMessage(
-                            actor = profiles[pubKey] ?: profileOf(pubKey, null),
-                            statusKey = MicroBlogKey(id, NOSTR_HOST),
-                            createdAt = createdAt,
-                            icon = UiIcon.Retweet,
-                            type =
-                                UiTimelineV2.Message.Type.Localized(
-                                    UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+                val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
+                UiTimelineV2.TimelinePostItem(
+                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            message =
+                                notificationMessage(
+                                    actor = actor,
+                                    statusKey = wrapperStatusKey,
+                                    createdAt = createdAt,
+                                    icon = UiIcon.Retweet,
+                                    type =
+                                        UiTimelineV2.Message.Type.Localized(
+                                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                        ),
                                 ),
+                            repost = boosted,
                         ),
-                    statusKey = MicroBlogKey(id, NOSTR_HOST),
-                    internalRepost = boosted,
                 )
             }
 
@@ -2340,20 +2436,25 @@ internal class NostrService(
                 val boosted =
                     resolvedBoostedEvent(eventsById)?.let { resolveEvent(it, setOf(id)) }
                         ?: return null
-                boosted.copy(
-                    message =
-                        notificationMessage(
-                            actor = profiles[pubKey] ?: profileOf(pubKey, null),
-                            statusKey = MicroBlogKey(id, NOSTR_HOST),
-                            createdAt = createdAt,
-                            icon = UiIcon.Retweet,
-                            type =
-                                UiTimelineV2.Message.Type.Localized(
-                                    UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+                val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
+                UiTimelineV2.TimelinePostItem(
+                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            message =
+                                notificationMessage(
+                                    actor = actor,
+                                    statusKey = wrapperStatusKey,
+                                    createdAt = createdAt,
+                                    icon = UiIcon.Retweet,
+                                    type =
+                                        UiTimelineV2.Message.Type.Localized(
+                                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                        ),
                                 ),
+                            repost = boosted,
                         ),
-                    statusKey = MicroBlogKey(id, NOSTR_HOST),
-                    internalRepost = boosted,
                 )
             }
 

@@ -9,6 +9,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.MediaType
 import dev.dimension.flare.data.network.mastodon.api.model.Meta
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -64,7 +65,7 @@ class MastodonRenderTest {
                     ),
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(status.render(host = accountKey.host, accountKey = accountKey))
+        val rendered = rootPostOf(status.render(host = accountKey.host, accountKey = accountKey))
         assertEquals(1, rendered.images.size)
         val image = assertIs<UiMedia.Image>(rendered.images.first())
         assertEquals("https://mastodon.social/media/full.jpg", image.url)
@@ -90,11 +91,11 @@ class MastodonRenderTest {
                 quote = quoted,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(status.render(host = accountKey.host, accountKey = accountKey))
-        assertEquals(1, rendered.quote.size)
+        val rendered = timelinePostItemOf(status.render(host = accountKey.host, accountKey = accountKey))
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
-            rendered.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
@@ -110,8 +111,22 @@ class MastodonRenderTest {
                 inReplyToID = "parent-id",
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(status.render(host = accountKey.host, accountKey = accountKey))
-        assertTrue(rendered.parents.isEmpty())
+        val rendered = status.render(host = accountKey.host, accountKey = accountKey)
+        val post = rootPostOf(rendered)
+        assertEquals(
+            listOf("parent-id"),
+            post.references
+                .filter { it.type == ReferenceType.Reply }
+                .map { it.statusKey.id },
+        )
+        assertTrue(
+            rendered
+                .asTimelinePostItemOrNull()
+                ?.presentation
+                ?.inlineParents
+                .orEmpty()
+                .isEmpty(),
+        )
     }
 
     @Test
@@ -137,11 +152,16 @@ class MastodonRenderTest {
                 inReplyToID = "child",
             )
 
-        val rendered = listOf(root, child, leaf).render(accountKey).filterIsInstance<UiTimelineV2.Post>()
+        val rendered = listOf(root, child, leaf).render(accountKey).timelinePostItems()
 
         assertEquals(listOf("leaf"), rendered.map { it.statusKey.id })
-        assertEquals(listOf("root", "child"), rendered.single().parents.map { it.statusKey.id })
-        assertTrue(rendered.single().parents.all { it.parents.isEmpty() })
+        assertEquals(
+            listOf("root", "child"),
+            rendered
+                .single()
+                .presentation.inlineParents
+                .map { it.statusKey.id },
+        )
     }
 
     @Test
@@ -208,7 +228,7 @@ class MastodonRenderTest {
                 current = current,
                 descendants = listOf(descendant0, descendant1, descendant2, descendant3, descendant4, descendant5),
                 accountKey = accountKey,
-            ).filterIsInstance<UiTimelineV2.Post>()
+            ).timelinePostItems()
 
         assertEquals(
             listOf("root", "current", "descendant-1", "descendant-5"),
@@ -216,16 +236,22 @@ class MastodonRenderTest {
         )
         assertEquals(
             listOf("descendant-0"),
-            rendered.first { it.statusKey.id == "descendant-1" }.parents.map { it.statusKey.id },
+            rendered
+                .first { it.statusKey.id == "descendant-1" }
+                .presentation.inlineParents
+                .map { it.statusKey.id },
         )
         assertEquals(
             listOf("descendant-2", "descendant-3", "descendant-4"),
-            rendered.first { it.statusKey.id == "descendant-5" }.parents.map { it.statusKey.id },
+            rendered
+                .first { it.statusKey.id == "descendant-5" }
+                .presentation.inlineParents
+                .map { it.statusKey.id },
         )
         assertEquals(
             listOf("root", "current", "descendant-0", "descendant-1", "descendant-2", "descendant-3", "descendant-4", "descendant-5"),
             rendered.flatMap { post ->
-                (post.parents + post).map { it.statusKey.id }
+                (post.presentation.inlineParents + post.post).map { it.statusKey.id }
             },
         )
     }
@@ -259,7 +285,7 @@ class MastodonRenderTest {
                 current = current,
                 descendants = listOf(directChild, replyToChild),
                 accountKey = accountKey,
-            ).filterIsInstance<UiTimelineV2.Post>()
+            ).timelinePostItems()
 
         assertEquals(
             listOf(
@@ -268,12 +294,15 @@ class MastodonRenderTest {
                 "116528933219506929",
             ),
             rendered.flatMap { post ->
-                (post.parents + post).map { it.statusKey.id }
+                (post.presentation.inlineParents + post.post).map { it.statusKey.id }
             },
         )
         assertEquals(
             listOf("116526337629636438"),
-            rendered.first { it.statusKey.id == "116528933219506929" }.parents.map { it.statusKey.id },
+            rendered
+                .first { it.statusKey.id == "116528933219506929" }
+                .presentation.inlineParents
+                .map { it.statusKey.id },
         )
     }
 
@@ -293,14 +322,14 @@ class MastodonRenderTest {
                 reblog = originalStatus,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(reblogWrapper.render(host = accountKey.host, accountKey = accountKey))
-        val message = assertNotNull(rendered.message)
+        val rendered = timelinePostItemOf(reblogWrapper.render(host = accountKey.host, accountKey = accountKey))
+        val message = assertNotNull(rendered.presentation.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
-        val repost = assertNotNull(rendered.internalRepost)
+        val repost = assertNotNull(rendered.presentation.repost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
-        assertEquals("wrapper content", rendered.content.innerText)
+        assertEquals("wrapper content", rendered.post.content.innerText)
         assertEquals("reblog-wrapper-1", rendered.statusKey.id)
         assertEquals("original content", repost.content.innerText)
         assertEquals("original-1", repost.statusKey.id)
@@ -329,21 +358,20 @@ class MastodonRenderTest {
                 reblog = originalStatus,
             )
 
-        val rendered = assertIs<UiTimelineV2.Post>(reblogWrapper.render(host = accountKey.host, accountKey = accountKey))
-        val message = assertNotNull(rendered.message)
+        val rendered = timelinePostItemOf(reblogWrapper.render(host = accountKey.host, accountKey = accountKey))
+        val message = assertNotNull(rendered.presentation.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
-        val repost = assertNotNull(rendered.internalRepost)
+        val repost = assertNotNull(rendered.presentation.repost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
-        assertEquals("wrapper", rendered.content.innerText)
+        assertEquals("wrapper", rendered.post.content.innerText)
         assertEquals("reblog-wrapper-2", rendered.statusKey.id)
-        assertTrue(rendered.quote.isEmpty())
         assertEquals("original content", repost.content.innerText)
-        assertEquals(1, repost.quote.size)
+        assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
-            repost.quote
+            rendered.presentation.quotes
                 .first()
                 .content.innerText,
         )
@@ -388,4 +416,24 @@ class MastodonRenderTest {
             avatar = "https://mastodon.social/$name.png",
             avatarStatic = "https://mastodon.social/$name.png",
         )
+
+    private fun rootPostOf(item: UiTimelineV2): UiTimelineV2.Post =
+        when (item) {
+            is UiTimelineV2.TimelinePostItem -> item.post
+            is UiTimelineV2.Post -> item
+            else -> error("Expected post timeline item, got ${item::class.simpleName}")
+        }
+
+    private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
+
+    private fun UiTimelineV2.asTimelinePostItemOrNull(): UiTimelineV2.TimelinePostItem? = this as? UiTimelineV2.TimelinePostItem
+
+    private fun List<UiTimelineV2>.timelinePostItems(): List<UiTimelineV2.TimelinePostItem> =
+        mapNotNull {
+            when (it) {
+                is UiTimelineV2.TimelinePostItem -> it
+                is UiTimelineV2.Post -> UiTimelineV2.TimelinePostItem(post = it)
+                else -> null
+            }
+        }
 }

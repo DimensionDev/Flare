@@ -312,11 +312,15 @@ public class RelationHandler(
             }
 
             is UiTimelineV2.Post -> {
-                user?.key == userKey ||
-                    message?.user?.key == userKey ||
-                    quote.any { it.containsUser(userKey) } ||
-                    parents.any { it.containsUser(userKey) } ||
-                    internalRepost?.containsUser(userKey) == true
+                user?.key == userKey
+            }
+
+            is UiTimelineV2.TimelinePostItem -> {
+                post.containsUser(userKey) ||
+                    presentation.message?.user?.key == userKey ||
+                    presentation.inlineParents.any { it.containsUser(userKey) } ||
+                    presentation.quotes.any { it.containsUser(userKey) } ||
+                    presentation.repost?.containsUser(userKey) == true
             }
 
             is UiTimelineV2.User -> {

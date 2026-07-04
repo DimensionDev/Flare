@@ -44,6 +44,11 @@ internal class DeepLinkPattern<T>(
     private val regexPatternFillIn = Regex("\\{(.+?)\\}")
 
     /**
+     * parse the host into a list of [PathSegment]
+     */
+    val hostSegments: List<PathSegment> = uriPattern.host.split('.').map(::parseSegment)
+
+    /**
      * parse the path into a list of [PathSegment]
      *
      * order matters here - path segments need to match in value and order when matching
@@ -51,26 +56,8 @@ internal class DeepLinkPattern<T>(
      */
     val pathSegments: List<PathSegment> =
         buildList {
-            uriPattern.rawSegments.forEach { segment ->
-                // first, check if it is a path arg
-                var result = regexPatternFillIn.find(segment)
-                if (result != null) {
-                    // if so, extract the path arg name (the string value within the curly braces)
-                    val argName = result.groups[1]!!.value
-                    // from [T], read the primitive type of this argument to get the correct type parser
-                    val elementIndex = serializer.descriptor.getElementIndex(argName)
-                    val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
-                    // Calculate prefix and suffix
-                    val range = result.range
-                    val prefix = segment.substring(0, range.first)
-                    val suffix = segment.substring(range.last + 1)
-
-                    // finally, add the arg name and its respective type parser to the map
-                    add(PathSegment(argName, true, getTypeParser(elementDescriptor.kind), prefix, suffix))
-                } else {
-                    // if its not a path arg, then its just a static string path segment
-                    add(PathSegment(segment, false, getTypeParser(PrimitiveKind.STRING)))
-                }
+            uriPattern.rawSegments.normalizeRootPathSegments().forEach { segment ->
+                add(parseSegment(segment))
             }
         }
 
@@ -98,6 +85,28 @@ internal class DeepLinkPattern<T>(
         val prefix: String = "",
         val suffix: String = "",
     )
+
+    private fun parseSegment(segment: String): PathSegment {
+        // first, check if it is an arg
+        val result = regexPatternFillIn.find(segment)
+        return if (result != null) {
+            // if so, extract the arg name (the string value within the curly braces)
+            val argName = result.groups[1]!!.value
+            // from [T], read the primitive type of this argument to get the correct type parser
+            val elementIndex = serializer.descriptor.getElementIndex(argName)
+            val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
+            // Calculate prefix and suffix
+            val range = result.range
+            val prefix = segment.substring(0, range.first)
+            val suffix = segment.substring(range.last + 1)
+
+            // finally, add the arg name and its respective type parser to the map
+            PathSegment(argName, true, getTypeParser(elementDescriptor.kind), prefix, suffix)
+        } else {
+            // if its not an arg, then its just a static string segment
+            PathSegment(segment, false, getTypeParser(PrimitiveKind.STRING))
+        }
+    }
 }
 
 /**
@@ -129,3 +138,5 @@ private fun getTypeParser(kind: SerialKind): TypeParser =
             "Unsupported argument type of SerialKind:$kind. The argument type must be a Primitive.",
         )
     }
+
+private fun List<String>.normalizeRootPathSegments(): List<String> = takeUnless { size == 1 && single().isEmpty() }.orEmpty()

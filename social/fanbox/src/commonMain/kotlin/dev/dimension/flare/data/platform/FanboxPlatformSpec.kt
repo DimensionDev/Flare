@@ -21,6 +21,7 @@ import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
@@ -59,26 +60,10 @@ public data object FanboxPlatformSpec :
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(
-            PlatformDeepLink(
-                uriPattern = "https://www.fanbox.cc/@{creatorId}/posts/{id}",
-                serializer = FanboxPostDeepLink.serializer(),
-                callback = { data ->
-                    DeeplinkRoute.Article(
-                        accountType = AccountType.Specific(accountKey),
-                        articleKey = fanboxPostKey(data.id),
-                    )
-                },
-            ),
-            PlatformDeepLink(
-                uriPattern = "https://www.fanbox.cc/@{creatorId}",
-                serializer = FanboxCreatorDeepLink.serializer(),
-                callback = { data ->
-                    DeeplinkRoute.Profile.User(
-                        accountType = AccountType.Specific(accountKey),
-                        userKey = fanboxCreatorKey(data.creatorId),
-                    )
-                },
-            ),
+            fanboxPostDeepLink(accountKey, "https://www.fanbox.cc/@{creatorId}/posts/{id}"),
+            fanboxSubdomainPostDeepLink(accountKey, "https://{creatorid}.fanbox.cc/posts/{id}"),
+            fanboxCreatorDeepLink(accountKey, "https://www.fanbox.cc/@{creatorId}"),
+            fanboxSubdomainCreatorDeepLink(accountKey, "https://{creatorid}.fanbox.cc"),
         )
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
@@ -99,8 +84,77 @@ public data object FanboxPlatformSpec :
     ): MicroblogDataSource = throw UnsupportedOperationException("FANBOX guest data source is not supported")
 }
 
+private fun fanboxPostDeepLink(
+    accountKey: MicroBlogKey,
+    uriPattern: String,
+): PlatformDeepLink<FanboxPostDeepLink> =
+    PlatformDeepLink(
+        uriPattern = uriPattern,
+        serializer = FanboxPostDeepLink.serializer(),
+        callback = { data ->
+            DeeplinkRoute.Article(
+                accountType = AccountType.Specific(accountKey),
+                articleKey = fanboxPostKey(data.id),
+            )
+        },
+    )
+
+private fun fanboxSubdomainPostDeepLink(
+    accountKey: MicroBlogKey,
+    uriPattern: String,
+): PlatformDeepLink<FanboxSubdomainPostDeepLink> =
+    PlatformDeepLink(
+        uriPattern = uriPattern,
+        serializer = FanboxSubdomainPostDeepLink.serializer(),
+        matcher = { data -> data.creatorId.isFanboxSubdomainCreatorId() },
+        callback = { data ->
+            DeeplinkRoute.Article(
+                accountType = AccountType.Specific(accountKey),
+                articleKey = fanboxPostKey(data.id),
+            )
+        },
+    )
+
+private fun fanboxCreatorDeepLink(
+    accountKey: MicroBlogKey,
+    uriPattern: String,
+): PlatformDeepLink<FanboxCreatorDeepLink> =
+    PlatformDeepLink(
+        uriPattern = uriPattern,
+        serializer = FanboxCreatorDeepLink.serializer(),
+        callback = { data ->
+            DeeplinkRoute.Profile.User(
+                accountType = AccountType.Specific(accountKey),
+                userKey = fanboxCreatorKey(data.creatorId),
+            )
+        },
+    )
+
+private fun fanboxSubdomainCreatorDeepLink(
+    accountKey: MicroBlogKey,
+    uriPattern: String,
+): PlatformDeepLink<FanboxSubdomainCreatorDeepLink> =
+    PlatformDeepLink(
+        uriPattern = uriPattern,
+        serializer = FanboxSubdomainCreatorDeepLink.serializer(),
+        matcher = { data -> data.creatorId.isFanboxSubdomainCreatorId() },
+        callback = { data ->
+            DeeplinkRoute.Profile.User(
+                accountType = AccountType.Specific(accountKey),
+                userKey = fanboxCreatorKey(data.creatorId),
+            )
+        },
+    )
+
 @Serializable
 private data class FanboxPostDeepLink(
+    val creatorId: String,
+    val id: String,
+)
+
+@Serializable
+private data class FanboxSubdomainPostDeepLink(
+    @SerialName("creatorid")
     val creatorId: String,
     val id: String,
 )
@@ -109,3 +163,11 @@ private data class FanboxPostDeepLink(
 private data class FanboxCreatorDeepLink(
     val creatorId: String,
 )
+
+@Serializable
+private data class FanboxSubdomainCreatorDeepLink(
+    @SerialName("creatorid")
+    val creatorId: String,
+)
+
+private fun String.isFanboxSubdomainCreatorId(): Boolean = !equals("www", ignoreCase = true)

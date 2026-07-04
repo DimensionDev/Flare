@@ -41,9 +41,10 @@ internal object PlatformDeepLinkMatcher {
             )
         val match = DeepLinkMatcher(request, pattern).match() ?: return null
         val data = KeyDecoder(match.args).decodeSerializableValue(match.serializer)
+        if (!deepLink.matcher(data)) return null
         return Match(
             route = deepLink.callback(data),
-            host = uriPattern.host,
+            host = request.uri.host,
         )
     }
 

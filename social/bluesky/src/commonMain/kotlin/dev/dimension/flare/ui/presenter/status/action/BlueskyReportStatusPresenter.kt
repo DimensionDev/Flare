@@ -14,6 +14,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
@@ -60,9 +61,8 @@ public class BlueskyReportStatusPresenter(
             ) {
                 service.onSuccess {
                     scope.launch {
-                        if (status is UiTimelineV2.Post) {
-                            it.report(status.statusKey, value)
-                        }
+                        val post = status.contentPostOrNull() ?: return@launch
+                        it.report(post.statusKey, value)
                     }
                 }
             }

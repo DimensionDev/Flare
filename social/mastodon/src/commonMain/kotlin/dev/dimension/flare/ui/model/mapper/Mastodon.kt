@@ -36,6 +36,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
@@ -183,13 +184,25 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             accountType = accountKey.toAccountType(),
         )
     } else if (status != null) {
-        return status
-            .renderStatus(
-                host = accountKey.host,
-                accountKey = accountKey,
-            ).copy(
-                message = message,
-            )
+        val renderedStatus =
+            status
+                .render(
+                    host = accountKey.host,
+                    accountKey = accountKey,
+                ).asTimelinePostItem()
+                ?: UiTimelineV2.TimelinePostItem(
+                    post =
+                        status.renderStatus(
+                            host = accountKey.host,
+                            accountKey = accountKey,
+                        ),
+                )
+        return renderedStatus.copy(
+            presentation =
+                renderedStatus.presentation.copy(
+                    message = message,
+                ),
+        )
     } else {
         return UiTimelineV2.User(
             value = user,
@@ -219,7 +232,10 @@ internal fun renderStatusContext(
     val descendantPosts =
         descendants
             .mapNotNull {
-                it.render(host = accountKey.host, accountKey = accountKey) as? UiTimelineV2.Post
+                it
+                    .render(host = accountKey.host, accountKey = accountKey)
+                    .asTimelinePostItem()
+                    ?.displayPost
             }
     val chains = mutableListOf<MutableList<UiTimelineV2.Post>>()
     val chainByStatusKey = mutableMapOf<MicroBlogKey, MutableList<UiTimelineV2.Post>>()
@@ -238,20 +254,23 @@ internal fun renderStatusContext(
                     chains += it
                 }
             }
-        val standalonePost = post.copy(parents = persistentListOf())
-        chain += standalonePost
-        chainByStatusKey[standalonePost.statusKey] = chain
+        chain += post
+        chainByStatusKey[post.statusKey] = chain
     }
 
     val descendantChainItems =
         chains.mapNotNull { chain ->
             val post = chain.lastOrNull() ?: return@mapNotNull null
-            post.copy(
-                parents =
-                    chain
-                        .dropLast(1)
-                        .map { it.copy(parents = persistentListOf()) }
-                        .toImmutableList(),
+            val inlineParents =
+                chain
+                    .dropLast(1)
+                    .toImmutableList()
+            UiTimelineV2.TimelinePostItem(
+                post = post,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = inlineParents,
+                    ),
             )
         }
 
@@ -264,6 +283,8 @@ internal fun Status.render(
 ): UiTimelineV2 {
     requireNotNull(account) { "account is null" }
     val currentStatus = this.renderStatus(host, accountKey)
+    val contentStatus = reblog ?: this
+    val quoteStatus = contentStatus.quote?.renderStatus(host, accountKey)
     val topMessage =
         if (pinned == true) {
             UiTimelineV2.Message(
@@ -306,17 +327,27 @@ internal fun Status.render(
         } else {
             null
         }
-    return if (reblog != null) {
-        currentStatus.copy(
+    val presentation =
+        UiTimelineV2.PostPresentation(
             message = topMessage,
-            internalRepost =
-                reblog.renderStatus(
+            quotes = listOfNotNull(quoteStatus).toImmutableList(),
+            repost =
+                reblog?.renderStatus(
                     host = host,
                     accountKey = accountKey,
                 ),
         )
+    return if (
+        presentation.message != null ||
+        presentation.quotes.isNotEmpty() ||
+        presentation.repost != null
+    ) {
+        UiTimelineV2.TimelinePostItem(
+            post = currentStatus,
+            presentation = presentation,
+        )
     } else {
-        currentStatus.copy(message = topMessage)
+        currentStatus
     }
 }
 
@@ -415,7 +446,6 @@ private fun Status.renderStatus(
                 append("https://$host/@${account.acct}/$id")
             }
         }
-    val quoteStatus = quote?.renderStatus(host, accountKey)
     val sourceLanguages = listOfNotNull(language).toPersistentList()
     return UiTimelineV2.Post(
         images =
@@ -429,7 +459,6 @@ private fun Status.renderStatus(
                 ?.toUiPlainText(sourceLanguages),
         user = actualUser,
         sourceLanguages = sourceLanguages,
-        quote = listOfNotNull(quoteStatus).toImmutableList(),
         content = parseMastodonContent(this, accountKey, host, sourceLanguages),
         card =
             card?.url?.let { url ->
@@ -749,6 +778,12 @@ private fun Status.renderStatus(
                         type = ReferenceType.Reply,
                     )
                 },
+                quote?.id?.let {
+                    UiTimelineV2.Post.Reference(
+                        statusKey = MicroBlogKey(id = it, host = statusKey.host),
+                        type = ReferenceType.Quote,
+                    )
+                },
             ).toImmutableList(),
         sensitive = sensitive ?: false,
         clickEvent =
@@ -770,35 +805,47 @@ private fun Status.renderStatus(
 private fun List<UiTimelineV2>.resolveParents(): List<UiTimelineV2> {
     val postsByKey =
         this
-            .filterIsInstance<UiTimelineV2.Post>()
-            .associateBy { it.statusKey }
+            .mapNotNull { it.asTimelinePostItem() }
+            .associateBy { it.displayPost.statusKey }
     if (postsByKey.isEmpty()) {
         return this
     }
 
     fun resolveParents(
-        post: UiTimelineV2.Post,
+        post: UiTimelineV2.TimelinePostItem,
         visiting: MutableSet<MicroBlogKey> = mutableSetOf(),
     ): ImmutableList<UiTimelineV2.Post> {
-        if (!visiting.add(post.statusKey)) {
+        val displayPost = post.displayPost
+        if (!visiting.add(displayPost.statusKey)) {
             return persistentListOf()
         }
         val parent =
-            post.references
+            displayPost.references
                 .firstOrNull { it.type == ReferenceType.Reply }
                 ?.takeUnless { it.statusKey in visiting }
                 ?.let { postsByKey[it.statusKey] }
                 ?: return persistentListOf()
         return (
             resolveParents(parent, visiting) +
-                parent.copy(parents = persistentListOf())
+                parent.displayPost
         ).distinctBy { it.statusKey }
             .toImmutableList()
     }
 
     return map { item ->
-        if (item is UiTimelineV2.Post && item.parents.isEmpty()) {
-            item.copy(parents = resolveParents(item))
+        val post = item.asTimelinePostItem()
+        if (post != null && post.presentation.inlineParents.isEmpty()) {
+            val parents = resolveParents(post)
+            if (parents.isEmpty()) {
+                item
+            } else {
+                post.copy(
+                    presentation =
+                        post.presentation.copy(
+                            inlineParents = parents,
+                        ),
+                )
+            }
         } else {
             item
         }
@@ -806,23 +853,19 @@ private fun List<UiTimelineV2>.resolveParents(): List<UiTimelineV2> {
 }
 
 private fun List<UiTimelineV2>.collapseStandaloneParents(): List<UiTimelineV2> {
-    fun UiTimelineV2.Post.collectParentKeys(): Set<MicroBlogKey> =
-        parents
-            .flatMap { parent ->
-                listOf(parent.statusKey) + parent.collectParentKeys()
-            }.toSet()
-
     val parentKeys =
-        filterIsInstance<UiTimelineV2.Post>()
-            .flatMap { it.collectParentKeys() }
-            .toSet()
+        mapNotNull { it.asTimelinePostItem() }
+            .flatMap { post ->
+                post.presentation.inlineParents.map { it.statusKey }
+            }.toSet()
     if (parentKeys.isEmpty()) {
         return this
     }
     return filterNot { item ->
-        item is UiTimelineV2.Post &&
-            item.message == null &&
-            item.statusKey in parentKeys
+        val post = item.asTimelinePostItem()
+        post != null &&
+            post.presentation.message == null &&
+            post.statusKey in parentKeys
     }
 }
 

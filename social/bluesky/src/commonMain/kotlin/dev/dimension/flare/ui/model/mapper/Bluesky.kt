@@ -37,6 +37,7 @@ import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
@@ -50,6 +51,7 @@ import dev.dimension.flare.ui.model.UiMedia.Video
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -652,9 +654,8 @@ internal fun List<ListNotificationsNotification>.render(
             -> {
                 items.mapNotNull {
                     references[it.uri]
-                        ?.render(
-                            accountKey,
-                        )?.copy(
+                        ?.renderTimelineItem(
+                            accountKey = accountKey,
                             message =
                                 UiTimelineV2.Message(
                                     user = it.author.render(accountKey),
@@ -707,8 +708,9 @@ internal fun List<ListNotificationsNotification>.render(
 
 private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val renderedPost = post.render(accountKey)
+    val feedReason = reason
     val message =
-        when (val reason = reason) {
+        when (val reason = feedReason) {
             is FeedViewPostReasonUnion.ReasonPin -> {
                 UiTimelineV2.Message(
                     user = renderedPost.user,
@@ -758,20 +760,6 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 null
             }
         }
-    val postForTimeline =
-        when (reason) {
-            is FeedViewPostReasonUnion.ReasonRepost -> {
-                renderedPost.copy(
-                    statusKey = message?.statusKey ?: renderedPost.statusKey,
-                    internalRepost = renderedPost,
-                )
-            }
-
-            else -> {
-                renderedPost
-            }
-        }
-
     val reply =
         when (val reply = reply?.parent) {
             is ReplyRefParentUnion.PostView -> {
@@ -786,10 +774,76 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 null
             }
         }?.render(accountKey)
-    return postForTimeline.copy(
-        message = message,
-        parents = listOfNotNull(reply).toImmutableList(),
-    )
+    val quote = findQuote(accountKey, post)
+    val inlineParents = listOfNotNull(reply).toImmutableList()
+    val quotes = listOfNotNull(quote).toImmutableList()
+    val presentation =
+        UiTimelineV2.PostPresentation(
+            message = message,
+            inlineParents = inlineParents,
+            quotes = quotes,
+            repost =
+                if (feedReason is FeedViewPostReasonUnion.ReasonRepost) {
+                    renderedPost
+                } else {
+                    null
+                },
+        )
+    val rootPost =
+        if (feedReason is FeedViewPostReasonUnion.ReasonRepost) {
+            val repostUser = feedReason.value.by.render(accountKey)
+            renderedPost.copy(
+                statusKey = message?.statusKey ?: renderedPost.statusKey,
+                user = repostUser,
+                images = persistentListOf(),
+                content = uiRichTextOf(emptyList()),
+                contentWarning = null,
+                card = null,
+                poll = null,
+                references =
+                    listOf(
+                        UiTimelineV2.Post.Reference(
+                            statusKey = renderedPost.statusKey,
+                            type = ReferenceType.Retweet,
+                        ),
+                    ).toImmutableList(),
+            )
+        } else {
+            renderedPost
+        }
+    return if (
+        presentation.message != null ||
+        presentation.inlineParents.isNotEmpty() ||
+        presentation.quotes.isNotEmpty() ||
+        presentation.repost != null
+    ) {
+        UiTimelineV2.TimelinePostItem(
+            post = rootPost,
+            presentation = presentation,
+        )
+    } else {
+        rootPost
+    }
+}
+
+private fun PostView.renderTimelineItem(
+    accountKey: MicroBlogKey,
+    message: UiTimelineV2.Message? = null,
+): UiTimelineV2 {
+    val post = render(accountKey)
+    val quotes = listOfNotNull(findQuote(accountKey, this)).toImmutableList()
+    return if (message != null || quotes.isNotEmpty()) {
+        UiTimelineV2.TimelinePostItem(
+            post = post,
+            presentation =
+                UiTimelineV2.PostPresentation(
+                    message = message,
+                    quotes = quotes,
+                ),
+        )
+    } else {
+        post
+    }
 }
 
 internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
@@ -821,6 +875,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
         }
 
     val sourceLanguages = record.sourceLanguages()
+    val quote = findQuote(accountKey, this)
     return UiTimelineV2.Post(
         platformType = PlatformType.Bluesky,
         user = user,
@@ -830,9 +885,16 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
         sourceLanguages = sourceLanguages,
         content = parseBlueskyJson(record, accountKey, sourceLanguages),
         poll = null,
-        quote = listOfNotNull(findQuote(accountKey, this)).toImmutableList(),
         contentWarning = null,
-        parents = persistentListOf(),
+        references =
+            listOfNotNull(
+                quote?.let {
+                    UiTimelineV2.Post.Reference(
+                        statusKey = it.statusKey,
+                        type = ReferenceType.Quote,
+                    )
+                },
+            ).toImmutableList(),
         actions =
             listOfNotNull(
                 ActionMenu.Item(
@@ -1613,7 +1675,6 @@ private fun render(
                     ).toImmutableList(),
                 contentWarning = null,
                 poll = null,
-                quote = persistentListOf(),
                 createdAt =
                     record.value.indexedAt
                         .toUi(),

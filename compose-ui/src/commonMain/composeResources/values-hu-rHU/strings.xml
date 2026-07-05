@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Manga rangsor</string>
     <string name="illustrations_title">Illusztrációk</string>
     <string name="manga_title">Manga</string>
+    <string name="media_menu_download">Letöltés</string>
+    <string name="media_menu_download_all">Összes letöltése</string>
+    <string name="media_menu_share_image">Kép megosztása</string>
+    <string name="media_menu_copy_link">Link másolása</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil-engedélyek javítása</string>
+    <string name="pixiv_private_following_title">Privát követések</string>
+    <string name="pixiv_private_bookmarks_title">Privát könyvjelzők</string>
+    <string name="fanbox_supported_title">Támogatva</string>
+    <string name="fanbox_recommended_creators_title">Ajánlott alkotók</string>
 </resources>

@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
@@ -71,9 +72,12 @@ internal class AccountRepository internal constructor(
             }
     }
     internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
-        appDatabase.accountDao().sortedAccounts().map {
-            it.map { it.toUi() }.toImmutableList()
-        }
+        appDatabase
+            .accountDao()
+            .sortedAccounts()
+            .map {
+                it.map { it.toUi() }.toImmutableList()
+            }.distinctUntilChanged()
     }
     private val dataSourceCacheMutex = Mutex()
     private val dataSourceCache by lazy {

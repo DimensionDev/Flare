@@ -12,6 +12,8 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.di.koinInject
@@ -71,7 +73,11 @@ public class LocalCacheSearchPresenter : PresenterBase<LocalCacheSearchPresenter
                             .getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
                     }.flow.map {
                         it.map {
-                            it.status.data.content
+                            TimelinePagingMapper.toUi(
+                                item = it,
+                                pagingKey = it.timeline.pagingKey,
+                                translationDisplayOptions = localCacheTranslationDisplayOptions,
+                            )
                         }
                     }
                 }
@@ -84,7 +90,11 @@ public class LocalCacheSearchPresenter : PresenterBase<LocalCacheSearchPresenter
                     paging.map { pagingData ->
                         pagingData.map {
                             it.map {
-                                it.status.data.content
+                                TimelinePagingMapper.toUi(
+                                    item = it,
+                                    pagingKey = LOCAL_CACHE_SEARCH_PAGING_KEY,
+                                    translationDisplayOptions = localCacheTranslationDisplayOptions,
+                                )
                             }
                         }
                     }
@@ -142,3 +152,12 @@ public class LocalCacheSearchPresenter : PresenterBase<LocalCacheSearchPresenter
         }
     }
 }
+
+private val localCacheTranslationDisplayOptions =
+    TranslationDisplayOptions(
+        translationEnabled = false,
+        autoDisplayEnabled = false,
+        providerCacheKey = "",
+    )
+
+private const val LOCAL_CACHE_SEARCH_PAGING_KEY = "local_cache_search"

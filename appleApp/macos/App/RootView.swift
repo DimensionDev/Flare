@@ -14,6 +14,7 @@ struct RootView: View {
     @StateObject private var secondaryTabPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var homeTimelineWithTabsPresenter = KotlinPresenter(presenter: HomeTimelineWithTabsPresenter())
     @StateObject private var allNotificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
+    @StateObject private var notificationAccountsPresenter = KotlinPresenter(presenter: NotificationAccountsPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @StateObject private var directMessageAvailabilityPresenter = KotlinPresenter(presenter: DirectMessageAvailabilityPresenter())
@@ -51,7 +52,7 @@ struct RootView: View {
                                 )
                             } else if tab == .notifications {
                                 DisclosureGroup {
-                                    ForEach(allNotificationBadgePresenter.state.notifications, id: \.profile.key) { item in
+                                    ForEach(notificationAccountsPresenter.state.notifications, id: \.profile.key) { item in
                                         UserOnelineView(data: item.profile)
                                             .badge(Int(item.badge))
                                             .tag(Route.accountNotification(item.profile.key))

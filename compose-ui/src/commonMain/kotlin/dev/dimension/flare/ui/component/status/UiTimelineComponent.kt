@@ -223,6 +223,7 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -238,6 +239,14 @@ internal fun UiTimelineComponent(
 ) {
     when (item) {
         is UiTimelineV2.Post -> {
+            StatusContent(
+                data = item.asTimelinePostItem() ?: return,
+                detailStatusKey = detailStatusKey,
+                modifier = modifier,
+            )
+        }
+
+        is UiTimelineV2.TimelinePostItem -> {
             StatusContent(
                 data = item,
                 detailStatusKey = detailStatusKey,
@@ -464,15 +473,17 @@ private fun UserListContent(
 
 @Composable
 private fun StatusContent(
-    data: UiTimelineV2.Post,
+    data: UiTimelineV2.TimelinePostItem,
     detailStatusKey: MicroBlogKey?,
     modifier: Modifier = Modifier,
 ) {
+    val post = data.displayPost
+    val presentation = data.presentation
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        if (data.parents.any()) {
+        if (presentation.inlineParents.any()) {
             Layout(
                 content = {
                     CompositionLocalProvider(
@@ -484,7 +495,7 @@ private fun StatusContent(
                         Column(
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
-                            data.parents.fastForEach {
+                            presentation.inlineParents.fastForEach {
                                 CommonStatusComponent(
                                     item = it,
                                     isDetail = false,
@@ -508,7 +519,7 @@ private fun StatusContent(
                                 ).padding(
                                     top = AvatarComponentDefaults.size / 2,
                                 ).let {
-                                    if (data.message == null) {
+                                    if (presentation.message == null) {
                                         it.offset(y = AvatarComponentDefaults.size / 2)
                                     } else {
                                         it
@@ -543,7 +554,7 @@ private fun StatusContent(
             )
         }
         Column {
-            data.message?.let { message ->
+            presentation.message?.let { message ->
                 TopMessageComponent(
                     data = message,
                     topMessageOnly = false,
@@ -557,14 +568,15 @@ private fun StatusContent(
                 )
             }
             CommonStatusComponent(
-                item = data,
-                isDetail = data.statusKey == detailStatusKey,
+                item = post,
+                isDetail = post.statusKey == detailStatusKey,
                 modifier =
                     Modifier
                         .padding(
                             horizontal = screenHorizontalPadding,
                             vertical = 8.dp,
                         ),
+                quotes = presentation.quotes,
             )
         }
     }

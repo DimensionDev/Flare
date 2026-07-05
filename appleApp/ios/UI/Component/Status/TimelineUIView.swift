@@ -201,10 +201,6 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
         case .post(let post):
             statusViewPreparedForReuse = false
-            if let message = post.message {
-                configureMessage(message, topMessageOnly: false)
-                desired.append(messageContainer)
-            }
             statusView.openURL = onOpenURL
             statusView.onLocalHeightInvalidated = { [weak self] in
                 self?.handleLocalHeightInvalidated()
@@ -215,6 +211,28 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
                 isDetail: detailStatusKey == post.statusKey,
                 showTranslate: showTranslate,
                 aiTldrEnabled: aiTldrEnabled,
+            )
+            desired.append(statusView)
+
+        case .timelinePostItem(let item):
+            statusViewPreparedForReuse = false
+            if let message = item.presentation.message {
+                configureMessage(message, topMessageOnly: false)
+                desired.append(messageContainer)
+            }
+            let bodyPost = item.presentation.repost ?? item.post
+            statusView.openURL = onOpenURL
+            statusView.onLocalHeightInvalidated = { [weak self] in
+                self?.handleLocalHeightInvalidated()
+            }
+            statusView.configure(
+                data: bodyPost,
+                appearance: appearance,
+                isDetail: detailStatusKey == bodyPost.statusKey,
+                showTranslate: showTranslate,
+                aiTldrEnabled: aiTldrEnabled,
+                inlineParents: Array(item.presentation.inlineParents),
+                quotes: Array(item.presentation.quotes),
             )
             desired.append(statusView)
 
@@ -281,7 +299,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         let activeUserList: Bool
         if let data {
             switch onEnum(of: data) {
-            case .post:
+            case .post, .timelinePostItem:
                 activeStatus = true
                 activeUser = false
                 activeUserList = false
@@ -333,7 +351,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         let activeUserList: Bool
         if let data {
             switch onEnum(of: data) {
-            case .post:
+            case .post, .timelinePostItem:
                 activeStatus = true
                 activeUser = false
                 activeUserList = false
@@ -412,6 +430,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
             feedView.prepareForFitting(width: width)
         case .post:
             statusView.prepareForFitting(width: width)
+        case .timelinePostItem:
+            statusView.prepareForFitting(width: width)
         case .userList:
             userListView.prepareForFitting(width: width)
         default:
@@ -428,7 +448,7 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
         switch onEnum(of: data) {
         case .feed:
             return feedView.estimatedHeight(for: width)
-        case .post(let post) where !post.quote.isEmpty:
+        case .timelinePostItem(let item) where !item.presentation.quotes.isEmpty:
             prepareForFitting(width: width)
             return sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height + 1
         case .userList:
@@ -441,8 +461,12 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
         guard let data, !isHidden, window != nil else { return [] }
-        guard case .post = onEnum(of: data) else { return [] }
-        return statusView.autoplayCandidates(prefix: prefix)
+        switch onEnum(of: data) {
+        case .post, .timelinePostItem:
+            return statusView.autoplayCandidates(prefix: prefix)
+        default:
+            return []
+        }
     }
 
 }

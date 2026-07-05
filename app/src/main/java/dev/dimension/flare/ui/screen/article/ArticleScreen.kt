@@ -665,7 +665,7 @@ private fun ArticleVideoBlock(
                 previewUri = media.thumbnailUrl,
                 contentDescription = media.description,
                 modifier = Modifier.fillMaxSize(),
-                muted = false,
+                muted = true,
                 showControls = true,
                 keepScreenOn = false,
                 aspectRatio = media.aspectRatio.coerceIn(0.2f, 4f),

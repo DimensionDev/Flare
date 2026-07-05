@@ -1,8 +1,7 @@
 import Foundation
-import FlareAppleCore
 
 enum FlareAppleUILocalization {
-    static let bundle = FlareAppleResource.bundle
+    static let bundle = Bundle.main
 
     static func string(
         _ key: String,

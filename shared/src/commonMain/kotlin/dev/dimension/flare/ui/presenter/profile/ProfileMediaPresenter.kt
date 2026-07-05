@@ -12,6 +12,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.CoroutineScope
@@ -47,25 +48,26 @@ private fun TimelinePresenter.createTransformedPager(
 ): Flow<PagingData<ProfileMedia>> =
     createPager(scope).map { data ->
         data.flatMap { status ->
-            if (status is UiTimelineV2.Post) {
+            val post = status.contentPostOrNull()
+            if (post != null) {
                 if (showAllImages) {
-                    status.images.mapIndexed { index, it ->
+                    post.images.mapIndexed { index, it ->
                         ProfileMedia(
                             it,
-                            status,
-                            status.statusKey,
+                            post,
+                            post.statusKey,
                             index,
                         )
                     }
                 } else {
-                    status.images
+                    post.images
                         .firstOrNull()
                         ?.let {
                             listOf(
                                 ProfileMedia(
                                     it,
-                                    status,
-                                    status.statusKey,
+                                    post,
+                                    post.statusKey,
                                     0,
                                 ),
                             )

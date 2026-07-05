@@ -1,15 +1,11 @@
 package dev.dimension.flare.ui.screen.settings
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,7 +17,6 @@ import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearancePatch
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.FlareDropdownMenu
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.invoke
@@ -42,57 +37,32 @@ internal fun <T> SingleChoiceSettingsItem(
     shapes: ListItemShapes,
     modifier: Modifier = Modifier,
 ) {
-    val isBigScreen = isBigScreen()
     var showMenu by remember { mutableStateOf(false) }
     SegmentedListItem(
         modifier = modifier,
         checked = showMenu,
         onCheckedChange = {
-            if (!isBigScreen) {
-                showMenu = it
-            }
+            showMenu = it
         },
         shapes = shapes,
         content = headline,
         supportingContent = supporting,
         trailingContent = {
-            if (isBigScreen) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-                ) {
-                    val entries = items.entries.toList()
-                    entries.forEachIndexed { index, (value, label) ->
-                        ToggleButton(
-                            checked = selected == value,
-                            onCheckedChange = { onSelected(value) },
-                            shapes =
-                                when (index) {
-                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                    entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                },
-                        ) {
-                            Text(text = label)
-                        }
-                    }
-                }
-            } else {
-                TextButton(onClick = { showMenu = true }) {
-                    Text(text = items[selected] ?: "")
-                }
-                FlareDropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                ) {
-                    items.forEach { (value, label) ->
-                        DropdownMenuItem(
-                            text = { Text(text = label) },
-                            onClick = {
-                                onSelected(value)
-                                showMenu = false
-                            },
-                        )
-                    }
+            TextButton(onClick = { showMenu = true }) {
+                Text(text = items[selected] ?: "")
+            }
+            FlareDropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+            ) {
+                items.forEach { (value, label) ->
+                    DropdownMenuItem(
+                        text = { Text(text = label) },
+                        onClick = {
+                            onSelected(value)
+                            showMenu = false
+                        },
+                    )
                 }
             }
         },

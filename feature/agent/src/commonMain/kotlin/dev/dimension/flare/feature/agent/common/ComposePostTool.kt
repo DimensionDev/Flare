@@ -472,13 +472,11 @@ internal class ComposePostTool(
         userPreview: UiProfile?,
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            message = null,
             platformType = platformType,
             images = persistentListOf(),
             sensitive = data.sensitive,
             contentWarning = data.spoilerText?.toUiPlainText(),
             user = userPreview,
-            quote = persistentListOf(),
             content = data.content.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
@@ -493,7 +491,6 @@ internal class ComposePostTool(
             sourceChannel = null,
             visibility = data.visibility,
             replyToHandle = null,
-            parents = persistentListOf(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),
         )

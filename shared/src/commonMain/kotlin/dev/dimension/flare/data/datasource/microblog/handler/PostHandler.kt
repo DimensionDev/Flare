@@ -65,25 +65,35 @@ public class PostHandler(
             },
             cacheSource = {
                 val dbAccountType = accountType as DbAccountType
-                combine(
-                    merge(
+                merge(
+                    combine(
                         database
                             .statusDao()
                             .getWithReferences(postKey, dbAccountType)
                             .filterNotNull(),
+                        translationDisplay.optionsFlow(translationDisplayFlow),
+                    ) { status, translationDisplayOptions ->
+                        TimelinePagingMapper.toUi(
+                            item = status,
+                            pagingKey = pagingKey,
+                            translationDisplayOptions = translationDisplayOptions,
+                        )
+                    },
+                    combine(
                         database
                             .pagingTimelineDao()
                             .get(pagingKey, accountType = dbAccountType)
                             .filterNotNull(),
-                    ),
-                    translationDisplay.optionsFlow(translationDisplayFlow),
-                ) { status, translationDisplayOptions ->
-                    TimelinePagingMapper.toUi(
-                        item = status,
-                        pagingKey = pagingKey,
-                        translationDisplayOptions = translationDisplayOptions,
-                    )
-                }.distinctUntilChanged()
+                        translationDisplay.optionsFlow(translationDisplayFlow),
+                    ) { status, translationDisplayOptions ->
+                        TimelinePagingMapper
+                            .toUi(
+                                item = status,
+                                pagingKey = pagingKey,
+                                translationDisplayOptions = translationDisplayOptions,
+                            ).asPostOnlyStatus()
+                    },
+                ).distinctUntilChanged()
             },
         )
     }
@@ -130,4 +140,10 @@ private fun PostTranslationDisplay.optionsFlow(userSettingsFlow: Flow<Translatio
                 ),
             )
         }
+    }
+
+private fun UiTimelineV2.asPostOnlyStatus(): UiTimelineV2 =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> post
+        else -> this
     }

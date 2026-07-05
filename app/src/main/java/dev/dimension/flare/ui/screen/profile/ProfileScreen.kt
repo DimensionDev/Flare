@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -64,7 +65,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
@@ -101,9 +101,11 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import dev.dimension.flare.ui.presenter.home.TimelineState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMedia
 import dev.dimension.flare.ui.presenter.profile.ProfileMediaPresenter
+import dev.dimension.flare.ui.presenter.profile.ProfileMediaState
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
@@ -493,21 +495,27 @@ internal fun ProfileScreen(
                                         }
                                         HorizontalPager(
                                             state = pagerState,
+                                            key = { index ->
+                                                tabs.getOrNull(index)?.id ?: "profile_tab_$index"
+                                            },
                                         ) { index ->
                                             val tab = tabs[index]
                                             when (tab) {
                                                 is ProfileTabItem.Media -> {
-                                                    val data = tab.presenter.body().mediaState
+                                                    val tabState = rememberProfileMediaTabState(tab)
+                                                    val data = tabState.mediaState
                                                     val latestData = rememberUpdatedState(data)
                                                     if (index == pagerState.currentPage) {
-                                                        LaunchedEffect(tab, index) {
+                                                        LaunchedEffect(tab.id, index) {
                                                             activeTabRefresh = {
                                                                 latestData.value.refreshSuspend()
                                                             }
                                                         }
                                                     }
+                                                    val gridState = rememberLazyStaggeredGridState()
                                                     ProfileMediaTab(
                                                         mediaState = data,
+                                                        state = gridState,
                                                         onItemClicked = { statusKey, index, preview ->
                                                             onMediaClick(statusKey, index, preview)
                                                         },
@@ -516,10 +524,11 @@ internal fun ProfileScreen(
                                                 }
 
                                                 is ProfileTabItem.Timeline -> {
-                                                    val data = tab.presenter.body().listState
+                                                    val tabState = rememberProfileTimelineTabState(tab)
+                                                    val data = tabState.listState
                                                     val latestData = rememberUpdatedState(data)
                                                     if (index == pagerState.currentPage) {
-                                                        LaunchedEffect(tab, index) {
+                                                        LaunchedEffect(tab.id, index) {
                                                             activeTabRefresh = {
                                                                 latestData.value.refreshSuspend()
                                                             }
@@ -660,6 +669,7 @@ private fun ProfileInsightAction(
 @Composable
 private fun ProfileMediaTab(
     mediaState: PagingState<ProfileMedia>,
+    state: LazyStaggeredGridState,
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -679,6 +689,7 @@ private fun ProfileMediaTab(
             }
         LazyVerticalStaggeredGrid(
             modifier = modifier,
+            state = state,
             columns = StaggeredGridCells.Adaptive(size),
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -738,6 +749,22 @@ private fun ProfileMediaTab(
 }
 
 @Composable
+private fun rememberProfileTimelineTabState(tab: ProfileTabItem.Timeline): TimelineState {
+    val state by producePresenter(key = "profile_timeline_${tab.id}") {
+        remember(tab.id) { tab.presenter }.invoke()
+    }
+    return state
+}
+
+@Composable
+private fun rememberProfileMediaTabState(tab: ProfileTabItem.Media): ProfileMediaState {
+    val state by producePresenter(key = "profile_media_${tab.id}") {
+        remember(tab.id) { tab.presenter }.invoke()
+    }
+    return state
+}
+
+@Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
     accountType: AccountType,
@@ -756,6 +783,7 @@ private fun profilePresenter(
                 when (it) {
                     is ProfileState.Tab.Timeline -> {
                         ProfileTabItem.Timeline(
+                            id = it.id,
                             name = it.name,
                             presenter = it.presenter,
                         )
@@ -763,6 +791,7 @@ private fun profilePresenter(
 
                     is ProfileState.Tab.Media -> {
                         ProfileTabItem.Media(
+                            id = it.id,
                             name = it.name,
                             presenter = it.presenter,
                         )
@@ -784,14 +813,17 @@ private fun profilePresenter(
 }
 
 private sealed interface ProfileTabItem {
+    val id: String
     val name: UiStrings
 
     data class Timeline(
+        override val id: String,
         override val name: UiStrings,
         val presenter: TimelinePresenter,
     ) : ProfileTabItem
 
     data class Media(
+        override val id: String,
         override val name: UiStrings,
         val presenter: ProfileMediaPresenter,
     ) : ProfileTabItem

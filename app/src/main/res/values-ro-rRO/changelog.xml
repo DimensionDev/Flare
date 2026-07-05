@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versiunea %1$s:</span>
             <ul>
-                <li>A fost adăugat Flare AI Agent cu chat, informații despre postări și informații despre profiluri.</li>
-                <li>A fost adăugat suport Pixiv și o nouă vizualizare a detaliilor galeriei.</li>
-                <li>Au fost adăugate acțiuni de postare personalizabile și opțiuni de afișare pentru avertismente de conținut.</li>
-                <li>Au fost îmbunătățite notificările, cronologiile RSS, redarea video și stabilitatea cronologiilor.</li>
+                <li>A fost adăugat suport pentru FANBOX.</li>
+                <li>Cronologia acceptă acum meniul la apăsare lungă pe imagini/videoclipuri: descărcare, descărcare toate, partajare și copiere link.</li>
+                <li>A fost adăugat suport pentru schimbarea locației de salvare a fișierelor media.</li>
+                <li>A fost adăugat un flux de reconectare direcționat după expirarea sesiunii.</li>
+                <li>Remedieri de erori și îmbunătățiri de performanță.</li>
             </ul>
         ]]></string>
 </resources>

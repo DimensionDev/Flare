@@ -36,7 +36,7 @@ struct MacStatusMediaResolver: View {
 
         switch onEnum(of: presenter.state.status) {
         case .success(let success):
-            guard let content = success.data as? UiTimelineV2.Post else {
+            guard let content = success.data.timelineContentPost else {
                 finish()
                 return
             }

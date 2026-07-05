@@ -169,36 +169,51 @@ class NostrServiceTest {
                 service.close()
             }
 
-        val root = timeline.first { it.statusKey.id == ROOT_EVENT_ID }
+        val root = rootPostOf(timeline.first { it.statusKey.id == ROOT_EVENT_ID })
         assertEquals(1, root.images.size)
         val rootImage = assertIs<UiMedia.Image>(root.images.first())
         assertEquals("https://image.nostr.build/0e2f4411fcc7be6fdc0ef68f2ee58d24f8cdcea0e1475299555c5321e4f4fd02.jpg", rootImage.url)
         assertEquals(1440f, rootImage.width)
         assertEquals(1080f, rootImage.height)
 
-        val reply = timeline.first { it.statusKey.id == REPLY_EVENT_ID }
-        assertEquals(listOf(ROOT_EVENT_ID), reply.parents.map { it.statusKey.id })
+        val replyItem = timelinePostItemOf(timeline.first { it.statusKey.id == REPLY_EVENT_ID })
+        val reply = replyItem.post
+        assertEquals(listOf(ROOT_EVENT_ID), replyItem.presentation.inlineParents.map { it.statusKey.id })
         assertEquals(listOf(ROOT_EVENT_ID), reply.references.filter { it.type == ReferenceType.Reply }.map { it.statusKey.id })
         assertEquals(
             1,
-            reply.parents
+            replyItem.presentation.inlineParents
                 .first()
                 .images.size,
         )
 
-        val quote = timeline.first { it.statusKey.id == QUOTE_EVENT_ID }
-        assertEquals(listOf(ROOT_EVENT_ID), quote.quote.map { it.statusKey.id })
-        assertEquals(listOf(ROOT_EVENT_ID), quote.references.filter { it.type == ReferenceType.Quote }.map { it.statusKey.id })
+        val quoteItem = timelinePostItemOf(timeline.first { it.statusKey.id == QUOTE_EVENT_ID })
+        assertEquals(listOf(ROOT_EVENT_ID), quoteItem.presentation.quotes.map { it.statusKey.id })
+        assertEquals(
+            listOf(ROOT_EVENT_ID),
+            quoteItem.post.references
+                .filter { it.type == ReferenceType.Quote }
+                .map { it.statusKey.id },
+        )
 
-        val repost = timeline.first { it.statusKey.id == REPOST_EVENT_ID }
-        val internalRepost = assertNotNull(repost.internalRepost)
-        assertEquals(ROOT_EVENT_ID, internalRepost.statusKey.id)
-        val message = assertNotNull(repost.message)
+        val repost = timelinePostItemOf(timeline.first { it.statusKey.id == REPOST_EVENT_ID })
+        val reposted = assertNotNull(repost.presentation.repost)
+        assertEquals(ROOT_EVENT_ID, reposted.statusKey.id)
+        val message = assertNotNull(repost.presentation.message)
         assertEquals(
             UiTimelineV2.Message.Type.Localized.MessageId.Repost,
             assertIs<UiTimelineV2.Message.Type.Localized>(message.type).data,
         )
     }
+
+    private fun rootPostOf(item: UiTimelineV2): UiTimelineV2.Post =
+        when (item) {
+            is UiTimelineV2.TimelinePostItem -> item.post
+            is UiTimelineV2.Post -> item
+            else -> error("Expected post timeline item, got ${item::class.simpleName}")
+        }
+
+    private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
 
     @Test
     fun quoteTagArrayUsesEventWhenAvailable() {

@@ -26,6 +26,7 @@ import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.SendChannel
@@ -34,7 +35,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.annotation.Single
 
 @Single
@@ -191,8 +192,7 @@ internal class StatusInsightAgentUseCase(
                     cacheable
                         .data
                         .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                        .map { it.data }
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.data.contentPostOrNull() }
                         .first()
                 }
 
@@ -277,15 +277,13 @@ internal class StatusInsightAgentUseCase(
             appendLine("cardTitle: ${card?.title.orEmpty()}")
             appendLine("cardDescription: ${card?.description.orEmpty()}")
             appendLine("cardUrl: ${card?.url.orEmpty()}")
-            appendLine("quotes:")
-            quote.take(MAX_RELATED_POSTS).forEachIndexed { index, quotedPost ->
-                appendLine("- #$index ${quotedPost.user?.handle?.raw.orEmpty()}: ${quotedPost.content.raw.take(MAX_RELATED_TEXT_LENGTH)}")
-            }
-            appendLine("parents:")
-            parents.take(MAX_RELATED_POSTS).forEachIndexed { index, parentPost ->
-                appendLine("- #$index ${parentPost.user?.handle?.raw.orEmpty()}: ${parentPost.content.raw.take(MAX_RELATED_TEXT_LENGTH)}")
-            }
             appendLine("referencesCount: ${references.size}")
+            if (references.isNotEmpty()) {
+                appendLine("references:")
+                references.take(MAX_RELATED_POSTS).forEachIndexed { index, reference ->
+                    appendLine("- #$index ${reference.type.name}: ${reference.statusKey}")
+                }
+            }
             appendLine("actions:")
             actions.flattenItems().forEach { item ->
                 appendLine("- ${item.promptLabel()}: ${item.count?.value ?: 0}")

@@ -64,9 +64,9 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Timeline layout, navigation, and post actions</string>
     <string name="settings_appearance_display_group_title">Display</string>
-    <string name="settings_appearance_display_group_subtitle">Timestamps, source badges, links, and browser behavior</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamps, source badges, and link previews</string>
     <string name="settings_appearance_media_group_title">Media</string>
-    <string name="settings_appearance_media_group_subtitle">Media visibility, playback, and sensitive content</string>
+    <string name="settings_appearance_media_group_subtitle">Media visibility, playback, sensitive content, and save location</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_storage_subtitle">Manage cached files, logs, and backups</string>
     <string name="settings_about_title">About</string>
@@ -557,8 +557,8 @@
     <string name="save_error">Export failed</string>
     <string name="import_completed">Import complete</string>
     <string name="import_error">Import failed</string>
-    <string name="import_confirmation_title">Confirm import</string>
-    <string name="import_confirmation_message">This will import data from the selected file. Existing records with matching IDs will be replaced. Continue?</string>
+    <string name="import_confirmation_title">Import backup</string>
+    <string name="import_confirmation_message">This will import data from the selected backup file. Existing records with matching IDs will be replaced. Continue?</string>
 
     <string name="tab_settings_add_group">Add group</string>
     <string name="tab_settings_add_tab">Add tab</string>
@@ -651,8 +651,8 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Help us translate Flare</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
-    <string name="settings_ai_config_enable_agent">Enable AI agent</string>
-    <string name="settings_ai_config_agent_description">Show AI agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
+    <string name="settings_ai_config_enable_agent">Enable AI Agent</string>
+    <string name="settings_ai_config_agent_description">Show AI Agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
     <string name="settings_appearance_expand_content_warning">Show content behind content warnings</string>
     <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="illustrations_title">Illustrations</string>
@@ -716,4 +716,26 @@
     <string name="agent_ui_select_followers_user">Select a user to view their followers.</string>
     <string name="agent_ui_select_profile_tabs_user">Select a user to view profile tabs.</string>
     <string name="agent_ui_status_insight_user_placeholder">You can also enter a user link, handle, or userKey…</string>
+    <string name="profile_blocked_gate_title">Blocked profile</string>
+    <string name="profile_blocked_gate_description">You blocked this user. Their tabs and timeline are hidden until you choose to show them.</string>
+    <string name="profile_blocked_gate_show">Show</string>
+    <string name="settings_behavior_title">Behavior</string>
+    <string name="settings_behavior_description">Browser and link handling preferences</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil permissions</string>
+    <string name="gallery_detail_tab_info">Info</string>
+    <string name="gallery_detail_tab_comments">Comments</string>
+    <string name="gallery_detail_tab_recommend">Recommend</string>
+    <string name="gallery_detail_comments_title">Comments</string>
+    <string name="gallery_detail_recommendations_title">Recommendations</string>
+    <string name="gallery_detail_view_more">View more</string>
+    <string name="gallery_detail_share_content_description">Share</string>
+    <string name="gallery_detail_expand_content_description">Expand</string>
+    <string name="deeplink_account_selection_save_default">Always open this way</string>
+    <string name="settings_link_open_defaults_title">Link opening</string>
+    <string name="settings_link_open_defaults_description">Choose defaults for supported links by host</string>
+    <string name="settings_link_open_default_title">Default for %1$s links</string>
+    <string name="settings_link_open_default_description">Choose how supported links open when Flare can handle them</string>
+    <string name="settings_link_open_default_ask_every_time">Ask every time</string>
+    <string name="fanbox_supported_title">Supporting</string>
+    <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

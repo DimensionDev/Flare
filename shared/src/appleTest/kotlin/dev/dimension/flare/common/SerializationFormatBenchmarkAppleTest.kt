@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiHandle
@@ -224,16 +225,28 @@ class SerializationFormatBenchmarkAppleTest {
             )
 
         val root =
-            createPost(
-                accountKey = accountKey,
-                user = rootUser,
-                statusKey = MicroBlogKey(id = "root-status", host = "bench.example"),
-                text =
-                    "Root content with multiple attachments, actions, reactions, and a poll to approximate a stored timeline entry.",
-                quote = listOf(quote),
-                parents = listOf(parent),
-                internalRepost = repost,
-                mediaCount = 4,
+            UiTimelineV2.TimelinePostItem(
+                post =
+                    createPost(
+                        accountKey = accountKey,
+                        user = rootUser,
+                        statusKey = MicroBlogKey(id = "root-status", host = "bench.example"),
+                        text =
+                            "Root content with multiple attachments, actions, reactions, and a poll to approximate a stored timeline entry.",
+                        references =
+                            persistentListOf(
+                                UiTimelineV2.Post.Reference(parent.statusKey, ReferenceType.Reply),
+                                UiTimelineV2.Post.Reference(quote.statusKey, ReferenceType.Quote),
+                                UiTimelineV2.Post.Reference(repost.statusKey, ReferenceType.Retweet),
+                            ),
+                        mediaCount = 4,
+                    ),
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = persistentListOf(parent),
+                        quotes = persistentListOf(quote),
+                        repost = repost,
+                    ),
             )
 
         val stored =
@@ -244,9 +257,7 @@ class SerializationFormatBenchmarkAppleTest {
                 .data
                 .content
         val storedPost = assertIs<UiTimelineV2.Post>(stored)
-        assertEquals(0, storedPost.parents.size)
-        assertEquals(0, storedPost.quote.size)
-        assertEquals(null, storedPost.internalRepost)
+        assertEquals(3, storedPost.references.size)
         return stored
     }
 
@@ -294,13 +305,10 @@ class SerializationFormatBenchmarkAppleTest {
         user: UiProfile,
         statusKey: MicroBlogKey,
         text: String,
-        quote: List<UiTimelineV2.Post> = emptyList(),
-        parents: List<UiTimelineV2.Post> = emptyList(),
-        internalRepost: UiTimelineV2.Post? = null,
+        references: kotlinx.collections.immutable.ImmutableList<UiTimelineV2.Post.Reference> = persistentListOf(),
         mediaCount: Int,
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            message = null,
             platformType = PlatformType.Mastodon,
             images =
                 List(mediaCount) { index ->
@@ -316,7 +324,6 @@ class SerializationFormatBenchmarkAppleTest {
             sensitive = false,
             contentWarning = "cw-$text".toUiPlainText(),
             user = user,
-            quote = quote.toPersistentList(),
             content = text.toUiPlainText(),
             actions = createActions(statusKey),
             poll = createPoll(statusKey, accountKey),
@@ -359,9 +366,7 @@ class SerializationFormatBenchmarkAppleTest {
             sourceChannel = UiTimelineV2.Post.SourceChannel(id = "channel-${statusKey.id}", name = "Benchmark"),
             visibility = UiTimelineV2.Post.Visibility.Public,
             replyToHandle = "@reply@example.com",
-            references = persistentListOf(),
-            parents = parents.toPersistentList(),
-            internalRepost = internalRepost,
+            references = references,
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),
         )

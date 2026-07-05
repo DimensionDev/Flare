@@ -36,7 +36,9 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
@@ -226,9 +228,8 @@ public class ComposePresenter(
             val statusPlatform =
                 status
                     .takeSuccess()
-                    ?.let {
-                        it as? UiTimelineV2.Post
-                    }?.platformType
+                    ?.contentPostOrNull()
+                    ?.platformType
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
@@ -263,9 +264,8 @@ public class ComposePresenter(
             val statusPlatform =
                 status
                     .takeSuccess()
-                    ?.let {
-                        it as? UiTimelineV2.Post
-                    }?.platformType
+                    ?.contentPostOrNull()
+                    ?.platformType
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
@@ -356,8 +356,9 @@ public class ComposePresenter(
         statusFlow
             .map { statusState ->
                 statusState.map { post ->
-                    if (post is UiTimelineV2.Post && post.platformType == PlatformType.VVo) {
-                        post.quote.firstOrNull() ?: post
+                    val timelinePost = post.asTimelinePostItem()
+                    if (timelinePost != null && timelinePost.displayPost.platformType == PlatformType.VVo) {
+                        timelinePost.presentation.quotes.firstOrNull() ?: timelinePost.displayPost
                     } else {
                         post
                     }
@@ -373,9 +374,11 @@ public class ComposePresenter(
                         it.firstOrNull()?.takeSuccess()
                     }.map { user ->
                         statusState.mapNotNull { post ->
-                            if (post is UiTimelineV2.Post) {
+                            val timelinePost = post.asTimelinePostItem()
+                            if (timelinePost != null) {
                                 InitialTextResolver.resolve(
-                                    post = post,
+                                    post = timelinePost.displayPost,
+                                    quotes = timelinePost.presentation.quotes,
                                     composeStatus = status,
                                     currentUserHandle = user.handle,
                                     selectedAccountKey = accountType.accountKey,

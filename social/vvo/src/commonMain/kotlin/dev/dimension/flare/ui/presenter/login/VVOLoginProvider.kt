@@ -70,7 +70,7 @@ private class VVOWebCookieLoginHandler(
         if (actionId != LOGIN_ACTION) return
         _effects.emit(
             LoginEffect.OpenWebCookieLogin(
-                url = "https://$vvoHost/message",
+                url = "https://$vvoHost/login?backURL=https://$vvoHost/",
             ),
         )
     }

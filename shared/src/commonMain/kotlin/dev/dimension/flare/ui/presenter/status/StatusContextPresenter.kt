@@ -27,10 +27,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelineState
 import dev.dimension.flare.ui.render.UiDateTime
-import dev.dimension.flare.ui.render.compareTo
 import dev.dimension.flare.web.shared.WebPresenter
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -110,13 +107,11 @@ public class StatusContextPresenter(
                     }
             }
 
-            override suspend fun transform(data: UiTimelineV2): UiTimelineV2 {
-                val currentCreatedAt = currentStatusFlow.firstOrNull()?.takeSuccess()?.createdAt
-                return data.filterDetailParents(
+            override suspend fun transform(data: UiTimelineV2): UiTimelineV2 =
+                data.filterDetailParents(
                     statusKey = statusKey,
-                    currentCreatedAt = currentCreatedAt,
+                    currentCreatedAt = null,
                 )
-            }
         }
     }
 
@@ -141,30 +136,4 @@ public class StatusContextPresenter(
 internal fun UiTimelineV2.filterDetailParents(
     statusKey: MicroBlogKey,
     currentCreatedAt: UiDateTime?,
-): UiTimelineV2 {
-    if (this !is UiTimelineV2.Post) {
-        return this
-    }
-    if (
-        this.statusKey == statusKey ||
-        (
-            currentCreatedAt != null &&
-                createdAt <= currentCreatedAt
-        )
-    ) {
-        return copy(
-            parents = persistentListOf(),
-        )
-    }
-    return copy(
-        parents =
-            parents
-                .filter {
-                    (
-                        currentCreatedAt == null ||
-                            it.createdAt > currentCreatedAt
-                    ) &&
-                        it.statusKey != statusKey
-                }.toPersistentList(),
-    )
-}
+): UiTimelineV2 = this

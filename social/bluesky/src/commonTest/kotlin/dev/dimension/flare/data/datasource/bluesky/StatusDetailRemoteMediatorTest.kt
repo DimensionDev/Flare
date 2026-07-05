@@ -1,7 +1,11 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import app.bsky.actor.ProfileViewBasic
+import app.bsky.embed.RecordView
+import app.bsky.embed.RecordViewRecord
+import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.feed.PostView
+import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.unspecced.GetPostThreadV2ThreadItem
 import app.bsky.unspecced.GetPostThreadV2ThreadItemValueUnion
 import app.bsky.unspecced.ThreadItemPost
@@ -25,6 +29,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class StatusDetailRemoteMediatorTest {
@@ -58,13 +64,13 @@ class StatusDetailRemoteMediatorTest {
                 createThreadItem(firstReply, depth = 1),
                 createThreadItem(secondReply, depth = 2),
             ).renderThread(accountKey)
-                .filterIsInstance<UiTimelineV2.Post>()
+                .timelinePostItems()
 
         val visibleKeys = rendered.map { it.statusKey }.toSet()
 
         rendered.forEach { post ->
             assertFalse(
-                post.parents.any { it.statusKey in visibleKeys },
+                post.presentation.inlineParents.any { it.statusKey in visibleKeys },
                 "Visible thread posts should not be repeated in ${post.statusKey.id} parents",
             )
         }
@@ -82,7 +88,7 @@ class StatusDetailRemoteMediatorTest {
                 createThreadItem(anchor, depth = 0),
                 createThreadItem(reply, depth = 1),
             ).renderThread(accountKey)
-                .filterIsInstance<UiTimelineV2.Post>()
+                .timelinePostItems()
 
         assertEquals(
             listOf(parent.uri.atUri, anchor.uri.atUri, reply.uri.atUri),
@@ -91,7 +97,7 @@ class StatusDetailRemoteMediatorTest {
         val visibleKeys = rendered.map { it.statusKey }.toSet()
         rendered.forEach { post ->
             assertFalse(
-                post.parents.any { it.statusKey in visibleKeys },
+                post.presentation.inlineParents.any { it.statusKey in visibleKeys },
                 "Visible thread posts should not be repeated in ${post.statusKey.id} parents",
             )
         }
@@ -109,17 +115,60 @@ class StatusDetailRemoteMediatorTest {
                 createThreadItem(firstReply, depth = 1),
                 createThreadItem(secondReply, depth = 2),
             ).renderThread(accountKey)
-                .filterIsInstance<UiTimelineV2.Post>()
+                .timelinePostItems()
 
         assertEquals(
-            listOf(anchor.uri.atUri, secondReply.uri.atUri),
+            listOf(anchor.uri.atUri, firstReply.uri.atUri, secondReply.uri.atUri),
             rendered.map { it.statusKey.id },
         )
+        assertTrue(rendered.all { it.presentation.inlineParents.isEmpty() })
+    }
+
+    @Test
+    fun renderThread_preservesRootQuotePresentationFromThreadV2() {
+        val quotedRecord =
+            RecordViewRecord(
+                uri = AtUri("at://did:plc:quoted/app.bsky.feed.post/quoted"),
+                cid = Cid("cid-quoted"),
+                author = createProfile("quoted", "quoted.bsky.social"),
+                value = jsonRecord("quoted post"),
+                indexedAt = Instant.parse("2024-01-01T00:00:00Z"),
+            )
+        val root =
+            createPostView(
+                id = "root",
+                text = "root with quote",
+                embed =
+                    PostViewEmbedUnion.RecordView(
+                        RecordView(
+                            record = RecordViewRecordUnion.ViewRecord(quotedRecord),
+                        ),
+                    ),
+            )
+
+        val rendered =
+            listOf(createThreadItem(root, depth = 0))
+                .renderThread(accountKey)
+                .single()
+        val post = assertIs<UiTimelineV2.TimelinePostItem>(rendered)
+
+        assertEquals(1, post.presentation.quotes.size)
         assertEquals(
-            listOf(firstReply.uri.atUri),
-            rendered.last().parents.map { it.statusKey.id },
+            "quoted post",
+            post.presentation.quotes
+                .first()
+                .content.innerText,
         )
     }
+
+    private fun List<UiTimelineV2>.timelinePostItems(): List<UiTimelineV2.TimelinePostItem> =
+        mapNotNull {
+            when (it) {
+                is UiTimelineV2.TimelinePostItem -> it
+                is UiTimelineV2.Post -> UiTimelineV2.TimelinePostItem(post = it)
+                else -> null
+            }
+        }
 
     private fun createThreadItem(
         post: PostView,
@@ -144,6 +193,7 @@ class StatusDetailRemoteMediatorTest {
     private fun createPostView(
         id: String,
         text: String,
+        embed: PostViewEmbedUnion? = null,
     ): PostView =
         PostView(
             uri = AtUri("at://did:plc:$id/app.bsky.feed.post/$id"),
@@ -160,6 +210,24 @@ class StatusDetailRemoteMediatorTest {
                         put("text", JsonPrimitive(text))
                     },
                 ),
+            embed = embed,
             indexedAt = Instant.parse("2024-01-01T00:00:00Z"),
+        )
+
+    private fun createProfile(
+        did: String,
+        handle: String,
+    ): ProfileViewBasic =
+        ProfileViewBasic(
+            did = Did("did:plc:$did"),
+            handle = Handle(handle),
+            displayName = did,
+        )
+
+    private fun jsonRecord(text: String) =
+        bskyJson.encodeAsJsonContent(
+            buildJsonObject {
+                put("text", JsonPrimitive(text))
+            },
         )
 }

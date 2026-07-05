@@ -12,10 +12,11 @@ configs:
   Debug: debug
   Release: release
 
+configFiles:
+  Debug: Version.xcconfig
+  Release: Version.xcconfig
+
 settingGroups:
-  appVersion:
-    CURRENT_PROJECT_VERSION: 1600
-    MARKETING_VERSION: 1.6.0
   appleApp:
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -81,7 +82,7 @@ packages:
   # Temporary fork: upstream Textual currently requires iOS 18 / macOS 15, while Flare still
   # supports iOS 17 / macOS 14. Switch back to gonzalezreal/textual when that is compatible.
   Textual:
-    url: https://github.com/llsc12/textual
+    url: https://github.com/Tlaster/textual
     branch: main
   swiftui-introspect:
     url: https://github.com/siteline/swiftui-introspect
@@ -189,7 +190,6 @@ targets:
           fi
     settings:
       groups:
-        - appVersion
         - appleApp
       base:
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon_black AppIcon_blue AppIcon_cyan AppIcon_light_blue AppIcon_orange AppIcon_red AppIcon_teal AppIcon_white AppIcon_yellow"
@@ -239,7 +239,6 @@ targets:
           fi
     settings:
       groups:
-        - appVersion
         - appleApp
       base:
         CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
@@ -262,9 +261,9 @@ targets:
     supportedDestinations: [iOS, macOS]
     sources:
       - path: Shared/FlareAppleResource/Resources
+        excludes:
+          - Localizable.xcstrings
     settings:
-      groups:
-        - appVersion
       base:
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Shared/FlareAppleResource/Info.plist

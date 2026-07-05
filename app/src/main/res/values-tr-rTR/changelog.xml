@@ -3,10 +3,13 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Sohbet, gönderi içgörüsü ve profil içgörüsü sunan Flare AI Agent eklendi.</li>
-                <li>Pixiv desteği ve yeni galeri ayrıntı görünümü eklendi.</li>
-                <li>Özelleştirilebilir gönderi eylemleri ve içerik uyarısı görüntüleme seçenekleri eklendi.</li>
-                <li>Bildirimler, RSS zaman akışları, video oynatma ve zaman akışı kararlılığı iyileştirildi.</li>
+                <li>FANBOX desteği eklendi.</li>
+                <li>Zaman akışı artık görsel/video uzun basma menülerini destekliyor: indir, tümünü indir, paylaş ve bağlantıyı kopyala.</li>
+                <li>Medya kaydetme konumunu değiştirme desteği eklendi.</li>
+                <li>Oturum süresi dolduktan sonra hedefli yeniden giriş akışı eklendi.</li>
+                <li>Hata düzeltmeleri ve performans iyileştirmeleri.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Tekrar hoş geldiniz!</string>
+    <string name="changelog_message">Son girişinizden bu yana bazı değişiklikler yaptık. Ayrıntılar:</string>
 </resources>

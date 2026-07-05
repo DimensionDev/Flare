@@ -419,4 +419,13 @@
     <string name="illustrations_title">الرسوم التوضيحية</string>
     <string name="manga_title">مانغا</string>
     <string name="app_name" translatable="false">Flare</string>
+    <string name="media_menu_download">تنزيل</string>
+    <string name="media_menu_download_all">تنزيل الكل</string>
+    <string name="media_menu_share_image">مشاركة الصورة</string>
+    <string name="media_menu_copy_link">نسخ الرابط</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">إصلاح أذونات Tranquil</string>
+    <string name="pixiv_private_following_title">المتابَعون الخاصون</string>
+    <string name="pixiv_private_bookmarks_title">الإشارات المرجعية الخاصة</string>
+    <string name="fanbox_supported_title">قيد الدعم</string>
+    <string name="fanbox_recommended_creators_title">منشئون موصى بهم</string>
 </resources>

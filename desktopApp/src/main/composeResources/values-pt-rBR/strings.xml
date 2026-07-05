@@ -191,7 +191,7 @@
     <string name="settings_appearance_layout_group_title">Disposição</string>
     <string name="settings_appearance_layout_group_subtitle">Layout da linha do tempo, navegação e ações de post</string>
     <string name="settings_appearance_display_group_title">Exibição</string>
-    <string name="settings_appearance_display_group_subtitle">Data/hora, selos de origem, links e comportamento do navegador</string>
+    <string name="settings_appearance_display_group_subtitle">Carimbos de data/hora, selos de origem e prévias de links</string>
     <string name="settings_appearance_media_group_title">Mídia</string>
     <string name="settings_appearance_media_group_subtitle">Visibilidade de mídia, reprodução e conteúdo sensível</string>
     <string name="settings_storage_title">Armazenamento</string>
@@ -247,8 +247,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Não definido</string>
     <string name="settings_ai_config_entable_translation">Ativar tradução por IA</string>
     <string name="settings_ai_config_translation_description">Usar IA em vez do Google Tradutor. As traduções podem levar mais tempo.</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">Ativar AI Agent</string>
+    <string name="settings_ai_config_agent_description">Depois de ativada, a funcionalidade AI Agent aparecerá nos locais relevantes da app quando estiver configurado um modelo compatível com OpenAI.</string>
     <string name="settings_ai_config_enable_pre_translation">Ativar tradução automática</string>
     <string name="settings_ai_config_pre_translation_description">Traduzir conteúdo novo de linhas do tempo e perfis em segundo plano e salvar os resultados. Isso pode consumir muitos tokens.</string>
     <string name="settings_ai_config_enable_tldr">Ativar resumos por IA</string>
@@ -524,8 +524,8 @@
     <string name="save_error">Falha na exportação</string>
     <string name="import_completed">Importação concluída</string>
     <string name="import_error">Falha na importação</string>
-    <string name="import_confirmation_title">Confirmar importação</string>
-    <string name="import_confirmation_message">Isso importará dados do arquivo selecionado. Registros existentes com IDs correspondentes serão substituídos. Continuar?</string>
+    <string name="import_confirmation_title">Importar backup</string>
+    <string name="import_confirmation_message">Isso importará dados do arquivo de backup selecionado. Registros existentes com IDs correspondentes serão substituídos. Continuar?</string>
     <string name="channel_title">Canal</string>
     <string name="misskey_channel_tab_following">Seguindo</string>
     <string name="misskey_channel_tab_favorites">Favoritos</string>
@@ -588,4 +588,24 @@
     <string name="agent_ui_select_followers_user">Selecionar: usuário (ver seguidores)</string>
     <string name="agent_ui_select_profile_tabs_user">Selecionar: usuário (ver abas do perfil)</string>
     <string name="agent_ui_status_insight_user_placeholder">Inserir: usuário link, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">Perfil bloqueado</string>
+    <string name="profile_blocked_gate_description">Você bloqueou este usuário. As abas e a linha do tempo ficarão ocultas até você escolher mostrá-las.</string>
+    <string name="profile_blocked_gate_show">Mostrar</string>
+    <string name="pixiv_private_following_title">Seguindo privado</string>
+    <string name="pixiv_private_bookmarks_title">Favoritos privados</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corrigir permissões do Tranquil</string>
+    <string name="settings_behavior_title">Comportamento</string>
+    <string name="settings_behavior_description">Preferências de navegador e abertura de links</string>
+    <string name="article_content_gate_subscription_title">Apoio necessário</string>
+    <string name="article_content_gate_subscription_description">Este artigo está disponível apenas para apoiadores. Abra no navegador para apoiar o criador e ler o conteúdo completo.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Este artigo está disponível apenas para apoiadores a partir de ¥%1$d. Abra no navegador para apoiar o criador e ler o conteúdo completo.</string>
+    <string name="deeplink_account_selection_save_default">Sempre abrir assim</string>
+    <string name="settings_link_open_defaults_title">Abertura de links</string>
+    <string name="settings_link_open_defaults_description">Escolha padrões para links compatíveis por host</string>
+    <string name="settings_link_open_default_title">Padrão para links %1$s</string>
+    <string name="settings_link_open_default_description">Escolha como links compatíveis serão abertos quando o Flare puder lidar com eles</string>
+    <string name="settings_link_open_default_ask_every_time">Perguntar sempre</string>
+    <string name="media_download_started">Download iniciado</string>
+    <string name="fanbox_supported_title">Apoiando</string>
+    <string name="fanbox_recommended_creators_title">Criadores recomendados</string>
 </resources>

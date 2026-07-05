@@ -21,7 +21,7 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -46,8 +46,10 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.CoroutineScope
@@ -161,7 +163,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 emitAll(PagingData.emptyFlow(isError = true))
             }
 
-    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbStatusWithReference>> =
+    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbPagingTimelineWithStatus>> =
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             val pageCache = TimelineDbPageCache()
@@ -261,7 +263,7 @@ internal fun UiTimelineV2.matchesTimelineFilter(filterConfig: TimelineFilterConf
     if (filterConfig.excludedKinds.isEmpty() && filterConfig.excludedContents.isEmpty()) {
         return true
     }
-    val post = this as? UiTimelineV2.Post ?: return true
+    val post = asTimelinePostItem() ?: return true
     val traits = post.traits()
     return filterConfig.excludedKinds.none(traits.kinds::contains) &&
         filterConfig.excludedContents.none(traits.contents::contains)
@@ -272,41 +274,47 @@ internal data class TimelinePostTraits(
     val contents: Set<TimelinePostContent>,
 )
 
-internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
+internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
+    val visiblePost = displayPost
     val kinds =
         buildSet {
-            val currentUserKey = user?.key
+            val currentUserKey = visiblePost.user?.key
             val hasParentFromOtherUser =
                 currentUserKey != null &&
-                    parents.any { parent ->
+                    presentation.inlineParents.any { parent ->
                         parent.user?.key?.let { it != currentUserKey } == true
                     }
             if (hasParentFromOtherUser) {
                 add(TimelinePostKind.Reply)
             }
-            if (internalRepost != null) {
+            if (presentation.repost != null) {
                 add(TimelinePostKind.Repost)
             }
-            if (quote.isNotEmpty()) {
+            if (presentation.quotes.isNotEmpty()) {
                 add(TimelinePostKind.Quote)
             }
-            if (isEmpty()) {
+            if (
+                visiblePost.references.none { it.type == ReferenceType.Reply } &&
+                presentation.inlineParents.isEmpty() &&
+                presentation.repost == null &&
+                presentation.quotes.isEmpty()
+            ) {
                 add(TimelinePostKind.Original)
             }
         }
     val contents =
         buildSet {
-            val hasVisualMedia = images.any { it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Video }
-            if (content.raw.isNotBlank() && !hasVisualMedia) {
+            val hasVisualMedia = visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Video }
+            if (visiblePost.content.raw.isNotBlank() && !hasVisualMedia) {
                 add(TimelinePostContent.Text)
             }
-            if (images.any { it is UiMedia.Image || it is UiMedia.Gif }) {
+            if (visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif }) {
                 add(TimelinePostContent.Image)
             }
-            if (images.any { it is UiMedia.Video }) {
+            if (visiblePost.images.any { it is UiMedia.Video }) {
                 add(TimelinePostContent.Video)
             }
-            if (isEmpty()) {
+            if (visiblePost.isTimelineFilterEmpty()) {
                 add(TimelinePostContent.Other)
             }
         }
@@ -315,6 +323,13 @@ internal fun UiTimelineV2.Post.traits(): TimelinePostTraits {
         contents = contents,
     )
 }
+
+private fun UiTimelineV2.Post.isTimelineFilterEmpty(): Boolean =
+    content.raw.isBlank() &&
+        contentWarning?.raw.isNullOrBlank() &&
+        images.isEmpty() &&
+        poll == null &&
+        card == null
 
 internal fun observeTimelineFilterConfig(
     settingsRepository: SettingsRepository,

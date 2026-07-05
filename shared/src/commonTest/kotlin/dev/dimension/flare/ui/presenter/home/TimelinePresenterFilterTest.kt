@@ -8,6 +8,7 @@ import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -44,10 +45,9 @@ class TimelinePresenterFilterTest {
         val currentUser = createSampleUser()
         val parentUser = currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost"))
         val base = createSampleStatus(currentUser)
-        val repost = base.copy(statusKey = base.statusKey.copy(id = "repost"))
         val quote = base.copy(statusKey = base.statusKey.copy(id = "quote"))
         val parent = createSampleStatus(parentUser)
-        val filtered =
+        val filteredPost =
             base.copy(
                 content = "".toUiPlainText(),
                 images =
@@ -68,9 +68,17 @@ class TimelinePresenterFilterTest {
                             width = 100f,
                         ),
                     ),
-                parents = persistentListOf(parent),
-                quote = persistentListOf(quote),
-                internalRepost = repost,
+            )
+        val repost = filteredPost.copy(statusKey = base.statusKey.copy(id = "repost"))
+        val filtered =
+            UiTimelineV2.TimelinePostItem(
+                post = filteredPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = persistentListOf(parent),
+                        quotes = persistentListOf(quote),
+                        repost = repost,
+                    ),
             )
 
         val traits = filtered.traits()
@@ -90,7 +98,7 @@ class TimelinePresenterFilterTest {
         val currentUser = createSampleUser()
         val parentUser = currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost"))
         val originalTextOnly = createSampleStatus(currentUser)
-        val replyWithImage =
+        val replyPost =
             originalTextOnly.copy(
                 statusKey = originalTextOnly.statusKey.copy(id = "reply"),
                 images =
@@ -104,7 +112,14 @@ class TimelinePresenterFilterTest {
                             sensitive = false,
                         ),
                     ),
-                parents = persistentListOf(createSampleStatus(parentUser)),
+            )
+        val replyWithImage =
+            UiTimelineV2.TimelinePostItem(
+                post = replyPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = persistentListOf(createSampleStatus(parentUser)),
+                    ),
             )
         val filter =
             TimelineFilterConfig(
@@ -120,19 +135,29 @@ class TimelinePresenterFilterTest {
     fun postTraitsOnlyMarksReplyWhenParentUserDiffersFromCurrentUser() {
         val currentUser = createSampleUser()
         val original = createSampleStatus(currentUser)
-        val selfThread =
+        val selfThreadPost =
             original.copy(
                 statusKey = original.statusKey.copy(id = "self-thread"),
-                parents = persistentListOf(createSampleStatus(currentUser)),
+            )
+        val selfThread =
+            UiTimelineV2.TimelinePostItem(
+                post = selfThreadPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents = persistentListOf(createSampleStatus(currentUser)),
+                    ),
             )
         val replyToOtherUser =
-            original.copy(
-                statusKey = original.statusKey.copy(id = "reply-to-other-user"),
-                parents =
-                    persistentListOf(
-                        createSampleStatus(
-                            currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost")),
-                        ),
+            UiTimelineV2.TimelinePostItem(
+                post = original.copy(statusKey = original.statusKey.copy(id = "reply-to-other-user")),
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        inlineParents =
+                            persistentListOf(
+                                createSampleStatus(
+                                    currentUser.copy(key = MicroBlogKey("parentKey", "sampleHost")),
+                                ),
+                            ),
                     ),
             )
 
@@ -180,10 +205,13 @@ class TimelinePresenterFilterTest {
                 content = "Visible original #blocked".toUiPlainText(),
             )
         val repostWrapper =
-            base.copy(
-                statusKey = original.statusKey.copy(id = "repost"),
-                content = "".toUiPlainText(),
-                internalRepost = original,
+            UiTimelineV2.TimelinePostItem(
+                post =
+                    base.copy(
+                        statusKey = original.statusKey.copy(id = "repost"),
+                        content = "".toUiPlainText(),
+                    ),
+                presentation = UiTimelineV2.PostPresentation(repost = original),
             )
 
         assertFalse(
@@ -210,13 +238,15 @@ class TimelinePresenterFilterTest {
             base.copy(
                 statusKey = base.statusKey.copy(id = "direct-repost"),
                 content = "".toUiPlainText(),
-                internalRepost = nestedOriginal,
             )
         val repostWrapper =
-            base.copy(
-                statusKey = base.statusKey.copy(id = "repost-wrapper"),
-                content = "".toUiPlainText(),
-                internalRepost = directRepost,
+            UiTimelineV2.TimelinePostItem(
+                post =
+                    base.copy(
+                        statusKey = base.statusKey.copy(id = "repost-wrapper"),
+                        content = "".toUiPlainText(),
+                    ),
+                presentation = UiTimelineV2.PostPresentation(repost = directRepost),
             )
 
         assertTrue(

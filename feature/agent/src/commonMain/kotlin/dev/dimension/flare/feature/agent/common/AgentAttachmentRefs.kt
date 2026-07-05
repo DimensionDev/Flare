@@ -11,7 +11,6 @@ internal fun UiTimelineV2.Post.agentAttachmentMarker(): String = "[[post:${agent
 
 internal fun UiProfile.agentAttachmentMarker(): String = "[[user:${agentAttachmentRef()}]]"
 
-internal tailrec fun UiTimelineV2.Post.agentDisplayPost(): UiTimelineV2.Post {
-    val repost = internalRepost ?: return this
-    return repost.agentDisplayPost()
-}
+internal fun UiTimelineV2.Post.agentDisplayPost(): UiTimelineV2.Post = this
+
+internal fun UiTimelineV2.TimelinePostItem.agentDisplayPost(): UiTimelineV2.Post = displayPost

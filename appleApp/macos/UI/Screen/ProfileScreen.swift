@@ -411,7 +411,7 @@ private struct ProfileGalleryTile: View {
     }
 
     private func openMedia() {
-        if let post = item.status as? UiTimelineV2.Post {
+        if let post = item.status.timelineContentPost {
             if post.mediaClickPolicy == .openPostClickEvent {
                 post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                 return

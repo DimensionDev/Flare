@@ -1190,13 +1190,11 @@ private fun createPost(
     actions: ImmutableList<ActionMenu> = persistentListOf(),
 ): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        message = null,
         platformType = PlatformType.Mastodon,
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,
         user = user,
-        quote = persistentListOf(),
         content = content,
         actions = actions,
         poll = null,
@@ -1207,7 +1205,6 @@ private fun createPost(
         sourceChannel = null,
         visibility = null,
         replyToHandle = null,
-        parents = persistentListOf(),
         clickEvent = ClickEvent.Noop,
         accountType = AccountType.Specific(MicroBlogKey("viewer", "example.social")),
     )

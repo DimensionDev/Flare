@@ -15,6 +15,7 @@ internal object PreTranslationContentRules {
         when (timeline) {
             is UiTimelineV2.Feed -> timeline.sourceLanguages
             is UiTimelineV2.Post -> timeline.sourceLanguages
+            is UiTimelineV2.TimelinePostItem -> timeline.displayPost.sourceLanguages
             is UiTimelineV2.Message -> emptyList()
             is UiTimelineV2.User -> emptyList()
             is UiTimelineV2.UserList -> emptyList()

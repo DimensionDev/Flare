@@ -86,7 +86,7 @@ internal class LoadBuiltInTimelineTool(
                 ?: return builtInTimelineSelectionMessage(session.builtInTimelineTargets, args)
         val maxItems = args.maxItems.builtInTimelineToolLimit()
         val items = runCatching { target.loadTimeline(maxItems) }.getOrElse { emptyList() }
-        session.messagePartStore.addPosts(items.filterIsInstance<UiTimelineV2.Post>())
+        session.messagePartStore.addPosts(items.mapNotNull { it.agentContentPostOrNull() })
         session.messagePartStore.addUsers(items.extractBuiltInTimelineUsers())
         return buildString {
             appendLine("Built-in timeline")
@@ -176,11 +176,18 @@ private fun List<UiTimelineV2>.toBuiltInTimelineItemsToolText(maxItems: Int): St
 
 private fun UiTimelineV2.toBuiltInTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.TimelinePostItem -> toBuiltInTimelinePostToolText()
         is UiTimelineV2.Post -> toBuiltInTimelinePostToolText()
         is UiTimelineV2.User -> value.toBuiltInTimelineUserToolText(message)
         is UiTimelineV2.UserList -> "itemType: user_list\nstatusKey: $statusKey\nusers: ${users.joinToString { it.handle.raw }}\n"
         is UiTimelineV2.Message -> "itemType: message\nstatusKey: $statusKey\ncreatedAt: ${createdAt.value}\n"
         is UiTimelineV2.Feed -> "itemType: feed\ntitle: ${title.orEmpty()}\nurl: $url\nsource: ${source.name}\n"
+    }
+
+private fun UiTimelineV2.TimelinePostItem.toBuiltInTimelinePostToolText(): String =
+    buildString {
+        presentation.message?.let { appendLine("messageStatusKey: ${it.statusKey}") }
+        append(displayPost.toBuiltInTimelinePostToolText())
     }
 
 private fun UiTimelineV2.Post.toBuiltInTimelinePostToolText(): String =
@@ -216,12 +223,43 @@ private fun UiProfile.toBuiltInTimelineUserToolText(message: UiTimelineV2.Messag
 private fun List<UiTimelineV2>.extractBuiltInTimelineUsers(): List<UiProfile> =
     flatMap { item ->
         when (item) {
-            is UiTimelineV2.Post -> listOfNotNull(item.user)
-            is UiTimelineV2.User -> listOf(item.value)
-            is UiTimelineV2.UserList -> item.users
-            is UiTimelineV2.Message -> listOfNotNull(item.user)
-            is UiTimelineV2.Feed -> emptyList()
+            is UiTimelineV2.TimelinePostItem -> {
+                listOfNotNull(
+                    item.post.user,
+                    item.displayPost.user,
+                    item.presentation.message?.user,
+                ) +
+                    item.presentation.inlineParents.mapNotNull { it.user } +
+                    item.presentation.quotes.mapNotNull { it.user }
+            }
+
+            is UiTimelineV2.Post -> {
+                listOfNotNull(item.user)
+            }
+
+            is UiTimelineV2.User -> {
+                listOf(item.value)
+            }
+
+            is UiTimelineV2.UserList -> {
+                item.users
+            }
+
+            is UiTimelineV2.Message -> {
+                listOfNotNull(item.user)
+            }
+
+            is UiTimelineV2.Feed -> {
+                emptyList()
+            }
         }
+    }.distinctBy { it.key }
+
+private fun UiTimelineV2.agentContentPostOrNull(): UiTimelineV2.Post? =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> displayPost
+        is UiTimelineV2.Post -> this
+        else -> null
     }
 
 private fun Int.builtInTimelineToolLimit(): Int = coerceIn(1, MAX_BUILT_IN_TIMELINE_TOOL_ITEMS)

@@ -419,4 +419,13 @@
     <string name="manga_title">マンガ</string>
     <string name="app_name" translatable="false">Flare</string>
     <string name="posts_with_replies_title">投稿と返信</string>
+    <string name="media_menu_download">ダウンロード</string>
+    <string name="media_menu_download_all">すべてダウンロード</string>
+    <string name="media_menu_share_image">画像を共有</string>
+    <string name="media_menu_copy_link">リンクをコピー</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil の権限を修正</string>
+    <string name="pixiv_private_following_title">非公開フォロー</string>
+    <string name="pixiv_private_bookmarks_title">非公開ブックマーク</string>
+    <string name="fanbox_supported_title">支援中</string>
+    <string name="fanbox_recommended_creators_title">おすすめクリエイター</string>
 </resources>

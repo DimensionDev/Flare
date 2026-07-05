@@ -3,10 +3,13 @@
     <string name="changelog_current"><![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Đã thêm Flare AI Agent với trò chuyện, thông tin chi tiết bài đăng và thông tin chi tiết hồ sơ.</li>
-                <li>Đã thêm hỗ trợ Pixiv và màn hình chi tiết bộ sưu tập mới.</li>
-                <li>Đã thêm tùy chỉnh hành động bài đăng và tùy chọn hiển thị cảnh báo nội dung.</li>
-                <li>Cải thiện thông báo, dòng thời gian RSS, phát video và độ ổn định của dòng thời gian.</li>
+                <li>Đã thêm hỗ trợ FANBOX.</li>
+                <li>Dòng thời gian hiện hỗ trợ menu nhấn giữ trên ảnh/video: tải xuống, tải xuống tất cả, chia sẻ và sao chép liên kết.</li>
+                <li>Đã thêm hỗ trợ thay đổi vị trí lưu phương tiện.</li>
+                <li>Đã thêm luồng đăng nhập lại có mục tiêu sau khi phiên hết hạn.</li>
+                <li>Sửa lỗi và cải thiện hiệu năng.</li>
             </ul>
         ]]></string>
+    <string name="changelog_title">Chào mừng trở lại!</string>
+    <string name="changelog_message">Chúng tôi đã thực hiện một số thay đổi kể từ lần đăng nhập trước của bạn. Chi tiết như sau:</string>
 </resources>

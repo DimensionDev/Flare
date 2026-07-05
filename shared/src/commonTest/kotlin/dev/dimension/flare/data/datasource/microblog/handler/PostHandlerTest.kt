@@ -17,6 +17,10 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -35,7 +39,9 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
@@ -52,8 +58,12 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import okio.FileSystem
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -193,9 +203,12 @@ class PostHandlerTest : RobolectricTest() {
             val repostKey = MicroBlogKey(id = "repost-1", host = "test.social")
             val repost = createPost(statusKey = repostKey)
             val wrapper =
-                createPost(statusKey = postKey).copy(
-                    content = "wrapper content".toUiPlainText(),
-                    internalRepost = repost,
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(statusKey = postKey, text = "wrapper content"),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            repost = repost,
+                        ),
                 )
 
             saveToDatabase(
@@ -219,12 +232,140 @@ class PostHandlerTest : RobolectricTest() {
                     .data
 
             val cachedPost = assertNotNull(cached as? UiTimelineV2.Post)
-            val internalRepost = assertNotNull(cachedPost.internalRepost)
             assertEquals(postKey, cachedPost.statusKey)
-            assertEquals(repostKey, internalRepost.statusKey)
-            assertEquals(repost.content.raw, cachedPost.content.raw)
-            assertEquals(repost.user?.key, cachedPost.user?.key)
+            assertEquals("wrapper content", cachedPost.content.raw)
             assertEquals(0, fakeLoader.statusCallCount)
+        }
+
+    @Test
+    fun postOnlyPagingCacheEmitsPostForStatusConsumers() =
+        runTest {
+            startTestKoin(this@runTest)
+
+            val media =
+                UiMedia.Image(
+                    url = "https://test.social/media/full.png",
+                    previewUrl = "https://test.social/media/preview.png",
+                    description = null,
+                    height = 100f,
+                    width = 100f,
+                    sensitive = false,
+                )
+            val parent = createPost(statusKey = MicroBlogKey(id = "parent-1", host = "test.social"))
+            val item =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(statusKey = postKey, images = persistentListOf(media)),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            inlineParents = persistentListOf(parent),
+                        ),
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        item,
+                        pagingKey = "post_only_$postKey",
+                    ),
+                ),
+            )
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+
+            val cachedItems = mutableListOf<UiTimelineV2>()
+            withTimeoutOrNull(1_000) {
+                cacheable.data
+                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                    .map { it.data }
+                    .take(2)
+                    .toList(cachedItems)
+            }
+
+            assertTrue(cachedItems.isNotEmpty())
+            cachedItems.forEach { cached ->
+                val post = assertNotNull(cached as? UiTimelineV2.Post)
+                assertEquals(postKey, post.statusKey)
+                assertEquals(listOf(media.url), post.images.map { it.url })
+            }
+        }
+
+    @Test
+    fun postCacheEmitsOptimisticActionMenuUpdates() =
+        runTest {
+            startTestKoin(this@runTest)
+
+            val original =
+                createPost(statusKey = postKey).copy(
+                    actions =
+                        persistentListOf(
+                            ActionMenu.vvoLike(
+                                statusKey = postKey,
+                                liked = false,
+                                count = 1,
+                                accountKey = accountKey,
+                            ),
+                        ),
+                )
+            db.statusDao().insert(
+                DbStatus(
+                    statusKey = postKey,
+                    accountType = accountType,
+                    content = original,
+                    renderHash = original.renderHash,
+                    text = original.searchText,
+                ),
+            )
+
+            val cacheable = PostHandler(accountType = accountType, loader = fakeLoader).post(postKey)
+            val initial =
+                cacheable.data
+                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                    .map { it.data as UiTimelineV2.Post }
+                    .first()
+            val initialLike = initial.actions.filterIsInstance<ActionMenu.Item>().first { it.actionFamily == PostActionFamily.Like }
+            assertEquals(1, initialLike.count?.value)
+            assertNull(initialLike.color)
+
+            val updatedDeferred =
+                async {
+                    cacheable.data
+                        .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                        .map { it.data as UiTimelineV2.Post }
+                        .first { post ->
+                            val like =
+                                post.actions
+                                    .filterIsInstance<ActionMenu.Item>()
+                                    .first { it.actionFamily == PostActionFamily.Like }
+                            like.count?.value == 2L && like.color == ActionMenu.Item.Color.Red
+                        }
+                }
+            val eventHandler =
+                PostEventHandler(
+                    accountType = accountType,
+                    handler =
+                        object : PostEventHandler.Handler {
+                            override suspend fun handle(
+                                event: PostEvent,
+                                updater: DatabaseUpdater,
+                            ) = Unit
+                        },
+                )
+            eventHandler.handleEvent(
+                PostEvent.VVO.Like(
+                    postKey = postKey,
+                    liked = false,
+                    count = 1,
+                    accountKey = accountKey,
+                ),
+            )
+            advanceUntilIdle()
+
+            val updated = assertNotNull(withTimeoutOrNull(1_000) { updatedDeferred.await() })
+            val updatedLike = updated.actions.filterIsInstance<ActionMenu.Item>().first { it.actionFamily == PostActionFamily.Like }
+            assertEquals(2, updatedLike.count?.value)
+            assertEquals(ActionMenu.Item.Color.Red, updatedLike.color)
         }
 
     @Test
@@ -262,8 +403,7 @@ class PostHandlerTest : RobolectricTest() {
             val savedStatus = db.statusDao().get(postKey, accountType).first()
             val savedPost = savedStatus?.content as? UiTimelineV2.Post
             assertNotNull(savedPost)
-            assertEquals(1, savedPost.references.size)
-            assertEquals(parentKey, savedPost.references.first().statusKey)
+            assertEquals(0, savedPost.references.size)
         }
 
     @Test
@@ -442,16 +582,26 @@ class PostHandlerTest : RobolectricTest() {
     private fun createPost(
         statusKey: MicroBlogKey,
         parents: PersistentList<UiTimelineV2.Post> = persistentListOf(),
+        images: PersistentList<UiMedia> = persistentListOf(),
         text: String = "post content",
-    ): UiTimelineV2.Post =
-        UiTimelineV2.Post(
-            message = null,
+    ): UiTimelineV2.Post {
+        val references =
+            parents
+                .lastOrNull()
+                ?.let {
+                    persistentListOf(
+                        UiTimelineV2.Post.Reference(
+                            statusKey = it.statusKey,
+                            type = ReferenceType.Reply,
+                        ),
+                    )
+                } ?: persistentListOf()
+        return UiTimelineV2.Post(
             platformType = PlatformType.Mastodon,
-            images = persistentListOf(),
+            images = images,
             sensitive = false,
             contentWarning = null,
             user = null,
-            quote = persistentListOf(),
             content = text.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
@@ -465,11 +615,11 @@ class PostHandlerTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
-            references = persistentListOf(),
-            parents = parents,
+            references = references,
             clickEvent = ClickEvent.Noop,
             accountType = accountType,
         )
+    }
 
     private class FakePostLoader : PostLoader {
         var nextStatus: UiTimelineV2? = null

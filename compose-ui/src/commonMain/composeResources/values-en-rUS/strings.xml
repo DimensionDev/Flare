@@ -425,4 +425,7 @@
     <string name="pixiv_private_bookmarks_title">Private Bookmarks</string>
     <string name="illustrations_title">Illustrations</string>
     <string name="manga_title">Manga</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil permissions</string>
+    <string name="fanbox_supported_title">Supporting</string>
+    <string name="fanbox_recommended_creators_title">Recommended creators</string>
 </resources>

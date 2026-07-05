@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Lagt till Flare AI Agent med chatt, inläggsinsikter och profilinsikter.</li>
-                <li>Lagt till Pixiv-stöd och en ny galleridetaljvy.</li>
-                <li>Lagt till anpassningsbara inläggsåtgärder och visningsalternativ för innehållsvarningar.</li>
-                <li>Förbättrat notiser, RSS-tidslinjer, videouppspelning och tidslinjestabilitet.</li>
+                <li>Lagt till stöd för FANBOX.</li>
+                <li>Tidslinjen stöder nu långtrycksmenyer för bilder/videor: hämta, hämta alla, dela och kopiera länk.</li>
+                <li>Lagt till stöd för att ändra lagringsplats för media.</li>
+                <li>Lagt till ett riktat återinloggningsflöde efter utgången session.</li>
+                <li>Buggfixar och prestandaförbättringar.</li>
             </ul>
         ]]></string>
 </resources>

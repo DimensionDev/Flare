@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Manga sıralaması</string>
     <string name="illustrations_title">İllüstrasyonlar</string>
     <string name="manga_title">Manga</string>
+    <string name="media_menu_download">İndir</string>
+    <string name="media_menu_download_all">Tümünü indir</string>
+    <string name="media_menu_share_image">Görüntüyü paylaş</string>
+    <string name="media_menu_copy_link">Bağlantıyı kopyala</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil izinlerini düzelt</string>
+    <string name="pixiv_private_following_title">Gizli takip</string>
+    <string name="pixiv_private_bookmarks_title">Gizli yer imleri</string>
+    <string name="fanbox_supported_title">Destekleniyor</string>
+    <string name="fanbox_recommended_creators_title">Önerilen içerik üreticiler</string>
 </resources>

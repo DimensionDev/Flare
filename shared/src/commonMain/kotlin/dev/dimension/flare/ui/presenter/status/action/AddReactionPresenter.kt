@@ -17,6 +17,7 @@ import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -68,10 +69,11 @@ public class AddReactionPresenter(
                     val postDataSource = dataSource as? PostDataSource ?: return@onSuccess
                     status.onSuccess { status ->
                         scope.launch {
-                            if (status is UiTimelineV2.Post) {
-                                val hasReacted = status.emojiReactions.any { it.me && it.name == emoji.shortcode }
+                            val post = status.contentPostOrNull()
+                            if (post != null) {
+                                val hasReacted = post.emojiReactions.any { it.me && it.name == emoji.shortcode }
                                 val count =
-                                    status.emojiReactions.sumOf { it.count.value }
+                                    post.emojiReactions.sumOf { it.count.value }
                                 postDataSource.postEventHandler.handleEvent(
                                     PostEvent.Misskey.React(
                                         postKey = statusKey,

@@ -53,6 +53,8 @@ public struct StatusView: View {
     private let forceHideActions: Bool
     private let showTranslate: Bool
     private let showParents: Bool
+    private let inlineParents: [UiTimelineV2.Post]
+    private let quotes: [UiTimelineV2.Post]
     @State private var contentWarningExpanded = false
     @State private var textExpanded = false
     @State private var textOverflows = false
@@ -67,7 +69,9 @@ public struct StatusView: View {
         showExpandTextButton: Bool = true,
         forceHideActions: Bool = false,
         showTranslate: Bool = true,
-        showParents: Bool = true
+        showParents: Bool = true,
+        inlineParents: [UiTimelineV2.Post] = [],
+        quotes: [UiTimelineV2.Post] = []
     ) {
         self.data = data
         self.isDetail = isDetail
@@ -79,13 +83,15 @@ public struct StatusView: View {
         self.forceHideActions = forceHideActions
         self.showTranslate = showTranslate
         self.showParents = showParents
+        self.inlineParents = inlineParents
+        self.quotes = quotes
     }
 
     private var showAsFullWidth: Bool {
         (!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
     }
     public var body: some View {
-        let parents = Array(data.parents)
+        let parents = inlineParents
         let user = data.user
         let replyToHandle = data.replyToHandle
         let contentWarning = data.contentWarning
@@ -98,8 +104,8 @@ public struct StatusView: View {
         let hasImages = !images.isEmpty
         let sensitive = data.sensitive
         let card = data.card
-        let quotes = Array(data.quote)
-        let hasQuotes = !quotes.isEmpty
+        let quoteItems = self.quotes
+        let hasQuotes = !quoteItems.isEmpty
         let sourceChannelName = data.sourceChannel?.name
         let emojiReactions = Array(data.emojiReactions)
         let hasEmojiReactions = !emojiReactions.isEmpty
@@ -310,9 +316,9 @@ public struct StatusView: View {
 
                         if hasQuotes, !isQuote {
                             VStack(alignment: .leading, spacing: 8) {
-                                ForEach(Array(quotes.enumerated()), id: \.offset) { index, quote in
+                                ForEach(Array(quoteItems.enumerated()), id: \.offset) { index, quote in
                                     StatusView(data: quote, isQuote: true, forceHideActions: true)
-                                    if index < quotes.count - 1 {
+                                    if index < quoteItems.count - 1 {
                                         Divider()
                                     }
                                 }

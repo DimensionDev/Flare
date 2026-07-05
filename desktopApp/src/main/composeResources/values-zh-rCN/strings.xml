@@ -186,7 +186,7 @@
     <string name="settings_appearance_layout_group_title">布局</string>
     <string name="settings_appearance_layout_group_subtitle">时间轴布局、导航栏和动作栏</string>
     <string name="settings_appearance_display_group_title">显示</string>
-    <string name="settings_appearance_display_group_subtitle">时间戳、来源徽章、链接和浏览器行为</string>
+    <string name="settings_appearance_display_group_subtitle">时间戳、来源标识和链接预览</string>
     <string name="settings_appearance_media_group_title">媒体</string>
     <string name="settings_appearance_media_group_subtitle">媒体可见性、播放和敏感内容</string>
     <string name="settings_storage_title">存储</string>
@@ -242,8 +242,8 @@
     <string name="settings_ai_config_value_empty_placeholder">未设置</string>
     <string name="settings_ai_config_entable_translation">启用 AI 翻译</string>
     <string name="settings_ai_config_translation_description">使用 AI 代替谷歌翻译。翻译可能需要更长时间。</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">启用 AI Agent</string>
+    <string name="settings_ai_config_agent_description">开启后，在已配置 OpenAI 兼容模型时，会在应用内相关位置显示 AI Agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">启用自动翻译</string>
     <string name="settings_ai_config_pre_translation_description">在后台翻译新加载的时间轴和资料内容并缓存结果。这可能会消耗大量 Token。</string>
     <string name="settings_ai_config_enable_tldr">启用 AI 总结</string>
@@ -519,8 +519,8 @@
     <string name="save_error">导出失败</string>
     <string name="import_completed">导入成功</string>
     <string name="import_error">导入失败</string>
-    <string name="import_confirmation_title">确认导入</string>
-    <string name="import_confirmation_message">这将从选定文件导入数据。ID 匹配的现有记录将被覆盖。是否继续？</string>
+    <string name="import_confirmation_title">导入备份</string>
+    <string name="import_confirmation_message">这将从所选备份文件导入数据。具有匹配 ID 的现有记录将被替换。要继续吗？</string>
     <string name="channel_title">频道</string>
     <string name="misskey_channel_tab_following">关注中</string>
     <string name="misskey_channel_tab_favorites">收藏</string>
@@ -591,4 +591,20 @@
     <string name="agent_ui_select_followers_user">选择: 用户 (查看 粉丝)</string>
     <string name="agent_ui_select_profile_tabs_user">选择: 用户 (查看 个人资料标签页)</string>
     <string name="agent_ui_status_insight_user_placeholder">输入: 用户 链接, handle, userKey…</string>
+    <string name="pixiv_private_following_title">私密关注</string>
+    <string name="pixiv_private_bookmarks_title">私密书签</string>
+    <string name="settings_behavior_title">行为</string>
+    <string name="settings_behavior_description">浏览器和链接处理偏好</string>
+    <string name="article_content_gate_subscription_title">需要支持后阅读</string>
+    <string name="article_content_gate_subscription_description">这篇文章仅对支持者开放。请在浏览器中打开原页面，支持创作者后阅读全文。</string>
+    <string name="article_content_gate_subscription_description_with_fee">这篇文章仅对 ¥%1$d 起的支持者开放。请在浏览器中打开原页面，支持创作者后阅读全文。</string>
+    <string name="deeplink_account_selection_save_default">始终这样打开</string>
+    <string name="settings_link_open_defaults_title">链接打开方式</string>
+    <string name="settings_link_open_defaults_description">按主机选择支持链接的默认打开方式</string>
+    <string name="settings_link_open_default_title">%1$s 链接的默认方式</string>
+    <string name="settings_link_open_default_description">选择 Flare 可处理的支持链接如何打开</string>
+    <string name="settings_link_open_default_ask_every_time">每次询问</string>
+    <string name="media_download_started">已开始下载。</string>
+    <string name="fanbox_supported_title">支持中</string>
+    <string name="fanbox_recommended_creators_title">推荐创作者</string>
 </resources>

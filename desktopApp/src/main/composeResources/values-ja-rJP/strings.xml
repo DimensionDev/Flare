@@ -172,7 +172,7 @@
     <string name="settings_appearance_layout_group_title">レイアウト</string>
     <string name="settings_appearance_layout_group_subtitle">タイムライン、ナビゲーション、投稿アクション</string>
     <string name="settings_appearance_display_group_title">表示</string>
-    <string name="settings_appearance_display_group_subtitle">タイムスタンプ、ソースバッジ、リンク、ブラウザ設定</string>
+    <string name="settings_appearance_display_group_subtitle">タイムスタンプ、ソースバッジ、リンクプレビュー</string>
     <string name="settings_appearance_media_group_title">メディア</string>
     <string name="settings_appearance_media_group_subtitle">メディアの表示、再生、閲覧注意コンテンツ</string>
     <string name="settings_storage_title">ストレージ</string>
@@ -228,8 +228,8 @@
     <string name="settings_ai_config_value_empty_placeholder">未設定</string>
     <string name="settings_ai_config_entable_translation">AI翻訳を有効にする</string>
     <string name="settings_ai_config_translation_description">Google翻訳の代わりにAIを使用します。翻訳に時間がかかる場合があります。</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">AI Agentを有効にする</string>
+    <string name="settings_ai_config_agent_description">有効にすると、OpenAI互換モデルが設定されている場合に、アプリ内の関連する場所にAI Agent機能が表示されます。</string>
     <string name="settings_ai_config_enable_pre_translation">自動翻訳を有効にする</string>
     <string name="settings_ai_config_pre_translation_description">新しく読み込まれたタイムラインやプロフィールの内容をバックグラウンドで翻訳し、結果をキャッシュします。大量のトークンを消費する可能性があります。</string>
     <string name="settings_ai_config_enable_tldr">AI要約を有効にする</string>
@@ -505,8 +505,8 @@
     <string name="save_error">エクスポートに失敗しました</string>
     <string name="import_completed">インポート完了</string>
     <string name="import_error">インポートに失敗しました</string>
-    <string name="import_confirmation_title">インポートの確認</string>
-    <string name="import_confirmation_message">選択したファイルからデータをインポートします。同じIDを持つ既存の記録は上書きされます。続行しますか？</string>
+    <string name="import_confirmation_title">バックアップをインポート</string>
+    <string name="import_confirmation_message">選択したバックアップファイルからデータをインポートします。ID が一致する既存のレコードは上書きされます。続行しますか？</string>
     <string name="channel_title">チャンネル</string>
     <string name="misskey_channel_tab_following">フォロー中</string>
     <string name="misskey_channel_tab_favorites">お気に入り</string>
@@ -587,4 +587,24 @@
     <string name="agent_ui_select_followers_user">選択: ユーザー (表示 フォロワー)</string>
     <string name="agent_ui_select_profile_tabs_user">選択: ユーザー (表示 プロフィールタブ)</string>
     <string name="agent_ui_status_insight_user_placeholder">入力: ユーザー リンク, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">ブロック済みプロフィール</string>
+    <string name="profile_blocked_gate_description">このユーザーをブロックしています。表示を選ぶまで、タブとタイムラインは非表示になります。</string>
+    <string name="profile_blocked_gate_show">表示</string>
+    <string name="pixiv_private_following_title">非公開フォロー</string>
+    <string name="pixiv_private_bookmarks_title">非公開ブックマーク</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil の権限を修正</string>
+    <string name="settings_behavior_title">挙動</string>
+    <string name="settings_behavior_description">ブラウザとリンク処理の設定</string>
+    <string name="article_content_gate_subscription_title">支援が必要です</string>
+    <string name="article_content_gate_subscription_description">この記事は支援者のみ閲覧できます。ブラウザで開いてクリエイターを支援し、全文を読んでください。</string>
+    <string name="article_content_gate_subscription_description_with_fee">この記事は ¥%1$d 以上の支援者のみ閲覧できます。ブラウザで開いてクリエイターを支援し、全文を読んでください。</string>
+    <string name="deeplink_account_selection_save_default">常にこの方法で開く</string>
+    <string name="settings_link_open_defaults_title">リンクの開き方</string>
+    <string name="settings_link_open_defaults_description">対応リンクの既定動作をホストごとに選択</string>
+    <string name="settings_link_open_default_title">%1$s リンクの既定</string>
+    <string name="settings_link_open_default_description">Flare が処理できる対応リンクをどのように開くかを選択</string>
+    <string name="settings_link_open_default_ask_every_time">毎回確認</string>
+    <string name="media_download_started">ダウンロードを開始しました</string>
+    <string name="fanbox_supported_title">支援中</string>
+    <string name="fanbox_recommended_creators_title">おすすめクリエイター</string>
 </resources>

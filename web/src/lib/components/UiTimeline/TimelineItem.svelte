@@ -14,8 +14,18 @@
 		detailStatusKey?: MicroBlogKey | null;
 	} = $props();
 
+	type UiTimelineV2TimelinePostItem = Extract<UiTimelineV2, { type: 'TimelinePostItem' }>;
+
 	function asPost(value: UiTimelineV2): UiTimelineV2Post {
 		return value as unknown as UiTimelineV2Post;
+	}
+
+	function asTimelinePostItem(value: UiTimelineV2): UiTimelineV2TimelinePostItem {
+		return value as UiTimelineV2TimelinePostItem;
+	}
+
+	function displayPost(item: UiTimelineV2TimelinePostItem): UiTimelineV2Post {
+		return item.presentation.repost ?? item.post;
 	}
 
 	function isDetailPost(post: UiTimelineV2Post): boolean {
@@ -29,6 +39,16 @@
 
 {#if item.type === 'Post'}
 	<UiTimelinePost post={asPost(item)} isDetail={isDetailPost(asPost(item))} />
+{:else if item.type === 'TimelinePostItem'}
+	{@const timelinePostItem = asTimelinePostItem(item)}
+	{@const post = displayPost(timelinePostItem)}
+	<UiTimelinePost
+		{post}
+		isDetail={isDetailPost(post)}
+		message={timelinePostItem.presentation.message}
+		inlineParents={timelinePostItem.presentation.inlineParents}
+		quotes={timelinePostItem.presentation.quotes}
+	/>
 {:else if item.type === 'Feed'}
 	<UiTimelineFeed feed={item} />
 {:else if item.type === 'Message'}

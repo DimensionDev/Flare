@@ -186,7 +186,7 @@
     <string name="settings_appearance_layout_group_title">Mise en page</string>
     <string name="settings_appearance_layout_group_subtitle">Mise en page du fil d\'actualité, navigation et actions sur les messages</string>
     <string name="settings_appearance_display_group_title">Affichage</string>
-    <string name="settings_appearance_display_group_subtitle">Horodatage, badges de source, liens et comportement du navigateur</string>
+    <string name="settings_appearance_display_group_subtitle">Horodatage, badges de plateforme et aperçus de liens</string>
     <string name="settings_appearance_media_group_title">Médias</string>
     <string name="settings_appearance_media_group_subtitle">Visibilité des médias, lecture et contenu sensible</string>
     <string name="settings_storage_title">Stockage</string>
@@ -242,8 +242,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Non défini</string>
     <string name="settings_ai_config_entable_translation">Activer la traduction par IA</string>
     <string name="settings_ai_config_translation_description">Utilisez l\'IA au lieu de Google Traduction. Les traductions peuvent prendre plus de temps.</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">Activer AI Agent</string>
+    <string name="settings_ai_config_agent_description">Une fois activée, la fonction AI Agent apparaîtra aux emplacements pertinents de l’app lorsqu’un modèle compatible OpenAI aura été configuré.</string>
     <string name="settings_ai_config_enable_pre_translation">Activer la traduction automatique</string>
     <string name="settings_ai_config_pre_translation_description">Traduire les nouveaux contenus du fil d\'actualité et des profils en arrière-plan et mettre les résultats en cache. Cela peut consommer un grand nombre de jetons.</string>
     <string name="settings_ai_config_enable_tldr">Activer les résumés par IA</string>
@@ -519,8 +519,8 @@
     <string name="save_error">Échec de l\'exportation</string>
     <string name="import_completed">Importation terminée</string>
     <string name="import_error">Échec de l\'importation</string>
-    <string name="import_confirmation_title">Confirmer l\'importation</string>
-    <string name="import_confirmation_message">Ceci importera les données du fichier sélectionné. Les enregistrements existants avec des identifiants correspondants seront remplacés. Continuer ?</string>
+    <string name="import_confirmation_title">Importer une sauvegarde</string>
+    <string name="import_confirmation_message">Ceci importera les données du fichier de sauvegarde sélectionné. Les enregistrements existants avec des ID correspondants seront remplacés. Continuer ?</string>
     <string name="channel_title">Canal</string>
     <string name="misskey_channel_tab_following">Abonnements</string>
     <string name="misskey_channel_tab_favorites">Favoris</string>
@@ -588,4 +588,24 @@
     <string name="agent_ui_select_followers_user">Sélectionner: utilisateur (voir abonnés)</string>
     <string name="agent_ui_select_profile_tabs_user">Sélectionner: utilisateur (voir onglets du profil)</string>
     <string name="agent_ui_status_insight_user_placeholder">Saisir: utilisateur lien, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">Profil bloqué</string>
+    <string name="profile_blocked_gate_description">Vous avez bloqué cet utilisateur. Ses onglets et son fil sont masqués jusqu’à ce que vous choisissiez de les afficher.</string>
+    <string name="profile_blocked_gate_show">Afficher</string>
+    <string name="pixiv_private_following_title">Abonnements privés</string>
+    <string name="pixiv_private_bookmarks_title">Favoris privés</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corriger les autorisations Tranquil</string>
+    <string name="settings_behavior_title">Comportement</string>
+    <string name="settings_behavior_description">Préférences du navigateur et de gestion des liens</string>
+    <string name="article_content_gate_subscription_title">Soutien requis</string>
+    <string name="article_content_gate_subscription_description">Cet article est réservé aux soutiens. Ouvrez-le dans le navigateur pour soutenir le créateur et lire le contenu complet.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Cet article est réservé aux soutiens à partir de ¥%1$d. Ouvrez-le dans le navigateur pour soutenir le créateur et lire le contenu complet.</string>
+    <string name="deeplink_account_selection_save_default">Toujours ouvrir ainsi</string>
+    <string name="settings_link_open_defaults_title">Ouverture des liens</string>
+    <string name="settings_link_open_defaults_description">Choisissez les valeurs par défaut des liens pris en charge par hôte</string>
+    <string name="settings_link_open_default_title">Par défaut pour les liens %1$s</string>
+    <string name="settings_link_open_default_description">Choisissez comment les liens pris en charge s’ouvrent lorsque Flare peut les gérer</string>
+    <string name="settings_link_open_default_ask_every_time">Demander à chaque fois</string>
+    <string name="media_download_started">Téléchargement démarré</string>
+    <string name="fanbox_supported_title">Soutien</string>
+    <string name="fanbox_recommended_creators_title">Créateurs recommandés</string>
 </resources>

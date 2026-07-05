@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.serialization.Serializable
 
 internal class ListListsTool(
@@ -140,7 +141,7 @@ internal class LoadListTimelineTool(
             targets.map { target ->
                 target to runCatching { target.loadListTimeline(listId, maxItems) }.getOrElse { emptyList() }
             }
-        session.messagePartStore.addPosts(results.flatMap { it.second }.filterIsInstance<UiTimelineV2.Post>())
+        session.messagePartStore.addPosts(results.flatMap { it.second }.mapNotNull { it.contentPostOrNull() })
         return buildString {
             appendLine("List timeline")
             appendLine("listId: $listId")
@@ -644,11 +645,18 @@ private fun List<UiTimelineV2>.toTimelineToolText(maxItems: Int): String {
 
 private fun UiTimelineV2.toTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.TimelinePostItem -> toListPostToolText()
         is UiTimelineV2.Post -> toListPostToolText()
         is UiTimelineV2.User -> value.toListUserToolText(message)
         is UiTimelineV2.UserList -> "itemType: user_list\nstatusKey: $statusKey\nusers: ${users.joinToString { it.handle.raw }}\n"
         is UiTimelineV2.Message -> "itemType: message\nstatusKey: $statusKey\ncreatedAt: ${createdAt.value}\n"
         is UiTimelineV2.Feed -> "itemType: feed\ntitle: ${title.orEmpty()}\nurl: $url\n"
+    }
+
+private fun UiTimelineV2.TimelinePostItem.toListPostToolText(): String =
+    buildString {
+        presentation.message?.let { appendLine("messageStatusKey: ${it.statusKey}") }
+        append(displayPost.toListPostToolText())
     }
 
 private fun UiTimelineV2.Post.toListPostToolText(): String =

@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionado o Flare AI Agent com chat, insights de posts e insights de perfis.</li>
-                <li>Adicionado suporte ao Pixiv e uma nova tela de detalhes da galeria.</li>
-                <li>Adicionadas ações de post personalizáveis e opções de exibição de avisos de conteúdo.</li>
-                <li>Melhoradas as notificações, timelines RSS, reprodução de vídeo e estabilidade das timelines.</li>
+                <li>Adicionado suporte ao FANBOX.</li>
+                <li>A linha do tempo agora oferece menu ao pressionar imagens/vídeos: baixar, baixar tudo, compartilhar e copiar link.</li>
+                <li>Adicionado suporte para alterar o local de salvamento de mídia.</li>
+                <li>Adicionado fluxo de login direcionado após a sessão expirar.</li>
+                <li>Correções de bugs e melhorias de desempenho.</li>
             </ul>
         ]]></string>
 </resources>

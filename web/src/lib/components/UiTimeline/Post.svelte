@@ -4,7 +4,7 @@
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
     import { useEnvironmentSettings } from "$lib/environment/environmentSettings.svelte";
     import { m } from "$lib/paraglide/messages.js";
-    import type { UiTimelineV2Post } from "@flare/web-presenters/timeline.svelte";
+    import type { UiTimelineV2Message, UiTimelineV2Post } from "@flare/web-presenters/timeline.svelte";
     import PostActions from "./post/PostActions.svelte";
     import PostAvatar from "./post/PostAvatar.svelte";
     import PostCard from "./post/PostCard.svelte";
@@ -28,6 +28,9 @@
         isQuote = false,
         forceHideActions = false,
         showParents = true,
+        message = null,
+        inlineParents = [],
+        quotes = [],
         withLeadingPadding = false,
         isParent = false,
         isDetail = false,
@@ -37,6 +40,9 @@
         isQuote?: boolean;
         forceHideActions?: boolean;
         showParents?: boolean;
+        message?: UiTimelineV2Message | null;
+        inlineParents?: UiTimelineV2Post[];
+        quotes?: UiTimelineV2Post[];
         withLeadingPadding?: boolean;
         isParent?: boolean;
         isDetail?: boolean;
@@ -112,7 +118,7 @@
         post.card &&
             appearance.showLinkPreview &&
             post.images.length === 0 &&
-            post.quote.length === 0
+            quotes.length === 0
             ? post.card
             : null,
     );
@@ -181,16 +187,16 @@
     onclick={performPostClick}
     onkeydown={performPostKeydown}
 >
-    {#if post.message && !isQuote}
+    {#if message && !isQuote}
         <PostTopMessage
-            message={post.message}
+            {message}
             sideAvatarVisible={showSideAvatar}
         />
     {/if}
 
-    {#if showParents && !isQuote && post.parents.length > 0}
+    {#if showParents && !isQuote && inlineParents.length > 0}
         <div class="parent-stack">
-            {#each post.parents as parent (postKey(parent))}
+            {#each inlineParents as parent (postKey(parent))}
                 <div class="parent-container">
                     <UiTimelinePost
                         post={parent}
@@ -325,13 +331,13 @@
                     <PostCard card={visibleCard} {appearance} />
                 {/if}
 
-                {#if post.quote.length > 0 && !isQuote}
+                {#if quotes.length > 0 && !isQuote}
                     <div class="quote-box rounded-box border border-base-300">
-                        {#each post.quote as quote, index (postKey(quote))}
+                        {#each quotes as quote, index (postKey(quote))}
                             <div class="quote-item">
                                 <PostQuote {quote} {appearance} />
                             </div>
-                            {#if index < post.quote.length - 1}
+                            {#if index < quotes.length - 1}
                                 <div class="divider quote-divider" aria-hidden="true"></div>
                             {/if}
                         {/each}

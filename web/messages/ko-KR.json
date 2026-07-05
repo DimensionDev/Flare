@@ -314,7 +314,7 @@
   "settingsAppearanceLayoutGroupTitle": "레이아웃",
   "settingsAppearanceLayoutGroupSubtitle": "타임라인 레이아웃, 내비게이션 및 게시물 동작",
   "settingsAppearanceDisplayGroupTitle": "디스플레이",
-  "settingsAppearanceDisplayGroupSubtitle": "타임스탬프, 소스 배지, 링크 및 브라우저 동작",
+  "settingsAppearanceDisplayGroupSubtitle": "타임스탬프, 소스 배지 및 링크 미리보기",
   "settingsAppearanceMediaGroupTitle": "미디어",
   "settingsAppearanceMediaGroupSubtitle": "미디어 가시성, 재생 및 민감한 콘텐츠",
   "settingsAppearanceTheme": "테마",

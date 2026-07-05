@@ -33,6 +33,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var showTranslate: Bool = true
     private var aiTldrEnabled: Bool = false
     private var showParents: Bool = true
+    private var inlineParents: [UiTimelineV2.Post] = []
+    private var quotes: [UiTimelineV2.Post] = []
     private var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default)
     private var lastConfigureSignature: ConfigureSignature?
     private var lastPreparedFittingWidthKey: Int?
@@ -50,10 +52,14 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let showTranslate: Bool
         let aiTldrEnabled: Bool
         let showParents: Bool
+        let parentKeys: [String]
+        let quoteKeys: [String]
         let appearance: StatusUIKitAppearance
 
         init(
             data: UiTimelineV2.Post,
+            inlineParents: [UiTimelineV2.Post],
+            quotes: [UiTimelineV2.Post],
             appearance: StatusUIKitAppearance,
             isDetail: Bool,
             isQuote: Bool,
@@ -78,6 +84,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             self.showTranslate = showTranslate
             self.aiTldrEnabled = aiTldrEnabled
             self.showParents = showParents
+            self.parentKeys = inlineParents.map { String(describing: $0.statusKey) }
+            self.quoteKeys = quotes.map { String(describing: $0.statusKey) }
             self.appearance = appearance
         }
     }
@@ -352,7 +360,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         forceHideActions: Bool = false,
         showTranslate: Bool = true,
         aiTldrEnabled: Bool = false,
-        showParents: Bool = true
+        showParents: Bool = true,
+        inlineParents: [UiTimelineV2.Post] = [],
+        quotes: [UiTimelineV2.Post] = []
     ) {
         let newStatusKey = String(describing: data.statusKey)
         if boundStatusKey != newStatusKey {
@@ -361,6 +371,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         }
         let signature = ConfigureSignature(
             data: data,
+            inlineParents: inlineParents,
+            quotes: quotes,
             appearance: appearance,
             isDetail: isDetail,
             isQuote: isQuote,
@@ -389,6 +401,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         self.showTranslate = showTranslate
         self.aiTldrEnabled = aiTldrEnabled
         self.showParents = showParents
+        self.inlineParents = inlineParents
+        self.quotes = quotes
         self.appearance = appearance
         lastConfigureSignature = signature
         lastPreparedFittingWidthKey = nil
@@ -401,6 +415,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         lastPreparedFittingWidthKey = nil
         boundStatusKey = nil
         expand = false
+        inlineParents = []
+        quotes = []
 
         mediaViewStorage?.prepareForPoolRemoval()
         actionsViewStorage?.prepareForPoolRemoval()
@@ -813,7 +829,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if let card = data.card,
            showMediaInput,
            data.images.isEmpty,
-           data.quote.isEmpty,
+           quotes.isEmpty,
            appearance.showLinkPreview {
             let corner: CGFloat = isQuote ? 12 : 16
             if appearance.compatLinkPreview {
@@ -832,8 +848,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         }
 
         // quotes (not when self is quote)
-        if !data.quote.isEmpty, !isQuote {
-            updateQuotes(quotes: data.quote)
+        if !quotes.isEmpty, !isQuote {
+            updateQuotes(quotes: quotes)
             items.append(resolvedQuotesContainer())
         } else {
             updateQuotes(quotes: [])
@@ -890,7 +906,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     // MARK: - Pools
 
     private func resolveActiveParentContainers(data: UiTimelineV2.Post) -> [ParentContainerView] {
-        let parentData = showParents ? Array(data.parents) : []
+        let parentData = showParents ? inlineParents : []
         while parentContainers.count < parentData.count {
             parentContainers.append(ParentContainerView())
         }
@@ -936,8 +952,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let activeParentCount: Int
         let activeQuoteCount: Int
         if let data {
-            activeParentCount = showParents ? data.parents.count : 0
-            activeQuoteCount = !isQuote ? data.quote.count : 0
+            activeParentCount = showParents ? inlineParents.count : 0
+            activeQuoteCount = !isQuote ? quotes.count : 0
         } else {
             activeParentCount = 0
             activeQuoteCount = 0
@@ -967,8 +983,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let activeParentCount: Int
         let activeQuoteCount: Int
         if let data {
-            activeParentCount = showParents ? data.parents.count : 0
-            activeQuoteCount = !isQuote ? data.quote.count : 0
+            activeParentCount = showParents ? inlineParents.count : 0
+            activeQuoteCount = !isQuote ? quotes.count : 0
         } else {
             activeParentCount = 0
             activeQuoteCount = 0

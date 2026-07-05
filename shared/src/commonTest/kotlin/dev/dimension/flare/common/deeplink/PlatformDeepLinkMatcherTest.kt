@@ -10,6 +10,8 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -183,6 +185,106 @@ class PlatformDeepLinkMatcherTest {
     }
 
     @Test
+    fun matchesHostArguments() {
+        val account =
+            UiAccount(
+                accountKey = MicroBlogKey(id = "1", host = "fanbox.cc"),
+                platformType = PlatformType.Fanbox,
+            )
+        val mapping =
+            mapOf(
+                account to
+                    listOf(
+                        PlatformDeepLink(
+                            uriPattern = "https://{creatorid}.fanbox.cc/posts/{id}",
+                            serializer = TestFanboxPostDeepLink.serializer(),
+                            callback = { data ->
+                                DeeplinkRoute.Article(
+                                    accountType = AccountType.Specific(account.accountKey),
+                                    articleKey = MicroBlogKey(id = data.id, host = "fanbox.cc"),
+                                )
+                            },
+                        ),
+                    ),
+            )
+
+        val matches = PlatformDeepLinkMatcher.matches("https://turisasu.fanbox.cc/posts/11771479", mapping)
+
+        assertMatch(
+            DeeplinkRoute.Article(
+                accountType = AccountType.Specific(account.accountKey),
+                articleKey = MicroBlogKey(id = "11771479", host = "fanbox.cc"),
+            ),
+            "turisasu.fanbox.cc",
+            matches[account],
+        )
+    }
+
+    @Test
+    fun matchesHostArgumentsWithoutPath() {
+        val account =
+            UiAccount(
+                accountKey = MicroBlogKey(id = "1", host = "fanbox.cc"),
+                platformType = PlatformType.Fanbox,
+            )
+        val mapping =
+            mapOf(
+                account to
+                    listOf(
+                        PlatformDeepLink(
+                            uriPattern = "https://{creatorid}.fanbox.cc",
+                            serializer = TestFanboxCreatorDeepLink.serializer(),
+                            callback = { data ->
+                                DeeplinkRoute.Profile.User(
+                                    accountType = AccountType.Specific(account.accountKey),
+                                    userKey = MicroBlogKey(id = data.creatorId, host = "fanbox.cc"),
+                                )
+                            },
+                        ),
+                    ),
+            )
+
+        val matches = PlatformDeepLinkMatcher.matches("https://turisasu.fanbox.cc/", mapping)
+
+        assertMatch(
+            DeeplinkRoute.Profile.User(
+                accountType = AccountType.Specific(account.accountKey),
+                userKey = MicroBlogKey(id = "turisasu", host = "fanbox.cc"),
+            ),
+            "turisasu.fanbox.cc",
+            matches[account],
+        )
+    }
+
+    @Test
+    fun hostArgumentMatcherRejectsWwwAsFanboxCreatorId() {
+        val account =
+            UiAccount(
+                accountKey = MicroBlogKey(id = "1", host = "fanbox.cc"),
+                platformType = PlatformType.Fanbox,
+            )
+        val mapping =
+            mapOf(
+                account to
+                    listOf(
+                        PlatformDeepLink(
+                            uriPattern = "https://{creatorid}.fanbox.cc",
+                            serializer = TestFanboxCreatorDeepLink.serializer(),
+                            matcher = { data -> data.creatorId != "www" },
+                            callback = { data ->
+                                DeeplinkRoute.Profile.User(
+                                    accountType = AccountType.Specific(account.accountKey),
+                                    userKey = MicroBlogKey(id = data.creatorId, host = "fanbox.cc"),
+                                )
+                            },
+                        ),
+                    ),
+            )
+
+        assertTrue(PlatformDeepLinkMatcher.matches("https://www.fanbox.cc/", mapping).isEmpty())
+    }
+
+    @Test
     fun matchesRealWorldLinks() {
         val mastodonAccount =
             UiAccount(
@@ -349,3 +451,16 @@ private fun deepLinkMapping(vararg accounts: UiAccount): Map<UiAccount, List<Pla
         }.build()
 
 private val platformRegistry = testPlatformRegistry()
+
+@Serializable
+private data class TestFanboxPostDeepLink(
+    @SerialName("creatorid")
+    val creatorId: String,
+    val id: String,
+)
+
+@Serializable
+private data class TestFanboxCreatorDeepLink(
+    @SerialName("creatorid")
+    val creatorId: String,
+)

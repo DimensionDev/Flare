@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">만화 랭킹</string>
     <string name="illustrations_title">일러스트</string>
     <string name="manga_title">만화</string>
+    <string name="media_menu_download">다운로드</string>
+    <string name="media_menu_download_all">모두 다운로드</string>
+    <string name="media_menu_share_image">이미지 공유</string>
+    <string name="media_menu_copy_link">링크 복사</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil 권한 수정</string>
+    <string name="pixiv_private_following_title">비공개 팔로잉</string>
+    <string name="pixiv_private_bookmarks_title">비공개 북마크</string>
+    <string name="fanbox_supported_title">지원 중</string>
+    <string name="fanbox_recommended_creators_title">추천 크리에이터</string>
 </resources>

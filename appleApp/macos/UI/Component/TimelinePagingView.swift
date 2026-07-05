@@ -461,7 +461,12 @@ private enum MacTimelineMasonryColumnBuilder {
         case .post(let post):
             let mediaHeight = post.images.first.map { columnWidth / CGFloat(max($0.aspectRatio ?? 1, 0.3)) } ?? 0
             let textHeight = min(CGFloat(post.content.raw.count) * 0.45, 160)
-            let parentPenalty = CGFloat(post.parents.count) * 140
+            return 120 + mediaHeight + textHeight
+        case .timelinePostItem(let item):
+            let post = item.presentation.repost ?? item.post
+            let mediaHeight = post.images.first.map { columnWidth / CGFloat(max($0.aspectRatio ?? 1, 0.3)) } ?? 0
+            let textHeight = min(CGFloat(post.content.raw.count) * 0.45, 160)
+            let parentPenalty = CGFloat(item.presentation.inlineParents.count) * 140
             return 120 + mediaHeight + textHeight + parentPenalty
         case .feed(let feed):
             if let media = feed.media {
@@ -479,6 +484,14 @@ private enum MacTimelineMasonryColumnBuilder {
         guard let item else { return 220 }
         switch onEnum(of: item) {
         case .post(let post):
+            if let media = post.images.first {
+                return 48 + columnWidth / CGFloat(max(media.aspectRatio ?? 1, 0.3))
+            }
+            return 140 + min(CGFloat(post.content.raw.count) * 0.35, 120)
+        case .timelinePostItem:
+            guard let post = item.timelineContentPost else {
+                return 180
+            }
             if let media = post.images.first {
                 return 48 + columnWidth / CGFloat(max(media.aspectRatio ?? 1, 0.3))
             }

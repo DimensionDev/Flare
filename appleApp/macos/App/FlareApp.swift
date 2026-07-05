@@ -1,5 +1,6 @@
 import Combine
 import FlareAppleCore
+import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 
@@ -15,6 +16,8 @@ enum MacWindowID {
 @main
 struct FlareApp: App {
     init() {
+        configureKingfisherCache()
+
         let firebaseEnabled = FirebaseBootstrap.configureIfAvailable()
         if firebaseEnabled {
             AppleSharedHelper.shared.setupCrashlytics()
@@ -101,6 +104,16 @@ struct FlareApp: App {
 //            SidebarCommands()
 //        }
     }
+}
+
+private func configureKingfisherCache() {
+    let megabyte: UInt64 = 1024 * 1024
+    let minimumLimit = 128 * megabyte
+    let maximumLimit = 512 * megabyte
+    let scaledLimit = ProcessInfo.processInfo.physicalMemory / 64
+    let memoryLimit = min(max(scaledLimit, minimumLimit), maximumLimit)
+
+    KingfisherManager.shared.cache.memoryStorage.config.totalCostLimit = Int(memoryLimit)
 }
 
 extension Scene {

@@ -21,44 +21,10 @@ internal class DeepLinkMatcher<T>(
 
         val args = mutableMapOf<String, Any>()
         // match the host
-        if (request.uri.host != deepLinkPattern.uriPattern.host) return null
+        if (!matchSegments(request.uri.host.split('.'), deepLinkPattern.hostSegments, args, "host")) return null
 
         // match the path
-        request.pathSegments
-            .asSequence()
-            // zip to compare the two objects side by side, order matters here so we
-            // need to make sure the compared segments are at the same position within the url
-            .zip(deepLinkPattern.pathSegments.asSequence())
-            .forEach { it ->
-                // retrieve the two path segments to compare
-                val requestedSegment = it.first
-                val candidateSegment = it.second
-                // if the potential match expects a path arg for this segment, try to parse the
-                // requested segment into the expected type
-                if (candidateSegment.isParamArg) {
-                    var valueToParse = requestedSegment
-                    if (!valueToParse.startsWith(candidateSegment.prefix)) return null
-                    valueToParse = valueToParse.removePrefix(candidateSegment.prefix)
-
-                    if (!valueToParse.endsWith(candidateSegment.suffix)) return null
-                    valueToParse = valueToParse.removeSuffix(candidateSegment.suffix)
-
-                    val parsedValue =
-                        try {
-                            candidateSegment.typeParser.invoke(valueToParse)
-                        } catch (e: IllegalArgumentException) {
-                            DebugRepository.log(
-                                "${TAG_LOG_ERROR}: Failed to parse path value:[$requestedSegment]" +
-                                    ". ${e.stackTraceToString()}",
-                            )
-                            return null
-                        }
-                    args[candidateSegment.stringValue] = parsedValue
-                } else if (requestedSegment != candidateSegment.stringValue) {
-                    // if it's path arg is not the expected type, its not a match
-                    return null
-                }
-            }
+        if (!matchSegments(request.pathSegments, deepLinkPattern.pathSegments, args, "path")) return null
         // match queries (if any)
         request.queries.forEach { query ->
             val name = query.key
@@ -78,6 +44,52 @@ internal class DeepLinkMatcher<T>(
         }
         // provide the serializer of the matching key and map of arg names to parsed arg values
         return DeepLinkMatchResult(deepLinkPattern.serializer, args)
+    }
+
+    private fun matchSegments(
+        requestedSegments: List<String>,
+        candidateSegments: List<DeepLinkPattern.PathSegment>,
+        args: MutableMap<String, Any>,
+        componentName: String,
+    ): Boolean {
+        if (requestedSegments.size != candidateSegments.size) return false
+
+        requestedSegments
+            .asSequence()
+            // zip to compare the two objects side by side, order matters here so we
+            // need to make sure the compared segments are at the same position within the url
+            .zip(candidateSegments.asSequence())
+            .forEach { it ->
+                // retrieve the two segments to compare
+                val requestedSegment = it.first
+                val candidateSegment = it.second
+                // if the potential match expects an arg for this segment, try to parse the
+                // requested segment into the expected type
+                if (candidateSegment.isParamArg) {
+                    var valueToParse = requestedSegment
+                    if (!valueToParse.startsWith(candidateSegment.prefix)) return false
+                    valueToParse = valueToParse.removePrefix(candidateSegment.prefix)
+
+                    if (!valueToParse.endsWith(candidateSegment.suffix)) return false
+                    valueToParse = valueToParse.removeSuffix(candidateSegment.suffix)
+
+                    val parsedValue =
+                        try {
+                            candidateSegment.typeParser.invoke(valueToParse)
+                        } catch (e: IllegalArgumentException) {
+                            DebugRepository.log(
+                                "${TAG_LOG_ERROR}: Failed to parse $componentName value:[$requestedSegment]" +
+                                    ". ${e.stackTraceToString()}",
+                            )
+                            return false
+                        }
+                    args[candidateSegment.stringValue] = parsedValue
+                } else if (requestedSegment != candidateSegment.stringValue) {
+                    // if it's not the expected segment, its not a match
+                    return false
+                }
+            }
+        return true
     }
 }
 

@@ -66,6 +66,7 @@ public interface PlatformDataSourceContext {
 public data class PlatformDeepLink<T>(
     public val uriPattern: String,
     public val serializer: KSerializer<T>,
+    public val matcher: (T) -> Boolean = { true },
     public val callback: (T) -> DeeplinkRoute,
 )
 

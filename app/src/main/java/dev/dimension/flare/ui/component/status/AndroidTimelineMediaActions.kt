@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.net.toUri
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
@@ -71,9 +70,9 @@ internal fun ProvideAndroidTimelineMediaActions(content: @Composable () -> Unit)
                                 scope.launch {
                                     clipboard.setClipEntry(
                                         ClipEntry(
-                                            ClipData.newRawUri(
+                                            ClipData.newPlainText(
                                                 mediaLinkLabel,
-                                                media.url.toUri(),
+                                                media.url,
                                             ),
                                         ),
                                     )

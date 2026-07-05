@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Манга ранг-листа</string>
     <string name="illustrations_title">Илустрације</string>
     <string name="manga_title">Манга</string>
+    <string name="media_menu_download">Преузми</string>
+    <string name="media_menu_download_all">Преузми све</string>
+    <string name="media_menu_share_image">Подели слику</string>
+    <string name="media_menu_copy_link">Копирај линк</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Поправи Tranquil дозволе</string>
+    <string name="pixiv_private_following_title">Приватно праћење</string>
+    <string name="pixiv_private_bookmarks_title">Приватни обележивачи</string>
+    <string name="fanbox_supported_title">Подржавам</string>
+    <string name="fanbox_recommended_creators_title">Препоручени аутори</string>
 </resources>

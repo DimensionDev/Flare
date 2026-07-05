@@ -11,6 +11,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
@@ -20,10 +21,13 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.renderVVOText
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
@@ -41,8 +45,8 @@ public class VVOStatusDetailPresenter(
     }
     private val rawStatusFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            require(service is VVODataSource)
-            service.status(statusKey)
+            require(service is PostDataSource)
+            service.postHandler.post(statusKey).toUi()
         }
     }
     private val extendedTextFlow by lazy {
@@ -58,14 +62,13 @@ public class VVOStatusDetailPresenter(
             serviceFlow,
         ) { status, extendedText, service ->
             status.map { item ->
-                if (extendedText is UiState.Success && item is UiTimelineV2.Post) {
+                if (extendedText is UiState.Success) {
                     require(service is VVODataSource)
-                    item.copy(
-                        content =
-                            renderVVOText(
-                                extendedText.data,
-                                service.accountKey,
-                            ),
+                    item.withVvoExtendedText(
+                        renderVVOText(
+                            extendedText.data,
+                            service.accountKey,
+                        ),
                     )
                 } else {
                     item
@@ -80,13 +83,7 @@ public class VVOStatusDetailPresenter(
                 service.statusRepost(statusKey = statusKey).toPagingSource()
             }.flow.map { data ->
                 data.map { item ->
-                    if (item is UiTimelineV2.Post) {
-                        item.copy(
-                            quote = persistentListOf(),
-                        )
-                    } else {
-                        item
-                    }
+                    item.withoutVvoQuotes()
                 }
             }
         }
@@ -127,3 +124,38 @@ public interface VVOStatusDetailState {
     public val comment: PagingState<UiTimelineV2>
     public val repost: PagingState<UiTimelineV2>
 }
+
+private fun UiTimelineV2.withoutVvoQuotes(): UiTimelineV2 {
+    val item = asTimelinePostItem() ?: return this
+    return item.copy(
+        presentation =
+            item.presentation.copy(
+                quotes = persistentListOf(),
+            ),
+    )
+}
+
+private fun UiTimelineV2.withVvoExtendedText(content: UiRichText): UiTimelineV2 =
+    when (this) {
+        is UiTimelineV2.Post -> {
+            copy(content = content)
+        }
+
+        is UiTimelineV2.TimelinePostItem -> {
+            val repost = presentation.repost
+            if (repost != null) {
+                copy(
+                    presentation =
+                        presentation.copy(
+                            repost = repost.copy(content = content),
+                        ),
+                )
+            } else {
+                copy(post = post.copy(content = content))
+            }
+        }
+
+        else -> {
+            this
+        }
+    }

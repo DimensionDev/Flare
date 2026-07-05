@@ -14,7 +14,7 @@ internal class DeepLinkRequest(
     /**
      * A list of path segments
      */
-    val pathSegments: List<String> = uri.rawSegments
+    val pathSegments: List<String> = uri.rawSegments.normalizeRootPathSegments()
 
     /**
      * A map of query name to query value
@@ -23,3 +23,5 @@ internal class DeepLinkRequest(
 
     // TODO add parsing for other Uri components, i.e. fragments, mimeType, action
 }
+
+private fun List<String>.normalizeRootPathSegments(): List<String> = takeUnless { size == 1 && single().isEmpty() }.orEmpty()

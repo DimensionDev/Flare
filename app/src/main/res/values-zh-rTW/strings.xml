@@ -65,9 +65,9 @@
     <string name="settings_appearance_layout_group_title">佈局</string>
     <string name="settings_appearance_layout_group_subtitle">時間軸佈局、導覽與貼文操作</string>
     <string name="settings_appearance_display_group_title">顯示</string>
-    <string name="settings_appearance_display_group_subtitle">時間戳記、來源標籤、連結與瀏覽器行為</string>
+    <string name="settings_appearance_display_group_subtitle">時間戳記、來源標籤與連結預覽</string>
     <string name="settings_appearance_media_group_title">媒體</string>
-    <string name="settings_appearance_media_group_subtitle">媒體可見性、播放與敏感內容</string>
+    <string name="settings_appearance_media_group_subtitle">媒體可見性、播放、敏感內容與儲存位置</string>
     <string name="settings_storage_title">儲存空間</string>
     <string name="settings_storage_subtitle">管理快取檔案、紀錄與備份</string>
     <string name="settings_about_title">關於</string>
@@ -501,8 +501,8 @@
     <string name="save_error">匯出失敗</string>
     <string name="import_completed">匯入完成</string>
     <string name="import_error">匯入失敗</string>
-    <string name="import_confirmation_title">確認匯入</string>
-    <string name="import_confirmation_message">這將從所選檔案匯入資料。現有具有相同 ID 的紀錄將被替換。是否繼續？</string>
+    <string name="import_confirmation_title">匯入備份</string>
+    <string name="import_confirmation_message">這將從所選備份檔案匯入資料。現有具有相同 ID 的紀錄將被替換。是否繼續？</string>
     <string name="tab_settings_add_group">新增群組</string>
     <string name="tab_settings_add_tab">新增分頁</string>
     <string name="tab_settings_edit_group">編輯群組</string>
@@ -581,7 +581,7 @@
     <string name="settings_about_discord" translatable="false">Discord</string>
     <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_ai_config_enable_agent">啟用 AI Agent</string>
-    <string name="settings_ai_config_agent_description">設定 OpenAI 相容模型後，在相關位置顯示 AI Agent 入口。</string>
+    <string name="settings_ai_config_agent_description">開啟後，在已設定 OpenAI 相容模型時，會在 App 內相關位置顯示 AI Agent 功能入口。</string>
     <string name="settings_ai_config_translate_provider_ai">AI</string>
     <string name="settings_ai_config_translate_provider_deepl">DeepL</string>
     <string name="settings_ai_config_translate_provider_libretranslate">LibreTranslate</string>
@@ -646,4 +646,32 @@
     <string name="agent_ui_select_followers_user">選擇: 使用者 (查看 粉絲)</string>
     <string name="agent_ui_select_profile_tabs_user">選擇: 使用者 (查看 個人資料分頁)</string>
     <string name="agent_ui_status_insight_user_placeholder">輸入: 使用者 連結, handle, userKey…</string>
+    <string name="settings_behavior_title">行為</string>
+    <string name="settings_behavior_description">瀏覽器與連結處理偏好</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">修復 Tranquil 權限</string>
+    <string name="gallery_detail_tab_info">資訊</string>
+    <string name="gallery_detail_tab_comments">評論</string>
+    <string name="gallery_detail_tab_recommend">推薦</string>
+    <string name="gallery_detail_comments_title">評論</string>
+    <string name="gallery_detail_recommendations_title">推薦</string>
+    <string name="gallery_detail_view_more">查看更多</string>
+    <string name="gallery_detail_share_content_description">分享</string>
+    <string name="gallery_detail_expand_content_description">展開</string>
+    <string name="settings_media_save_location">媒體儲存位置</string>
+    <string name="settings_media_save_location_description">選擇下載的媒體在此裝置上的儲存位置。</string>
+    <string name="settings_media_save_location_downloads">下載</string>
+    <string name="settings_media_save_location_custom_folder">自訂資料夾</string>
+    <string name="settings_media_save_location_choose_folder">選擇資料夾</string>
+    <string name="settings_media_save_location_reset_downloads">重設為下載資料夾</string>
+    <string name="settings_media_save_location_ask_every_time">每次詢問</string>
+    <string name="pixiv_private_following_title">私人追蹤</string>
+    <string name="pixiv_private_bookmarks_title">私人書籤</string>
+    <string name="deeplink_account_selection_save_default">一律這樣開啟</string>
+    <string name="settings_link_open_defaults_title">連結開啟方式</string>
+    <string name="settings_link_open_defaults_description">依主機選擇支援連結的預設開啟方式</string>
+    <string name="settings_link_open_default_title">%1$s 連結的預設方式</string>
+    <string name="settings_link_open_default_description">選擇 Flare 可處理的支援連結如何開啟</string>
+    <string name="settings_link_open_default_ask_every_time">每次詢問</string>
+    <string name="fanbox_supported_title">支援中</string>
+    <string name="fanbox_recommended_creators_title">推薦創作者</string>
 </resources>

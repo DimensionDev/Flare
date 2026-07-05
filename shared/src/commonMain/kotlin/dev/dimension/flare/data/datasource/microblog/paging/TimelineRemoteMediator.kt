@@ -5,12 +5,13 @@ import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.translation.NoopPreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalPagingApi::class)
@@ -22,7 +23,7 @@ internal class TimelineRemoteMediator(
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
-        DbStatusWithReference,
+        DbPagingTimelineWithStatus,
         DbPagingTimelineWithStatus,
     >(
         database = database,
@@ -108,6 +109,9 @@ internal class TimelineRemoteMediator(
                 .forEach { key ->
                     database
                         .pagingTimelineDao()
+                        .deletePresentationReferences(pagingKey = key)
+                    database
+                        .pagingTimelineDao()
                         .delete(pagingKey = key)
                 }
         }
@@ -131,7 +135,8 @@ internal class TimelineRemoteMediator(
             data
                 .flatMap { item ->
                     listOfNotNull(item.status.status.data) +
-                        item.status.references.mapNotNull { it.status?.data }
+                        item.status.references.mapNotNull { it.status?.data } +
+                        item.presentationReferences.mapNotNull { it.status?.data }
                 }.distinctBy { it.id },
             allowLongText = allowLongText,
         )
@@ -139,35 +144,43 @@ internal class TimelineRemoteMediator(
 }
 
 private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
+    fun UiTimelineV2.TimelinePostItem.key(): Pair<AccountType, MicroBlogKey> = accountType to statusKey
+
+    fun UiTimelineV2.Post.key(): Pair<AccountType, MicroBlogKey> = accountType to statusKey
+
     val rootPosts =
         asSequence()
-            .filterIsInstance<UiTimelineV2.Post>()
-            .associateBy { it.accountType to it.statusKey }
+            .mapNotNull { it.asTimelinePostItem() }
+            .associateBy { it.key() }
     if (rootPosts.isEmpty()) {
         return this
     }
 
-    val collapsedPosts = mutableMapOf<Pair<AccountType, MicroBlogKey>, UiTimelineV2.Post>()
+    val collapsedPosts = mutableMapOf<Pair<AccountType, MicroBlogKey>, UiTimelineV2.TimelinePostItem>()
     val ancestorKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
 
-    fun UiTimelineV2.Post.key(): Pair<AccountType, MicroBlogKey> = accountType to statusKey
-
-    fun UiTimelineV2.Post.directParentKey(): Pair<AccountType, MicroBlogKey>? =
-        parents
+    fun UiTimelineV2.TimelinePostItem.directParentKey(): Pair<AccountType, MicroBlogKey>? =
+        presentation
+            .inlineParents
             .lastOrNull()
             ?.let { it.key() }
-            ?.takeIf { rootPosts.containsKey(it) }
+            ?.takeIf { it in rootPosts }
+            ?: post
+                .references
+                .firstOrNull { it.type == ReferenceType.Reply }
+                ?.let { post.accountType to it.statusKey }
+                ?.takeIf { it in rootPosts }
 
-    fun collapse(start: UiTimelineV2.Post): UiTimelineV2.Post {
+    fun collapse(start: UiTimelineV2.TimelinePostItem): UiTimelineV2.TimelinePostItem {
         val startKey = start.key()
         collapsedPosts[startKey]?.let {
             return it
         }
 
-        val path = mutableListOf<UiTimelineV2.Post>()
+        val path = mutableListOf<UiTimelineV2.TimelinePostItem>()
         val activeKeys = mutableSetOf<Pair<AccountType, MicroBlogKey>>()
         var current = start
-        var collapsed: UiTimelineV2.Post
+        var collapsed: UiTimelineV2.TimelinePostItem
 
         while (true) {
             val currentKey = current.key()
@@ -190,7 +203,13 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
                 collapsed =
                     if (directParentKey in activeKeys) {
                         current.copy(
-                            parents = current.parents.dropLast(1).toImmutableList(),
+                            presentation =
+                                current.presentation.copy(
+                                    inlineParents =
+                                        current.presentation.inlineParents
+                                            .dropLast(1)
+                                            .toImmutableList(),
+                                ),
                         )
                     } else {
                         current
@@ -207,13 +226,16 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
         for (post in path.asReversed()) {
             collapsed =
                 post.copy(
-                    parents =
-                        (
-                            post.parents.dropLast(1) +
-                                collapsed.parents +
-                                listOf(collapsed)
-                        ).distinctBy { it.statusKey }
-                            .toImmutableList(),
+                    presentation =
+                        post.presentation.copy(
+                            inlineParents =
+                                (
+                                    post.presentation.inlineParents.dropLast(1) +
+                                        collapsed.presentation.inlineParents +
+                                        listOf(collapsed.displayPost)
+                                ).distinctBy { it.statusKey }
+                                    .toImmutableList(),
+                        ),
                 )
             collapsedPosts[post.key()] = collapsed
         }
@@ -222,8 +244,9 @@ private fun List<UiTimelineV2>.collapseReplyChains(): List<UiTimelineV2> {
 
     val collapsedItems =
         map { item ->
-            if (item is UiTimelineV2.Post) {
-                item.key() to collapse(item)
+            val post = item.asTimelinePostItem()
+            if (post != null) {
+                post.key() to collapse(post)
             } else {
                 null to item
             }

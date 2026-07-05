@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -55,7 +56,7 @@ internal class LoadStatusContextTool(
                     pageSize = STATUS_CONTEXT_PAGE_SIZE,
                     request = PagingRequest.Refresh,
                 ).data
-                .filterIsInstance<UiTimelineV2.Post>()
+                .mapNotNull { it.contentPostOrNull() }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Status context",
@@ -827,7 +828,7 @@ private suspend fun List<AgentSearchTarget>.loadPosts(
                             pageSize = POST_TOOL_PAGE_SIZE,
                             request = PagingRequest.Refresh,
                         ).data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.contentPostOrNull() }
                 }.getOrElse { emptyList() }
             }
         }.awaitAll()
@@ -925,7 +926,7 @@ private suspend fun List<Pair<AgentSearchTarget, ProfileTab>>.loadProfileTabPost
                             pageSize = POST_TOOL_PAGE_SIZE,
                             request = PagingRequest.Refresh,
                         ).data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.contentPostOrNull() }
                 }.getOrElse { emptyList() }
             }
         }.awaitAll()
@@ -983,7 +984,7 @@ private suspend fun List<AgentSearchTarget>.searchPosts(query: String): List<UiT
                             pageSize = STATUS_SEARCH_PAGE_SIZE,
                             request = PagingRequest.Refresh,
                         ).data
-                        .filterIsInstance<UiTimelineV2.Post>()
+                        .mapNotNull { it.contentPostOrNull() }
                 }.getOrElse { emptyList() }
             }
         }.awaitAll()
@@ -1099,16 +1100,10 @@ private fun UiTimelineV2.Post.toInsightPostToolText(): String =
             appendLine("image${index + 1}Url: ${image.url}")
             appendLine("image${index + 1}Description: ${image.description.orEmpty()}")
         }
-        if (quote.isNotEmpty()) {
-            appendLine("quotes:")
-            quote.take(MAX_TOOL_RELATED_POSTS).forEachIndexed { index, post ->
-                appendLine("- #${index + 1} ${post.user?.handle?.raw.orEmpty()}: ${post.content.raw.take(MAX_TOOL_RELATED_TEXT_LENGTH)}")
-            }
-        }
-        if (parents.isNotEmpty()) {
-            appendLine("parents:")
-            parents.take(MAX_TOOL_RELATED_POSTS).forEachIndexed { index, post ->
-                appendLine("- #${index + 1} ${post.user?.handle?.raw.orEmpty()}: ${post.content.raw.take(MAX_TOOL_RELATED_TEXT_LENGTH)}")
+        if (references.isNotEmpty()) {
+            appendLine("references:")
+            references.take(MAX_TOOL_RELATED_POSTS).forEachIndexed { index, reference ->
+                appendLine("- #${index + 1} ${reference.type.name}: ${reference.statusKey}")
             }
         }
     }

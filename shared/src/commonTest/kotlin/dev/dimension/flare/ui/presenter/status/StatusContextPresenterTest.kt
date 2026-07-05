@@ -20,16 +20,19 @@ class StatusContextPresenterTest {
     private val detailKey = MicroBlogKey("detail", "mastodon.example")
 
     @Test
-    fun filterDetailParents_removesParentsFromDetailPostEvenBeforeCurrentLoads() {
+    fun filterDetailParents_keepsInlineParentsOnDetailPost() {
         val parent =
             createPost(
                 id = "parent",
                 createdAt = "2024-01-01T00:00:00Z",
             )
         val detail =
-            createPost(
-                id = detailKey.id,
-                createdAt = "2024-01-01T00:01:00Z",
+            createItem(
+                post =
+                    createPost(
+                        id = detailKey.id,
+                        createdAt = "2024-01-01T00:01:00Z",
+                    ),
                 parents = listOf(parent),
             )
 
@@ -39,12 +42,12 @@ class StatusContextPresenterTest {
                 currentCreatedAt = null,
             )
 
-        val post = filtered as UiTimelineV2.Post
-        assertTrue(post.parents.isEmpty())
+        val post = filtered as UiTimelineV2.TimelinePostItem
+        assertEquals(listOf(parent.statusKey), post.presentation.inlineParents.map { it.statusKey })
     }
 
     @Test
-    fun filterDetailParents_removesCurrentAndOlderParentsFromDescendants() {
+    fun filterDetailParents_keepsInlineParentsOnDescendants() {
         val olderParent =
             createPost(
                 id = "older-parent",
@@ -54,7 +57,6 @@ class StatusContextPresenterTest {
             createPost(
                 id = detailKey.id,
                 createdAt = "2024-01-01T00:01:00Z",
-                parents = listOf(olderParent),
             )
         val newerParent =
             createPost(
@@ -62,9 +64,12 @@ class StatusContextPresenterTest {
                 createdAt = "2024-01-01T00:02:00Z",
             )
         val descendant =
-            createPost(
-                id = "descendant",
-                createdAt = "2024-01-01T00:03:00Z",
+            createItem(
+                post =
+                    createPost(
+                        id = "descendant",
+                        createdAt = "2024-01-01T00:03:00Z",
+                    ),
                 parents = listOf(olderParent, detail, newerParent),
             )
 
@@ -74,23 +79,23 @@ class StatusContextPresenterTest {
                 currentCreatedAt = detail.createdAt,
             )
 
-        val post = filtered as UiTimelineV2.Post
-        assertEquals(listOf(newerParent.statusKey), post.parents.map { it.statusKey })
+        val post = filtered as UiTimelineV2.TimelinePostItem
+        assertEquals(
+            listOf(olderParent.statusKey, detail.statusKey, newerParent.statusKey),
+            post.presentation.inlineParents.map { it.statusKey },
+        )
     }
 
     private fun createPost(
         id: String,
         createdAt: String,
-        parents: List<UiTimelineV2.Post> = emptyList(),
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            message = null,
             platformType = PlatformType.Mastodon,
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,
             user = null,
-            quote = persistentListOf(),
             content = id.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
@@ -102,8 +107,19 @@ class StatusContextPresenterTest {
             visibility = null,
             replyToHandle = null,
             references = persistentListOf(),
-            parents = parents.toPersistentList(),
             clickEvent = ClickEvent.Noop,
             accountType = accountType,
+        )
+
+    private fun createItem(
+        post: UiTimelineV2.Post,
+        parents: List<UiTimelineV2.Post>,
+    ): UiTimelineV2.TimelinePostItem =
+        UiTimelineV2.TimelinePostItem(
+            post = post,
+            presentation =
+                UiTimelineV2.PostPresentation(
+                    inlineParents = parents.toPersistentList(),
+                ),
         )
 }

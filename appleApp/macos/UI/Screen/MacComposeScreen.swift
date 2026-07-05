@@ -281,7 +281,7 @@ struct MacComposeScreen: View {
     private var referencePostSection: some View {
         if let replyState = presenter.state.replyState,
            case .success(let reply) = onEnum(of: replyState),
-           let content = reply.data as? UiTimelineV2.Post {
+           let content = reply.data.timelineContentPost {
             ComposeReferenceStatusPreview(data: content)
         }
     }

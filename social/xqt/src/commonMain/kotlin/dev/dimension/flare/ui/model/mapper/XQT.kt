@@ -40,6 +40,7 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
@@ -56,6 +57,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.render.RenderBlockStyle
@@ -236,7 +238,7 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                     }
 
                     post != null -> {
-                        post.copy(message = messageItem)
+                        post.withPresentationMessage(messageItem)
                     }
 
                     else -> {
@@ -278,31 +280,30 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                             ),
                         legacy = tweet,
                     ).renderStatus(accountKey)
-                data.copy(
-                    message =
-                        UiTimelineV2.Message(
-                            user = renderedUser,
-                            statusKey =
-                                MicroBlogKey(
-                                    id = notification?.id.orEmpty(),
-                                    host = accountKey.host,
-                                ),
-                            icon = UiIcon.Retweet,
-                            type =
-                                UiTimelineV2.Message.Type.Localized(
-                                    UiTimelineV2.Message.Type.Localized.MessageId.Mention,
-                                ),
-                            createdAt = data.createdAt,
-                            clickEvent =
-                                ClickEvent.Deeplink(
-                                    DeeplinkRoute.Profile
-                                        .User(
-                                            accountType = AccountType.Specific(accountKey),
-                                            userKey = renderedUser.key,
-                                        ),
-                                ),
-                            accountType = AccountType.Specific(accountKey),
-                        ),
+                data.withPresentationMessage(
+                    UiTimelineV2.Message(
+                        user = renderedUser,
+                        statusKey =
+                            MicroBlogKey(
+                                id = notification?.id.orEmpty(),
+                                host = accountKey.host,
+                            ),
+                        icon = UiIcon.Retweet,
+                        type =
+                            UiTimelineV2.Message.Type.Localized(
+                                UiTimelineV2.Message.Type.Localized.MessageId.Mention,
+                            ),
+                        createdAt = data.createdAt,
+                        clickEvent =
+                            ClickEvent.Deeplink(
+                                DeeplinkRoute.Profile
+                                    .User(
+                                        accountType = AccountType.Specific(accountKey),
+                                        userKey = renderedUser.key,
+                                    ),
+                            ),
+                        accountType = AccountType.Specific(accountKey),
+                    ),
                 )
             } else {
                 null
@@ -311,18 +312,22 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
         .orEmpty()
 }
 
-internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
+private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message): UiTimelineV2 {
+    val post = asTimelinePostItem() ?: return this
+    return post.copy(
+        presentation =
+            post.presentation.copy(
+                message = message,
+            ),
+    )
+}
+
+internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val retweetUnion = this.getRetweet()
     val quoteUnion = retweetUnion?.getQuoted() ?: this.getQuoted()
     val quote = quoteUnion?.toTweetOrNull()?.renderStatus(accountKey = accountKey)
     val retweet = retweetUnion?.toTweetOrNull()?.renderStatus(accountKey, quote = quote)
     val currentTweet = renderStatus(accountKey, quote = quote)
-    val actualTweet =
-        if (retweet != null) {
-            currentTweet.copy(internalRepost = retweet)
-        } else {
-            currentTweet
-        }
     val user = currentTweet.user
     val message =
         if (retweet != null && user != null) {
@@ -348,10 +353,23 @@ internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
         } else {
             null
         }
-    return if (message != null) {
-        actualTweet.copy(message = message)
+    val presentation =
+        UiTimelineV2.PostPresentation(
+            message = message,
+            quotes = listOfNotNull(quote).toImmutableList(),
+            repost = retweet,
+        )
+    return if (
+        presentation.message != null ||
+        presentation.quotes.isNotEmpty() ||
+        presentation.repost != null
+    ) {
+        UiTimelineV2.TimelinePostItem(
+            post = currentTweet,
+            presentation = presentation,
+        )
     } else {
-        actualTweet
+        currentTweet
     }
 }
 
@@ -383,12 +401,6 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
                 accountKey = accountKey,
                 quote = quote,
             )
-    val actualTweet =
-        if (retweet != null) {
-            currentTweet.copy(internalRepost = retweet)
-        } else {
-            currentTweet
-        }
     val user = currentTweet.user
     val message =
         if (retweet != null && user != null) {
@@ -414,10 +426,25 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
         } else {
             null
         }
-    return if (message != null) {
-        actualTweet.copy(message = message)
+    val presentation =
+        UiTimelineV2.PostPresentation(
+            message = message,
+            inlineParents = parentStatuses,
+            quotes = listOfNotNull(quote).toImmutableList(),
+            repost = retweet,
+        )
+    return if (
+        presentation.message != null ||
+        presentation.inlineParents.isNotEmpty() ||
+        presentation.quotes.isNotEmpty() ||
+        presentation.repost != null
+    ) {
+        UiTimelineV2.TimelinePostItem(
+            post = currentTweet,
+            presentation = presentation,
+        )
     } else {
-        actualTweet
+        currentTweet
     }
 }
 
@@ -650,14 +677,40 @@ internal fun Tweet.renderStatus(
         }
 
     return UiTimelineV2.Post(
-        message = null,
         platformType = PlatformType.xQt,
         images = medias,
         sensitive = legacy?.possiblySensitive == true,
         contentWarning = null,
         user = user,
         sourceLanguages = sourceLanguages,
-        quote = listOfNotNull(actualQuote).toImmutableList(),
+        references =
+            buildList {
+                legacy?.in_reply_to_status_id_str?.let {
+                    add(
+                        UiTimelineV2.Post.Reference(
+                            statusKey = MicroBlogKey(it, accountKey.host),
+                            type = ReferenceType.Reply,
+                        ),
+                    )
+                }
+                actualParents.forEach { parent ->
+                    add(
+                        UiTimelineV2.Post.Reference(
+                            statusKey = parent.statusKey,
+                            type = ReferenceType.Reply,
+                        ),
+                    )
+                }
+                actualQuote?.let {
+                    add(
+                        UiTimelineV2.Post.Reference(
+                            statusKey = it.statusKey,
+                            type = ReferenceType.Quote,
+                        ),
+                    )
+                }
+            }.distinctBy { it.type to it.statusKey }
+                .toImmutableList(),
         content = content,
         actions =
             listOfNotNull(
@@ -800,7 +853,6 @@ internal fun Tweet.renderStatus(
         sourceChannel = null,
         visibility = null,
         replyToHandle = replyToHandle,
-        parents = actualParents,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Status.Detail(

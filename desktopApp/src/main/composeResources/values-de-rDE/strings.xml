@@ -191,7 +191,7 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Timeline-Layout, Navigation und Beitragsaktionen</string>
     <string name="settings_appearance_display_group_title">Anzeige</string>
-    <string name="settings_appearance_display_group_subtitle">Zeitstempel, Quell-Badges, Links und Browser-Verhalten</string>
+    <string name="settings_appearance_display_group_subtitle">Zeitstempel, Quell-Badges und Link-Vorschauen</string>
     <string name="settings_appearance_media_group_title">Medien</string>
     <string name="settings_appearance_media_group_subtitle">Medien-Sichtbarkeit, Wiedergabe und sensible Inhalte</string>
     <string name="settings_storage_title">Speicher</string>
@@ -247,8 +247,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Nicht festgelegt</string>
     <string name="settings_ai_config_entable_translation">KI-Übersetzung aktivieren</string>
     <string name="settings_ai_config_translation_description">KI anstelle von Google Translate verwenden. Übersetzungen können länger dauern.</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">AI Agent aktivieren</string>
+    <string name="settings_ai_config_agent_description">Nach der Aktivierung erscheint die AI-Agent-Funktion an den passenden Stellen in der App, sobald ein OpenAI-kompatibles Modell konfiguriert wurde.</string>
     <string name="settings_ai_config_enable_pre_translation">Auto-Übersetzung aktivieren</string>
     <string name="settings_ai_config_pre_translation_description">Neu geladene Timeline- und Profilinhalte im Hintergrund übersetzen und Ergebnisse cachen. Dies kann eine große Anzahl von Token verbrauchen.</string>
     <string name="settings_ai_config_enable_tldr">KI-Zusammenfassungen aktivieren</string>
@@ -524,8 +524,8 @@
     <string name="save_error">Export fehlgeschlagen</string>
     <string name="import_completed">Import abgeschlossen</string>
     <string name="import_error">Import fehlgeschlagen</string>
-    <string name="import_confirmation_title">Import bestätigen</string>
-    <string name="import_confirmation_message">Dies importiert Daten aus der gewählten Datei. Vorhandene Datensätze mit übereinstimmenden IDs werden ersetzt. Fortfahren?</string>
+    <string name="import_confirmation_title">Backup importieren</string>
+    <string name="import_confirmation_message">Dies importiert Daten aus der ausgewählten Backup-Datei. Vorhandene Datensätze mit übereinstimmenden IDs werden ersetzt. Fortfahren?</string>
     <string name="channel_title">Kanal</string>
     <string name="misskey_channel_tab_following">Folge ich</string>
     <string name="misskey_channel_tab_favorites">Favoriten</string>
@@ -588,4 +588,24 @@
     <string name="agent_ui_select_followers_user">Auswählen: Benutzer (anzeigen Follower)</string>
     <string name="agent_ui_select_profile_tabs_user">Auswählen: Benutzer (anzeigen Profil-Tabs)</string>
     <string name="agent_ui_status_insight_user_placeholder">Eingeben: Benutzer Link, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">Blockiertes Profil</string>
+    <string name="profile_blocked_gate_description">Du hast diesen Benutzer blockiert. Seine Tabs und Timeline bleiben verborgen, bis du sie anzeigen lässt.</string>
+    <string name="profile_blocked_gate_show">Anzeigen</string>
+    <string name="pixiv_private_following_title">Private Folge ich</string>
+    <string name="pixiv_private_bookmarks_title">Private Lesezeichen</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil-Berechtigungen reparieren</string>
+    <string name="settings_behavior_title">Verhalten</string>
+    <string name="settings_behavior_description">Einstellungen für Browser- und Linkbehandlung</string>
+    <string name="article_content_gate_subscription_title">Unterstützung erforderlich</string>
+    <string name="article_content_gate_subscription_description">Dieser Artikel ist nur für Unterstützer verfügbar. Öffne ihn im Browser, um den Ersteller zu unterstützen und den vollständigen Inhalt zu lesen.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Dieser Artikel ist nur für Unterstützer ab ¥%1$d verfügbar. Öffne ihn im Browser, um den Ersteller zu unterstützen und den vollständigen Inhalt zu lesen.</string>
+    <string name="deeplink_account_selection_save_default">Immer so öffnen</string>
+    <string name="settings_link_open_defaults_title">Linköffnung</string>
+    <string name="settings_link_open_defaults_description">Standardwerte für unterstützte Links nach Host auswählen</string>
+    <string name="settings_link_open_default_title">Standard für %1$s-Links</string>
+    <string name="settings_link_open_default_description">Wähle aus, wie unterstützte Links geöffnet werden, wenn Flare sie verarbeiten kann</string>
+    <string name="settings_link_open_default_ask_every_time">Jedes Mal fragen</string>
+    <string name="media_download_started">Download gestartet</string>
+    <string name="fanbox_supported_title">Unterstützt</string>
+    <string name="fanbox_recommended_creators_title">Empfohlene Ersteller</string>
 </resources>

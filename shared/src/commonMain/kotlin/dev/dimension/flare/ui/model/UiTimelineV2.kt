@@ -37,6 +37,7 @@ public sealed class UiTimelineV2 {
         when (this) {
             is Feed -> "feed"
             is Post -> "post"
+            is TimelinePostItem -> "timeline_post_item"
             is User -> "user"
             is UserList -> "user_list"
             is Message -> "message"
@@ -191,8 +192,56 @@ public sealed class UiTimelineV2 {
 
     @Serializable
     @Immutable
-    public data class Post public constructor(
+    public data class TimelinePostItem public constructor(
+        val post: Post,
+        val presentation: PostPresentation = PostPresentation(),
+        @Transient
+        override val itemKey: String? = post.itemKey,
+    ) : UiTimelineV2() {
+        override val statusKey: MicroBlogKey = post.statusKey
+        override val createdAt: UiDateTime = post.createdAt
+        override val accountType: AccountType = post.accountType
+        override val searchText: String =
+            buildString {
+                append(post.searchText)
+                presentation.inlineParents.forEach { parent ->
+                    append(" ")
+                    append(parent.searchText)
+                }
+                presentation.quotes.forEach { quote ->
+                    append(" ")
+                    append(quote.searchText)
+                }
+                presentation.repost?.let { repost ->
+                    append(" ")
+                    append(repost.searchText)
+                }
+            }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(post.renderSummaryHash())
+                .add(presentation.renderSummaryHash())
+                .build()
+        }
+
+        val displayPost: Post by lazy {
+            presentation.repost ?: post
+        }
+    }
+
+    @Serializable
+    @Immutable
+    public data class PostPresentation public constructor(
         val message: Message? = null,
+        val inlineParents: SerializableImmutableList<Post> = persistentListOf(),
+        val quotes: SerializableImmutableList<Post> = persistentListOf(),
+        val repost: Post? = null,
+    )
+
+    @Serializable
+    @Immutable
+    public data class Post public constructor(
         val platformType: PlatformType,
         val images: SerializableImmutableList<UiMedia>,
         val sensitive: Boolean,
@@ -201,8 +250,6 @@ public sealed class UiTimelineV2 {
         public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
-        @Transient
-        val quote: SerializableImmutableList<Post> = persistentListOf(),
         val content: UiRichText,
         val actions: SerializableImmutableList<ActionMenu>,
         val poll: UiPoll?,
@@ -214,10 +261,6 @@ public sealed class UiTimelineV2 {
         val visibility: Visibility? = null,
         val replyToHandle: String? = null,
         public val references: SerializableImmutableList<Reference> = persistentListOf(),
-        @Transient
-        val parents: SerializableImmutableList<Post> = persistentListOf(),
-        @Transient
-        public val internalRepost: Post? = null,
         public val clickEvent: ClickEvent,
         public val mediaClickPolicy: MediaClickPolicy = MediaClickPolicy.OpenStatusMedia,
         public override val accountType: AccountType,
@@ -238,16 +281,6 @@ public sealed class UiTimelineV2 {
                     append(it)
                     append(" ")
                 }
-                quote.forEach { post ->
-                    post.content.raw.let { quoteContent ->
-                        append(quoteContent)
-                        append(" ")
-                    }
-                }
-                internalRepost?.content?.raw?.let { repostContent ->
-                    append(repostContent)
-                    append(" ")
-                }
             }
 
         val onClicked: ClickContext.() -> Unit by lazy {
@@ -260,14 +293,12 @@ public sealed class UiTimelineV2 {
         override val renderHash: Int by lazy {
             renderHashBuilder()
                 .add(itemKey)
-                .add(message?.renderHash)
                 .add(platformType)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
                 .add(contentWarning?.renderSummaryHash())
                 .add(sourceLanguages)
                 .add(translationDisplayState)
-                .add(quote.renderSummaryHash { it.renderSummaryHash() })
                 .add(content.renderSummaryHash())
                 .add(actions.renderSummaryHash { it.renderSummaryHash() })
                 .add(poll?.renderSummaryHash())
@@ -280,8 +311,6 @@ public sealed class UiTimelineV2 {
                 .add(visibility)
                 .add(replyToHandle)
                 .add(references.renderSummaryHash { it.renderSummaryHash() })
-                .add(parents.renderSummaryHash { it.renderSummaryHash() })
-                .add(internalRepost?.renderSummaryHash())
                 .add(mediaClickPolicy)
                 .add(accountType)
                 .build()
@@ -394,8 +423,23 @@ internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 =
         is UiTimelineV2.Feed -> copy(itemKey = itemKey)
         is UiTimelineV2.Message -> copy(itemKey = itemKey)
         is UiTimelineV2.Post -> copy(itemKey = itemKey)
+        is UiTimelineV2.TimelinePostItem -> copy(itemKey = itemKey)
         is UiTimelineV2.User -> copy(itemKey = itemKey)
         is UiTimelineV2.UserList -> copy(itemKey = itemKey)
+    }
+
+public fun UiTimelineV2.asTimelinePostItem(): UiTimelineV2.TimelinePostItem? =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> this
+        is UiTimelineV2.Post -> UiTimelineV2.TimelinePostItem(post = this, itemKey = itemKey)
+        else -> null
+    }
+
+public fun UiTimelineV2.contentPostOrNull(): UiTimelineV2.Post? =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> displayPost
+        is UiTimelineV2.Post -> this
+        else -> null
     }
 
 private fun renderHashBuilder(): RenderHashBuilder = RenderHashBuilder()
@@ -436,7 +480,6 @@ private fun UiTimelineV2.Message.Type.renderSummaryHash(): Int =
 private fun UiTimelineV2.Post.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(itemKey)
-        .add(message?.renderHash)
         .add(platformType)
         .add(user?.renderSummaryHash())
         .add(contentWarning?.renderSummaryHash())
@@ -453,6 +496,14 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
         .add(translationDisplayState)
         .add(actions.renderSummaryHash { it.renderSummaryHash() })
         .add(createdAt.value.toEpochMilliseconds())
+        .build()
+
+private fun UiTimelineV2.PostPresentation.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(message?.renderHash)
+        .add(inlineParents.renderSummaryHash { it.renderSummaryHash() })
+        .add(quotes.renderSummaryHash { it.renderSummaryHash() })
+        .add(repost?.renderSummaryHash())
         .build()
 
 private fun UiProfile.renderSummaryHash(): Int =

@@ -21,8 +21,19 @@ public struct TimelineView: View {
             FeedView(data: feed)
         case .post(let post):
             VStack {
-                messageView(post.message, topMessageOnly: false)
                 StatusView(data: post, isDetail: detailStatusKey == post.statusKey, showTranslate: showTranslate)
+            }
+        case .timelinePostItem(let item):
+            let bodyPost = item.presentation.repost ?? item.post
+            VStack {
+                messageView(item.presentation.message, topMessageOnly: false)
+                StatusView(
+                    data: bodyPost,
+                    isDetail: detailStatusKey == bodyPost.statusKey,
+                    showTranslate: showTranslate,
+                    inlineParents: Array(item.presentation.inlineParents),
+                    quotes: Array(item.presentation.quotes)
+                )
             }
         case .user(let user):
             VStack {

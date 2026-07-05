@@ -45,17 +45,18 @@ class InitialTextResolverTest {
 
     @Test
     fun `resolves quote text for vvo quote`() {
+        val quote = createPost()
         val post =
             createPost(
                 platformType = PlatformType.VVo,
                 user = createUser(name = "Alice", handle = UiHandle("alice", "weibo.cn")),
                 content = text("<span>Hello world</span>"),
-                quote = persistentListOf(createPost()),
             )
 
         val result =
             InitialTextResolver.resolve(
                 post = post,
+                quotes = persistentListOf(quote),
                 composeStatus = ComposeStatus.Quote(post.statusKey),
                 currentUserHandle = UiHandle("current", "example.com"),
                 selectedAccountKey = null,
@@ -124,16 +125,13 @@ class InitialTextResolverTest {
         statusKey: MicroBlogKey = MicroBlogKey("post", "example.com"),
         user: UiProfile = createUser(),
         content: UiRichText = text("<span>content</span>"),
-        quote: kotlinx.collections.immutable.ImmutableList<UiTimelineV2.Post> = persistentListOf(),
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            message = null,
             platformType = platformType,
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,
             user = user,
-            quote = quote,
             content = content,
             actions = persistentListOf<ActionMenu>(),
             poll = null,
@@ -144,7 +142,6 @@ class InitialTextResolverTest {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
-            parents = persistentListOf(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(user.key),
         )

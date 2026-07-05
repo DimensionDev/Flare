@@ -419,4 +419,13 @@
     <string name="pixiv_ranking_day_manga_title">Manga-ranglys</string>
     <string name="illustrations_title">Illustrasies</string>
     <string name="manga_title">Manga</string>
+    <string name="media_menu_download">Laai af</string>
+    <string name="media_menu_download_all">Laai alles af</string>
+    <string name="media_menu_share_image">Deel beeld</string>
+    <string name="media_menu_copy_link">Kopieer skakel</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Stel Tranquil-toestemmings reg</string>
+    <string name="pixiv_private_following_title">Privaat volglys</string>
+    <string name="pixiv_private_bookmarks_title">Privaat boekmerke</string>
+    <string name="fanbox_supported_title">Ondersteun</string>
+    <string name="fanbox_recommended_creators_title">Aanbevole skeppers</string>
 </resources>

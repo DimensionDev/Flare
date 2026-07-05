@@ -191,7 +191,7 @@
     <string name="settings_appearance_layout_group_title">Layout</string>
     <string name="settings_appearance_layout_group_subtitle">Layout della timeline, navigazione e azioni sui post</string>
     <string name="settings_appearance_display_group_title">Visualizzazione</string>
-    <string name="settings_appearance_display_group_subtitle">Timestamp, badge della sorgente, link e comportamento del browser</string>
+    <string name="settings_appearance_display_group_subtitle">Timestamp, badge sorgente e anteprime dei link</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Visibilità dei media, riproduzione e contenuti sensibili</string>
     <string name="settings_storage_title">Archiviazione</string>
@@ -247,8 +247,8 @@
     <string name="settings_ai_config_value_empty_placeholder">Non impostato</string>
     <string name="settings_ai_config_entable_translation">Abilita traduzione tramite IA</string>
     <string name="settings_ai_config_translation_description">Usa l\'IA invece di Google Translate. Le traduzioni potrebbero richiedere più tempo.</string>
-    <string name="settings_ai_config_enable_agent">启用 AI agent</string>
-    <string name="settings_ai_config_agent_description">开启后,在已配置 OpenAI 兼容模型时,会在应用内相关位置显示 AI agent 功能入口。</string>
+    <string name="settings_ai_config_enable_agent">Abilita AI Agent</string>
+    <string name="settings_ai_config_agent_description">Una volta abilitata, la funzione AI Agent apparirà nei punti pertinenti dell’app quando sarà configurato un modello compatibile con OpenAI.</string>
     <string name="settings_ai_config_enable_pre_translation">Abilita traduzione automatica</string>
     <string name="settings_ai_config_pre_translation_description">Traduci i nuovi contenuti della timeline e dei profili in background e memorizza i risultati nella cache. Questo può consumare un numero elevato di token.</string>
     <string name="settings_ai_config_enable_tldr">Abilita riepiloghi tramite IA</string>
@@ -524,8 +524,8 @@
     <string name="save_error">Esportazione fallita</string>
     <string name="import_completed">Importazione completata</string>
     <string name="import_error">Importazione fallita</string>
-    <string name="import_confirmation_title">Conferma importazione</string>
-    <string name="import_confirmation_message">Verranno importati i dati dal file selezionato. I record esistenti con ID corrispondenti verranno sostituiti. Continuare?</string>
+    <string name="import_confirmation_title">Importa backup</string>
+    <string name="import_confirmation_message">Questo importerà i dati dal file di backup selezionato. I record esistenti con ID corrispondenti verranno sostituiti. Continuare?</string>
     <string name="channel_title">Canale</string>
     <string name="misskey_channel_tab_following">Seguiti</string>
     <string name="misskey_channel_tab_favorites">Preferiti</string>
@@ -588,4 +588,24 @@
     <string name="agent_ui_select_followers_user">Seleziona: utente (vedere follower)</string>
     <string name="agent_ui_select_profile_tabs_user">Seleziona: utente (vedere schede del profilo)</string>
     <string name="agent_ui_status_insight_user_placeholder">Inserisci: utente link, handle, userKey…</string>
+    <string name="profile_blocked_gate_title">Profilo bloccato</string>
+    <string name="profile_blocked_gate_description">Hai bloccato questo utente. Le sue schede e la timeline sono nascoste finché non scegli di mostrarle.</string>
+    <string name="profile_blocked_gate_show">Mostra</string>
+    <string name="pixiv_private_following_title">Seguiti privati</string>
+    <string name="pixiv_private_bookmarks_title">Segnalibri privati</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Correggi i permessi di Tranquil</string>
+    <string name="settings_behavior_title">Comportamento</string>
+    <string name="settings_behavior_description">Preferenze per browser e gestione dei link</string>
+    <string name="article_content_gate_subscription_title">Supporto richiesto</string>
+    <string name="article_content_gate_subscription_description">Questo articolo è disponibile solo per i sostenitori. Aprilo nel browser per supportare il creatore e leggere il contenuto completo.</string>
+    <string name="article_content_gate_subscription_description_with_fee">Questo articolo è disponibile solo per i sostenitori da ¥%1$d. Aprilo nel browser per supportare il creatore e leggere il contenuto completo.</string>
+    <string name="deeplink_account_selection_save_default">Apri sempre in questo modo</string>
+    <string name="settings_link_open_defaults_title">Apertura dei link</string>
+    <string name="settings_link_open_defaults_description">Scegli le impostazioni predefinite per i link supportati per host</string>
+    <string name="settings_link_open_default_title">Predefinito per i link %1$s</string>
+    <string name="settings_link_open_default_description">Scegli come aprire i link supportati quando Flare può gestirli</string>
+    <string name="settings_link_open_default_ask_every_time">Chiedi ogni volta</string>
+    <string name="media_download_started">Download avviato</string>
+    <string name="fanbox_supported_title">Sostenuti</string>
+    <string name="fanbox_recommended_creators_title">Creatori consigliati</string>
 </resources>

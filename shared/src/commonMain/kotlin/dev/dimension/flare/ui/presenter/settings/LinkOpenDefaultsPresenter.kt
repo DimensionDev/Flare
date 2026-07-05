@@ -116,7 +116,9 @@ public class LinkOpenDefaultsPresenter : PresenterBase<LinkOpenDefaultsPresenter
                         spec
                             .deepLinks(service.accountKey)
                             .mapNotNull { deepLink ->
-                                Url(deepLink.uriPattern).host.takeIf { it.isNotBlank() }
+                                Url(deepLink.uriPattern).host.takeIf { host ->
+                                    host.isNotBlank() && !host.contains('{') && !host.contains('}')
+                                }
                             }.distinct()
                     if (hosts.isEmpty()) {
                         return@mapNotNull null

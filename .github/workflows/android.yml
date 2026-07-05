@@ -6,18 +6,16 @@ on:
       - master
       - release
       - develop
-      - 'version/**'
     tags:
-      - '**'
+      - "**"
     paths-ignore:
-      - '**.md'
-      - '**.yml'
+      - "**.md"
+      - "**.yml"
   pull_request:
     branches:
       - master
       - release
       - develop
-      - 'version/**'
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -37,7 +35,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          distribution: 'jetbrains'
+          distribution: "jetbrains"
           java-version: 25
 
       - name: Setup Android SDK
@@ -56,22 +54,15 @@ jobs:
       - name: Run Tests
         run: ./gradlew allTests -x wasmJsBrowserTest
 
-      - name: Resolve build version
-        run: |
-          build_version="$GITHUB_REF_NAME"
-          if [[ "$GITHUB_REF" == refs/heads/version/* ]]; then
-            build_version="${GITHUB_REF#refs/heads/version/}"
-          fi
-
-          echo "BUILD_VERSION=$build_version" >> "$GITHUB_ENV"
-          echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
-
       # Build with Gradle
       - name: Build with Gradle
+        env:
+          BUILD_NUMBER: ${{github.run_number}}
+          BUILD_VERSION: ${{github.ref_name}}
         run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint --stacktrace
 
       - name: Publish to Google Play
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
@@ -96,7 +87,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          distribution: 'adopt'
+          distribution: "adopt"
           java-version: 25
 
       - name: Setup Android SDK

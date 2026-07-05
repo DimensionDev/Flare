@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’ha afegit Flare AI Agent amb xat, informació de publicacions i informació de perfils.</li>
-                <li>S’ha afegit compatibilitat amb Pixiv i una nova vista de detall de galeria.</li>
-                <li>S’han afegit accions de publicació personalitzables i opcions de visualització d’avisos de contingut.</li>
-                <li>S’han millorat les notificacions, les línies de temps RSS, la reproducció de vídeo i l’estabilitat de les línies de temps.</li>
+                <li>S\'ha afegit compatibilitat amb FANBOX.</li>
+                <li>La línia de temps ara admet el menú de pressió llarga en imatges/vídeos: baixar, baixar-ho tot, compartir i copiar l\'enllaç.</li>
+                <li>S\'ha afegit compatibilitat per canviar la ubicació de desament dels mitjans.</li>
+                <li>S\'ha afegit un flux de reinici de sessió dirigit quan caduca la sessió.</li>
+                <li>Correccions d\'errors i millores de rendiment.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

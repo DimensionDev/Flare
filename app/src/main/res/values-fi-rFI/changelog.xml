@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty Flare AI Agent, jossa on keskustelu, julkaisujen oivallukset ja profiilioivallukset.</li>
-                <li>Lisätty Pixiv-tuki ja uusi gallerian tietonäkymä.</li>
-                <li>Lisätty mukautettavat julkaisutoiminnot ja sisältövaroitusten näyttöasetukset.</li>
-                <li>Parannettu ilmoituksia, RSS-aikajanoja, videotoistoa ja aikajanojen vakautta.</li>
+                <li>FANBOX-tuki lisätty.</li>
+                <li>Aikajana tukee nyt kuvien/videoiden pitkän painalluksen valikkoa: lataa, lataa kaikki, jaa ja kopioi linkki.</li>
+                <li>Lisätty tuki median tallennussijainnin muuttamiseen.</li>
+                <li>Lisätty kohdistettu uudelleenkirjautuminen vanhentuneen istunnon jälkeen.</li>
+                <li>Virhekorjauksia ja suorituskykyparannuksia.</li>
             </ul>
         ]]></string>
 </resources>

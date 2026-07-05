@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Flare AI Agent mit Chat, Beitrags-Insights und Profil-Insights hinzugefügt.</li>
-                <li>Pixiv-Unterstützung und eine neue Galerie-Detailansicht hinzugefügt.</li>
-                <li>Anpassbare Beitragsaktionen und Anzeigeoptionen für Inhaltswarnungen hinzugefügt.</li>
-                <li>Benachrichtigungen, RSS-Timelines, Videowiedergabe und Timeline-Stabilität verbessert.</li>
+                <li>FANBOX-Unterstützung hinzugefügt.</li>
+                <li>Die Timeline unterstützt jetzt Menüs beim langen Drücken von Bildern/Videos: Herunterladen, alle herunterladen, teilen und Link kopieren.</li>
+                <li>Der Speicherort für Medien kann jetzt geändert werden.</li>
+                <li>Gezieltes erneutes Anmelden nach abgelaufenen Sitzungen hinzugefügt.</li>
+                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>
 </resources>

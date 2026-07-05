@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Přidán Flare AI Agent s chatem, přehledy příspěvků a přehledy profilů.</li>
-                <li>Přidána podpora Pixiv a nové zobrazení detailu galerie.</li>
-                <li>Přidáno přizpůsobení akcí příspěvků a možnosti zobrazení varování před obsahem.</li>
-                <li>Vylepšena oznámení, RSS časové osy, přehrávání videa a stabilita časových os.</li>
+                <li>Přidána podpora FANBOX.</li>
+                <li>Časová osa nyní podporuje nabídku po dlouhém stisknutí obrázků/videí: stáhnout, stáhnout vše, sdílet a zkopírovat odkaz.</li>
+                <li>Přidána možnost změnit umístění pro ukládání médií.</li>
+                <li>Přidán cílený tok opětovného přihlášení po vypršení relace.</li>
+                <li>Opravy chyb a vylepšení výkonu.</li>
             </ul>
         ]]></string>
 </resources>

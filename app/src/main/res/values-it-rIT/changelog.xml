@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunto Flare AI Agent con chat, approfondimenti sui post e approfondimenti sui profili.</li>
-                <li>Aggiunto il supporto a Pixiv e una nuova schermata dettagli galleria.</li>
-                <li>Aggiunte opzioni per personalizzare le azioni dei post e la visualizzazione degli avvisi di contenuto.</li>
-                <li>Migliorati notifiche, timeline RSS, riproduzione video e stabilità delle timeline.</li>
+                <li>Aggiunto il supporto a FANBOX.</li>
+                <li>La timeline ora supporta il menu con pressione prolungata su immagini/video: scarica, scarica tutto, condividi e copia link.</li>
+                <li>Aggiunto il supporto per modificare la posizione di salvataggio dei media.</li>
+                <li>Aggiunto un flusso di nuovo accesso mirato dopo la scadenza della sessione.</li>
+                <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bentornato!</string>

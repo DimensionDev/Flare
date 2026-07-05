@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>Hozzáadva a Flare AI Agent csevegéssel, bejegyzés- és profilbetekintésekkel.</li>
-                <li>Hozzáadva a Pixiv-támogatás és egy új galéria-részletek nézet.</li>
-                <li>Hozzáadva a testreszabható bejegyzésműveletek és tartalomfigyelmeztetés-megjelenítési beállítások.</li>
-                <li>Javultak az értesítések, az RSS-idővonalak, a videólejátszás és az idővonalak stabilitása.</li>
+                <li>FANBOX-támogatás hozzáadva.</li>
+                <li>Az idővonal mostantól támogatja a képek/videók hosszan nyomására megjelenő menüt: letöltés, összes letöltése, megosztás és hivatkozás másolása.</li>
+                <li>Hozzáadva a média mentési helyének módosítása.</li>
+                <li>Hozzáadva célzott újbóli bejelentkezési folyamat lejárt munkamenet esetén.</li>
+                <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Üdv újra!</string>

@@ -71,6 +71,7 @@ struct FeedView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .onTapGesture {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }

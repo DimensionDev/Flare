@@ -86,6 +86,7 @@ public struct EditRssSheet: View {
                             if let favIcon = rssFeed.icon, !favIcon.isEmpty {
                                 NetworkImage(data: favIcon)
                                     .frame(width: 24, height: 24)
+                                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                             } else {
                                 Image(fontAwesome: .squareRss)
                             }
@@ -358,6 +359,7 @@ private struct SelectableSubscriptionTypeRow: View {
             if let icon, !icon.isEmpty {
                 NetworkImage(data: icon)
                     .frame(width: 24, height: 24)
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             } else {
                 Image(fontAwesome: .squareRss)
             }

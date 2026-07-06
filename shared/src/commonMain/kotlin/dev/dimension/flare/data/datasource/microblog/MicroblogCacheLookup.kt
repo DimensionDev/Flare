@@ -6,6 +6,7 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import kotlinx.coroutines.flow.firstOrNull
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
@@ -46,5 +47,6 @@ internal class DatabaseMicroblogCacheLookup(
                 statusKey = statusKey,
                 accountType = accountType as DbAccountType,
             ).firstOrNull()
-            ?.content as? UiTimelineV2.Post
+            ?.content
+            ?.contentPostOrNull()
 }

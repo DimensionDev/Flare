@@ -2,6 +2,8 @@ import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 
+private let faviconCornerRadius: CGFloat = 4
+
 public struct TimelineTabTitle: View {
     private let title: UiText
 
@@ -40,6 +42,7 @@ public struct TabIcon: View {
         case .url(let url):
             NetworkImage(data: url.url)
                 .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
         case .mixed(let mixed):
             if iconOnly {
                 MaterialTabIcon(icon: mixed.icon)
@@ -62,6 +65,7 @@ public struct TabIcon: View {
         case .favIcon(let favIcon):
             FavTabIcon(host: favIcon.host)
                 .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
         }
     }
 }
@@ -120,6 +124,7 @@ public struct FavTabIcon: View {
     public var body: some View {
         StateView(state: presenter.state) { url in
             NetworkImage(data: .init(url))
+                .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
         } loadingContent: {
             Image(fontAwesome: .globe)
                 .resizable()

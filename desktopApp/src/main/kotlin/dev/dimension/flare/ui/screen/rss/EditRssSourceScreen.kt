@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.delete
@@ -21,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
@@ -291,7 +293,10 @@ fun EditRssSourceScreen(
                                             NetworkImage(
                                                 it,
                                                 contentDescription = null,
-                                                modifier = Modifier.size(24.dp),
+                                                modifier =
+                                                    Modifier
+                                                        .size(24.dp)
+                                                        .clip(RoundedCornerShape(4.dp)),
                                             )
                                         }
                                     },
@@ -397,7 +402,10 @@ fun EditRssSourceScreen(
                                         NetworkImage(
                                             source.favIcon,
                                             contentDescription = null,
-                                            modifier = Modifier.size(24.dp),
+                                            modifier =
+                                                Modifier
+                                                    .size(24.dp)
+                                                    .clip(RoundedCornerShape(4.dp)),
                                         )
                                     },
                                     heading = {
@@ -443,7 +451,10 @@ fun EditRssSourceScreen(
                                                 NetworkImage(
                                                     it,
                                                     contentDescription = null,
-                                                    modifier = Modifier.size(24.dp),
+                                                    modifier =
+                                                        Modifier
+                                                            .size(24.dp)
+                                                            .clip(RoundedCornerShape(4.dp)),
                                                 )
                                             }
                                         },

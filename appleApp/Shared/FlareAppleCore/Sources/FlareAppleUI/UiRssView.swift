@@ -21,6 +21,7 @@ public struct UiRssView: View {
                 if let favIcon = data.favIcon, !favIcon.isEmpty {
                     NetworkImage(data: favIcon)
                         .frame(width: 24, height: 24)
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                 } else {
                     Image(fontAwesome: .squareRss)
                 }

@@ -110,6 +110,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.brandIcon
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -669,8 +670,8 @@ fun ComposeDialog(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    val content = state as? UiTimelineV2.Post
-                    if (content is UiTimelineV2.Post) {
+                    val content = state.contentPostOrNull()
+                    if (content != null) {
                         Card(
                             modifier =
                                 Modifier

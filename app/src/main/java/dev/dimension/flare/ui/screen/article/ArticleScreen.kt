@@ -92,7 +92,9 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.render.UiDateTime
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
@@ -128,6 +130,12 @@ internal fun ArticleScreen(
     }
     val listState = rememberLazyListState()
     val uriHandler = LocalUriHandler.current
+    val openExternalUrl =
+        remember(uriHandler) {
+            { url: String ->
+                uriHandler.openUri(DeeplinkRoute.OpenLinkDirectly(url).toUri())
+            }
+        }
     val context = LocalContext.current
     val downloadScope = koinInject<CoroutineScope>()
     val mediaDownloadManager = koinInject<AndroidDownloadManager>()
@@ -246,7 +254,7 @@ internal fun ArticleScreen(
                         IconButton(
                             enabled = sourceUrl != null,
                             onClick = {
-                                sourceUrl?.let(uriHandler::openUri)
+                                sourceUrl?.let(openExternalUrl)
                             },
                         ) {
                             FAIcon(
@@ -294,7 +302,7 @@ internal fun ArticleScreen(
                     onTitleMeasured = {
                         titleHeightPx = it
                     },
-                    onOpenUrl = uriHandler::openUri,
+                    onOpenUrl = openExternalUrl,
                     onDownloadFile = { file ->
                         downloadArticleFile(
                             block = file,

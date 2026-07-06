@@ -70,6 +70,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asText
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -428,7 +429,7 @@ internal fun ProfileScreen(
                                                             vertical = 4.dp,
                                                         ).clipToBounds()
                                                         .clickable {
-                                                            if (item.status is UiTimelineV2.Post) {
+                                                            if (item.status.contentPostOrNull() != null) {
                                                                 onMediaClick(
                                                                     item.statusKey,
                                                                     item.index,

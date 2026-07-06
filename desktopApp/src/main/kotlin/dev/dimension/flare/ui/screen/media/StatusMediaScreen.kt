@@ -85,6 +85,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -610,7 +611,11 @@ private fun presenter(
 
     val medias =
         state.status.map {
-            (it as? UiTimelineV2.Post)?.images.orEmpty().toImmutableList()
+            it
+                .contentPostOrNull()
+                ?.images
+                .orEmpty()
+                .toImmutableList()
         }
 
     object : StatusState by state {
@@ -622,7 +627,7 @@ private fun presenter(
         }
 
         fun save(item: UiMedia) {
-            val status = state.status.takeSuccess() as? UiTimelineV2.Post
+            val status = state.status.takeSuccess()?.contentPostOrNull()
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"
                 val fileName =

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tumblr OAuth Redirect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+  </style>
+</head>
+<body>
+  <p id="status">Redirecting...</p>
+  <script>
+  (function() {
+    function getQueryAndHash() {
+      const search = window.location.search;
+      const hash = window.location.hash;
+      if (search && search.length > 1) {
+        return search;
+      }
+      if (hash && hash.length > 1) {
+        return '?' + hash.substring(1);
+      }
+      return '';
+    }
+
+    const params = getQueryAndHash();
+    const target = 'flare://Callback/SignIn/Tumblr' + params;
+
+    try {
+      window.location.replace(target);
+    } catch (_) {
+      const status = document.getElementById('status');
+      status.innerHTML = 'If you are not redirected automatically, <a href="' + target + '">tap here</a>.';
+    }
+  })();
+  </script>
+</body>
+</html>

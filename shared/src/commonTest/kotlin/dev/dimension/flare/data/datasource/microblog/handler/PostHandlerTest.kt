@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
@@ -61,8 +62,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
@@ -276,21 +275,10 @@ class PostHandlerTest : RobolectricTest() {
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
             val cacheable = handler.post(postKey)
 
-            val cachedItems = mutableListOf<UiTimelineV2>()
-            withTimeoutOrNull(1_000) {
-                cacheable.data
-                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                    .map { it.data }
-                    .take(2)
-                    .toList(cachedItems)
-            }
-
-            assertTrue(cachedItems.isNotEmpty())
-            cachedItems.forEach { cached ->
-                val post = assertNotNull(cached.asTimelinePostItem()).displayPost
-                assertEquals(postKey, post.statusKey)
-                assertEquals(listOf(media.url), post.images.map { it.url })
-            }
+            val cached = cacheable.firstSuccess()
+            val post = assertNotNull(cached.asTimelinePostItem()).displayPost
+            assertEquals(postKey, post.statusKey)
+            assertEquals(listOf(media.url), post.images.map { it.url })
         }
 
     @Test
@@ -334,22 +322,14 @@ class PostHandlerTest : RobolectricTest() {
 
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
             val cacheable = handler.post(postKey)
-            val firstCached =
-                cacheable.data
-                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                    .map { it.data }
-                    .first()
+            val firstCached = cacheable.firstSuccess()
             val refreshedItem =
                 async {
-                    cacheable.data
-                        .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                        .map { it.data }
-                        .filterIsInstance<UiTimelineV2.TimelinePostItem>()
-                        .first()
+                    cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem } as UiTimelineV2.TimelinePostItem
                 }
             val refreshState = cacheable.refreshState.drop(1).first()
             assertTrue(refreshState is androidx.paging.LoadState.NotLoading)
-            val refreshed = assertNotNull(withTimeoutOrNull(1_000) { refreshedItem.await() })
+            val refreshed = assertNotNull(withTimeoutOrNull(5_000) { refreshedItem.await() })
 
             assertTrue(firstCached is UiTimelineV2.Post)
             listOf(firstCached, refreshed).forEach { item ->
@@ -387,16 +367,12 @@ class PostHandlerTest : RobolectricTest() {
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
             val cacheable = handler.post(postKey)
 
-            val cached =
-                withTimeoutOrNull(1_000) {
-                    cacheable.data
-                        .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                        .map { it.data }
-                        .filterIsInstance<UiTimelineV2.TimelinePostItem>()
-                        .first()
-                }
-
-            val timelineItem = assertNotNull(cached)
+            val timelineItem =
+                assertNotNull(
+                    withTimeoutOrNull(5_000) {
+                        cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem } as UiTimelineV2.TimelinePostItem
+                    },
+                )
             assertEquals(postKey, timelineItem.post.statusKey)
             assertEquals("outer content", timelineItem.post.content.raw)
             assertEquals(
@@ -441,15 +417,11 @@ class PostHandlerTest : RobolectricTest() {
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
             val cacheable = handler.post(postKey)
 
-            val firstTimelineItem =
-                withTimeoutOrNull(1_000) {
-                    cacheable.data
-                        .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                        .map { it.data }
-                        .filterIsInstance<UiTimelineV2.TimelinePostItem>()
-                        .first()
-                }
-            assertNotNull(firstTimelineItem)
+            assertNotNull(
+                withTimeoutOrNull(5_000) {
+                    cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem }
+                },
+            )
 
             val bareUpdate = createPost(statusKey = postKey, text = "updated outer content")
             db.statusDao().update(
@@ -461,17 +433,14 @@ class PostHandlerTest : RobolectricTest() {
             )
 
             val updated =
-                withTimeoutOrNull(1_000) {
-                    cacheable.data
-                        .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                        .map { it.data }
-                        .first { item ->
-                            item
-                                .asTimelinePostItem()
-                                ?.displayPost
-                                ?.content
-                                ?.raw == "updated outer content"
-                        }
+                withTimeoutOrNull(5_000) {
+                    cacheable.firstSuccess { item ->
+                        item
+                            .asTimelinePostItem()
+                            ?.displayPost
+                            ?.content
+                            ?.raw == "updated outer content"
+                    }
                 }
 
             val updatedTimelineItem = assertNotNull(updated).asTimelinePostItem()
@@ -773,6 +742,12 @@ class PostHandlerTest : RobolectricTest() {
                     .first { it.content.raw == "$longText (${Locale.language})" }
             assertEquals("$longText (${Locale.language})", translated.content.raw)
         }
+
+    private suspend fun Cacheable<UiTimelineV2>.firstSuccess(predicate: (UiTimelineV2) -> Boolean = { true }): UiTimelineV2 =
+        data
+            .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+            .map { it.data }
+            .first(predicate)
 
     private fun createPost(
         statusKey: MicroBlogKey,

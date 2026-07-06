@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlin.native.HiddenFromObjC
 
@@ -65,35 +64,30 @@ public class PostHandler(
             },
             cacheSource = {
                 val dbAccountType = accountType as DbAccountType
-                merge(
-                    combine(
-                        database
-                            .statusDao()
-                            .getWithReferences(postKey, dbAccountType)
-                            .filterNotNull(),
-                        translationDisplay.optionsFlow(translationDisplayFlow),
-                    ) { status, translationDisplayOptions ->
+                combine(
+                    database
+                        .statusDao()
+                        .getWithReferences(postKey, dbAccountType),
+                    database
+                        .pagingTimelineDao()
+                        .get(pagingKey, accountType = dbAccountType),
+                    translationDisplay.optionsFlow(translationDisplayFlow),
+                ) { status, timelineStatus, translationDisplayOptions ->
+                    timelineStatus?.let {
                         TimelinePagingMapper.toUi(
-                            item = status,
+                            item = it,
                             pagingKey = pagingKey,
                             translationDisplayOptions = translationDisplayOptions,
                         )
-                    },
-                    combine(
-                        database
-                            .pagingTimelineDao()
-                            .get(pagingKey, accountType = dbAccountType)
-                            .filterNotNull(),
-                        translationDisplay.optionsFlow(translationDisplayFlow),
-                    ) { status, translationDisplayOptions ->
-                        TimelinePagingMapper
-                            .toUi(
-                                item = status,
-                                pagingKey = pagingKey,
-                                translationDisplayOptions = translationDisplayOptions,
-                            ).asPostOnlyStatus()
-                    },
-                ).distinctUntilChanged()
+                    } ?: status?.let {
+                        TimelinePagingMapper.toUi(
+                            item = it,
+                            pagingKey = pagingKey,
+                            translationDisplayOptions = translationDisplayOptions,
+                        )
+                    }
+                }.filterNotNull()
+                    .distinctUntilChanged()
             },
         )
     }
@@ -140,10 +134,4 @@ private fun PostTranslationDisplay.optionsFlow(userSettingsFlow: Flow<Translatio
                 ),
             )
         }
-    }
-
-private fun UiTimelineV2.asPostOnlyStatus(): UiTimelineV2 =
-    when (this) {
-        is UiTimelineV2.TimelinePostItem -> post
-        else -> this
     }

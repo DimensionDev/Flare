@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asText
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -718,8 +719,7 @@ private fun ProfileMediaTab(
                             .clip(MaterialTheme.shapes.medium)
                             .clipToBounds()
                             .clickable {
-                                val content = item.status
-                                if (content is UiTimelineV2.Post) {
+                                item.status.contentPostOrNull()?.let { content ->
                                     when (content.mediaClickPolicy) {
                                         UiTimelineV2.Post.MediaClickPolicy.OpenStatusMedia -> {
                                             onItemClicked(

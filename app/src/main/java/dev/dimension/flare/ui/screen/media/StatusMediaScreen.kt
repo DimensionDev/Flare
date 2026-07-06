@@ -126,6 +126,7 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -180,7 +181,7 @@ internal fun StatusMediaScreen(
             accountType = accountType,
         )
     }
-    val status = state.status.takeSuccess() as? UiTimelineV2.Post
+    val status = state.status.takeSuccess()?.contentPostOrNull()
     MediaViewerScreen(
         medias = state.medias,
         initialIndex = index,
@@ -1394,7 +1395,8 @@ private fun statusMediaPresenter(
                 .onSuccess {
                     medias =
                         UiState.Success(
-                            (it as? UiTimelineV2.Post)
+                            it
+                                .contentPostOrNull()
                                 ?.images
                                 .orEmpty()
                                 .toImmutableList(),

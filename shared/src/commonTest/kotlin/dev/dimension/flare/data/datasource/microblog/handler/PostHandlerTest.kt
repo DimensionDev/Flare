@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
+import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.common.TestFormatter
@@ -41,6 +42,8 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
@@ -59,8 +62,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
@@ -238,7 +239,7 @@ class PostHandlerTest : RobolectricTest() {
         }
 
     @Test
-    fun postOnlyPagingCacheEmitsPostForStatusConsumers() =
+    fun postOnlyPagingCacheEmitsDisplayPostForStatusConsumers() =
         runTest {
             startTestKoin(this@runTest)
 
@@ -274,21 +275,183 @@ class PostHandlerTest : RobolectricTest() {
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
             val cacheable = handler.post(postKey)
 
-            val cachedItems = mutableListOf<UiTimelineV2>()
-            withTimeoutOrNull(1_000) {
-                cacheable.data
-                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                    .map { it.data }
-                    .take(2)
-                    .toList(cachedItems)
-            }
+            val cached = cacheable.firstSuccess()
+            val post = assertNotNull(cached.asTimelinePostItem()).displayPost
+            assertEquals(postKey, post.statusKey)
+            assertEquals(listOf(media.url), post.images.map { it.url })
+        }
 
-            assertTrue(cachedItems.isNotEmpty())
-            cachedItems.forEach { cached ->
-                val post = assertNotNull(cached as? UiTimelineV2.Post)
+    @Test
+    fun postCacheKeepsMediaContentAcrossPostToTimelineItemTransition() =
+        runTest {
+            startTestKoin(this@runTest)
+
+            val media =
+                UiMedia.Image(
+                    url = "https://test.social/media/full.png",
+                    previewUrl = "https://test.social/media/preview.png",
+                    description = null,
+                    height = 100f,
+                    width = 100f,
+                    sensitive = false,
+                )
+            val cachedPost = createPost(statusKey = postKey, images = persistentListOf(media), text = "cached post")
+            db.statusDao().insert(
+                DbStatus(
+                    statusKey = postKey,
+                    accountType = accountType,
+                    content = cachedPost,
+                    renderHash = cachedPost.renderHash,
+                    text = cachedPost.searchText,
+                ),
+            )
+            fakeLoader.nextStatus =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(statusKey = postKey, images = persistentListOf(media), text = "refreshed post"),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            quotes =
+                                persistentListOf(
+                                    createPost(
+                                        statusKey = MicroBlogKey(id = "quote-1", host = "test.social"),
+                                        text = "quoted content",
+                                    ),
+                                ),
+                        ),
+                )
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+            val firstCached = cacheable.firstSuccess()
+            val refreshedItem =
+                async {
+                    cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem } as UiTimelineV2.TimelinePostItem
+                }
+            val refreshState = cacheable.refreshState.drop(1).first()
+            assertTrue(refreshState is androidx.paging.LoadState.NotLoading)
+            val refreshed = assertNotNull(withTimeoutOrNull(5_000) { refreshedItem.await() })
+
+            assertTrue(firstCached is UiTimelineV2.Post)
+            listOf(firstCached, refreshed).forEach { item ->
+                val post = assertNotNull(item.contentPostOrNull())
                 assertEquals(postKey, post.statusKey)
                 assertEquals(listOf(media.url), post.images.map { it.url })
             }
+        }
+
+    @Test
+    fun postOnlyPagingCachePreservesQuotePresentation() =
+        runTest {
+            startTestKoin(this@runTest)
+
+            val quoteKey = MicroBlogKey(id = "quote-1", host = "test.social")
+            val item =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(statusKey = postKey, text = "outer content"),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            quotes = persistentListOf(createPost(statusKey = quoteKey, text = "quoted content")),
+                        ),
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        item,
+                        pagingKey = "post_only_$postKey",
+                    ),
+                ),
+            )
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+
+            val timelineItem =
+                assertNotNull(
+                    withTimeoutOrNull(5_000) {
+                        cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem } as UiTimelineV2.TimelinePostItem
+                    },
+                )
+            assertEquals(postKey, timelineItem.post.statusKey)
+            assertEquals("outer content", timelineItem.post.content.raw)
+            assertEquals(
+                quoteKey,
+                timelineItem.presentation.quotes
+                    .single()
+                    .statusKey,
+            )
+            assertEquals(
+                "quoted content",
+                timelineItem.presentation.quotes
+                    .single()
+                    .content.raw,
+            )
+        }
+
+    @Test
+    fun postOnlyPagingPresentationWinsOverStatusTableUpdates() =
+        runTest {
+            startTestKoin(this@runTest)
+
+            val quoteKey = MicroBlogKey(id = "quote-1", host = "test.social")
+            val item =
+                UiTimelineV2.TimelinePostItem(
+                    post = createPost(statusKey = postKey, text = "outer content"),
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            quotes = persistentListOf(createPost(statusKey = quoteKey, text = "quoted content")),
+                        ),
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        item,
+                        pagingKey = "post_only_$postKey",
+                    ),
+                ),
+            )
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+
+            assertNotNull(
+                withTimeoutOrNull(5_000) {
+                    cacheable.firstSuccess { it is UiTimelineV2.TimelinePostItem }
+                },
+            )
+
+            val bareUpdate = createPost(statusKey = postKey, text = "updated outer content")
+            db.statusDao().update(
+                statusKey = postKey,
+                accountType = accountType,
+                content = bareUpdate,
+                renderHash = bareUpdate.renderHash,
+                text = bareUpdate.searchText,
+            )
+
+            val updated =
+                withTimeoutOrNull(5_000) {
+                    cacheable.firstSuccess { item ->
+                        item
+                            .asTimelinePostItem()
+                            ?.displayPost
+                            ?.content
+                            ?.raw == "updated outer content"
+                    }
+                }
+
+            val updatedTimelineItem = assertNotNull(updated).asTimelinePostItem()
+            assertNotNull(updatedTimelineItem)
+            assertEquals("updated outer content", updatedTimelineItem.displayPost.content.raw)
+            assertEquals(
+                quoteKey,
+                updatedTimelineItem.presentation.quotes
+                    .single()
+                    .statusKey,
+            )
         }
 
     @Test
@@ -574,10 +737,17 @@ class PostHandlerTest : RobolectricTest() {
             val translated =
                 cacheable.data
                     .filterIsInstance<CacheState.Success<UiTimelineV2>>()
-                    .first { (it.data as? UiTimelineV2.Post)?.content?.raw == "$longText (${Locale.language})" }
-                    .data as UiTimelineV2.Post
+                    .map { it.data.asTimelinePostItem()?.displayPost }
+                    .filterNotNull()
+                    .first { it.content.raw == "$longText (${Locale.language})" }
             assertEquals("$longText (${Locale.language})", translated.content.raw)
         }
+
+    private suspend fun Cacheable<UiTimelineV2>.firstSuccess(predicate: (UiTimelineV2) -> Boolean = { true }): UiTimelineV2 =
+        data
+            .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+            .map { it.data }
+            .first(predicate)
 
     private fun createPost(
         statusKey: MicroBlogKey,

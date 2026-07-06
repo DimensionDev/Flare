@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -757,7 +758,10 @@ private fun ServiceSelectItem(
                     NetworkImage(
                         instance.iconUrl,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier =
+                            Modifier
+                                .size(24.dp)
+                                .clip(RoundedCornerShape(4.dp)),
                     )
                 } else if (instance != null) {
                     FAIcon(

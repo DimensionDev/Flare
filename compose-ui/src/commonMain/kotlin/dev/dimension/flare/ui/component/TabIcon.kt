@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -85,6 +87,8 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+
+private val FavIconShape = RoundedCornerShape(4.dp)
 
 @Composable
 public fun Text(
@@ -223,7 +227,8 @@ public fun TabIcon(
                 contentDescription = text,
                 modifier =
                     modifier
-                        .size(size),
+                        .size(size)
+                        .clip(FavIconShape),
                 contentScale = ContentScale.Fit,
             )
         }
@@ -260,15 +265,19 @@ public fun FavIcon(
                     },
                 modifier =
                     modifier
-                        .size(size),
+                        .size(size)
+                        .clip(FavIconShape),
                 contentScale = ContentScale.Fit,
             )
         }.onLoading {
-            AvatarComponent(
-                null,
-                size = size,
-                modifier = Modifier.placeholder(true),
-            )
+            Box(
+                modifier =
+                    modifier
+                        .size(size)
+                        .clip(FavIconShape)
+                        .placeholder(true),
+            ) {
+            }
         }
 }
 

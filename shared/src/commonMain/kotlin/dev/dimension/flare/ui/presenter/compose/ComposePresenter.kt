@@ -357,7 +357,9 @@ public class ComposePresenter(
             .map { statusState ->
                 statusState.map { post ->
                     val timelinePost = post.asTimelinePostItem()
-                    if (timelinePost != null && timelinePost.displayPost.platformType == PlatformType.VVo) {
+                    if (timelinePost != null && timelinePost.displayPost.platformType == PlatformType.VVo &&
+                        status is ComposeStatus.Quote
+                    ) {
                         timelinePost.presentation.quotes.firstOrNull() ?: timelinePost.displayPost
                     } else {
                         post

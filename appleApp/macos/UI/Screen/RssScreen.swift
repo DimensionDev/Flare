@@ -422,7 +422,7 @@ private struct RssTimelineItemDetailScaffold: View {
             if let selection {
                 RssDetailScreen(
                     url: selection.url,
-                    descriptionHtml: selection.descriptionHtml,
+                    descriptionHtml: nil,
                     descriptionTitle: selection.title
                 )
                 .id(selection.id)

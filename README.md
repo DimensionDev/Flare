@@ -12,7 +12,7 @@
 ![badge-Linux](https://img.shields.io/badge/Linux-AppImage-black)
 ![badge-Web](https://img.shields.io/badge/Web-Svelte-black)
 
-Flare is an open-source, privacy-first social client that brings Mastodon, Misskey, Bluesky, X, Nostr, and RSS into one unified timeline. It supports cross-posting, lists, feeds, DMs, RSS management, and AI-powered features such as translation and summaries. Built with Kotlin Multiplatform, Flare shares its core logic across Android, iOS, macOS, Windows, and Linux, turning fragmented social feeds into a personal information hub.
+Flare is an open-source, privacy-first social client that brings Mastodon, Misskey, Bluesky, X, Pixiv, Fanbox, Nostr, and RSS into one unified timeline. It supports cross-posting, lists, feeds, DMs, RSS management, and AI-powered features such as translation and agents. Built with Kotlin Multiplatform, Flare shares its core logic across Android, iOS, macOS, Windows, and Linux, turning fragmented social feeds into a personal information hub.
 
 <a href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="190"/>
@@ -23,12 +23,12 @@ Flare is an open-source, privacy-first social client that brings Mastodon, Missk
 <a href='https://github.com/DimensionDev/Flare/releases/latest'><img alt='Download AppImage' src='docs/appimage_badge.svg' width=150/></a>
 
 ## Features
- - Unified social inbox: Flare brings Mastodon, Misskey, Bluesky, X, and RSS together in one place, so users can follow fragmented communities through a single timeline.
+ - Unified social inbox: Flare brings Mastodon, Misskey, Bluesky, X, Pixiv, Fanbox, Nostr and RSS together in one place, so users can follow fragmented communities through a single timeline.
  - Mixed timeline experience: It merges content from multiple accounts and platforms into a coherent feed, reducing context switching between apps.
  - Cross-platform by design: Built with Kotlin Multiplatform, Flare shares core logic across Android, iOS, macOS, Windows, and Linux.
  - Rich platform support: Beyond basic timelines, it supports features such as polls, lists, bookmarks/favorites, Misskey antennas, Bluesky feeds and DMs, and RSS management.
  - Cross-posting workflow: Users can publish to multiple platforms at once, making it practical for creators and heavy social media users.
- - AI-assisted reading: Flare includes AI-powered capabilities such as translation and summaries to help users catch up on content faster.
+ - Built in AI Agent: Configure OpenAI-compatible or on-device AI, enable summaries, or ask for post or profile insights, chat with Flare’s agent, and query local cache/history.
  - Privacy-first approach: As a FOSS client, it emphasizes user control with features like anonymous mode, local filtering, local history, and transparent data handling.
 
 ## Roadmap
@@ -52,7 +52,7 @@ Here're some features we're planning to implement in the future.
  - Run `./gradlew installDebug` to build and install the debug version of the app
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
-### iOS
+### iOS/macOS
  - Make sure you have JDK 25 installed
  - Make sure you have a Mac with Xcode 26 installed
  - open `appleApp/Flare.xcodeproj` in Xcode

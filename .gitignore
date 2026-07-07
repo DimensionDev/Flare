@@ -16,6 +16,7 @@ local.properties
 /.idea
 *.jks
 signing.properties
+secret.properties
 
 build/
 */Podfile.lock

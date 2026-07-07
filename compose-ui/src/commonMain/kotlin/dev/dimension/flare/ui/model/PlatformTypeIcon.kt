@@ -8,6 +8,7 @@ import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
 import compose.icons.fontawesomeicons.brands.Pix
 import compose.icons.fontawesomeicons.brands.Pixiv
+import compose.icons.fontawesomeicons.brands.Tumblr
 import compose.icons.fontawesomeicons.brands.Weibo
 import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.solid.Image
@@ -24,6 +25,7 @@ public val PlatformType.brandIcon: ImageVector
             PlatformType.Bluesky -> FontAwesomeIcons.Brands.Bluesky
             PlatformType.Pixiv -> FontAwesomeIcons.Brands.Pixiv
             PlatformType.Fanbox -> FontAwesomeIcons.Brands.Pixiv
+            PlatformType.Tumblr -> FontAwesomeIcons.Brands.Tumblr
             PlatformType.xQt -> FontAwesomeIcons.Brands.XTwitter
             PlatformType.VVo -> FontAwesomeIcons.Brands.Weibo
         }

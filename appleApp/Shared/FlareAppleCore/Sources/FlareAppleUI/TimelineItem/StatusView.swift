@@ -476,6 +476,10 @@ public struct StatusView: View {
                     Image(fontAwesome: .pixiv)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                case .tumblr:
+                    Image(fontAwesome: .squareRss)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             if !isDetail {

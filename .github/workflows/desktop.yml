@@ -6,7 +6,6 @@ on:
       - master
       - release
       - develop
-      - "version/**"
     tags:
       - "**"
     paths-ignore:
@@ -17,7 +16,6 @@ on:
       - master
       - release
       - develop
-      - "version/**"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -44,13 +42,13 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: import certs
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: apple-actions/import-codesign-certs@v6
         with:
           p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
           p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
       - name: Install macOS Provision Profile
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           echo "$MACOS_EMBEDDED_PROVISION" > "$RUNNER_TEMP/native-macos.provisionprofile.b64"
@@ -64,7 +62,7 @@ jobs:
         env:
           MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
       - name: Resolve native macOS signing identities
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           set -euo pipefail
 
@@ -101,14 +99,9 @@ jobs:
       - name: Resolve native macOS version
         run: |
           marketing_version="$(sed -n 's/^versionName=//p' fdroid.properties | head -n 1)"
-          ref_version="$GITHUB_REF_NAME"
 
-          if [[ "$GITHUB_REF" == refs/heads/version/* ]]; then
-            ref_version="${GITHUB_REF#refs/heads/version/}"
-          fi
-
-          if [[ "$ref_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            marketing_version="$ref_version"
+          if [[ "$GITHUB_REF_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            marketing_version="$GITHUB_REF_NAME"
           fi
 
           if [ -z "$marketing_version" ]; then
@@ -119,7 +112,7 @@ jobs:
           echo "NATIVE_MACOS_MARKETING_VERSION=$marketing_version" >> "$GITHUB_ENV"
           echo "NATIVE_MACOS_BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
       - name: Build native macOS app
-        if: ${{ ! startsWith(github.ref, 'refs/tags/') && ! startsWith(github.ref, 'refs/heads/version/') }}
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         working-directory: ./appleApp
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
@@ -138,7 +131,7 @@ jobs:
             CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER" \
             CODE_SIGNING_ALLOWED=NO
       - name: Archive native macOS app
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         working-directory: ./appleApp
         env:
           FIREBASE_CRASHLYTICS_UPLOAD_SYMBOLS: ${{ startsWith(github.ref, 'refs/tags/') && '1' || '0' }}
@@ -163,7 +156,7 @@ jobs:
             MARKETING_VERSION="$NATIVE_MACOS_MARKETING_VERSION" \
             CURRENT_PROJECT_VERSION="$NATIVE_MACOS_BUILD_NUMBER"
       - name: Package native macOS app
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           set -euo pipefail
 
@@ -178,7 +171,7 @@ jobs:
           pkg_path="appleApp/build/native-macos/pkg/Flare-native-macOS-$safe_ref.pkg"
           productbuild --sign "$NATIVE_MACOS_INSTALLER_SIGNING_IDENTITY" --component "$app_path" /Applications "$pkg_path"
       - name: Upload native macOS package
-        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/version/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v6
         with:
           name: Native-macOS-package

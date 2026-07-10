@@ -63,6 +63,9 @@
     <string name="delete_status_title">删除</string>
     <string name="delete_status_message">确定要删除此动态吗？</string>
     <string name="compose_close_confirm_title">保存草稿？</string>
+    <string name="compose_cross_platform_title">跨平台发布？</string>
+    <string name="compose_cross_platform_quote_message">该账号无法直接引用原帖。Flare 将发布原帖截图，并在字数允许时附上原帖链接。</string>
+    <string name="compose_cross_platform_reply_message">该账号无法保留回复关系。Flare 将创建一条带原帖截图的新帖子，并在字数允许时附上原帖链接。</string>
     <string name="compose_close_confirm_message">您有未保存的更改。要在关闭前保存为草稿吗？</string>
     <string name="compose_close_discard">丢弃</string>
     <string name="mastodon_report_title">举报</string>

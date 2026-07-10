@@ -678,6 +678,7 @@ internal fun Tweet.renderStatus(
 
     return UiTimelineV2.Post(
         platformType = PlatformType.xQt,
+        shareUrl = statusUrl,
         images = medias,
         sensitive = legacy?.possiblySensitive == true,
         contentWarning = null,

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,7 +87,9 @@ import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MediaFileNamePolicy
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -96,17 +100,22 @@ import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.util.UUID
 
 private enum class SharePreviewTheme {
     Light,
@@ -121,6 +130,72 @@ private val ShareCardShadowCornerRadius = 12.dp
 private val ShareCardShadowRadius = 16.dp
 private val ShareCaptureWidth = ShareCardWidth + ShareCardPadding * 2
 private const val SHARE_LONG_CAPTURE_HEIGHT_THRESHOLD_PX = 4096
+
+@Composable
+internal fun rememberAndroidReferenceShareImageRenderer(): ReferenceShareImageRenderer {
+    val context = LocalContext.current
+    val rootView = LocalView.current.rootView
+    val density = LocalDensity.current
+    val darkTheme = isSystemInDarkTheme()
+    val widthPx = with(density) { ShareCaptureWidth.roundToPx() }
+    return remember(
+        context,
+        rootView,
+        darkTheme,
+        widthPx,
+    ) {
+        object : ReferenceShareImageRenderer {
+            override fun render(
+                post: UiTimelineV2,
+                completion: (ComposeData.Media?, String?) -> Unit,
+            ) {
+                CoroutineScope(Dispatchers.Main.immediate).launch {
+                    val bitmap =
+                        captureOffscreenShareBitmap(
+                            context = context,
+                            view = rootView,
+                            parentCompositionContext = null,
+                            lifecycleOwner = null,
+                            savedStateRegistryOwner = null,
+                            viewModelStoreOwner = null,
+                            widthPx = widthPx,
+                        ) {
+                            CompositionLocalProvider(LocalNetworkImageAllowHardware provides false) {
+                                FlareTheme(darkTheme = darkTheme) {
+                                    StatusShareCard(
+                                        statusKey = post.statusKey,
+                                        status = post,
+                                    )
+                                }
+                            }
+                        }
+                    if (bitmap == null) {
+                        completion(null, "Unable to render referenced post image.")
+                        return@launch
+                    }
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            val directory = File(context.cacheDir, "reference_share")
+                            directory.mkdirs()
+                            val file = File(directory, "reference_${UUID.randomUUID()}.png")
+                            FileOutputStream(file).use { output ->
+                                check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                            }
+                            ComposeData.Media(
+                                file = FileItem(context, Uri.fromFile(file)),
+                                altText = null,
+                            )
+                        }
+                    }.onSuccess { media ->
+                        completion(media, null)
+                    }.onFailure { throwable ->
+                        completion(null, throwable.message)
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -497,9 +572,9 @@ private suspend fun capturePreviewShareBitmap(
 private suspend fun captureOffscreenShareBitmap(
     context: Context,
     view: View,
-    parentCompositionContext: CompositionContext,
-    lifecycleOwner: LifecycleOwner,
-    savedStateRegistryOwner: SavedStateRegistryOwner,
+    parentCompositionContext: CompositionContext?,
+    lifecycleOwner: LifecycleOwner?,
+    savedStateRegistryOwner: SavedStateRegistryOwner?,
     viewModelStoreOwner: ViewModelStoreOwner?,
     widthPx: Int,
     content: @Composable () -> Unit,
@@ -512,9 +587,9 @@ private suspend fun captureOffscreenShareBitmap(
             }
         val composeView =
             ComposeView(themedContext).apply {
-                setParentCompositionContext(parentCompositionContext)
-                setViewTreeLifecycleOwner(lifecycleOwner)
-                setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+                parentCompositionContext?.let(::setParentCompositionContext)
+                lifecycleOwner?.let(::setViewTreeLifecycleOwner)
+                savedStateRegistryOwner?.let(::setViewTreeSavedStateRegistryOwner)
                 viewModelStoreOwner?.let {
                     setViewTreeViewModelStoreOwner(it)
                 }

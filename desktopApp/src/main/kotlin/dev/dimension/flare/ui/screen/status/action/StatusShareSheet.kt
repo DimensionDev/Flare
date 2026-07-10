@@ -20,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposePanel
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -35,8 +36,10 @@ import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.common.DesktopSaveDialog
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MediaFileNamePolicy
 import dev.dimension.flare.copied_to_clipboard
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -52,7 +55,9 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -68,7 +73,11 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.swing.Swing
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -76,12 +85,86 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.awt.image.BufferedImage
+import java.io.File
+import java.util.UUID
 import javax.imageio.ImageIO
+import javax.swing.JWindow
 
 private enum class SharePreviewTheme {
     Light,
     Dark,
 }
+
+@Composable
+internal fun rememberDesktopReferenceShareImageRenderer(): ReferenceShareImageRenderer =
+    remember {
+        object : ReferenceShareImageRenderer {
+            override fun render(
+                post: UiTimelineV2,
+                completion: (ComposeData.Media?, String?) -> Unit,
+            ) {
+                CoroutineScope(Dispatchers.Swing).launch {
+                    val window = JWindow()
+                    val panel = ComposePanel()
+                    runCatching {
+                        panel.setContent {
+                            FlareTheme {
+                                ViewBox {
+                                    Box(
+                                        modifier =
+                                            Modifier.background(FluentTheme.colors.background.mica.base),
+                                    ) {
+                                        Layer(
+                                            modifier = Modifier.padding(64.dp).width(360.dp),
+                                            shape = RoundedCornerShape(12.dp),
+                                            elevation = 32.dp,
+                                        ) {
+                                            CompositionLocalProvider(
+                                                LocalTimelineAppearance provides
+                                                    LocalTimelineAppearance.current.copy(
+                                                        expandContentWarning = true,
+                                                        showTranslateButton = false,
+                                                        videoAutoplay = VideoAutoplay.NEVER,
+                                                    ),
+                                                LocalContentColor provides FluentTheme.colors.text.text.primary,
+                                                LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),
+                                            ) {
+                                                StatusItem(item = post, detailStatusKey = post.statusKey)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        window.contentPane.add(panel)
+                        window.pack()
+                        window.setLocation(-20_000, -20_000)
+                        window.isVisible = true
+                        delay(200)
+                        window.pack()
+                        val width = panel.width.coerceAtLeast(1)
+                        val height = panel.height.coerceAtLeast(1)
+                        val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+                        val graphics = image.createGraphics()
+                        try {
+                            panel.paint(graphics)
+                        } finally {
+                            graphics.dispose()
+                        }
+                        val file = File.createTempFile("flare-reference-${UUID.randomUUID()}", ".png")
+                        check(ImageIO.write(image, "png", file))
+                        ComposeData.Media(file = FileItem(file), altText = null)
+                    }.onSuccess { media ->
+                        completion(media, null)
+                    }.onFailure { throwable ->
+                        completion(null, throwable.message)
+                    }
+                    window.isVisible = false
+                    window.dispose()
+                }
+            }
+        }
+    }
 
 @Composable
 internal fun StatusShareSheet(

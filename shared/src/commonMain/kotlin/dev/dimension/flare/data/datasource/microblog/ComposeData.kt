@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 
@@ -29,5 +31,9 @@ public data class ComposeData(
 
     public data class ReferenceStatus(
         val composeStatus: ComposeStatus,
+        val sourceAccountKey: MicroBlogKey? = null,
+        val sourcePlatform: PlatformType? = null,
+        val shareUrl: String? = null,
+        val shareMedia: Media? = null,
     )
 }

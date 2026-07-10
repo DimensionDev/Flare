@@ -534,6 +534,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             }
         }
     return UiTimelineV2.Post(
+        shareUrl = postUrl,
         images =
             files
                 ?.mapNotNull { file ->

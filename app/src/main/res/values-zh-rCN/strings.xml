@@ -37,6 +37,9 @@
     <string name="compose_notification_success">动态已发送</string>
     <string name="compose_notification_error">发送动态失败</string>
     <string name="compose_close_confirm_title">保存草稿？</string>
+    <string name="compose_cross_platform_title">跨平台发布？</string>
+    <string name="compose_cross_platform_quote_message">该账号无法直接引用原帖。Flare 将发布原帖截图，并在字数允许时附上原帖链接。</string>
+    <string name="compose_cross_platform_reply_message">该账号无法保留回复关系。Flare 将创建一条带原帖截图的新帖子，并在字数允许时附上原帖链接。</string>
     <string name="compose_close_confirm_message">您有未保存的更改。在关闭前将其保存为草稿吗？</string>
     <string name="compose_save_draft">保存</string>
     <string name="compose_close_discard">舍弃</string>

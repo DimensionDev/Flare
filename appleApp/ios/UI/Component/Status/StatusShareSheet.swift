@@ -147,7 +147,7 @@ struct StatusShareSheet: View {
     }
 }
 
-private extension TimelineAppearance {
+extension TimelineAppearance {
     func withSharePreviewDefaults() -> TimelineAppearance {
         doCopy(
             avatarShape: avatarShape,
@@ -176,22 +176,83 @@ extension View {
     @MainActor
     func snapshot(
         colorScheme: ColorScheme,
+        proposedWidth: CGFloat = 520,
         delay: TimeInterval = 0.1
     ) async -> UIImage? {
+        guard proposedWidth.isFinite, proposedWidth > 0 else {
+            return nil
+        }
+
         let controller = UIHostingController(rootView: self.edgesIgnoringSafeArea(.top))
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
-        let view = controller.view
-        let targetSize = controller.view.intrinsicContentSize
-        view?.bounds = CGRect(origin: CGPoint(x: 0, y: 0), size: targetSize)
-        view?.backgroundColor = .systemGroupedBackground
+        controller.sizingOptions = [.intrinsicContentSize]
+        guard let view = controller.view else {
+            return nil
+        }
+        view.backgroundColor = .systemGroupedBackground
+
+        guard let initialSize = controller.snapshotSize(proposedWidth: proposedWidth) else {
+            return nil
+        }
+        view.prepareForSnapshot(size: initialSize)
         try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+
+        guard let targetSize = controller.snapshotSize(proposedWidth: proposedWidth) else {
+            return nil
+        }
+        view.prepareForSnapshot(size: targetSize)
 
         let format = UIGraphicsImageRendererFormat()
         format.scale = 3
         format.opaque = true
-        let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
-        return renderer.image { _ in
-            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        guard targetSize.isValidSnapshotSize(scale: format.scale) else {
+            return nil
         }
+        let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
+        return renderer.image { context in
+            if !view.drawHierarchy(in: view.bounds, afterScreenUpdates: true) {
+                view.layer.render(in: context.cgContext)
+            }
+        }
+    }
+}
+
+@MainActor
+private extension UIHostingController {
+    func snapshotSize(proposedWidth: CGFloat) -> CGSize? {
+        let measuredSize = sizeThatFits(
+            in: CGSize(
+                width: proposedWidth,
+                height: UIView.layoutFittingExpandedSize.height
+            )
+        )
+        let size = CGSize(width: ceil(measuredSize.width), height: ceil(measuredSize.height))
+        return size.width.isFinite && size.height.isFinite && size.width > 0 && size.height > 0
+            ? size
+            : nil
+    }
+}
+
+@MainActor
+private extension UIView {
+    func prepareForSnapshot(size: CGSize) {
+        bounds = CGRect(origin: .zero, size: size)
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+}
+
+private extension CGSize {
+    func isValidSnapshotSize(scale: CGFloat) -> Bool {
+        let pixelWidth = width * scale
+        let pixelHeight = height * scale
+        let pixelCount = pixelWidth * pixelHeight
+        return width.isFinite &&
+            height.isFinite &&
+            width > 0 &&
+            height > 0 &&
+            pixelWidth <= 16_384 &&
+            pixelHeight <= 16_384 &&
+            pixelCount <= 64_000_000
     }
 }

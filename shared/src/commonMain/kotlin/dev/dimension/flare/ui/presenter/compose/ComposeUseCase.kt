@@ -3,19 +3,32 @@ package dev.dimension.flare.ui.presenter.compose
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
+import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.DebugRepository
+import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.data.repository.toComposeDraftBundle
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
+
+public interface ReferenceShareImageRenderer {
+    public fun render(
+        post: UiTimelineV2,
+        completion: (media: ComposeData.Media?, errorMessage: String?) -> Unit,
+    )
+}
 
 @Single
 internal class ComposeUseCase(
@@ -24,13 +37,22 @@ internal class ComposeUseCase(
     private val appDataStore: AppDataStore,
     private val saveDraftUseCase: SaveDraftUseCase,
     private val sendDraftUseCase: SendDraftUseCase,
+    private val draftRepository: DraftRepository,
 ) {
     operator fun invoke(
         accounts: List<UiAccount>,
         data: ComposeData,
         groupId: String,
+        referencePost: UiTimelineV2? = null,
+        referenceShareImageRenderer: ReferenceShareImageRenderer? = null,
     ) {
-        invoke(accounts = accounts, data = data, groupId = groupId) {
+        invoke(
+            accounts = accounts,
+            data = data,
+            groupId = groupId,
+            referencePost = referencePost,
+            referenceShareImageRenderer = referenceShareImageRenderer,
+        ) {
             if (it is ComposeProgressState.Error) {
                 DebugRepository.error(it.throwable)
             }
@@ -56,26 +78,105 @@ internal class ComposeUseCase(
         accounts: List<UiAccount>,
         data: ComposeData,
         groupId: String,
+        referencePost: UiTimelineV2? = null,
+        referenceShareImageRenderer: ReferenceShareImageRenderer? = null,
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         scope.launch {
-            tryRun {
-                progress.invoke(ComposeProgressState.Progress(0, 1))
-                appDataStore.composeConfigData.updateData {
-                    it.copy(
-                        visibility = data.visibility,
-                        lastAccounts =
-                            if (data.referenceStatus == null) {
-                                accounts.map { account -> account.accountKey }
-                            } else {
-                                it.lastAccounts
-                            },
-                    )
+            val result =
+                tryRun {
+                    progress.invoke(ComposeProgressState.Progress(0, 1))
+                    appDataStore.composeConfigData.updateData {
+                        it.copy(
+                            visibility = data.visibility,
+                            lastAccounts =
+                                if (data.referenceStatus == null) {
+                                    accounts.map { account -> account.accountKey }
+                                } else {
+                                    it.lastAccounts
+                                },
+                        )
+                    }
+                    val bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId)
+                    val sourcePlatform = data.referenceStatus?.sourcePlatform
+                    val crossPlatformAccounts =
+                        sourcePlatform
+                            ?.let { platform -> accounts.filter { it.platformType != platform } }
+                            .orEmpty()
+                    if (crossPlatformAccounts.isNotEmpty()) {
+                        saveDraftUseCase(bundle, targetStatus = DraftTargetStatus.PREPARING)
+                        val renderFailure =
+                            try {
+                                val renderer =
+                                    requireNotNull(referenceShareImageRenderer) {
+                                        "Cross-platform reference image renderer is unavailable."
+                                    }
+                                val post =
+                                    requireNotNull(referencePost) {
+                                        "Referenced post is unavailable."
+                                    }
+                                val shareMedia = renderer.renderAndAwait(post)
+                                val referenceStatus = requireNotNull(data.referenceStatus)
+                                sendDraftUseCase(
+                                    bundle =
+                                        bundle.copy(
+                                            template =
+                                                data.copy(
+                                                    referenceStatus = referenceStatus.copy(shareMedia = shareMedia),
+                                                ),
+                                        ),
+                                    progress = progress,
+                                )
+                                null
+                            } catch (throwable: Exception) {
+                                throwable
+                            }
+                        if (renderFailure != null) {
+                            crossPlatformAccounts.forEach { account ->
+                                draftRepository.updateTargetStatus(
+                                    groupId = groupId,
+                                    accountKey = account.accountKey,
+                                    status = DraftTargetStatus.FAILED,
+                                    errorMessage = renderFailure.message,
+                                )
+                            }
+                            val nativeAccounts = accounts - crossPlatformAccounts.toSet()
+                            val nativeFailures =
+                                if (nativeAccounts.isNotEmpty()) {
+                                    sendDraftUseCase.sendPersistedTargets(
+                                        groupId = groupId,
+                                        accounts = nativeAccounts,
+                                        data = data,
+                                        progress = progress,
+                                    )
+                                } else {
+                                    emptyList()
+                                }
+                            progress(
+                                ComposeProgressState.Error(
+                                    ComposeDraftFailedException(listOf(renderFailure) + nativeFailures),
+                                ),
+                            )
+                        }
+                    } else {
+                        sendDraftUseCase(
+                            bundle = bundle,
+                            progress = progress,
+                        )
+                    }
                 }
-                sendDraftUseCase(
-                    bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId),
-                    progress = progress,
-                )
+            result.exceptionOrNull()?.let { throwable ->
+                accounts.forEach { account ->
+                    runCatching {
+                        draftRepository.updateTargetStatus(
+                            groupId = groupId,
+                            accountKey = account.accountKey,
+                            status = DraftTargetStatus.FAILED,
+                            errorMessage = throwable.message,
+                        )
+                    }
+                }
+                progress(ComposeProgressState.Error(throwable))
             }
         }
     }
@@ -92,6 +193,19 @@ internal class ComposeUseCase(
         }
     }
 }
+
+private suspend fun ReferenceShareImageRenderer.renderAndAwait(post: UiTimelineV2): ComposeData.Media =
+    suspendCoroutine { continuation ->
+        render(post) { media, errorMessage ->
+            if (media != null) {
+                continuation.resume(media)
+            } else {
+                continuation.resumeWithException(
+                    IllegalStateException(errorMessage ?: "Unable to render referenced post image."),
+                )
+            }
+        }
+    }
 
 @Immutable
 internal sealed interface ComposeProgressState {

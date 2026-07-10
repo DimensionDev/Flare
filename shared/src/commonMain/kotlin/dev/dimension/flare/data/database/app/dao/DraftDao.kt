@@ -89,7 +89,7 @@ internal interface DraftDao {
         WHERE EXISTS (
             SELECT 1 FROM DbDraftTarget
             WHERE DbDraftTarget.group_id = DbDraftGroup.group_id
-              AND DbDraftTarget.status = 'SENDING'
+              AND DbDraftTarget.status IN ('PREPARING', 'SENDING')
         )
         ORDER BY updated_at DESC
         """,

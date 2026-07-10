@@ -116,7 +116,9 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.status.action.rememberAndroidReferenceShareImageRenderer
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
@@ -164,6 +166,7 @@ internal fun ComposeScreen(
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val referenceShareImageRenderer = rememberAndroidReferenceShareImageRenderer()
     val state by producePresenter(key = "compose_${accountType}_${status}_$draftGroupId") {
         composePresenter(
             context = context,
@@ -172,9 +175,29 @@ internal fun ComposeScreen(
             draftGroupId = draftGroupId,
             initialText = initialText,
             initialMedias = initialMedias,
+            referenceShareImageRenderer = referenceShareImageRenderer,
         )
     }
     var showCloseConfirmDialog by remember { mutableStateOf(false) }
+    var pendingCrossPlatformAccount by remember { mutableStateOf<UiProfile?>(null) }
+    var crossPlatformConfirmed by remember { mutableStateOf(false) }
+
+    fun toggleAccount(
+        user: UiProfile,
+        selected: Boolean,
+    ) {
+        val sourcePlatform = state.state.referenceSourcePlatform
+        val requiresConfirmation =
+            !selected &&
+                !crossPlatformConfirmed &&
+                sourcePlatform != null &&
+                user.platformType != sourcePlatform
+        if (requiresConfirmation) {
+            pendingCrossPlatformAccount = user
+        } else {
+            state.state.selectAccount(user.key)
+        }
+    }
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenMultipleDocuments(),
@@ -305,6 +328,39 @@ internal fun ComposeScreen(
                 },
             )
         }
+        pendingCrossPlatformAccount?.let { account ->
+            AlertDialog(
+                onDismissRequest = { pendingCrossPlatformAccount = null },
+                title = { Text(stringResource(R.string.compose_cross_platform_title)) },
+                text = {
+                    Text(
+                        stringResource(
+                            if (state.state.composeStatus is ComposeStatus.Reply) {
+                                R.string.compose_cross_platform_reply_message
+                            } else {
+                                R.string.compose_cross_platform_quote_message
+                            },
+                        ),
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            crossPlatformConfirmed = true
+                            pendingCrossPlatformAccount = null
+                            state.state.selectAccount(account.key)
+                        },
+                    ) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingCrossPlatformAccount = null }) {
+                        Text(stringResource(android.R.string.cancel))
+                    }
+                },
+            )
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -353,7 +409,7 @@ internal fun ComposeScreen(
                                                 }
                                             },
                                             onClick = {
-                                                state.state.selectAccount(user.key)
+                                                toggleAccount(user, selected)
                                             },
                                             leadingIcon = {
                                                 ComposeAccountAvatar(user = user, size = 24.dp)
@@ -362,7 +418,7 @@ internal fun ComposeScreen(
                                                 Checkbox(
                                                     checked = selected,
                                                     onCheckedChange = {
-                                                        state.state.selectAccount(user.key)
+                                                        toggleAccount(user, selected)
                                                     },
                                                 )
                                             },
@@ -1052,6 +1108,7 @@ private fun composePresenter(
     draftGroupId: String? = null,
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),
+    referenceShareImageRenderer: ReferenceShareImageRenderer,
 ) = run {
     val state =
         remember(status, accountType, draftGroupId) {
@@ -1059,6 +1116,7 @@ private fun composePresenter(
                 accountType = accountType,
                 status = status,
                 draftGroupId = draftGroupId,
+                enableCrossPlatformReference = true,
             )
         }.invoke()
     val textFieldState by remember {
@@ -1240,7 +1298,10 @@ private fun composePresenter(
 
         fun send(onDispatched: () -> Unit = {}) {
             val data = buildComposeData()
-            state.send(data) { dispatched ->
+            state.send(
+                data = data,
+                referenceShareImageRenderer = referenceShareImageRenderer,
+            ) { dispatched ->
                 if (dispatched) {
                     onDispatched()
                 }

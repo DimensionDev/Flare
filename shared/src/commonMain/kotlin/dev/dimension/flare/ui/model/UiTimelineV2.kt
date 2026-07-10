@@ -243,6 +243,7 @@ public sealed class UiTimelineV2 {
     @Immutable
     public data class Post public constructor(
         val platformType: PlatformType,
+        val shareUrl: String? = null,
         val images: SerializableImmutableList<UiMedia>,
         val sensitive: Boolean,
         val contentWarning: UiRichText?,
@@ -294,6 +295,7 @@ public sealed class UiTimelineV2 {
             renderHashBuilder()
                 .add(itemKey)
                 .add(platformType)
+                .add(shareUrl)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
                 .add(contentWarning?.renderSummaryHash())

@@ -878,6 +878,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val quote = findQuote(accountKey, this)
     return UiTimelineV2.Post(
         platformType = PlatformType.Bluesky,
+        shareUrl = url,
         user = user,
         images = findMedias(this),
         card = findCard(this),
@@ -1454,6 +1455,7 @@ private fun render(
                     )
                 }
             UiTimelineV2.Post(
+                shareUrl = url,
                 user = user,
                 images =
                     record.value.embeds

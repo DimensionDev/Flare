@@ -448,6 +448,7 @@ private fun Status.renderStatus(
         }
     val sourceLanguages = listOfNotNull(language).toPersistentList()
     return UiTimelineV2.Post(
+        shareUrl = postUrl,
         images =
             mediaAttachments
                 ?.mapNotNull { attachment ->

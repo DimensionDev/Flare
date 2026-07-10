@@ -75,6 +75,9 @@
     <string name="delete_status_title">Delete</string>
     <string name="delete_status_message">Delete this post?</string>
     <string name="compose_close_confirm_title">Save draft?</string>
+    <string name="compose_cross_platform_title">Post across platforms?</string>
+    <string name="compose_cross_platform_quote_message">This account cannot reference the original post directly. Flare will post a screenshot and add the original link when it fits.</string>
+    <string name="compose_cross_platform_reply_message">This account cannot preserve the reply thread. Flare will create a new post with a screenshot and add the original link when it fits.</string>
     <string name="compose_close_confirm_message">You have unsaved changes. Save this as a draft before closing?</string>
     <string name="compose_close_discard">Discard</string>
 

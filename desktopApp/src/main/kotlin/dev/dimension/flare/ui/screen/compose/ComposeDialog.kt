@@ -67,6 +67,9 @@ import dev.dimension.flare.common.ImageDragAndDropTarget
 import dev.dimension.flare.compose_close_confirm_message
 import dev.dimension.flare.compose_close_confirm_title
 import dev.dimension.flare.compose_content_warning_hint
+import dev.dimension.flare.compose_cross_platform_quote_message
+import dev.dimension.flare.compose_cross_platform_reply_message
+import dev.dimension.flare.compose_cross_platform_title
 import dev.dimension.flare.compose_hint
 import dev.dimension.flare.compose_media_sensitive
 import dev.dimension.flare.compose_poll_expiration_12_hours
@@ -118,7 +121,9 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.status.action.rememberDesktopReferenceShareImageRenderer
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -169,15 +174,19 @@ fun ComposeDialog(
     focusOnOpen: Boolean = true,
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
+    val referenceShareImageRenderer = rememberDesktopReferenceShareImageRenderer()
     val state by producePresenter(key = "compose_$accountType") {
         composePresenter(
             accountType = accountType,
             status = status,
             draftGroupId = draftGroupId,
             initialText = initialText,
+            referenceShareImageRenderer = referenceShareImageRenderer,
         )
     }
     var showCloseConfirmDialog by remember { mutableStateOf(false) }
+    var pendingCrossPlatformAccount by remember { mutableStateOf<UiProfile?>(null) }
+    var crossPlatformConfirmed by remember { mutableStateOf(false) }
     val composeWindow = LocalComposeWindow.current
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
@@ -187,6 +196,18 @@ fun ComposeDialog(
             showCloseConfirmDialog = true
         } else {
             onBack?.invoke()
+        }
+    }
+
+    fun toggleAccount(
+        account: UiProfile,
+        selected: Boolean,
+    ) {
+        val sourcePlatform = state.state.referenceSourcePlatform
+        if (!selected && !crossPlatformConfirmed && sourcePlatform != null && account.platformType != sourcePlatform) {
+            pendingCrossPlatformAccount = account
+        } else {
+            state.state.selectAccount(account.key)
         }
     }
     if (focusOnOpen) {
@@ -231,6 +252,40 @@ fun ComposeDialog(
                     }
 
                     ContentDialogButton.Close -> {}
+                }
+            },
+        )
+    }
+    pendingCrossPlatformAccount?.let { account ->
+        ContentDialog(
+            visible = true,
+            title = stringResource(Res.string.compose_cross_platform_title),
+            content = {
+                Text(
+                    stringResource(
+                        if (state.state.composeStatus is ComposeStatus.Reply) {
+                            Res.string.compose_cross_platform_reply_message
+                        } else {
+                            Res.string.compose_cross_platform_quote_message
+                        },
+                    ),
+                )
+            },
+            primaryButtonText = stringResource(Res.string.ok),
+            secondaryButtonText = stringResource(Res.string.cancel),
+            onButtonClick = {
+                when (it) {
+                    ContentDialogButton.Primary -> {
+                        crossPlatformConfirmed = true
+                        pendingCrossPlatformAccount = null
+                        state.state.selectAccount(account.key)
+                    }
+
+                    ContentDialogButton.Secondary,
+                    ContentDialogButton.Close,
+                    -> {
+                        pendingCrossPlatformAccount = null
+                    }
                 }
             },
         )
@@ -316,13 +371,13 @@ fun ComposeDialog(
                                                     CheckBox(
                                                         checked = selected,
                                                         onCheckStateChange = {
-                                                            state.state.selectAccount(data.key)
+                                                            toggleAccount(data, selected)
                                                         },
                                                     )
                                                 }
                                             },
                                             onClick = {
-                                                state.state.selectAccount(data.key)
+                                                toggleAccount(data, selected)
                                             },
                                             icon = {
                                                 ComposeAccountAvatar(
@@ -1012,10 +1067,16 @@ private fun composePresenter(
     status: ComposeStatus? = null,
     draftGroupId: String? = null,
     initialText: String = "",
+    referenceShareImageRenderer: ReferenceShareImageRenderer,
 ) = run {
     val state =
         remember(status, accountType, draftGroupId) {
-            ComposePresenter(accountType = accountType, status = status, draftGroupId = draftGroupId)
+            ComposePresenter(
+                accountType = accountType,
+                status = status,
+                draftGroupId = draftGroupId,
+                enableCrossPlatformReference = true,
+            )
         }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(initialText))
@@ -1185,7 +1246,10 @@ private fun composePresenter(
 
         fun send(onDispatched: () -> Unit = {}) {
             val data = buildComposeData()
-            state.send(data) { dispatched ->
+            state.send(
+                data = data,
+                referenceShareImageRenderer = referenceShareImageRenderer,
+            ) { dispatched ->
                 if (dispatched) {
                     // cleanup
                     textFieldState.edit {

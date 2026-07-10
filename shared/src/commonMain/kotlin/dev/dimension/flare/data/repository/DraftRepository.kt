@@ -151,24 +151,36 @@ internal class DraftRepository(
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
         database.connect {
-            database.draftDao().resetSendingTargets(
-                fromStatus = DraftTargetStatus.SENDING,
-                toStatus = DraftTargetStatus.DRAFT,
-                expiredBefore = expiredBefore,
-                errorMessage = errorMessage,
-                updatedAt = now,
-            )
-            database.draftDao().touchExpiredSendingGroups(
-                fromStatus = DraftTargetStatus.SENDING,
-                expiredBefore = expiredBefore,
-                updatedAt = now,
-            )
+            listOf(DraftTargetStatus.PREPARING, DraftTargetStatus.SENDING).forEach { status ->
+                database.draftDao().touchExpiredSendingGroups(
+                    fromStatus = status,
+                    expiredBefore = expiredBefore,
+                    updatedAt = now,
+                )
+                database.draftDao().resetSendingTargets(
+                    fromStatus = status,
+                    toStatus = DraftTargetStatus.DRAFT,
+                    expiredBefore = expiredBefore,
+                    errorMessage = errorMessage,
+                    updatedAt = now,
+                )
+            }
         }
     }
 
     suspend fun markSendingAsFailed(errorMessage: String? = null) {
         val now = Clock.System.now().toEpochMilliseconds()
         database.connect {
+            database.draftDao().touchGroupsByTargetStatus(
+                status = DraftTargetStatus.PREPARING,
+                updatedAt = now,
+            )
+            database.draftDao().updateTargetsByStatus(
+                fromStatus = DraftTargetStatus.PREPARING,
+                toStatus = DraftTargetStatus.FAILED,
+                errorMessage = errorMessage,
+                updatedAt = now,
+            )
             database.draftDao().touchGroupsByTargetStatus(
                 status = DraftTargetStatus.SENDING,
                 updatedAt = now,

@@ -190,6 +190,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
     val post =
         UiTimelineV2.Post(
             platformType = PlatformType.VVo,
+            shareUrl = url,
             images = actualMedia.toImmutableList(),
             sensitive = false,
             contentWarning = null,
@@ -381,6 +382,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
     val post =
         UiTimelineV2.Post(
             platformType = PlatformType.VVo,
+            shareUrl = url,
             images = media.toImmutableList(),
             sensitive = false,
             contentWarning = null,

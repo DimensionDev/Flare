@@ -8,6 +8,8 @@ import SwiftUIBackports
 
 struct ComposeScreen: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.timelineAppearance) private var timelineAppearance
     let accountType: AccountType?
     let composeStatus: ComposeStatus?
     let draftGroupId: String?
@@ -23,6 +25,8 @@ struct ComposeScreen: View {
     @State private var showDraftSheet = false
     @State private var showDraftConfirmation = false
     @State private var showAccountPicker = false
+    @State private var pendingCrossPlatformAccount: UiProfile?
+    @State private var crossPlatformConfirmed = false
 
     var body: some View {
         VStack(
@@ -125,6 +129,27 @@ struct ComposeScreen: View {
             if isFocused {
                 applyCursorIfPossible()
             }
+        }
+        .alert(
+            "compose_cross_platform_title",
+            isPresented: Binding(
+                get: { pendingCrossPlatformAccount != nil },
+                set: { if !$0 { pendingCrossPlatformAccount = nil } }
+            )
+        ) {
+            Button("Cancel", role: .cancel) {
+                pendingCrossPlatformAccount = nil
+            }
+            Button("Continue") {
+                guard let account = pendingCrossPlatformAccount else { return }
+                crossPlatformConfirmed = true
+                pendingCrossPlatformAccount = nil
+                presenter.state.selectAccount(accountKey: account.key)
+            }
+        } message: {
+            Text(presenter.state.composeStatus is ComposeStatus.Reply
+                 ? "compose_cross_platform_reply_message"
+                 : "compose_cross_platform_quote_message")
         }
         .onChange(of: mediaViewModel.items.count) { _, newValue in
             presenter.state.setMediaSize(value: Int32(newValue))
@@ -316,7 +341,7 @@ struct ComposeScreen: View {
         isSelected: Bool
     ) -> some View {
         Button {
-            presenter.state.selectAccount(accountKey: user.key)
+            toggleAccount(user, isSelected: isSelected)
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
@@ -347,6 +372,17 @@ struct ComposeScreen: View {
                 return nil
             }
             return userSuccess.data
+        }
+    }
+
+    private func toggleAccount(_ account: UiProfile, isSelected: Bool) {
+        if !isSelected,
+           !crossPlatformConfirmed,
+           let sourcePlatform = presenter.state.referenceSourcePlatform,
+           sourcePlatform != account.platformType {
+            pendingCrossPlatformAccount = account
+        } else {
+            presenter.state.selectAccount(accountKey: account.key)
         }
     }
 
@@ -452,7 +488,11 @@ struct ComposeScreen: View {
     
     private func send() {
         let data = getComposeData()
-        presenter.state.send(data: data) { dispatched in
+        let renderer = IOSReferenceShareImageRenderer(
+            colorScheme: colorScheme,
+            timelineAppearance: timelineAppearance
+        )
+        presenter.state.send(data: data, referenceShareImageRenderer: renderer) { dispatched in
             if dispatched.boolValue {
                 dismiss()
             }
@@ -540,6 +580,69 @@ struct ComposeScreen: View {
         .presentationDetents([.medium, .large])
     }
 
+}
+
+private final class IOSReferenceShareImageRenderer: ReferenceShareImageRenderer {
+    private let colorScheme: ColorScheme
+    private let timelineAppearance: TimelineAppearance
+
+    init(colorScheme: ColorScheme, timelineAppearance: TimelineAppearance) {
+        self.colorScheme = colorScheme
+        self.timelineAppearance = timelineAppearance
+    }
+
+    nonisolated func render(
+        post: UiTimelineV2,
+        completion: @escaping (ComposeData.Media?, String?) -> Void
+    ) {
+        let request = IOSReferenceShareRenderRequest(post: post, completion: completion)
+        Task { @MainActor in
+            let post = request.post
+            let preview = TimelineView(
+                data: post,
+                detailStatusKey: post.statusKey,
+                showTranslate: false
+            )
+            .frame(width: 360)
+            .padding()
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 16))
+            .shadow(radius: 8)
+            .padding(64)
+            .background(Color(.systemGroupedBackground))
+            .environment(\.colorScheme, colorScheme)
+            .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
+
+            guard let image = await preview.snapshot(colorScheme: colorScheme),
+                  let data = image.pngData() else {
+                request.completion(nil, "Unable to render referenced post image.")
+                return
+            }
+            let media = ComposeData.Media(
+                file: FileItem(
+                    name: "reference-\(UUID().uuidString).png",
+                    data: KotlinByteArray.from(data: data),
+                    type: .image,
+                    mimeType: "image/png"
+                ),
+                altText: nil
+            )
+            request.completion(media, nil)
+        }
+    }
+}
+
+private nonisolated final class IOSReferenceShareRenderRequest: @unchecked Sendable {
+    let post: UiTimelineV2
+    let completion: (ComposeData.Media?, String?) -> Void
+
+    init(
+        post: UiTimelineV2,
+        completion: @escaping (ComposeData.Media?, String?) -> Void
+    ) {
+        self.post = post
+        self.completion = completion
+    }
 }
 
 @Observable
@@ -673,7 +776,16 @@ extension ComposeScreen {
         self.accountType = accountType
         self.composeStatus = composeStatus
         self.draftGroupId = draftGroupId
-        self._presenter = .init(wrappedValue: .init(presenter: ComposePresenter(accountType: accountType, status: composeStatus, draftGroupId: draftGroupId)))
+        self._presenter = .init(
+            wrappedValue: .init(
+                presenter: ComposePresenter(
+                    accountType: accountType,
+                    status: composeStatus,
+                    draftGroupId: draftGroupId,
+                    enableCrossPlatformReference: true
+                )
+            )
+        )
     }
 }
 

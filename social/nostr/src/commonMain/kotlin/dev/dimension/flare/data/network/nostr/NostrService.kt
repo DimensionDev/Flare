@@ -1791,6 +1791,7 @@ internal class NostrService(
         val contentWarning = contentWarningReason()?.toUiPlainText()
         return UiTimelineV2.Post(
             platformType = PlatformType.Nostr,
+            shareUrl = statusShareUrl(statusKey.id),
             images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
             contentWarning = contentWarning,

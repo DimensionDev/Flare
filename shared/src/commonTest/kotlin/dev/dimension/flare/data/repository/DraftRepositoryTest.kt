@@ -30,6 +30,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class DraftRepositoryTest : RobolectricTest() {
     private val root = createTestRootPath()
@@ -213,6 +214,7 @@ class DraftRepositoryTest : RobolectricTest() {
     fun markSendingAsFailedResetsStatus() =
         runTest {
             val account = MicroBlogKey("alice", "example.com")
+            val preparingAccount = MicroBlogKey("bob", "example.com")
             val now = 2_000L
             val groupId =
                 repository.saveDraft(
@@ -227,6 +229,12 @@ class DraftRepositoryTest : RobolectricTest() {
                                     lastAttemptAt = 1_000L,
                                     attemptCount = 2,
                                 ),
+                                SaveDraftTarget(
+                                    accountKey = preparingAccount,
+                                    status = DraftTargetStatus.PREPARING,
+                                    lastAttemptAt = 1_000L,
+                                    attemptCount = 1,
+                                ),
                             ),
                         medias = emptyList(),
                         createdAt = now,
@@ -238,8 +246,8 @@ class DraftRepositoryTest : RobolectricTest() {
             val draft = repository.draft(groupId).first()
 
             assertNotNull(draft)
-            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
-            assertEquals("interrupted", draft.targets.single().errorMessage)
+            assertTrue(draft.targets.all { it.status == DraftTargetStatus.FAILED })
+            assertTrue(draft.targets.all { it.errorMessage == "interrupted" })
             assertEquals(
                 groupId,
                 repository.visibleDrafts
@@ -247,6 +255,41 @@ class DraftRepositoryTest : RobolectricTest() {
                     .single()
                     .groupId,
             )
+        }
+
+    @Test
+    fun expiredPreparingAndSendingTargetsReturnToDraft() =
+        runTest {
+            val groupId =
+                repository.saveDraft(
+                    SaveDraftInput(
+                        groupId = "group-timeout",
+                        content = sampleContent("retry me"),
+                        targets =
+                            listOf(
+                                SaveDraftTarget(
+                                    accountKey = MicroBlogKey("alice", "example.com"),
+                                    status = DraftTargetStatus.PREPARING,
+                                    lastAttemptAt = 1_000L,
+                                ),
+                                SaveDraftTarget(
+                                    accountKey = MicroBlogKey("bob", "example.com"),
+                                    status = DraftTargetStatus.SENDING,
+                                    lastAttemptAt = 1_000L,
+                                ),
+                            ),
+                        medias = emptyList(),
+                    ),
+                )
+
+            repository.markSendingAsDraftIfExpired(
+                expiredBefore = 2_000L,
+                errorMessage = "timed out",
+            )
+
+            val draft = assertNotNull(repository.draft(groupId).first())
+            assertTrue(draft.targets.all { it.status == DraftTargetStatus.DRAFT })
+            assertTrue(draft.targets.all { it.errorMessage == "timed out" })
         }
 
     private fun sampleContent(text: String) =

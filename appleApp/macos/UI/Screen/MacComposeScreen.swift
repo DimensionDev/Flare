@@ -8,6 +8,8 @@ import UniformTypeIdentifiers
 
 struct MacComposeScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.timelineAppearance) private var timelineAppearance
     @FocusState private var textEditorFocused: Bool
 
     let request: MacComposeWindowRequest
@@ -25,6 +27,8 @@ struct MacComposeScreen: View {
     @State private var pendingCursor: Int?
     @State private var closeController = MacComposeWindowCloseController()
     @State private var mediaDropTargeted = false
+    @State private var pendingCrossPlatformAccount: UiProfile?
+    @State private var crossPlatformConfirmed = false
 
     init(request: MacComposeWindowRequest) {
         self.request = request
@@ -33,7 +37,8 @@ struct MacComposeScreen: View {
                 presenter: ComposePresenter(
                     accountType: request.accountType,
                     status: request.composeStatus,
-                    draftGroupId: request.draftGroupId
+                    draftGroupId: request.draftGroupId,
+                    enableCrossPlatformReference: true
                 )
             )
         )
@@ -211,6 +216,27 @@ struct MacComposeScreen: View {
                 mediaItems = Array(mediaItems.prefix(Int(media.maxCount)))
             }
         }
+        .alert(
+            "compose_cross_platform_title",
+            isPresented: Binding(
+                get: { pendingCrossPlatformAccount != nil },
+                set: { if !$0 { pendingCrossPlatformAccount = nil } }
+            )
+        ) {
+            Button("Cancel", role: .cancel) {
+                pendingCrossPlatformAccount = nil
+            }
+            Button("Continue") {
+                guard let account = pendingCrossPlatformAccount else { return }
+                crossPlatformConfirmed = true
+                pendingCrossPlatformAccount = nil
+                presenter.state.selectAccount(accountKey: account.key)
+            }
+        } message: {
+            Text(presenter.state.composeStatus is ComposeStatus.Reply
+                 ? "compose_cross_platform_reply_message"
+                 : "compose_cross_platform_quote_message")
+        }
     }
 
     private static let mediaTransferTypes: [UTType] = [
@@ -273,7 +299,7 @@ struct MacComposeScreen: View {
                     accounts: accounts,
                     selected: selected,
                     onToggle: { account in
-                        presenter.state.selectAccount(accountKey: account.key)
+                        toggleAccount(account, isSelected: selected.containsAccount(account))
                     }
                 )
             }
@@ -436,10 +462,25 @@ struct MacComposeScreen: View {
     }
 
     private func send() {
-        presenter.state.send(data: composeData) { dispatched in
+        let renderer = MacReferenceShareImageRenderer(
+            colorScheme: colorScheme,
+            timelineAppearance: timelineAppearance
+        )
+        presenter.state.send(data: composeData, referenceShareImageRenderer: renderer) { dispatched in
             if dispatched.boolValue {
                 dismissComposeWindow()
             }
+        }
+    }
+
+    private func toggleAccount(_ account: UiProfile, isSelected: Bool) {
+        if !isSelected,
+           !crossPlatformConfirmed,
+           let sourcePlatform = presenter.state.referenceSourcePlatform,
+           sourcePlatform != account.platformType {
+            pendingCrossPlatformAccount = account
+        } else {
+            presenter.state.selectAccount(accountKey: account.key)
         }
     }
 

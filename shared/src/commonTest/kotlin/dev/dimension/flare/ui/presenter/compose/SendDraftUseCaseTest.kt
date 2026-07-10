@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.repository.ComposeDraftBundle
@@ -744,6 +745,171 @@ class SendDraftUseCaseTest : RobolectricTest() {
             assertIs<ComposeDraftFailedException>(error.throwable)
         }
 
+    @Test
+    fun shareUrlIsAppendedOnlyWhenTargetLimitAllowsIt() {
+        val url = "https://example.com/post/1"
+
+        assertEquals(url, appendShareUrlIfAllowed("", url, 100))
+        assertEquals("hello\n\n$url", appendShareUrlIfAllowed("hello  \n", url, 100))
+        assertEquals("hello $url", appendShareUrlIfAllowed("hello $url", url, 100))
+        assertEquals("hello", appendShareUrlIfAllowed("hello", url, 10))
+        assertEquals("hello", appendShareUrlIfAllowed("hello", null, 100))
+    }
+
+    @Test
+    fun crossPlatformTargetBecomesNewPostWithShareImage() {
+        val sourceAccount = mastodonAccount("alice", "mastodon.social")
+        val targetAccount = blueskyAccount("bob", "bsky.social")
+        val userMedia = media(name = "user.png", bytes = byteArrayOf(1), altText = "user")
+        val shareMedia = media(name = "share.png", bytes = byteArrayOf(2), altText = null)
+        val url = "https://mastodon.social/@alice/1"
+        val data =
+            ComposeData(
+                content = "hello",
+                medias = listOf(userMedia),
+                referenceStatus =
+                    ComposeData.ReferenceStatus(
+                        composeStatus = ComposeStatus.Quote(MicroBlogKey("1", "mastodon.social")),
+                        sourceAccountKey = sourceAccount.accountKey,
+                        sourcePlatform = PlatformType.Mastodon,
+                        shareUrl = url,
+                        shareMedia = shareMedia,
+                    ),
+            )
+
+        val targetData = data.forTarget(targetAccount, composeConfig(maxLength = 100, maxMediaCount = 2))
+        val nativeData = data.forTarget(sourceAccount, composeConfig(maxLength = 100, maxMediaCount = 2))
+
+        assertEquals("hello\n\n$url", targetData.content)
+        assertEquals(listOf(userMedia, shareMedia), targetData.medias)
+        assertNull(targetData.referenceStatus)
+        assertEquals(data, nativeData)
+    }
+
+    @Test
+    fun targetPreparationFailureDoesNotBlockOtherTargets() =
+        runTest {
+            val validAccount = mastodonAccount("alice", "mastodon.social")
+            val invalidAccount = blueskyAccount("bob", "bsky.social")
+            val sent = mutableListOf<SentCompose>()
+            val progresses = mutableListOf<ComposeProgressState>()
+            val useCase =
+                SendDraftUseCase(
+                    draftRepository = repository,
+                    draftMediaStore = mediaStore,
+                    findAccount = { null },
+                    prepareData = { account, data ->
+                        if (account.accountKey == invalidAccount.accountKey) {
+                            error("invalid target payload")
+                        }
+                        data
+                    },
+                    composeDraft = { account, data, _ -> sent += SentCompose(account, data) },
+                )
+
+            useCase(
+                ComposeDraftBundle(
+                    accounts = listOf(validAccount, invalidAccount),
+                    groupId = "prepare-partial-failure",
+                    template = ComposeData(content = "hello"),
+                ),
+            ) { progresses += it }
+            advanceUntilIdle()
+
+            assertEquals(listOf(validAccount.accountKey), sent.map { it.account.accountKey })
+            val draft = assertNotNull(repository.draft("prepare-partial-failure").first())
+            assertEquals(invalidAccount.accountKey, draft.targets.single().accountKey)
+            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            assertEquals("invalid target payload", draft.targets.single().errorMessage)
+            assertIs<ComposeProgressState.Error>(progresses.last())
+        }
+
+    @Test
+    fun resendSkipsPreparingTargets() =
+        runTest {
+            val account = mastodonAccount("alice", "mastodon.social")
+            saveDraftGroup(
+                groupId = "resend-preparing",
+                content = sampleContent("preparing"),
+                targets = listOf(SaveDraftTarget(accountKey = account.accountKey, status = DraftTargetStatus.PREPARING)),
+            )
+            val sent = mutableListOf<SentCompose>()
+            val progresses = mutableListOf<ComposeProgressState>()
+            val useCase = testUseCase(sent = sent, findAccount = { account })
+
+            useCase("resend-preparing") { progresses += it }
+            advanceUntilIdle()
+
+            assertTrue(sent.isEmpty())
+            assertEquals(
+                DraftTargetStatus.PREPARING,
+                repository
+                    .draft("resend-preparing")
+                    .first()
+                    ?.targets
+                    ?.single()
+                    ?.status,
+            )
+            assertEquals(
+                listOf(ComposeProgressState.Progress(0, 0), ComposeProgressState.Success),
+                progresses,
+            )
+        }
+
+    @Test
+    fun failedCrossPlatformDraftReusesPersistedShareImageOnRetry() =
+        runTest {
+            val account = mastodonAccount("alice", "mastodon.social")
+            val sourceAccountKey = MicroBlogKey("source", "bsky.social")
+            val userMedia = media(name = "user.png", bytes = byteArrayOf(1), altText = "user")
+            val shareMedia = media(name = "share.png", bytes = byteArrayOf(2), altText = null)
+            val data =
+                ComposeData(
+                    content = "retry",
+                    medias = listOf(userMedia),
+                    referenceStatus =
+                        ComposeData.ReferenceStatus(
+                            composeStatus = ComposeStatus.Quote(MicroBlogKey("post", "bsky.social")),
+                            sourceAccountKey = sourceAccountKey,
+                            sourcePlatform = PlatformType.Bluesky,
+                            shareUrl = "https://bsky.app/profile/source/post/post",
+                            shareMedia = shareMedia,
+                        ),
+                )
+            val failingUseCase = testUseCase { _, _, _ -> error("upload failed") }
+
+            failingUseCase(
+                ComposeDraftBundle(
+                    accounts = listOf(account),
+                    groupId = "share-image-retry",
+                    template = data,
+                ),
+            ) {}
+
+            val failedDraft = assertNotNull(repository.draft("share-image-retry").first())
+            assertEquals(1, failedDraft.content.reference?.shareImageMediaIndex)
+            assertEquals(sourceAccountKey, failedDraft.content.reference?.sourceAccountKey)
+            assertEquals(PlatformType.Bluesky, failedDraft.content.reference?.sourcePlatform)
+            assertEquals(2, failedDraft.medias.size)
+
+            val resent = mutableListOf<SentCompose>()
+            var retriedShareBytes: ByteArray? = null
+            val retryUseCase =
+                testUseCase(sent = resent, findAccount = { account }) { _, retryData, _ ->
+                    retriedShareBytes =
+                        retryData.referenceStatus
+                            ?.shareMedia
+                            ?.file
+                            ?.readBytes()
+                }
+            retryUseCase("share-image-retry") {}
+
+            val retriedData = resent.single().data
+            assertEquals(listOf("user"), retriedData.medias.map { it.altText })
+            assertContentEquals(byteArrayOf(2), retriedShareBytes)
+            assertNull(repository.draft("share-image-retry").first())
+        }
+
     private fun testUseCase(
         sent: MutableList<SentCompose> = mutableListOf(),
         findAccount: suspend (MicroBlogKey) -> UiAccount? = { null },
@@ -794,6 +960,30 @@ class SendDraftUseCaseTest : RobolectricTest() {
         UiAccount(
             accountKey = MicroBlogKey(id, host),
             platformType = PlatformType.Mastodon,
+        )
+
+    private fun blueskyAccount(
+        id: String,
+        host: String,
+    ): UiAccount =
+        UiAccount(
+            accountKey = MicroBlogKey(id, host),
+            platformType = PlatformType.Bluesky,
+        )
+
+    private fun composeConfig(
+        maxLength: Int,
+        maxMediaCount: Int,
+    ): ComposeConfig =
+        ComposeConfig(
+            text = ComposeConfig.Text(maxLength),
+            media =
+                ComposeConfig.Media(
+                    maxCount = maxMediaCount,
+                    canSensitive = true,
+                    altTextMaxLength = 1_000,
+                    allowMediaOnly = true,
+                ),
         )
 
     private fun media(

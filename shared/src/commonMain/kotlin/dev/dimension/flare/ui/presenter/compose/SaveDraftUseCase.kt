@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
+import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
@@ -14,7 +15,10 @@ internal class SaveDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,
 ) {
-    suspend operator fun invoke(bundle: ComposeDraftBundle): String {
+    suspend operator fun invoke(
+        bundle: ComposeDraftBundle,
+        targetStatus: DraftTargetStatus = DraftTargetStatus.DRAFT,
+    ): String {
         val persistedMedia = draftMediaStore.persist(groupId = bundle.groupId, medias = bundle.template.medias)
         return draftRepository.saveDraft(
             SaveDraftInput(
@@ -24,6 +28,7 @@ internal class SaveDraftUseCase(
                     bundle.accounts.map {
                         SaveDraftTarget(
                             accountKey = it.accountKey,
+                            status = targetStatus,
                         )
                     },
                 medias = persistedMedia,
@@ -32,7 +37,7 @@ internal class SaveDraftUseCase(
     }
 }
 
-internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftContent(): DraftContent =
+internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftContent(shareImageMediaIndex: Int? = null): DraftContent =
     DraftContent(
         text = content,
         visibility = visibility,
@@ -59,6 +64,10 @@ internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftCo
                         },
                     statusKey = it.composeStatus.statusKey,
                     rootId = (it.composeStatus as? ComposeStatus.VVOComment)?.rootId,
+                    sourceAccountKey = it.sourceAccountKey,
+                    sourcePlatform = it.sourcePlatform,
+                    shareUrl = it.shareUrl,
+                    shareImageMediaIndex = shareImageMediaIndex,
                 )
             },
     )

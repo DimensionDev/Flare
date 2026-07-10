@@ -165,7 +165,12 @@ private val UiDraftStatus.sortOrder: Int
 
 private fun dev.dimension.flare.data.repository.DraftGroup.toUiDraftStatus(): UiDraftStatus =
     when {
-        targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
+        targets.any {
+            it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.PREPARING ||
+                it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING
+        } -> UiDraftStatus.SENDING
+
         targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED
+
         else -> UiDraftStatus.DRAFT
     }

@@ -37,6 +37,9 @@
     <string name="compose_notification_success">貼文已發送</string>
     <string name="compose_notification_error">貼文發送失敗</string>
     <string name="compose_close_confirm_title">儲存草稿？</string>
+    <string name="compose_cross_platform_title">跨平台發佈？</string>
+    <string name="compose_cross_platform_quote_message">此帳號無法直接引用原帖。Flare 將發佈原帖截圖，並在字數允許時附上原帖連結。</string>
+    <string name="compose_cross_platform_reply_message">此帳號無法保留回覆關係。Flare 將建立一則帶原帖截圖的新帖子，並在字數允許時附上原帖連結。</string>
     <string name="compose_close_confirm_message">您有未儲存的變更。是否在關閉前將其儲存為草稿？</string>
     <string name="compose_save_draft">儲存</string>
     <string name="compose_close_discard">捨棄</string>

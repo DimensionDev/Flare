@@ -36,6 +36,7 @@ public class RestoreDraftUseCase internal constructor(
             data = draft.content.toComposeData(medias = emptyList()),
             medias =
                 draft.medias
+                    .filterIndexed { index, _ -> index != draft.content.reference?.shareImageMediaIndex }
                     .map { media ->
                         UiDraftMedia(
                             cachePath = media.cachePath,
@@ -55,12 +56,15 @@ public class RestoreDraftUseCase internal constructor(
 
 internal fun DraftContent.toComposeData(
     medias: List<dev.dimension.flare.data.datasource.microblog.ComposeData.Media>,
-): dev.dimension.flare.data.datasource.microblog.ComposeData =
-    dev.dimension.flare.data.datasource.microblog.ComposeData(
+): dev.dimension.flare.data.datasource.microblog.ComposeData {
+    val shareImageMediaIndex = reference?.shareImageMediaIndex
+    val shareMedia = shareImageMediaIndex?.let(medias::getOrNull)
+    val userMedias = medias.filterIndexed { index, _ -> index != shareImageMediaIndex }
+    return dev.dimension.flare.data.datasource.microblog.ComposeData(
         content = text,
         visibility = visibility,
         language = language,
-        medias = medias,
+        medias = userMedias,
         sensitive = sensitive,
         spoilerText = spoilerText,
         poll =
@@ -76,9 +80,14 @@ internal fun DraftContent.toComposeData(
             reference?.let { reference ->
                 dev.dimension.flare.data.datasource.microblog.ComposeData.ReferenceStatus(
                     composeStatus = reference.toComposeStatus(),
+                    sourceAccountKey = reference.sourceAccountKey,
+                    sourcePlatform = reference.sourcePlatform,
+                    shareUrl = reference.shareUrl,
+                    shareMedia = shareMedia,
                 )
             },
     )
+}
 
 internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
     when (type) {
@@ -100,7 +109,12 @@ internal fun DraftContent.DraftReference.toComposeStatus(): ComposeStatus =
 
 private fun dev.dimension.flare.data.repository.DraftGroup.toUiDraftStatus(): UiDraftStatus =
     when {
-        targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING } -> UiDraftStatus.SENDING
+        targets.any {
+            it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.PREPARING ||
+                it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.SENDING
+        } -> UiDraftStatus.SENDING
+
         targets.any { it.status == dev.dimension.flare.data.database.app.model.DraftTargetStatus.FAILED } -> UiDraftStatus.FAILED
+
         else -> UiDraftStatus.DRAFT
     }

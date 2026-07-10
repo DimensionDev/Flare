@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.compose
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ComposeDraftBundle
 import dev.dimension.flare.data.repository.DraftMediaStore
@@ -18,6 +19,7 @@ internal class SendDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,
     private val findAccount: suspend (MicroBlogKey) -> UiAccount?,
+    private val prepareData: suspend (UiAccount, ComposeData) -> ComposeData = { _, data -> data },
     private val composeDraft: suspend (UiAccount, ComposeData, () -> Unit) -> Unit,
 ) {
     constructor(
@@ -28,6 +30,15 @@ internal class SendDraftUseCase(
         draftRepository = draftRepository,
         draftMediaStore = draftMediaStore,
         findAccount = { accountRepository.find(it) },
+        prepareData = { account, data ->
+            val dataSource =
+                accountRepository.getOrCreateDataSource(account) as? ComposeDataSource
+                    ?: error("Account does not support compose: ${account.accountKey}")
+            data.forTarget(
+                account = account,
+                newPostConfig = dataSource.composeConfig(ComposeType.New),
+            )
+        },
         composeDraft = { account, data, progress ->
             val dataSource =
                 accountRepository.getOrCreateDataSource(account) as? ComposeDataSource
@@ -40,13 +51,16 @@ internal class SendDraftUseCase(
         bundle: ComposeDraftBundle,
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
-        val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
+        val shareMedia = bundle.template.referenceStatus?.shareMedia
+        val mediasToPersist = bundle.template.medias + listOfNotNull(shareMedia)
+        val shareImageMediaIndex = shareMedia?.let { bundle.template.medias.size }
+        val persistedMedia = draftMediaStore.persist(bundle.groupId, mediasToPersist)
         val savedGroupId =
             draftRepository.saveDraft(
                 input =
                     SaveDraftInput(
                         groupId = bundle.groupId,
-                        content = bundle.template.toDraftContent(),
+                        content = bundle.template.toDraftContent(shareImageMediaIndex = shareImageMediaIndex),
                         targets =
                             bundle.accounts.map {
                                 SaveDraftTarget(
@@ -59,11 +73,13 @@ internal class SendDraftUseCase(
                         medias = persistedMedia,
                     ),
             )
-        sendDatas(
-            targets = bundle.accounts.map { ComposeTargetData(account = it, data = bundle.template) },
-            groupId = savedGroupId,
-            progress = progress,
-        )
+        val failures =
+            sendDatas(
+                targets = bundle.accounts.map { ComposeTargetData(account = it, data = bundle.template) },
+                groupId = savedGroupId,
+                progress = progress,
+            )
+        progress(failures.toProgressState())
     }
 
     suspend operator fun invoke(
@@ -74,8 +90,10 @@ internal class SendDraftUseCase(
         val medias = draftMediaStore.restore(draft.medias)
         val datas =
             draft.targets
-                .filter { it.status != DraftTargetStatus.SENDING }
-                .mapNotNull { target ->
+                .filter {
+                    it.status != DraftTargetStatus.PREPARING &&
+                        it.status != DraftTargetStatus.SENDING
+                }.mapNotNull { target ->
                     findAccount(target.accountKey)?.let { account ->
                         ComposeTargetData(
                             account = account,
@@ -83,22 +101,53 @@ internal class SendDraftUseCase(
                         )
                     }
                 }
+        val failures =
+            sendDatas(
+                targets = datas,
+                groupId = groupId,
+                progress = progress,
+            )
+        progress(failures.toProgressState())
+    }
+
+    suspend fun sendPersistedTargets(
+        groupId: String,
+        accounts: List<UiAccount>,
+        data: ComposeData,
+        progress: suspend (ComposeProgressState) -> Unit,
+    ): List<Throwable> =
         sendDatas(
-            targets = datas,
+            targets = accounts.map { ComposeTargetData(account = it, data = data) },
             groupId = groupId,
             progress = progress,
         )
-    }
 
     private suspend fun sendDatas(
         targets: List<ComposeTargetData>,
         groupId: String,
         progress: suspend (ComposeProgressState) -> Unit,
-    ) {
-        val progressTracker = ComposeProgressTracker(targets)
-        progress(progressTracker.state())
+    ): List<Throwable> {
         val failures = mutableListOf<Throwable>()
-        targets.forEach { target ->
+        val preparedTargets =
+            targets.mapNotNull { target ->
+                try {
+                    target.copy(data = prepareData(target.account, target.data))
+                } catch (throwable: Exception) {
+                    draftRepository.updateTargetStatus(
+                        groupId = groupId,
+                        accountKey = target.account.accountKey,
+                        status = DraftTargetStatus.FAILED,
+                        errorMessage = throwable.message,
+                        attemptCount = 1,
+                        lastAttemptAt = Clock.System.now().toEpochMilliseconds(),
+                    )
+                    failures += throwable
+                    null
+                }
+            }
+        val progressTracker = ComposeProgressTracker(preparedTargets)
+        progress(progressTracker.state())
+        preparedTargets.forEach { target ->
             draftRepository.updateTargetStatus(
                 groupId = groupId,
                 accountKey = target.account.accountKey,
@@ -134,12 +183,65 @@ internal class SendDraftUseCase(
                 failures += throwable
             }
         }
-        if (failures.isEmpty()) {
-            progress(ComposeProgressState.Success)
-        } else {
-            progress(ComposeProgressState.Error(ComposeDraftFailedException(failures)))
-        }
+        return failures
     }
+}
+
+private fun List<Throwable>.toProgressState(): ComposeProgressState =
+    if (isEmpty()) {
+        ComposeProgressState.Success
+    } else {
+        ComposeProgressState.Error(ComposeDraftFailedException(this))
+    }
+
+internal fun ComposeData.forTarget(
+    account: UiAccount,
+    newPostConfig: dev.dimension.flare.data.datasource.microblog.ComposeConfig,
+): ComposeData {
+    val reference = referenceStatus ?: return this
+    val sourcePlatform = reference.sourcePlatform ?: return this
+    if (account.platformType == sourcePlatform) return this
+
+    val shareMedia =
+        requireNotNull(reference.shareMedia) {
+            "Cross-platform reference image is unavailable."
+        }
+    val mediaConfig =
+        requireNotNull(newPostConfig.media) {
+            "Target account does not support image posts."
+        }
+    require(poll == null) {
+        "Cross-platform references cannot be combined with a poll."
+    }
+    require(medias.size + 1 <= mediaConfig.maxCount) {
+        "Target account has no remaining media slot for the reference image."
+    }
+
+    val targetContent = appendShareUrlIfAllowed(content, reference.shareUrl, newPostConfig.text?.maxLength)
+    require(targetContent.isNotBlank() || mediaConfig.allowMediaOnly) {
+        "Target account does not support media-only posts."
+    }
+    return copy(
+        content = targetContent,
+        medias = medias + shareMedia,
+        referenceStatus = null,
+    )
+}
+
+internal fun appendShareUrlIfAllowed(
+    content: String,
+    shareUrl: String?,
+    maxLength: Int?,
+): String {
+    val url = shareUrl?.takeIf { it.isNotBlank() } ?: return content
+    if (content.contains(url)) return content
+    val candidate =
+        if (content.isBlank()) {
+            url
+        } else {
+            "${content.trimEnd()}\n\n$url"
+        }
+    return if (maxLength != null && candidate.length <= maxLength) candidate else content
 }
 
 private class ComposeProgressTracker(

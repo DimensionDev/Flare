@@ -10,6 +10,7 @@ import androidx.room3.Relation
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -38,6 +39,10 @@ internal data class DraftContent(
         val type: DraftReferenceType,
         val statusKey: MicroBlogKey,
         val rootId: String? = null,
+        val sourceAccountKey: MicroBlogKey? = null,
+        val sourcePlatform: PlatformType? = null,
+        val shareUrl: String? = null,
+        val shareImageMediaIndex: Int? = null,
     )
 }
 
@@ -57,6 +62,9 @@ internal enum class DraftReferenceType {
 internal enum class DraftTargetStatus {
     @SerialName("draft")
     DRAFT,
+
+    @SerialName("preparing")
+    PREPARING,
 
     @SerialName("sending")
     SENDING,

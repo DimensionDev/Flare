@@ -40,6 +40,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
     val statusKey = pixivIllustKey(id)
     return UiTimelineV2.Post(
         platformType = PlatformType.Pixiv,
+        shareUrl = "https://www.pixiv.net/artworks/$id",
         images = toUiMedia().toPersistentList(),
         sensitive = xRestrict > 0 || sanityLevel >= 6,
         contentWarning = title.toUiPlainText(),

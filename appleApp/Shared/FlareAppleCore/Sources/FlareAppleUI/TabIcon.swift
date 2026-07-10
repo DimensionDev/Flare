@@ -39,6 +39,7 @@ public struct TabIcon: View {
         case .avatar(let avatar):
             AvatarTabIcon(userKey: avatar.accountKey, accountType: AccountType.Specific(accountKey: avatar.accountKey))
                 .frame(width: size, height: size)
+                .id("\(avatar.accountKey.id)@\(avatar.accountKey.host)")
         case .url(let url):
             NetworkImage(data: url.url)
                 .frame(width: size, height: size)
@@ -53,6 +54,7 @@ public struct TabIcon: View {
                 ) {
                     AvatarTabIcon(userKey: mixed.accountKey, accountType: AccountType.Specific(accountKey: mixed.accountKey))
                         .frame(width: size, height: size)
+                        .id("\(mixed.accountKey.id)@\(mixed.accountKey.host)")
                     MaterialTabIcon(icon: mixed.icon)
                         .padding(2)
                         .background(Color.white)
@@ -66,6 +68,7 @@ public struct TabIcon: View {
             FavTabIcon(host: favIcon.host)
                 .frame(width: size, height: size)
                 .clipShape(RoundedRectangle(cornerRadius: faviconCornerRadius, style: .continuous))
+                .id(favIcon.host)
         }
     }
 }

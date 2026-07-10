@@ -57,8 +57,8 @@ internal fun DeepLinkAccountPickerModal(
     val defaultsActions by producePresenter("link_open_defaults_picker") {
         remember(originalUrl) { LinkOpenDefaultsActionsPresenter(originalUrl) }.invoke()
     }
-    var saveAsDefault by remember(defaultsActions.canSaveDefault) {
-        mutableStateOf(defaultsActions.canSaveDefault)
+    var saveAsDefault by remember(originalUrl) {
+        mutableStateOf(false)
     }
     LazyColumn(
         contentPadding =
@@ -77,7 +77,7 @@ internal fun DeepLinkAccountPickerModal(
             AccountItem(
                 item.userState.user,
                 onClick = {
-                    if (saveAsDefault && defaultsActions.canSaveDefault) {
+                    if (saveAsDefault) {
                         defaultsActions.setAccountDefault(item.accountKey)
                     }
                     onDismissRequest()
@@ -130,32 +130,30 @@ internal fun DeepLinkAccountPickerModal(
                 },
             )
         }
-        if (defaultsActions.canSaveDefault) {
-            item {
-                ListItem(
-                    modifier =
-                        Modifier
-                            .clickable {
-                                saveAsDefault = !saveAsDefault
-                            },
-                    trailingContent = {
-                        Checkbox(
-                            checked = saveAsDefault,
-                            onCheckedChange = {
-                                saveAsDefault = it
-                            },
-                        )
-                    },
-                    colors =
-                        ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                        ),
-                    elevation = ListItemDefaults.elevation(),
-                    content = {
-                        Text(stringResource(R.string.deeplink_account_selection_save_default))
-                    },
-                )
-            }
+        item {
+            ListItem(
+                modifier =
+                    Modifier
+                        .clickable {
+                            saveAsDefault = !saveAsDefault
+                        },
+                trailingContent = {
+                    Checkbox(
+                        checked = saveAsDefault,
+                        onCheckedChange = {
+                            saveAsDefault = it
+                        },
+                    )
+                },
+                colors =
+                    ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    ),
+                elevation = ListItemDefaults.elevation(),
+                content = {
+                    Text(stringResource(R.string.deeplink_account_selection_save_default))
+                },
+            )
         }
         item {
             Spacer(modifier = Modifier.height(14.dp))

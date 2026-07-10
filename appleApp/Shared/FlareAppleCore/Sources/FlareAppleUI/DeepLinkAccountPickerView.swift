@@ -21,7 +21,7 @@ public struct DeepLinkAccountPickerView<Route>: View {
         self.data = data
         self.onNavigate = onNavigate
         _defaultsActions = StateObject(wrappedValue: KotlinPresenter(presenter: LinkOpenDefaultsActionsPresenter(originalUrl: originalUrl)))
-        _saveAsDefault = State(initialValue: true)
+        _saveAsDefault = State(initialValue: false)
     }
 
     public var body: some View {
@@ -30,7 +30,7 @@ public struct DeepLinkAccountPickerView<Route>: View {
                 ForEach(data.keys.sorted(by: { $0.id < $1.id }), id: \.self) { userKey in
                     if let route = data[userKey] {
                         Button {
-                            if saveAsDefault, defaultsActions.state.canSaveDefault {
+                            if saveAsDefault {
                                 defaultsActions.state.setAccountDefault(accountKey: userKey)
                             }
                             onNavigate(route)
@@ -43,7 +43,7 @@ public struct DeepLinkAccountPickerView<Route>: View {
                 }
 
                 Button {
-                    if saveAsDefault, defaultsActions.state.canSaveDefault {
+                    if saveAsDefault {
                         defaultsActions.state.setBrowserDefault()
                     }
                     let routeLink = DeeplinkRoute.OpenLinkDirectly(url: originalUrl).toUri()
@@ -60,10 +60,8 @@ public struct DeepLinkAccountPickerView<Route>: View {
                 }
                 .buttonStyle(.plain)
             } footer: {
-                if defaultsActions.state.canSaveDefault {
-                    Toggle(isOn: $saveAsDefault) {
-                        Text("deep_link_account_picker_save_default", bundle: FlareAppleUILocalization.bundle)
-                    }
+                Toggle(isOn: $saveAsDefault) {
+                    Text("deep_link_account_picker_save_default", bundle: FlareAppleUILocalization.bundle)
                 }
             }
         }

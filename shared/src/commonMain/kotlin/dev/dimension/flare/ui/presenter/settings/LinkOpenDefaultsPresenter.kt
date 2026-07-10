@@ -38,17 +38,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 public class LinkOpenDefaultsActionsPresenter(
-    private val originalUrl: String,
+    originalUrl: String,
 ) : PresenterBase<LinkOpenDefaultsActionsPresenter.State>() {
     private val settingsRepository: SettingsRepository by koinInject()
+    private val host = originalUrl.toLinkOpenDefaultHost()
 
     @Composable
     override fun body(): State {
         val scope = rememberCoroutineScope()
-        val host = originalUrl.toLinkOpenDefaultHost()
         return object : State {
-            override val canSaveDefault: Boolean = host != null
-
             override fun setBrowserDefault() {
                 host?.let {
                     scope.setDefault(
@@ -82,9 +80,6 @@ public class LinkOpenDefaultsActionsPresenter(
 
     @Immutable
     public interface State {
-        @WebIgnore
-        public val canSaveDefault: Boolean
-
         @WebIgnore
         public fun setBrowserDefault()
 

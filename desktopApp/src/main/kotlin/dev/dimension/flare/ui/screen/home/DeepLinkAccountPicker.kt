@@ -54,8 +54,8 @@ internal fun DeepLinkAccountPicker(
     val defaultsActions by producePresenter("link_open_defaults_picker") {
         remember(originalUrl) { LinkOpenDefaultsActionsPresenter(originalUrl) }.invoke()
     }
-    var saveAsDefault by remember(defaultsActions.canSaveDefault) {
-        mutableStateOf(defaultsActions.canSaveDefault)
+    var saveAsDefault by remember(originalUrl) {
+        mutableStateOf(false)
     }
     ContentDialog(
         visible = true,
@@ -73,7 +73,7 @@ internal fun DeepLinkAccountPicker(
                     AccountItem(
                         item.userState.user,
                         onClick = {
-                            if (saveAsDefault && defaultsActions.canSaveDefault) {
+                            if (saveAsDefault) {
                                 defaultsActions.setAccountDefault(item.accountKey)
                             }
                             onDismissRequest()
@@ -89,7 +89,7 @@ internal fun DeepLinkAccountPicker(
                 item {
                     CardExpanderItem(
                         onClick = {
-                            if (saveAsDefault && defaultsActions.canSaveDefault) {
+                            if (saveAsDefault) {
                                 defaultsActions.setBrowserDefault()
                             }
                             uriHandler.openUri(originalUrl)
@@ -106,24 +106,22 @@ internal fun DeepLinkAccountPicker(
                         },
                     )
                 }
-                if (defaultsActions.canSaveDefault) {
-                    item {
-                        Row(
-                            modifier =
-                                Modifier.clickable {
-                                    saveAsDefault = !saveAsDefault
-                                },
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            CheckBox(
-                                checked = saveAsDefault,
-                                onCheckStateChange = {
-                                    saveAsDefault = it
-                                },
-                            )
-                            Text(stringResource(Res.string.deeplink_account_selection_save_default))
-                        }
+                item {
+                    Row(
+                        modifier =
+                            Modifier.clickable {
+                                saveAsDefault = !saveAsDefault
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CheckBox(
+                            checked = saveAsDefault,
+                            onCheckStateChange = {
+                                saveAsDefault = it
+                            },
+                        )
+                        Text(stringResource(Res.string.deeplink_account_selection_save_default))
                     }
                 }
             }

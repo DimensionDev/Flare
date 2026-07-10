@@ -7,8 +7,8 @@ import UIKit
 @MainActor
 enum MediaCacheMaintenance {
     private static let mebibyte: UInt = 1024 * 1024
-    private static let kingfisherDiskLimit = 512 * mebibyte
-    private static let videoCacheLimit = 1024 * mebibyte
+    private static let kingfisherDiskLimit = 250 * mebibyte
+    private static let videoCacheLimit = 512 * mebibyte
     private static let videoCheckInterval: TimeInterval = 24 * 60 * 60
     private static let lastVideoCheckKey = "mediaCacheMaintenance.lastVideoCacheCheck"
     private static var isVideoCheckRunning = false

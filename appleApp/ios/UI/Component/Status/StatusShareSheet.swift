@@ -135,7 +135,9 @@ struct StatusShareSheet: View {
     
     
     private func renderImage(data: UiTimelineV2) async -> UIImage? {
-        return await previewView(data: data).snapshot()
+        return await previewView(data: data).snapshot(
+            colorScheme: theme ?? colorScheme
+        )
     }
     
     private func saveImage() {
@@ -172,16 +174,21 @@ private extension TimelineAppearance {
 
 extension View {
     @MainActor
-    func snapshot(delay: TimeInterval = 0.1) async -> UIImage? {
+    func snapshot(
+        colorScheme: ColorScheme,
+        delay: TimeInterval = 0.1
+    ) async -> UIImage? {
         let controller = UIHostingController(rootView: self.edgesIgnoringSafeArea(.top))
+        controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
         let view = controller.view
         let targetSize = controller.view.intrinsicContentSize
         view?.bounds = CGRect(origin: CGPoint(x: 0, y: 0), size: targetSize)
-        view?.backgroundColor = .clear
+        view?.backgroundColor = .systemGroupedBackground
         try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
 
         let format = UIGraphicsImageRendererFormat()
         format.scale = 3
+        format.opaque = true
         let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
         return renderer.image { _ in
             view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)

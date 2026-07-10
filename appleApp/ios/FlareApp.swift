@@ -5,7 +5,10 @@ import AVFAudio
 
 @main
 struct FlareApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     init() {
+        MediaCacheMaintenance.configure()
         configureAudioSessionForMixing()
         let firebaseEnabled = FirebaseBootstrap.configureIfAvailable()
         if firebaseEnabled {
@@ -26,6 +29,9 @@ struct FlareApp: App {
                 } else {
                     BackportFlareRoot()
                 }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                MediaCacheMaintenance.handleScenePhase(phase)
             }
         }
     }

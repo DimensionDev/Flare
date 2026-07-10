@@ -98,28 +98,26 @@ public class ComposePresenter(
     }
 
     private val allAccountsFlow by lazy {
-        allAccountServicesFlow(accountRepository)
-            .map { accounts ->
-                accounts
-                    .filterIsInstance<ComposeDataSource>()
-                    .map { account ->
-                        accountRepository.getFlow(account.accountKey).map {
-                            account.accountKey to it
-                        }
-                    }
-            }.combineLatestFlowLists()
-            .map { it.toMap() }
+        observeAllComposeAccounts(
+            accountFlows =
+                allAccountServicesFlow(accountRepository)
+                    .map { accounts ->
+                        accounts
+                            .filterIsInstance<ComposeDataSource>()
+                            .map { account ->
+                                accountRepository.getFlow(account.accountKey).map {
+                                    account.accountKey to it
+                                }
+                            }
+                    },
+        )
     }
 
     private val selectedComposeAccountKeysFlow by lazy {
-        combine(
-            allAccountsFlow,
-            selectedAccountsKeyFlow,
-        ) { allAccounts, selectedKeys ->
-            selectedKeys
-                .filter { key -> allAccounts.containsKey(key) }
-                .toImmutableList()
-        }
+        observeSelectedComposeAccountKeys(
+            allAccountsFlow = allAccountsFlow,
+            selectedAccountsKeyFlow = selectedAccountsKeyFlow,
+        )
     }
 
     private val allUsersFlow by lazy {
@@ -874,6 +872,27 @@ public class ComposePresenter(
             }
     }
 }
+
+internal fun observeSelectedComposeAccountKeys(
+    allAccountsFlow: Flow<Map<MicroBlogKey, UiState<UiAccount>>>,
+    selectedAccountsKeyFlow: Flow<ImmutableList<MicroBlogKey>>,
+): Flow<ImmutableList<MicroBlogKey>> =
+    combine(
+        allAccountsFlow,
+        selectedAccountsKeyFlow,
+    ) { allAccounts, selectedKeys ->
+        selectedKeys
+            .filter { key -> allAccounts.containsKey(key) }
+            .toImmutableList()
+    }.distinctUntilChanged()
+
+internal fun observeAllComposeAccounts(
+    accountFlows: Flow<List<Flow<Pair<MicroBlogKey, UiState<UiAccount>>>>>,
+): Flow<Map<MicroBlogKey, UiState<UiAccount>>> =
+    accountFlows
+        .combineLatestFlowLists()
+        .map { it.toMap() }
+        .distinctUntilChanged()
 
 @Serializable
 private data class WebComposeMedia(

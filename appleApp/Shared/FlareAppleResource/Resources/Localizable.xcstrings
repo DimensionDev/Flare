@@ -58951,6 +58951,34 @@
         }
       }
     },
+    "macos_menu_new_post" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Post"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規投稿"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建帖子"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增貼文"
+          }
+        }
+      }
+    },
     "macos_action_open" : {
       "localizations" : {
         "af" : {

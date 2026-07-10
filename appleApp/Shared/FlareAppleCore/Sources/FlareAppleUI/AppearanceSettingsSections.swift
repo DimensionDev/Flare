@@ -248,7 +248,7 @@ public struct LinkOpenDefaultsSettingsSection: View {
             StateView(state: presenter.state.targets) { data in
                 let targets = data.cast(LinkOpenDefaultsPresenter.Target.self)
                 ForEach(targets, id: \.id) { target in
-                    LinkOpenDefaultSettingsPicker(
+                    LinkOpenDefaultSettingsMenu(
                         target: target,
                         state: presenter.state
                     )
@@ -260,30 +260,62 @@ public struct LinkOpenDefaultsSettingsSection: View {
     }
 }
 
-private struct LinkOpenDefaultSettingsPicker: View {
+private struct LinkOpenDefaultSettingsMenu: View {
     let target: LinkOpenDefaultsPresenter.Target
     let state: LinkOpenDefaultsPresenterState
 
     var body: some View {
-        Picker(selection: Binding(get: {
-            target.selectedOption.id
-        }, set: { newValue in
-            if let option = options.first(where: { $0.id == newValue }) {
-                state.select(target: target, option: option)
-            }
-        })) {
+        Menu {
             ForEach(options, id: \.id) { option in
-                LinkOpenDefaultOptionLabel(option: option)
-                    .tag(option.id)
+                Toggle(isOn: Binding(get: {
+                    target.selectedOption.id == option.id
+                }, set: { isSelected in
+                    if isSelected {
+                        state.select(target: target, option: option)
+                    }
+                })) {
+                    LinkOpenDefaultOptionLabel(option: option)
+                }
             }
         } label: {
-            Text(target.title)
-            LinkOpenDefaultOptionLabel(option: target.selectedOption)
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(target.title)
+                        .foregroundStyle(.primary)
+                    LinkOpenDefaultSelectedOptionLabel(option: target.selectedOption)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(.rect)
         }
+        .buttonStyle(.plain)
     }
 
     private var options: [any LinkOpenDefaultsPresenterOption] {
         target.options
+    }
+}
+
+private struct LinkOpenDefaultSelectedOptionLabel: View {
+    let option: any LinkOpenDefaultsPresenterOption
+
+    var body: some View {
+        if let account = option.account {
+            StateView(state: account.profile) { user in
+                Text(user.handle.canonical)
+            } errorContent: { error in
+                Text(error.message ?? "Unknown error")
+            } loadingContent: {
+                Text("#loading", bundle: FlareAppleUILocalization.bundle)
+            }
+        } else {
+            LinkOpenDefaultOptionLabel(option: option)
+        }
     }
 }
 
@@ -306,7 +338,11 @@ private struct LinkOpenDefaultAccountRow: View {
 
     var body: some View {
         StateView(state: account.profile) { user in
-            UserOnelineView(data: user)
+            Label {
+                Text(user.handle.canonical)
+            } icon: {
+                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+            }
         } errorContent: { error in
             Text(error.message ?? "Unknown error")
         } loadingContent: {

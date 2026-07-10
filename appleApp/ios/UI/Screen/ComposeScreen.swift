@@ -582,69 +582,6 @@ struct ComposeScreen: View {
 
 }
 
-private final class IOSReferenceShareImageRenderer: ReferenceShareImageRenderer {
-    private let colorScheme: ColorScheme
-    private let timelineAppearance: TimelineAppearance
-
-    init(colorScheme: ColorScheme, timelineAppearance: TimelineAppearance) {
-        self.colorScheme = colorScheme
-        self.timelineAppearance = timelineAppearance
-    }
-
-    nonisolated func render(
-        post: UiTimelineV2,
-        completion: @escaping (ComposeData.Media?, String?) -> Void
-    ) {
-        let request = IOSReferenceShareRenderRequest(post: post, completion: completion)
-        Task { @MainActor in
-            let post = request.post
-            let preview = TimelineView(
-                data: post,
-                detailStatusKey: post.statusKey,
-                showTranslate: false
-            )
-            .frame(width: 360)
-            .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(.rect(cornerRadius: 16))
-            .shadow(radius: 8)
-            .padding(64)
-            .background(Color(.systemGroupedBackground))
-            .environment(\.colorScheme, colorScheme)
-            .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
-
-            guard let image = await preview.snapshot(colorScheme: colorScheme),
-                  let data = image.pngData() else {
-                request.completion(nil, "Unable to render referenced post image.")
-                return
-            }
-            let media = ComposeData.Media(
-                file: FileItem(
-                    name: "reference-\(UUID().uuidString).png",
-                    data: KotlinByteArray.from(data: data),
-                    type: .image,
-                    mimeType: "image/png"
-                ),
-                altText: nil
-            )
-            request.completion(media, nil)
-        }
-    }
-}
-
-private nonisolated final class IOSReferenceShareRenderRequest: @unchecked Sendable {
-    let post: UiTimelineV2
-    let completion: (ComposeData.Media?, String?) -> Void
-
-    init(
-        post: UiTimelineV2,
-        completion: @escaping (ComposeData.Media?, String?) -> Void
-    ) {
-        self.post = post
-        self.completion = completion
-    }
-}
-
 @Observable
 class MediaViewModel {
     var selectedItems: [PhotosPickerItem] = []

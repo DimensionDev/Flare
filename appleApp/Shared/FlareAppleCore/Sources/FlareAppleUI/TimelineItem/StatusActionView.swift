@@ -549,9 +549,8 @@ public struct MacStatusShareSheet: View {
         StateView(state: presenter.state.status) { state in
             VStack(spacing: 0) {
                 ScrollView {
-                    MacStatusSharePreview(
+                    MacStatusShareImageContent(
                         data: state,
-                        statusKey: statusKey,
                         colorScheme: resolvedColorScheme,
                         timelineAppearance: timelineAppearance
                     )
@@ -645,10 +644,9 @@ public struct MacStatusShareSheet: View {
 
         Task { @MainActor in
             do {
-                let fileURL = try await MacStatusShareScreenshotRenderer.render(
-                    view: MacStatusSharePreview(
+                let fileURL = try await MacStatusShareImageRenderer.render(
+                    view: MacStatusShareImageContent(
                         data: data,
-                        statusKey: statusKey,
                         colorScheme: resolvedColorScheme,
                         timelineAppearance: timelineAppearance
                     ),
@@ -666,130 +664,9 @@ public struct MacStatusShareSheet: View {
     }
 }
 
-private struct MacStatusSharePreview: View {
-    let data: UiTimelineV2
-    let statusKey: MicroBlogKey
-    let colorScheme: ColorScheme
-    let timelineAppearance: TimelineAppearance
-
-    var body: some View {
-        TimelineView(
-            data: data,
-            detailStatusKey: statusKey,
-            showTranslate: false
-        )
-        .frame(width: 360, alignment: .leading)
-        .padding()
-        .background(Color.flareSecondarySystemGroupedBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .contentShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(radius: 8)
-        .padding(64)
-        .background(Color.flareSystemGroupedBackground)
-        .environment(\.colorScheme, colorScheme)
-        .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
-    }
-}
-
-private enum MacStatusShareScreenshotRenderer {
-    @MainActor
-    static func render<Content: View>(
-        view: Content,
-        fileName: String
-    ) async throws -> URL {
-        let scale: CGFloat = 2
-        let hostingView = NSHostingView(rootView: view.fixedSize(horizontal: false, vertical: true))
-        let fittingSize = hostingView.fittingSize
-        guard fittingSize.width > 0, fittingSize.height > 0 else {
-            throw MacStatusShareError.invalidSnapshotSize
-        }
-
-        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
-        hostingView.wantsLayer = true
-        hostingView.layer?.contentsScale = scale
-        hostingView.layoutSubtreeIfNeeded()
-        try? await Task.sleep(nanoseconds: 100_000_000)
-        hostingView.layoutSubtreeIfNeeded()
-
-        let pixelWidth = max(1, Int((fittingSize.width * scale).rounded(.up)))
-        let pixelHeight = max(1, Int((fittingSize.height * scale).rounded(.up)))
-        guard let representation = NSBitmapImageRep(
-            bitmapDataPlanes: nil,
-            pixelsWide: pixelWidth,
-            pixelsHigh: pixelHeight,
-            bitsPerSample: 8,
-            samplesPerPixel: 4,
-            hasAlpha: true,
-            isPlanar: false,
-            colorSpaceName: .deviceRGB,
-            bytesPerRow: 0,
-            bitsPerPixel: 0
-        ) else {
-            throw MacStatusShareError.snapshotFailed
-        }
-        representation.size = fittingSize
-        hostingView.cacheDisplay(in: hostingView.bounds, to: representation)
-
-        guard let pngData = representation.representation(using: .png, properties: [:]) else {
-            throw MacStatusShareError.pngEncodingFailed
-        }
-
-        let directoryURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("flare-status-share-\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-
-        let fileURL = directoryURL.appendingPathComponent(
-            MediaFileNamePolicy.shared.safeLocalFileName(value: fileName, fallback: "flare-status.png")
-        )
-        try pngData.write(to: fileURL, options: .atomic)
-        return fileURL
-    }
-}
-
-private enum MacStatusShareError: LocalizedError {
-    case invalidSnapshotSize
-    case snapshotFailed
-    case pngEncodingFailed
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidSnapshotSize:
-            String(localized: "share_screenshot_invalid_size")
-        case .snapshotFailed:
-            String(localized: "share_screenshot_failed")
-        case .pngEncodingFailed:
-            String(localized: "share_screenshot_encoding_failed")
-        }
-    }
-}
-
 private struct MacStatusShareAlert: Identifiable {
     let id = UUID()
     let message: String
 }
 
-private extension TimelineAppearance {
-    func withSharePreviewDefaults() -> TimelineAppearance {
-        doCopy(
-            avatarShape: avatarShape,
-            showMedia: showMedia,
-            showSensitiveContent: showSensitiveContent,
-            expandContentWarning: true,
-            expandMediaSize: expandMediaSize,
-            videoAutoplay: .never,
-            showLinkPreview: showLinkPreview,
-            compatLinkPreview: compatLinkPreview,
-            showNumbers: showNumbers,
-            postActionStyle: postActionStyle,
-            postActionLayout: postActionLayout,
-            fullWidthPost: fullWidthPost,
-            absoluteTimestamp: absoluteTimestamp,
-            showPlatformLogo: showPlatformLogo,
-            timelineDisplayMode: timelineDisplayMode,
-            aiConfig: aiConfig,
-            lineLimit: lineLimit,
-            showTranslateButton: showTranslateButton
-        )
-    }
-}
 #endif

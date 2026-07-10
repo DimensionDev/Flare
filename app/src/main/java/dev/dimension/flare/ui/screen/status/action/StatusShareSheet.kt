@@ -4,18 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.net.Uri
-import android.view.ContextThemeWrapper
-import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,20 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,35 +38,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.nativePaint
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import androidx.core.graphics.createBitmap
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Download
@@ -87,35 +59,28 @@ import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
-import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MediaFileNamePolicy
-import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalNetworkImageAllowHardware
-import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ViewBox
-import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.component.status.share.AndroidStatusShareCaptureWidth
+import dev.dimension.flare.ui.component.status.share.AndroidStatusShareImageContent
+import dev.dimension.flare.ui.component.status.share.renderAndroidStatusShareImage
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.util.UUID
 
 private enum class SharePreviewTheme {
     Light,
@@ -123,79 +88,7 @@ private enum class SharePreviewTheme {
 }
 
 private val SharePreviewMaxHeight = 360.dp
-private val ShareCardWidth = 360.dp
-private val ShareCardPadding = 64.dp
-private val ShareCardShapeCornerRadius = 16.dp
-private val ShareCardShadowCornerRadius = 12.dp
-private val ShareCardShadowRadius = 16.dp
-private val ShareCaptureWidth = ShareCardWidth + ShareCardPadding * 2
 private const val SHARE_LONG_CAPTURE_HEIGHT_THRESHOLD_PX = 4096
-
-@Composable
-internal fun rememberAndroidReferenceShareImageRenderer(): ReferenceShareImageRenderer {
-    val context = LocalContext.current
-    val rootView = LocalView.current.rootView
-    val density = LocalDensity.current
-    val darkTheme = isSystemInDarkTheme()
-    val widthPx = with(density) { ShareCaptureWidth.roundToPx() }
-    return remember(
-        context,
-        rootView,
-        darkTheme,
-        widthPx,
-    ) {
-        object : ReferenceShareImageRenderer {
-            override fun render(
-                post: UiTimelineV2,
-                completion: (ComposeData.Media?, String?) -> Unit,
-            ) {
-                CoroutineScope(Dispatchers.Main.immediate).launch {
-                    val bitmap =
-                        captureOffscreenShareBitmap(
-                            context = context,
-                            view = rootView,
-                            parentCompositionContext = null,
-                            lifecycleOwner = null,
-                            savedStateRegistryOwner = null,
-                            viewModelStoreOwner = null,
-                            widthPx = widthPx,
-                        ) {
-                            CompositionLocalProvider(LocalNetworkImageAllowHardware provides false) {
-                                FlareTheme(darkTheme = darkTheme) {
-                                    StatusShareCard(
-                                        statusKey = post.statusKey,
-                                        status = post,
-                                    )
-                                }
-                            }
-                        }
-                    if (bitmap == null) {
-                        completion(null, "Unable to render referenced post image.")
-                        return@launch
-                    }
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            val directory = File(context.cacheDir, "reference_share")
-                            directory.mkdirs()
-                            val file = File(directory, "reference_${UUID.randomUUID()}.png")
-                            FileOutputStream(file).use { output ->
-                                check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
-                            }
-                            ComposeData.Media(
-                                file = FileItem(context, Uri.fromFile(file)),
-                                altText = null,
-                            )
-                        }
-                    }.onSuccess { media ->
-                        completion(media, null)
-                    }.onFailure { throwable ->
-                        completion(null, throwable.message)
-                    }
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -227,13 +120,13 @@ internal fun StatusShareSheet(
         }.invoke()
     }
     val status = state.status.takeSuccess()
-    val shareCaptureWidthPx = with(density) { ShareCaptureWidth.roundToPx() }
+    val shareCaptureWidthPx = with(density) { AndroidStatusShareCaptureWidth.roundToPx() }
 
     suspend fun captureBitmap(): Bitmap? {
         val isLongCapture =
             previewContentHeightPx > SHARE_LONG_CAPTURE_HEIGHT_THRESHOLD_PX
         return if (isLongCapture) {
-            captureOffscreenShareBitmap(
+            renderAndroidStatusShareImage(
                 context = context,
                 view = view,
                 parentCompositionContext = parentCompositionContext,
@@ -248,7 +141,7 @@ internal fun StatusShareSheet(
                     FlareTheme(
                         darkTheme = previewTheme == SharePreviewTheme.Dark,
                     ) {
-                        StatusShareCard(
+                        AndroidStatusShareImageContent(
                             statusKey = statusKey,
                             status = status,
                         )
@@ -479,63 +372,11 @@ private fun StatusSharePreview(
                             drawContent()
                         },
             ) {
-                StatusShareCard(
+                AndroidStatusShareImageContent(
                     statusKey = statusKey,
                     status = status,
                     blockInteractions = true,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatusShareCard(
-    statusKey: MicroBlogKey,
-    status: UiTimelineV2?,
-    modifier: Modifier = Modifier,
-    blockInteractions: Boolean = false,
-) {
-    Box(
-        modifier = modifier.background(MaterialTheme.colorScheme.background),
-    ) {
-        Surface(
-            modifier =
-                Modifier
-                    .padding(ShareCardPadding)
-                    .width(ShareCardWidth)
-                    .captureableShadow(
-                        cornerRadius = ShareCardShadowCornerRadius,
-                        shadowRadius = ShareCardShadowRadius,
-                    ),
-            shape = RoundedCornerShape(ShareCardShapeCornerRadius),
-        ) {
-            Box {
-                CompositionLocalProvider(
-                    LocalTimelineAppearance provides
-                        LocalTimelineAppearance.current.copy(
-                            expandContentWarning = true,
-                            showTranslateButton = false,
-                            videoAutoplay = VideoAutoplay.NEVER,
-                        ),
-                ) {
-                    StatusItem(
-                        item = status,
-                        detailStatusKey = statusKey,
-                    )
-                }
-                if (blockInteractions) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .matchParentSize()
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = {},
-                                ),
-                    )
-                }
             }
         }
     }
@@ -568,97 +409,6 @@ private suspend fun capturePreviewShareBitmap(
     } finally {
         onCaptureRequestedChange(false)
     }
-
-private suspend fun captureOffscreenShareBitmap(
-    context: Context,
-    view: View,
-    parentCompositionContext: CompositionContext?,
-    lifecycleOwner: LifecycleOwner?,
-    savedStateRegistryOwner: SavedStateRegistryOwner?,
-    viewModelStoreOwner: ViewModelStoreOwner?,
-    widthPx: Int,
-    content: @Composable () -> Unit,
-): Bitmap? =
-    runCatching {
-        val themedContext = ContextThemeWrapper(context, context.theme)
-        val captureHost =
-            checkNotNull(view.findCaptureHostView()) {
-                "Unable to find a host view for share capture"
-            }
-        val composeView =
-            ComposeView(themedContext).apply {
-                parentCompositionContext?.let(::setParentCompositionContext)
-                lifecycleOwner?.let(::setViewTreeLifecycleOwner)
-                savedStateRegistryOwner?.let(::setViewTreeSavedStateRegistryOwner)
-                viewModelStoreOwner?.let {
-                    setViewTreeViewModelStoreOwner(it)
-                }
-                setContent(content)
-            }
-        val container =
-            FrameLayout(themedContext).apply {
-                alpha = 0f
-                translationX = -10_000f
-                clipChildren = false
-                clipToPadding = false
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                addView(
-                    composeView,
-                    FrameLayout.LayoutParams(
-                        widthPx,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ),
-                )
-            }
-        try {
-            captureHost.addView(
-                container,
-                ViewGroup.LayoutParams(
-                    widthPx,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                ),
-            )
-
-            repeat(2) {
-                withFrameNanos { }
-            }
-
-            val widthSpec = View.MeasureSpec.makeMeasureSpec(widthPx, View.MeasureSpec.EXACTLY)
-            val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-
-            repeat(2) {
-                container.measure(widthSpec, heightSpec)
-                container.layout(
-                    -container.measuredWidth * 2,
-                    0,
-                    -container.measuredWidth,
-                    container.measuredHeight,
-                )
-                withFrameNanos { }
-            }
-
-            val captureWidth = composeView.measuredWidth
-            val captureHeight = composeView.measuredHeight
-
-            check(captureWidth > 0 && captureHeight > 0) {
-                "Unable to measure share content"
-            }
-
-            createBitmap(captureWidth, captureHeight).also { bitmap ->
-                composeView.draw(Canvas(bitmap))
-            }
-        } finally {
-            captureHost.removeView(container)
-            composeView.disposeComposition()
-        }
-    }.onFailure {
-        it.printStackTrace()
-    }.getOrNull()
-
-private fun View.findCaptureHostView(): ViewGroup? =
-    rootView.findViewById<ViewGroup?>(android.R.id.content)
-        ?: rootView as? ViewGroup
-        ?: parent as? ViewGroup
 
 private suspend fun saveBitmapToDownloads(
     context: Context,
@@ -709,39 +459,4 @@ private fun shareBitmapAsImage(
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
     }
     return file
-}
-
-private fun Modifier.captureableShadow(
-    color: Color = Color.Black,
-    cornerRadius: Dp = 0.dp,
-    shadowRadius: Dp = 8.dp,
-    offsetY: Dp = 0.dp,
-    offsetX: Dp = 0.dp,
-    alpha: Float = 0.2f,
-) = this.drawBehind {
-    val shadowColor = color.copy(alpha = alpha).toArgb()
-    val transparentColor = color.copy(alpha = 0f).toArgb()
-
-    this.drawIntoCanvas {
-        val paint = Paint()
-        val frameworkPaint = paint.nativePaint
-        frameworkPaint.color = transparentColor
-
-        frameworkPaint.setShadowLayer(
-            shadowRadius.toPx(),
-            offsetX.toPx(),
-            offsetY.toPx(),
-            shadowColor,
-        )
-
-        it.drawRoundRect(
-            0f,
-            0f,
-            this.size.width,
-            this.size.height,
-            cornerRadius.toPx(),
-            cornerRadius.toPx(),
-            paint,
-        )
-    }
 }

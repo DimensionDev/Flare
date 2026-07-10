@@ -23,13 +23,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-public interface ReferenceShareImageRenderer {
-    public fun render(
-        post: UiTimelineV2,
-        completion: (media: ComposeData.Media?, errorMessage: String?) -> Unit,
-    )
-}
-
 @Single
 internal class ComposeUseCase(
     private val scope: CoroutineScope,

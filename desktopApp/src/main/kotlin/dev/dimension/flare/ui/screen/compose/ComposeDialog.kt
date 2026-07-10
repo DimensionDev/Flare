@@ -107,6 +107,7 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
+import dev.dimension.flare.ui.component.status.share.rememberDesktopReferenceShareImageRenderer
 import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiProfile
@@ -123,7 +124,6 @@ import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.status.action.rememberDesktopReferenceShareImageRenderer
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme

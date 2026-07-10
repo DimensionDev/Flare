@@ -103,6 +103,7 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
+import dev.dimension.flare.ui.component.status.share.rememberAndroidReferenceShareImageRenderer
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -118,7 +119,6 @@ import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.ReferenceShareImageRenderer
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.status.action.rememberAndroidReferenceShareImageRenderer
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList

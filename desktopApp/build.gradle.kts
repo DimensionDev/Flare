@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.sentry)
     implementation(libs.richtext.ui)
     implementation(libs.richtext.commonmark)
+
+    testImplementation(kotlin("test"))
 }
 
 val fdroid = rootProject.file("fdroid.properties")

@@ -60,6 +60,13 @@ public data class TimelineAppearance(
         val tldr: Boolean = false,
         val agent: Boolean = false,
     )
+
+    public fun withSharePreviewDefaults(): TimelineAppearance =
+        copy(
+            expandContentWarning = true,
+            videoAutoplay = VideoAutoplay.NEVER,
+            showTranslateButton = false,
+        )
 }
 
 public fun AppearancePatch.toGlobalAppearance(): GlobalAppearance =

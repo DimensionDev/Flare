@@ -14,7 +14,7 @@ struct HomeTimelineScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.openURL) private var openURL
-    @State private var selectedTabIndex = 0
+    @State private var selectedTabId: String?
     @Namespace private var selectedTabIndicatorNamespace
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
@@ -78,17 +78,20 @@ struct HomeTimelineScreen: View {
                             }
                         }
                     } else {
-                        let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
+                        let tab = selectedTabId.flatMap { id in
+                            tabs.first { $0.id == id }
+                        } ?? tabs[0]
                         ZStack {
                             TimelineScreen(tabItem: tab, allowGalleryMode: true)
                                 .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
                                 .id(tab.id)
                         }
-                        .onChange(of: state.count, { oldValue, newValue in
-                            if !(tabs.indices.contains(selectedTabIndex)) {
-                                selectedTabIndex = 0
+                        .onChange(of: tabs.map { $0.id }, initial: true) { _, tabIds in
+                            if let selectedTabId, tabIds.contains(selectedTabId) {
+                                return
                             }
-                        })
+                            selectedTabId = tabIds.first
+                        }
                         .toolbar {
                             leadingToolbarContent
                             if horizontalSizeClass == .compact {
@@ -99,15 +102,15 @@ struct HomeTimelineScreen: View {
                                         TabIcon(tabItem: tab)
                                     }
                                     .labelStyle(.titleAndIcon)
+                                    .id(tab.id)
                                 }
                                 ToolbarTitleMenu {
-                                    ForEach(0..<tabs.count, id: \.self) { index in
-                                        let item = tabs[index]
+                                    ForEach(tabs, id: \.id) { item in
                                         Toggle(isOn: Binding(get: {
-                                            selectedTabIndex == index
+                                            tab.id == item.id
                                         }, set: { value in
                                             if value {
-                                                selectedTabIndex = index
+                                                selectedTabId = item.id
                                             }
                                         })) {
                                             Label {
@@ -135,10 +138,9 @@ struct HomeTimelineScreen: View {
                                 ToolbarItem(placement: .automatic) {
                                     ScrollView(.horizontal) {
                                         HStack {
-                                            ForEach(0..<tabs.count, id: \.self) { index in
-                                                let item = tabs[index]
+                                            ForEach(tabs, id: \.id) { item in
                                                 Button {
-                                                    selectedTabIndex = index
+                                                    selectedTabId = item.id
                                                 } label: {
                                                     Label {
                                                         TimelineTabTitle(title: item.title)
@@ -152,7 +154,7 @@ struct HomeTimelineScreen: View {
                                                 .padding(.bottom, 9)
                                                 .ignoresSafeArea(edges: .bottom)
                                                 .safeAreaInset(edge: .bottom) {
-                                                    if selectedTabIndex == index {
+                                                    if tab.id == item.id {
                                                         Capsule()
                                                             .fill(Color.accentColor)
                                                             .frame(width: 18, height: 3)
@@ -165,7 +167,7 @@ struct HomeTimelineScreen: View {
                                             }
                                         }
                                         .padding(.horizontal)
-                                        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selectedTabIndex)
+                                        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selectedTabId)
                                     }
                                 }
                                 if #available(iOS 26.0, *) {
@@ -243,8 +245,7 @@ private struct DeckTimelineLayout: View {
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack(alignment: .top, spacing: 0) {
-                ForEach(0..<tabs.count, id: \.self) { index in
-                    let tab = tabs[index]
+                ForEach(tabs, id: \.id) { tab in
                     DeckTimelineColumnRoot(
                         tabItem: tab,
                         baseTimelineAppearance: baseTimelineAppearance,
@@ -254,7 +255,7 @@ private struct DeckTimelineLayout: View {
                     .ignoresSafeArea()
                     .frame(width: columnWidth)
                     .frame(maxHeight: .infinity)
-                    if index < tabs.count - 1 {
+                    if tab.id != tabs.last?.id {
                         Divider()
                             .ignoresSafeArea()
                     }

@@ -75,7 +75,8 @@ struct ComposeScreen: View {
                             }
                         }
                     }
-                    if viewModel.pollViewModel.enabled {
+                    if viewModel.pollViewModel.enabled,
+                       presenter.state.pollMaxOptions != nil {
                         ComposePollSection(
                             viewModel: viewModel.pollViewModel,
                             maxChoices: maxPollOptions
@@ -115,6 +116,9 @@ struct ComposeScreen: View {
                 mediaViewModel.maxSize = Int(media.maxCount)
                 mediaViewModel.enableAltText = media.altTextMaxLength > 0
                 mediaViewModel.altTextMaxLength = Int(media.altTextMaxLength)
+            }
+            if config.poll == nil {
+                viewModel.pollViewModel.reset()
             }
         }
         .onChange(of: presenter.state.loadedDraftState) { _, newValue in
@@ -509,10 +513,19 @@ struct ComposeScreen: View {
 
     private func applyDraft(_ draft: UiDraft) {
         let result = viewModel.applyDraft(draft)
+        resetPollIfUnsupported()
         mediaViewModel.sensitive = result.sensitive
         mediaViewModel.restore(draftMedias: draft.medias)
         setVisibility(result.visibility)
         requestComposerFocus()
+    }
+
+    private func resetPollIfUnsupported() {
+        guard case .success(let composeConfig) = onEnum(of: presenter.state.composeConfig),
+              composeConfig.data.poll == nil else {
+            return
+        }
+        viewModel.pollViewModel.reset()
     }
     
     private func getMedia() -> [ComposeData.Media] {

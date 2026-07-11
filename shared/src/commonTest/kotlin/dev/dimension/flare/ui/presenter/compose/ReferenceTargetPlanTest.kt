@@ -8,10 +8,49 @@ import dev.dimension.flare.ui.model.UiAccount
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ReferenceTargetPlanTest {
+    @Test
+    fun crossPlatformReferenceTargetDisablesPoll() {
+        val config = ComposeConfig(poll = ComposeConfig.Poll(maxOptions = 4))
+
+        assertNull(config.withReferenceTargetConstraints(requiresShareImage = true).poll)
+    }
+
+    @Test
+    fun nativeReferenceTargetKeepsPoll() {
+        val poll = ComposeConfig.Poll(maxOptions = 4)
+        val config = ComposeConfig(poll = poll)
+
+        assertEquals(
+            poll,
+            config.withReferenceTargetConstraints(requiresShareImage = false).poll,
+        )
+    }
+
+    @Test
+    fun mixedNativeAndCrossPlatformTargetsDisablePoll() {
+        val nativeConfig =
+            ComposeConfig(poll = ComposeConfig.Poll(maxOptions = 4))
+                .withReferenceTargetConstraints(requiresShareImage = false)
+        val crossPlatformConfig =
+            ComposeConfig(poll = ComposeConfig.Poll(maxOptions = 6))
+                .withReferenceTargetConstraints(requiresShareImage = true)
+
+        assertNull(nativeConfig.merge(crossPlatformConfig).poll)
+    }
+
+    @Test
+    fun nativeTargetsStillMergePollLimits() {
+        val first = ComposeConfig(poll = ComposeConfig.Poll(maxOptions = 4))
+        val second = ComposeConfig(poll = ComposeConfig.Poll(maxOptions = 2))
+
+        assertEquals(2, assertNotNull(first.merge(second).poll).maxOptions)
+    }
+
     @Test
     fun nativeQuoteWithoutMediaConfigDoesNotBlockCrossPlatformReferenceImage() {
         val nativeTarget =

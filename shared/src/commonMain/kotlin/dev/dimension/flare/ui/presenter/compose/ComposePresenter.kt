@@ -143,8 +143,9 @@ public class ComposePresenter(
 
     private val referenceMetadataFlow by lazy {
         MutableStateFlow(
-            ReferenceMetadata(
-                sourceAccountKey = (accountType as? AccountType.Specific)?.accountKey,
+            initialReferenceMetadata(
+                accountType = accountType,
+                composeStatus = status,
             ),
         )
     }
@@ -231,15 +232,16 @@ public class ComposePresenter(
                     account = account,
                     requiresShareImage = requiresShareImage,
                     composeConfig =
-                        service.composeConfig(
-                            type =
-                                when {
-                                    requiresShareImage -> ComposeType.New
-                                    composeStatus is ComposeStatus.Quote -> ComposeType.Quote
-                                    composeStatus is ComposeStatus.Reply -> ComposeType.Reply
-                                    else -> ComposeType.New
-                                },
-                        ),
+                        service
+                            .composeConfig(
+                                type =
+                                    when {
+                                        requiresShareImage -> ComposeType.New
+                                        composeStatus is ComposeStatus.Quote -> ComposeType.Quote
+                                        composeStatus is ComposeStatus.Reply -> ComposeType.Reply
+                                        else -> ComposeType.New
+                                    },
+                            ).withReferenceTargetConstraints(requiresShareImage),
                 )
             }
         }
@@ -276,21 +278,16 @@ public class ComposePresenter(
         ) { allAccounts, selectedAccountKeys, status, referenceMetadata ->
             val post = status.takeSuccess()?.contentPostOrNull()
             val statusPlatform = post?.platformType ?: referenceMetadata.sourcePlatform
-            val canCrossPlatform =
-                enableCrossPlatformReference &&
-                    (post?.shareUrl ?: referenceMetadata.shareUrl) != null
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
                 .filterNot { account ->
                     selectedAccountKeys.contains(account.accountKey) ||
-                        (
-                            !canCrossPlatform &&
-                                requiresReferenceShareImage(
-                                    sourcePlatform = statusPlatform,
-                                    sourceAccountKey = referenceMetadata.sourceAccountKey,
-                                    targetAccount = account,
-                                )
+                        !isReferenceTargetSelectable(
+                            enableCrossPlatformReference = enableCrossPlatformReference,
+                            sourcePlatform = statusPlatform,
+                            sourceAccountKey = referenceMetadata.sourceAccountKey,
+                            targetAccount = account,
                         )
                 }.map {
                     it.accountKey
@@ -320,17 +317,13 @@ public class ComposePresenter(
         ) { allAccounts, allUsers, selectedAccountKeys, status, referenceMetadata ->
             val post = status.takeSuccess()?.contentPostOrNull()
             val statusPlatform = post?.platformType ?: referenceMetadata.sourcePlatform
-            val canCrossPlatform =
-                enableCrossPlatformReference &&
-                    (post?.shareUrl ?: referenceMetadata.shareUrl) != null
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
                 .filter { account ->
                     selectedAccountKeys.contains(account.accountKey) ||
-                        statusPlatform == null ||
-                        canCrossPlatform ||
-                        !requiresReferenceShareImage(
+                        isReferenceTargetSelectable(
+                            enableCrossPlatformReference = enableCrossPlatformReference,
                             sourcePlatform = statusPlatform,
                             sourceAccountKey = referenceMetadata.sourceAccountKey,
                             targetAccount = account,
@@ -1054,6 +1047,39 @@ internal data class ReferenceMetadata(
     val sourcePlatform: PlatformType? = null,
     val shareUrl: String? = null,
 )
+
+internal fun initialReferenceMetadata(
+    accountType: AccountType?,
+    composeStatus: ComposeStatus?,
+): ReferenceMetadata =
+    ReferenceMetadata(
+        sourceAccountKey =
+            if (composeStatus != null) {
+                (accountType as? AccountType.Specific)?.accountKey
+            } else {
+                null
+            },
+    )
+
+internal fun isReferenceTargetSelectable(
+    enableCrossPlatformReference: Boolean,
+    sourcePlatform: PlatformType?,
+    sourceAccountKey: MicroBlogKey?,
+    targetAccount: UiAccount,
+): Boolean =
+    enableCrossPlatformReference ||
+        !requiresReferenceShareImage(
+            sourcePlatform = sourcePlatform,
+            sourceAccountKey = sourceAccountKey,
+            targetAccount = targetAccount,
+        )
+
+internal fun ComposeConfig.withReferenceTargetConstraints(requiresShareImage: Boolean): ComposeConfig =
+    if (requiresShareImage) {
+        copy(poll = null)
+    } else {
+        this
+    }
 
 internal fun ComposeData.withReferenceMetadata(metadata: ReferenceMetadata): ComposeData =
     copy(

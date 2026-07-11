@@ -91,7 +91,8 @@ struct MacComposeScreen: View {
                     mediaSection
                 }
 
-                if viewModel.pollViewModel.enabled {
+                if viewModel.pollViewModel.enabled,
+                   presenter.state.pollMaxOptions != nil {
                     pollSection
                 }
 
@@ -214,6 +215,9 @@ struct MacComposeScreen: View {
         .onSuccessOf(of: presenter.state.composeConfig) { config in
             if let media = config.media {
                 mediaItems = Array(mediaItems.prefix(Int(media.maxCount)))
+            }
+            if config.poll == nil {
+                viewModel.pollViewModel.reset()
             }
         }
         .alert(
@@ -638,9 +642,18 @@ struct MacComposeScreen: View {
 
     private func applyDraft(_ draft: UiDraft) {
         let result = viewModel.applyDraft(draft)
+        resetPollIfUnsupported()
         sensitive = result.sensitive
         mediaItems = draft.medias.compactMap(MacComposeMediaItem.init(draftMedia:))
         setVisibility(result.visibility)
+    }
+
+    private func resetPollIfUnsupported() {
+        guard case .success(let composeConfig) = onEnum(of: presenter.state.composeConfig),
+              composeConfig.data.poll == nil else {
+            return
+        }
+        viewModel.pollViewModel.reset()
     }
 
     private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {

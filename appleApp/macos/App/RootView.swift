@@ -1,9 +1,11 @@
+import AppKit
 import FlareAppleCore
 import FlareAppleUI
 import Foundation
 import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
+import SwiftUIIntrospect
 
 struct RootView: View {
     @Environment(\.openWindow) private var openWindow
@@ -163,6 +165,7 @@ struct RootView: View {
                 .listStyle(.sidebar)
 
 //            }
+            .toolbar(removing: .sidebarToggle)
             .frame(minWidth: 100, maxWidth: 280)
             .navigationSplitViewColumnWidth(min: 100, ideal: 200, max: 280)
         } detail: {
@@ -171,7 +174,7 @@ struct RootView: View {
                     initialRoute: selectedTab,
                     externalNavigationRequest: mainNavigationRequest
                 )
-                    .navigationSplitViewColumnWidth(ideal: 380, max: 480)
+                .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
                     .id(selectedTab)
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {
@@ -196,6 +199,13 @@ struct RootView: View {
                             }
                         )
                     }
+            }
+        }
+        .introspect(.navigationSplitView, on: .macOS(.v13, .v14, .v15, .v26, .v27)) { splitview in
+            if let delegate = splitview.delegate as? NSSplitViewController {
+                // Disables the ability to collapse the sidebar via dragging
+                delegate.splitViewItems.first?.canCollapse = false
+                delegate.splitViewItems.first?.canCollapseFromWindowResize = false
             }
         }
         .sheet(isPresented: $showLogin) {

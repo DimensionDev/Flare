@@ -1,5 +1,6 @@
 import Combine
 import FlareAppleCore
+import FlareAppleUI
 import Kingfisher
 import KotlinSharedUI
 import SwiftUI
@@ -189,8 +190,6 @@ private struct MacAppCommands: Commands {
     )
 
     var body: some Commands {
-        SidebarCommands()
-
         CommandGroup(replacing: .newItem) {
             Button {
                 MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
@@ -291,7 +290,16 @@ private struct MacAppCommands: Commands {
                                 Label {
                                     Text(verbatim: accountTitle(data.data))
                                 } icon: {
-                                    Image(systemName: "person.crop.circle")
+                                    if let avatar = data.data.avatar {
+                                        AvatarView(
+                                            data: avatar.url,
+                                            customHeader: avatar.customHeaders
+                                        )
+                                        .frame(width: 16, height: 16)
+                                        .clipShape(Circle())
+                                    } else {
+                                        Image(systemName: "person.crop.circle")
+                                    }
                                 }
                             case .loading:
                                 Text("Loading…")

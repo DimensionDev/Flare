@@ -67,6 +67,25 @@ public struct ArticleScreen: View {
                     }
                     .accessibilityLabel(Text("deep_link_account_picker_open_in_browser", bundle: FlareAppleUILocalization.bundle))
                 }
+                #if os(macOS)
+                if let onShareArticle {
+                    ToolbarItem {
+                        MacStatusShareMenu(
+                            data: MacStatusShareData(
+                                statusKey: articleKey,
+                                accountType: accountType,
+                                shareUrl: sourceURL.absoluteString
+                            ),
+                            onShareScreenshot: {
+                                onShareArticle(accountType, articleKey, sourceURL.absoluteString)
+                            }
+                        ) {
+                            Image(fontAwesome: .shareNodes)
+                        }
+                        .accessibilityLabel(Text("fx_share", bundle: FlareAppleUILocalization.bundle))
+                    }
+                }
+                #else
                 if let onShareArticle {
                     ToolbarItem {
                         Button {
@@ -77,6 +96,7 @@ public struct ArticleScreen: View {
                         .accessibilityLabel(Text("fx_share", bundle: FlareAppleUILocalization.bundle))
                     }
                 }
+                #endif
             }
         }
     }

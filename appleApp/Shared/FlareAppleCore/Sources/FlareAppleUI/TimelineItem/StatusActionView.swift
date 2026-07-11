@@ -7,6 +7,10 @@ import FlareAppleCore
 import UIKit
 #endif
 
+#if os(macOS)
+import AppKit
+#endif
+
 // MARK: - Top-level container
 // Hoists @ScaledMetric, @Environment reads to a single place
 // instead of duplicating them in every child view instance.
@@ -219,27 +223,80 @@ public struct StatusActionItemView: View {
     }
 
     public var body: some View {
+        actionControl
+            .optionalForegroundStyle(data.color?.swiftColor)
+            .buttonStyle(.plain)
+            .macOSStatusActionHoverStyle(isEnabled: !useText)
+    }
+
+    @ViewBuilder
+    private var actionControl: some View {
+        #if os(macOS)
+        if let shareData = macStatusShareData {
+            MacStatusShareMenu(
+                data: shareData,
+                onShareScreenshot: {
+                    data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                }
+            ) {
+                actionLabel
+            }
+        } else {
+            actionButton
+        }
+        #else
+        actionButton
+        #endif
+    }
+
+    private var actionButton: some View {
         Button(role: data.color?.role) {
             triggerHapticFeedback()
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         } label: {
-            Group {
-                if let text = resolvedText {
-                    Label {
-                        text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                    } icon: {
-                        StatusActionIcon(icon: data.icon)
-                    }
-                } else {
+            actionLabel
+        }
+    }
+
+    @ViewBuilder
+    private var actionLabel: some View {
+        Group {
+            if let text = resolvedText {
+                Label {
+                    text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                } icon: {
                     StatusActionIcon(icon: data.icon)
                 }
+            } else {
+                StatusActionIcon(icon: data.icon)
             }
-            .statusActionContentPadding(isExpanded: !useText, fontSize: fontSize)
         }
-        .optionalForegroundStyle(data.color?.swiftColor)
-        .buttonStyle(.plain)
-        .macOSStatusActionHoverStyle(isEnabled: !useText)
+        .statusActionContentPadding(isExpanded: !useText, fontSize: fontSize)
     }
+
+    #if os(macOS)
+    private var macStatusShareData: MacStatusShareData? {
+        guard let actionFamily = data.actionFamily,
+              actionFamily == .share || actionFamily == .fxShare
+        else {
+            return nil
+        }
+        guard case .deeplink(let clickEvent) = onEnum(of: data.clickEvent),
+              let route = DeeplinkRoute.companion.parse(uri: clickEvent.url),
+              case .status(let status) = onEnum(of: route),
+              case .shareSheet(let shareSheet) = onEnum(of: status)
+        else {
+            return nil
+        }
+        return MacStatusShareData(
+            statusKey: shareSheet.statusKey,
+            accountType: shareSheet.accountType,
+            shareUrl: shareSheet.shareUrl,
+            fxShareUrl: shareSheet.fxShareUrl,
+            fixvxShareUrl: shareSheet.fixvxShareUrl
+        )
+    }
+    #endif
 }
 
 // MARK: - Helpers
@@ -366,3 +423,364 @@ private func castActionMenus(_ value: Any) -> [ActionMenu] {
     }
     return []
 }
+
+#if os(macOS)
+struct MacStatusShareData {
+    let statusKey: MicroBlogKey
+    let accountType: AccountType
+    let shareUrl: String
+    let fxShareUrl: String?
+    let fixvxShareUrl: String?
+
+    init(
+        statusKey: MicroBlogKey,
+        accountType: AccountType,
+        shareUrl: String,
+        fxShareUrl: String? = nil,
+        fixvxShareUrl: String? = nil
+    ) {
+        self.statusKey = statusKey
+        self.accountType = accountType
+        self.shareUrl = shareUrl
+        self.fxShareUrl = fxShareUrl
+        self.fixvxShareUrl = fixvxShareUrl
+    }
+}
+
+struct MacStatusShareMenu<LabelContent: View>: View {
+    let data: MacStatusShareData
+    let onShareScreenshot: () -> Void
+    @ViewBuilder let label: () -> LabelContent
+
+    init(
+        data: MacStatusShareData,
+        onShareScreenshot: @escaping () -> Void,
+        @ViewBuilder label: @escaping () -> LabelContent
+    ) {
+        self.data = data
+        self.onShareScreenshot = onShareScreenshot
+        self.label = label
+    }
+
+    public var body: some View {
+        Menu {
+            if let shareURL = URL(string: data.shareUrl) {
+                ShareLink(item: shareURL) {
+                    Label("share_link", systemImage: "link")
+                }
+            }
+
+            Button {
+                onShareScreenshot()
+            } label: {
+                Label("share_screenshot", systemImage: "photo")
+            }
+
+            if let fxShareUrl = data.fxShareUrl,
+               let fxShareURL = URL(string: fxShareUrl) {
+                ShareLink(item: fxShareURL) {
+                    Label("share_via_fxembed", systemImage: "link")
+                }
+            }
+
+            if let fixvxShareUrl = data.fixvxShareUrl,
+               let fixvxShareURL = URL(string: fixvxShareUrl) {
+                ShareLink(item: fixvxShareURL) {
+                    Label("share_via_fixvx", systemImage: "link")
+                }
+            }
+
+            Divider()
+
+            Button {
+                copyLink()
+            } label: {
+                Label("share_copy_link", systemImage: "doc.on.doc")
+            }
+        } label: {
+            label()
+        }
+    }
+
+    private func copyLink() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(data.shareUrl, forType: .string)
+    }
+}
+
+public struct MacStatusShareSheet: View {
+    private let statusKey: MicroBlogKey
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.timelineAppearance) private var timelineAppearance
+    @StateObject private var presenter: KotlinPresenter<StatusState>
+    @State private var theme: ColorScheme?
+    @State private var screenshotURL: URL?
+    @State private var isRenderingScreenshot = false
+    @State private var renderRequestID: UUID?
+    @State private var alert: MacStatusShareAlert?
+
+    public init(
+        statusKey: MicroBlogKey,
+        accountType: AccountType
+    ) {
+        self.statusKey = statusKey
+        _presenter = .init(
+            wrappedValue: .init(
+                presenter: StatusPresenter(
+                    accountType: accountType,
+                    statusKey: statusKey
+                )
+            )
+        )
+    }
+
+    public var body: some View {
+        StateView(state: presenter.state.status) { state in
+            VStack(spacing: 0) {
+                ScrollView {
+                    MacStatusSharePreview(
+                        data: state,
+                        statusKey: statusKey,
+                        colorScheme: resolvedColorScheme,
+                        timelineAppearance: timelineAppearance
+                    )
+                    .allowsHitTesting(false)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("appearance_theme")
+                        .font(.headline)
+
+                    Picker("appearance_theme", selection: $theme) {
+                        Text("appearance_theme_system").tag(nil as ColorScheme?)
+                        Text("appearance_theme_light").tag(Optional(ColorScheme.light))
+                        Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+
+                    HStack {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+
+                        Spacer()
+
+                        if let screenshotURL {
+                            ShareLink(item: screenshotURL) {
+                                Text("done")
+                            }
+                            .buttonStyle(.borderedProminent)
+                        } else {
+                            Button {} label: {
+                                if isRenderingScreenshot {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else {
+                                    Text("done")
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(true)
+                        }
+                    }
+                }
+                .padding(20)
+            }
+            .frame(width: 560, height: 720)
+            .onAppear {
+                renderScreenshot(data: state)
+            }
+            .onChange(of: theme) { _, _ in
+                renderScreenshot(data: state)
+            }
+        } errorContent: { error in
+            ContentUnavailableView {
+                Label("share_screenshot_failed", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text(error.message ?? String(localized: "share_screenshot_failed"))
+            } actions: {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+            .frame(width: 560, height: 720)
+        } loadingContent: {
+            TimelinePlaceholderView()
+                .frame(width: 560, height: 720)
+        }
+        .navigationTitle("share_screenshot")
+        .alert(item: $alert) { alert in
+            Alert(
+                title: Text("share_screenshot_failed"),
+                message: Text(verbatim: alert.message),
+                dismissButton: .default(Text("Ok"))
+            )
+        }
+    }
+
+    private var resolvedColorScheme: ColorScheme {
+        theme ?? colorScheme
+    }
+
+    private func renderScreenshot(data: UiTimelineV2) {
+        let requestID = UUID()
+        renderRequestID = requestID
+        screenshotURL = nil
+        isRenderingScreenshot = true
+
+        Task { @MainActor in
+            do {
+                let fileURL = try await MacStatusShareScreenshotRenderer.render(
+                    view: MacStatusSharePreview(
+                        data: data,
+                        statusKey: statusKey,
+                        colorScheme: resolvedColorScheme,
+                        timelineAppearance: timelineAppearance
+                    ),
+                    fileName: "flare-status-\(statusKey.description()).png"
+                )
+                guard renderRequestID == requestID else { return }
+                screenshotURL = fileURL
+            } catch {
+                guard renderRequestID == requestID else { return }
+                alert = MacStatusShareAlert(message: error.localizedDescription)
+            }
+            guard renderRequestID == requestID else { return }
+            isRenderingScreenshot = false
+        }
+    }
+}
+
+private struct MacStatusSharePreview: View {
+    let data: UiTimelineV2
+    let statusKey: MicroBlogKey
+    let colorScheme: ColorScheme
+    let timelineAppearance: TimelineAppearance
+
+    var body: some View {
+        TimelineView(
+            data: data,
+            detailStatusKey: statusKey,
+            showTranslate: false
+        )
+        .frame(width: 360, alignment: .leading)
+        .padding()
+        .background(Color.flareSecondarySystemGroupedBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(radius: 8)
+        .padding(64)
+        .background(Color.flareSystemGroupedBackground)
+        .environment(\.colorScheme, colorScheme)
+        .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())
+    }
+}
+
+private enum MacStatusShareScreenshotRenderer {
+    @MainActor
+    static func render<Content: View>(
+        view: Content,
+        fileName: String
+    ) async throws -> URL {
+        let scale: CGFloat = 2
+        let hostingView = NSHostingView(rootView: view.fixedSize(horizontal: false, vertical: true))
+        let fittingSize = hostingView.fittingSize
+        guard fittingSize.width > 0, fittingSize.height > 0 else {
+            throw MacStatusShareError.invalidSnapshotSize
+        }
+
+        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
+        hostingView.wantsLayer = true
+        hostingView.layer?.contentsScale = scale
+        hostingView.layoutSubtreeIfNeeded()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        hostingView.layoutSubtreeIfNeeded()
+
+        let pixelWidth = max(1, Int((fittingSize.width * scale).rounded(.up)))
+        let pixelHeight = max(1, Int((fittingSize.height * scale).rounded(.up)))
+        guard let representation = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: pixelWidth,
+            pixelsHigh: pixelHeight,
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ) else {
+            throw MacStatusShareError.snapshotFailed
+        }
+        representation.size = fittingSize
+        hostingView.cacheDisplay(in: hostingView.bounds, to: representation)
+
+        guard let pngData = representation.representation(using: .png, properties: [:]) else {
+            throw MacStatusShareError.pngEncodingFailed
+        }
+
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("flare-status-share-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+
+        let fileURL = directoryURL.appendingPathComponent(
+            MediaFileNamePolicy.shared.safeLocalFileName(value: fileName, fallback: "flare-status.png")
+        )
+        try pngData.write(to: fileURL, options: .atomic)
+        return fileURL
+    }
+}
+
+private enum MacStatusShareError: LocalizedError {
+    case invalidSnapshotSize
+    case snapshotFailed
+    case pngEncodingFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidSnapshotSize:
+            String(localized: "share_screenshot_invalid_size")
+        case .snapshotFailed:
+            String(localized: "share_screenshot_failed")
+        case .pngEncodingFailed:
+            String(localized: "share_screenshot_encoding_failed")
+        }
+    }
+}
+
+private struct MacStatusShareAlert: Identifiable {
+    let id = UUID()
+    let message: String
+}
+
+private extension TimelineAppearance {
+    func withSharePreviewDefaults() -> TimelineAppearance {
+        doCopy(
+            avatarShape: avatarShape,
+            showMedia: showMedia,
+            showSensitiveContent: showSensitiveContent,
+            expandContentWarning: true,
+            expandMediaSize: expandMediaSize,
+            videoAutoplay: .never,
+            showLinkPreview: showLinkPreview,
+            compatLinkPreview: compatLinkPreview,
+            showNumbers: showNumbers,
+            postActionStyle: postActionStyle,
+            postActionLayout: postActionLayout,
+            fullWidthPost: fullWidthPost,
+            absoluteTimestamp: absoluteTimestamp,
+            showPlatformLogo: showPlatformLogo,
+            timelineDisplayMode: timelineDisplayMode,
+            aiConfig: aiConfig,
+            lineLimit: lineLimit,
+            showTranslateButton: showTranslateButton
+        )
+    }
+}
+#endif

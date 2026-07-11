@@ -344,7 +344,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             Drops.show(
                 .init(
                     title: mediaType.downloadStartedTitle,
-                    icon: .init(fontAwesome: FontAwesomeIcon.photoFilm)
+                    icon: .init(fontAwesome: FontAwesomeIcon.circleDown)
                 )
             )
         }
@@ -355,7 +355,7 @@ class MediaSaver: NSObject, UIDocumentPickerDelegate {
             Drops.show(
                 .init(
                     title: String(localized: "notification_prepare_media_started", defaultValue: "Preparing media"),
-                    icon: .init(fontAwesome: FontAwesomeIcon.photoFilm)
+                    icon: .init(fontAwesome: FontAwesomeIcon.circleDown)
                 )
             )
         }

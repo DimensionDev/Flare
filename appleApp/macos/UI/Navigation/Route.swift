@@ -247,13 +247,10 @@ enum Route: Hashable, Identifiable {
         case .statusAddReaction(let accountType, let statusKey):
             StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
                 .frame(width: 400, height: 300)
-        case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
+        case .statusShareSheet(let accountType, let statusKey, _, _, _):
             MacStatusShareSheet(
                 statusKey: statusKey,
-                accountType: accountType,
-                shareUrl: shareUrl,
-                fxShareUrl: fxShareUrl,
-                fixvxShareUrl: fixvxShareUrl
+                accountType: accountType
             )
         case .statusBlueskyReport(let accountType, let statusKey):
             BlueskyReportSheet(accountType: accountType, statusKey: statusKey)

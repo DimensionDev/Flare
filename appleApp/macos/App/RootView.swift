@@ -174,7 +174,7 @@ struct RootView: View {
                     initialRoute: selectedTab,
                     externalNavigationRequest: mainNavigationRequest
                 )
-                    .navigationSplitViewColumnWidth(ideal: 380, max: 480)
+                .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
                     .id(selectedTab)
                     .toolbar {
                         if case .success(let data) = onEnum(of: loggedInPresenter.state.isLoggedIn), !data.data.boolValue {

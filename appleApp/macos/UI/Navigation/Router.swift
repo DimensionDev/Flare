@@ -1,5 +1,6 @@
 import Combine
 import FlareAppleCore
+import FlareAppleUI
 import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
@@ -68,6 +69,15 @@ struct Router: View {
                 })
             }
         }
+        .environment(\.macCrossPostAction, { data in
+            handle(
+                route: .statusCrossPost(
+                    data.accountType,
+                    data.statusKey,
+                    data.shareUrl
+                )
+            )
+        })
         .sheet(item: $sheet) { route in
             NavigationStack {
                 route.view(
@@ -143,6 +153,12 @@ struct Router: View {
             MacMainWindowCoordinator.shared.open(route: route, openWindow: openWindow)
         case .composeNew:
             MacComposeWindowCoordinator.shared.openNew(openWindow: openWindow)
+        case .composeCrossPost(let prefill):
+            sheet = nil
+            MacComposeWindowCoordinator.shared.openCrossPost(
+                prefill: prefill,
+                openWindow: openWindow
+            )
         case .composeDraft(let groupId):
             MacComposeWindowCoordinator.shared.openDraft(
                 groupId: groupId,
@@ -221,6 +237,7 @@ struct Router: View {
 
         switch initialRoute {
         case .composeNew,
+                .composeCrossPost,
                 .composeDraft,
                 .composeQuote,
                 .composeReply,
@@ -263,6 +280,7 @@ struct Router: View {
                 .deepLinkAccountPicker,
                 .statusAddReaction,
                 .statusShareSheet,
+                .statusCrossPost,
                 .statusBlueskyReport,
                 .statusMisskeyReport,
                 .editUserList:

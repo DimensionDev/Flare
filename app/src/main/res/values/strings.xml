@@ -681,6 +681,8 @@
     <string name="tab_settings_filter_image">Images</string>
     <string name="tab_settings_filter_video">Videos</string>
     <string name="status_share_sheet_theme_title">Theme</string>
+    <string name="status_share_crosspost">Cross-post</string>
+    <string name="status_share_crosspost_failed">Unable to prepare cross-post</string>
     <string name="channel_title">Channel</string>
     <string name="channel_item_follow">Follow</string>
     <string name="channel_item_unfollow">Unfollow</string>

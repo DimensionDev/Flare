@@ -32,6 +32,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.common.DesktopSaveDialog
@@ -43,6 +44,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.status_share
+import dev.dimension.flare.status_share_crosspost
+import dev.dimension.flare.status_share_crosspost_failed
 import dev.dimension.flare.status_share_image
 import dev.dimension.flare.status_share_save_screenshot
 import dev.dimension.flare.status_share_via_fixvx
@@ -68,7 +71,9 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -76,6 +81,8 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.awt.image.BufferedImage
+import java.io.File
+import java.nio.file.Files
 import javax.imageio.ImageIO
 
 private enum class SharePreviewTheme {
@@ -91,6 +98,7 @@ internal fun StatusShareSheet(
     fxShareUrl: String?,
     fixvxShareUrl: String?,
     onBack: () -> Unit,
+    onCrossPost: (File) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val inAppNotification: ComposeInAppNotification = koinInject()
@@ -98,6 +106,7 @@ internal fun StatusShareSheet(
     val scope = rememberCoroutineScope()
     val previewGraphicsLayer = rememberGraphicsLayer()
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
+    var isPreparingCrossPost by remember { mutableStateOf(false) }
 
     val state by producePresenter("DesktopStatusShareSheet_${accountType}_$statusKey") {
         remember(accountType, statusKey) {
@@ -198,7 +207,36 @@ internal fun StatusShareSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                AccentButton(onClick = {
+                AccentButton(
+                    onClick = {
+                        isPreparingCrossPost = true
+                        scope.launch {
+                            val image = capturePreviewImage(previewGraphicsLayer)
+                            val file =
+                                image?.let {
+                                    writeCrossPostImage(
+                                        image = it,
+                                        fileName =
+                                            "status_${MediaFileNamePolicy.sanitizeFileName(statusKey.toString())}.png",
+                                    )
+                                }
+                            if (file == null) {
+                                isPreparingCrossPost = false
+                                inAppNotification.message(Res.string.status_share_crosspost_failed)
+                            } else {
+                                onCrossPost(file)
+                            }
+                        }
+                    },
+                    disabled = isPreparingCrossPost,
+                ) {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Retweet,
+                        contentDescription = stringResource(Res.string.status_share_crosspost),
+                    )
+                    Text(stringResource(Res.string.status_share_crosspost))
+                }
+                Button(onClick = {
                     shareText(shareUrl)
                     inAppNotification.message(Res.string.copied_to_clipboard)
                 }) {
@@ -271,6 +309,25 @@ internal fun StatusShareSheet(
 
 private suspend fun capturePreviewImage(graphicsLayer: GraphicsLayer): ImageBitmap? =
     runCatching { graphicsLayer.toImageBitmap() }.getOrNull()
+
+private suspend fun writeCrossPostImage(
+    image: ImageBitmap,
+    fileName: String,
+): File? {
+    val bufferedImage = image.toBufferedImage()
+    return withContext(Dispatchers.IO) {
+        var directory: File? = null
+        runCatching {
+            directory = Files.createTempDirectory("flare-crosspost-").toFile()
+            val file = File(directory, fileName)
+            check(ImageIO.write(bufferedImage, "png", file))
+            file
+        }.getOrElse {
+            directory?.deleteRecursively()
+            null
+        }
+    }
+}
 
 private fun saveImageWithDialog(
     window: androidx.compose.ui.awt.ComposeWindow?,

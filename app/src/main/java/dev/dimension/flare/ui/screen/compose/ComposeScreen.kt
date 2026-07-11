@@ -133,6 +133,7 @@ import kotlin.time.Duration.Companion.minutes
 fun ShortcutComposeRoute(
     onBack: () -> Unit,
     initialText: String = "",
+    initialCursorPosition: Int = initialText.length,
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) {
     FlareTheme {
@@ -143,6 +144,7 @@ fun ShortcutComposeRoute(
                 onBack = onBack,
                 accountType = null,
                 initialText = initialText,
+                initialCursorPosition = initialCursorPosition,
                 initialMedias = initialMedias,
             )
         }
@@ -160,6 +162,7 @@ internal fun ComposeScreen(
     status: ComposeStatus? = null,
     draftGroupId: String? = null,
     initialText: String = "",
+    initialCursorPosition: Int = initialText.length,
     initialMedias: ImmutableList<Uri> = persistentListOf(),
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
@@ -171,6 +174,7 @@ internal fun ComposeScreen(
             status = status,
             draftGroupId = draftGroupId,
             initialText = initialText,
+            initialCursorPosition = initialCursorPosition,
             initialMedias = initialMedias,
         )
     }
@@ -1051,6 +1055,7 @@ private fun composePresenter(
     status: ComposeStatus? = null,
     draftGroupId: String? = null,
     initialText: String = "",
+    initialCursorPosition: Int = initialText.length,
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) = run {
     val state =
@@ -1062,7 +1067,12 @@ private fun composePresenter(
             )
         }.invoke()
     val textFieldState by remember {
-        mutableStateOf(TextFieldState(initialText))
+        mutableStateOf(
+            TextFieldState(
+                initialText = initialText,
+                initialSelection = TextRange(initialCursorPosition.coerceIn(0, initialText.length)),
+            ),
+        )
     }
 
     LaunchedEffect(textFieldState.text) {

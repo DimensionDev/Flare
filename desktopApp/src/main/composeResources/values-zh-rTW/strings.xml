@@ -79,6 +79,8 @@
     <string name="media_hide_thumbnail_list">隱藏縮圖列表</string>
     <string name="media_save">儲存</string>
     <string name="media_fullscreen">全螢幕</string>
+    <string name="status_share_crosspost">跨平台轉發</string>
+    <string name="status_share_crosspost_failed">無法準備跨平台轉發</string>
     <string name="status_share">分享連結</string>
     <string name="status_share_save_screenshot">儲存截圖</string>
     <string name="status_share_image">分享截圖</string>

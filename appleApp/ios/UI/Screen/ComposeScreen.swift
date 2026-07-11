@@ -6,11 +6,40 @@ import PhotosUI
 import SwiftUIIntrospect
 import SwiftUIBackports
 
+final class ComposePrefill: Hashable {
+    let id = UUID()
+    let text: String
+    let cursorPosition: Int
+    let imageData: Data
+    let fileName: String
+
+    init(
+        text: String,
+        cursorPosition: Int,
+        imageData: Data,
+        fileName: String
+    ) {
+        self.text = text
+        self.cursorPosition = cursorPosition
+        self.imageData = imageData
+        self.fileName = fileName
+    }
+
+    static func == (lhs: ComposePrefill, rhs: ComposePrefill) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
 struct ComposeScreen: View {
     @Environment(\.dismiss) var dismiss
     let accountType: AccountType?
     let composeStatus: ComposeStatus?
     let draftGroupId: String?
+    let prefill: ComposePrefill?
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     @StateObject private var presenter: KotlinPresenter<ComposeState>
@@ -19,6 +48,7 @@ struct ComposeScreen: View {
     @State private var uiTextView: UITextView?
     @State private var pendingCursor: Int?
     @State private var initialTextApplied = false
+    @State private var prefillApplied = false
     @State private var defaultFocusRequested = false
     @State private var showDraftSheet = false
     @State private var showDraftConfirmation = false
@@ -94,6 +124,9 @@ struct ComposeScreen: View {
                     .padding()
             }
             
+        }
+        .onAppear {
+            applyPrefillIfNeeded()
         }
         .onChange(of: presenter.state.initialTextState) { _, newValue in
             guard !initialTextApplied else { return }
@@ -405,6 +438,22 @@ struct ComposeScreen: View {
         }
     }
 
+    private func applyPrefillIfNeeded() {
+        guard !prefillApplied, let prefill else { return }
+        prefillApplied = true
+        initialTextApplied = true
+        viewModel.text = prefill.text
+        mediaViewModel.setInitialImage(
+            data: prefill.imageData,
+            fileName: prefill.fileName
+        )
+        presenter.state.setText(value: prefill.text)
+        presenter.state.setMediaSize(value: Int32(mediaViewModel.items.count))
+        pendingCursor = prefill.cursorPosition
+        requestComposerFocus()
+        applyCursorIfPossible()
+    }
+
     private func requestDefaultFocus() {
         guard !defaultFocusRequested else { return }
         defaultFocusRequested = true
@@ -564,6 +613,10 @@ class MediaViewModel {
         selectedItems = []
         items = draftMedias.compactMap(MediaItem.init(draftMedia:))
     }
+    func setInitialImage(data: Data, fileName: String) {
+        selectedItems = []
+        items = MediaItem(data: data, fileName: fileName).map { [$0] } ?? []
+    }
     func remove(item: MediaItem) {
         if let index = items.firstIndex(of: item) {
             items.remove(at: index)
@@ -613,6 +666,16 @@ class MediaItem: Equatable, Identifiable {
             } catch {
             }
         }
+    }
+
+    init?(data: Data, fileName: String) {
+        guard let image = UIImage(data: data) else { return nil }
+        self.item = nil
+        self.id = UUID().uuidString
+        self.fileName = fileName
+        self.data = data
+        self.image = image
+        self.type = .image
     }
 
     init?(draftMedia: UiDraftMedia) {
@@ -669,10 +732,16 @@ extension UiDraftStatus {
 
 
 extension ComposeScreen {
-    init(accountType: AccountType?, composeStatus: ComposeStatus? = nil, draftGroupId: String? = nil) {
+    init(
+        accountType: AccountType?,
+        composeStatus: ComposeStatus? = nil,
+        draftGroupId: String? = nil,
+        prefill: ComposePrefill? = nil
+    ) {
         self.accountType = accountType
         self.composeStatus = composeStatus
         self.draftGroupId = draftGroupId
+        self.prefill = prefill
         self._presenter = .init(wrappedValue: .init(presenter: ComposePresenter(accountType: accountType, status: composeStatus, draftGroupId: draftGroupId)))
     }
 }

@@ -17,6 +17,7 @@ enum Route: Hashable, Identifiable {
     case localHistoryAgent(String, String?, String)
     case timeline(UiTimelineTabItem)
     case composeNew
+    case composeCrossPost(MacComposePrefill)
     case composeDraft(String)
     case composeQuote(AccountType, MicroBlogKey)
     case composeReply(AccountType, MicroBlogKey)
@@ -41,6 +42,7 @@ enum Route: Hashable, Identifiable {
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
     case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
+    case statusCrossPost(AccountType, MicroBlogKey, String)
     case statusBlueskyReport(AccountType, MicroBlogKey)
     case statusDeleteConfirm(AccountType, MicroBlogKey)
     case statusMastodonReport(AccountType, MicroBlogKey, MicroBlogKey?)
@@ -76,6 +78,8 @@ enum Route: Hashable, Identifiable {
             return lhsAccountKey.id == rhsAccountKey.id &&
                 lhsAccountKey.host == rhsAccountKey.host &&
                 lhsPlatformType == rhsPlatformType
+        case (.composeCrossPost(let lhs), .composeCrossPost(let rhs)):
+            return lhs == rhs
         default:
             return lhs.hashValue == rhs.hashValue
         }
@@ -95,6 +99,9 @@ enum Route: Hashable, Identifiable {
             hasher.combine(accountKey.id)
             hasher.combine(accountKey.host)
             hasher.combine(platformType)
+        case .composeCrossPost(let prefill):
+            hasher.combine("composeCrossPost")
+            hasher.combine(prefill)
         case .mediaRaw(let medias, let selectedIndex, let preview):
             hasher.combine("mediaRaw")
             hasher.combine(medias.map { $0.url })
@@ -161,6 +168,7 @@ enum Route: Hashable, Identifiable {
             TimelineScreen(tabItem: item, allowGalleryMode: true)
                 .navigationTitle(item.title.text)
         case .composeNew,
+                .composeCrossPost,
                 .composeDraft,
                 .composeQuote,
                 .composeReply,
@@ -251,6 +259,24 @@ enum Route: Hashable, Identifiable {
             MacStatusShareSheet(
                 statusKey: statusKey,
                 accountType: accountType
+            )
+        case .statusCrossPost(let accountType, let statusKey, let shareUrl):
+            MacStatusShareSheet(
+                statusKey: statusKey,
+                accountType: accountType,
+                purpose: .crossPost,
+                onCrossPost: { imageData, fileName in
+                    onNavigate(
+                        .composeCrossPost(
+                            MacComposePrefill(
+                                text: "\n\n\(shareUrl)",
+                                cursorPosition: 0,
+                                imageData: imageData,
+                                fileName: fileName
+                            )
+                        )
+                    )
+                }
             )
         case .statusBlueskyReport(let accountType, let statusKey):
             BlueskyReportSheet(accountType: accountType, statusKey: statusKey)

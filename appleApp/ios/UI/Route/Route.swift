@@ -20,6 +20,8 @@ enum Route: Hashable, Identifiable {
             return lhsAccountKey.id == rhsAccountKey.id &&
                 lhsAccountKey.host == rhsAccountKey.host &&
                 lhsPlatformType == rhsPlatformType
+        case (.composeCrossPost(let lhs), .composeCrossPost(let rhs)):
+            return lhs == rhs
         default:
             return lhs.hashValue == rhs.hashValue
         }
@@ -40,6 +42,9 @@ enum Route: Hashable, Identifiable {
             hasher.combine(accountKey.id)
             hasher.combine(accountKey.host)
             hasher.combine(platformType)
+        case .composeCrossPost(let prefill):
+            hasher.combine("composeCrossPost")
+            hasher.combine(prefill)
         default:
             hasher.combine(String(describing: self))
         }
@@ -101,6 +106,8 @@ enum Route: Hashable, Identifiable {
             }
         case .composeNew:
             ComposeScreen(accountType: nil)
+        case .composeCrossPost(let prefill):
+            ComposeScreen(accountType: nil, prefill: prefill)
         case .composeDraft(let groupId):
             ComposeScreen(accountType: nil, draftGroupId: groupId)
         case .composeQuote(let accountType, let statusKey):
@@ -186,7 +193,16 @@ enum Route: Hashable, Identifiable {
         case .statusVVOStatus(let accountType, let statusKey):
             VVOStatusScreen(accountType: accountType, statusKey: statusKey)
         case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
-            StatusShareSheet(statusKey: statusKey, accountType: accountType, shareUrl: shareUrl, fxShareUrl: fxShareUrl, fixvxShareUrl: fixvxShareUrl)
+            StatusShareSheet(
+                statusKey: statusKey,
+                accountType: accountType,
+                shareUrl: shareUrl,
+                fxShareUrl: fxShareUrl,
+                fixvxShareUrl: fixvxShareUrl,
+                onCrossPost: { prefill in
+                    onNavigate(.composeCrossPost(prefill))
+                }
+            )
         case .statusVVOComment(let accountType, let statusKey):
             VVOCommentScreen(accountType: accountType, statusKey: statusKey)
         case .statusBlueskyReport(let accountType, let statusKey):
@@ -264,6 +280,7 @@ enum Route: Hashable, Identifiable {
     case home
     case timeline(UiTimelineTabItem)
     case composeNew
+    case composeCrossPost(ComposePrefill)
     case composeDraft(String)
     case composeQuote(AccountType, MicroBlogKey)
     case composeReply(AccountType, MicroBlogKey)

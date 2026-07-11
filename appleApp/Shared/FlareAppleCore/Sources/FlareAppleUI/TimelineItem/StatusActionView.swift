@@ -451,6 +451,7 @@ struct MacStatusShareMenu<LabelContent: View>: View {
     let data: MacStatusShareData
     let onShareScreenshot: () -> Void
     @ViewBuilder let label: () -> LabelContent
+    @Environment(\.openURL) private var openURL
 
     init(
         data: MacStatusShareData,
@@ -496,6 +497,14 @@ struct MacStatusShareMenu<LabelContent: View>: View {
                 copyLink()
             } label: {
                 Label("share_copy_link", systemImage: "doc.on.doc")
+            }
+
+            if let shareURL = URL(string: DeeplinkRoute.OpenLinkDirectly(url: data.shareUrl).toUri()) {
+                Button {
+                    openURL(shareURL)
+                } label: {
+                    Label("deep_link_account_picker_open_in_browser", systemImage: "safari")
+                }
             }
         } label: {
             label()

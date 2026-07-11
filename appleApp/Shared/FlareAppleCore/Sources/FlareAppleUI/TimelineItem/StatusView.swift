@@ -362,6 +362,11 @@ public struct StatusView: View {
                         }
                     }
                 }
+                #if os(macOS)
+                .contextMenu {
+                    StatusActionsView(data: data.actions, useText: true, allowSpacer: false)
+                }
+                #endif
 //                .if(!isDetail) { view in
 //                    view
 //                        .contextMenu {

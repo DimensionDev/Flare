@@ -141,8 +141,23 @@ public class ComposePresenter(
         MutableStateFlow(status)
     }
 
-    private val referenceSourceAccountKeyFlow by lazy {
-        MutableStateFlow((accountType as? AccountType.Specific)?.accountKey)
+    private val referenceMetadataFlow by lazy {
+        MutableStateFlow(
+            ReferenceMetadata(
+                sourceAccountKey = (accountType as? AccountType.Specific)?.accountKey,
+            ),
+        )
+    }
+
+    private val resolvedReferenceMetadataFlow by lazy {
+        combine(referenceMetadataFlow, allAccountsFlow) { metadata, accounts ->
+            metadata.copy(
+                sourcePlatform =
+                    metadata.sourcePlatform
+                        ?: metadata.sourceAccountKey
+                            ?.let { accounts[it]?.takeSuccess()?.platformType },
+            )
+        }
     }
 
     private val editingDraftGroupIdFlow by lazy {
@@ -184,46 +199,59 @@ public class ComposePresenter(
             .map { it.toImmutableList() }
     }
 
-    private val composeConfigFlow by lazy {
+    private val referenceTargetPlansFlow by lazy {
         combine(
             selectedAccountServicesFlow,
             selectedAccountsFlow,
             activeStatusFlow,
             statusFlow,
-        ) { services, accounts, composeStatus, statusState ->
-            val sourcePlatform = statusState.takeSuccess()?.contentPostOrNull()?.platformType
+            resolvedReferenceMetadataFlow,
+        ) { services, accounts, composeStatus, statusState, referenceMetadata ->
+            val sourcePlatform =
+                statusState.takeSuccess()?.contentPostOrNull()?.platformType
+                    ?: referenceMetadata.sourcePlatform
             val accountsByKey = accounts.associateBy { it.accountKey }
-            val configs =
-                services.mapNotNull {
-                    if (it is ComposeDataSource) {
-                        val targetPlatform = accountsByKey[it.accountKey]?.platformType
-                        val isCrossPlatform =
-                            enableCrossPlatformReference &&
-                                composeStatus != null &&
-                                sourcePlatform != null &&
-                                targetPlatform != null &&
-                                targetPlatform != sourcePlatform
-                        it.composeConfig(
+            services.mapNotNull { service ->
+                if (service !is ComposeDataSource) {
+                    return@mapNotNull null
+                }
+                val account = accountsByKey[service.accountKey] ?: return@mapNotNull null
+                val requiresShareImage =
+                    enableCrossPlatformReference &&
+                        composeStatus != null &&
+                        (
+                            sourcePlatform == null ||
+                                requiresReferenceShareImage(
+                                    sourcePlatform = sourcePlatform,
+                                    sourceAccountKey = referenceMetadata.sourceAccountKey,
+                                    targetAccount = account,
+                                )
+                        )
+                ReferenceTargetPlan(
+                    account = account,
+                    requiresShareImage = requiresShareImage,
+                    composeConfig =
+                        service.composeConfig(
                             type =
                                 when {
-                                    isCrossPlatform -> ComposeType.New
+                                    requiresShareImage -> ComposeType.New
                                     composeStatus is ComposeStatus.Quote -> ComposeType.Quote
                                     composeStatus is ComposeStatus.Reply -> ComposeType.Reply
                                     else -> ComposeType.New
                                 },
-                        )
-                    } else {
-                        null
-                    }
-                }
+                        ),
+                )
+            }
+        }
+    }
 
-            val merged =
-                when (configs.size) {
-                    0 -> ComposeConfig()
-                    1 -> configs.first()
-                    else -> configs.reduce { acc, config -> acc.merge(config) }
-                }
-            merged
+    private val composeConfigFlow by lazy {
+        referenceTargetPlansFlow.map { targets ->
+            when (targets.size) {
+                0 -> ComposeConfig()
+                1 -> targets.first().composeConfig
+                else -> targets.map { it.composeConfig }.reduce { acc, config -> acc.merge(config) }
+            }
         }
     }
 
@@ -244,16 +272,26 @@ public class ComposePresenter(
             allAccountsFlow,
             selectedComposeAccountKeysFlow,
             statusFlow,
-        ) { allAccounts, selectedAccountKeys, status ->
+            resolvedReferenceMetadataFlow,
+        ) { allAccounts, selectedAccountKeys, status, referenceMetadata ->
             val post = status.takeSuccess()?.contentPostOrNull()
-            val statusPlatform = post?.platformType
-            val canCrossPlatform = enableCrossPlatformReference && post?.shareUrl != null
+            val statusPlatform = post?.platformType ?: referenceMetadata.sourcePlatform
+            val canCrossPlatform =
+                enableCrossPlatformReference &&
+                    (post?.shareUrl ?: referenceMetadata.shareUrl) != null
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
                 .filterNot { account ->
                     selectedAccountKeys.contains(account.accountKey) ||
-                        (!canCrossPlatform && statusPlatform != null && account.platformType != statusPlatform)
+                        (
+                            !canCrossPlatform &&
+                                requiresReferenceShareImage(
+                                    sourcePlatform = statusPlatform,
+                                    sourceAccountKey = referenceMetadata.sourceAccountKey,
+                                    targetAccount = account,
+                                )
+                        )
                 }.map {
                     it.accountKey
                 }
@@ -278,10 +316,13 @@ public class ComposePresenter(
             allUsersFlow,
             selectedComposeAccountKeysFlow,
             statusFlow,
-        ) { allAccounts, allUsers, selectedAccountKeys, status ->
+            resolvedReferenceMetadataFlow,
+        ) { allAccounts, allUsers, selectedAccountKeys, status, referenceMetadata ->
             val post = status.takeSuccess()?.contentPostOrNull()
-            val statusPlatform = post?.platformType
-            val canCrossPlatform = enableCrossPlatformReference && post?.shareUrl != null
+            val statusPlatform = post?.platformType ?: referenceMetadata.sourcePlatform
+            val canCrossPlatform =
+                enableCrossPlatformReference &&
+                    (post?.shareUrl ?: referenceMetadata.shareUrl) != null
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
@@ -289,7 +330,11 @@ public class ComposePresenter(
                     selectedAccountKeys.contains(account.accountKey) ||
                         statusPlatform == null ||
                         canCrossPlatform ||
-                        account.platformType == statusPlatform
+                        !requiresReferenceShareImage(
+                            sourcePlatform = statusPlatform,
+                            sourceAccountKey = referenceMetadata.sourceAccountKey,
+                            targetAccount = account,
+                        )
                 }.mapNotNull { account ->
                     allUsers[account.accountKey]
                 }.toImmutableList()
@@ -322,31 +367,31 @@ public class ComposePresenter(
 
     private val crossPlatformTargetStateFlow by lazy {
         combine(
-            selectedAccountsFlow,
+            referenceTargetPlansFlow,
             statusFlow,
-        ) { accounts, statusState ->
+            resolvedReferenceMetadataFlow,
+        ) { targets, statusState, referenceMetadata ->
             val post = statusState.takeSuccess()?.contentPostOrNull()
-            val sourcePlatform = post?.platformType
-            val selectedAccounts = accounts.orEmpty()
             CrossPlatformTargetState(
-                shareUrl = post?.shareUrl,
-                hasCrossTargets =
-                    enableCrossPlatformReference &&
-                        sourcePlatform != null &&
-                        selectedAccounts.any { it.platformType != sourcePlatform },
+                shareUrl = post?.shareUrl ?: referenceMetadata.shareUrl,
+                hasCrossTargets = targets.any { it.requiresShareImage },
                 allTargetsAreCrossPlatform =
-                    sourcePlatform != null &&
-                        selectedAccounts.isNotEmpty() &&
-                        selectedAccounts.all { it.platformType != sourcePlatform },
+                    targets.isNotEmpty() &&
+                        targets.all { it.requiresShareImage },
             )
         }
     }
 
     private val sendCapabilityFlow by lazy {
-        combine(composeConfigFlow, crossPlatformTargetStateFlow) { composeConfig, crossPlatformState ->
+        combine(
+            composeConfigFlow,
+            crossPlatformTargetStateFlow,
+            referenceTargetPlansFlow,
+        ) { composeConfig, crossPlatformState, targetPlans ->
             SendCapability(
                 composeConfig = composeConfig,
                 crossPlatformState = crossPlatformState,
+                targetPlans = targetPlans,
             )
         }
     }
@@ -372,8 +417,7 @@ public class ComposePresenter(
             val crossPlatformState = sendCapability.crossPlatformState
             val mediaConfig = composeConfig.media
             val crossPlatformMediaIsValid =
-                !crossPlatformState.hasCrossTargets ||
-                    (mediaConfig != null && mediaSize + 1 <= mediaConfig.maxCount)
+                sendCapability.targetPlans.hasReferenceShareImageCapacity(mediaSize)
             val canUseAutomaticReferenceContent =
                 crossPlatformState.hasCrossTargets &&
                     crossPlatformState.allTargetsAreCrossPlatform &&
@@ -394,8 +438,8 @@ public class ComposePresenter(
     }
 
     private val statusFlow by lazy {
-        combine(activeStatusFlow, referenceSourceAccountKeyFlow) { composeStatus, sourceAccountKey ->
-            composeStatus to sourceAccountKey
+        combine(activeStatusFlow, referenceMetadataFlow) { composeStatus, referenceMetadata ->
+            composeStatus to referenceMetadata.sourceAccountKey
         }.flatMapLatest { (composeStatus, sourceAccountKey) ->
             val resolvedAccountType = sourceAccountKey?.let { AccountType.Specific(it) }
             if (composeStatus != null && resolvedAccountType != null) {
@@ -466,9 +510,12 @@ public class ComposePresenter(
         val selectedAccounts by selectedAccountsFlow.collectAsUiState()
         val remainingUsers by otherUsersFlow.collectAsUiState()
         val accountUsers by accountUsersFlow.collectAsUiState()
+        val availableAccounts by allAccountsFlow.collectAsState(emptyMap())
         val emojiState by emojiFlow.flattenUiState()
         val enableCrossPost by enableCrossPostFlow.collectAsUiState()
         val composeConfig: UiState<ComposeConfig> by composeConfigFlow.collectAsUiState()
+        val referenceMetadata by resolvedReferenceMetadataFlow.collectAsState(ReferenceMetadata())
+        val referenceTargetPlans by referenceTargetPlansFlow.collectAsState(emptyList())
         val canSend by canSendFlow.collectAsState(false)
         val loadedDraftState by loadedDraftStateFlow.collectAsState()
         val editingDraftGroupId by editingDraftGroupIdFlow.collectAsState()
@@ -552,12 +599,26 @@ public class ComposePresenter(
         val replyState = replyStateFlow.flattenUiState().value
         val referencePost = rawStatusState.takeSuccess()
         val referenceContentPost = referencePost?.contentPostOrNull()
-        val referenceSourcePlatform = referenceContentPost?.platformType
-        val referenceShareUrl = referenceContentPost?.shareUrl
+        val referenceSourcePlatform = referenceContentPost?.platformType ?: referenceMetadata.sourcePlatform
+        val referenceShareUrl = referenceContentPost?.shareUrl ?: referenceMetadata.shareUrl
+        val effectiveReferenceMetadata =
+            referenceMetadata.copy(
+                sourcePlatform = referenceSourcePlatform,
+                shareUrl = referenceShareUrl,
+            )
+        LaunchedEffect(referenceContentPost?.platformType, referenceContentPost?.shareUrl) {
+            referenceContentPost?.let { post ->
+                val current = referenceMetadataFlow.value
+                referenceMetadataFlow.value =
+                    current.copy(
+                        sourcePlatform = post.platformType,
+                        shareUrl = post.shareUrl ?: current.shareUrl,
+                    )
+            }
+        }
         val selectedAccountValues = selectedAccounts.takeSuccess().orEmpty()
         val hasCrossPlatformTargets =
-            referenceSourcePlatform != null &&
-                selectedAccountValues.any { it.platformType != referenceSourcePlatform }
+            referenceTargetPlans.any { it.requiresShareImage }
         val initialTextState =
             if (editingDraftGroupId == null) {
                 initialTextFlow?.flattenUiState()?.value
@@ -677,28 +738,18 @@ public class ComposePresenter(
                     onDispatched(false)
                     return
                 }
-                val mediaConfig = composeConfig.takeSuccess()?.media
                 if (
                     hasCrossPlatformTargets &&
                     (
                         data.poll != null ||
-                            mediaConfig == null ||
-                            data.medias.size + 1 > mediaConfig.maxCount
+                            !referenceTargetPlans.hasReferenceShareImageCapacity(data.medias.size)
                     )
                 ) {
                     onDispatched(false)
                     return
                 }
                 sendEnqueued = true
-                val enrichedData =
-                    data.copy(
-                        referenceStatus =
-                            data.referenceStatus?.copy(
-                                sourceAccountKey = referenceSourceAccountKeyFlow.value,
-                                sourcePlatform = referenceSourcePlatform,
-                                shareUrl = referenceShareUrl,
-                            ),
-                    )
+                val enrichedData = data.withReferenceMetadata(effectiveReferenceMetadata)
                 composeUseCase.invoke(
                     accounts = selectedAccountValues,
                     data = enrichedData,
@@ -811,6 +862,17 @@ public class ComposePresenter(
                 directSendState = ComposeDirectSendState.idle()
             }
 
+            override fun requiresReferenceShareImage(accountKey: MicroBlogKey): Boolean {
+                if (!enableCrossPlatformReference) return false
+                if (composeStatus != null && referenceSourcePlatform == null) return true
+                val targetAccount = availableAccounts[accountKey]?.takeSuccess() ?: return false
+                return dev.dimension.flare.ui.presenter.compose.requiresReferenceShareImage(
+                    sourcePlatform = referenceSourcePlatform,
+                    sourceAccountKey = referenceMetadata.sourceAccountKey,
+                    targetAccount = targetAccount,
+                )
+            }
+
             override fun selectAccount(accountKey: MicroBlogKey) {
                 if (selectedAccountsKeyFlow.value.contains(accountKey)) {
                     if (selectedAccountsKeyFlow.value.size == 1) {
@@ -851,15 +913,7 @@ public class ComposePresenter(
                     if (selectedAccounts.isNotEmpty()) {
                         val groupId =
                             editingDraftGroupIdFlow.value ?: draftGroupId ?: newDraftGroupId()
-                        val enrichedData =
-                            data.copy(
-                                referenceStatus =
-                                    data.referenceStatus?.copy(
-                                        sourceAccountKey = referenceSourceAccountKeyFlow.value,
-                                        sourcePlatform = referenceSourcePlatform,
-                                        shareUrl = referenceShareUrl,
-                                    ),
-                            )
+                        val enrichedData = data.withReferenceMetadata(effectiveReferenceMetadata)
                         composeUseCase.saveDraft(
                             accounts = selectedAccounts,
                             data = enrichedData,
@@ -892,12 +946,14 @@ public class ComposePresenter(
             }
             editingDraftGroupIdFlow.value = draft.groupId
             activeStatusFlow.value = draft.data.referenceStatus?.composeStatus
-            referenceSourceAccountKeyFlow.value =
-                draft.data.referenceStatus?.sourceAccountKey
-                    ?: draft.accounts
-                        .firstOrNull()
-                        ?.account
-                        ?.accountKey
+            referenceMetadataFlow.value =
+                ReferenceMetadata(
+                    sourceAccountKey =
+                        draft.data.referenceStatus?.sourceAccountKey
+                            ?: draft.resolveReferenceSourceAccountKey(),
+                    sourcePlatform = draft.data.referenceStatus?.sourcePlatform,
+                    shareUrl = draft.data.referenceStatus?.shareUrl,
+                )
             selectedAccountsKeyFlow.value =
                 draft.accounts.map { it.account.accountKey }.toImmutableList()
             textFlow.value = draft.data.content
@@ -993,10 +1049,59 @@ private data class CrossPlatformTargetState(
     val allTargetsAreCrossPlatform: Boolean,
 )
 
+internal data class ReferenceMetadata(
+    val sourceAccountKey: MicroBlogKey? = null,
+    val sourcePlatform: PlatformType? = null,
+    val shareUrl: String? = null,
+)
+
+internal fun ComposeData.withReferenceMetadata(metadata: ReferenceMetadata): ComposeData =
+    copy(
+        referenceStatus =
+            referenceStatus?.let { reference ->
+                reference.copy(
+                    sourceAccountKey = metadata.sourceAccountKey ?: reference.sourceAccountKey,
+                    sourcePlatform = metadata.sourcePlatform ?: reference.sourcePlatform,
+                    shareUrl = metadata.shareUrl ?: reference.shareUrl,
+                )
+            },
+    )
+
+private fun UiDraft.resolveReferenceSourceAccountKey(): MicroBlogKey? {
+    val reference = data.referenceStatus ?: return null
+    val statusHost = reference.composeStatus.statusKey.host
+    accounts
+        .firstOrNull { draftAccount ->
+            draftAccount.account.accountKey.host
+                .equals(statusHost, ignoreCase = true)
+        }?.let { return it.account.accountKey }
+    val sourcePlatform = reference.sourcePlatform ?: return null
+    return accounts
+        .filter { it.account.platformType == sourcePlatform }
+        .singleOrNull()
+        ?.account
+        ?.accountKey
+}
+
 private data class SendCapability(
     val composeConfig: ComposeConfig,
     val crossPlatformState: CrossPlatformTargetState,
+    val targetPlans: List<ReferenceTargetPlan>,
 )
+
+internal data class ReferenceTargetPlan(
+    val account: UiAccount,
+    val requiresShareImage: Boolean,
+    val composeConfig: ComposeConfig,
+)
+
+internal fun List<ReferenceTargetPlan>.hasReferenceShareImageCapacity(userMediaCount: Int): Boolean =
+    all { target ->
+        !target.requiresShareImage ||
+            target.composeConfig.media?.let { media ->
+                userMediaCount + 1 <= media.maxCount
+            } == true
+    }
 
 internal fun observeSelectedComposeAccountKeys(
     allAccountsFlow: Flow<Map<MicroBlogKey, UiState<UiAccount>>>,
@@ -1124,6 +1229,8 @@ public abstract class ComposeState(
     )
 
     public abstract fun clearDirectSendState()
+
+    public abstract fun requiresReferenceShareImage(accountKey: MicroBlogKey): Boolean
 
     public abstract fun selectAccount(accountKey: MicroBlogKey)
 

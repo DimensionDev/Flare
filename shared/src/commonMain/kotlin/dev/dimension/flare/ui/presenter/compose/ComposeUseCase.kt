@@ -19,9 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @Single
 internal class ComposeUseCase(
@@ -91,11 +88,20 @@ internal class ComposeUseCase(
                         )
                     }
                     val bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId)
-                    val sourcePlatform = data.referenceStatus?.sourcePlatform
+                    val referenceStatus = data.referenceStatus
                     val crossPlatformAccounts =
-                        sourcePlatform
-                            ?.let { platform -> accounts.filter { it.platformType != platform } }
-                            .orEmpty()
+                        if (referenceStatus == null) {
+                            emptyList()
+                        } else {
+                            accounts.filter { account ->
+                                referenceStatus.sourcePlatform == null ||
+                                    requiresReferenceShareImage(
+                                        sourcePlatform = referenceStatus.sourcePlatform,
+                                        sourceAccountKey = referenceStatus.sourceAccountKey,
+                                        targetAccount = account,
+                                    )
+                            }
+                        }
                     if (crossPlatformAccounts.isNotEmpty()) {
                         saveDraftUseCase(bundle, targetStatus = DraftTargetStatus.PREPARING)
                         val renderFailure =
@@ -109,13 +115,13 @@ internal class ComposeUseCase(
                                         "Referenced post is unavailable."
                                     }
                                 val shareMedia = renderer.renderAndAwait(post)
-                                val referenceStatus = requireNotNull(data.referenceStatus)
                                 sendDraftUseCase(
                                     bundle =
                                         bundle.copy(
                                             template =
                                                 data.copy(
-                                                    referenceStatus = referenceStatus.copy(shareMedia = shareMedia),
+                                                    referenceStatus =
+                                                        requireNotNull(referenceStatus).copy(shareMedia = shareMedia),
                                                 ),
                                         ),
                                     progress = progress,
@@ -186,19 +192,6 @@ internal class ComposeUseCase(
         }
     }
 }
-
-private suspend fun ReferenceShareImageRenderer.renderAndAwait(post: UiTimelineV2): ComposeData.Media =
-    suspendCoroutine { continuation ->
-        render(post) { media, errorMessage ->
-            if (media != null) {
-                continuation.resume(media)
-            } else {
-                continuation.resumeWithException(
-                    IllegalStateException(errorMessage ?: "Unable to render referenced post image."),
-                )
-            }
-        }
-    }
 
 @Immutable
 internal sealed interface ComposeProgressState {

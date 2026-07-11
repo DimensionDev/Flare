@@ -118,6 +118,24 @@ internal interface DraftDao {
 
     @Query(
         """
+        UPDATE DbDraftTarget
+        SET status = 'PREPARING',
+            error_message = NULL,
+            attempt_count = attempt_count + 1,
+            last_attempt_at = :lastAttemptAt,
+            updated_at = :updatedAt
+        WHERE group_id = :groupId
+          AND status IN ('DRAFT', 'FAILED')
+        """,
+    )
+    suspend fun claimDraftTargets(
+        groupId: String,
+        lastAttemptAt: Long,
+        updatedAt: Long,
+    ): Int
+
+    @Query(
+        """
         UPDATE DbDraftGroup
         SET updated_at = :updatedAt
         WHERE group_id = :groupId

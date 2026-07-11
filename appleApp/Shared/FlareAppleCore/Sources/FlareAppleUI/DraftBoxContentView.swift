@@ -18,15 +18,18 @@ public struct DraftBoxContentView: View {
 
     private let rowMode: DraftBoxContentRowMode
     private let showsEditAction: Bool
+    private let referenceShareImageRenderer: ReferenceShareImageRenderer?
     private let onEditDraft: ((String) -> Void)?
 
     public init(
         rowMode: DraftBoxContentRowMode = .regular,
         showsEditAction: Bool = true,
+        referenceShareImageRenderer: ReferenceShareImageRenderer? = nil,
         onEditDraft: ((String) -> Void)? = nil
     ) {
         self.rowMode = rowMode
         self.showsEditAction = showsEditAction
+        self.referenceShareImageRenderer = referenceShareImageRenderer
         self.onEditDraft = onEditDraft
     }
 
@@ -51,10 +54,16 @@ public struct DraftBoxContentView: View {
                             rowMode: rowMode,
                             showsEditAction: showsEditAction,
                             onRetry: {
-                                presenter.state.retry(groupId: draft.groupId)
+                                presenter.state.retry(
+                                    groupId: draft.groupId,
+                                    referenceShareImageRenderer: referenceShareImageRenderer
+                                )
                             },
                             onSend: {
-                                presenter.state.send(groupId: draft.groupId)
+                                presenter.state.send(
+                                    groupId: draft.groupId,
+                                    referenceShareImageRenderer: referenceShareImageRenderer
+                                )
                             },
                             onDelete: {
                                 presenter.state.delete(groupId: draft.groupId)

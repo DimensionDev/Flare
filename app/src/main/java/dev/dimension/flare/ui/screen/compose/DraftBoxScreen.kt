@@ -50,6 +50,7 @@ import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.status.share.rememberAndroidReferenceShareImageRenderer
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
@@ -65,6 +66,7 @@ internal fun DraftBoxScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
 ) {
+    val referenceShareImageRenderer = rememberAndroidReferenceShareImageRenderer()
     val state by producePresenter {
         remember { DraftBoxPresenter() }.invoke()
     }
@@ -117,8 +119,12 @@ internal fun DraftBoxScreen(
                         item = item,
                         index = state.items.indexOf(item),
                         total = state.items.size,
-                        onRetry = { state.retry(item.groupId) },
-                        onSend = { state.send(item.groupId) },
+                        onRetry = {
+                            state.retry(item.groupId, referenceShareImageRenderer)
+                        },
+                        onSend = {
+                            state.send(item.groupId, referenceShareImageRenderer)
+                        },
                         onDelete = { state.delete(item.groupId) },
                         onEdit = { onEdit(item.groupId) },
                         modifier = Modifier.animateItem(),

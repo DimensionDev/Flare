@@ -27,9 +27,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -338,7 +341,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
         }
 
     @Test
-    fun resendSkipsTargetsWithoutResolvedAccountAndKeepsTheirStatus() =
+    fun resendMissingTargetAccountKeepsDraftFailedAndReportsError() =
         runTest {
             val account = mastodonAccount("alice", "mastodon.social")
             saveDraftGroup(
@@ -357,17 +360,12 @@ class SendDraftUseCaseTest : RobolectricTest() {
 
             val draft = assertNotNull(repository.draft("resend-missing-account").first())
             assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
-            assertEquals(
-                listOf(
-                    ComposeProgressState.Progress(0, 0),
-                    ComposeProgressState.Success,
-                ),
-                progresses,
-            )
+            assertEquals(ComposeProgressState.Progress(0, 0), progresses.first())
+            assertIs<ComposeProgressState.Error>(progresses.last())
         }
 
     @Test
-    fun resendAllSendingTargetsOnlyEmitsProgressAndSuccess() =
+    fun resendAllSendingTargetsReturnsWithoutProgress() =
         runTest {
             val account = mastodonAccount("alice", "mastodon.social")
             saveDraftGroup(
@@ -386,13 +384,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
             advanceUntilIdle()
 
             assertTrue(sent.isEmpty())
-            assertEquals(
-                listOf(
-                    ComposeProgressState.Progress(0, 0),
-                    ComposeProgressState.Success,
-                ),
-                progresses,
-            )
+            assertTrue(progresses.isEmpty())
             assertEquals(
                 DraftTargetStatus.SENDING,
                 repository
@@ -568,6 +560,8 @@ class SendDraftUseCaseTest : RobolectricTest() {
                                 type = DraftReferenceType.VVO_COMMENT,
                                 statusKey = MicroBlogKey("reply", "weibo.com"),
                                 rootId = "root-id",
+                                sourceAccountKey = account.accountKey,
+                                sourcePlatform = PlatformType.Mastodon,
                             ),
                     ),
                 targets = listOf(SaveDraftTarget(accountKey = account.accountKey, status = DraftTargetStatus.FAILED)),
@@ -850,10 +844,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
                     ?.single()
                     ?.status,
             )
-            assertEquals(
-                listOf(ComposeProgressState.Progress(0, 0), ComposeProgressState.Success),
-                progresses,
-            )
+            assertTrue(progresses.isEmpty())
         }
 
     @Test
@@ -910,19 +901,345 @@ class SendDraftUseCaseTest : RobolectricTest() {
             assertNull(repository.draft("share-image-retry").first())
         }
 
+    @Test
+    fun missingShareImageIsRerenderedPersistedAndReusedAfterUploadFailure() =
+        runTest {
+            val sourceAccountKey = MicroBlogKey("source", "bsky.social")
+            val targetAccount = mastodonAccount("target", "mastodon.social")
+            val statusKey = MicroBlogKey("post", "bsky.social")
+            saveDraftGroup(
+                groupId = "rerender-share-image",
+                content =
+                    sampleContent("rerender").copy(
+                        reference =
+                            DraftContent.DraftReference(
+                                type = DraftReferenceType.QUOTE,
+                                statusKey = statusKey,
+                                sourceAccountKey = sourceAccountKey,
+                                sourcePlatform = PlatformType.Bluesky,
+                                shareUrl = "https://bsky.app/profile/source/post/post",
+                            ),
+                    ),
+                targets =
+                    listOf(
+                        SaveDraftTarget(
+                            accountKey = targetAccount.accountKey,
+                            status = DraftTargetStatus.DRAFT,
+                        ),
+                    ),
+            )
+            val shareMedia = media(name = "rendered.png", bytes = byteArrayOf(4, 5, 6), altText = null)
+            var renderAttempts = 0
+
+            val failedRenderUseCase =
+                testUseCase(
+                    findAccount = { key -> targetAccount.takeIf { it.accountKey == key } },
+                    resolveReferencePost = { _, _ ->
+                        ResolvedReferencePost(
+                            sourcePlatform = PlatformType.Bluesky,
+                            shareUrl = "https://bsky.app/profile/source/post/post",
+                            renderShareMedia = {
+                                renderAttempts++
+                                error("render failed")
+                            },
+                        )
+                    },
+                )
+            failedRenderUseCase(
+                groupId = "rerender-share-image",
+                referenceShareImageRenderer = unusedReferenceShareImageRenderer,
+            ) {}
+
+            val renderFailedDraft = assertNotNull(repository.draft("rerender-share-image").first())
+            assertEquals(DraftTargetStatus.FAILED, renderFailedDraft.targets.single().status)
+            assertNull(renderFailedDraft.content.reference?.shareImageMediaIndex)
+            assertEquals(1, renderAttempts)
+
+            val uploadFailureUseCase =
+                testUseCase(
+                    findAccount = { key -> targetAccount.takeIf { it.accountKey == key } },
+                    prepareData = { account, data ->
+                        data.forTarget(account, composeConfig(maxLength = 300, maxMediaCount = 4))
+                    },
+                    resolveReferencePost = { _, _ ->
+                        ResolvedReferencePost(
+                            sourcePlatform = PlatformType.Bluesky,
+                            shareUrl = "https://bsky.app/profile/source/post/post",
+                            renderShareMedia = {
+                                renderAttempts++
+                                shareMedia
+                            },
+                        )
+                    },
+                ) { _, _, _ ->
+                    error("upload failed")
+                }
+            uploadFailureUseCase(
+                groupId = "rerender-share-image",
+                referenceShareImageRenderer = unusedReferenceShareImageRenderer,
+            ) {}
+
+            val uploadFailedDraft = assertNotNull(repository.draft("rerender-share-image").first())
+            assertEquals(DraftTargetStatus.FAILED, uploadFailedDraft.targets.single().status)
+            assertEquals(0, uploadFailedDraft.content.reference?.shareImageMediaIndex)
+            assertEquals(1, uploadFailedDraft.medias.size)
+            assertContentEquals(
+                byteArrayOf(4, 5, 6),
+                mediaStore
+                    .restore(uploadFailedDraft.medias)
+                    .single()
+                    .file
+                    .readBytes(),
+            )
+            assertEquals(2, renderAttempts)
+
+            val resent = mutableListOf<SentCompose>()
+            var resentShareBytes: ByteArray? = null
+            val retryUseCase =
+                testUseCase(
+                    sent = resent,
+                    findAccount = { key -> targetAccount.takeIf { it.accountKey == key } },
+                    prepareData = { account, data ->
+                        data.forTarget(account, composeConfig(maxLength = 300, maxMediaCount = 4))
+                    },
+                ) { _, retryData, _ ->
+                    resentShareBytes =
+                        retryData.medias
+                            .single()
+                            .file
+                            .readBytes()
+                }
+            retryUseCase(groupId = "rerender-share-image") {}
+
+            assertEquals(2, renderAttempts)
+            assertNull(resent.single().data.referenceStatus)
+            assertContentEquals(byteArrayOf(4, 5, 6), resentShareBytes)
+            assertNull(repository.draft("rerender-share-image").first())
+        }
+
+    @Test
+    fun federatedReferenceUsesShareImageAcrossHostsAndStaysNativeOnSameHost() =
+        runTest {
+            listOf(PlatformType.Mastodon, PlatformType.Misskey).forEach { platform ->
+                val sourceHost = "source.example"
+                val sourceAccountKey = MicroBlogKey("logged-out-source", sourceHost)
+                val differentHostTarget =
+                    UiAccount(
+                        accountKey = MicroBlogKey("target", "target.example"),
+                        platformType = platform,
+                    )
+                val shareMedia = media(name = "${platform.name}-share.png", bytes = byteArrayOf(7), altText = null)
+                val crossGroupId = "${platform.name}-different-host"
+                saveDraftGroup(
+                    groupId = crossGroupId,
+                    content =
+                        sampleContent("cross host").copy(
+                            reference =
+                                DraftContent.DraftReference(
+                                    type = DraftReferenceType.QUOTE,
+                                    statusKey = MicroBlogKey("post", sourceHost),
+                                    sourceAccountKey = sourceAccountKey,
+                                    sourcePlatform = platform,
+                                ),
+                        ),
+                    targets = listOf(SaveDraftTarget(accountKey = differentHostTarget.accountKey)),
+                )
+                var renderCount = 0
+                val crossSent = mutableListOf<SentCompose>()
+                val crossUseCase =
+                    testUseCase(
+                        sent = crossSent,
+                        findAccount = { key -> differentHostTarget.takeIf { it.accountKey == key } },
+                        prepareData = { account, data ->
+                            data.forTarget(account, composeConfig(maxLength = 300, maxMediaCount = 4))
+                        },
+                        resolveReferencePost = { _, _ ->
+                            ResolvedReferencePost(
+                                sourcePlatform = platform,
+                                shareUrl = null,
+                                renderShareMedia = {
+                                    renderCount++
+                                    shareMedia
+                                },
+                            )
+                        },
+                    )
+                crossUseCase(
+                    groupId = crossGroupId,
+                    referenceShareImageRenderer = unusedReferenceShareImageRenderer,
+                ) {}
+
+                assertEquals(1, renderCount)
+                assertNull(crossSent.single().data.referenceStatus)
+                assertEquals(
+                    1,
+                    crossSent
+                        .single()
+                        .data.medias.size,
+                )
+
+                val sameHostTarget =
+                    UiAccount(
+                        accountKey = MicroBlogKey("target", sourceHost),
+                        platformType = platform,
+                    )
+                val nativeGroupId = "${platform.name}-same-host"
+                saveDraftGroup(
+                    groupId = nativeGroupId,
+                    content =
+                        sampleContent("same host").copy(
+                            reference =
+                                DraftContent.DraftReference(
+                                    type = DraftReferenceType.REPLY,
+                                    statusKey = MicroBlogKey("post", sourceHost),
+                                    sourceAccountKey = sourceAccountKey,
+                                    sourcePlatform = null,
+                                ),
+                        ),
+                    targets = listOf(SaveDraftTarget(accountKey = sameHostTarget.accountKey)),
+                )
+                val nativeSent = mutableListOf<SentCompose>()
+                val nativeUseCase =
+                    testUseCase(
+                        sent = nativeSent,
+                        findAccount = { key -> sameHostTarget.takeIf { it.accountKey == key } },
+                        prepareData = { account, data ->
+                            data.forTarget(account, composeConfig(maxLength = 300, maxMediaCount = 4))
+                        },
+                    )
+                nativeUseCase(groupId = nativeGroupId) {}
+
+                assertIs<ComposeStatus.Reply>(
+                    nativeSent
+                        .single()
+                        .data.referenceStatus
+                        ?.composeStatus,
+                )
+                assertTrue(
+                    nativeSent
+                        .single()
+                        .data.medias
+                        .isEmpty(),
+                )
+            }
+        }
+
+    @Test
+    fun rendererFailureKeepsCrossTargetFailedAndSendsNativeTargetOnce() =
+        runTest {
+            val sourceAccountKey = MicroBlogKey("source", "mastodon.social")
+            val nativeAccount = mastodonAccount("native", "mastodon.social")
+            val crossAccount = blueskyAccount("cross", "bsky.social")
+            saveDraftGroup(
+                groupId = "partial-render-failure",
+                content =
+                    sampleContent("partial").copy(
+                        reference =
+                            DraftContent.DraftReference(
+                                type = DraftReferenceType.QUOTE,
+                                statusKey = MicroBlogKey("post", "mastodon.social"),
+                                sourceAccountKey = sourceAccountKey,
+                                sourcePlatform = PlatformType.Mastodon,
+                            ),
+                    ),
+                targets =
+                    listOf(
+                        SaveDraftTarget(accountKey = nativeAccount.accountKey),
+                        SaveDraftTarget(accountKey = crossAccount.accountKey),
+                    ),
+            )
+            val sent = mutableListOf<SentCompose>()
+            val useCase =
+                testUseCase(
+                    sent = sent,
+                    findAccount = { key ->
+                        when (key) {
+                            nativeAccount.accountKey -> nativeAccount
+                            crossAccount.accountKey -> crossAccount
+                            else -> null
+                        }
+                    },
+                    prepareData = { account, data ->
+                        data.forTarget(account, composeConfig(maxLength = 300, maxMediaCount = 4))
+                    },
+                    resolveReferencePost = { _, _ ->
+                        ResolvedReferencePost(
+                            sourcePlatform = PlatformType.Mastodon,
+                            shareUrl = null,
+                            renderShareMedia = { error("render failed") },
+                        )
+                    },
+                )
+            useCase(
+                groupId = "partial-render-failure",
+                referenceShareImageRenderer = unusedReferenceShareImageRenderer,
+            ) {}
+
+            assertEquals(listOf(nativeAccount.accountKey), sent.map { it.account.accountKey })
+            val remainingDraft = assertNotNull(repository.draft("partial-render-failure").first())
+            assertEquals(crossAccount.accountKey, remainingDraft.targets.single().accountKey)
+            assertEquals(DraftTargetStatus.FAILED, remainingDraft.targets.single().status)
+            assertEquals("render failed", remainingDraft.targets.single().errorMessage)
+        }
+
+    @Test
+    fun concurrentDraftDispatchClaimsTargetsOnlyOnce() =
+        runTest {
+            val account = mastodonAccount("alice", "mastodon.social")
+            saveDraftGroup(
+                groupId = "concurrent-claim",
+                content = sampleContent("claim once"),
+                targets = listOf(SaveDraftTarget(accountKey = account.accountKey)),
+            )
+            val bothResolvingAccount = CompletableDeferred<Unit>()
+            var findAccountCalls = 0
+            var composeCalls = 0
+            val firstProgress = mutableListOf<ComposeProgressState>()
+            val secondProgress = mutableListOf<ComposeProgressState>()
+            val useCase =
+                testUseCase(
+                    findAccount = {
+                        findAccountCalls++
+                        if (findAccountCalls == 2) {
+                            bothResolvingAccount.complete(Unit)
+                        }
+                        bothResolvingAccount.await()
+                        account
+                    },
+                ) { _, _, _ ->
+                    composeCalls++
+                }
+
+            listOf(
+                launch { useCase(groupId = "concurrent-claim") { firstProgress += it } },
+                launch { useCase(groupId = "concurrent-claim") { secondProgress += it } },
+            ).joinAll()
+
+            assertEquals(2, findAccountCalls)
+            assertEquals(1, composeCalls)
+            assertEquals(listOf(0, 3), listOf(firstProgress.size, secondProgress.size).sorted())
+            assertNull(repository.draft("concurrent-claim").first())
+        }
+
     private fun testUseCase(
         sent: MutableList<SentCompose> = mutableListOf(),
         findAccount: suspend (MicroBlogKey) -> UiAccount? = { null },
+        prepareData: suspend (UiAccount, ComposeData) -> ComposeData = { _, data -> data },
+        resolveReferencePost: suspend (MicroBlogKey, MicroBlogKey) -> ResolvedReferencePost = { _, _ ->
+            error("Referenced post resolver should not be called.")
+        },
         composeDraft: suspend (UiAccount, ComposeData, () -> Unit) -> Unit = { _, _, _ -> },
     ): SendDraftUseCase =
         SendDraftUseCase(
             draftRepository = repository,
             draftMediaStore = mediaStore,
             findAccount = findAccount,
+            prepareData = prepareData,
             composeDraft = { account, data, progress ->
                 sent += SentCompose(account = account, data = data)
                 composeDraft(account, data, progress)
             },
+            resolveReferencePost = resolveReferencePost,
         )
 
     private suspend fun saveDraftGroup(
@@ -996,6 +1313,16 @@ class SendDraftUseCaseTest : RobolectricTest() {
             file = createTestFileItem(root = root, name = name, bytes = bytes, type = type),
             altText = altText,
         )
+
+    private val unusedReferenceShareImageRenderer =
+        object : ReferenceShareImageRenderer {
+            override fun render(
+                post: UiTimelineV2,
+                completion: (ComposeData.Media?, String?) -> Unit,
+            ) {
+                error("Test resolver renders without calling the platform renderer.")
+            }
+        }
 
     private data class SentCompose(
         val account: UiAccount,

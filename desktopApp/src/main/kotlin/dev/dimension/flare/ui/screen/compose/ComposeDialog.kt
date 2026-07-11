@@ -181,7 +181,6 @@ fun ComposeDialog(
             status = status,
             draftGroupId = draftGroupId,
             initialText = initialText,
-            referenceShareImageRenderer = referenceShareImageRenderer,
         )
     }
     var showCloseConfirmDialog by remember { mutableStateOf(false) }
@@ -203,8 +202,7 @@ fun ComposeDialog(
         account: UiProfile,
         selected: Boolean,
     ) {
-        val sourcePlatform = state.state.referenceSourcePlatform
-        if (!selected && !crossPlatformConfirmed && sourcePlatform != null && account.platformType != sourcePlatform) {
+        if (!selected && !crossPlatformConfirmed && state.state.requiresReferenceShareImage(account.key)) {
             pendingCrossPlatformAccount = account
         } else {
             state.state.selectAccount(account.key)
@@ -501,7 +499,7 @@ fun ComposeDialog(
                                 ).onKeyEvent {
                                     if (it.isCtrlPressed && it.key == Key.Enter) {
                                         if (state.canSend) {
-                                            state.send {
+                                            state.send(referenceShareImageRenderer) {
                                                 onBack?.invoke()
                                             }
                                         }
@@ -957,7 +955,7 @@ fun ComposeDialog(
                 Spacer(modifier = Modifier.width(8.dp))
                 AccentButton(
                     onClick = {
-                        state.send {
+                        state.send(referenceShareImageRenderer) {
                             onBack?.invoke()
                         }
                     },
@@ -1067,7 +1065,6 @@ private fun composePresenter(
     status: ComposeStatus? = null,
     draftGroupId: String? = null,
     initialText: String = "",
-    referenceShareImageRenderer: ReferenceShareImageRenderer,
 ) = run {
     val state =
         remember(status, accountType, draftGroupId) {
@@ -1244,7 +1241,10 @@ private fun composePresenter(
                 language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
             )
 
-        fun send(onDispatched: () -> Unit = {}) {
+        fun send(
+            referenceShareImageRenderer: ReferenceShareImageRenderer,
+            onDispatched: () -> Unit = {},
+        ) {
             val data = buildComposeData()
             state.send(
                 data = data,

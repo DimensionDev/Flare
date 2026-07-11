@@ -476,8 +476,7 @@ struct MacComposeScreen: View {
     private func toggleAccount(_ account: UiProfile, isSelected: Bool) {
         if !isSelected,
            !crossPlatformConfirmed,
-           let sourcePlatform = presenter.state.referenceSourcePlatform,
-           sourcePlatform != account.platformType {
+           presenter.state.requiresReferenceShareImage(accountKey: account.key) {
             pendingCrossPlatformAccount = account
         } else {
             presenter.state.selectAccount(accountKey: account.key)

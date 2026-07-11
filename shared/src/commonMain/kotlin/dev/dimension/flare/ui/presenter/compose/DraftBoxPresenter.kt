@@ -82,7 +82,9 @@ public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
                             data = draft.content.toComposeData(medias = emptyList()),
                             medias =
                                 draft.medias
-                                    .map { media ->
+                                    .filterIndexed { index, _ ->
+                                        index != draft.content.reference?.shareImageMediaIndex
+                                    }.map { media ->
                                         UiDraftMedia(
                                             cachePath = media.cachePath,
                                             fileName = media.fileName,
@@ -102,12 +104,18 @@ public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
         return object : DraftBoxState {
             override val items: ImmutableList<UiDraft> = items
 
-            override fun retry(groupId: String) {
-                sendDraft(groupId)
+            override fun retry(
+                groupId: String,
+                referenceShareImageRenderer: ReferenceShareImageRenderer?,
+            ) {
+                sendDraft(groupId, referenceShareImageRenderer)
             }
 
-            override fun send(groupId: String) {
-                sendDraft(groupId)
+            override fun send(
+                groupId: String,
+                referenceShareImageRenderer: ReferenceShareImageRenderer?,
+            ) {
+                sendDraft(groupId, referenceShareImageRenderer)
             }
 
             override fun delete(groupId: String) {
@@ -116,9 +124,15 @@ public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
                 }
             }
 
-            private fun sendDraft(groupId: String) {
+            private fun sendDraft(
+                groupId: String,
+                referenceShareImageRenderer: ReferenceShareImageRenderer?,
+            ) {
                 coroutineScope.launch {
-                    sendDraftUseCase(groupId) {
+                    sendDraftUseCase(
+                        groupId = groupId,
+                        referenceShareImageRenderer = referenceShareImageRenderer,
+                    ) {
                         when (it) {
                             is ComposeProgressState.Error -> {
                                 inAppNotification.onError(Message.Compose, it.throwable)
@@ -148,9 +162,15 @@ public class DraftBoxPresenter : PresenterBase<DraftBoxState>() {
 public interface DraftBoxState {
     public val items: ImmutableList<UiDraft>
 
-    public fun retry(groupId: String)
+    public fun retry(
+        groupId: String,
+        referenceShareImageRenderer: ReferenceShareImageRenderer?,
+    )
 
-    public fun send(groupId: String)
+    public fun send(
+        groupId: String,
+        referenceShareImageRenderer: ReferenceShareImageRenderer?,
+    )
 
     public fun delete(groupId: String)
 }

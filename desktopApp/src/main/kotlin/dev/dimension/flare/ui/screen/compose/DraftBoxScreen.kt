@@ -42,6 +42,7 @@ import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.status.share.rememberDesktopReferenceShareImageRenderer
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
@@ -58,6 +59,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DraftBoxScreen(onEdit: (String) -> Unit = {}) {
+    val referenceShareImageRenderer = rememberDesktopReferenceShareImageRenderer()
     val state by producePresenter {
         remember { DraftBoxPresenter() }.invoke()
     }
@@ -101,8 +103,12 @@ internal fun DraftBoxScreen(onEdit: (String) -> Unit = {}) {
                 items(state.items, key = { it.groupId }) { item ->
                     DraftBoxCard(
                         item = item,
-                        onRetry = { state.retry(item.groupId) },
-                        onSend = { state.send(item.groupId) },
+                        onRetry = {
+                            state.retry(item.groupId, referenceShareImageRenderer)
+                        },
+                        onSend = {
+                            state.send(item.groupId, referenceShareImageRenderer)
+                        },
                         onDelete = { state.delete(item.groupId) },
                         onEdit = { onEdit(item.groupId) },
                         modifier = Modifier.animateItem(),

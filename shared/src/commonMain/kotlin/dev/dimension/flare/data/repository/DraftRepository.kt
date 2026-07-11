@@ -92,6 +92,55 @@ internal class DraftRepository(
         return groupId
     }
 
+    suspend fun updateDraftContent(
+        groupId: String,
+        content: DraftContent,
+    ) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            val group = database.draftDao().getGroup(groupId) ?: return@connect
+            database.draftDao().upsertGroup(
+                group.copy(
+                    content = content,
+                    updated_at = now,
+                ),
+            )
+        }
+    }
+
+    suspend fun updateDraftContentAndMedias(
+        groupId: String,
+        content: DraftContent,
+        medias: List<SaveDraftMedia>,
+    ) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            val group = database.draftDao().getGroup(groupId) ?: return@connect
+            database.draftDao().upsertGroup(
+                group.copy(
+                    content = content,
+                    updated_at = now,
+                ),
+            )
+            database.draftDao().deleteMediasByGroup(groupId)
+            if (medias.isNotEmpty()) {
+                database.draftDao().insertMedias(
+                    medias.mapIndexed { index, media ->
+                        DbDraftMedia(
+                            group_id = groupId,
+                            cache_path = media.cachePath,
+                            file_name = media.fileName,
+                            media_type = media.mediaType,
+                            alt_text = media.altText,
+                            sort_order = media.sortOrder ?: index,
+                            created_at = media.createdAt ?: now,
+                        )
+                    },
+                )
+            }
+        }
+    }
+
     suspend fun updateTargetStatus(
         groupId: String,
         accountKey: MicroBlogKey,
@@ -111,6 +160,22 @@ internal class DraftRepository(
                 updatedAt = now,
             )
             database.draftDao().touchGroup(groupId = groupId, updatedAt = now)
+        }
+    }
+
+    suspend fun claimTargetsForSending(groupId: String): Boolean {
+        val now = Clock.System.now().toEpochMilliseconds()
+        return database.connect {
+            val claimedCount =
+                database.draftDao().claimDraftTargets(
+                    groupId = groupId,
+                    lastAttemptAt = now,
+                    updatedAt = now,
+                )
+            if (claimedCount > 0) {
+                database.draftDao().touchGroup(groupId = groupId, updatedAt = now)
+            }
+            claimedCount > 0
         }
     }
 

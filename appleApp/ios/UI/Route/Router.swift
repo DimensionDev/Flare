@@ -42,11 +42,26 @@ struct Router<Root: View>: View {
         }
         .environment(\.timelineMediaActionHandler, IOSTimelineMediaActions.handler)
         .sheet(item: $sheet) { route in
-            NavigationStack {
-                route.view(
-                    onNavigate: { route in navigate(route: route) },
-                    goBack: { backStack.removeLast() }
-                )
+            if #available(iOS 18.0, *) {
+                NavigationStack {
+                    route.view(
+                        onNavigate: { route in navigate(route: route) },
+                        goBack: { backStack.removeLast() }
+                    )
+                }
+            } else {
+                NavigationStack {
+                    route.view(
+                        onNavigate: { route in navigate(route: route) },
+                        goBack: { backStack.removeLast() }
+                    )
+                    .navigationDestination(for: Route.self) { destination in
+                        destination.view(
+                            onNavigate: { route in navigate(route: route) },
+                            goBack: {}
+                        )
+                    }
+                }
             }
         }
         .fullScreenCover(item: $cover) { route in

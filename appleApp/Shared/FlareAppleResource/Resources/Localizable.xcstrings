@@ -111903,7 +111903,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved"
+            "value" : "Saved to Files"
           }
         },
         "fi" : {
@@ -118922,7 +118922,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Analyzing this profile..."
+            "value" : "Analyzing this profile…"
           }
         },
         "fi" : {
@@ -135266,34 +135266,6 @@
         }
       }
     },
-    "share_crosspost" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cross-post"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クロスポスト"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "跨平台转发"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "跨平台轉發"
-          }
-        }
-      }
-    },
     "share_copy_link" : {
       "localizations" : {
         "af" : {
@@ -135474,6 +135446,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "複製連結"
+          }
+        }
+      }
+    },
+    "share_crosspost" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cross-post"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クロスポスト"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跨平台转发"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跨平台轉發"
           }
         }
       }

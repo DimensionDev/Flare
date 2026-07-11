@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.status.action
 
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -28,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ListItemDefaults
@@ -83,6 +86,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
@@ -98,6 +102,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
+import dev.dimension.flare.ui.screen.compose.ShortcutComposeActivity
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
@@ -144,6 +149,7 @@ internal fun StatusShareSheet(
     val scope = rememberCoroutineScope()
     val previewGraphicsLayer = rememberGraphicsLayer()
     var captureRequested by remember { mutableStateOf(false) }
+    var isCrossPosting by remember { mutableStateOf(false) }
     var previewContentHeightPx by remember { mutableIntStateOf(0) }
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
     val state by producePresenter("status_share_sheet_${statusKey}_$shareUrl") {
@@ -216,6 +222,73 @@ internal fun StatusShareSheet(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Button(
+                enabled = status != null && !isCrossPosting,
+                onClick = {
+                    scope.launch {
+                        isCrossPosting = true
+                        try {
+                            val bitmap = captureBitmap()
+                            val uri =
+                                bitmap?.let {
+                                    createShareImageUri(
+                                        context = context,
+                                        bitmap = it,
+                                        statusKey = statusKey.toString(),
+                                    )
+                                }
+                            if (uri == null) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        R.string.status_share_crosspost_failed,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                return@launch
+                            }
+
+                            val intent =
+                                Intent(context, ShortcutComposeActivity::class.java).apply {
+                                    action = Intent.ACTION_SEND
+                                    type = "image/png"
+                                    putExtra(Intent.EXTRA_TEXT, shareUrl)
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    putExtra(ShortcutComposeActivity.EXTRA_INITIAL_TEXT, "\n\n$shareUrl")
+                                    putExtra(ShortcutComposeActivity.EXTRA_INITIAL_CURSOR_POSITION, 0)
+                                    clipData = ClipData.newUri(context.contentResolver, "Cross-post image", uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                            if (runCatching { context.startActivity(intent) }.isFailure) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        R.string.status_share_crosspost_failed,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                return@launch
+                            }
+                            onBack()
+                        } finally {
+                            isCrossPosting = false
+                        }
+                    }
+                },
+            ) {
+                if (isCrossPosting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Retweet,
+                        contentDescription = stringResource(id = R.string.status_share_crosspost),
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = stringResource(id = R.string.status_share_crosspost))
+            }
+
+            FilledTonalButton(
                 onClick = {
                     shareText(context = context, content = shareUrl)
                     onBack()
@@ -635,6 +708,19 @@ private fun shareBitmapAsImage(
     }
     return file
 }
+
+private fun createShareImageUri(
+    context: Context,
+    bitmap: Bitmap,
+    statusKey: String,
+) = runCatching {
+    val imageFile = shareBitmapAsImage(context, bitmap, statusKey) ?: return@runCatching null
+    FileProvider.getUriForFile(
+        context,
+        context.packageName + ".provider",
+        imageFile,
+    )
+}.getOrNull()
 
 private fun Modifier.captureableShadow(
     color: Color = Color.Black,

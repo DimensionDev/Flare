@@ -13,12 +13,21 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
 class ShortcutComposeActivity : ComponentActivity() {
+    companion object {
+        const val EXTRA_INITIAL_TEXT = "dev.dimension.flare.extra.INITIAL_TEXT"
+        const val EXTRA_INITIAL_CURSOR_POSITION = "dev.dimension.flare.extra.INITIAL_CURSOR_POSITION"
+    }
+
     @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         ComposeUiFlags.isMediaQueryIntegrationEnabled = true
         super.onCreate(savedInstanceState)
         val initialText =
             when {
+                intent?.hasExtra(EXTRA_INITIAL_TEXT) == true -> {
+                    intent.getStringExtra(EXTRA_INITIAL_TEXT).orEmpty()
+                }
+
                 intent?.action == Intent.ACTION_SEND -> {
                     intent.sharedTextWithTitle()
                 }
@@ -26,6 +35,14 @@ class ShortcutComposeActivity : ComponentActivity() {
                 else -> {
                     ""
                 }
+            }
+        val initialCursorPosition =
+            if (intent?.hasExtra(EXTRA_INITIAL_CURSOR_POSITION) == true) {
+                intent
+                    .getIntExtra(EXTRA_INITIAL_CURSOR_POSITION, initialText.length)
+                    .coerceIn(0, initialText.length)
+            } else {
+                initialText.length
             }
 
         val initialMedias =
@@ -62,6 +79,7 @@ class ShortcutComposeActivity : ComponentActivity() {
                 ShortcutComposeRoute(
                     onBack = { finish() },
                     initialText = initialText,
+                    initialCursorPosition = initialCursorPosition,
                     initialMedias = initialMedias,
                 )
             }

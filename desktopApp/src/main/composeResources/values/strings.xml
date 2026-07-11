@@ -103,6 +103,8 @@
     <string name="media_hide_thumbnail_list">Hide thumbnail list</string>
     <string name="media_save">Save</string>
     <string name="media_fullscreen">Fullscreen</string>
+    <string name="status_share_crosspost">Cross-post</string>
+    <string name="status_share_crosspost_failed">Unable to prepare cross-post</string>
     <string name="status_share">Share link</string>
     <string name="status_share_save_screenshot">Save screenshot</string>
     <string name="status_share_image">Share screenshot</string>

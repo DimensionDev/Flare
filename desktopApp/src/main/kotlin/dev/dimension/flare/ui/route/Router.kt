@@ -113,12 +113,14 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
+import java.io.File
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 internal fun Router(
     backStack: ImmutableList<Route>,
     navigate: (Route) -> Unit,
+    replace: (Route) -> Unit,
     onBack: () -> Unit,
     enableDeepLinkHandler: Boolean = true,
     modifier: Modifier = Modifier,
@@ -340,6 +342,14 @@ internal fun Router(
                         fxShareUrl = args.fxShareUrl,
                         fixvxShareUrl = args.fixvxShareUrl,
                         onBack = onBack,
+                        onCrossPost = { imageFile ->
+                            replace(
+                                Route.Compose.CrossPost(
+                                    shareUrl = args.shareUrl,
+                                    imagePath = imageFile.absolutePath,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -400,6 +410,23 @@ internal fun Router(
                         onDismissRequest = onBack,
                         filePath = args.filePath,
                     )
+                }
+
+                entry<Route.Compose.CrossPost>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(
+                        visible = true,
+                    ) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            accountType = null,
+                            initialText = "\n\n${args.shareUrl}",
+                            initialCursorPosition = 0,
+                            initialMedia = File(args.imagePath),
+                            cleanupInitialMediaOnDispose = true,
+                        )
+                    }
                 }
 
                 entry<Route.Compose.New>(

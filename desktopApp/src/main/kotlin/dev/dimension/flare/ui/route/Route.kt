@@ -178,6 +178,11 @@ internal sealed interface Route : NavKey {
     ) : WindowRoute
 
     data object Compose {
+        data class CrossPost(
+            val shareUrl: String,
+            val imagePath: String,
+        ) : FloatingRoute
+
         data class Draft(
             val draftGroupId: String,
         ) : FloatingRoute

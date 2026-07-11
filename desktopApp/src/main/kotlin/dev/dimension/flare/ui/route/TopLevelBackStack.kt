@@ -44,6 +44,14 @@ internal class TopLevelBackStack(
         updateEntry()
     }
 
+    fun replace(route: Route) {
+        if (_stack.size > 1) {
+            _stack.removeLast()
+        }
+        updateEntry()
+        push(route)
+    }
+
     fun pop() {
         if (stack.size > 1) {
             _stack.removeLast()

@@ -425,14 +425,14 @@ private func castActionMenus(_ value: Any) -> [ActionMenu] {
 }
 
 #if os(macOS)
-struct MacStatusShareData {
-    let statusKey: MicroBlogKey
-    let accountType: AccountType
-    let shareUrl: String
-    let fxShareUrl: String?
-    let fixvxShareUrl: String?
+public struct MacStatusShareData {
+    public let statusKey: MicroBlogKey
+    public let accountType: AccountType
+    public let shareUrl: String
+    public let fxShareUrl: String?
+    public let fixvxShareUrl: String?
 
-    init(
+    public init(
         statusKey: MicroBlogKey,
         accountType: AccountType,
         shareUrl: String,
@@ -447,11 +447,25 @@ struct MacStatusShareData {
     }
 }
 
+public typealias MacCrossPostAction = (MacStatusShareData) -> Void
+
+private struct MacCrossPostActionKey: EnvironmentKey {
+    static let defaultValue: MacCrossPostAction? = nil
+}
+
+public extension EnvironmentValues {
+    var macCrossPostAction: MacCrossPostAction? {
+        get { self[MacCrossPostActionKey.self] }
+        set { self[MacCrossPostActionKey.self] = newValue }
+    }
+}
+
 struct MacStatusShareMenu<LabelContent: View>: View {
     let data: MacStatusShareData
     let onShareScreenshot: () -> Void
     @ViewBuilder let label: () -> LabelContent
     @Environment(\.openURL) private var openURL
+    @Environment(\.macCrossPostAction) private var crossPost
 
     init(
         data: MacStatusShareData,
@@ -465,6 +479,17 @@ struct MacStatusShareMenu<LabelContent: View>: View {
 
     public var body: some View {
         Menu {
+            Button {
+                crossPost?(data)
+            } label: {
+                Label {
+                    Text("share_crosspost")
+                } icon: {
+                    Image(fontAwesome: .retweet)
+                }
+            }
+            .disabled(crossPost == nil)
+
             if let shareURL = URL(string: data.shareUrl) {
                 ShareLink(item: shareURL) {
                     Label("share_link", systemImage: "link")
@@ -517,8 +542,15 @@ struct MacStatusShareMenu<LabelContent: View>: View {
     }
 }
 
+public enum MacStatusSharePurpose {
+    case shareScreenshot
+    case crossPost
+}
+
 public struct MacStatusShareSheet: View {
     private let statusKey: MicroBlogKey
+    private let purpose: MacStatusSharePurpose
+    private let onCrossPost: ((Data, String) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
@@ -529,12 +561,17 @@ public struct MacStatusShareSheet: View {
     @State private var isRenderingScreenshot = false
     @State private var renderRequestID: UUID?
     @State private var alert: MacStatusShareAlert?
+    @State private var crossPostDispatched = false
 
     public init(
         statusKey: MicroBlogKey,
-        accountType: AccountType
+        accountType: AccountType,
+        purpose: MacStatusSharePurpose = .shareScreenshot,
+        onCrossPost: ((Data, String) -> Void)? = nil
     ) {
         self.statusKey = statusKey
+        self.purpose = purpose
+        self.onCrossPost = onCrossPost
         _presenter = .init(
             wrappedValue: .init(
                 presenter: StatusPresenter(
@@ -561,44 +598,7 @@ public struct MacStatusShareSheet: View {
 
                 Divider()
 
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("appearance_theme")
-                        .font(.headline)
-
-                    Picker("appearance_theme", selection: $theme) {
-                        Text("appearance_theme_system").tag(nil as ColorScheme?)
-                        Text("appearance_theme_light").tag(Optional(ColorScheme.light))
-                        Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
-
-                    HStack {
-                        Button("Cancel") {
-                            dismiss()
-                        }
-
-                        Spacer()
-
-                        if let screenshotURL {
-                            ShareLink(item: screenshotURL) {
-                                Text("done")
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button {} label: {
-                                if isRenderingScreenshot {
-                                    ProgressView()
-                                        .controlSize(.small)
-                                } else {
-                                    Text("done")
-                                }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(true)
-                        }
-                    }
-                }
+                footer
                 .padding(20)
             }
             .frame(width: 560, height: 720)
@@ -623,7 +623,7 @@ public struct MacStatusShareSheet: View {
             TimelinePlaceholderView()
                 .frame(width: 560, height: 720)
         }
-        .navigationTitle("share_screenshot")
+        .navigationTitle(navigationTitle)
         .alert(item: $alert) { alert in
             Alert(
                 title: Text("share_screenshot_failed"),
@@ -637,7 +637,74 @@ public struct MacStatusShareSheet: View {
         theme ?? colorScheme
     }
 
+    private var navigationTitle: LocalizedStringKey {
+        switch purpose {
+        case .shareScreenshot:
+            "share_screenshot"
+        case .crossPost:
+            "share_crosspost"
+        }
+    }
+
+    @ViewBuilder
+    private var footer: some View {
+        switch purpose {
+        case .shareScreenshot:
+            VStack(alignment: .leading, spacing: 16) {
+                Text("appearance_theme")
+                    .font(.headline)
+
+                Picker("appearance_theme", selection: $theme) {
+                    Text("appearance_theme_system").tag(nil as ColorScheme?)
+                    Text("appearance_theme_light").tag(Optional(ColorScheme.light))
+                    Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+
+                HStack {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+
+                    Spacer()
+
+                    if let screenshotURL {
+                        ShareLink(item: screenshotURL) {
+                            Text("done")
+                        }
+                        .buttonStyle(.borderedProminent)
+                    } else {
+                        Button {} label: {
+                            if isRenderingScreenshot {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else {
+                                Text("done")
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(true)
+                    }
+                }
+            }
+        case .crossPost:
+            HStack {
+                Button("Cancel") {
+                    dismiss()
+                }
+
+                Spacer()
+
+                ProgressView()
+                    .controlSize(.small)
+                Text("share_crosspost")
+            }
+        }
+    }
+
     private func renderScreenshot(data: UiTimelineV2) {
+        guard !crossPostDispatched else { return }
         let requestID = UUID()
         renderRequestID = requestID
         screenshotURL = nil
@@ -645,7 +712,7 @@ public struct MacStatusShareSheet: View {
 
         Task { @MainActor in
             do {
-                let fileURL = try await MacStatusShareScreenshotRenderer.render(
+                let screenshot = try await MacStatusShareScreenshotRenderer.render(
                     view: MacStatusSharePreview(
                         data: data,
                         statusKey: statusKey,
@@ -655,7 +722,16 @@ public struct MacStatusShareSheet: View {
                     fileName: "flare-status-\(statusKey.description()).png"
                 )
                 guard renderRequestID == requestID else { return }
-                screenshotURL = fileURL
+                switch purpose {
+                case .shareScreenshot:
+                    screenshotURL = screenshot.fileURL
+                case .crossPost:
+                    crossPostDispatched = true
+                    onCrossPost?(screenshot.data, screenshot.fileURL.lastPathComponent)
+                    try? FileManager.default.removeItem(
+                        at: screenshot.fileURL.deletingLastPathComponent()
+                    )
+                }
             } catch {
                 guard renderRequestID == requestID else { return }
                 alert = MacStatusShareAlert(message: error.localizedDescription)
@@ -664,6 +740,11 @@ public struct MacStatusShareSheet: View {
             isRenderingScreenshot = false
         }
     }
+}
+
+private struct MacStatusShareScreenshot {
+    let data: Data
+    let fileURL: URL
 }
 
 private struct MacStatusSharePreview: View {
@@ -696,7 +777,7 @@ private enum MacStatusShareScreenshotRenderer {
     static func render<Content: View>(
         view: Content,
         fileName: String
-    ) async throws -> URL {
+    ) async throws -> MacStatusShareScreenshot {
         let scale: CGFloat = 2
         let hostingView = NSHostingView(rootView: view.fixedSize(horizontal: false, vertical: true))
         let fittingSize = hostingView.fittingSize
@@ -742,7 +823,7 @@ private enum MacStatusShareScreenshotRenderer {
             MediaFileNamePolicy.shared.safeLocalFileName(value: fileName, fallback: "flare-status.png")
         )
         try pngData.write(to: fileURL, options: .atomic)
-        return fileURL
+        return MacStatusShareScreenshot(data: pngData, fileURL: fileURL)
     }
 }
 

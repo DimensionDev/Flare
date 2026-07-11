@@ -577,6 +577,8 @@
     <string name="tab_settings_filter_image">图片</string>
     <string name="tab_settings_filter_video">视频</string>
     <string name="status_share_sheet_theme_title">主题</string>
+    <string name="status_share_crosspost">跨平台转发</string>
+    <string name="status_share_crosspost_failed">无法准备跨平台转发</string>
     <string name="channel_title">频道</string>
     <string name="channel_item_follow">关注</string>
     <string name="channel_item_unfollow">取消关注</string>

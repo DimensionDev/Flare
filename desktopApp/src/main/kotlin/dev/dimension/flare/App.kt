@@ -494,6 +494,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                 state.topLevelBackStack.takeSuccess()?.stack
                                     ?: persistentListOf(),
                             navigate = { route -> state.navigate(route) },
+                            replace = { route -> state.replace(route) },
                             onBack = { state.goBack() },
                         )
                         Spacer(
@@ -685,6 +686,18 @@ private fun presenter(uriHandler: UriHandler) =
                 val route = getDirection(shortcut)
                 if (route != null) {
                     navigate(route)
+                }
+            }
+
+            fun replace(route: Route) {
+                when (route) {
+                    is Route.UrlRoute -> {
+                        uriHandler.openUri(route.url)
+                    }
+
+                    else -> {
+                        topLevelBackStack.takeSuccess()?.replace(route)
+                    }
                 }
             }
 

@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -166,21 +167,37 @@ fun ComposeDialog(
     status: ComposeStatus? = null,
     draftGroupId: String? = null,
     initialText: String = "",
+    initialCursorPosition: Int = initialText.length,
+    initialMedia: File? = null,
+    cleanupInitialMediaOnDispose: Boolean = false,
     focusOnOpen: Boolean = true,
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
-    val state by producePresenter(key = "compose_$accountType") {
+    val state by producePresenter(key = "compose_${accountType}_${initialMedia?.absolutePath.orEmpty()}") {
         composePresenter(
             accountType = accountType,
             status = status,
             draftGroupId = draftGroupId,
             initialText = initialText,
+            initialCursorPosition = initialCursorPosition,
+            initialMedia = initialMedia,
         )
     }
     var showCloseConfirmDialog by remember { mutableStateOf(false) }
     val composeWindow = LocalComposeWindow.current
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
+
+    DisposableEffect(initialMedia, cleanupInitialMediaOnDispose) {
+        onDispose {
+            if (cleanupInitialMediaOnDispose) {
+                initialMedia
+                    ?.parentFile
+                    ?.takeIf { it.name.startsWith("flare-crosspost-") }
+                    ?.deleteRecursively()
+            }
+        }
+    }
 
     fun closeOrConfirm() {
         if (state.hasTextContent) {
@@ -1012,13 +1029,20 @@ private fun composePresenter(
     status: ComposeStatus? = null,
     draftGroupId: String? = null,
     initialText: String = "",
+    initialCursorPosition: Int = initialText.length,
+    initialMedia: File? = null,
 ) = run {
     val state =
         remember(status, accountType, draftGroupId) {
             ComposePresenter(accountType = accountType, status = status, draftGroupId = draftGroupId)
         }.invoke()
-    val textFieldState by remember {
-        mutableStateOf(TextFieldState(initialText))
+    val textFieldState by remember(initialText, initialCursorPosition) {
+        mutableStateOf(
+            TextFieldState(
+                initialText = initialText,
+                initialSelection = TextRange(initialCursorPosition.coerceIn(0, initialText.length)),
+            ),
+        )
     }
 
     LaunchedEffect(textFieldState.text) {
@@ -1046,7 +1070,7 @@ private fun composePresenter(
             .mapNotNull {
                 it.media
             }.map {
-                mediaPresenter(it)
+                mediaPresenter(it, initialMedia)
             }
 
     mediaState.onSuccess {
@@ -1073,7 +1097,7 @@ private fun composePresenter(
 
     state.initialTextState?.onSuccess {
         LaunchedEffect(it) {
-            if (it.text.isNotEmpty()) {
+            if (initialText.isEmpty() && it.text.isNotEmpty()) {
                 textFieldState.edit {
                     append(it.text)
                     selection = TextRange(it.cursorPosition)
@@ -1241,66 +1265,73 @@ private fun contentWarningPresenter() =
     }
 
 @Composable
-private fun mediaPresenter(config: ComposeConfig.Media) =
-    run {
-        var medias by remember {
-            mutableStateOf(listOf<MediaData>())
-        }
-        var isMediaSensitive by remember {
-            mutableStateOf(false)
+private fun mediaPresenter(
+    config: ComposeConfig.Media,
+    initialMedia: File? = null,
+) = run {
+    var medias by remember(initialMedia) {
+        mutableStateOf(
+            initialMedia
+                ?.takeIf { it.isFile }
+                ?.let { listOf(MediaData(it)) }
+                .orEmpty(),
+        )
+    }
+    var isMediaSensitive by remember {
+        mutableStateOf(false)
+    }
+
+    object {
+        val medias = medias.toImmutableList()
+        val isMediaSensitive = isMediaSensitive
+        val canAddMedia = medias.size < config.maxCount
+        val canSensitive = config.canSensitive
+        val enabled = config.maxCount > 0
+        val enableAltText = config.altTextMaxLength > 0
+        val altTextMaxLength = config.altTextMaxLength
+
+        fun addMedia(uris: List<File>) {
+            medias =
+                (
+                    medias +
+                        uris.map {
+                            MediaData(it)
+                        }
+                ).distinctBy {
+                    it.file
+                }.takeLast(config.maxCount)
         }
 
-        object {
-            val medias = medias.toImmutableList()
-            val isMediaSensitive = isMediaSensitive
-            val canAddMedia = medias.size < config.maxCount
-            val canSensitive = config.canSensitive
-            val enabled = config.maxCount > 0
-            val enableAltText = config.altTextMaxLength > 0
-            val altTextMaxLength = config.altTextMaxLength
-
-            fun addMedia(uris: List<File>) {
-                medias =
-                    (
-                        medias +
-                            uris.map {
-                                MediaData(it)
-                            }
-                    ).distinctBy {
+        fun replaceMedias(items: List<UiDraftMedia>) {
+            medias =
+                items
+                    .map { item ->
+                        MediaData(
+                            file = File(item.cachePath),
+                            textState = TextFieldState(item.altText.orEmpty()),
+                        )
+                    }.distinctBy {
                         it.file
                     }.takeLast(config.maxCount)
-            }
+        }
 
-            fun replaceMedias(items: List<UiDraftMedia>) {
-                medias =
-                    items
-                        .map { item ->
-                            MediaData(
-                                file = File(item.cachePath),
-                                textState = TextFieldState(item.altText.orEmpty()),
-                            )
-                        }.distinctBy {
-                            it.file
-                        }.takeLast(config.maxCount)
-            }
-
-            fun removeMedia(uri: File) {
-                medias = medias.filterNot { it.file == uri }
-                if (medias.isEmpty()) {
-                    isMediaSensitive = false
-                }
-            }
-
-            fun setMediaSensitive(value: Boolean) {
-                isMediaSensitive = value
-            }
-
-            fun clear() {
-                medias = emptyList()
+        fun removeMedia(uri: File) {
+            medias = medias.filterNot { it.file == uri }
+            if (medias.isEmpty()) {
                 isMediaSensitive = false
             }
         }
+
+        fun setMediaSensitive(value: Boolean) {
+            isMediaSensitive = value
+        }
+
+        fun clear() {
+            medias = emptyList()
+            isMediaSensitive = false
+        }
     }
+}
 
 private data class MediaData(
     val file: File,

@@ -11,6 +11,7 @@ struct StatusShareSheet: View {
     let shareUrl: String
     let fxShareUrl: String?
     let fixvxShareUrl: String?
+    let onCrossPost: (ComposePrefill) -> Void
     
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
@@ -20,12 +21,20 @@ struct StatusShareSheet: View {
     @State private var theme: ColorScheme? = nil
     @State private var image: UIImage? = nil
     
-    init(statusKey: MicroBlogKey, accountType: AccountType, shareUrl: String, fxShareUrl: String?, fixvxShareUrl: String?) {
+    init(
+        statusKey: MicroBlogKey,
+        accountType: AccountType,
+        shareUrl: String,
+        fxShareUrl: String?,
+        fixvxShareUrl: String?,
+        onCrossPost: @escaping (ComposePrefill) -> Void
+    ) {
         self.statusKey = statusKey
         self.accountType = accountType
         self.shareUrl = shareUrl
         self.fxShareUrl = fxShareUrl
         self.fixvxShareUrl = fixvxShareUrl
+        self.onCrossPost = onCrossPost
         self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
     }
     
@@ -48,6 +57,17 @@ struct StatusShareSheet: View {
                 .listRowBackground(Color.clear)
                 
                 Section {
+                    Button {
+                        crossPost()
+                    } label: {
+                        Label {
+                            Text("share_crosspost")
+                        } icon: {
+                            Image(fontAwesome: .retweet)
+                        }
+                    }
+                    .disabled(image == nil)
+
                     if let url = URL(string: shareUrl) {
                         ShareLink(item: url) {
                             Label("share_link", systemImage: "link")
@@ -105,12 +125,14 @@ struct StatusShareSheet: View {
         }
         .navigationTitle("fx_share")
         .onSuccessOf(of: presenter.state.status) { data in
+            image = nil
             Task {
                 image = await renderImage(data: data)
             }
         }
         .onChange(of: theme) { oldValue, newValue in
             if case .success(let data) = onEnum(of: presenter.state.status) {
+                image = nil
                 Task {
                     image = await renderImage(data: data.data)
                 }
@@ -144,6 +166,18 @@ struct StatusShareSheet: View {
         guard let image = image else { return }
         MediaSaver.shared.saveImage(image)
         dismiss()
+    }
+
+    private func crossPost() {
+        guard let imageData = image?.pngData() else { return }
+        onCrossPost(
+            ComposePrefill(
+                text: "\n\n\(shareUrl)",
+                cursorPosition: 0,
+                imageData: imageData,
+                fileName: "flare-crosspost.png"
+            )
+        )
     }
 }
 

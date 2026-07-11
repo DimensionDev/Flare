@@ -88,6 +88,8 @@
     <string name="media_hide_thumbnail_list">隐藏缩略图列表</string>
     <string name="media_save">保存</string>
     <string name="media_fullscreen">全屏</string>
+    <string name="status_share_crosspost">跨平台转发</string>
+    <string name="status_share_crosspost_failed">无法准备跨平台转发</string>
     <string name="status_share">分享链接</string>
     <string name="status_share_save_screenshot">保存截图</string>
     <string name="status_share_image">分享截图</string>

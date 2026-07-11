@@ -21,6 +21,7 @@ struct MacComposeScreen: View {
     @State private var showAccountPopover = false
     @State private var showDraftBoxPopover = false
     @State private var initialTextApplied = false
+    @State private var prefillApplied = false
     @State private var nsTextView: NSTextView?
     @State private var pendingCursor: Int?
     @State private var closeController = MacComposeWindowCloseController()
@@ -182,6 +183,7 @@ struct MacComposeScreen: View {
             closeController.updateLayoutMetrics(metrics)
         }
         .onAppear {
+            applyPrefillIfNeeded()
             presenter.state.setText(value: viewModel.text)
             presenter.state.setMediaSize(value: Int32(mediaItems.count))
         }
@@ -559,6 +561,21 @@ struct MacComposeScreen: View {
             return []
         }
         return Array(visibilityState.data.allVisibilities)
+    }
+
+    private func applyPrefillIfNeeded() {
+        guard !prefillApplied, let prefill = request.prefill else { return }
+        prefillApplied = true
+        initialTextApplied = true
+        viewModel.text = prefill.text
+        mediaItems = MacComposeMediaItem(
+            data: prefill.imageData,
+            fileName: prefill.fileName,
+            contentType: .png
+        ).map { [$0] } ?? []
+        pendingCursor = prefill.cursorPosition
+        requestComposerFocus()
+        applyCursorIfPossible()
     }
 
     private func applyCursorIfPossible(retryCount: Int = 0) {

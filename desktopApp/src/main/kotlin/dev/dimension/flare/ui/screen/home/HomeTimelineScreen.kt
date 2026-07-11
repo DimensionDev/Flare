@@ -163,6 +163,12 @@ internal fun HomeTimelineScreen(
                                                 }
                                             }
                                         },
+                                        replace = { route ->
+                                            if (deepLinkState.backStack.size > 1) {
+                                                deepLinkState.backStack.removeAt(deepLinkState.backStack.lastIndex)
+                                            }
+                                            deepLinkState.backStack.add(route)
+                                        },
                                         onBack = {
                                             if (deepLinkState.backStack.size > 1) {
                                                 deepLinkState.backStack.removeAt(deepLinkState.backStack.lastIndex)

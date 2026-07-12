@@ -25,6 +25,7 @@ public enum FontAwesomeIcon: String, CaseIterable, Hashable, Identifiable, Senda
     case check = "check"
     case chevronDown = "chevron-down"
     case circleCheck = "circle-check"
+    case circleDown = "circle-down"
     case circleChevronDown = "circle-chevron-down"
     case circleExclamation = "circle-exclamation"
     case circleInfo = "circle-info"

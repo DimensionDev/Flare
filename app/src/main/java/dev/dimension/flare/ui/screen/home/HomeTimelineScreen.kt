@@ -1,10 +1,13 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -35,6 +39,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LeadingIconTab
@@ -52,8 +57,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,6 +76,8 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.CaretDown
+import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
@@ -78,6 +87,7 @@ import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.Glassify
@@ -110,6 +120,7 @@ import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import dev.dimension.flare.ui.component.Text as FlareText
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -274,57 +285,67 @@ internal fun HomeTimelineScreen(
                         state.pagerState.onSuccess { pagerState ->
                             state.tabState.onSuccess { tabs ->
                                 if (tabs.any()) {
-                                    SecondaryScrollableTabRow(
-                                        containerColor = Color.Transparent,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth(),
-                                        selectedTabIndex =
-                                            minOf(
-                                                pagerState.currentPage,
-                                                tabs.lastIndex,
-                                            ),
-                                        edgePadding = 0.dp,
-                                        divider = { },
-                                        indicator = {
-                                            TabRowDefaults.SecondaryIndicator(
-                                                Modifier.tabIndicatorOffset(
-                                                    minOf(
-                                                        pagerState.currentPage,
-                                                        tabs.lastIndex,
-                                                    ),
-                                                    matchContentSize = false,
+                                    if (tabs.size > MAX_SCROLLABLE_HOME_TABS) {
+                                        HomeTabDropdown(
+                                            tabs = tabs,
+                                            selectedTabIndex =
+                                                minOf(
+                                                    pagerState.currentPage,
+                                                    tabs.lastIndex,
                                                 ),
-                                            )
-                                        },
-                                        minTabWidth = 48.dp,
-                                    ) {
-                                        tabs.forEachIndexed { index, tab ->
-                                            LeadingIconTab(
-                                                modifier = Modifier,
-                                                selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                unselectedContentColor = LocalContentColor.current,
-                                                selected = index == pagerState.currentPage,
-                                                onClick = {
-                                                    scope.launch {
-                                                        pagerState.scrollToPage(index)
-                                                    }
-                                                },
-                                                text = {
-                                                    dev.dimension.flare.ui.component.Text(
-                                                        tab.title,
-//                                                        modifier =
-//                                                            Modifier
-//                                                                .padding(8.dp),
-                                                    )
-                                                },
-                                                icon = {
-                                                    TabIcon(tab)
-                                                },
-//                                                colors = FilterChipDefaults.filterChipColors(
-//                                                    containerColor = MaterialTheme.colorScheme.surface,
-//                                                ),
-                                            )
+                                            onTabSelected = { index ->
+                                                scope.launch {
+                                                    pagerState.scrollToPage(index)
+                                                }
+                                            },
+                                        )
+                                    } else {
+                                        SecondaryScrollableTabRow(
+                                            containerColor = Color.Transparent,
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth(),
+                                            selectedTabIndex =
+                                                minOf(
+                                                    pagerState.currentPage,
+                                                    tabs.lastIndex,
+                                                ),
+                                            edgePadding = 0.dp,
+                                            divider = { },
+                                            indicator = {
+                                                TabRowDefaults.SecondaryIndicator(
+                                                    Modifier.tabIndicatorOffset(
+                                                        minOf(
+                                                            pagerState.currentPage,
+                                                            tabs.lastIndex,
+                                                        ),
+                                                        matchContentSize = false,
+                                                    ),
+                                                )
+                                            },
+                                            minTabWidth = 48.dp,
+                                        ) {
+                                            tabs.forEachIndexed { index, tab ->
+                                                LeadingIconTab(
+                                                    modifier = Modifier,
+                                                    selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    unselectedContentColor = LocalContentColor.current,
+                                                    selected = index == pagerState.currentPage,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            pagerState.scrollToPage(index)
+                                                        }
+                                                    },
+                                                    text = {
+                                                        FlareText(
+                                                            tab.title,
+                                                        )
+                                                    },
+                                                    icon = {
+                                                        TabIcon(tab)
+                                                    },
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -437,6 +458,71 @@ internal fun HomeTimelineScreen(
         }
     }
 }
+
+@Composable
+private fun HomeTabDropdown(
+    tabs: List<UiTimelineTabItem>,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedTab = tabs[selectedTabIndex]
+
+    Box {
+        AnimatedContent(selectedTab) { selectedTab ->
+            Row(
+                modifier =
+                    Modifier
+                        .clickable { expanded = true }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TabIcon(selectedTab)
+                FlareText(selectedTab.title, style = MaterialTheme.typography.bodyLarge)
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.CaretDown,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                )
+            }
+        }
+        FlareDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.widthIn(min = 200.dp, max = 320.dp),
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                DropdownMenuItem(
+                    text = {
+                        FlareText(tab.title)
+                    },
+                    leadingIcon = {
+                        TabIcon(tab)
+                    },
+                    trailingIcon =
+                        if (index == selectedTabIndex) {
+                            {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                    onClick = {
+                        expanded = false
+                        onTabSelected(index)
+                    },
+                )
+            }
+        }
+    }
+}
+
+private const val MAX_SCROLLABLE_HOME_TABS = 10
 
 @Composable
 internal fun TimelineItemContent(

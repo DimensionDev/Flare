@@ -784,6 +784,7 @@ private extension TimelineAppearance {
             showNumbers: showNumbers,
             postActionStyle: postActionStyle,
             postActionLayout: postActionLayout,
+            postActionFixedWidth: postActionFixedWidth,
             fullWidthPost: fullWidthPost,
             absoluteTimestamp: absoluteTimestamp,
             showPlatformLogo: showPlatformLogo,

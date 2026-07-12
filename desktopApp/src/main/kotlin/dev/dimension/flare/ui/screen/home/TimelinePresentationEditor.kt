@@ -93,6 +93,8 @@ import dev.dimension.flare.settings_appearance_video_autoplay_always
 import dev.dimension.flare.settings_appearance_video_autoplay_description
 import dev.dimension.flare.settings_appearance_video_autoplay_never
 import dev.dimension.flare.settings_appearance_video_autoplay_wifi
+import dev.dimension.flare.settings_post_action_fixed_width
+import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.tab_settings_filter_content_group
 import dev.dimension.flare.tab_settings_filter_desc
 import dev.dimension.flare.tab_settings_filter_image
@@ -154,6 +156,7 @@ internal fun TimelinePresentationEditor(
         appearancePatch.contains(AppearanceKeys.TimelineDisplayMode) ||
             appearancePatch.contains(AppearanceKeys.FullWidthPost) ||
             appearancePatch.contains(AppearanceKeys.PostActionStyle) ||
+            appearancePatch.contains(AppearanceKeys.PostActionFixedWidth) ||
             appearancePatch.contains(AppearanceKeys.ShowNumbers)
     val displayOverridesEnabled =
         appearancePatch.contains(AppearanceKeys.AbsoluteTimestamp) ||
@@ -232,11 +235,16 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.PostActionStyle,
                                         timelineAppearance.postActionStyle,
                                     ).set(AppearanceKeys.ShowNumbers, timelineAppearance.showNumbers)
+                                    .set(
+                                        AppearanceKeys.PostActionFixedWidth,
+                                        timelineAppearance.postActionFixedWidth,
+                                    )
                             } else {
                                 appearancePatch.clearAll(
                                     AppearanceKeys.TimelineDisplayMode,
                                     AppearanceKeys.FullWidthPost,
                                     AppearanceKeys.PostActionStyle,
+                                    AppearanceKeys.PostActionFixedWidth,
                                     AppearanceKeys.ShowNumbers,
                                 )
                             },
@@ -308,6 +316,20 @@ internal fun TimelinePresentationEditor(
                                     onAppearancePatchChange(
                                         appearancePatch.set(
                                             AppearanceKeys.ShowNumbers,
+                                            it,
+                                        ),
+                                    )
+                                },
+                            )
+                            ExpanderItemSeparator()
+                            SwitchItem(
+                                title = stringResource(Res.string.settings_post_action_fixed_width),
+                                caption = stringResource(Res.string.settings_post_action_fixed_width_description),
+                                checked = timelineAppearance.postActionFixedWidth,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.PostActionFixedWidth,
                                             it,
                                         ),
                                     )

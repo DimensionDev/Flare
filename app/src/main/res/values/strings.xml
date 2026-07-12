@@ -304,6 +304,8 @@
     <string name="settings_post_action_layout_title">Post actions</string>
     <string name="settings_post_action_layout_enable">Customize actions</string>
     <string name="settings_post_action_layout_enable_description">Choose which actions appear in the row, More menu, or stay hidden</string>
+    <string name="settings_post_action_fixed_width">Fixed button width</string>
+    <string name="settings_post_action_fixed_width_description">Keep action buttons with counts at a consistent width</string>
     <string name="settings_post_action_layout_button_row">Button row</string>
     <string name="settings_post_action_layout_more_menu">More menu</string>
     <string name="settings_post_action_layout_hidden">Hidden</string>

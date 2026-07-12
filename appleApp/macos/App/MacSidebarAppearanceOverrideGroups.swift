@@ -79,6 +79,17 @@ struct MacSidebarLayoutAppearanceOverrideGroup: View {
                 })) {
                     Text("appearance_show_numbers")
                 }
+
+                Toggle(isOn: Binding(get: {
+                    timelineAppearance.postActionFixedWidth
+                }, set: { value in
+                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setPostActionFixedWidth(
+                        patch: appearancePatch,
+                        value: value
+                    )
+                })) {
+                    Text("post_action_fixed_width")
+                }
             }
         }
     }

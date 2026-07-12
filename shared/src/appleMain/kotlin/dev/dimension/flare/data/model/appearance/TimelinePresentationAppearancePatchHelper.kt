@@ -17,6 +17,7 @@ public object TimelinePresentationAppearancePatchHelper {
         patch.contains(AppearanceKeys.TimelineDisplayMode) ||
             patch.contains(AppearanceKeys.FullWidthPost) ||
             patch.contains(AppearanceKeys.PostActionStyle) ||
+            patch.contains(AppearanceKeys.PostActionFixedWidth) ||
             patch.contains(AppearanceKeys.ShowNumbers)
 
     public fun displayOverridesEnabled(patch: AppearancePatch): Boolean =
@@ -43,6 +44,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .set(AppearanceKeys.TimelineDisplayMode, appearance.timelineDisplayMode)
             .set(AppearanceKeys.FullWidthPost, appearance.fullWidthPost)
             .set(AppearanceKeys.PostActionStyle, appearance.postActionStyle)
+            .set(AppearanceKeys.PostActionFixedWidth, appearance.postActionFixedWidth)
             .set(AppearanceKeys.ShowNumbers, appearance.showNumbers)
 
     public fun disableLayoutOverrides(patch: AppearancePatch): AppearancePatch =
@@ -50,6 +52,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .clear(AppearanceKeys.TimelineDisplayMode)
             .clear(AppearanceKeys.FullWidthPost)
             .clear(AppearanceKeys.PostActionStyle)
+            .clear(AppearanceKeys.PostActionFixedWidth)
             .clear(AppearanceKeys.ShowNumbers)
 
     public fun enableDisplayOverrides(
@@ -111,6 +114,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: PostActionStyle,
     ): AppearancePatch = patch.set(AppearanceKeys.PostActionStyle, value)
+
+    public fun setPostActionFixedWidth(
+        patch: AppearancePatch,
+        value: Boolean,
+    ): AppearancePatch = patch.set(AppearanceKeys.PostActionFixedWidth, value)
 
     public fun setShowNumbers(
         patch: AppearancePatch,

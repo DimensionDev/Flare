@@ -56,6 +56,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
+                .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
         assertEquals(
@@ -72,6 +73,7 @@ class AppearancePatchTest {
                 showMedia = false,
                 expandContentWarning = true,
                 limitMediaGridToNine = false,
+                postActionFixedWidth = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
             ),
             patch.toTimelineAppearance(),
@@ -84,6 +86,7 @@ class AppearancePatchTest {
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ShowNumbers, false)
+                .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.ExpandContentWarning, false)
         val timelinePatch =
             AppearancePatch.EMPTY
@@ -95,6 +98,7 @@ class AppearancePatchTest {
                 showMedia = true,
                 expandContentWarning = true,
                 showNumbers = false,
+                postActionFixedWidth = false,
             ),
             globalPatch.toTimelineAppearance(timelinePatch),
         )
@@ -115,6 +119,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.ShowMedia, true)
                 .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
+                .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
         assertEquals(
@@ -123,6 +128,7 @@ class AppearancePatchTest {
                 expandContentWarning = true,
                 limitMediaGridToNine = false,
                 showNumbers = false,
+                postActionFixedWidth = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
                 aiConfig = TimelineAppearance.AiConfig(translation = true, tldr = true),
                 lineLimit = 9,
@@ -178,6 +184,7 @@ class AppearancePatchTest {
                 AppearanceKeys.ExpandContentWarning,
                 AppearanceKeys.LimitMediaGridToNine,
                 AppearanceKeys.PostActionLayout,
+                AppearanceKeys.PostActionFixedWidth,
             )
         val activeFields =
             AppearanceSettings
@@ -236,6 +243,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)
+                .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(
                     AppearanceKeys.PostActionLayout,
                     PostActionLayoutConfig(

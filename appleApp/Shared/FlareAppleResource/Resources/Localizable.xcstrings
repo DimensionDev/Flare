@@ -111947,7 +111947,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved"
+            "value" : "Saved to Files"
           }
         },
         "fi" : {
@@ -117437,6 +117437,62 @@
         }
       }
     },
+    "post_action_fixed_width" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed button width"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボタンの幅を固定"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按钮固定宽度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按鈕固定寬度"
+          }
+        }
+      }
+    },
+    "post_action_fixed_width_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep action buttons with counts at a consistent width"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カウント付きアクションボタンの幅を揃えます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "让带数字的操作按钮保持统一宽度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "讓帶數字的操作按鈕保持一致寬度"
+          }
+        }
+      }
+    },
     "post_action_layout_customize_description" : {
       "localizations" : {
         "af" : {
@@ -118966,7 +119022,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Analyzing this profile..."
+            "value" : "Analyzing this profile…"
           }
         },
         "fi" : {

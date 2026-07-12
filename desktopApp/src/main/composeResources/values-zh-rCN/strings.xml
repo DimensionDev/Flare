@@ -336,6 +336,8 @@
     <string name="settings_post_action_layout_title">动态操作</string>
     <string name="settings_post_action_layout_enable">自定义操作</string>
     <string name="settings_post_action_layout_enable_description">选择哪些操作显示在按钮行、更多菜单或保持隐藏</string>
+    <string name="settings_post_action_fixed_width">按钮固定宽度</string>
+    <string name="settings_post_action_fixed_width_description">让带数字的操作按钮保持统一宽度</string>
     <string name="settings_post_action_layout_button_row">按钮行</string>
     <string name="settings_post_action_layout_more_menu">更多菜单</string>
     <string name="settings_post_action_layout_hidden">隐藏</string>

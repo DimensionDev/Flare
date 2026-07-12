@@ -235,6 +235,7 @@ private extension TimelineAppearance {
             showNumbers: showNumbers,
             postActionStyle: postActionStyle,
             postActionLayout: config,
+            postActionFixedWidth: postActionFixedWidth,
             fullWidthPost: fullWidthPost,
             absoluteTimestamp: absoluteTimestamp,
             showPlatformLogo: showPlatformLogo,

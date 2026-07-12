@@ -136,6 +136,14 @@ public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View 
                     Text("appearance_show_numbers", bundle: FlareAppleUILocalization.bundle)
                     Text("appearance_show_numbers_description", bundle: FlareAppleUILocalization.bundle)
                 }
+                Toggle(isOn: Binding(get: {
+                    appearance.postActionFixedWidth
+                }, set: { newValue in
+                    presenter.state.updatePostActionFixedWidth(value: newValue)
+                })) {
+                    Text("post_action_fixed_width", bundle: FlareAppleUILocalization.bundle)
+                    Text("post_action_fixed_width_description", bundle: FlareAppleUILocalization.bundle)
+                }
             }
             postActionLayoutLink()
         }

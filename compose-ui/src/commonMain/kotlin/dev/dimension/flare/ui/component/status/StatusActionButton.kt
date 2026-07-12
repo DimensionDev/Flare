@@ -14,10 +14,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -56,13 +54,11 @@ public fun StatusActionButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val appearanceSettings = LocalTimelineAppearance.current
-    Row(
-        modifier =
-            modifier
-                .padding(vertical = 4.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
+    val displayNumber =
+        number?.takeIf {
+            appearanceSettings.showNumbers && it.humanized.isNotEmpty()
+        }
+    val actionIcon: @Composable () -> Unit = {
         if (!LocalIsScrollingInProgress.current) {
             val contentColor = PlatformContentColor.current
             AnimatedContent(
@@ -125,7 +121,38 @@ public fun StatusActionButton(
                 tint = color,
             )
         }
-        if (withTextMinWidth || (number != null && appearanceSettings.showNumbers)) {
+    }
+    Row(
+        modifier =
+            modifier
+                .padding(vertical = 4.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        if (withTextMinWidth && displayNumber == null) {
+            Box(
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    FAIcon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.height(PlatformTextStyle.current.fontSize.value.dp + 2.dp),
+                        tint = Color.Transparent,
+                    )
+                    PlatformText(
+                        "0000",
+                        color = Color.Transparent,
+                    )
+                }
+                actionIcon()
+            }
+        } else {
+            actionIcon()
+        }
+        if (displayNumber != null) {
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically),
             ) {
@@ -135,25 +162,19 @@ public fun StatusActionButton(
                         color = Color.Transparent,
                     )
                 }
-                if (number != null && appearanceSettings.showNumbers) {
-                    AnimatedNumber(
-                        number = number,
-                        color = color,
-                        modifier =
-                            Modifier
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .clickable(
-                                    onClick = onClicked,
-                                    enabled = enabled,
-                                    interactionSource = interactionSource,
-                                    indication = null,
-                                ),
-                    )
-                } else {
-                    if (withTextMinWidth) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                    }
-                }
+                AnimatedNumber(
+                    number = displayNumber,
+                    color = color,
+                    modifier =
+                        Modifier
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .clickable(
+                                onClick = onClicked,
+                                enabled = enabled,
+                                interactionSource = interactionSource,
+                                indication = null,
+                            ),
+                )
             }
         }
     }

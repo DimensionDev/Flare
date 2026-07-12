@@ -910,12 +910,11 @@ internal fun StatusActions(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement =
             when (appearanceSettings.postActionStyle) {
-                PostActionStyle.Hidden -> Arrangement.Start
-                PostActionStyle.LeftAligned -> Arrangement.Start
-                PostActionStyle.RightAligned -> Arrangement.End
+                PostActionStyle.Hidden -> Arrangement.spacedBy(4.dp, Alignment.Start)
+                PostActionStyle.LeftAligned -> Arrangement.spacedBy(4.dp, Alignment.Start)
+                PostActionStyle.RightAligned -> Arrangement.spacedBy(4.dp, Alignment.End)
                 PostActionStyle.Stretch -> Arrangement.SpaceBetween
             },
-//        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         displayItems.fastForEachIndexed { index, action ->
             if (index == displayItems.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
@@ -931,7 +930,10 @@ internal fun StatusActions(
                         color =
                             action.displayItem.color?.toComposeColor()
                                 ?: PlatformContentColor.current,
-                        withTextMinWidth = action.displayItem.count != null && index != displayItems.lastIndex,
+                        withTextMinWidth =
+                            appearanceSettings.postActionFixedWidth &&
+                                action.displayItem.count != null &&
+                                index != displayItems.lastIndex,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
@@ -958,7 +960,10 @@ internal fun StatusActions(
                         // Fallback or handle null
                         number = action.count,
                         color = action.color?.toComposeColor() ?: PlatformContentColor.current,
-                        withTextMinWidth = action.count != null && index != displayItems.lastIndex,
+                        withTextMinWidth =
+                            appearanceSettings.postActionFixedWidth &&
+                                action.count != null &&
+                                index != displayItems.lastIndex,
                         onClicked = {
                             action.onClicked.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)

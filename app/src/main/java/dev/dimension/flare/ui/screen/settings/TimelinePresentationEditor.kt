@@ -88,6 +88,7 @@ internal fun TimelinePresentationEditor(
         appearancePatch.contains(AppearanceKeys.TimelineDisplayMode) ||
             appearancePatch.contains(AppearanceKeys.FullWidthPost) ||
             appearancePatch.contains(AppearanceKeys.PostActionStyle) ||
+            appearancePatch.contains(AppearanceKeys.PostActionFixedWidth) ||
             appearancePatch.contains(AppearanceKeys.ShowNumbers)
     val displayOverridesEnabled =
         appearancePatch.contains(AppearanceKeys.AbsoluteTimestamp) ||
@@ -218,11 +219,16 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.PostActionStyle,
                                         timelineAppearance.postActionStyle,
                                     ).set(AppearanceKeys.ShowNumbers, timelineAppearance.showNumbers)
+                                    .set(
+                                        AppearanceKeys.PostActionFixedWidth,
+                                        timelineAppearance.postActionFixedWidth,
+                                    )
                             } else {
                                 appearancePatch.clearAll(
                                     AppearanceKeys.TimelineDisplayMode,
                                     AppearanceKeys.FullWidthPost,
                                     AppearanceKeys.PostActionStyle,
+                                    AppearanceKeys.PostActionFixedWidth,
                                     AppearanceKeys.ShowNumbers,
                                 )
                             },
@@ -303,6 +309,20 @@ internal fun TimelinePresentationEditor(
                                 onAppearancePatchChange(
                                     appearancePatch.set(
                                         AppearanceKeys.ShowNumbers,
+                                        it,
+                                    ),
+                                )
+                            },
+                            shapes = ListItemDefaults.item(),
+                        )
+                        SwitchSettingsItem(
+                            title = stringResource(id = R.string.settings_post_action_fixed_width),
+                            description = stringResource(id = R.string.settings_post_action_fixed_width_description),
+                            checked = timelineAppearance.postActionFixedWidth,
+                            onCheckedChange = {
+                                onAppearancePatchChange(
+                                    appearancePatch.set(
+                                        AppearanceKeys.PostActionFixedWidth,
                                         it,
                                     ),
                                 )

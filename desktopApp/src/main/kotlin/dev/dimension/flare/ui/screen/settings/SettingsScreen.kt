@@ -209,6 +209,8 @@ import dev.dimension.flare.settings_link_open_defaults_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_nostr_relays_manage
+import dev.dimension.flare.settings_post_action_fixed_width
+import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
@@ -934,6 +936,24 @@ internal fun SettingsScreen(
                                     checked = LocalTimelineAppearance.current.showNumbers,
                                     {
                                         state.appearanceState.update(AppearanceKeys.ShowNumbers, it)
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_post_action_fixed_width))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_post_action_fixed_width_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalTimelineAppearance.current.postActionFixedWidth,
+                                    {
+                                        state.appearanceState.update(AppearanceKeys.PostActionFixedWidth, it)
                                     },
                                     textBefore = true,
                                 )

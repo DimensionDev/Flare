@@ -104,6 +104,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updatePostActionLayout(value: PostActionLayoutConfig) = update(AppearanceKeys.PostActionLayout, value)
 
+            override fun updatePostActionFixedWidth(value: Boolean) = update(AppearanceKeys.PostActionFixedWidth, value)
+
             override fun updateShowNumbers(value: Boolean) = update(AppearanceKeys.ShowNumbers, value)
 
             override fun updateAppSettings(block: AppSettings.() -> AppSettings) {
@@ -171,6 +173,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updatePostActionStyle(value: PostActionStyle)
 
         public fun updatePostActionLayout(value: PostActionLayoutConfig)
+
+        public fun updatePostActionFixedWidth(value: Boolean)
 
         public fun updateShowNumbers(value: Boolean)
 

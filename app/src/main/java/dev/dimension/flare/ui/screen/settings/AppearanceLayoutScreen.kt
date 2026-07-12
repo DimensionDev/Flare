@@ -258,6 +258,29 @@ internal fun AppearanceLayoutScreen(
                             },
                         )
                         SegmentedListItem(
+                            onClick = {
+                                state.update(
+                                    AppearanceKeys.PostActionFixedWidth,
+                                    !timelineAppearance.postActionFixedWidth,
+                                )
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_post_action_fixed_width))
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_post_action_fixed_width_description))
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = timelineAppearance.postActionFixedWidth,
+                                    onCheckedChange = {
+                                        state.update(AppearanceKeys.PostActionFixedWidth, it)
+                                    },
+                                )
+                            },
+                        )
+                        SegmentedListItem(
                             onClick = toPostActionLayout,
                             shapes = ListItemDefaults.last(),
                             content = {

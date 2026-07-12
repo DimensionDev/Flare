@@ -90,6 +90,12 @@ public object AppearanceKeys {
         AppearancePostActionLayoutConfig.serializer(),
     )
 
+    public object PostActionFixedWidth : PerTimeline<Boolean>(
+        "timeline.post_action_fixed_width",
+        true,
+        Boolean.serializer(),
+    )
+
     public object FullWidthPost : PerTimeline<Boolean>("timeline.full_width_post", false, Boolean.serializer())
 
     public object AbsoluteTimestamp : PerTimeline<Boolean>("timeline.absolute_timestamp", false, Boolean.serializer())
@@ -128,6 +134,7 @@ public object AppearanceKeys {
             ShowNumbers,
             PostActionStyle,
             PostActionLayout,
+            PostActionFixedWidth,
             FullWidthPost,
             AbsoluteTimestamp,
             ShowPlatformLogo,

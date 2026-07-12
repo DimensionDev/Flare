@@ -19,6 +19,7 @@ public struct StatusActionsView: View {
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.timelineAppearance.showNumbers) private var showNumbers
     @Environment(\.timelineAppearance.postActionLayout) private var postActionLayout
+    @Environment(\.timelineAppearance.postActionFixedWidth) private var postActionFixedWidth
     @Environment(\.openURL) private var openURL
     #if os(macOS)
     @ScaledMetric(relativeTo: .callout) private var fontSize = 16
@@ -51,7 +52,7 @@ public struct StatusActionsView: View {
                 )
             }
         } else {
-            HStack {
+            HStack(spacing: postActionStyle == .stretch ? nil : 4) {
                 ForEach(0..<actions.count, id: \.self) { index in
                     let item = actions[index]
                     if (index == actions.count - 1 && postActionStyle == .leftAligned) ||
@@ -64,7 +65,7 @@ public struct StatusActionsView: View {
                     StatusActionView(
                         data: item,
                         useText: useText,
-                        isFixedWidth: index != actions.count - 1,
+                        isFixedWidth: postActionFixedWidth && index != actions.count - 1,
                         fontSize: fontSize,
                         showNumbers: showNumbers,
                         openURL: openURL
@@ -152,7 +153,7 @@ public struct StatusActionView: View {
                     }
                 } label: {
                     Group {
-                        if let text = group.displayItem.count?.humanized, showNumbers {
+                        if let text = group.displayItem.count?.humanized, showNumbers, !text.isEmpty {
                             Label {
                                 Text(text)
                                     .lineLimit(1)
@@ -171,6 +172,14 @@ public struct StatusActionView: View {
                 .optionalForegroundStyle(group.displayItem.color?.swiftColor)
                 .buttonStyle(.plain)
                 .macOSStatusActionHoverStyle(isEnabled: true)
+                .statusActionFixedWidthSlot(
+                    icon: group.displayItem.icon,
+                    fontSize: fontSize,
+                    isEnabled: isFixedWidth &&
+                        showNumbers &&
+                        group.displayItem.count != nil &&
+                        group.displayItem.count?.humanized.isEmpty == true
+                )
             }
         case .divider:
             Divider()
@@ -208,7 +217,7 @@ public struct StatusActionItemView: View {
     private var resolvedText: Text? {
         if useText, let text = data.text?.resolvedString {
             return Text(text)
-        } else if showNumbers, let count = data.count?.humanized {
+        } else if showNumbers, let count = data.count?.humanized, !count.isEmpty {
             return Text(count)
         }
         return nil
@@ -227,6 +236,15 @@ public struct StatusActionItemView: View {
             .optionalForegroundStyle(data.color?.swiftColor)
             .buttonStyle(.plain)
             .macOSStatusActionHoverStyle(isEnabled: !useText)
+            .statusActionFixedWidthSlot(
+                icon: data.icon,
+                fontSize: fontSize,
+                isEnabled: !useText &&
+                    isFixedWidth &&
+                    showNumbers &&
+                    data.count != nil &&
+                    data.count?.humanized.isEmpty == true
+            )
     }
 
     @ViewBuilder
@@ -362,6 +380,24 @@ private extension View {
     }
 
     @ViewBuilder
+    func statusActionFixedWidthSlot(
+        icon: UiIcon?,
+        fontSize: CGFloat,
+        isEnabled: Bool
+    ) -> some View {
+        if isEnabled {
+            ZStack(alignment: .leading) {
+                StatusActionFixedWidthPlaceholder(icon: icon, fontSize: fontSize)
+                    .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
+                    .hidden()
+                self
+            }
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
     func macOSStatusActionHoverStyle(isEnabled: Bool) -> some View {
         #if os(macOS)
         modifier(StatusActionHoverModifier(isEnabled: isEnabled))
@@ -410,6 +446,20 @@ public struct StatusActionIcon: View {
     public var body: some View {
         if let icon = icon {
             icon.image
+        }
+    }
+}
+
+private struct StatusActionFixedWidthPlaceholder: View {
+    let icon: UiIcon?
+    let fontSize: CGFloat
+
+    var body: some View {
+        Label {
+            Text("")
+                .frame(minWidth: fontSize * 2.5)
+        } icon: {
+            StatusActionIcon(icon: icon)
         }
     }
 }
@@ -864,6 +914,7 @@ private extension TimelineAppearance {
             showNumbers: showNumbers,
             postActionStyle: postActionStyle,
             postActionLayout: postActionLayout,
+            postActionFixedWidth: postActionFixedWidth,
             fullWidthPost: fullWidthPost,
             absoluteTimestamp: absoluteTimestamp,
             showPlatformLogo: showPlatformLogo,

@@ -195,6 +195,37 @@ private struct AiConfigSettingsSectionsContent: View {
     }
 
     private func editButton(field: AiConfigEditableField, value: String) -> some View {
+        #if os(macOS)
+        HStack(spacing: 16) {
+            Label {
+                Text(field.titleKey, bundle: FlareAppleUILocalization.bundle)
+                if field == .extraBody {
+                    if !value.isEmpty {
+                        Text(value)
+                    }
+                } else {
+                    Text(field.displayValue(value))
+                }
+            } icon: {
+                EmptyView()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                state.beginEditing(field: field, value: value)
+            } label: {
+                Label {
+                    Text("edit", bundle: FlareAppleUILocalization.bundle)
+                } icon: {
+                    Image(fontAwesome: .pen)
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help(Text("edit", bundle: FlareAppleUILocalization.bundle))
+        }
+        .transition(.opacity.combined(with: .move(edge: .top)))
+        #else
         Button {
             state.beginEditing(field: field, value: value)
         } label: {
@@ -214,6 +245,7 @@ private struct AiConfigSettingsSectionsContent: View {
         }
         .buttonStyle(.plain)
         .transition(.opacity.combined(with: .move(edge: .top)))
+        #endif
     }
 
     private func aiTypeOptionTitleKey(option: AiTypeOption) -> LocalizedStringKey {

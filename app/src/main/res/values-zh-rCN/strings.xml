@@ -293,6 +293,8 @@
     <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保留媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中以原始宽高比显示媒体</string>
+    <string name="settings_appearance_limit_media_grid_to_nine">媒体网格最多显示 9 项</string>
+    <string name="settings_appearance_limit_media_grid_to_nine_description">每条时间轴动态最多显示 9 项媒体</string>
     <string name="settings_appearance_video_autoplay">视频自动播放</string>
     <string name="settings_appearance_video_autoplay_description">自动播放动态中的视频</string>
     <string name="settings_appearance_video_autoplay_wifi">仅限 Wi-Fi</string>

@@ -28,6 +28,7 @@ class AppearancePatchTest {
     fun emptyPatchSynthesizesDefaultAppearanceSettings() {
         assertEquals(AppearanceSettings.Default, AppearancePatch.EMPTY.toAppearanceSettings())
         assertFalse(TimelineAppearance.Default.expandContentWarning)
+        assertEquals(true, TimelineAppearance.Default.limitMediaGridToNine)
     }
 
     @Test
@@ -54,6 +55,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
+                .set(AppearanceKeys.LimitMediaGridToNine, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
         assertEquals(
@@ -69,6 +71,7 @@ class AppearancePatchTest {
                 avatarShape = AvatarShape.SQUARE,
                 showMedia = false,
                 expandContentWarning = true,
+                limitMediaGridToNine = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
             ),
             patch.toTimelineAppearance(),
@@ -111,12 +114,14 @@ class AppearancePatchTest {
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, true)
                 .set(AppearanceKeys.ExpandContentWarning, true)
+                .set(AppearanceKeys.LimitMediaGridToNine, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
         assertEquals(
             TimelineAppearance(
                 showMedia = true,
                 expandContentWarning = true,
+                limitMediaGridToNine = false,
                 showNumbers = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
                 aiConfig = TimelineAppearance.AiConfig(translation = true, tldr = true),
@@ -171,6 +176,7 @@ class AppearancePatchTest {
                 AppearanceKeys.ShowBottomBarLabels,
                 AppearanceKeys.DeckMode,
                 AppearanceKeys.ExpandContentWarning,
+                AppearanceKeys.LimitMediaGridToNine,
                 AppearanceKeys.PostActionLayout,
             )
         val activeFields =
@@ -227,6 +233,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.DeckMode, true)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
+                .set(AppearanceKeys.LimitMediaGridToNine, false)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)
                 .set(

@@ -228,6 +228,7 @@ private extension TimelineAppearance {
             showSensitiveContent: showSensitiveContent,
             expandContentWarning: expandContentWarning,
             expandMediaSize: expandMediaSize,
+            limitMediaGridToNine: limitMediaGridToNine,
             videoAutoplay: videoAutoplay,
             showLinkPreview: showLinkPreview,
             compatLinkPreview: compatLinkPreview,

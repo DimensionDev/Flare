@@ -14178,6 +14178,50 @@
         }
       }
     },
+    "appearance_limit_media_grid_to_nine" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit media grids to 9 items"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体网格最多显示 9 项"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒體網格最多顯示 9 項"
+          }
+        }
+      }
+    },
+    "appearance_limit_media_grid_to_nine_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show at most 9 media items in each timeline post"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每条时间轴动态最多显示 9 项媒体"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每則時間軸貼文最多顯示 9 項媒體"
+          }
+        }
+      }
+    },
     "appearance_media_group_subtitle" : {
       "localizations" : {
         "af" : {
@@ -111903,7 +111947,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved to Files"
+            "value" : "Saved"
           }
         },
         "fi" : {
@@ -118922,7 +118966,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Analyzing this profile…"
+            "value" : "Analyzing this profile..."
           }
         },
         "fi" : {

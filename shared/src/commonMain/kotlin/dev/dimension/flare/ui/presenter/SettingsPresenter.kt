@@ -84,6 +84,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateExpandMediaSize(value: Boolean) = update(AppearanceKeys.ExpandMediaSize, value)
 
+            override fun updateLimitMediaGridToNine(value: Boolean) = update(AppearanceKeys.LimitMediaGridToNine, value)
+
             override fun updateShowSensitiveContent(value: Boolean) = update(AppearanceKeys.ShowSensitiveContent, value)
 
             override fun updateExpandContentWarning(value: Boolean) = update(AppearanceKeys.ExpandContentWarning, value)
@@ -149,6 +151,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updateShowMedia(value: Boolean)
 
         public fun updateExpandMediaSize(value: Boolean)
+
+        public fun updateLimitMediaGridToNine(value: Boolean)
 
         public fun updateShowSensitiveContent(value: Boolean)
 

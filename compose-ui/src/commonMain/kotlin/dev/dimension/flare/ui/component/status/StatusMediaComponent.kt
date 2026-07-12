@@ -206,6 +206,7 @@ internal fun StatusMediaComponent(
                     }
                 }
             },
+            maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,
             modifier =
                 Modifier
                     .let {

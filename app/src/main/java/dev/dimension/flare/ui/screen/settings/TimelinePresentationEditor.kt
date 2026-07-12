@@ -99,6 +99,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
             appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
+            appearancePatch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
     var showFilterDialog by remember { mutableStateOf(false) }
@@ -421,6 +422,9 @@ internal fun TimelinePresentationEditor(
                                     ).set(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
+                                    ).set(
+                                        AppearanceKeys.LimitMediaGridToNine,
+                                        timelineAppearance.limitMediaGridToNine,
                                     ).set(AppearanceKeys.VideoAutoplay, timelineAppearance.videoAutoplay)
                             } else {
                                 appearancePatch.clearAll(
@@ -428,6 +432,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowSensitiveContent,
                                     AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.LimitMediaGridToNine,
                                     AppearanceKeys.VideoAutoplay,
                                 )
                             },
@@ -474,6 +479,20 @@ internal fun TimelinePresentationEditor(
                                     onAppearancePatchChange(
                                         appearancePatch.set(
                                             AppearanceKeys.ExpandContentWarning,
+                                            it,
+                                        ),
+                                    )
+                                },
+                                shapes = ListItemDefaults.item(),
+                            )
+                            SwitchSettingsItem(
+                                title = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine),
+                                description = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine_description),
+                                checked = timelineAppearance.limitMediaGridToNine,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.LimitMediaGridToNine,
                                             it,
                                         ),
                                     )

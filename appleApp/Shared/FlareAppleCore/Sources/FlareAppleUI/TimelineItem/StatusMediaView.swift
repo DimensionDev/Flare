@@ -12,6 +12,7 @@ struct StatusMediaView: View {
     let onMediaClicked: (any UiMedia, Int) -> Void
     let cornerRadius: CGFloat
     @Environment(\.timelineAppearance.expandMediaSize) private var expandMediaSize
+    @Environment(\.timelineAppearance.limitMediaGridToNine) private var limitMediaGridToNine
     @Environment(\.timelineMediaActionHandler) private var timelineMediaActionHandler
     @State private var isBlur: Bool
 //    @State private var selectedIndex: Int? = nil
@@ -32,7 +33,7 @@ struct StatusMediaView: View {
     }
 
     var body: some View {
-        let visibleData = Array(data.prefix(statusMediaMaxVisibleMediaCount))
+        let visibleData = limitMediaGridToNine ? Array(data.prefix(statusMediaMaxVisibleMediaCount)) : data
         let overflowCount = data.count - visibleData.count
         AdaptiveGrid(
             singleFollowsImageAspect: expandMediaSize,

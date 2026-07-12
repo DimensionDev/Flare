@@ -157,6 +157,8 @@ import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
 import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
+import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
+import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
 import dev.dimension.flare.settings_appearance_post_action_layout
@@ -1101,6 +1103,24 @@ internal fun SettingsScreen(
                 }
                 AnimatedVisibility(LocalTimelineAppearance.current.showMedia) {
                     Column {
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalTimelineAppearance.current.limitMediaGridToNine,
+                                    {
+                                        state.appearanceState.update(AppearanceKeys.LimitMediaGridToNine, it)
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
                         ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {

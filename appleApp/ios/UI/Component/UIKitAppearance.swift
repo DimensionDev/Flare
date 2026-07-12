@@ -40,6 +40,7 @@ struct StatusUIKitAppearance: Equatable {
     let showLinkPreview: Bool
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
+    let limitMediaGridToNine: Bool
     let aiAgentEnabled: Bool
 
     init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
@@ -61,6 +62,7 @@ struct StatusUIKitAppearance: Equatable {
         showLinkPreview = timeline.showLinkPreview
         compatLinkPreview = timeline.compatLinkPreview
         expandMediaSize = timeline.expandMediaSize
+        limitMediaGridToNine = timeline.limitMediaGridToNine
         aiAgentEnabled = timeline.aiConfig.agent
     }
 
@@ -79,6 +81,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.showLinkPreview == rhs.showLinkPreview &&
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
             lhs.expandMediaSize == rhs.expandMediaSize &&
+            lhs.limitMediaGridToNine == rhs.limitMediaGridToNine &&
             lhs.aiAgentEnabled == rhs.aiAgentEnabled
     }
 }

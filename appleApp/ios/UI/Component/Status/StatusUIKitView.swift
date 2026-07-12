@@ -792,7 +792,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 cornerRadius: corner,
                 appearanceShowMedia: appearance.showMedia,
                 appearanceShowSensitive: appearance.showSensitiveContent,
-                appearanceExpandMediaSize: appearance.expandMediaSize
+                appearanceExpandMediaSize: appearance.expandMediaSize,
+                appearanceLimitMediaGridToNine: appearance.limitMediaGridToNine
             )
             mediaView.onMediaClicked = { [weak self] media, index in
                 guard let self else { return }

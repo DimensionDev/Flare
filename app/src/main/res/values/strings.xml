@@ -334,6 +334,8 @@
     <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
     <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
+    <string name="settings_appearance_limit_media_grid_to_nine">Limit media grids to 9 items</string>
+    <string name="settings_appearance_limit_media_grid_to_nine_description">Show at most 9 media items in each timeline post</string>
     <string name="gallery_detail_tab_info">Info</string>
     <string name="gallery_detail_tab_comments">Comments</string>
     <string name="gallery_detail_tab_recommend">Recommend</string>

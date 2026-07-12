@@ -514,6 +514,17 @@ private struct MediaAppearanceOverrideGroup: View {
                     Text("appearance_expand_media_size_description")
                 }
                 Toggle(isOn: Binding(get: {
+                    timelineAppearance.limitMediaGridToNine
+                }, set: { value in
+                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setLimitMediaGridToNine(
+                        patch: appearancePatch,
+                        value: value
+                    )
+                })) {
+                    Text("appearance_limit_media_grid_to_nine")
+                    Text("appearance_limit_media_grid_to_nine_description")
+                }
+                Toggle(isOn: Binding(get: {
                     timelineAppearance.showSensitiveContent
                 }, set: { value in
                     appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setShowSensitiveContent(

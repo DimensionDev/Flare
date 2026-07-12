@@ -385,6 +385,14 @@ public struct AppearanceMediaSettingsSection: View {
                     Text("appearance_expand_media_size_description", bundle: FlareAppleUILocalization.bundle)
                 }
                 Toggle(isOn: Binding(get: {
+                    appearance.limitMediaGridToNine
+                }, set: { newValue in
+                    presenter.state.updateLimitMediaGridToNine(value: newValue)
+                })) {
+                    Text("appearance_limit_media_grid_to_nine", bundle: FlareAppleUILocalization.bundle)
+                    Text("appearance_limit_media_grid_to_nine_description", bundle: FlareAppleUILocalization.bundle)
+                }
+                Toggle(isOn: Binding(get: {
                     appearance.showSensitiveContent
                 }, set: { newValue in
                     presenter.state.updateShowSensitiveContent(value: newValue)

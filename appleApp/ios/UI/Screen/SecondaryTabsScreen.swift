@@ -9,79 +9,13 @@ struct SecondaryTabsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     var body: some View {
-        Router { _ in
-            List {
-                StateView(state: presenter.state.items) { data in
-                    let items = data.cast(SecondaryTabsPresenter.Item.self)
-                    if !items.isEmpty {
-                        Section {
-                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                                DisclosureGroup {
-                                    ForEach(item.tabs, id: \.self) { tab in
-                                        if let route = route(for: tab) {
-                                            Button {
-                                                onTabSelected(route)
-                                            } label: {
-                                                Label {
-                                                    Text(tab.title.text)
-                                                } icon: {
-                                                    Image(fontAwesome: tab.icon.fontAwesomeIcon)
-                                                }
-                                            }
-                                            .buttonStyle(.plain)
-                                        }
-                                    }
-                                } label: {
-                                    StateView(state: item.user) { user in
-                                        UserCompatView(data: user)
-                                    }
-                                }
-                            }
-                        } header: {
-                            Text("account_management_title")
-                        }
-                    }
+        Group {
+            if #available(iOS 18.0, *) {
+                Router { _ in
+                    content
                 }
-
-                Section {
-                    NavigationLink(value: Route.draftBox) {
-                        Label {
-                            Text("Drafts")
-                        } icon: {
-                            Image(fontAwesome: .penToSquare)
-                        }
-                    }
-                    NavigationLink(value: Route.rssManagement) {
-                        Label {
-                            Text("settings_rss_management_title")
-                        } icon: {
-                            Image(fontAwesome: .squareRss)
-                        }
-                    }
-                    NavigationLink(value: Route.localHostory) {
-                        Label {
-                            Text("local_history_title")
-                        } icon: {
-                            Image(fontAwesome: .clockRotateLeft)
-                        }
-                    }
-                    if aiAgentEnabledPresenter.state.enabled {
-                        NavigationLink(value: Route.agentHistory) {
-                            Label {
-                                Text("agent_history_title")
-                            } icon: {
-                                Image(fontAwesome: .robot)
-                            }
-                        }
-                    }
-                    NavigationLink(value: Route.settings) {
-                        Label {
-                            Text("settings_title")
-                        } icon: {
-                            Image(fontAwesome: .gear)
-                        }
-                    }
-                }
+            } else {
+                content
             }
         }
         .toolbar {
@@ -90,6 +24,82 @@ struct SecondaryTabsScreen: View {
                     dismiss()
                 } label: {
                     Image(fontAwesome: .xmark)
+                }
+            }
+        }
+    }
+
+    private var content: some View {
+        List {
+            StateView(state: presenter.state.items) { data in
+                let items = data.cast(SecondaryTabsPresenter.Item.self)
+                if !items.isEmpty {
+                    Section {
+                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                            DisclosureGroup {
+                                ForEach(item.tabs, id: \.self) { tab in
+                                    if let route = route(for: tab) {
+                                        Button {
+                                            onTabSelected(route)
+                                        } label: {
+                                            Label {
+                                                Text(tab.title.text)
+                                            } icon: {
+                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            } label: {
+                                StateView(state: item.user) { user in
+                                    UserCompatView(data: user)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("account_management_title")
+                    }
+                }
+            }
+
+            Section {
+                NavigationLink(value: Route.draftBox) {
+                    Label {
+                        Text("Drafts")
+                    } icon: {
+                        Image(fontAwesome: .penToSquare)
+                    }
+                }
+                NavigationLink(value: Route.rssManagement) {
+                    Label {
+                        Text("settings_rss_management_title")
+                    } icon: {
+                        Image(fontAwesome: .squareRss)
+                    }
+                }
+                NavigationLink(value: Route.localHostory) {
+                    Label {
+                        Text("local_history_title")
+                    } icon: {
+                        Image(fontAwesome: .clockRotateLeft)
+                    }
+                }
+                if aiAgentEnabledPresenter.state.enabled {
+                    NavigationLink(value: Route.agentHistory) {
+                        Label {
+                            Text("agent_history_title")
+                        } icon: {
+                            Image(fontAwesome: .robot)
+                        }
+                    }
+                }
+                NavigationLink(value: Route.settings) {
+                    Label {
+                        Text("settings_title")
+                    } icon: {
+                        Image(fontAwesome: .gear)
+                    }
                 }
             }
         }

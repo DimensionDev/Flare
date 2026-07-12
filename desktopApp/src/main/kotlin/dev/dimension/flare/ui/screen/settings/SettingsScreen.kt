@@ -157,6 +157,8 @@ import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
 import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
+import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
+import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
 import dev.dimension.flare.settings_appearance_post_action_layout
@@ -207,6 +209,8 @@ import dev.dimension.flare.settings_link_open_defaults_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_nostr_relays_manage
+import dev.dimension.flare.settings_post_action_fixed_width
+import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
@@ -937,6 +941,24 @@ internal fun SettingsScreen(
                                 )
                             },
                         )
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_post_action_fixed_width))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_post_action_fixed_width_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalTimelineAppearance.current.postActionFixedWidth,
+                                    {
+                                        state.appearanceState.update(AppearanceKeys.PostActionFixedWidth, it)
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
                     }
                 }
             }
@@ -1101,6 +1123,24 @@ internal fun SettingsScreen(
                 }
                 AnimatedVisibility(LocalTimelineAppearance.current.showMedia) {
                     Column {
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalTimelineAppearance.current.limitMediaGridToNine,
+                                    {
+                                        state.appearanceState.update(AppearanceKeys.LimitMediaGridToNine, it)
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
                         ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {

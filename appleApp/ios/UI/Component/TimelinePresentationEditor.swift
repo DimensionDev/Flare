@@ -387,6 +387,17 @@ private struct LayoutAppearanceOverrideGroup: View {
                     Text("appearance_show_numbers")
                     Text("appearance_show_numbers_description")
                 }
+                Toggle(isOn: Binding(get: {
+                    timelineAppearance.postActionFixedWidth
+                }, set: { value in
+                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setPostActionFixedWidth(
+                        patch: appearancePatch,
+                        value: value
+                    )
+                })) {
+                    Text("post_action_fixed_width")
+                    Text("post_action_fixed_width_description")
+                }
             }
         }
     }
@@ -512,6 +523,17 @@ private struct MediaAppearanceOverrideGroup: View {
                 })) {
                     Text("appearance_expand_media_size")
                     Text("appearance_expand_media_size_description")
+                }
+                Toggle(isOn: Binding(get: {
+                    timelineAppearance.limitMediaGridToNine
+                }, set: { value in
+                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setLimitMediaGridToNine(
+                        patch: appearancePatch,
+                        value: value
+                    )
+                })) {
+                    Text("appearance_limit_media_grid_to_nine")
+                    Text("appearance_limit_media_grid_to_nine_description")
                 }
                 Toggle(isOn: Binding(get: {
                     timelineAppearance.showSensitiveContent

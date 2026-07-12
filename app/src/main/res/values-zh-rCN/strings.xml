@@ -259,6 +259,8 @@
     <string name="settings_post_action_layout_title">动态操作</string>
     <string name="settings_post_action_layout_enable">自定义操作</string>
     <string name="settings_post_action_layout_enable_description">选择哪些操作显示在按钮行、更多菜单或保持隐藏</string>
+    <string name="settings_post_action_fixed_width">按钮固定宽度</string>
+    <string name="settings_post_action_fixed_width_description">让带数字的操作按钮保持统一宽度</string>
     <string name="settings_post_action_layout_button_row">按钮行</string>
     <string name="settings_post_action_layout_more_menu">更多菜单</string>
     <string name="settings_post_action_layout_hidden">隐藏</string>
@@ -293,6 +295,8 @@
     <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保留媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中以原始宽高比显示媒体</string>
+    <string name="settings_appearance_limit_media_grid_to_nine">媒体网格最多显示 9 项</string>
+    <string name="settings_appearance_limit_media_grid_to_nine_description">每条时间轴动态最多显示 9 项媒体</string>
     <string name="settings_appearance_video_autoplay">视频自动播放</string>
     <string name="settings_appearance_video_autoplay_description">自动播放动态中的视频</string>
     <string name="settings_appearance_video_autoplay_wifi">仅限 Wi-Fi</string>

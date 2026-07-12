@@ -181,6 +181,31 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
             AnimatedVisibility(timelineAppearance.showMedia) {
                 SegmentedListItem(
                     onClick = {
+                        state.update(
+                            AppearanceKeys.LimitMediaGridToNine,
+                            !timelineAppearance.limitMediaGridToNine,
+                        )
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = timelineAppearance.limitMediaGridToNine,
+                            onCheckedChange = {
+                                state.update(AppearanceKeys.LimitMediaGridToNine, it)
+                            },
+                        )
+                    },
+                )
+            }
+            AnimatedVisibility(timelineAppearance.showMedia) {
+                SegmentedListItem(
+                    onClick = {
                         state.update(AppearanceKeys.ExpandMediaSize, !timelineAppearance.expandMediaSize)
                     },
                     shapes = ListItemDefaults.item(),

@@ -17,6 +17,7 @@ public object TimelinePresentationAppearancePatchHelper {
         patch.contains(AppearanceKeys.TimelineDisplayMode) ||
             patch.contains(AppearanceKeys.FullWidthPost) ||
             patch.contains(AppearanceKeys.PostActionStyle) ||
+            patch.contains(AppearanceKeys.PostActionFixedWidth) ||
             patch.contains(AppearanceKeys.ShowNumbers)
 
     public fun displayOverridesEnabled(patch: AppearancePatch): Boolean =
@@ -30,6 +31,7 @@ public object TimelinePresentationAppearancePatchHelper {
             patch.contains(AppearanceKeys.ShowSensitiveContent) ||
             patch.contains(AppearanceKeys.ExpandContentWarning) ||
             patch.contains(AppearanceKeys.ExpandMediaSize) ||
+            patch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             patch.contains(AppearanceKeys.VideoAutoplay)
 
     public fun themeOverridesEnabled(patch: AppearancePatch): Boolean = patch.contains(AppearanceKeys.AvatarShape)
@@ -42,6 +44,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .set(AppearanceKeys.TimelineDisplayMode, appearance.timelineDisplayMode)
             .set(AppearanceKeys.FullWidthPost, appearance.fullWidthPost)
             .set(AppearanceKeys.PostActionStyle, appearance.postActionStyle)
+            .set(AppearanceKeys.PostActionFixedWidth, appearance.postActionFixedWidth)
             .set(AppearanceKeys.ShowNumbers, appearance.showNumbers)
 
     public fun disableLayoutOverrides(patch: AppearancePatch): AppearancePatch =
@@ -49,6 +52,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .clear(AppearanceKeys.TimelineDisplayMode)
             .clear(AppearanceKeys.FullWidthPost)
             .clear(AppearanceKeys.PostActionStyle)
+            .clear(AppearanceKeys.PostActionFixedWidth)
             .clear(AppearanceKeys.ShowNumbers)
 
     public fun enableDisplayOverrides(
@@ -77,6 +81,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .set(AppearanceKeys.ShowSensitiveContent, appearance.showSensitiveContent)
             .set(AppearanceKeys.ExpandContentWarning, appearance.expandContentWarning)
             .set(AppearanceKeys.ExpandMediaSize, appearance.expandMediaSize)
+            .set(AppearanceKeys.LimitMediaGridToNine, appearance.limitMediaGridToNine)
             .set(AppearanceKeys.VideoAutoplay, appearance.videoAutoplay)
 
     public fun disableMediaOverrides(patch: AppearancePatch): AppearancePatch =
@@ -85,6 +90,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .clear(AppearanceKeys.ShowSensitiveContent)
             .clear(AppearanceKeys.ExpandContentWarning)
             .clear(AppearanceKeys.ExpandMediaSize)
+            .clear(AppearanceKeys.LimitMediaGridToNine)
             .clear(AppearanceKeys.VideoAutoplay)
 
     public fun enableThemeOverrides(
@@ -108,6 +114,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: PostActionStyle,
     ): AppearancePatch = patch.set(AppearanceKeys.PostActionStyle, value)
+
+    public fun setPostActionFixedWidth(
+        patch: AppearancePatch,
+        value: Boolean,
+    ): AppearancePatch = patch.set(AppearanceKeys.PostActionFixedWidth, value)
 
     public fun setShowNumbers(
         patch: AppearancePatch,
@@ -153,6 +164,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: Boolean,
     ): AppearancePatch = patch.set(AppearanceKeys.ExpandMediaSize, value)
+
+    public fun setLimitMediaGridToNine(
+        patch: AppearancePatch,
+        value: Boolean,
+    ): AppearancePatch = patch.set(AppearanceKeys.LimitMediaGridToNine, value)
 
     public fun setVideoAutoplay(
         patch: AppearancePatch,

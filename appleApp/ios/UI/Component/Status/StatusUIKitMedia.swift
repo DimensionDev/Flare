@@ -297,6 +297,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     private var cornerRadius: CGFloat = 16
     private var isBlurred: Bool = false
     private var singleFollowsImageAspect: Bool = true
+    private var limitMediaGridToNine: Bool = true
     private var toggleButtonPositionConstraints: [NSLayoutConstraint] = []
     private var aspectConstraint: NSLayoutConstraint?
     private var lastLayoutWidth: CGFloat = 0
@@ -309,17 +310,20 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         let sensitive: Bool
         let cornerRadius: CGFloat
         let singleFollowsImageAspect: Bool
+        let limitMediaGridToNine: Bool
 
         init(
             data: [UiMedia],
             sensitive: Bool,
             cornerRadius: CGFloat,
-            singleFollowsImageAspect: Bool
+            singleFollowsImageAspect: Bool,
+            limitMediaGridToNine: Bool
         ) {
             items = data.map(MediaItemSignature.init)
             self.sensitive = sensitive
             self.cornerRadius = cornerRadius
             self.singleFollowsImageAspect = singleFollowsImageAspect
+            self.limitMediaGridToNine = limitMediaGridToNine
         }
     }
 
@@ -397,12 +401,19 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         return ceil(gridHeight(for: width))
     }
 
-    func configure(data: [UiMedia], sensitive: Bool, cornerRadius: CGFloat, singleFollowsImageAspect: Bool) {
+    func configure(
+        data: [UiMedia],
+        sensitive: Bool,
+        cornerRadius: CGFloat,
+        singleFollowsImageAspect: Bool,
+        limitMediaGridToNine: Bool
+    ) {
         let signature = ConfigureSignature(
             data: data,
             sensitive: sensitive,
             cornerRadius: cornerRadius,
-            singleFollowsImageAspect: singleFollowsImageAspect
+            singleFollowsImageAspect: singleFollowsImageAspect,
+            limitMediaGridToNine: limitMediaGridToNine
         )
         guard lastConfigureSignature != signature else { return }
         let shouldResetBlur =
@@ -413,6 +424,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
         self.sensitive = sensitive
         self.cornerRadius = cornerRadius
         self.singleFollowsImageAspect = singleFollowsImageAspect
+        self.limitMediaGridToNine = limitMediaGridToNine
         if shouldResetBlur {
             self.isBlurred = sensitive
         }
@@ -643,7 +655,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding {
     }
 
     private var visibleItemCount: Int {
-        min(items.count, Self.maxVisibleMediaCount)
+        limitMediaGridToNine ? min(items.count, Self.maxVisibleMediaCount) : items.count
     }
 
     private var overflowCount: Int {
@@ -920,6 +932,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     private var appearanceShowMedia: Bool = true
     private var appearanceShowSensitive: Bool = false
     private var appearanceExpandMediaSize: Bool = true
+    private var appearanceLimitMediaGridToNine: Bool = true
     private var showButtonConstraints: [NSLayoutConstraint] = []
     private var lastConfigureSignature: ConfigureSignature?
 
@@ -930,6 +943,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         let appearanceShowMedia: Bool
         let appearanceShowSensitive: Bool
         let appearanceExpandMediaSize: Bool
+        let appearanceLimitMediaGridToNine: Bool
 
         init(
             data: [UiMedia],
@@ -937,7 +951,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             cornerRadius: CGFloat,
             appearanceShowMedia: Bool,
             appearanceShowSensitive: Bool,
-            appearanceExpandMediaSize: Bool
+            appearanceExpandMediaSize: Bool,
+            appearanceLimitMediaGridToNine: Bool
         ) {
             items = data.map(MediaItemSignature.init)
             self.sensitive = sensitive
@@ -945,6 +960,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             self.appearanceShowMedia = appearanceShowMedia
             self.appearanceShowSensitive = appearanceShowSensitive
             self.appearanceExpandMediaSize = appearanceExpandMediaSize
+            self.appearanceLimitMediaGridToNine = appearanceLimitMediaGridToNine
         }
     }
 
@@ -1024,7 +1040,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         cornerRadius: CGFloat,
         appearanceShowMedia: Bool,
         appearanceShowSensitive: Bool,
-        appearanceExpandMediaSize: Bool
+        appearanceExpandMediaSize: Bool,
+        appearanceLimitMediaGridToNine: Bool
     ) {
         let signature = ConfigureSignature(
             data: data,
@@ -1032,7 +1049,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             cornerRadius: cornerRadius,
             appearanceShowMedia: appearanceShowMedia,
             appearanceShowSensitive: appearanceShowSensitive,
-            appearanceExpandMediaSize: appearanceExpandMediaSize
+            appearanceExpandMediaSize: appearanceExpandMediaSize,
+            appearanceLimitMediaGridToNine: appearanceLimitMediaGridToNine
         )
         guard lastConfigureSignature != signature else { return }
         let shouldResetExpanded =
@@ -1045,6 +1063,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         self.appearanceShowMedia = appearanceShowMedia
         self.appearanceShowSensitive = appearanceShowSensitive
         self.appearanceExpandMediaSize = appearanceExpandMediaSize
+        self.appearanceLimitMediaGridToNine = appearanceLimitMediaGridToNine
         if shouldResetExpanded {
             self.expanded = false
         }
@@ -1061,7 +1080,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             data: [],
             sensitive: false,
             cornerRadius: cornerRadius,
-            singleFollowsImageAspect: appearanceExpandMediaSize
+            singleFollowsImageAspect: appearanceExpandMediaSize,
+            limitMediaGridToNine: appearanceLimitMediaGridToNine
         )
         grid.performDeferredPoolCleanup()
         grid.isHidden = true
@@ -1092,7 +1112,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
                 data: items,
                 sensitive: !appearanceShowSensitive && sensitive,
                 cornerRadius: cornerRadius,
-                singleFollowsImageAspect: appearanceExpandMediaSize
+                singleFollowsImageAspect: appearanceExpandMediaSize,
+                limitMediaGridToNine: appearanceLimitMediaGridToNine
             )
         } else {
             grid.isHidden = true
@@ -1102,7 +1123,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
                 data: [],
                 sensitive: false,
                 cornerRadius: cornerRadius,
-                singleFollowsImageAspect: appearanceExpandMediaSize
+                singleFollowsImageAspect: appearanceExpandMediaSize,
+                limitMediaGridToNine: appearanceLimitMediaGridToNine
             )
         }
         setNeedsLayout()

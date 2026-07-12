@@ -33,6 +33,7 @@ struct StatusUIKitAppearance: Equatable {
     let postActionStyleID: String
     let postActionLayout: PostActionLayoutConfig
     let postActionLayoutID: String
+    let postActionFixedWidth: Bool
     let showNumbers: Bool
     let showMedia: Bool
     let showSensitiveContent: Bool
@@ -40,6 +41,7 @@ struct StatusUIKitAppearance: Equatable {
     let showLinkPreview: Bool
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
+    let limitMediaGridToNine: Bool
     let aiAgentEnabled: Bool
 
     init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
@@ -54,6 +56,7 @@ struct StatusUIKitAppearance: Equatable {
         postActionStyleID = timeline.postActionStyle.name
         postActionLayout = timeline.postActionLayout
         postActionLayoutID = PostActionLayoutHelpers.shared.signature(config: timeline.postActionLayout)
+        postActionFixedWidth = timeline.postActionFixedWidth
         showNumbers = timeline.showNumbers
         showMedia = timeline.showMedia
         showSensitiveContent = timeline.showSensitiveContent
@@ -61,6 +64,7 @@ struct StatusUIKitAppearance: Equatable {
         showLinkPreview = timeline.showLinkPreview
         compatLinkPreview = timeline.compatLinkPreview
         expandMediaSize = timeline.expandMediaSize
+        limitMediaGridToNine = timeline.limitMediaGridToNine
         aiAgentEnabled = timeline.aiConfig.agent
     }
 
@@ -72,6 +76,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.absoluteTimestamp == rhs.absoluteTimestamp &&
             lhs.postActionStyleID == rhs.postActionStyleID &&
             lhs.postActionLayoutID == rhs.postActionLayoutID &&
+            lhs.postActionFixedWidth == rhs.postActionFixedWidth &&
             lhs.showNumbers == rhs.showNumbers &&
             lhs.showMedia == rhs.showMedia &&
             lhs.showSensitiveContent == rhs.showSensitiveContent &&
@@ -79,6 +84,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.showLinkPreview == rhs.showLinkPreview &&
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
             lhs.expandMediaSize == rhs.expandMediaSize &&
+            lhs.limitMediaGridToNine == rhs.limitMediaGridToNine &&
             lhs.aiAgentEnabled == rhs.aiAgentEnabled
     }
 }

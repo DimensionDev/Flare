@@ -18,6 +18,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
     private var allowSpacer: Bool = true
     private var postActionStyle: PostActionStyle = .leftAligned
     private var postActionLayout: PostActionLayoutConfig = PostActionLayoutConfig.companion.Default
+    private var postActionFixedWidth: Bool = true
     private var showNumbers: Bool = true
     private var fontSize: CGFloat = 13
     private var textStyle: UIFont.TextStyle = .footnote
@@ -43,6 +44,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         allowSpacer: Bool = true,
         postActionStyle: PostActionStyle,
         postActionLayout: PostActionLayoutConfig = PostActionLayoutConfig.companion.Default,
+        postActionFixedWidth: Bool = true,
         applyPostActionLayout: Bool = true,
         showNumbers: Bool,
         isDetail: Bool
@@ -54,6 +56,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         self.allowSpacer = allowSpacer
         self.postActionStyle = postActionStyle
         self.postActionLayout = postActionLayout
+        self.postActionFixedWidth = postActionFixedWidth
         self.showNumbers = showNumbers
         self.fontSize = UIFontMetrics(forTextStyle: .footnote).scaledValue(for: 13)
         self.textStyle = isDetail ? .body : .footnote
@@ -65,7 +68,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
     }
 
     private var actionIconSize: CGFloat {
-        max(actionFont.pointSize + 1, fontSize * 1.2)
+        actionFont.pointSize
     }
 
     private func rebuild() {
@@ -92,7 +95,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         if postActionStyle == .stretch, allowSpacer {
             isStretch = true
             for (index, item) in data.enumerated() {
-                if let v = makeActionView(for: item, isFixedWidth: index != data.count - 1) {
+                if let v = makeActionView(for: item, isFixedWidth: postActionFixedWidth && index != data.count - 1) {
                     desired.append(v)
                 }
             }
@@ -111,7 +114,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
                 spacerIndex = desired.count
             }
 
-            if let v = makeActionView(for: item, isFixedWidth: index != data.count - 1) {
+            if let v = makeActionView(for: item, isFixedWidth: postActionFixedWidth && index != data.count - 1) {
                 desired.append(v)
             }
         }
@@ -150,7 +153,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         }
 
         // Compute total content width
-        let spacing: CGFloat = 8
+        let spacing: CGFloat = 4
         var totalContentWidth: CGFloat = 0
         var childSizes: [CGSize] = []
         for child in managedChildren {
@@ -286,7 +289,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         let title: String?
         if useText, let text = item.text?.resolvedString {
             title = text
-        } else if showNumbers, let count = item.count?.humanized {
+        } else if showNumbers, let count = item.count?.humanized, !count.isEmpty {
             title = count
         } else {
             title = nil
@@ -302,8 +305,9 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
             tintColor: item.color?.uiColor ?? .secondaryLabel,
             font: actionFont,
             iconSize: actionIconSize,
-            minimumTextWidth: isFixedWidth && title != nil ? fontSize * 2.5 : nil,
-            minimumIconOnlySize: nil
+            minimumTextWidth: isFixedWidth && showNumbers && item.count != nil ? fontSize * 2.5 : nil,
+            minimumIconOnlySize: nil,
+            usesExpandedHitArea: !useText
         ) { [weak self] in
             guard let self = self else { return }
             let gen = UIImpactFeedbackGenerator(style: .medium)
@@ -315,7 +319,7 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
 
     private func makeGroupButton(group: ActionMenu.Group, isFixedWidth: Bool) -> UIView {
         let title: String?
-        if let text = group.displayItem.count?.humanized, showNumbers {
+        if let text = group.displayItem.count?.humanized, showNumbers, !text.isEmpty {
             title = text
         } else {
             title = nil
@@ -331,8 +335,9 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
             tintColor: group.displayItem.color?.uiColor ?? .secondaryLabel,
             font: actionFont,
             iconSize: actionIconSize,
-            minimumTextWidth: isFixedWidth && title != nil ? fontSize * 2.5 : nil,
-            minimumIconOnlySize: title == nil ? actionIconSize : nil
+            minimumTextWidth: isFixedWidth && showNumbers && group.displayItem.count != nil ? fontSize * 2.5 : nil,
+            minimumIconOnlySize: title == nil ? fontSize + 2 : nil,
+            usesExpandedHitArea: !useText
         )
         control.showsMenuAsPrimaryAction = true
         control.menu = UIMenu(children: [
@@ -506,6 +511,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     private var minimumTextWidth: CGFloat?
     private var iconSize: CGFloat = 0
     private var currentSpacing: CGFloat = 0
+    private var horizontalInset: CGFloat = 0
     private var onTap: (() -> Void)?
 
     override init(frame: CGRect) {
@@ -520,7 +526,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         font: UIFont,
         iconSize: CGFloat,
         minimumTextWidth: CGFloat?,
-        minimumIconOnlySize: CGFloat?
+        minimumIconOnlySize: CGFloat?,
+        usesExpandedHitArea: Bool
     ) {
         self.init(frame: .zero)
         configure(
@@ -531,6 +538,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
             iconSize: iconSize,
             minimumTextWidth: minimumTextWidth,
             minimumIconOnlySize: minimumIconOnlySize,
+            usesExpandedHitArea: usesExpandedHitArea,
             onTap: nil
         )
     }
@@ -565,6 +573,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         iconSize: CGFloat,
         minimumTextWidth: CGFloat?,
         minimumIconOnlySize: CGFloat?,
+        usesExpandedHitArea: Bool,
         onTap: (() -> Void)? = nil
     ) {
         self.minimumIconOnlySize = minimumIconOnlySize
@@ -572,7 +581,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.iconSize = iconSize
         self.onTap = onTap
         self.tintColor = tintColor
-        self.currentSpacing = title == nil ? 0 : 4
+        self.currentSpacing = title != nil || minimumTextWidth != nil ? 4 : 0
+        self.horizontalInset = usesExpandedHitArea ? 6 : 0
         menu = nil
         showsMenuAsPrimaryAction = false
 
@@ -599,6 +609,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         label.text = nil
         minimumTextWidth = nil
         minimumIconOnlySize = nil
+        horizontalInset = 0
     }
 
     @objc private func onTapped() {
@@ -608,15 +619,16 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     override func layoutSubviews() {
         super.layoutSubviews()
         let size = actionContentSize()
-        var x: CGFloat = 0
+        let iconLayoutSize = resolvedIconLayoutSize()
+        var x = horizontalInset
         if !iconView.isHidden {
             iconView.frame = CGRect(
                 x: x,
-                y: (size.height - iconSize) / 2,
-                width: iconSize,
-                height: iconSize
+                y: (size.height - iconLayoutSize.height) / 2,
+                width: iconLayoutSize.width,
+                height: iconLayoutSize.height
             )
-            x += iconSize + currentSpacing
+            x += iconLayoutSize.width + currentSpacing
         }
         if !label.isHidden {
             let labelSize = label.sizeThatFits(CGSize(width: .greatestFiniteMagnitude, height: size.height))
@@ -655,23 +667,38 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     }
 
     private func actionContentSize() -> CGSize {
-        let minimum = minimumIconOnlySize ?? 0
+        let minimumIconOnlySize = minimumIconOnlySize ?? 0
         var w: CGFloat = 0
         var h: CGFloat = 0
         if !iconView.isHidden {
-            w += iconSize
-            h = max(h, iconSize)
+            let iconLayoutSize = resolvedIconLayoutSize()
+            w += iconLayoutSize.width
+            h = max(h, iconLayoutSize.height)
         }
         if !label.isHidden {
             let labelSize = label.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
             let labelW = max(labelSize.width, minimumTextWidth ?? 0)
             w += currentSpacing + labelW
             h = max(h, labelSize.height)
+        } else if let minimumTextWidth {
+            w += currentSpacing + minimumTextWidth
         }
         return CGSize(
-            width: ceil(max(w, minimum)),
-            height: ceil(max(h, minimum))
+            width: ceil(max(w, minimumIconOnlySize) + horizontalInset * 2),
+            height: ceil(max(h, minimumIconOnlySize))
         )
+    }
+
+    private func resolvedIconLayoutSize() -> CGSize {
+        let intrinsicSize = iconView.intrinsicContentSize
+        guard intrinsicSize.width > 0,
+              intrinsicSize.height > 0,
+              intrinsicSize.width.isFinite,
+              intrinsicSize.height.isFinite
+        else {
+            return CGSize(width: iconSize, height: iconSize)
+        }
+        return intrinsicSize
     }
 
     override var isHighlighted: Bool {

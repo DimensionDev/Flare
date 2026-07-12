@@ -76,6 +76,7 @@
 		compatLinkPreview: false,
 		showNumbers: true,
 		postActionStyle: 'LeftAligned',
+		postActionFixedWidth: true,
 		fullWidthPost: false,
 		absoluteTimestamp: false,
 		showPlatformLogo: true,

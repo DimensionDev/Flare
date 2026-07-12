@@ -21,6 +21,7 @@ export const defaultTimelineAppearance = {
 	expandMediaSize: true,
 	fullWidthPost: false,
 	lineLimit: 5,
+	postActionFixedWidth: true,
 	postActionStyle: 'LeftAligned',
 	showLinkPreview: true,
 	showMedia: true,

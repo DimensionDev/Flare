@@ -60,6 +60,12 @@ public object AppearanceKeys {
 
     public object ExpandMediaSize : PerTimeline<Boolean>("timeline.expand_media_size", true, Boolean.serializer())
 
+    public object LimitMediaGridToNine : PerTimeline<Boolean>(
+        "timeline.limit_media_grid_to_nine",
+        true,
+        Boolean.serializer(),
+    )
+
     public object VideoAutoplay : PerTimeline<AppearanceVideoAutoplay>(
         "timeline.video_autoplay",
         AppearanceVideoAutoplay.WIFI,
@@ -82,6 +88,12 @@ public object AppearanceKeys {
         "timeline.post_action_layout",
         AppearancePostActionLayoutConfig.Default,
         AppearancePostActionLayoutConfig.serializer(),
+    )
+
+    public object PostActionFixedWidth : PerTimeline<Boolean>(
+        "timeline.post_action_fixed_width",
+        true,
+        Boolean.serializer(),
     )
 
     public object FullWidthPost : PerTimeline<Boolean>("timeline.full_width_post", false, Boolean.serializer())
@@ -115,12 +127,14 @@ public object AppearanceKeys {
             ShowSensitiveContent,
             ExpandContentWarning,
             ExpandMediaSize,
+            LimitMediaGridToNine,
             VideoAutoplay,
             ShowLinkPreview,
             CompatLinkPreview,
             ShowNumbers,
             PostActionStyle,
             PostActionLayout,
+            PostActionFixedWidth,
             FullWidthPost,
             AbsoluteTimestamp,
             ShowPlatformLogo,

@@ -14178,6 +14178,50 @@
         }
       }
     },
+    "appearance_limit_media_grid_to_nine" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit media grids to 9 items"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体网格最多显示 9 项"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒體網格最多顯示 9 項"
+          }
+        }
+      }
+    },
+    "appearance_limit_media_grid_to_nine_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show at most 9 media items in each timeline post"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每条时间轴动态最多显示 9 项媒体"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每則時間軸貼文最多顯示 9 項媒體"
+          }
+        }
+      }
+    },
     "appearance_media_group_subtitle" : {
       "localizations" : {
         "af" : {
@@ -117389,6 +117433,62 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "貼文操作"
+          }
+        }
+      }
+    },
+    "post_action_fixed_width" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed button width"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボタンの幅を固定"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按钮固定宽度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按鈕固定寬度"
+          }
+        }
+      }
+    },
+    "post_action_fixed_width_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep action buttons with counts at a consistent width"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カウント付きアクションボタンの幅を揃えます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "让带数字的操作按钮保持统一宽度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "讓帶數字的操作按鈕保持一致寬度"
           }
         }
       }

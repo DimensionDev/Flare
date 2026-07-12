@@ -171,7 +171,7 @@ struct RootView: View {
         } detail: {
             if let selectedTab {
                 Router(
-                    initialRoute: selectedTab,
+                    initialRoute: routeWithLatestTimelinePresentation(selectedTab),
                     externalNavigationRequest: mainNavigationRequest
                 )
                 .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 500)
@@ -255,6 +255,18 @@ struct RootView: View {
                 selectedTab = route
             }
         }
+    }
+
+    private func routeWithLatestTimelinePresentation(_ route: Route) -> Route {
+        guard case .timeline(let selectedTimeline) = route,
+              case .success(let data) = onEnum(of: homeTimelineWithTabsPresenter.state.tabState),
+              let latestTimeline = data.data
+                .cast(UiTimelineTabItem.self)
+                .first(where: { $0.id == selectedTimeline.id })
+        else {
+            return route
+        }
+        return .timeline(latestTimeline)
     }
 
     private func handleMainWindowNavigationRequest(_ request: MacMainWindowNavigationRequest?) {

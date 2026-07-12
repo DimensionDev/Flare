@@ -61,6 +61,8 @@ import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
 import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
+import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
+import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
 import dev.dimension.flare.settings_appearance_post_action_style
@@ -91,6 +93,8 @@ import dev.dimension.flare.settings_appearance_video_autoplay_always
 import dev.dimension.flare.settings_appearance_video_autoplay_description
 import dev.dimension.flare.settings_appearance_video_autoplay_never
 import dev.dimension.flare.settings_appearance_video_autoplay_wifi
+import dev.dimension.flare.settings_post_action_fixed_width
+import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.tab_settings_filter_content_group
 import dev.dimension.flare.tab_settings_filter_desc
 import dev.dimension.flare.tab_settings_filter_image
@@ -152,6 +156,7 @@ internal fun TimelinePresentationEditor(
         appearancePatch.contains(AppearanceKeys.TimelineDisplayMode) ||
             appearancePatch.contains(AppearanceKeys.FullWidthPost) ||
             appearancePatch.contains(AppearanceKeys.PostActionStyle) ||
+            appearancePatch.contains(AppearanceKeys.PostActionFixedWidth) ||
             appearancePatch.contains(AppearanceKeys.ShowNumbers)
     val displayOverridesEnabled =
         appearancePatch.contains(AppearanceKeys.AbsoluteTimestamp) ||
@@ -163,6 +168,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
             appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
+            appearancePatch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
     var showFilterDialog by remember { mutableStateOf(false) }
@@ -229,11 +235,16 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.PostActionStyle,
                                         timelineAppearance.postActionStyle,
                                     ).set(AppearanceKeys.ShowNumbers, timelineAppearance.showNumbers)
+                                    .set(
+                                        AppearanceKeys.PostActionFixedWidth,
+                                        timelineAppearance.postActionFixedWidth,
+                                    )
                             } else {
                                 appearancePatch.clearAll(
                                     AppearanceKeys.TimelineDisplayMode,
                                     AppearanceKeys.FullWidthPost,
                                     AppearanceKeys.PostActionStyle,
+                                    AppearanceKeys.PostActionFixedWidth,
                                     AppearanceKeys.ShowNumbers,
                                 )
                             },
@@ -305,6 +316,20 @@ internal fun TimelinePresentationEditor(
                                     onAppearancePatchChange(
                                         appearancePatch.set(
                                             AppearanceKeys.ShowNumbers,
+                                            it,
+                                        ),
+                                    )
+                                },
+                            )
+                            ExpanderItemSeparator()
+                            SwitchItem(
+                                title = stringResource(Res.string.settings_post_action_fixed_width),
+                                caption = stringResource(Res.string.settings_post_action_fixed_width_description),
+                                checked = timelineAppearance.postActionFixedWidth,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.PostActionFixedWidth,
                                             it,
                                         ),
                                     )
@@ -426,6 +451,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(
+                                        AppearanceKeys.LimitMediaGridToNine,
+                                        timelineAppearance.limitMediaGridToNine,
+                                    ).set(
                                         AppearanceKeys.VideoAutoplay,
                                         timelineAppearance.videoAutoplay,
                                     )
@@ -435,6 +463,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowSensitiveContent,
                                     AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.LimitMediaGridToNine,
                                     AppearanceKeys.VideoAutoplay,
                                 )
                             },
@@ -479,6 +508,20 @@ internal fun TimelinePresentationEditor(
                                     onAppearancePatchChange(
                                         appearancePatch.set(
                                             AppearanceKeys.ExpandContentWarning,
+                                            it,
+                                        ),
+                                    )
+                                },
+                            )
+                            ExpanderItemSeparator()
+                            SwitchItem(
+                                title = stringResource(Res.string.settings_appearance_limit_media_grid_to_nine),
+                                caption = stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description),
+                                checked = timelineAppearance.limitMediaGridToNine,
+                                onCheckedChange = {
+                                    onAppearancePatchChange(
+                                        appearancePatch.set(
+                                            AppearanceKeys.LimitMediaGridToNine,
                                             it,
                                         ),
                                     )

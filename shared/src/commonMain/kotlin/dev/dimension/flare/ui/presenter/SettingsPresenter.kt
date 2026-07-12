@@ -84,6 +84,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateExpandMediaSize(value: Boolean) = update(AppearanceKeys.ExpandMediaSize, value)
 
+            override fun updateLimitMediaGridToNine(value: Boolean) = update(AppearanceKeys.LimitMediaGridToNine, value)
+
             override fun updateShowSensitiveContent(value: Boolean) = update(AppearanceKeys.ShowSensitiveContent, value)
 
             override fun updateExpandContentWarning(value: Boolean) = update(AppearanceKeys.ExpandContentWarning, value)
@@ -101,6 +103,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
             override fun updatePostActionStyle(value: PostActionStyle) = update(AppearanceKeys.PostActionStyle, value)
 
             override fun updatePostActionLayout(value: PostActionLayoutConfig) = update(AppearanceKeys.PostActionLayout, value)
+
+            override fun updatePostActionFixedWidth(value: Boolean) = update(AppearanceKeys.PostActionFixedWidth, value)
 
             override fun updateShowNumbers(value: Boolean) = update(AppearanceKeys.ShowNumbers, value)
 
@@ -150,6 +154,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
         public fun updateExpandMediaSize(value: Boolean)
 
+        public fun updateLimitMediaGridToNine(value: Boolean)
+
         public fun updateShowSensitiveContent(value: Boolean)
 
         public fun updateExpandContentWarning(value: Boolean)
@@ -167,6 +173,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updatePostActionStyle(value: PostActionStyle)
 
         public fun updatePostActionLayout(value: PostActionLayoutConfig)
+
+        public fun updatePostActionFixedWidth(value: Boolean)
 
         public fun updateShowNumbers(value: Boolean)
 

@@ -4,12 +4,11 @@ import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.flowOf
 import kotlin.test.Test
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
 
 class XQTArticleDataSourceTest {
     @Test
-    fun articleCommentsUsesFullStatusContext() {
+    fun articleCommentsUsesDedicatedCommentsLoader() {
         val dataSource =
             XQTDataSource(
                 accountKey = MicroBlogKey(id = "account", host = "x.com"),
@@ -21,7 +20,6 @@ class XQTArticleDataSourceTest {
                 articleKey = MicroBlogKey(id = "article", host = "x.com"),
             )
 
-        val contextLoader = assertIs<StatusDetailRemoteMediator>(loader)
-        assertFalse(contextLoader.collapseReplyChains)
+        assertIs<ArticleCommentsRemoteMediator>(loader)
     }
 }

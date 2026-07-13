@@ -377,6 +377,35 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
         it.tweets.promotedMetadata == null
     }
 
+internal fun List<InstructionUnion>.conversationTweets(): List<XQTTimeline> =
+    flatMap { instruction ->
+        when (instruction) {
+            is TimelineAddEntries -> {
+                instruction.propertyEntries.flatMap { entry ->
+                    when (entry.content) {
+                        is TimelineTimelineModule -> {
+                            listOf<InstructionUnion>(
+                                TimelineAddEntries(propertyEntries = listOf(entry)),
+                            ).tweets()
+                        }
+
+                        else -> {
+                            emptyList()
+                        }
+                    }
+                }
+            }
+
+            is TimelineAddToModule -> {
+                listOf<InstructionUnion>(instruction).tweets()
+            }
+
+            else -> {
+                emptyList()
+            }
+        }
+    }
+
 internal fun List<InstructionUnion>.cursor() =
     flatMap {
         when (it) {

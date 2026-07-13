@@ -1,7 +1,5 @@
 package dev.dimension.flare.ui.presenter.article
 
-import androidx.paging.testing.ErrorRecovery
-import androidx.paging.testing.LoadErrorHandler
 import androidx.paging.testing.asSnapshot
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
@@ -31,9 +29,8 @@ class ArticlePresenterTest {
     private val articleKey = MicroBlogKey("article", "x.com")
 
     @Test
-    fun commentsFlow_filtersArticleAndKeepsReplyOrderAcrossPages() =
+    fun commentsFlow_keepsReplyOrderAcrossPages() =
         runTest {
-            val root = createPost(articleKey)
             val firstReply = createPost(MicroBlogKey("reply-1", articleKey.host))
             val secondReply = createPost(MicroBlogKey("reply-2", articleKey.host))
             val requests = mutableListOf<PagingRequest>()
@@ -50,7 +47,7 @@ class ArticlePresenterTest {
                             return when (request) {
                                 PagingRequest.Refresh -> {
                                     PagingResult(
-                                        data = listOf(root, firstReply),
+                                        data = listOf(firstReply),
                                         nextKey = "next",
                                     )
                                 }
@@ -89,7 +86,7 @@ class ArticlePresenterTest {
         }
 
     @Test
-    fun commentsFlow_isEmptyWhenOnlyArticleIsReturned() =
+    fun commentsFlow_isEmptyWhenLoaderReturnsNoComments() =
         runTest {
             val dataSource =
                 fakeArticleDataSource {
@@ -99,7 +96,6 @@ class ArticlePresenterTest {
                             request: PagingRequest,
                         ): PagingResult<UiTimelineV2> =
                             PagingResult(
-                                data = listOf(createPost(articleKey)),
                                 endOfPaginationReached = true,
                             )
                     }
@@ -112,47 +108,6 @@ class ArticlePresenterTest {
                 ).asSnapshot()
 
             assertTrue(snapshot.isEmpty())
-        }
-
-    @Test
-    fun commentsFlow_retriesLoaderCreationFailure() =
-        runTest {
-            var requestCount = 0
-            var errorCount = 0
-            val reply = createPost(MicroBlogKey("reply", articleKey.host))
-            val dataSource =
-                fakeArticleDataSource {
-                    requestCount++
-                    if (requestCount == 1) {
-                        error("comments unavailable")
-                    }
-                    object : RemoteLoader<UiTimelineV2> {
-                        override suspend fun load(
-                            pageSize: Int,
-                            request: PagingRequest,
-                        ): PagingResult<UiTimelineV2> =
-                            PagingResult(
-                                data = listOf(reply),
-                                endOfPaginationReached = true,
-                            )
-                    }
-                }
-
-            val snapshot =
-                articleCommentsFlow(
-                    dataSources = flowOf(dataSource),
-                    articleKey = articleKey,
-                ).asSnapshot(
-                    onError =
-                        LoadErrorHandler {
-                            errorCount++
-                            ErrorRecovery.RETRY
-                        },
-                )
-
-            assertEquals(listOf(reply.statusKey), snapshot.mapNotNull { it.contentPostOrNull()?.statusKey })
-            assertEquals(2, requestCount)
-            assertEquals(1, errorCount)
         }
 
     private fun fakeArticleDataSource(comments: (MicroBlogKey) -> RemoteLoader<UiTimelineV2>): ArticleDataSource =

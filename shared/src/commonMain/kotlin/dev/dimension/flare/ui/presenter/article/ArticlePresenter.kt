@@ -10,15 +10,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.filter
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
-import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -33,7 +29,6 @@ import dev.dimension.flare.ui.model.UiArticleAuthor
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
@@ -120,42 +115,12 @@ internal fun articleCommentsFlow(
     articleKey: MicroBlogKey,
 ): Flow<PagingData<UiTimelineV2>> =
     dataSources.flatMapLatest { dataSource ->
+        val articleDataSource =
+            dataSource as? ArticleDataSource
+                ?: error("Current service does not support article data source")
         Pager(config = pagingConfig) {
-            retryableArticleCommentsLoader(
-                dataSource = dataSource,
-                articleKey = articleKey,
-            ).toPagingSource()
-        }.flow.map { pagingData ->
-            pagingData.filter { item ->
-                item.contentPostOrNull()?.statusKey != articleKey
-            }
-        }
-    }
-
-private fun retryableArticleCommentsLoader(
-    dataSource: Any,
-    articleKey: MicroBlogKey,
-): RemoteLoader<UiTimelineV2> =
-    object : RemoteLoader<UiTimelineV2> {
-        private var delegate: RemoteLoader<UiTimelineV2>? = null
-
-        override suspend fun load(
-            pageSize: Int,
-            request: PagingRequest,
-        ): PagingResult<UiTimelineV2> {
-            val loader =
-                delegate
-                    ?: run {
-                        val articleDataSource =
-                            dataSource as? ArticleDataSource
-                                ?: error("Current service does not support article data source")
-                        articleDataSource.articleComments(articleKey).also { delegate = it }
-                    }
-            return loader.load(
-                pageSize = pageSize,
-                request = request,
-            )
-        }
+            articleDataSource.articleComments(articleKey).toPagingSource()
+        }.flow
     }
 
 private fun UiArticle.toHistoryFeed(

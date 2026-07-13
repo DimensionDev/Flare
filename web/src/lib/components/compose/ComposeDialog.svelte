@@ -726,6 +726,8 @@
 				class="input compose-inline-input"
 				bind:value={spoilerText}
 				disabled={composeBusy}
+				autocapitalize="sentences"
+				inputmode="text"
 				placeholder={m.composeContentWarningHint()}
 			/>
 			<div class="compose-divider"></div>
@@ -736,6 +738,8 @@
 			class="textarea compose-textarea"
 			bind:value={text}
 			disabled={composeBusy}
+			autocapitalize="sentences"
+			inputmode="text"
 			placeholder={m.composeHint()}
 		></textarea>
 
@@ -769,6 +773,8 @@
 							class="input input-sm media-alt-input"
 							value={item.altText}
 							disabled={composeBusy}
+							autocapitalize="sentences"
+							inputmode="text"
 							placeholder={m.composeAltText()}
 							oninput={(event) => updateMediaAltText(index, event.currentTarget.value)}
 						/>
@@ -816,6 +822,8 @@
 							class="input input-bordered join-item min-w-0 flex-1"
 							value={option}
 							disabled={composeBusy}
+							autocapitalize="sentences"
+							inputmode="text"
 							placeholder={m.composePollOptionHint({ option: index + 1 })}
 							oninput={(event) => updatePollOption(index, event.currentTarget.value)}
 						/>

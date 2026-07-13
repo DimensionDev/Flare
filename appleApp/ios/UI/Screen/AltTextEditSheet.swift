@@ -19,6 +19,8 @@ struct AltTextEditSheet: View {
                 
                 TextField("Description", text: $item.altText, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
+                    .textInputAutocapitalization(.sentences)
+                    .keyboardType(.twitter)
                     .lineLimit(3...10)
                     .padding()
                     .onChange(of: item.altText) { oldValue, newValue in

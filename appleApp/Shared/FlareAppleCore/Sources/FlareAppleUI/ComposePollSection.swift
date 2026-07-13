@@ -211,6 +211,7 @@ public struct ComposePollSection: View {
                         Text("compose_poll_choice_placeholder", bundle: FlareAppleUILocalization.bundle)
                     }
                     .textFieldStyle(.roundedBorder)
+                    .composeTextInputConfiguration()
 
                     Button {
                         withAnimation {
@@ -240,5 +241,18 @@ public struct ComposePollSection: View {
                 }
             }
         }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func composeTextInputConfiguration() -> some View {
+        #if os(iOS)
+            self
+                .textInputAutocapitalization(.sentences)
+                .keyboardType(.twitter)
+        #else
+            self
+        #endif
     }
 }

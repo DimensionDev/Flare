@@ -68,6 +68,8 @@ struct ComposeScreen: View {
                             Text("compose_cw_placeholder")
                         }
                         .textFieldStyle(.plain)
+                        .textInputAutocapitalization(.sentences)
+                        .keyboardType(.twitter)
                         .focused($cwKeyboardFocused)
                         Divider()
                     }
@@ -75,6 +77,8 @@ struct ComposeScreen: View {
                     TextField(text: $viewModel.text, axis: .vertical) {
                         Text("compose_placeholder")
                     }
+                    .textInputAutocapitalization(.sentences)
+                    .keyboardType(.twitter)
                     .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18, .v26, .v27)) { textField in
                         self.uiTextView = textField
                         applyCursorIfPossible()

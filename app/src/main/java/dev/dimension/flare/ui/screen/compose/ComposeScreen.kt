@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
@@ -74,6 +75,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -385,6 +388,7 @@ internal fun ComposeScreen(
                     ) {
                         TextField(
                             state = it.textFieldState,
+                            keyboardOptions = composeKeyboardOptions,
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
@@ -415,6 +419,7 @@ internal fun ComposeScreen(
             ) {
                 TextField(
                     state = state.textFieldState,
+                    keyboardOptions = composeKeyboardOptions,
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -525,6 +530,7 @@ internal fun ComposeScreen(
                                                         text = {
                                                             OutlinedTextField(
                                                                 media.textState,
+                                                                keyboardOptions = composeKeyboardOptions,
                                                                 trailingIcon = {
                                                                     val remainingLength =
                                                                         mediaState.altTextMaxLength - media.textState.text.length
@@ -1031,6 +1037,7 @@ private fun PollOption(
 ) {
     OutlinedTextField(
         state = textFieldState,
+        keyboardOptions = composeKeyboardOptions,
         modifier =
             modifier
                 .fillMaxWidth(),
@@ -1047,6 +1054,12 @@ private fun PollOption(
         },
     )
 }
+
+private val composeKeyboardOptions =
+    KeyboardOptions(
+        capitalization = KeyboardCapitalization.Sentences,
+        keyboardType = KeyboardType.Text,
+    )
 
 @Composable
 private fun composePresenter(

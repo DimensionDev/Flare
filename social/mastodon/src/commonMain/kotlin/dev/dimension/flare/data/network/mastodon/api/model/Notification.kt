@@ -16,28 +16,30 @@ internal data class Notification(
 )
 
 @Serializable
-internal enum class NotificationTypes {
+internal enum class NotificationTypes(
+    val apiValue: String,
+) {
     @SerialName("follow")
-    Follow,
+    Follow("follow"),
 
     @SerialName("favourite")
-    Favourite,
+    Favourite("favourite"),
 
     @SerialName("reblog")
-    Reblog,
+    Reblog("reblog"),
 
     @SerialName("mention")
-    Mention,
+    Mention("mention"),
 
     @SerialName("poll")
-    Poll,
+    Poll("poll"),
 
     @SerialName("follow_request")
-    FollowRequest,
+    FollowRequest("follow_request"),
 
     @SerialName("status")
-    Status,
+    Status("status"),
 
     @SerialName("update")
-    Update,
+    Update("update"),
 }

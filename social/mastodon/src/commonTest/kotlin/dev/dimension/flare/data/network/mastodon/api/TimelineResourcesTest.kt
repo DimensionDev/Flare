@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.mastodon.api
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import de.jensklingenberg.ktorfit.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
+import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -13,11 +14,10 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class TimelineResourcesTest {
     @Test
-    fun notificationSerializesMentionTypeAsLowercaseQueryParameter() =
+    fun notificationSerializesExcludedTypesAsLowercaseQueryParameters() =
         runTest {
             var requestedUrl: Url? = null
             val client =
@@ -43,9 +43,16 @@ class TimelineResourcesTest {
                     )
                 }.createTimelineResources()
 
-            resources.notification(types = listOf("mention"))
+            resources.notification(
+                exclude_types =
+                    NotificationTypes.entries
+                        .filter { it != NotificationTypes.Mention }
+                        .map { it.apiValue },
+            )
 
-            assertEquals(listOf("mention"), requestedUrl?.parameters?.getAll("types[]"))
-            assertNull(requestedUrl?.parameters?.get("exclude_types[]"))
+            assertEquals(
+                listOf("follow", "favourite", "reblog", "poll", "follow_request", "status", "update"),
+                requestedUrl?.parameters?.getAll("exclude_types[]"),
+            )
         }
 }

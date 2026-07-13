@@ -6,7 +6,6 @@ import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.Context
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
-import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 
 internal interface TimelineResources {
@@ -57,8 +56,7 @@ internal interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-        @Query("types[]") types: List<String>? = null,
-        @Query("exclude_types[]") exclude_types: List<NotificationTypes>? = null,
+        @Query("exclude_types[]") exclude_types: List<String>? = null,
         @Query("account_id") account_id: String? = null,
     ): MastodonPaging<Notification>
 

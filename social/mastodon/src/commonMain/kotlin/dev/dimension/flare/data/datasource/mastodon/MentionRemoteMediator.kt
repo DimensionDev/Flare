@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -26,7 +27,7 @@ internal class MentionRemoteMediator(
                     service
                         .notification(
                             limit = pageSize,
-                            types = listOf(MENTION_TYPE),
+                            exclude_types = MENTION_EXCLUDED_TYPES,
                         )
                 }
 
@@ -34,7 +35,7 @@ internal class MentionRemoteMediator(
                     service.notification(
                         limit = pageSize,
                         min_id = request.previousKey,
-                        types = listOf(MENTION_TYPE),
+                        exclude_types = MENTION_EXCLUDED_TYPES,
                     )
                 }
 
@@ -42,7 +43,7 @@ internal class MentionRemoteMediator(
                     service.notification(
                         limit = pageSize,
                         max_id = request.nextKey,
-                        types = listOf(MENTION_TYPE),
+                        exclude_types = MENTION_EXCLUDED_TYPES,
                     )
                 }
             }
@@ -56,4 +57,7 @@ internal class MentionRemoteMediator(
     }
 }
 
-private const val MENTION_TYPE = "mention"
+private val MENTION_EXCLUDED_TYPES =
+    NotificationTypes.entries
+        .filter { it != NotificationTypes.Mention }
+        .map { it.apiValue }

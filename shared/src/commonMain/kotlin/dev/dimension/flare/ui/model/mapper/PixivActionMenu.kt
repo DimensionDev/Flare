@@ -8,30 +8,30 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiNumber
 
-public fun ActionMenu.Companion.pixivBookmark(
+public fun ActionMenu.Companion.pixivFavourite(
     statusKey: MicroBlogKey,
-    bookmarked: Boolean,
+    favourited: Boolean,
     count: Long,
     accountKey: MicroBlogKey,
 ): ActionMenu.Item =
     ActionMenu.Item(
         updateKey = "pixiv_bookmark_$statusKey",
-        icon = if (bookmarked) UiIcon.Unbookmark else UiIcon.Bookmark,
+        icon = if (favourited) UiIcon.Unlike else UiIcon.Like,
         text =
             ActionMenu.Item.Text.Localized(
-                if (bookmarked) ActionMenu.Item.Text.Localized.Type.Unbookmark else ActionMenu.Item.Text.Localized.Type.Bookmark,
+                if (favourited) ActionMenu.Item.Text.Localized.Type.UnFavorite else ActionMenu.Item.Text.Localized.Type.Favorite,
             ),
         count = UiNumber(count),
-        color = if (bookmarked) ActionMenu.Item.Color.PrimaryColor else null,
+        color = if (favourited) ActionMenu.Item.Color.Red else null,
         clickEvent =
             ClickEvent.event(
                 accountKey,
                 PostEvent.Pixiv.Bookmark(
                     postKey = statusKey,
-                    bookmarked = bookmarked,
+                    bookmarked = favourited,
                     count = count,
                     accountKey = accountKey,
                 ),
             ),
-        actionFamily = PostActionFamily.Bookmark,
+        actionFamily = PostActionFamily.Favorite,
     )

@@ -285,7 +285,7 @@ internal fun HomeTimelineScreen(
                         state.pagerState.onSuccess { pagerState ->
                             state.tabState.onSuccess { tabs ->
                                 if (tabs.any()) {
-                                    if (tabs.size > MAX_SCROLLABLE_HOME_TABS) {
+                                    if (isCompatScreen() && tabs.size > MAX_SCROLLABLE_HOME_TABS) {
                                         HomeTabDropdown(
                                             tabs = tabs,
                                             selectedTabIndex =

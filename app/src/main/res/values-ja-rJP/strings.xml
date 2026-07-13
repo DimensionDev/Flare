@@ -663,6 +663,7 @@
     <string name="media_prepare_started">メディアを準備中...</string>
     <string name="pixiv_private_following_title">非公開フォロー</string>
     <string name="pixiv_private_bookmarks_title">非公開ブックマーク</string>
+    <string name="pixiv_private_favourites_title">非公開のお気に入り</string>
     <string name="article_content_gate_subscription_title">支援が必要です</string>
     <string name="article_content_gate_subscription_description">この記事は支援者のみ閲覧できます。ブラウザで開いてクリエイターを支援し、全文を読んでください。</string>
     <string name="article_content_gate_subscription_description_with_fee">この記事は ¥%1$d 以上の支援者のみ閲覧できます。ブラウザで開いてクリエイターを支援し、全文を読んでください。</string>

@@ -22,7 +22,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.mapper.pixivBookmark
+import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
@@ -61,13 +61,13 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
         actions =
             persistentListOf(
                 ActionMenu.Item(
-                    icon = UiIcon.Info,
+                    icon = UiIcon.Eye,
                     count = UiNumber(totalView),
                     clickEvent = ClickEvent.Noop,
                 ),
-                ActionMenu.pixivBookmark(
+                ActionMenu.pixivFavourite(
                     statusKey = statusKey,
-                    bookmarked = isBookmarked,
+                    favourited = isBookmarked,
                     count = totalBookmarks,
                     accountKey = accountKey,
                 ),

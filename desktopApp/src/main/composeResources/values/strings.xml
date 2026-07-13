@@ -54,6 +54,7 @@
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
     <string name="pixiv_private_following_title">Private Following</string>
     <string name="pixiv_private_bookmarks_title">Private Bookmarks</string>
+    <string name="pixiv_private_favourites_title">Private Favorites</string>
 
     <string name="report_title">Report</string>
     <string name="report_description">What's wrong with this post?</string>

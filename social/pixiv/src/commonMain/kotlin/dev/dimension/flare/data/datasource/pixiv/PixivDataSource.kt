@@ -208,8 +208,8 @@ internal class PixivDataSource(
                     ),
             ),
             ShortcutSpec(
-                title = UiStrings.Bookmark,
-                icon = UiIcon.Bookmark,
+                title = UiStrings.Favourite,
+                icon = UiIcon.Heart,
                 target =
                     ShortcutSpec.Target.Timeline(
                         PixivPlatformSpec.bookmarkTimelineSpec.galleryCandidate(
@@ -218,8 +218,8 @@ internal class PixivDataSource(
                     ),
             ),
             ShortcutSpec(
-                title = UiStrings.PixivPrivateBookmarks,
-                icon = UiIcon.Bookmark,
+                title = UiStrings.PixivPrivateFavourites,
+                icon = UiIcon.Heart,
                 target =
                     ShortcutSpec.Target.Timeline(
                         PixivPlatformSpec.privateBookmarkTimelineSpec.galleryCandidate(
@@ -329,15 +329,15 @@ internal class PixivDataSource(
         postHandler.post(statusKey).map {
             val post = it.contentPostOrNull() ?: error("Gallery detail should be a post")
             val actionItems = post.actions.filterIsInstance<ActionMenu.Item>()
-            val bookmarkAction =
+            val favouriteAction =
                 actionItems.firstOrNull { action ->
                     val text = action.text as? ActionMenu.Item.Text.Localized
-                    text?.type == ActionMenu.Item.Text.Localized.Type.Bookmark ||
-                        text?.type == ActionMenu.Item.Text.Localized.Type.Unbookmark
+                    text?.type == ActionMenu.Item.Text.Localized.Type.Favorite ||
+                        text?.type == ActionMenu.Item.Text.Localized.Type.UnFavorite
                 }
-            val bookmarkText = bookmarkAction?.text as? ActionMenu.Item.Text.Localized
-            val bookmarked = bookmarkText?.type == ActionMenu.Item.Text.Localized.Type.Unbookmark
-            val bookmarkCount = bookmarkAction?.count?.value ?: 0L
+            val favouriteText = favouriteAction?.text as? ActionMenu.Item.Text.Localized
+            val favourited = favouriteText?.type == ActionMenu.Item.Text.Localized.Type.UnFavorite
+            val favouriteCount = favouriteAction?.count?.value ?: 0L
             GalleryDetail(
                 orientation = GalleryOrientation.Vertical,
                 statusKey = post.statusKey,
@@ -348,15 +348,15 @@ internal class PixivDataSource(
                 author = post.user,
                 createdAt = post.createdAt,
                 content = post.content.takeUnless { content -> content.isEmpty },
-                isBookmarked = bookmarked,
+                isBookmarked = favourited,
                 bookmarkAction =
                     ClickEvent.event(
                         accountKey = accountKey,
                         postEvent =
                             PostEvent.Pixiv.Bookmark(
                                 postKey = post.statusKey,
-                                bookmarked = bookmarked,
-                                count = bookmarkCount,
+                                bookmarked = favourited,
+                                count = favouriteCount,
                                 accountKey = accountKey,
                             ),
                     ),

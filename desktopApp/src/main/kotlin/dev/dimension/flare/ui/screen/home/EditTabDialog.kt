@@ -53,7 +53,7 @@ import dev.dimension.flare.mastodon_tab_public_title
 import dev.dimension.flare.misskey_channel_tab_following
 import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.ok
-import dev.dimension.flare.pixiv_private_bookmarks_title
+import dev.dimension.flare.pixiv_private_favourites_title
 import dev.dimension.flare.pixiv_private_following_title
 import dev.dimension.flare.pixiv_ranking_day_female_title
 import dev.dimension.flare.pixiv_ranking_day_male_title
@@ -219,56 +219,110 @@ private val UiStrings.desktopStringResource: StringResource
     get() =
         when (this) {
             UiStrings.Default -> Res.string.tab_settings_default
+
             UiStrings.Home -> Res.string.home_tab_home_title
+
             UiStrings.Notifications -> Res.string.home_tab_notifications_title
+
             UiStrings.Discover -> Res.string.home_tab_discover_title
+
             UiStrings.Me -> Res.string.home_tab_me_title
+
             UiStrings.Settings -> Res.string.settings_title
+
             UiStrings.MastodonLocal -> Res.string.mastodon_tab_local_title
+
             UiStrings.MastodonPublic -> Res.string.mastodon_tab_public_title
+
             UiStrings.Featured -> Res.string.home_tab_featured_title
+
             UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
+
             UiStrings.Favourite -> Res.string.home_tab_favorite_title
+
             UiStrings.List -> Res.string.home_tab_list_title
+
             UiStrings.Feeds -> Res.string.home_tab_feeds_title
+
             UiStrings.DirectMessage -> Res.string.dm_list_title
+
             UiStrings.Rss -> Res.string.rss_title
+
             UiStrings.Social -> Res.string.social_title
+
             UiStrings.Antenna -> Res.string.antenna_title
+
             UiStrings.MixedTimeline -> Res.string.mixed_timeline_title
+
             UiStrings.Liked -> Res.string.liked_title
+
             UiStrings.AllRssFeeds -> Res.string.all_rss_feeds_title
+
             UiStrings.Posts -> Res.string.posts_title
+
             UiStrings.PostsWithReplies -> Res.string.profile_tab_timeline_with_reply
+
             UiStrings.Media -> Res.string.profile_tab_media
+
             UiStrings.Channel -> Res.string.channel_title
+
             UiStrings.Login -> Res.string.ok
+
             UiStrings.Verify -> Res.string.ok
+
             UiStrings.Cancel -> Res.string.cancel
+
             UiStrings.Next -> Res.string.service_select_next_button
+
             UiStrings.Username -> Res.string.bluesky_login_username
+
             UiStrings.Password -> Res.string.bluesky_login_password
+
             UiStrings.Otp -> Res.string.bluesky_login_2fa
+
             UiStrings.OAuthLogin -> Res.string.bluesky_login_oauth_button
+
             UiStrings.BlueskyFixDelegationScopes -> Res.string.bluesky_login_fix_delegation_scopes_button
+
             UiStrings.PasswordLogin -> Res.string.bluesky_login_use_password_button
+
             UiStrings.QrConnect -> Res.string.ok
+
             UiStrings.CredentialImport -> Res.string.ok
+
             UiStrings.ExternalSigner -> Res.string.ok
+
             UiStrings.WebCookieLogin -> Res.string.ok
+
             UiStrings.NostrLoginAccount -> Res.string.ok
+
             UiStrings.Following -> Res.string.misskey_channel_tab_following
+
             UiStrings.PixivRankingWeek -> Res.string.pixiv_ranking_week_title
+
             UiStrings.PixivRankingMonth -> Res.string.pixiv_ranking_month_title
+
             UiStrings.PixivRankingDayMale -> Res.string.pixiv_ranking_day_male_title
+
             UiStrings.PixivRankingDayFemale -> Res.string.pixiv_ranking_day_female_title
+
             UiStrings.PixivRankingWeekOriginal -> Res.string.pixiv_ranking_week_original_title
+
             UiStrings.PixivRankingWeekRookie -> Res.string.pixiv_ranking_week_rookie_title
+
             UiStrings.PixivRankingDayManga -> Res.string.pixiv_ranking_day_manga_title
+
             UiStrings.Illustrations -> Res.string.illustrations_title
+
             UiStrings.Manga -> Res.string.manga_title
+
             UiStrings.FanboxSupported -> Res.string.fanbox_supported_title
+
             UiStrings.FanboxRecommendedCreators -> Res.string.fanbox_recommended_creators_title
+
             UiStrings.PixivPrivateFollowing -> Res.string.pixiv_private_following_title
-            UiStrings.PixivPrivateBookmarks -> Res.string.pixiv_private_bookmarks_title
+
+            UiStrings.PixivPrivateBookmarks,
+            UiStrings.PixivPrivateFavourites,
+            -> Res.string.pixiv_private_favourites_title
         }

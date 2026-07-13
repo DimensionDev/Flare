@@ -104,7 +104,8 @@ export function localizedUiString(value: UiStrings): string {
 		case 'PixivPrivateFollowing':
 			return 'Private Following';
 		case 'PixivPrivateBookmarks':
-			return 'Private Bookmarks';
+		case 'PixivPrivateFavourites':
+			return 'Private Favorites';
 		default:
 			return m.loginCredentialImport();
 	}

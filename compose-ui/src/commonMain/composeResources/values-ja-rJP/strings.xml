@@ -426,6 +426,7 @@
     <string name="bluesky_login_fix_delegation_scopes_button">Tranquil の権限を修正</string>
     <string name="pixiv_private_following_title">非公開フォロー</string>
     <string name="pixiv_private_bookmarks_title">非公開ブックマーク</string>
+    <string name="pixiv_private_favourites_title">非公開のお気に入り</string>
     <string name="fanbox_supported_title">支援中</string>
     <string name="fanbox_recommended_creators_title">おすすめクリエイター</string>
 </resources>

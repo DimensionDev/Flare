@@ -170,56 +170,110 @@ private val UiStrings.androidStringRes: Int
     get() =
         when (this) {
             UiStrings.Default -> R.string.tab_settings_default
+
             UiStrings.Home -> R.string.home_tab_home_title
+
             UiStrings.Notifications -> R.string.home_tab_notifications_title
+
             UiStrings.Discover -> R.string.home_tab_discover_title
+
             UiStrings.Me -> R.string.home_tab_me_title
+
             UiStrings.Settings -> R.string.settings_title
+
             UiStrings.MastodonLocal -> R.string.mastodon_tab_local_title
+
             UiStrings.MastodonPublic -> R.string.mastodon_tab_public_title
+
             UiStrings.Featured -> R.string.home_tab_featured_title
+
             UiStrings.Bookmark -> R.string.home_tab_bookmarks_title
+
             UiStrings.Favourite -> R.string.home_tab_favorite_title
+
             UiStrings.List -> R.string.home_tab_list_title
+
             UiStrings.Feeds -> R.string.home_tab_feeds_title
+
             UiStrings.DirectMessage -> R.string.dm_list_title
+
             UiStrings.Rss -> R.string.rss_title
+
             UiStrings.Social -> R.string.social_title
+
             UiStrings.Antenna -> R.string.antenna_title
+
             UiStrings.MixedTimeline -> R.string.home_tab_mixed_timeline_title
+
             UiStrings.Liked -> R.string.liked_title
+
             UiStrings.AllRssFeeds -> R.string.all_rss_feeds_title
+
             UiStrings.Posts -> R.string.posts_title
+
             UiStrings.PostsWithReplies -> R.string.profile_tab_timeline_with_reply
+
             UiStrings.Media -> R.string.profile_tab_media
+
             UiStrings.Channel -> R.string.channel_title
+
             UiStrings.Login -> R.string.login_button
+
             UiStrings.Verify -> R.string.login_button
+
             UiStrings.Cancel -> R.string.navigate_back
+
             UiStrings.Next -> R.string.service_select_next_button
+
             UiStrings.Username -> R.string.bluesky_login_username_hint
+
             UiStrings.Password -> R.string.bluesky_login_password_hint
+
             UiStrings.Otp -> R.string.bluesky_login_auth_factor_token_hint
+
             UiStrings.OAuthLogin -> R.string.bluesky_login_oauth_button
+
             UiStrings.BlueskyFixDelegationScopes -> R.string.bluesky_login_fix_delegation_scopes_button
+
             UiStrings.PasswordLogin -> R.string.bluesky_login_use_password_button
+
             UiStrings.QrConnect -> R.string.login_button
+
             UiStrings.CredentialImport -> R.string.login_button
+
             UiStrings.ExternalSigner -> R.string.login_button
+
             UiStrings.WebCookieLogin -> R.string.login_button
+
             UiStrings.NostrLoginAccount -> R.string.login_button
+
             UiStrings.Following -> R.string.following_title
+
             UiStrings.PixivRankingWeek -> R.string.pixiv_ranking_week_title
+
             UiStrings.PixivRankingMonth -> R.string.pixiv_ranking_month_title
+
             UiStrings.PixivRankingDayMale -> R.string.pixiv_ranking_day_male_title
+
             UiStrings.PixivRankingDayFemale -> R.string.pixiv_ranking_day_female_title
+
             UiStrings.PixivRankingWeekOriginal -> R.string.pixiv_ranking_week_original_title
+
             UiStrings.PixivRankingWeekRookie -> R.string.pixiv_ranking_week_rookie_title
+
             UiStrings.PixivRankingDayManga -> R.string.pixiv_ranking_day_manga_title
+
             UiStrings.Illustrations -> R.string.illustrations_title
+
             UiStrings.Manga -> R.string.manga_title
+
             UiStrings.FanboxSupported -> R.string.fanbox_supported_title
+
             UiStrings.FanboxRecommendedCreators -> R.string.fanbox_recommended_creators_title
+
             UiStrings.PixivPrivateFollowing -> R.string.pixiv_private_following_title
-            UiStrings.PixivPrivateBookmarks -> R.string.pixiv_private_bookmarks_title
+
+            UiStrings.PixivPrivateBookmarks,
+            UiStrings.PixivPrivateFavourites,
+            -> R.string.pixiv_private_favourites_title
         }

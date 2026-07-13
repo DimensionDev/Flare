@@ -23,6 +23,7 @@ import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.Eye
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Heart
@@ -83,6 +84,7 @@ public fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
         UiIcon.Edit -> FontAwesomeIcons.Solid.Pen
         UiIcon.Info -> FontAwesomeIcons.Solid.CircleInfo
+        UiIcon.Eye -> FontAwesomeIcons.Solid.Eye
         UiIcon.Pin -> FontAwesomeIcons.Solid.Thumbtack
         UiIcon.Check -> FontAwesomeIcons.Solid.Check
         UiIcon.Home -> FontAwesomeIcons.Solid.House

@@ -27,7 +27,7 @@ internal class MentionRemoteMediator(
                     service
                         .notification(
                             limit = pageSize,
-                            exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
+                            exclude_types = MENTION_EXCLUDED_TYPES,
                         )
                 }
 
@@ -35,7 +35,7 @@ internal class MentionRemoteMediator(
                     service.notification(
                         limit = pageSize,
                         min_id = request.previousKey,
-                        exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
+                        exclude_types = MENTION_EXCLUDED_TYPES,
                     )
                 }
 
@@ -43,7 +43,7 @@ internal class MentionRemoteMediator(
                     service.notification(
                         limit = pageSize,
                         max_id = request.nextKey,
-                        exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
+                        exclude_types = MENTION_EXCLUDED_TYPES,
                     )
                 }
             }
@@ -56,3 +56,8 @@ internal class MentionRemoteMediator(
         )
     }
 }
+
+private val MENTION_EXCLUDED_TYPES =
+    NotificationTypes.entries
+        .filter { it != NotificationTypes.Mention }
+        .map { it.apiValue }

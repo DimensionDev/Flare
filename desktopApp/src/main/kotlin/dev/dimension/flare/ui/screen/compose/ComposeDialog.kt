@@ -98,6 +98,8 @@ import dev.dimension.flare.misskey_visibility_specified_description
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.navigate_back
 import dev.dimension.flare.ok
+import dev.dimension.flare.tumblr_visibility_private
+import dev.dimension.flare.tumblr_visibility_private_description
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
@@ -1517,6 +1519,10 @@ internal val UiTimelineV2.Post.Visibility.localName: StringResource
                 Res.string.misskey_visibility_specified
             }
 
+            UiTimelineV2.Post.Visibility.Private -> {
+                Res.string.tumblr_visibility_private
+            }
+
             UiTimelineV2.Post.Visibility.Channel -> {
                 Res.string.misskey_visibility_public
             }
@@ -1539,6 +1545,10 @@ internal val UiTimelineV2.Post.Visibility.localDescription: StringResource
 
             UiTimelineV2.Post.Visibility.Specified -> {
                 Res.string.misskey_visibility_specified_description
+            }
+
+            UiTimelineV2.Post.Visibility.Private -> {
+                Res.string.tumblr_visibility_private_description
             }
 
             UiTimelineV2.Post.Visibility.Channel -> {

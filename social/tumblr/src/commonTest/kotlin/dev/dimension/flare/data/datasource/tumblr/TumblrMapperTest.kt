@@ -5,8 +5,11 @@ import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.network.tumblr.TumblrBlog
 import dev.dimension.flare.data.network.tumblr.TumblrNote
+import dev.dimension.flare.data.network.tumblr.TumblrNpfAttribution
 import dev.dimension.flare.data.network.tumblr.TumblrNpfBlock
 import dev.dimension.flare.data.network.tumblr.TumblrNpfFormatting
+import dev.dimension.flare.data.network.tumblr.TumblrNpfLayout
+import dev.dimension.flare.data.network.tumblr.TumblrNpfLayoutDisplay
 import dev.dimension.flare.data.network.tumblr.TumblrNpfMedia
 import dev.dimension.flare.data.network.tumblr.TumblrPost
 import dev.dimension.flare.data.network.tumblr.TumblrTrailItem
@@ -90,11 +93,11 @@ class TumblrMapperTest {
         assertEquals("A link card", card.description)
         assertEquals("https://example.com/story", card.url)
         assertEquals("https://example.com/poster.jpg", card.media?.url)
-        assertEquals(4, timelinePost.actions.size)
+        assertEquals(3, timelinePost.actions.size)
     }
 
     @Test
-    fun actionMenusMatchTwitterStyleReplyRepostQuoteLikeMore() {
+    fun actionMenusExposeSupportedRepostQuoteLikeAndMoreActions() {
         val post =
             TumblrPost(
                 idString = "123",
@@ -104,6 +107,9 @@ class TumblrMapperTest {
                 content = listOf(textBlock("Hello")),
                 reblogKey = "abc123",
                 noteCount = 7,
+                replyCount = 2,
+                reblogCount = 3,
+                likeCount = 5,
                 notes =
                     listOf(
                         TumblrNote(type = "reply"),
@@ -125,15 +131,9 @@ class TumblrMapperTest {
         val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
         val actions = timelinePost.actions
 
-        assertEquals(4, actions.size)
+        assertEquals(3, actions.size)
 
-        val reply = assertIs<ActionMenu.Item>(actions[0])
-        assertEquals(PostActionFamily.Reply, reply.actionFamily)
-        assertEquals(2L, reply.count?.value)
-        val replyRoute = DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(reply.clickEvent).url)
-        assertIs<DeeplinkRoute.Compose.Reply>(replyRoute)
-
-        val repostGroup = assertIs<ActionMenu.Group>(actions[1])
+        val repostGroup = assertIs<ActionMenu.Group>(actions[0])
         val repostDisplay = assertIs<ActionMenu.Item>(repostGroup.displayItem)
         assertEquals(PostActionFamily.Repost, repostDisplay.actionFamily)
         assertEquals(3L, repostDisplay.count?.value)
@@ -149,17 +149,18 @@ class TumblrMapperTest {
         val quoteRoute = DeeplinkRoute.parse(assertIs<ClickEvent.Deeplink>(quote.clickEvent).url)
         assertIs<DeeplinkRoute.Compose.Quote>(quoteRoute)
 
-        val like = assertIs<ActionMenu.Item>(actions[2])
+        val like = assertIs<ActionMenu.Item>(actions[1])
         assertEquals(PostActionFamily.Like, like.actionFamily)
         assertEquals(5L, like.count?.value)
 
-        val more = assertIs<ActionMenu.Group>(actions[3])
+        val more = assertIs<ActionMenu.Group>(actions[2])
         val overflowFamilies =
             more.actions
                 .filterIsInstance<ActionMenu.Item>()
                 .mapNotNull { it.actionFamily }
         assertEquals(
             listOf(
+                PostActionFamily.Comment,
                 PostActionFamily.Share,
                 PostActionFamily.MuteUser,
                 PostActionFamily.BlockUser,
@@ -631,6 +632,210 @@ class TumblrMapperTest {
 
         assertEquals(0, rendered.presentation.quotes.size)
         assertEquals("https://64.media.tumblr.com/original.jpg", assertIs<UiMedia.Image>(repost.images.single()).url)
+    }
+
+    @Test
+    fun externalAudioPrefersPlayableMediaUrl() {
+        val post =
+            TumblrPost(
+                idString = "audio-external",
+                blogName = "staff",
+                content =
+                    listOf(
+                        TumblrNpfBlock(
+                            type = "audio",
+                            provider = "soundcloud",
+                            title = "Track",
+                            url = "https://soundcloud.com/example/track",
+                            media = listOf(TumblrNpfMedia(type = "audio/mp3", url = "https://cdn.example.com/track.mp3")),
+                        ),
+                    ),
+            )
+
+        val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
+        assertEquals("https://cdn.example.com/track.mp3", assertIs<UiMedia.Audio>(timelinePost.images.single()).url)
+    }
+
+    @Test
+    fun formattingOffsetsUseUnicodeCodePoints() {
+        val post =
+            TumblrPost(
+                idString = "unicode-formatting",
+                blogName = "staff",
+                content =
+                    listOf(
+                        textBlock(
+                            text = "😀a link",
+                            formatting =
+                                listOf(
+                                    TumblrNpfFormatting(type = "link", start = 3, end = 7, url = "https://example.com"),
+                                ),
+                        ),
+                    ),
+            )
+
+        val content = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post.content
+        val runs = assertIs<RenderContent.Text>(content.renderRuns.single()).runs.filterIsInstance<RenderRun.Text>()
+        assertEquals("😀a ", runs[0].text)
+        assertEquals("link", runs[1].text)
+        assertEquals("https://example.com", runs[1].style.link)
+    }
+
+    @Test
+    fun completeReblogTrailIsPreservedInOrderWithRichText() {
+        val post =
+            TumblrPost(
+                idString = "trail-chain",
+                blogName = "me",
+                content = emptyList(),
+                trail =
+                    listOf(
+                        TumblrTrailItem(
+                            blog = TumblrBlog(name = "root"),
+                            post = TumblrTrailPost(id = "root-id"),
+                            content =
+                                listOf(
+                                    textBlock(
+                                        "Root text",
+                                        formatting = listOf(TumblrNpfFormatting(type = "bold", start = 0, end = 4)),
+                                    ),
+                                ),
+                        ),
+                        TumblrTrailItem(
+                            blog = TumblrBlog(name = "parent"),
+                            post = TumblrTrailPost(id = "parent-id"),
+                            content = listOf(textBlock("Parent comment")),
+                        ),
+                    ),
+            )
+
+        val rendered = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey))
+        assertEquals("Parent comment", assertNotNull(rendered.presentation.repost).content.raw)
+        assertEquals(
+            "Root text",
+            rendered.presentation.inlineParents
+                .single()
+                .content.raw,
+        )
+        val rootRun =
+            assertIs<RenderContent.Text>(
+                rendered.presentation.inlineParents
+                    .single()
+                    .content.renderRuns
+                    .single(),
+            ).runs
+                .filterIsInstance<RenderRun.Text>()
+                .first()
+        assertTrue(rootRun.style.bold)
+    }
+
+    @Test
+    fun brokenTrailAndRowsVisibilityArePreserved() {
+        val post =
+            TumblrPost(
+                idString = "broken-trail",
+                blogName = "me",
+                content = listOf(textBlock("My comment")),
+                trail =
+                    listOf(
+                        TumblrTrailItem(
+                            brokenBlogName = "gone-blog",
+                            content = listOf(textBlock("First"), textBlock("Hidden"), textBlock("Third")),
+                            layout =
+                                listOf(
+                                    TumblrNpfLayout(
+                                        type = "rows",
+                                        display = listOf(TumblrNpfLayoutDisplay(blocks = listOf(2, 0))),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        val quote = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).presentation.quotes.single()
+        assertEquals("gone-blog", quote.user?.handle?.raw)
+        assertEquals("Third\nFirst", quote.content.raw)
+        assertIs<ClickEvent.Noop>(quote.clickEvent)
+    }
+
+    @Test
+    fun imageCaptionAskGroupingAndHtmlDescriptionAreMapped() {
+        val post =
+            TumblrPost(
+                idString = "ask-caption",
+                blogName = "staff",
+                content =
+                    listOf(
+                        imageBlock(
+                            url = "https://64.media.tumblr.com/ask.jpg",
+                            width = 640,
+                            height = 480,
+                            altText = "ask",
+                        ).copy(caption = "Image caption"),
+                        textBlock("Question"),
+                        textBlock("Answer"),
+                    ),
+                layout =
+                    listOf(
+                        TumblrNpfLayout(
+                            type = "ask",
+                            blocks = listOf(1),
+                            attribution = TumblrNpfAttribution(type = "blog", blog = TumblrBlog(name = "asker")),
+                        ),
+                    ),
+            )
+
+        val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
+        assertEquals("Image caption\nQuestion\nAnswer", timelinePost.content.raw)
+        assertTrue(
+            timelinePost.content.renderRuns
+                .filterIsInstance<RenderContent.Text>()
+                .any { it.block.isBlockQuote },
+        )
+
+        val profile = TumblrBlog(name = "staff", description = "<p>Hello <strong>Tumblr</strong> &amp; friends</p>").toUiProfile(accountKey)
+        assertEquals("Hello Tumblr & friends", profile.description?.raw)
+    }
+
+    @Test
+    fun missingBlogNameIsResolvedFromTumblrSubdomainUrl() {
+        val profile = TumblrBlog(url = "https://staff.tumblr.com/").toUiProfile(accountKey)
+
+        assertEquals(tumblrUserKey("staff"), profile.key)
+    }
+
+    @Test
+    fun noteMetadataIsNotUsedAsAnActionTotal() {
+        val post =
+            TumblrPost(
+                idString = "notes",
+                blogName = "staff",
+                reblogKey = "key",
+                noteCount = 42,
+                notes = listOf(TumblrNote(type = "like")),
+            )
+
+        val actions = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post.actions
+        assertEquals(0, assertIs<ActionMenu.Item>(assertIs<ActionMenu.Group>(actions[0]).displayItem).count?.value)
+        assertEquals(0, assertIs<ActionMenu.Item>(actions[1]).count?.value)
+        val overflow = assertIs<ActionMenu.Group>(actions[2]).actions.filterIsInstance<ActionMenu.Item>()
+        val notes = overflow.single { it.actionFamily == PostActionFamily.Comment }
+        assertEquals(42L, notes.count?.value)
+    }
+
+    @Test
+    fun privatePostUsesPrivateVisibility() {
+        val post =
+            TumblrPost(
+                idString = "private-post",
+                blogName = "staff",
+                state = "private",
+                content = listOf(textBlock("Private content")),
+            )
+
+        val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
+
+        assertEquals(UiTimelineV2.Post.Visibility.Private, timelinePost.visibility)
     }
 
     private fun textBlock(

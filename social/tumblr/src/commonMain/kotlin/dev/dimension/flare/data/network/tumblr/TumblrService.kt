@@ -121,12 +121,14 @@ internal class TumblrService(
             .blog
 
     suspend fun following(
+        blogIdentifier: String,
         limit: Int,
         offset: Int?,
     ): TumblrBlogPage =
         resources
             .following(
                 authorization = authorization(),
+                blogIdentifier = blogIdentifier,
                 limit = limit.coercePageSize(),
                 offset = offset,
             ).requiredResponse()

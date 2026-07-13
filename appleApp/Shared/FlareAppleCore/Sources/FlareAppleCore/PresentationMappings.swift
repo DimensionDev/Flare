@@ -284,7 +284,7 @@ public extension UiIcon {
         case .fanbox:
             .pixiv
         case .tumblr:
-            .squareRss
+            .tumblr
         case .list:
             .list
         case .feeds, .rss:

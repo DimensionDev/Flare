@@ -19,6 +19,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.decodeFromString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -130,6 +131,7 @@ class TumblrServiceTest {
                             TumblrNpfBlock(
                                 type = "video",
                                 media = listOf(TumblrNpfMedia(identifier = "video0", type = "video/mp4")),
+                                poster = listOf(TumblrNpfMedia(url = "https://example.com/poster.jpg", type = "image/jpeg")),
                             ),
                         ),
                 ),
@@ -137,6 +139,17 @@ class TumblrServiceTest {
 
         assertTrue("\"media\":[{\"identifier\":\"image0\",\"type\":\"image/jpeg\"}]" in image)
         assertTrue("\"media\":{\"identifier\":\"video0\",\"type\":\"video/mp4\"}" in video)
+        assertTrue("\"poster\":[{\"type\":\"image/jpeg\",\"url\":\"https://example.com/poster.jpg\"}]" in video)
+    }
+
+    @Test
+    fun blogInfoDecodesFollowedAndUuidOnlyBlog() {
+        val followed = JSON.decodeFromString<TumblrBlog>("""{"name":"staff","followed":true}""")
+        val uuidOnly = JSON.decodeFromString<TumblrBlog>("""{"uuid":"t:abc123"}""")
+
+        assertEquals(true, followed.followed)
+        assertEquals(null, uuidOnly.name)
+        assertEquals("t:abc123", uuidOnly.uuid)
     }
 
     @Test
@@ -159,6 +172,36 @@ class TumblrServiceTest {
 
             assertEquals("true", requests[0].url.parameters["reblog_info"])
             assertEquals("true", requests[1].url.parameters["reblog_info"])
+        }
+
+    @Test
+    fun followingUsesBlogScopedEndpoint() =
+        runTest {
+            val requests = mutableListOf<HttpRequestData>()
+            val service =
+                TumblrService(
+                    credentialFlow = MutableStateFlow(credential()),
+                    authResources = unusedAuthResources,
+                    resources =
+                        mockResources { scope, request ->
+                            requests += request
+                            scope.respondJson(
+                                """{"meta":{"status":200,"msg":"OK"},"response":{"blogs":[]}}""",
+                            )
+                        },
+                )
+
+            service.following(
+                blogIdentifier = "mtlaster",
+                limit = 20,
+                offset = 40,
+            )
+
+            val request = requests.single()
+            assertEquals(HttpMethod.Get, request.method)
+            assertEquals("/v2/blog/mtlaster/following", request.url.encodedPath)
+            assertEquals("20", request.url.parameters["limit"])
+            assertEquals("40", request.url.parameters["offset"])
         }
 
     @Test

@@ -12,6 +12,7 @@ import dev.dimension.flare.model.PlatformDeepLink
 import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.social.tumblr.TumblrBuildConfig
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import dev.dimension.flare.ui.presenter.login.TumblrLoginProvider
@@ -30,6 +31,9 @@ public data object TumblrPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by TumblrLoginProvider {
     override val type: PlatformType = PlatformType.Tumblr
+    public val isConfigured: Boolean
+        get() = TumblrBuildConfig.configured
+
     override val metadata: PlatformTypeMetadata =
         PlatformTypeMetadata(
             displayName = "Tumblr",
@@ -42,7 +46,9 @@ public data object TumblrPlatformSpec :
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(
             tumblrWebPostDeepLink(accountKey, "https://www.tumblr.com/{blogName}/{id}"),
+            tumblrWebPostWithSlugDeepLink(accountKey, "https://www.tumblr.com/{blogName}/{id}/{slug}"),
             tumblrSubdomainPostDeepLink(accountKey, "https://{blogname}.tumblr.com/post/{id}"),
+            tumblrSubdomainPostWithSlugDeepLink(accountKey, "https://{blogname}.tumblr.com/post/{id}/{slug}"),
             tumblrWebProfileDeepLink(accountKey, "https://www.tumblr.com/{blogName}"),
             tumblrSubdomainProfileDeepLink(accountKey, "https://{blogname}.tumblr.com"),
         )
@@ -110,6 +116,37 @@ private fun tumblrSubdomainPostDeepLink(
         },
     )
 
+private fun tumblrWebPostWithSlugDeepLink(
+    accountKey: MicroBlogKey,
+    uriPattern: String,
+): PlatformDeepLink<TumblrWebPostWithSlugDeepLink> =
+    PlatformDeepLink(
+        uriPattern = uriPattern,
+        serializer = TumblrWebPostWithSlugDeepLink.serializer(),
+        callback = { data ->
+            DeeplinkRoute.Status.Detail(
+                accountType = AccountType.Specific(accountKey),
+                statusKey = tumblrPostKey(data.blogName, data.id),
+            )
+        },
+    )
+
+private fun tumblrSubdomainPostWithSlugDeepLink(
+    accountKey: MicroBlogKey,
+    uriPattern: String,
+): PlatformDeepLink<TumblrSubdomainPostWithSlugDeepLink> =
+    PlatformDeepLink(
+        uriPattern = uriPattern,
+        serializer = TumblrSubdomainPostWithSlugDeepLink.serializer(),
+        matcher = { data -> !data.blogName.equals("www", ignoreCase = true) },
+        callback = { data ->
+            DeeplinkRoute.Status.Detail(
+                accountType = AccountType.Specific(accountKey),
+                statusKey = tumblrPostKey(data.blogName, data.id),
+            )
+        },
+    )
+
 private fun tumblrWebProfileDeepLink(
     accountKey: MicroBlogKey,
     uriPattern: String,
@@ -152,6 +189,21 @@ private data class TumblrSubdomainPostDeepLink(
     @SerialName("blogname")
     val blogName: String,
     val id: String,
+)
+
+@Serializable
+private data class TumblrWebPostWithSlugDeepLink(
+    val blogName: String,
+    val id: String,
+    val slug: String,
+)
+
+@Serializable
+private data class TumblrSubdomainPostWithSlugDeepLink(
+    @SerialName("blogname")
+    val blogName: String,
+    val id: String,
+    val slug: String,
 )
 
 @Serializable

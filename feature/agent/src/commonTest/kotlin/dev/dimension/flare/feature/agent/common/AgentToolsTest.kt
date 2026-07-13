@@ -1587,7 +1587,7 @@ private class StubComposeDataSource(
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(maxLength = 300),
-            visibility = ComposeConfig.Visibility,
+            visibility = ComposeConfig.Visibility(),
             language = ComposeConfig.Language(maxCount = 1),
         )
 

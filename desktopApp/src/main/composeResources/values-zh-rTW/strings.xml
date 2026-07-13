@@ -347,6 +347,8 @@
     <string name="misskey_visibility_home_description">僅此執行體的使用者可以看到此貼文</string>
     <string name="misskey_visibility_followers_description">僅您的跟隨者可以看到此貼文</string>
     <string name="misskey_visibility_specified_description">僅被提及的使用者可以看到此貼文</string>
+    <string name="tumblr_visibility_private">私人</string>
+    <string name="tumblr_visibility_private_description">不公開顯示</string>
     <string name="rss_sources_title">訂閱管理</string>
     <string name="add_rss_source">加入訂閱</string>
     <string name="edit_rss_source">編輯訂閱</string>

@@ -90,6 +90,7 @@ public enum FontAwesomeIcon: String, CaseIterable, Hashable, Identifiable, Senda
     case tableList = "table-list"
     case telegram = "telegram"
     case thumbtack = "thumbtack"
+    case tumblr = "tumblr"
     case trash = "trash"
     case tv = "tv"
     case twitter = "twitter"

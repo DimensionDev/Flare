@@ -179,6 +179,7 @@ internal class TumblrDataSource(
         TumblrFollowingLoader(
             service = service,
             accountKey = accountKey,
+            blogKey = userKey,
         )
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
@@ -208,7 +209,10 @@ internal class TumblrDataSource(
         require(data.poll == null) { "Tumblr poll compose is not supported" }
         val credential = credentialFlow.first()
         val referenceStatus = data.referenceStatus?.composeStatus
-        if (referenceStatus is ComposeStatus.Quote || referenceStatus is ComposeStatus.Reply) {
+        require(referenceStatus !is ComposeStatus.Reply) {
+            "Tumblr replies are not supported by the public API"
+        }
+        if (referenceStatus is ComposeStatus.Quote) {
             require(data.medias.isEmpty()) { "Tumblr reblog compose media is not supported" }
             val comment = data.content.trim()
             require(comment.isNotEmpty()) { "Tumblr reblog comment is empty" }
@@ -280,7 +284,15 @@ internal class TumblrDataSource(
                         altTextMaxLength = TUMBLR_TEXT_BLOCK_MAX_LENGTH,
                         allowMediaOnly = true,
                     ).takeUnless { type == ComposeType.Quote || type == ComposeType.Reply },
-            visibility = ComposeConfig.Visibility,
+            visibility =
+                ComposeConfig.Visibility(
+                    allVisibilities =
+                        persistentListOf(
+                            UiTimelineV2.Post.Visibility.Public,
+                            UiTimelineV2.Post.Visibility.Private,
+                        ),
+                    defaultVisibility = UiTimelineV2.Post.Visibility.Public,
+                ),
         )
 
     override suspend fun handle(
@@ -360,14 +372,9 @@ private fun String?.toNpfBlockType(): String =
         else -> "image"
     }
 
-private fun UiTimelineV2.Post.Visibility.toTumblrState(): String =
+internal fun UiTimelineV2.Post.Visibility.toTumblrState(): String =
     when (this) {
-        UiTimelineV2.Post.Visibility.Public,
-        UiTimelineV2.Post.Visibility.Home,
-        -> "published"
-
-        UiTimelineV2.Post.Visibility.Followers,
-        UiTimelineV2.Post.Visibility.Specified,
-        UiTimelineV2.Post.Visibility.Channel,
-        -> "private"
+        UiTimelineV2.Post.Visibility.Public -> "published"
+        UiTimelineV2.Post.Visibility.Private -> "private"
+        else -> error("Tumblr does not support $this post visibility")
     }

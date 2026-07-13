@@ -140,6 +140,9 @@ private class TumblrOAuthLoginHandler(
             _state.value = oauthState(loading = true)
             runCatching {
                 val parsedUrl = Url(value)
+                parsedUrl.parameters["error"]?.let { oauthError ->
+                    error(parsedUrl.parameters["error_description"] ?: oauthError)
+                }
                 val code = parsedUrl.parameters["code"] ?: error("Missing Tumblr OAuth code")
                 val state = parsedUrl.parameters["state"] ?: error("Missing Tumblr OAuth state")
                 val pending =
@@ -172,11 +175,19 @@ private class TumblrOAuthLoginHandler(
                                 ),
                             ),
                     )
-                val blogs = userInfoService.userInfo().user.blogs
-                require(blogs.isNotEmpty()) { "Tumblr account has no blogs" }
+                val blogs =
+                    userInfoService
+                        .userInfo()
+                        .user.blogs
+                        .mapNotNull { blog ->
+                            blog.name
+                                ?.takeIf { it.isNotBlank() }
+                                ?.let { blogName -> blog to blogName }
+                        }
+                require(blogs.isNotEmpty()) { "Tumblr account has no named blogs" }
                 val target = context.reloginTarget
-                blogs.forEach { blog ->
-                    val accountKey = MicroBlogKey(id = blog.name, host = TUMBLR_HOST)
+                blogs.forEach { (blog, blogName) ->
+                    val accountKey = MicroBlogKey(id = blogName, host = TUMBLR_HOST)
                     if (target != null && target.accountKey != accountKey) {
                         return@forEach
                     }
@@ -189,16 +200,18 @@ private class TumblrOAuthLoginHandler(
                             ),
                         credential =
                             token.toCredential(
-                                blogIdentifier = blog.name,
-                                blogName = blog.name,
-                                blogUrl = blog.url ?: "https://${blog.name}.tumblr.com/",
+                                blogIdentifier = blogName,
+                                blogName = blogName,
+                                blogUrl = blog.url ?: "https://$blogName.tumblr.com/",
                                 blogUuid = blog.uuid,
                                 isPrimary = blog.primary == true,
                             ),
                         serializer = TumblrCredential.serializer(),
                     )
                 }
-                if (target != null && blogs.none { MicroBlogKey(id = it.name, host = TUMBLR_HOST) == target.accountKey }) {
+                if (target != null &&
+                    blogs.none { (_, blogName) -> MicroBlogKey(id = blogName, host = TUMBLR_HOST) == target.accountKey }
+                ) {
                     error("Relogin account not found in Tumblr blogs: ${target.accountKey}")
                 }
                 pendingRepository.clear(pending)
@@ -213,7 +226,8 @@ private class TumblrOAuthLoginHandler(
     override fun canResume(value: String): Boolean =
         runCatching {
             val parsed = Url(value)
-            parsed.parameters["code"] != null && parsed.parameters["state"] != null
+            parsed.parameters["state"] != null &&
+                (parsed.parameters["code"] != null || parsed.parameters["error"] != null)
         }.getOrDefault(false)
 
     override fun clear() {

@@ -130,7 +130,7 @@ internal data class TumblrPostMutationResponse(
 
 @Serializable
 internal data class TumblrBlog(
-    val name: String,
+    val name: String? = null,
     val title: String? = null,
     val description: String? = null,
     val url: String? = null,
@@ -142,6 +142,7 @@ internal data class TumblrBlog(
     val totalPosts: Long? = null,
     val posts: Long? = null,
     val following: Boolean? = null,
+    val followed: Boolean? = null,
     val primary: Boolean? = null,
     val theme: TumblrBlogTheme? = null,
 )
@@ -160,6 +161,7 @@ internal data class TumblrPost(
     @SerialName("id_string")
     val idString: String? = null,
     val type: String? = null,
+    val state: String? = null,
     @SerialName("blog_name")
     val blogName: String? = null,
     @SerialName("blog")
@@ -221,6 +223,8 @@ internal data class TumblrTrailItem(
     val content: List<TumblrNpfBlock> = emptyList(),
     val layout: List<TumblrNpfLayout> = emptyList(),
     val tags: List<String> = emptyList(),
+    @SerialName("broken_blog_name")
+    val brokenBlogName: String? = null,
     @SerialName("post")
     val post: TumblrTrailPost? = null,
 )
@@ -228,6 +232,7 @@ internal data class TumblrTrailItem(
 @Serializable
 internal data class TumblrTrailPost(
     val id: String? = null,
+    val timestamp: Long? = null,
     val tags: List<String> = emptyList(),
 )
 
@@ -284,9 +289,17 @@ internal data class TumblrNpfBlock(
     val text: String? = null,
     val formatting: List<TumblrNpfFormatting> = emptyList(),
     val title: String? = null,
+    val caption: String? = null,
     val url: String? = null,
     val description: String? = null,
+    val author: String? = null,
+    @SerialName("site_name")
+    val siteName: String? = null,
+    val artist: String? = null,
+    val album: String? = null,
     val provider: String? = null,
+    @SerialName("embed_url")
+    val embedUrl: String? = null,
     val media: List<TumblrNpfMedia> = emptyList(),
     val poster: List<TumblrNpfMedia> = emptyList(),
     @SerialName("alt_text")
@@ -295,6 +308,8 @@ internal data class TumblrNpfBlock(
     val thumbnailUrl: String? = null,
     val width: Int? = null,
     val height: Int? = null,
+    @SerialName("indent_level")
+    val indentLevel: Int? = null,
     @SerialName("embed_iframe")
     val embedIframe: TumblrNpfEmbedIframe? = null,
     val raw: JsonObject? = null,
@@ -334,6 +349,32 @@ internal data class TumblrNpfEmbedIframe(
 @Serializable
 internal data class TumblrNpfLayout(
     val type: String? = null,
+    val display: List<TumblrNpfLayoutDisplay> = emptyList(),
+    // Older trail payloads used `rows` directly instead of `display`.
+    val rows: List<List<Int>> = emptyList(),
+    val blocks: List<Int> = emptyList(),
+    @SerialName("truncate_after")
+    val truncateAfter: Int? = null,
+    val attribution: TumblrNpfAttribution? = null,
+)
+
+@Serializable
+internal data class TumblrNpfLayoutDisplay(
+    val blocks: List<Int> = emptyList(),
+    val mode: TumblrNpfLayoutMode? = null,
+)
+
+@Serializable
+internal data class TumblrNpfLayoutMode(
+    val type: String? = null,
+)
+
+@Serializable
+internal data class TumblrNpfAttribution(
+    val type: String? = null,
+    val url: String? = null,
+    val blog: TumblrBlog? = null,
+    val post: TumblrTrailPost? = null,
 )
 
 internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
@@ -355,15 +396,22 @@ internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
                         }.getOrNull()
                     }.orEmpty(),
             title = obj.stringOrNull("title"),
+            caption = obj.stringOrNull("caption"),
             url = obj.stringOrNull("url"),
             description = obj.stringOrNull("description"),
+            author = obj.stringOrNull("author"),
+            siteName = obj.stringOrNull("site_name"),
+            artist = obj.stringOrNull("artist"),
+            album = obj.stringOrNull("album"),
             provider = obj.stringOrNull("provider"),
+            embedUrl = obj.stringOrNull("embed_url"),
             media = obj.mediaList("media"),
             poster = obj.mediaList("poster"),
             altText = obj.stringOrNull("alt_text"),
             thumbnailUrl = obj.stringOrNull("thumbnail_url"),
             width = obj.intOrNull("width"),
             height = obj.intOrNull("height"),
+            indentLevel = obj.intOrNull("indent_level"),
             embedIframe = obj.objectOrNull("embed_iframe")?.let { TumblrNpfEmbedIframe(url = it.stringOrNull("url")) },
             raw = obj,
         )
@@ -383,19 +431,26 @@ internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
                     put("formatting", output.json.encodeToJsonElement(value.formatting))
                 }
                 value.title?.let { put("title", it) }
+                value.caption?.let { put("caption", it) }
                 value.url?.let { put("url", it) }
                 value.description?.let { put("description", it) }
+                value.author?.let { put("author", it) }
+                value.siteName?.let { put("site_name", it) }
+                value.artist?.let { put("artist", it) }
+                value.album?.let { put("album", it) }
                 value.provider?.let { put("provider", it) }
+                value.embedUrl?.let { put("embed_url", it) }
                 if (value.media.isNotEmpty()) {
-                    put("media", value.media.toNpfMediaJsonElement(blockType = value.type))
+                    put("media", value.media.toNpfMediaJsonElement(asArray = value.type != "video" && value.type != "audio"))
                 }
                 if (value.poster.isNotEmpty()) {
-                    put("poster", value.poster.toNpfMediaJsonElement(blockType = value.type))
+                    put("poster", value.poster.toNpfMediaJsonElement(asArray = true))
                 }
                 value.altText?.let { put("alt_text", it) }
                 value.thumbnailUrl?.let { put("thumbnail_url", it) }
                 value.width?.let { put("width", it) }
                 value.height?.let { put("height", it) }
+                value.indentLevel?.let { put("indent_level", it) }
                 value.embedIframe?.url?.let { url ->
                     put(
                         "embed_iframe",
@@ -409,11 +464,11 @@ internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
     }
 }
 
-private fun List<TumblrNpfMedia>.toNpfMediaJsonElement(blockType: String?) =
-    if (blockType == "video" || blockType == "audio") {
-        tumblrNpfMediaJsonObject(first())
-    } else {
+private fun List<TumblrNpfMedia>.toNpfMediaJsonElement(asArray: Boolean) =
+    if (asArray) {
         JsonArray(map { tumblrNpfMediaJsonObject(it) })
+    } else {
+        tumblrNpfMediaJsonObject(first())
     }
 
 private fun tumblrNpfMediaJsonObject(media: TumblrNpfMedia): JsonObject =

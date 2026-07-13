@@ -7,10 +7,10 @@ import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.tumblr.TumblrBlog
 import dev.dimension.flare.data.network.tumblr.TumblrLegacyPhoto
 import dev.dimension.flare.data.network.tumblr.TumblrLegacyPhotoSize
-import dev.dimension.flare.data.network.tumblr.TumblrNote
 import dev.dimension.flare.data.network.tumblr.TumblrNpfBlock
 import dev.dimension.flare.data.network.tumblr.TumblrNpfFormatting
 import dev.dimension.flare.data.network.tumblr.TumblrNpfFormattingBlog
+import dev.dimension.flare.data.network.tumblr.TumblrNpfLayout
 import dev.dimension.flare.data.network.tumblr.TumblrNpfMedia
 import dev.dimension.flare.data.network.tumblr.TumblrPost
 import dev.dimension.flare.data.network.tumblr.TumblrTrailItem
@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
@@ -46,20 +47,21 @@ import kotlin.time.Instant
 internal fun TumblrPost.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2 {
     val postBlogName = resolvedBlogName()
     val statusKey = tumblrPostKey(postBlogName, resolvedId())
-    val baseText = content.collectText().ifBlank { fallbackTextParts().joinToString(separator = "\n") }.trim()
+    val baseText = content.collectText(layout).ifBlank { fallbackTextParts().joinToString(separator = "\n") }.trim()
     val shouldMoveRootTagsToQuote = baseText.isBlank() && tags.isNotEmpty() && trail.isNotEmpty()
     val renderedContent = renderContent(tags = if (shouldMoveRootTagsToQuote) emptyList() else tags)
     val ownText = renderedContent.text
     val createdAt = createdAtInstant().toUi()
     val hasReblogComment = baseText.isNotBlank() || shouldMoveRootTagsToQuote
-    val referencedTrailPost =
-        collectReferencedTrailPost(
+    val referencedTrailPosts =
+        collectReferencedTrailPosts(
             accountKey = accountKey,
+            parentStatusKey = statusKey,
             fallbackCreatedAt = createdAt,
             fallbackTags = if (shouldMoveRootTagsToQuote) tags else emptyList(),
         )
-    val quote = referencedTrailPost.takeIf { hasReblogComment }
-    val quoteMediaKeys = quote?.mediaDeduplicationKeys().orEmpty()
+    val quotes = referencedTrailPosts.takeIf { hasReblogComment }.orEmpty()
+    val quoteMediaKeys = quotes.flatMapTo(mutableSetOf()) { it.mediaDeduplicationKeys() }
     val postMedia = renderedContent.media.filterNot { it.deduplicationKey() in quoteMediaKeys }
     val actions = actionMenus(accountKey = accountKey, statusKey = statusKey).toPersistentList()
     val post =
@@ -75,12 +77,17 @@ internal fun TumblrPost.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2 {
             statusKey = statusKey,
             card = renderedContent.card,
             createdAt = createdAt,
-            visibility = UiTimelineV2.Post.Visibility.Public,
+            visibility =
+                if (state == "private") {
+                    UiTimelineV2.Post.Visibility.Private
+                } else {
+                    UiTimelineV2.Post.Visibility.Public
+                },
             references =
                 trail
                     .mapNotNull { trailItem ->
                         val trailPostId = trailItem.post?.id ?: return@mapNotNull null
-                        val trailBlogName = trailItem.blog?.name ?: postBlogName
+                        val trailBlogName = trailItem.resolvedBlogName() ?: return@mapNotNull null
                         UiTimelineV2.Post.Reference(
                             statusKey = tumblrPostKey(trailBlogName, trailPostId),
                             type = ReferenceType.Retweet,
@@ -97,7 +104,8 @@ internal fun TumblrPost.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2 {
             itemKey = "tumblr_${statusKey.id}",
         )
     val repost =
-        referencedTrailPost
+        referencedTrailPosts
+            .lastOrNull()
             ?.takeUnless { hasReblogComment }
             ?.copy(actions = actions)
     return UiTimelineV2.TimelinePostItem(
@@ -112,14 +120,20 @@ internal fun TumblrPost.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2 {
                             createdAt = createdAt,
                         )
                     },
-                quotes = listOfNotNull(quote).toPersistentList(),
+                inlineParents =
+                    referencedTrailPosts
+                        .dropLast(if (repost == null) 0 else 1)
+                        .takeUnless { hasReblogComment }
+                        .orEmpty()
+                        .toPersistentList(),
+                quotes = quotes.toPersistentList(),
                 repost = repost,
             ),
     )
 }
 
 internal fun TumblrBlog.toUiProfile(accountKey: MicroBlogKey): UiProfile {
-    val blogName = name.normalizedTumblrBlogName()
+    val blogName = resolvedBlogName() ?: "unknown-tumblr-blog"
     val userKey = tumblrUserKey(blogName)
     return UiProfile(
         key = userKey,
@@ -139,7 +153,7 @@ internal fun TumblrBlog.toUiProfile(accountKey: MicroBlogKey): UiProfile {
                 ),
             ),
         banner = theme?.headerImage,
-        description = description?.takeIf { it.isNotBlank() }?.toUiPlainText(),
+        description = description?.takeIf { it.isNotBlank() }?.toTumblrDescriptionRichText(),
         matrices =
             UiProfile.Matrices(
                 fansCount = followers ?: 0,
@@ -150,6 +164,23 @@ internal fun TumblrBlog.toUiProfile(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
     )
 }
+
+private fun TumblrBlog.resolvedBlogName(): String? =
+    name
+        ?.normalizedTumblrBlogName()
+        ?.takeIf { it.isNotBlank() }
+        ?: url
+            ?.normalizedTumblrBlogName()
+            ?.takeIf { it.isNotBlank() && it != "tumblr.com" }
+        ?: uuid?.takeIf { it.isNotBlank() }?.lowercase()
+
+private fun TumblrTrailItem.resolvedBlogName(): String? =
+    blog?.resolvedBlogName()
+        ?: brokenBlogName
+            ?.normalizedTumblrBlogName()
+            ?.takeIf { it.isNotBlank() }
+
+private fun String.toTumblrDescriptionRichText(): UiRichText = parseHtml(this).toUi()
 
 private fun TumblrPost.repostMessage(
     accountKey: MicroBlogKey,
@@ -180,21 +211,6 @@ private fun TumblrPost.actionMenus(
     statusKey: MicroBlogKey,
 ): List<ActionMenu> =
     buildList {
-        add(
-            ActionMenu.Item(
-                icon = UiIcon.Reply,
-                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
-                count = UiNumber(replyActionCount),
-                clickEvent =
-                    ClickEvent.Deeplink(
-                        DeeplinkRoute.Compose.Reply(
-                            accountKey = accountKey,
-                            statusKey = statusKey,
-                        ),
-                    ),
-                actionFamily = PostActionFamily.Reply,
-            ),
-        )
         if (canReblog != false && reblogKey != null) {
             add(
                 ActionMenu.Group(
@@ -239,6 +255,17 @@ private fun TumblrPost.actionMenus(
         }
         val overflow =
             buildList {
+                noteCount?.let { totalNotes ->
+                    add(
+                        ActionMenu.Item(
+                            icon = UiIcon.Comment,
+                            text = ActionMenu.Item.Text.Raw("Notes"),
+                            count = UiNumber(totalNotes),
+                            clickEvent = ClickEvent.Noop,
+                            actionFamily = PostActionFamily.Comment,
+                        ),
+                    )
+                }
                 val shareUrl = postUrl ?: shortUrl
                 if (shareUrl != null) {
                     add(
@@ -332,43 +359,23 @@ private fun tumblrRepeatableRepostAction(
         actionFamily = PostActionFamily.Repost,
     )
 
-private val TumblrPost.replyActionCount: Long
-    get() =
-        replyCount
-            ?: repliesCount
-            ?: commentCount
-            ?: commentsCount
-            ?: notes.countTypes("reply", "replied", "comment", "commented")
-
 private val TumblrPost.reblogActionCount: Long
     get() =
         reblogCount
             ?: reblogsCount
-            ?: notes.countTypes("reblog", "reblogged", "posted")
+            ?: 0
 
 private val TumblrPost.likeActionCount: Long
     get() =
         likeCount
             ?: likesCount
-            ?: notes.countTypes("like", "liked")
-
-private fun List<TumblrNote>.countTypes(vararg types: String): Long {
-    val normalizedTypes = types.toSet()
-    return count { note ->
-        val type =
-            note.type
-                ?.trim()
-                ?.lowercase()
-                ?.replace('-', '_')
-        normalizedTypes.contains(type)
-    }.toLong()
-}
+            ?: 0
 
 internal fun TumblrPost.resolvedId(): String = idString ?: id?.toString() ?: error("Tumblr post id is missing")
 
 internal fun TumblrPost.resolvedBlogName(): String =
     blogName?.normalizedTumblrBlogName()
-        ?: blog?.name?.normalizedTumblrBlogName()
+        ?: blog?.resolvedBlogName()
         ?: error("Tumblr blog name is missing")
 
 private fun TumblrPost.createdAtInstant(): Instant =
@@ -401,6 +408,7 @@ private data class TumblrNpfFormattingRange(
 private fun TumblrPost.renderContent(tags: List<String> = this.tags): TumblrRenderedPostContent =
     renderContent(
         content = content,
+        layout = layout,
         tags = tags,
         fallbackTextParts = fallbackTextParts(),
         photos = photos,
@@ -411,24 +419,32 @@ private fun TumblrPost.fallbackTextParts(): List<String> = listOfNotNull(title, 
 private fun TumblrTrailItem.renderContent(fallbackTags: List<String> = emptyList()): TumblrRenderedPostContent =
     renderContent(
         content = content,
+        layout = layout,
         tags = tags.ifEmpty { post?.tags.orEmpty() }.ifEmpty { fallbackTags },
     )
 
 private fun renderContent(
     content: List<TumblrNpfBlock>,
+    layout: List<TumblrNpfLayout>,
     tags: List<String>,
     fallbackTextParts: List<String> = emptyList(),
     photos: List<TumblrLegacyPhoto> = emptyList(),
 ): TumblrRenderedPostContent {
+    val orderedContent = content.inLayoutDisplayOrder(layout)
+    val visibleContent = orderedContent.map { it.value }
     val tagLine = tags.toTumblrTagLine()
     val text =
-        content
+        visibleContent
             .collectText()
             .ifBlank {
                 fallbackTextParts.joinToString(separator = "\n")
             }.appendTumblrTagLine(tagLine)
-    val shouldInlineImages = content.shouldInlineAllImages()
-    val renderedNpfContent = content.renderNpfContent(inlineImages = shouldInlineImages)
+    val shouldInlineImages = visibleContent.shouldInlineAllImages()
+    val renderedNpfContent =
+        orderedContent.renderNpfContent(
+            inlineImages = shouldInlineImages,
+            askLayout = layout.firstOrNull { it.type == "ask" },
+        )
     val fallbackTextRuns =
         fallbackTextParts.mapNotNull { part ->
             part.takeIf { it.isNotBlank() }?.toRenderTextContent()
@@ -457,8 +473,28 @@ private fun renderContent(
                 innerText = text,
             ),
         media = media,
-        card = content.collectCard(),
+        card = visibleContent.collectCard(),
     )
+}
+
+private fun List<TumblrNpfBlock>.inLayoutDisplayOrder(layout: List<TumblrNpfLayout>): List<IndexedValue<TumblrNpfBlock>> {
+    val rowsLayout = layout.firstOrNull { it.type == "rows" }
+    val orderedIndexes =
+        rowsLayout
+            ?.let { rows ->
+                rows.display
+                    .flatMap { it.blocks }
+                    .ifEmpty { rows.rows.flatten() }
+            }.orEmpty()
+            .distinct()
+    val indexes =
+        if (rowsLayout != null && orderedIndexes.isNotEmpty()) {
+            // A rows layout also controls visibility (for example paywall blocks).
+            orderedIndexes
+        } else {
+            indices.toList()
+        }
+    return indexes.mapNotNull { index -> getOrNull(index)?.let { IndexedValue(index, it) } }
 }
 
 private fun String.appendTumblrTagLine(tagLine: String): String {
@@ -501,14 +537,17 @@ private fun TumblrNpfBlock.isImageBlockWithMedia(): Boolean = type == "image" &&
 
 private fun TumblrNpfBlock.isInlineDecisionTextBlock(): Boolean = type == "text" && !text.isNullOrBlank()
 
-private fun TumblrPost.collectReferencedTrailPost(
+private fun TumblrPost.collectReferencedTrailPosts(
     accountKey: MicroBlogKey,
+    parentStatusKey: MicroBlogKey,
     fallbackCreatedAt: UiDateTime,
     fallbackTags: List<String>,
-): UiTimelineV2.Post? =
-    trail.firstNotNullOfOrNull { trailItem ->
+): List<UiTimelineV2.Post> =
+    trail.mapIndexedNotNull { index, trailItem ->
         trailItem.toReferencedPost(
             accountKey = accountKey,
+            parentStatusKey = parentStatusKey,
+            trailIndex = index,
             fallbackCreatedAt = fallbackCreatedAt,
             fallbackTags = fallbackTags,
         )
@@ -516,13 +555,15 @@ private fun TumblrPost.collectReferencedTrailPost(
 
 private fun TumblrTrailItem.toReferencedPost(
     accountKey: MicroBlogKey,
+    parentStatusKey: MicroBlogKey,
+    trailIndex: Int,
     fallbackCreatedAt: UiDateTime,
     fallbackTags: List<String>,
 ): UiTimelineV2.Post? {
-    val trailPost = post ?: return null
-    val trailPostId = trailPost.id ?: return null
-    val trailBlog = blog ?: return null
-    val trailBlogName = trailBlog.name.normalizedTumblrBlogName()
+    val trailBlogName = resolvedBlogName() ?: return null
+    val trailBlog = blog ?: TumblrBlog(name = trailBlogName)
+    val resolvablePostId = post?.id
+    val trailPostId = resolvablePostId ?: "broken-${parentStatusKey.id.substringAfterLast(':')}-$trailIndex"
     val statusKey = tumblrPostKey(trailBlogName, trailPostId)
     val content = renderContent(fallbackTags = fallbackTags)
 
@@ -536,42 +577,78 @@ private fun TumblrTrailItem.toReferencedPost(
         sensitive = false,
         contentWarning = null,
         user = trailBlog.toUiProfile(accountKey),
-        content = content.text.toUiPlainText(),
+        content = content.richText,
         actions = persistentListOf(),
         poll = null,
         statusKey = statusKey,
         card = content.card,
-        createdAt = fallbackCreatedAt,
+        createdAt = post?.timestamp?.let(Instant::fromEpochSeconds)?.toUi() ?: fallbackCreatedAt,
         visibility = UiTimelineV2.Post.Visibility.Public,
         references = persistentListOf(),
         clickEvent =
-            ClickEvent.Deeplink(
-                DeeplinkRoute.Status.Detail(
-                    statusKey = statusKey,
-                    accountType = AccountType.Specific(accountKey),
-                ),
-            ),
+            if (resolvablePostId == null) {
+                ClickEvent.Noop
+            } else {
+                ClickEvent.Deeplink(
+                    DeeplinkRoute.Status.Detail(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    ),
+                )
+            },
         accountType = AccountType.Specific(accountKey),
         itemKey = "tumblr_quote_${statusKey.id}",
     )
 }
 
-private fun List<TumblrNpfBlock>.renderNpfContent(inlineImages: Boolean): TumblrNpfRenderedContent {
+private fun List<IndexedValue<TumblrNpfBlock>>.renderNpfContent(
+    inlineImages: Boolean,
+    askLayout: TumblrNpfLayout?,
+): TumblrNpfRenderedContent {
     val renderRuns = mutableListOf<RenderContent>()
     val media = mutableListOf<UiMedia>()
-    forEach { block ->
+    val askBlockIndexes = askLayout?.blocks.orEmpty().toSet()
+    var askAttributionRendered = false
+    forEach { indexedBlock ->
+        val block = indexedBlock.value
+        val isAskBlock = indexedBlock.index in askBlockIndexes
+        if (isAskBlock && !askAttributionRendered) {
+            askAttributionRendered = true
+            askLayout
+                ?.attribution
+                ?.blog
+                ?.resolvedBlogName()
+                ?.let { blogName ->
+                    renderRuns +=
+                        RenderContent.Text(
+                            runs = persistentListOf(RenderRun.Text("@$blogName")),
+                            block = RenderBlockStyle(isBlockQuote = true),
+                        )
+                }
+        }
         when (block.type) {
             "image" -> {
-                val image = block.toBestImageMedia(block.altText) ?: return@forEach
-                if (inlineImages) {
-                    renderRuns +=
-                        RenderContent.BlockImage(
-                            url = image.url,
-                            href = block.url,
-                        )
-                } else {
-                    media += image
+                val image = block.toBestImageMedia(block.altText)
+                if (image != null) {
+                    if (inlineImages) {
+                        renderRuns +=
+                            RenderContent.BlockImage(
+                                url = image.url,
+                                href = block.url,
+                            )
+                    } else {
+                        media += image
+                    }
                 }
+                block.caption
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { caption ->
+                        renderRuns +=
+                            RenderContent.Text(
+                                runs = persistentListOf(RenderRun.Text(caption)),
+                                block = RenderBlockStyle(isFigCaption = true),
+                            )
+                    }
             }
 
             "video" -> {
@@ -594,7 +671,13 @@ private fun List<TumblrNpfBlock>.renderNpfContent(inlineImages: Boolean): Tumblr
             else -> {
                 block
                     .toRenderTextContent()
-                    ?.let(renderRuns::add)
+                    ?.let { content ->
+                        if (isAskBlock) {
+                            content.copy(block = content.block.copy(isBlockQuote = true))
+                        } else {
+                            content
+                        }
+                    }?.let(renderRuns::add)
             }
         }
     }
@@ -680,8 +763,8 @@ private fun String.toRenderTextRuns(
 private fun List<TumblrNpfFormatting>.toRanges(text: String): List<TumblrNpfFormattingRange> =
     mapNotNull { formatting ->
         val type = formatting.type?.lowercase() ?: return@mapNotNull null
-        val start = formatting.start?.let(text::safeCharIndex) ?: return@mapNotNull null
-        val end = formatting.end?.let(text::safeCharIndex) ?: return@mapNotNull null
+        val start = formatting.start?.let(text::charIndexForCodePointOffset) ?: return@mapNotNull null
+        val end = formatting.end?.let(text::charIndexForCodePointOffset) ?: return@mapNotNull null
         if (start >= end) return@mapNotNull null
         TumblrNpfFormattingRange(
             type = type,
@@ -713,19 +796,6 @@ private fun List<TumblrNpfFormattingRange>.toRenderTextStyle(baseStyle: RenderTe
 private fun TumblrNpfFormattingBlog.toTumblrBlogUrl(): String? =
     url ?: name?.normalizedTumblrBlogName()?.let { "https://www.tumblr.com/$it" }
 
-private fun String.safeCharIndex(offset: Int): Int {
-    val direct = offset.coerceIn(0, length)
-    if (!isInsideSurrogatePair(direct)) {
-        return direct
-    }
-    return charIndexForCodePointOffset(offset)
-}
-
-private fun String.isInsideSurrogatePair(index: Int): Boolean =
-    index in 1 until length &&
-        this[index - 1].isHighSurrogateChar() &&
-        this[index].isLowSurrogateChar()
-
 private fun String.charIndexForCodePointOffset(offset: Int): Int {
     var charIndex = 0
     var codePointIndex = 0
@@ -752,6 +822,11 @@ private fun List<TumblrNpfBlock>.collectText(): String =
         appendNpfText(this)
     }.trim()
 
+private fun List<TumblrNpfBlock>.collectText(layout: List<TumblrNpfLayout>): String =
+    inLayoutDisplayOrder(layout)
+        .map { it.value }
+        .collectText()
+
 private fun List<TumblrNpfBlock>.appendNpfText(builder: StringBuilder) {
     forEach { block ->
         when (block.type) {
@@ -768,6 +843,14 @@ private fun List<TumblrNpfBlock>.appendNpfText(builder: StringBuilder) {
                 if (!title.isNullOrBlank()) {
                     if (builder.isNotEmpty()) builder.append('\n')
                     builder.append(title)
+                }
+            }
+
+            "image" -> {
+                val caption = block.caption
+                if (!caption.isNullOrBlank()) {
+                    if (builder.isNotEmpty()) builder.append('\n')
+                    builder.append(caption)
                 }
             }
 
@@ -985,8 +1068,24 @@ private fun TumblrNpfBlock.posterUrl(): String? =
         ?: poster.firstNotNullOfOrNull { it.url }
 
 private fun TumblrNpfBlock.audioUrl(): String? =
-    url
+    media
+        .firstOrNull { item ->
+            val mediaUrl = item.url ?: return@firstOrNull false
+            item.type?.startsWith("audio/", ignoreCase = true) == true || mediaUrl.isLikelyPlayableAudioUrl()
+        }?.url
         ?: media.firstNotNullOfOrNull { it.url }
+        ?: url?.takeIf { it.isLikelyPlayableAudioUrl() }
+
+private fun String.isLikelyPlayableAudioUrl(): Boolean {
+    val path = substringBefore('?').substringBefore('#').lowercase()
+    return path.endsWith(".mp3") ||
+        path.endsWith(".m4a") ||
+        path.endsWith(".aac") ||
+        path.endsWith(".ogg") ||
+        path.endsWith(".oga") ||
+        path.endsWith(".wav") ||
+        path.endsWith(".flac")
+}
 
 private fun String.isLikelyPlayableVideoUrl(
     type: String?,

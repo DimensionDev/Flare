@@ -39,7 +39,7 @@ internal class TumblrLoader(
 
     override suspend fun relation(userKey: MicroBlogKey): UiRelation {
         val blog = service.blogInfo(userKey.toTumblrBlogIdentifier())
-        return UiRelation(following = blog.following == true)
+        return UiRelation(following = blog.followed == true)
     }
 
     override suspend fun follow(userKey: MicroBlogKey) {

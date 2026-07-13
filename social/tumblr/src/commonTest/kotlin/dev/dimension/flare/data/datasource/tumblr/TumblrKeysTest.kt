@@ -16,6 +16,18 @@ class TumblrKeysTest {
             MicroBlogKey(id = "staff", host = TUMBLR_HOST),
             tumblrUserKey("@Staff"),
         )
+        assertEquals(
+            MicroBlogKey(id = "staff", host = TUMBLR_HOST),
+            tumblrUserKey("https://www.tumblr.com/staff"),
+        )
+        assertEquals(
+            MicroBlogKey(id = "staff", host = TUMBLR_HOST),
+            tumblrUserKey("https://www.tumblr.com/@Staff"),
+        )
+        assertEquals(
+            MicroBlogKey(id = "www.davidslog.com", host = TUMBLR_HOST),
+            tumblrUserKey("https://www.davidslog.com/archive"),
+        )
     }
 
     @Test

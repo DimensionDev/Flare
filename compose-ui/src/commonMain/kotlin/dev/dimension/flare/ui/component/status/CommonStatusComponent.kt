@@ -872,6 +872,15 @@ public fun StatusVisibilityComponent(
             )
         }
 
+        UiTimelineV2.Post.Visibility.Private -> {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Lock,
+                contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
+                modifier = modifier,
+                tint = tint,
+            )
+        }
+
         UiTimelineV2.Post.Visibility.Specified -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,

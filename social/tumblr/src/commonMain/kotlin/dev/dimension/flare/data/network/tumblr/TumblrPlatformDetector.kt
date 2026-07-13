@@ -10,7 +10,7 @@ internal data object TumblrPlatformDetector : PlatformDetector {
     override val priority: Int = 80
 
     override suspend fun detect(host: String): NodeData? {
-        if (!TUMBLR_HOST.equals(host, ignoreCase = true) && !TUMBLR_WEB_HOST.equals(host, ignoreCase = true)) {
+        if (!host.isTumblrHost()) {
             return null
         }
         return NodeData(
@@ -20,4 +20,13 @@ internal data object TumblrPlatformDetector : PlatformDetector {
             compatibleMode = false,
         )
     }
+}
+
+private fun String.isTumblrHost(): Boolean {
+    val normalized = lowercase()
+    if (normalized == TUMBLR_HOST || normalized == TUMBLR_WEB_HOST) {
+        return true
+    }
+    val blogName = normalized.removeSuffix(".$TUMBLR_HOST")
+    return blogName != normalized && blogName.isNotBlank() && !blogName.contains('.')
 }

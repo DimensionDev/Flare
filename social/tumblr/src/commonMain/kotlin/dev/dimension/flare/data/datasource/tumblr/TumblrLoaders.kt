@@ -45,7 +45,7 @@ internal class TumblrBlogTimelineLoader(
     private val blogKey: MicroBlogKey,
     private val mediaOnly: Boolean = false,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "tumblr_blog_${blogKey.id}_$accountKey"
+    override val pagingKey: String = "tumblr_blog_${blogKey.id}_${if (mediaOnly) "media" else "posts"}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -71,6 +71,7 @@ internal class TumblrBlogTimelineLoader(
             accountKey = accountKey,
             nextOffset = (offset ?: 0) + response.posts.size,
             pageSize = pageSize,
+            paginationItemCount = response.posts.size,
         )
     }
 }
@@ -165,8 +166,9 @@ internal class TumblrBlogProfileLoader(
 internal class TumblrFollowingLoader(
     private val service: TumblrService,
     private val accountKey: MicroBlogKey,
+    private val blogKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiProfile> {
-    override val pagingKey: String = "tumblr_following_$accountKey"
+    override val pagingKey: String = "tumblr_following_${blogKey.id}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -176,7 +178,12 @@ internal class TumblrFollowingLoader(
             return PagingResult(endOfPaginationReached = true)
         }
         val offset = (request as? PagingRequest.Append)?.nextKey?.toIntOrNull()
-        val response = service.following(pageSize.coercePageSize(), offset)
+        val response =
+            service.following(
+                blogIdentifier = blogKey.toTumblrBlogIdentifier(),
+                limit = pageSize.coercePageSize(),
+                offset = offset,
+            )
         return response.blogs.toProfileResult(accountKey, offset, pageSize)
     }
 }
@@ -210,8 +217,9 @@ private fun List<TumblrPost>.toTimelineResult(
     accountKey: MicroBlogKey,
     nextOffset: Int,
     pageSize: Int,
+    paginationItemCount: Int = size,
 ): PagingResult<UiTimelineV2> {
-    val nextKey = nextOffset.takeIf { size >= pageSize.coercePageSize() }?.toString()
+    val nextKey = nextOffset.takeIf { paginationItemCount >= pageSize.coercePageSize() }?.toString()
     return PagingResult(
         data = map { it.toUiTimeline(accountKey) },
         nextKey = nextKey,

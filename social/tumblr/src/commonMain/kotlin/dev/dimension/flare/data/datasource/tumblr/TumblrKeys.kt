@@ -33,16 +33,38 @@ internal fun MicroBlogKey.toTumblrPostKeyParts(): TumblrPostKeyParts {
 
 internal fun MicroBlogKey.toTumblrBlogIdentifier(): String = id.normalizedTumblrBlogName()
 
-internal fun String.normalizedTumblrBlogName(): String =
-    trim()
-        .removePrefix("@")
-        .removePrefix("https://")
-        .removePrefix("http://")
-        .removePrefix("www.")
-        .removeSuffix("/")
-        .substringBefore(".tumblr.com")
-        .substringBefore("/")
-        .lowercase()
+internal fun String.normalizedTumblrBlogName(): String {
+    val value =
+        trim()
+            .lowercase()
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .substringBefore('?')
+            .substringBefore('#')
+            .removeSuffix("/")
+    val host = value.substringBefore('/')
+    val path = value.substringAfter('/', missingDelimiterValue = "")
+
+    return when {
+        host == TUMBLR_HOST || host == "www.$TUMBLR_HOST" -> {
+            path.substringBefore('/').removePrefix("@")
+        }
+
+        host.endsWith(".$TUMBLR_HOST") -> {
+            host
+                .removeSuffix(".$TUMBLR_HOST")
+                .removePrefix("www.")
+        }
+
+        host.contains('.') -> {
+            host
+        }
+
+        else -> {
+            host.removePrefix("@")
+        }
+    }
+}
 
 internal fun tumblrBlogUrl(blogName: String): String = "https://${blogName.normalizedTumblrBlogName()}.tumblr.com/"
 

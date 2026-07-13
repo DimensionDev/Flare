@@ -477,7 +477,7 @@ public struct StatusView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 case .tumblr:
-                    Image(fontAwesome: .squareRss)
+                    Image(fontAwesome: .tumblr)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

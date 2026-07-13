@@ -80,9 +80,10 @@ internal interface TumblrResources {
         @Path("blogIdentifier") blogIdentifier: String,
     ): TumblrEnvelope<TumblrBlogInfoResponse>
 
-    @GET("user/following")
+    @GET("blog/{blogIdentifier}/following")
     suspend fun following(
         @Header("Authorization") authorization: String,
+        @Path("blogIdentifier") blogIdentifier: String,
         @Query("limit") limit: Int,
         @Query("offset") offset: Int? = null,
     ): TumblrEnvelope<TumblrBlogPage>

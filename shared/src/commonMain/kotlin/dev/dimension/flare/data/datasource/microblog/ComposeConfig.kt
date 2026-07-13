@@ -4,8 +4,11 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -328,7 +331,43 @@ public data class ComposeConfig public constructor(
     public data object ContentWarning
 
     @Immutable
-    public data object Visibility
+    public data class Visibility public constructor(
+        val allVisibilities: ImmutableList<UiTimelineV2.Post.Visibility> =
+            persistentListOf(
+                UiTimelineV2.Post.Visibility.Public,
+                UiTimelineV2.Post.Visibility.Home,
+                UiTimelineV2.Post.Visibility.Followers,
+                UiTimelineV2.Post.Visibility.Specified,
+            ),
+        val defaultVisibility: UiTimelineV2.Post.Visibility = UiTimelineV2.Post.Visibility.Public,
+    ) {
+        init {
+            require(allVisibilities.isNotEmpty()) { "Compose visibility options must not be empty" }
+            require(defaultVisibility in allVisibilities) {
+                "Default compose visibility must be included in the available options"
+            }
+        }
+
+        internal fun merge(other: Visibility): Visibility? {
+            val commonVisibilities =
+                allVisibilities
+                    .filter { it in other.allVisibilities }
+                    .toImmutableList()
+            if (commonVisibilities.isEmpty()) {
+                return null
+            }
+            val mergedDefault =
+                defaultVisibility
+                    .takeIf { it == other.defaultVisibility && it in commonVisibilities }
+                    ?: UiTimelineV2.Post.Visibility.Public
+                        .takeIf { it in commonVisibilities }
+                    ?: commonVisibilities.first()
+            return Visibility(
+                allVisibilities = commonVisibilities,
+                defaultVisibility = mergedDefault,
+            )
+        }
+    }
 
     internal fun merge(other: ComposeConfig): ComposeConfig {
         val text =
@@ -363,7 +402,7 @@ public data class ComposeConfig public constructor(
             }
         val visibility =
             if (visibility != null && other.visibility != null) {
-                visibility
+                visibility.merge(other.visibility)
             } else {
                 null
             }

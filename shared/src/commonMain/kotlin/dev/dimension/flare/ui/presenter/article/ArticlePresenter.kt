@@ -4,10 +4,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.Pager
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.STATUS_HISTORY_PAGING_KEY
 import dev.dimension.flare.di.koinInject
@@ -23,9 +33,13 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
 
+@OptIn(ExperimentalCoroutinesApi::class)
 public class ArticlePresenter(
     private val accountType: AccountType,
     private val articleKey: MicroBlogKey,
@@ -33,23 +47,41 @@ public class ArticlePresenter(
     private val accountService: AccountService by koinInject()
     private val cacheDatabase: CacheDatabase by koinInject()
 
+    private val serviceFlow by lazy {
+        accountService.accountServiceFlow(accountType)
+    }
+
     private val articleStateFlow by lazy {
-        accountService
-            .accountServiceFlow(accountType)
-            .map { service ->
-                require(service is ArticleDataSource)
-                service.article(articleKey)
-            }
+        serviceFlow.map { service ->
+            val articleDataSource =
+                service as? ArticleDataSource
+                    ?: error("Current service does not support article data source")
+            articleDataSource.article(articleKey)
+        }
+    }
+
+    private val commentsFlow by lazy {
+        articleCommentsFlow(
+            dataSources = serviceFlow,
+            articleKey = articleKey,
+        )
     }
 
     @Immutable
     public interface State {
         public val article: UiState<UiArticle>
+        public val comments: PagingState<UiTimelineV2>
     }
 
     @Composable
     override fun body(): State {
+        val scope = rememberCoroutineScope()
         val articleState by articleStateFlow.collectAsUiState()
+        val comments =
+            remember(commentsFlow, scope) {
+                commentsFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
         LaunchedEffect(accountType, articleKey, articleState) {
             articleState
                 .takeSuccess()
@@ -72,9 +104,24 @@ public class ArticlePresenter(
         }
         return object : State {
             override val article: UiState<UiArticle> = articleState
+            override val comments: PagingState<UiTimelineV2> = comments
         }
     }
 }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun articleCommentsFlow(
+    dataSources: Flow<Any>,
+    articleKey: MicroBlogKey,
+): Flow<PagingData<UiTimelineV2>> =
+    dataSources.flatMapLatest { dataSource ->
+        val articleDataSource =
+            dataSource as? ArticleDataSource
+                ?: error("Current service does not support article data source")
+        Pager(config = pagingConfig) {
+            articleDataSource.articleComments(articleKey).toPagingSource()
+        }.flow
+    }
 
 private fun UiArticle.toHistoryFeed(
     accountType: AccountType,

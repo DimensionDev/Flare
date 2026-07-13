@@ -235,6 +235,13 @@ internal class FanboxDataSource(
                 imageHeaders = service.fanboxImageHeaders(),
             )
 
+    override fun articleComments(articleKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        FanboxCommentsLoader(
+            service = service,
+            accountKey = accountKey,
+            statusKey = articleKey,
+        )
+
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab(

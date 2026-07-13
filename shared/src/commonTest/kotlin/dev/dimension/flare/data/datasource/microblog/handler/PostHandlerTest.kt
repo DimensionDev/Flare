@@ -365,7 +365,7 @@ class PostHandlerTest : RobolectricTest() {
             )
 
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
-            val cacheable = handler.post(postKey)
+            val cacheable = handler.post(postKey, translationDisplay = PostTranslationDisplay.Original)
 
             val timelineItem =
                 assertNotNull(
@@ -415,7 +415,7 @@ class PostHandlerTest : RobolectricTest() {
             )
 
             val handler = PostHandler(accountType = accountType, loader = fakeLoader)
-            val cacheable = handler.post(postKey)
+            val cacheable = handler.post(postKey, translationDisplay = PostTranslationDisplay.Original)
 
             assertNotNull(
                 withTimeoutOrNull(5_000) {

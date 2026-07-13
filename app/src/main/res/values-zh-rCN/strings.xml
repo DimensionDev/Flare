@@ -672,6 +672,7 @@
     <string name="settings_media_save_location_ask_every_time">每次询问</string>
     <string name="pixiv_private_following_title">私密关注</string>
     <string name="pixiv_private_bookmarks_title">私密书签</string>
+    <string name="pixiv_private_favourites_title">私密收藏</string>
     <string name="deeplink_account_selection_save_default">始终这样打开</string>
     <string name="settings_link_open_defaults_title">链接打开方式</string>
     <string name="settings_link_open_defaults_description">按主机选择支持链接的默认打开方式</string>

@@ -1,16 +1,32 @@
 package dev.dimension.flare.data.datasource.pixiv
 
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.network.pixiv.model.PixivIllust
 import dev.dimension.flare.data.network.pixiv.model.PixivImageUrls
 import dev.dimension.flare.data.network.pixiv.model.PixivMetaPage
 import dev.dimension.flare.data.network.pixiv.model.PixivMetaSinglePage
 import dev.dimension.flare.data.network.pixiv.model.PixivUser
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class PixivMapperTest {
+    @Test
+    fun viewCountUsesEyeIcon() {
+        val post =
+            pixivIllust(
+                imageUrls = PixivImageUrls(medium = "https://example.com/medium.jpg"),
+                totalView = 123,
+            ).toUiTimeline(accountKey = MicroBlogKey("21714218", "pixiv.net"))
+
+        val viewCountAction = assertIs<ActionMenu.Item>(post.actions.first())
+        assertEquals(UiIcon.Eye, viewCountAction.icon)
+        assertEquals(123L, viewCountAction.count?.value)
+    }
+
     @Test
     fun singlePageIllustUsesMetaSinglePageOriginalImageUrl() {
         val post =
@@ -67,6 +83,7 @@ class PixivMapperTest {
         imageUrls: PixivImageUrls,
         metaSinglePage: PixivMetaSinglePage? = null,
         metaPages: List<PixivMetaPage> = emptyList(),
+        totalView: Long = 0,
     ): PixivIllust =
         PixivIllust(
             id = 146347478,
@@ -84,5 +101,6 @@ class PixivMapperTest {
             height = 3000,
             metaSinglePage = metaSinglePage,
             metaPages = metaPages,
+            totalView = totalView,
         )
 }

@@ -38,8 +38,8 @@ public data object PixivPlatformSpec :
     internal val bookmarkTimelineSpec =
         TimelineSpec(
             id = PIXIV_BOOKMARK,
-            title = UiStrings.Bookmark,
-            icon = UiIcon.Bookmark.asType(),
+            title = UiStrings.Favourite,
+            icon = UiIcon.Heart.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory =
@@ -51,8 +51,8 @@ public data object PixivPlatformSpec :
     internal val privateBookmarkTimelineSpec =
         TimelineSpec(
             id = PIXIV_PRIVATE_BOOKMARK,
-            title = UiStrings.PixivPrivateBookmarks,
-            icon = UiIcon.Bookmark.asType(),
+            title = UiStrings.PixivPrivateFavourites,
+            icon = UiIcon.Heart.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory =

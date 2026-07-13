@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.model.mapper.misskeyReact
 import dev.dimension.flare.ui.model.mapper.misskeyRenote
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
-import dev.dimension.flare.ui.model.mapper.pixivBookmark
+import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.mapper.vvoFavorite
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.model.mapper.vvoLikeComment
@@ -445,9 +445,9 @@ public sealed interface PostEvent {
         ) : Pixiv,
             UpdatePostActionMenuEvent {
             public override fun nextActionMenu(): ActionMenu.Item =
-                ActionMenu.pixivBookmark(
+                ActionMenu.pixivFavourite(
                     statusKey = postKey,
-                    bookmarked = !bookmarked,
+                    favourited = !bookmarked,
                     count = (count + if (!bookmarked) 1 else -1).coerceAtLeast(0),
                     accountKey = accountKey,
                 )

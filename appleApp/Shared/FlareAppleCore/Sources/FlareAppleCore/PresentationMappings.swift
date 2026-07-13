@@ -130,8 +130,8 @@ public extension UiStrings {
             localizedPresentationString("pixiv_ranking_day_manga_title", fallback: "Manga Ranking")
         case .pixivPrivateFollowing:
             localizedPresentationString("pixiv_private_following_title", fallback: "Private Following")
-        case .pixivPrivateBookmarks:
-            localizedPresentationString("pixiv_private_bookmarks_title", fallback: "Private Bookmarks")
+        case .pixivPrivateBookmarks, .pixivPrivateFavourites:
+            localizedPresentationString("pixiv_private_favourites_title", fallback: "Private Favorites")
         case .illustrations:
             localizedPresentationString("illustrations_title", fallback: "Illustrations")
         case .manga:
@@ -303,6 +303,8 @@ public extension UiIcon {
             .trash
         case .report, .info:
             .circleInfo
+        case .eye:
+            .eye
         case .react:
             .plus
         case .unReact:

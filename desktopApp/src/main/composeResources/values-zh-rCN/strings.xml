@@ -599,6 +599,7 @@
     <string name="agent_ui_status_insight_user_placeholder">输入: 用户 链接, handle, userKey…</string>
     <string name="pixiv_private_following_title">私密关注</string>
     <string name="pixiv_private_bookmarks_title">私密书签</string>
+    <string name="pixiv_private_favourites_title">私密收藏</string>
     <string name="settings_behavior_title">行为</string>
     <string name="settings_behavior_description">浏览器和链接处理偏好</string>
     <string name="article_content_gate_subscription_title">需要支持后阅读</string>

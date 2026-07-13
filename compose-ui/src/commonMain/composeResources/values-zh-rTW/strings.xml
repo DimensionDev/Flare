@@ -426,6 +426,7 @@
     <string name="bluesky_login_fix_delegation_scopes_button">修復 Tranquil 權限</string>
     <string name="pixiv_private_following_title">私人追蹤</string>
     <string name="pixiv_private_bookmarks_title">私人書籤</string>
+    <string name="pixiv_private_favourites_title">私人收藏</string>
     <string name="fanbox_supported_title">支援中</string>
     <string name="fanbox_recommended_creators_title">推薦創作者</string>
 </resources>

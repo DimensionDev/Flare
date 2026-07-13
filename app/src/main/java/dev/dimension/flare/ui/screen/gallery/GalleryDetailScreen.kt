@@ -641,14 +641,14 @@ private fun GalleryAuthorCard(
             StatusActionButton(
                 icon =
                     if (detail.isBookmarked) {
-                        UiIcon.Unbookmark.toImageVector()
+                        UiIcon.Unlike.toImageVector()
                     } else {
-                        UiIcon.Bookmark.toImageVector()
+                        UiIcon.Like.toImageVector()
                     },
                 number = null,
                 color =
                     if (detail.isBookmarked) {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.error
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -65,6 +67,7 @@ import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidDownloadManager
 import dev.dimension.flare.common.MediaFileNamePolicy
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -78,8 +81,11 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
@@ -88,6 +94,7 @@ import dev.dimension.flare.ui.model.UiArticleContentGateReason
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -290,6 +297,8 @@ internal fun ArticleScreen(
             is UiState.Success -> {
                 ArticleSuccessContent(
                     article = articleState.data,
+                    articleKey = articleKey,
+                    comments = state.comments,
                     contentPadding = contentPadding,
                     listState = listState,
                     onProfileClick = { profile ->
@@ -358,6 +367,8 @@ internal fun ArticleScreen(
 @Composable
 private fun ArticleSuccessContent(
     article: UiArticle,
+    articleKey: MicroBlogKey,
+    comments: PagingState<UiTimelineV2>,
     contentPadding: PaddingValues,
     listState: LazyListState,
     onProfileClick: (UiProfile) -> Unit,
@@ -421,6 +432,116 @@ private fun ArticleSuccessContent(
                         onOpenMedia = onOpenMedia,
                     )
                 }
+            }
+            articleComments(
+                comments = comments,
+                articleKey = articleKey,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.articleComments(
+    comments: PagingState<UiTimelineV2>,
+    articleKey: MicroBlogKey,
+) {
+    when (comments) {
+        is PagingState.Empty -> {
+            return
+        }
+
+        is PagingState.Loading -> {
+            articleCommentsTitle()
+            items(
+                count = 3,
+                key = { "article_comment_placeholder_$it" },
+            ) { index ->
+                ArticleBodyContainer {
+                    AdaptiveCard(
+                        modifier = Modifier.ignoreHorizontalParentPadding(screenHorizontalPadding),
+                        index = index,
+                        totalCount = 3,
+                        respectTimelineMode = true,
+                    ) {
+                        StatusItem(item = null)
+                    }
+                }
+            }
+        }
+
+        is PagingState.Error -> {
+            articleCommentsTitle()
+            item(key = "article_comments_error") {
+                ArticleBodyContainer {
+                    ErrorContent(
+                        error = comments.error,
+                        onRetry = comments.onRetry,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+
+        is PagingState.Success -> {
+            articleCommentsTitle()
+            items(
+                count = comments.itemCount,
+                key = comments.itemKey { item -> item.itemKey ?: item.hashCode() },
+                contentType = comments.itemContentType { item -> item.itemType },
+            ) { index ->
+                ArticleBodyContainer {
+                    AdaptiveCard(
+                        modifier = Modifier.ignoreHorizontalParentPadding(screenHorizontalPadding),
+                        index = index,
+                        totalCount = comments.itemCount,
+                        respectTimelineMode = true,
+                    ) {
+                        StatusItem(
+                            item = comments[index],
+                            detailStatusKey = articleKey,
+                        )
+                    }
+                }
+            }
+            when (val appendState = comments.appendState) {
+                is androidx.paging.LoadState.Error -> {
+                    item(key = "article_comments_append_error") {
+                        ArticleBodyContainer {
+                            ErrorContent(
+                                error = appendState.error,
+                                onRetry = comments::retry,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+
+                androidx.paging.LoadState.Loading -> {
+                    item(key = "article_comments_append_loading") {
+                        ArticleBodyContainer {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+
+                is androidx.paging.LoadState.NotLoading -> {
+                }
+            }
+        }
+    }
+}
+
+private fun LazyListScope.articleCommentsTitle() {
+    item(key = "article_comments_title") {
+        ArticleBodyContainer {
+            Column {
+                Text(
+                    text = stringResource(R.string.gallery_detail_comments_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                HorizontalDivider(
+                    modifier = Modifier.ignoreHorizontalParentPadding(screenHorizontalPadding),
+                )
             }
         }
     }

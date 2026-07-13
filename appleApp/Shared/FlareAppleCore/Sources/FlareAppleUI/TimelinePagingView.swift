@@ -6,29 +6,41 @@ public struct TimelinePagingContent: View {
     private let data: PagingState<UiTimelineV2>
     private let detailStatusKey: MicroBlogKey?
     private let loadingCount: Int
+    private let contentMaxWidth: CGFloat?
+    private let contentHorizontalPadding: CGFloat
 
     public init(
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey? = nil,
-        loadingCount: Int = 5
+        loadingCount: Int = 5,
+        contentMaxWidth: CGFloat? = nil,
+        contentHorizontalPadding: CGFloat = 0
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.loadingCount = loadingCount
+        self.contentMaxWidth = contentMaxWidth
+        self.contentHorizontalPadding = contentHorizontalPadding
     }
 
     public var body: some View {
         switch onEnum(of: data) {
         case .empty:
-            ListEmptyView()
-        case .error(let error):
-            ListErrorView(error: error.error) {
-                _ = error.onRetry()
+            contentLayout {
+                ListEmptyView()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        case .error(let error):
+            contentLayout {
+                ListErrorView(error: error.error) {
+                    _ = error.onRetry()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            }
         case .loading:
             ForEach(0..<loadingCount, id: \.self) { index in
-                loadingRow(index: index, totalCount: loadingCount)
+                contentLayout {
+                    loadingRow(index: index, totalCount: loadingCount)
+                }
             }
         case .success(let success):
             successContent(success)
@@ -40,26 +52,32 @@ public struct TimelinePagingContent: View {
         let count = Int(success.itemCount)
         let rows = TimelinePagingRows(success: success, count: count)
         ForEach(rows) { row in
-            TimelinePagingRowView(
-                row: row,
-                totalCount: count,
-                detailStatusKey: detailStatusKey,
-                onDisplay: { index in
-                    _ = success.get(index: Int32(index))
-                }
-            )
+            contentLayout {
+                TimelinePagingRowView(
+                    row: row,
+                    totalCount: count,
+                    detailStatusKey: detailStatusKey,
+                    onDisplay: { index in
+                        _ = success.get(index: Int32(index))
+                    }
+                )
+            }
         }
 
         switch onEnum(of: success.appendState) {
         case .error(let error):
-            ListErrorView(error: error.error) {
-                success.retry()
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-        case .loading:
-            ProgressView()
-                .padding()
+            contentLayout {
+                ListErrorView(error: error.error) {
+                    success.retry()
+                }
                 .frame(maxWidth: .infinity, alignment: .center)
+            }
+        case .loading:
+            contentLayout {
+                ProgressView()
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
         case .notLoading:
             EmptyView()
         }
@@ -70,6 +88,22 @@ public struct TimelinePagingContent: View {
             TimelinePlaceholderView()
                 .padding(.horizontal)
                 .padding(.vertical, 12)
+        }
+    }
+
+    @ViewBuilder
+    private func contentLayout<Content: View>(
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        if let contentMaxWidth {
+            content()
+                .frame(maxWidth: contentMaxWidth, alignment: .leading)
+                .padding(.horizontal, contentHorizontalPadding)
+        } else if contentHorizontalPadding > 0 {
+            content()
+                .padding(.horizontal, contentHorizontalPadding)
+        } else {
+            content()
         }
     }
 }

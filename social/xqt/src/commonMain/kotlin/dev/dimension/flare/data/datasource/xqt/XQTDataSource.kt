@@ -180,6 +180,8 @@ internal class XQTDataSource(
             ?.renderArticle(accountKey = accountKey)
             ?: error("Twitter article not found")
 
+    override fun articleComments(articleKey: MicroBlogKey): RemoteLoader<UiTimelineV2> = context(articleKey)
+
     override val notificationHandler by lazy {
         NotificationHandler(
             accountKey = accountKey,

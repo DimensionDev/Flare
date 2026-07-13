@@ -1,8 +1,12 @@
 package dev.dimension.flare.data.network.fanbox
 
 import io.ktor.http.Url
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonTransformingSerializer
 
 @Serializable
 internal data class FanboxMetaDataEntity(
@@ -145,8 +149,15 @@ internal data class FanboxPostSearchResponse(
 @Serializable
 internal data class FanboxPostDetailResponse(
     @SerialName("body")
+    @Serializable(with = FanboxPostDetailBodySerializer::class)
     val body: FanboxPostDetailBody = FanboxPostDetailBody(),
 )
+
+@OptIn(ExperimentalSerializationApi::class)
+private object FanboxPostDetailBodySerializer :
+    JsonTransformingSerializer<FanboxPostDetailBody>(FanboxPostDetailBody.serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement = (element as? JsonObject)?.get("post") ?: element
+}
 
 @Serializable
 internal data class FanboxPostDetailBody(

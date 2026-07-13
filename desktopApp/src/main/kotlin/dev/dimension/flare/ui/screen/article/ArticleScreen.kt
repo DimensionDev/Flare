@@ -54,6 +54,7 @@ import dev.dimension.flare.article_content_gate_subscription_title
 import dev.dimension.flare.common.DesktopDownloadManager
 import dev.dimension.flare.common.DesktopSaveDialog
 import dev.dimension.flare.common.MediaFileNamePolicy
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -68,13 +69,16 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
 import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.model.UiArticleContentGateReason
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.article.ArticlePresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -86,6 +90,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ListItemSeparator
+import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
@@ -183,6 +188,10 @@ internal fun ArticleScreen(
                                         downloadManager = downloadManager,
                                     )
                                 },
+                            )
+                            articleComments(
+                                comments = state.comments,
+                                articleKey = articleKey,
                             )
                         }
 
@@ -298,6 +307,105 @@ private fun LazyListScope.articleSuccessItems(
                 onOpenMedia = { media ->
                     navigate(media.rawImageRoute())
                 },
+            )
+        }
+    }
+}
+
+private fun LazyListScope.articleComments(
+    comments: PagingState<UiTimelineV2>,
+    articleKey: MicroBlogKey,
+) {
+    when (comments) {
+        is PagingState.Empty -> {
+            return
+        }
+
+        is PagingState.Loading -> {
+            articleCommentsTitle()
+            items(
+                count = 3,
+                key = { "article_comment_placeholder_$it" },
+            ) { index ->
+                ArticleBodyContainer {
+                    AdaptiveCard(
+                        index = index,
+                        totalCount = 3,
+                        respectTimelineMode = true,
+                    ) {
+                        StatusItem(item = null)
+                    }
+                }
+            }
+        }
+
+        is PagingState.Error -> {
+            articleCommentsTitle()
+            item(key = "article_comments_error") {
+                ArticleBodyContainer {
+                    ErrorContent(
+                        error = comments.error,
+                        onRetry = comments.onRetry,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+
+        is PagingState.Success -> {
+            articleCommentsTitle()
+            items(
+                count = comments.itemCount,
+                key = comments.itemKey { item -> item.itemKey ?: item.hashCode() },
+                contentType = comments.itemContentType { item -> item.itemType },
+            ) { index ->
+                ArticleBodyContainer {
+                    AdaptiveCard(
+                        index = index,
+                        totalCount = comments.itemCount,
+                        respectTimelineMode = true,
+                    ) {
+                        StatusItem(
+                            item = comments[index],
+                            detailStatusKey = articleKey,
+                        )
+                    }
+                }
+            }
+            when (val appendState = comments.appendState) {
+                is androidx.paging.LoadState.Error -> {
+                    item(key = "article_comments_append_error") {
+                        ArticleBodyContainer {
+                            ErrorContent(
+                                error = appendState.error,
+                                onRetry = comments::retry,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+
+                androidx.paging.LoadState.Loading -> {
+                    item(key = "article_comments_append_loading") {
+                        ArticleBodyContainer {
+                            ProgressBar(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+
+                is androidx.paging.LoadState.NotLoading -> {
+                }
+            }
+        }
+    }
+}
+
+private fun LazyListScope.articleCommentsTitle() {
+    item(key = "article_comments_title") {
+        ArticleBodyContainer {
+            Text(
+                text = "Comments",
+                style = FluentTheme.typography.bodyStrong,
             )
         }
     }

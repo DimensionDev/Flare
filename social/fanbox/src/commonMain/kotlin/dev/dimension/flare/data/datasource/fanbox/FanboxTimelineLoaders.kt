@@ -4,12 +4,14 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.fanbox.FanboxCommentItem
+import dev.dimension.flare.data.network.fanbox.FanboxCommentListResponse
 import dev.dimension.flare.data.network.fanbox.FanboxPostPage
 import dev.dimension.flare.data.network.fanbox.FanboxService
 import dev.dimension.flare.data.network.fanbox.toFanboxCursor
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import io.ktor.http.Url
+import kotlinx.collections.immutable.toImmutableList
 
 internal abstract class FanboxTimelineLoader(
     protected val service: FanboxService,
@@ -216,6 +218,8 @@ internal class FanboxCommentsLoader(
     private val service: FanboxService,
     private val accountKey: MicroBlogKey,
     private val statusKey: MicroBlogKey,
+    private val fetchComments: suspend (postId: String, offset: Int, limit: Int) -> FanboxCommentListResponse =
+        service::getComments,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "fanbox_comments_${statusKey}_$accountKey"
 
@@ -229,41 +233,63 @@ internal class FanboxCommentsLoader(
 
         val (comments, nextKey) =
             when (request) {
-                PagingRequest.Refresh -> loadCommentPage(nextKey = null)
-                is PagingRequest.Append -> loadCommentPage(nextKey = request.nextKey)
+                PagingRequest.Refresh -> loadCommentPage(pageSize = pageSize, nextKey = null)
+                is PagingRequest.Append -> loadCommentPage(pageSize = pageSize, nextKey = request.nextKey)
                 is PagingRequest.Prepend -> error("Handled above")
             }
 
         val imageHeaders = service.fanboxImageHeaders()
         return PagingResult(
             data =
-                comments.map {
-                    it.toUiTimeline(
-                        accountKey = accountKey,
-                        postKey = statusKey,
-                        imageHeaders = imageHeaders,
-                    )
+                comments.map { comment ->
+                    val post =
+                        comment.toUiTimeline(
+                            accountKey = accountKey,
+                            postKey = statusKey,
+                            imageHeaders = imageHeaders,
+                        )
+                    val replies =
+                        comment.replies
+                            .map { reply ->
+                                reply.toUiTimeline(
+                                    accountKey = accountKey,
+                                    postKey = statusKey,
+                                    imageHeaders = imageHeaders,
+                                )
+                            }.toImmutableList()
+                    if (replies.isNotEmpty()) {
+                        UiTimelineV2.TimelinePostItem(
+                            post = post,
+                            presentation =
+                                UiTimelineV2.PostPresentation(
+                                    quotes = replies,
+                                ),
+                        )
+                    } else {
+                        post
+                    }
                 },
             nextKey = nextKey,
             endOfPaginationReached = nextKey == null,
         )
     }
 
-    private suspend fun loadCommentPage(nextKey: String?): Pair<List<FanboxCommentItem>, String?> {
+    private suspend fun loadCommentPage(
+        pageSize: Int,
+        nextKey: String?,
+    ): Pair<List<FanboxCommentItem>, String?> {
         val offset = nextKey?.toIntOrNull() ?: 0
         val response =
-            service.getComments(
-                postId = statusKey.id,
-                offset = offset,
-                limit = 20,
+            fetchComments(
+                statusKey.id,
+                offset,
+                pageSize.coerceAtLeast(1),
             )
         val nextOffset =
             response.body.commentList.nextUrl?.let { url ->
                 Url(url).parameters["offset"]
             }
-        val comments =
-            response.body.commentList.items
-                .flatMap { it.flatten() }
+        val comments = response.body.commentList.items
         return comments to nextOffset
     }
 }
@@ -298,5 +324,3 @@ internal class FanboxRecommendedCreatorsTimelineLoader(
         )
     }
 }
-
-private fun FanboxCommentItem.flatten(): List<FanboxCommentItem> = listOf(this) + replies.flatMap { it.flatten() }

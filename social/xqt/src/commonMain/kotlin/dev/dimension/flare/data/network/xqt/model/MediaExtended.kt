@@ -70,6 +70,20 @@ internal data class MediaExtended(
     val mediaStats: MediaStats? = null,
     @SerialName(value = "video_info")
     val videoInfo: MediaVideoInfo? = null,
+    @SerialName(value = "allow_download_status")
+    val allowDownloadStatus: AllowDownloadStatus? = null,
+    @SerialName(value = "ext_alt_text")
+    val extAltText: kotlin.String? = null,
+    @SerialName(value = "grok_post_id")
+    val grokPostId: kotlin.String? = null,
+    @SerialName(value = "media_results")
+    val mediaResults: MediaResults? = null,
+    @SerialName(value = "sensitive_media_warning")
+    val sensitiveMediaWarning: SensitiveMediaWarning? = null,
+    @SerialName(value = "source_status_id_str")
+    val sourceStatusIdStr: kotlin.String? = null,
+    @SerialName(value = "source_user_id_str")
+    val sourceUserIdStr: kotlin.String? = null,
 ) {
     /**
      *

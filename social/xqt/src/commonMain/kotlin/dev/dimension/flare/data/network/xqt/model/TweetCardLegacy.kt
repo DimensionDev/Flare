@@ -33,4 +33,8 @@ internal data class TweetCardLegacy(
     val name: kotlin.String,
     @SerialName(value = "url")
     val url: kotlin.String,
+    @SerialName(value = "card_platform")
+    val cardPlatform: TweetCardPlatformData? = null,
+    @SerialName(value = "user_refs_results")
+    val userRefsResults: kotlin.collections.List<UserResults>? = null,
 )

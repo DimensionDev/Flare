@@ -27,6 +27,8 @@ import kotlinx.serialization.Serializable
 internal data class TimelineCoverBehavior(
     @SerialName(value = "type")
     val type: TimelineCoverBehavior.Type,
+    @SerialName(value = "url")
+    val url: TimelineCoverBehaviorUrl? = null,
 ) {
     /**
      *
@@ -39,5 +41,8 @@ internal data class TimelineCoverBehavior(
     ) {
         @SerialName(value = "TimelineCoverBehaviorDismiss")
         timelineCoverBehaviorDismiss("TimelineCoverBehaviorDismiss"),
-    }
+
+        @SerialName(value = "TimelineCoverBehaviorNavigate")
+        TimelineCoverBehaviorNavigate("TimelineCoverBehaviorNavigate"),
+        }
 }

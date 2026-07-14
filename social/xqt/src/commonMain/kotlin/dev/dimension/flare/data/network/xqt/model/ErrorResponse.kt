@@ -27,4 +27,24 @@ import kotlinx.serialization.Serializable
 internal data class ErrorResponse(
     @SerialName(value = "errors")
     val errors: Errors,
+    @SerialName(value = "code")
+    val code: kotlin.Int? = null,
+    @SerialName(value = "extensions")
+    val extensions: ErrorExtensions? = null,
+    @SerialName(value = "kind")
+    val kind: kotlin.String? = null,
+    @SerialName(value = "locations")
+    val locations: kotlin.collections.List<Location>? = null,
+    @SerialName(value = "message")
+    val message: kotlin.String? = null,
+    @SerialName(value = "name")
+    val name: kotlin.String? = null,
+    @SerialName(value = "path")
+    val path: kotlin.collections.List<ErrorResponsePathInner>? = null,
+    @SerialName(value = "source")
+    val source: kotlin.String? = null,
+    @SerialName(value = "tracing")
+    val tracing: Tracing? = null,
+    @SerialName(value = "retry_after")
+    val retryAfter: kotlin.Int? = null,
 )

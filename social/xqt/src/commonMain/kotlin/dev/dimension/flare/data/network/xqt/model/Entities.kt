@@ -43,6 +43,10 @@ internal data class Entities(
     val description: Description? = null,
     @SerialName(value = "url")
     val url: Description? = null,
+    @SerialName(value = "smarttags")
+    val smarttags: kotlin.collections.List<Smarttag>? = null,
+    @SerialName(value = "timestamps")
+    val timestamps: kotlin.collections.List<XqtTimestamp>? = null,
 )
 
 @Serializable

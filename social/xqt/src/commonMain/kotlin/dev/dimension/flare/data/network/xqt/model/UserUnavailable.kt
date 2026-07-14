@@ -31,4 +31,6 @@ internal data class UserUnavailable(
 //    val typename: TypeName,
     @SerialName(value = "reason")
     val reason: kotlin.String,
+    @SerialName(value = "message")
+    val message: kotlin.String? = null,
 ) : UserUnion

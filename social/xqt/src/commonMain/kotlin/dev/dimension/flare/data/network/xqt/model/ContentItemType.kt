@@ -47,6 +47,15 @@ internal enum class ContentItemType(
 
     @SerialName(value = "TimelineTwitterList")
     timelineTwitterList("TimelineTwitterList"),
+
+    @SerialName(value = "TimelineTombstone")
+    TimelineTombstone("TimelineTombstone"),
+
+    @SerialName(value = "TimelineTrend")
+    TimelineTrend("TimelineTrend"),
+
+    @SerialName(value = "TimelineNotification")
+    TimelineNotification("TimelineNotification"),
     ;
 
     /**

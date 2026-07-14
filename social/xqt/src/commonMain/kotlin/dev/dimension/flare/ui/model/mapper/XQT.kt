@@ -23,7 +23,9 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTwitterList
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacy
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacyBindingValueData
+import dev.dimension.flare.data.network.xqt.model.TweetPreviewDisplay
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetUnavailable
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.TwitterArticleBlock
@@ -96,21 +98,39 @@ private val twitterParser by lazy {
 private fun TweetUnion.toTweetOrNull(): Tweet? =
     when (this) {
         is Tweet -> this
+
         is TweetWithVisibilityResults -> tweet
-        is TweetTombstone -> null
+
+        is TweetPreviewDisplay,
+        is TweetTombstone,
+        -> null
+
+        is TweetUnavailable -> null
     }
 
 private fun TweetUnion.getRetweet(): TweetUnion? =
     when (this) {
         is Tweet -> legacy?.retweetedStatusResult?.result
-        is TweetTombstone -> null
+
+        is TweetPreviewDisplay,
+        is TweetTombstone,
+        -> null
+
+        is TweetUnavailable -> null
+
         is TweetWithVisibilityResults -> tweet.legacy?.retweetedStatusResult?.result
     }
 
 private fun TweetUnion.getQuoted(): TweetUnion? =
     when (this) {
         is Tweet -> quotedStatusResult?.result
-        is TweetTombstone -> null
+
+        is TweetPreviewDisplay,
+        is TweetTombstone,
+        -> null
+
+        is TweetUnavailable -> null
+
         is TweetWithVisibilityResults -> tweet.quotedStatusResult?.result
     }
 

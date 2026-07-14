@@ -31,4 +31,10 @@ internal data class TweetWithVisibilityResults(
 //    val typename: TypeName,
     @SerialName(value = "tweet")
     val tweet: Tweet,
+    @SerialName(value = "limitedActionResults")
+    val limitedActionResults: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null,
+    @SerialName(value = "mediaVisibilityResults")
+    val mediaVisibilityResults: MediaVisibilityResults? = null,
+    @SerialName(value = "tweetInterstitial")
+    val tweetInterstitial: TweetInterstitial? = null,
 ) : TweetUnion

@@ -27,4 +27,6 @@ import kotlinx.serialization.Serializable
 internal data class DeleteRetweetResponse(
     @SerialName(value = "data")
     val `data`: DeleteRetweetResponseData,
+    @SerialName(value = "errors")
+    val errors: kotlin.collections.List<ErrorResponse>? = null,
 )

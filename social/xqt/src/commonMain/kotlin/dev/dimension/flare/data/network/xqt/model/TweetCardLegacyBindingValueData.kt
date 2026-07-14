@@ -38,6 +38,10 @@ internal data class TweetCardLegacyBindingValueData(
     val stringValue: kotlin.String? = null,
     @SerialName(value = "image_value")
     val imageValue: ImageValue? = null,
+    @SerialName(value = "image_color_value")
+    val imageColorValue: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null,
+    @SerialName(value = "user_value")
+    val userValue: UserValue? = null,
 )
 
 @Serializable

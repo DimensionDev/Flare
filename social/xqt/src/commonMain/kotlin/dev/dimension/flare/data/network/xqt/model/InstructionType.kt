@@ -50,6 +50,12 @@ internal enum class InstructionType(
 
     @SerialName(value = "TimelineShowCover")
     timelineShowCover("TimelineShowCover"),
+
+    @SerialName(value = "TimelineClearEntriesUnreadState")
+    TimelineClearEntriesUnreadState("TimelineClearEntriesUnreadState"),
+
+    @SerialName(value = "TimelineMarkEntriesUnreadGreaterThanSortIndex")
+    TimelineMarkEntriesUnreadGreaterThanSortIndex("TimelineMarkEntriesUnreadGreaterThanSortIndex"),
     ;
 
     /**

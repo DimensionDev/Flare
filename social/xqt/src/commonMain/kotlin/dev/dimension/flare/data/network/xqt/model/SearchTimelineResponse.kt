@@ -27,4 +27,6 @@ import kotlinx.serialization.Serializable
 internal data class SearchTimelineResponse(
     @SerialName(value = "data")
     val `data`: SearchTimelineData,
+    @SerialName(value = "errors")
+    val errors: kotlin.collections.List<ErrorResponse>? = null,
 )

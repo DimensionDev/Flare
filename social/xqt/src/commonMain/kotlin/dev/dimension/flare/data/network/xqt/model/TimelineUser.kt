@@ -58,5 +58,8 @@ internal data class TimelineUser(
 
         @SerialName(value = "SubscribableUser")
         subscribableUser("SubscribableUser"),
-    }
+
+        @SerialName(value = "UserConcise")
+        UserConcise("UserConcise"),
+        }
 }

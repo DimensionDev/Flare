@@ -30,4 +30,6 @@ internal data class ModuleItem(
     val entryId: kotlin.String,
     @SerialName(value = "item")
     val item: ModuleEntry,
+    @SerialName(value = "dispensable")
+    val dispensable: kotlin.Boolean? = null,
 )

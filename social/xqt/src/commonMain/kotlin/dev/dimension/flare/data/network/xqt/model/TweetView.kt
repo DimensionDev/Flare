@@ -42,5 +42,8 @@ internal data class TweetView(
     ) {
         @SerialName(value = "EnabledWithCount")
         enabledWithCount("EnabledWithCount"),
-    }
+
+        @SerialName(value = "Enabled")
+        Enabled("Enabled"),
+        }
 }

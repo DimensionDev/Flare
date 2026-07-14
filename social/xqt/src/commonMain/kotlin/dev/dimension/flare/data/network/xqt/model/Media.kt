@@ -58,6 +58,24 @@ internal data class Media(
     val ext_alt_text: String? = null,
 //    @SerialName(value = "features")
 //    val features: kotlin.Any? = null,
+    @SerialName(value = "ext_media_availability")
+    val extMediaAvailability: ExtMediaAvailability? = null,
+    @SerialName(value = "media_key")
+    val mediaKey: kotlin.String? = null,
+    @SerialName(value = "additional_media_info")
+    val additionalMediaInfo: AdditionalMediaInfo? = null,
+    @SerialName(value = "allow_download_status")
+    val allowDownloadStatus: AllowDownloadStatus? = null,
+    @SerialName(value = "grok_post_id")
+    val grokPostId: kotlin.String? = null,
+    @SerialName(value = "media_results")
+    val mediaResults: MediaResults? = null,
+    @SerialName(value = "sensitive_media_warning")
+    val sensitiveMediaWarning: SensitiveMediaWarning? = null,
+    @SerialName(value = "source_status_id_str")
+    val sourceStatusIdStr: kotlin.String? = null,
+    @SerialName(value = "source_user_id_str")
+    val sourceUserIdStr: kotlin.String? = null,
 ) {
     /**
      *

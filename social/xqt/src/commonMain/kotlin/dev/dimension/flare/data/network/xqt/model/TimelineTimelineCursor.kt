@@ -41,5 +41,9 @@ internal data class TimelineTimelineCursor(
     val entryType: ContentEntryType? = null,
     @Contextual @SerialName(value = "itemType")
     val itemType: ContentEntryType? = null,
+    @SerialName(value = "displayTreatment")
+    val displayTreatment: DisplayTreatment? = null,
+    @SerialName(value = "stopOnEmptyResponse")
+    val stopOnEmptyResponse: kotlin.Boolean? = null,
 ) : ContentUnion,
     ItemContentUnion

@@ -1,20 +1,23 @@
 package dev.dimension.flare.data.network.xqt.api
 
 import de.jensklingenberg.ktorfit.Response
+import de.jensklingenberg.ktorfit.http.*
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.AudioSpaceByIDResponse
 import dev.dimension.flare.data.network.xqt.model.Other200Response
+import dev.dimension.flare.data.network.xqt.model.OtherObjectAll
 
 internal interface OtherApi {
     /**
+     * GET other
      *
      * This is not an actual endpoint
      * Responses:
      *  - 200: Successful operation
      *
-     * @return [Other200Response]
+     * @return [OtherObjectAll]
      */
     @GET("other")
     suspend fun other(): Response<Other200Response>

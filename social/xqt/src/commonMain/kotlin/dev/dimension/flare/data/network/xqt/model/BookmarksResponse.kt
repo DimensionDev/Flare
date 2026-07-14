@@ -27,4 +27,6 @@ import kotlinx.serialization.Serializable
 internal data class BookmarksResponse(
     @SerialName(value = "data")
     val `data`: BookmarksResponseData,
+    @SerialName(value = "errors")
+    val errors: kotlin.collections.List<ErrorResponse>? = null,
 )

@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.xqt.api
 
 import de.jensklingenberg.ktorfit.Response
+import de.jensklingenberg.ktorfit.http.*
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
@@ -12,6 +13,7 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 
 internal interface V20GetApi {
     /**
+     * GET 2/search/adaptive.json
      *
      * get search adaptive
      * Responses:
@@ -57,49 +59,47 @@ internal interface V20GetApi {
      * @return [Unit]
      */
     @GET("2/search/adaptive.json")
-    suspend fun getSearchAdaptive(
-        @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int = 1,
-        @Query("include_blocking") includeBlocking: kotlin.Int = 1,
-        @Query("include_blocked_by") includeBlockedBy: kotlin.Int = 1,
-        @Query("include_followed_by") includeFollowedBy: kotlin.Int = 1,
-        @Query("include_want_retweets") includeWantRetweets: kotlin.Int = 1,
-        @Query("include_mute_edge") includeMuteEdge: kotlin.Int = 1,
-        @Query("include_can_dm") includeCanDm: kotlin.Int = 1,
-        @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int = 1,
-        @Query("include_ext_has_nft_avatar") includeExtHasNftAvatar: kotlin.Int = 1,
-        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int = 1,
-        @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int = 1,
-        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int = 1,
-        @Query("skip_status") skipStatus: kotlin.Int = 1,
-        @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12",
-        @Query("include_cards") includeCards: kotlin.Int = 1,
-        @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true,
-        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = false,
-        @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true,
-        @Query("include_reply_count") includeReplyCount: kotlin.Int = 1,
-        @Query("tweet_mode") tweetMode: kotlin.String = "extended",
-        @Query("include_ext_views") includeExtViews: kotlin.Boolean = true,
-        @Query("include_entities") includeEntities: kotlin.Boolean = true,
-        @Query("include_user_entities") includeUserEntities: kotlin.Boolean = true,
-        @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true,
-        @Query("include_ext_media_availability") includeExtMediaAvailability: kotlin.Boolean = true,
-        @Query("include_ext_sensitive_media_warning") includeExtSensitiveMediaWarning: kotlin.Boolean = true,
-        @Query("include_ext_trusted_friends_metadata") includeExtTrustedFriendsMetadata: kotlin.Boolean = true,
-        @Query("send_error_codes") sendErrorCodes: kotlin.Boolean = true,
-        @Query("simple_quoted_tweet") simpleQuotedTweet: kotlin.Boolean = true,
-        @Query("q") q: kotlin.String = "elon musk",
-        @Query("query_source") querySource: kotlin.String = "trend_click",
-        @Query("count") count: kotlin.Int = 20,
-        @Query("requestContext") requestContext: kotlin.String = "launch",
-        @Query("pc") pc: kotlin.Int = 1,
-        @Query("spelling_corrections") spellingCorrections: kotlin.Int = 1,
-        @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true,
+    suspend fun getSearchAdaptive(@Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int = 1, @Query("include_blocking") includeBlocking: kotlin.Int = 1, @Query("include_blocked_by") includeBlockedBy: kotlin.Int = 1, @Query("include_followed_by") includeFollowedBy: kotlin.Int = 1, @Query("include_want_retweets") includeWantRetweets: kotlin.Int = 1, @Query("include_mute_edge") includeMuteEdge: kotlin.Int = 1, @Query("include_can_dm") includeCanDm: kotlin.Int = 1, @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int = 1, @Query("include_ext_has_nft_avatar") includeExtHasNftAvatar: kotlin.Int = 1, @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int = 1, @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int = 1, @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int = 1, @Query("skip_status") skipStatus: kotlin.Int = 1, @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12", @Query("include_cards") includeCards: kotlin.Int = 1, @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true, @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = false, @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true, @Query("include_reply_count") includeReplyCount: kotlin.Int = 1, @Query("tweet_mode") tweetMode: kotlin.String = "extended", @Query("include_ext_views") includeExtViews: kotlin.Boolean = true, @Query("include_entities") includeEntities: kotlin.Boolean = true, @Query("include_user_entities") includeUserEntities: kotlin.Boolean = true, @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true, @Query("include_ext_media_availability") includeExtMediaAvailability: kotlin.Boolean = true, @Query("include_ext_sensitive_media_warning") includeExtSensitiveMediaWarning: kotlin.Boolean = true, @Query("include_ext_trusted_friends_metadata") includeExtTrustedFriendsMetadata: kotlin.Boolean = true, @Query("send_error_codes") sendErrorCodes: kotlin.Boolean = true, @Query("simple_quoted_tweet") simpleQuotedTweet: kotlin.Boolean = true, @Query("q") q: kotlin.String = "elon musk", @Query("query_source") querySource: kotlin.String = "trend_click", @Query("count") count: kotlin.Int = 20, @Query("requestContext") requestContext: kotlin.String = "launch", @Query("pc") pc: kotlin.Int = 1, @Query("spelling_corrections") spellingCorrections: kotlin.Int = 1, @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true, @Query("ext") ext: kotlin.String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,enrichments,superFollowMetadata,unmentionInfo,editControl,vibe"): Response<Unit>
+
+    @GET("2/guide.json")
+    suspend fun getGuide(
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: Int = 1,
+        @Query("include_blocking") includeBlocking: Int = 1,
+        @Query("include_blocked_by") includeBlockedBy: Int = 1,
+        @Query("include_followed_by") includeFollowedBy: Int = 1,
+        @Query("include_want_retweets") includeWantRetweets: Int = 1,
+        @Query("include_mute_edge") includeMuteEdge: Int = 1,
+        @Query("include_can_dm") includeCanDm: Int = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: Int = 1,
+        @Query("include_ext_has_nft_avatar") includeExtHasNftAvatar: Int = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: Int = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: Int = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: Int = 1,
+        @Query("skip_status") skipStatus: Int = 1,
+        @Query("cards_platform") cardsPlatform: String = "Web-12",
+        @Query("include_cards") includeCards: Int = 1,
+        @Query("include_ext_alt_text") includeExtAltText: Boolean = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: Boolean = true,
+        @Query("include_quote_count") includeQuoteCount: Boolean = true,
+        @Query("include_reply_count") includeReplyCount: Int = 1,
+        @Query("tweet_mode") tweetMode: String = "extended",
+        @Query("include_ext_views") includeExtViews: Boolean = true,
+        @Query("include_entities") includeEntities: Boolean = true,
+        @Query("include_user_entities") includeUserEntities: Boolean = true,
+        @Query("include_ext_media_color") includeExtMediaColor: Boolean = true,
+        @Query("include_ext_media_availability") includeExtMediaAvailability: Boolean = true,
+        @Query("include_ext_sensitive_media_warning") includeExtSensitiveMediaWarning: Boolean = true,
+        @Query("include_ext_trusted_friends_metadata") includeExtTrustedFriendsMetadata: Boolean = true,
+        @Query("send_error_codes") sendErrorCodes: Boolean = true,
+        @Query("simple_quoted_tweet") simpleQuotedTweet: Boolean = true,
+        @Query("tab_category") tabCategory: String = "objective_trends",
+        @Query("count") count: Int = 20,
         @Query(
             "ext",
-        ) ext: kotlin.String =
+        ) ext: String =
             "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo," +
-                "birdwatchPivot,enrichments,superFollowMetadata,unmentionInfo,editControl,vibe",
-    ): Response<Unit>
+                "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
+    ): TopLevel
 
     @GET("2/notifications/mentions.json")
     suspend fun getNotificationsMentions(
@@ -142,45 +142,10 @@ internal interface V20GetApi {
                 "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
     ): TopLevel
 
-    @GET("2/guide.json")
-    suspend fun getGuide(
-        @Query("include_profile_interstitial_type") includeProfileInterstitialType: Int = 1,
-        @Query("include_blocking") includeBlocking: Int = 1,
-        @Query("include_blocked_by") includeBlockedBy: Int = 1,
-        @Query("include_followed_by") includeFollowedBy: Int = 1,
-        @Query("include_want_retweets") includeWantRetweets: Int = 1,
-        @Query("include_mute_edge") includeMuteEdge: Int = 1,
-        @Query("include_can_dm") includeCanDm: Int = 1,
-        @Query("include_can_media_tag") includeCanMediaTag: Int = 1,
-        @Query("include_ext_has_nft_avatar") includeExtHasNftAvatar: Int = 1,
-        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: Int = 1,
-        @Query("include_ext_verified_type") includeExtVerifiedType: Int = 1,
-        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: Int = 1,
-        @Query("skip_status") skipStatus: Int = 1,
-        @Query("cards_platform") cardsPlatform: String = "Web-12",
-        @Query("include_cards") includeCards: Int = 1,
-        @Query("include_ext_alt_text") includeExtAltText: Boolean = true,
-        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: Boolean = true,
-        @Query("include_quote_count") includeQuoteCount: Boolean = true,
-        @Query("include_reply_count") includeReplyCount: Int = 1,
-        @Query("tweet_mode") tweetMode: String = "extended",
-        @Query("include_ext_views") includeExtViews: Boolean = true,
-        @Query("include_entities") includeEntities: Boolean = true,
-        @Query("include_user_entities") includeUserEntities: Boolean = true,
-        @Query("include_ext_media_color") includeExtMediaColor: Boolean = true,
-        @Query("include_ext_media_availability") includeExtMediaAvailability: Boolean = true,
-        @Query("include_ext_sensitive_media_warning") includeExtSensitiveMediaWarning: Boolean = true,
-        @Query("include_ext_trusted_friends_metadata") includeExtTrustedFriendsMetadata: Boolean = true,
-        @Query("send_error_codes") sendErrorCodes: Boolean = true,
-        @Query("simple_quoted_tweet") simpleQuotedTweet: Boolean = true,
-        @Query("tab_category") tabCategory: String = "objective_trends",
-        @Query("count") count: Int = 20,
-        @Query(
-            "ext",
-        ) ext: String =
-            "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo," +
-                "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
-    ): TopLevel
+    @GET("2/badge_count/badge_count.json")
+    suspend fun getBadgeCount(
+        @Query("supports_ntab_urt") supportsNtabUrt: Int = 1,
+    ): BadgeCount
 
     @GET("2/notifications/all.json")
     suspend fun getNotificationsAll(
@@ -223,6 +188,12 @@ internal interface V20GetApi {
         @Header("X-Twitter-Client-Language") xTwitterClientLanguage: String = "en",
     ): TopLevel
 
+    @POST("2/notifications/all/last_seen_cursor.json")
+    @FormUrlEncoded
+    suspend fun postNotificationsAllLastSeenCursor(
+        @Field("cursor") cursor: String,
+    ): Unit
+
     @GET("2/notifications/device_follow.json")
     suspend fun getNotificationsDeviceFollow(
         @Query("include_profile_interstitial_type") includeProfileInterstitialType: Int = 1,
@@ -261,15 +232,4 @@ internal interface V20GetApi {
             "mediaStats,highlightedLabel,parodyCommentaryFanLabel,voiceInfo,birdwatchPivot," +
                 "superFollowMetadata,unmentionInfo,editControl,article",
     ): TopLevel
-
-    @GET("2/badge_count/badge_count.json")
-    suspend fun getBadgeCount(
-        @Query("supports_ntab_urt") supportsNtabUrt: Int = 1,
-    ): BadgeCount
-
-    @POST("2/notifications/all/last_seen_cursor.json")
-    @FormUrlEncoded
-    suspend fun postNotificationsAllLastSeenCursor(
-        @Field("cursor") cursor: String,
-    ): Unit
 }

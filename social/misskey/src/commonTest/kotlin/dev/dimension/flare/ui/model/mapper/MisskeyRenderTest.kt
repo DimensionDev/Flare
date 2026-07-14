@@ -1,6 +1,9 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.DriveFileProperties
 import dev.dimension.flare.data.network.misskey.api.model.Note
@@ -12,6 +15,7 @@ import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.postEventOrNull
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -138,6 +142,31 @@ class MisskeyRenderTest {
                 .filter { it.type == ReferenceType.Reply }
                 .map { it.statusKey.id },
         )
+    }
+
+    @Test
+    fun reactionChipKeepsTotalCountWhenReacting() {
+        val note =
+            createNote(
+                id = "note-reactions",
+                user = createUser("user-reactions"),
+                text = "react to me",
+                reactions = mapOf("👍" to 3L, "🎉" to 2L),
+            )
+
+        val rendered = rootPostOf(note.render(accountKey))
+        val action =
+            rendered.actions
+                .filterIsInstance<ActionMenu.Item>()
+                .first { it.actionFamily == PostActionFamily.React }
+        val reaction = rendered.emojiReactions.first { it.name == "👍" }
+        val event =
+            assertIs<PostEvent.Misskey.React>(
+                assertNotNull(reaction.clickEvent.postEventOrNull()).postEvent,
+            )
+
+        assertEquals(5L, action.count?.value)
+        assertEquals(6L, event.nextActionMenu().count?.value)
     }
 
     @Test
@@ -315,6 +344,7 @@ class MisskeyRenderTest {
         replyId: String? = null,
         renote: Note? = null,
         files: List<DriveFile>? = null,
+        reactions: Map<String, Long> = emptyMap(),
     ): Note =
         Note(
             id = id,
@@ -323,7 +353,7 @@ class MisskeyRenderTest {
             userId = user.id,
             user = user,
             visibility = Visibility.Public,
-            reactions = emptyMap(),
+            reactions = reactions,
             renoteCount = 0.0,
             repliesCount = 0.0,
             replyId = replyId,

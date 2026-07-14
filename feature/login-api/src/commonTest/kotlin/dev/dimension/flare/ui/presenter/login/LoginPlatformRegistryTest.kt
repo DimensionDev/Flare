@@ -18,7 +18,10 @@ import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -123,6 +126,51 @@ class LoginPlatformRegistryTest {
         }
 
     @Test
+    fun detectionReturnsFirstSuccessfulResultWithoutWaitingForSlowerDetectors() =
+        runTest {
+            val slowDetectorStarted = CompletableDeferred<Unit>()
+            val slowDetectorCancelled = CompletableDeferred<Unit>()
+            val registry =
+                LoginPlatformRegistry(
+                    testRuntimeData(
+                        testProvider(
+                            platformType = PlatformType.Misskey,
+                            detectorPriority = 10,
+                            detectorBlock = {
+                                slowDetectorStarted.complete(Unit)
+                                try {
+                                    awaitCancellation()
+                                } finally {
+                                    slowDetectorCancelled.complete(Unit)
+                                }
+                            },
+                        ),
+                        testProvider(
+                            platformType = PlatformType.Mastodon,
+                            detectorPriority = 0,
+                            detectorBlock = { host ->
+                                slowDetectorStarted.await()
+                                NodeData(
+                                    host = host,
+                                    platformType = PlatformType.Mastodon,
+                                    software = "mastodon",
+                                    compatibleMode = false,
+                                )
+                            },
+                        ),
+                    ),
+                )
+
+            val detected =
+                withTimeout(1_000) {
+                    registry.detectPlatformType("mstdn.jp")
+                }
+
+            assertEquals(PlatformType.Mastodon, detected.platformType)
+            slowDetectorCancelled.await()
+        }
+
+    @Test
     fun detectionDoesNotSwallowCancellation() =
         runTest {
             val registry =
@@ -168,6 +216,7 @@ class LoginPlatformRegistryTest {
         detectorPriority: Int = 0,
         detectedSoftware: String? = null,
         detectorFailure: Throwable? = null,
+        detectorBlock: (suspend (String) -> NodeData?)? = null,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
             override val platformType: PlatformType = platformType
@@ -181,6 +230,7 @@ class LoginPlatformRegistryTest {
                     override val priority: Int = detectorPriority
 
                     override suspend fun detect(host: String): NodeData? {
+                        detectorBlock?.let { return it(host) }
                         detectorFailure?.let { throw it }
                         return detectedSoftware?.let {
                             NodeData(

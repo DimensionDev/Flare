@@ -67,6 +67,7 @@ kotlin {
                 implementation(libs.okio)
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.paging.common)
+                implementation(libs.ksoup)
             }
         }
         val commonTest by getting {

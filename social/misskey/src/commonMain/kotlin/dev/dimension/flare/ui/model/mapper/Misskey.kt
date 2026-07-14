@@ -490,6 +490,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             id,
             host = user.key.host,
         )
+    val reactionCount = reactions.values.sum()
     val reaction =
         reactions
             .map { emoji ->
@@ -505,6 +506,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                 postKey = statusKey,
                                 hasReacted = myReaction == emoji.key,
                                 reaction = emoji.key,
+                                count = reactionCount,
                             ),
                         ),
                     me = myReaction == emoji.key,
@@ -636,7 +638,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                     postKey = statusKey,
                     hasReacted = myReaction != null,
                     reaction = myReaction,
-                    count = reaction.sumOf { it.count.value },
+                    count = reactionCount,
                     accountKey = accountKey,
                 ),
                 ActionMenu.Group(

@@ -114661,6 +114661,7 @@
       }
     },
     "pixiv_private_bookmarks_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

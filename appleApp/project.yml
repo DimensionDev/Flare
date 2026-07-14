@@ -152,6 +152,7 @@ targets:
           - Info.plist
           - GoogleService-Info.plist
           - AppIcon_*.icon
+          - SafariOpenInFlare/**
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - package: Kingfisher
@@ -178,6 +179,7 @@ targets:
         copy:
           destination: resources
         destinationFilters: [iOS]
+      - target: OpenInFlare
     preBuildScripts:
       - name: Compile Kotlin
         basedOnDependencyAnalysis: false
@@ -197,6 +199,36 @@ targets:
         DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
         INFOPLIST_FILE: ios/Info.plist
         OTHER_LDFLAGS: "$(inherited) -ObjC"
+
+  OpenInFlare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ios/SafariOpenInFlare
+        excludes:
+          - ActionIcon.svg
+          - ActionIcon*.png
+          - Info.plist
+    postBuildScripts:
+      - name: Copy Transparent Action Icon
+        basedOnDependencyAnalysis: false
+        script: |
+          ICON_DIR="$SRCROOT/ios/SafariOpenInFlare"
+          DEST_DIR="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+          for icon in "$ICON_DIR"/ActionIcon*.png; do
+            /bin/cp "$icon" "$DEST_DIR/$(basename "$icon")"
+          done
+    settings:
+      base:
+        APPLICATION_EXTENSION_API_ONLY: YES
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        INFOPLIST_FILE: ios/SafariOpenInFlare/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.OpenInFlare
+        PRODUCT_NAME: Open in Flare
+        SKIP_INSTALL: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        SWIFT_STRICT_CONCURRENCY: targeted
 
   macOS:
     templates: [FirebaseOptionalApp]

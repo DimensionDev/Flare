@@ -83,6 +83,10 @@ struct Router<Root: View>: View {
             deepLinkPresenter.state.handle(url: url.absoluteString)
             return .handled
         })
+        .onOpenURL { url in
+            let targetURL = url.openInFlareTargetURL ?? url
+            deepLinkPresenter.state.handle(url: targetURL.absoluteString)
+        }
         .onAppear {
             deepLinkHandler.onRoute = { route in
                 navigate(route: route)
@@ -147,4 +151,22 @@ struct Router<Root: View>: View {
 class DeepLinkHandler : ObservableObject {
     var onRoute: ((Route) -> Void)?
     var onLink: ((String) -> Void)?
+}
+
+private extension URL {
+    var openInFlareTargetURL: URL? {
+        guard scheme?.lowercased() == "flare",
+              host?.lowercased() == "open",
+              let targetValue = URLComponents(
+                  url: self,
+                  resolvingAgainstBaseURL: false
+              )?.queryItems?.first(where: { $0.name == "url" })?.value,
+              let targetURL = URL(string: targetValue),
+              let targetScheme = targetURL.scheme?.lowercased(),
+              targetScheme == "https" || targetScheme == "http"
+        else {
+            return nil
+        }
+        return targetURL
+    }
 }

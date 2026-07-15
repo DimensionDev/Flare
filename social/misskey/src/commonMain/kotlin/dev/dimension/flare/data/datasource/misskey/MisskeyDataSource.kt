@@ -278,10 +278,15 @@ internal class MisskeyDataSource(
             }
 
             is PostEvent.Misskey.Favourite -> {
-                if (event.favourited) {
-                    service.notesFavoritesDelete(IPinRequest(noteId = event.postKey.id))
-                } else {
-                    service.notesFavoritesCreate(IPinRequest(noteId = event.postKey.id))
+                val request = IPinRequest(noteId = event.postKey.id)
+                val favourited = service.notesState(request).isFavorited
+                val shouldFavourite = !event.favourited
+                if (favourited != shouldFavourite) {
+                    if (shouldFavourite) {
+                        service.notesFavoritesCreate(request)
+                    } else {
+                        service.notesFavoritesDelete(request)
+                    }
                 }
             }
 

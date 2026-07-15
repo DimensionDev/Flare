@@ -70,7 +70,10 @@ private fun vvoKtorfit(
             }
         },
     )
-    converterFactories(ResponseConverterFactory())
+    converterFactories(
+        VVOResponseConverterFactory(),
+        ResponseConverterFactory(),
+    )
 }
 
 private class VVOApis(

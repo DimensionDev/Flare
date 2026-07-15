@@ -86,6 +86,16 @@ public struct VVOStatusScreen: View {
             .vvoListRowSpacing()
             .listStyle(.plain)
         }
+        #if os(iOS)
+        .refreshable {
+            switch selectedType {
+            case .comment:
+                try? await presenter.state.refreshComment()
+            case .repost:
+                try? await presenter.state.refreshRepost()
+            }
+        }
+        #endif
         .background(backgroundColor)
         .navigationTitle(Text("vvo_status_title", bundle: FlareAppleUILocalization.bundle))
     }

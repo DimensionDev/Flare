@@ -10,6 +10,7 @@ import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
@@ -114,6 +115,14 @@ public class VVOStatusDetailPresenter(
             override val status = status
             override val comment = comment
             override val repost = repost
+
+            override suspend fun refreshComment() {
+                comment.refreshSuspend()
+            }
+
+            override suspend fun refreshRepost() {
+                repost.refreshSuspend()
+            }
         }
     }
 }
@@ -123,6 +132,10 @@ public interface VVOStatusDetailState {
     public val status: UiState<UiTimelineV2>
     public val comment: PagingState<UiTimelineV2>
     public val repost: PagingState<UiTimelineV2>
+
+    public suspend fun refreshComment()
+
+    public suspend fun refreshRepost()
 }
 
 private fun UiTimelineV2.withoutVvoQuotes(): UiTimelineV2 {

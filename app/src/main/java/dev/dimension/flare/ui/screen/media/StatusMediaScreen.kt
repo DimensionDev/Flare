@@ -234,22 +234,37 @@ internal fun MediaViewerScreen(
         rememberPermissionState(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
         )
-    val state =
-        mediaViewerPresenter(
-            medias = medias,
-            initialIndex = initialIndex,
-            context = context,
-            fileName = fileName,
-            fileNames = fileNames,
+    val state by producePresenter(key = MEDIA_VIEWER_PRESENTER_KEY) {
+        mediaViewerPresenter(initialIndex = initialIndex)
+    }
+    val saveMedia: (UiMedia) -> Unit = { media ->
+        state.save(
+            data = media,
+            fileName = fileName(media),
+            context = context.applicationContext,
         )
+    }
+    val saveAllMedia: (List<UiMedia>) -> Unit = { media ->
+        state.saveAll(
+            media = fileNames(media),
+            context = context.applicationContext,
+        )
+    }
+    val shareMedia: (UiMedia) -> Unit = { media ->
+        state.shareMedia(
+            data = media,
+            fileName = fileName(media),
+            context = context,
+        )
+    }
     val pagerState =
         rememberPagerState(
             initialPage = initialIndex,
             pageCount = {
-                when (val medias = state.medias) {
+                when (val mediaState = medias) {
                     is UiState.Error -> 1
                     is UiState.Loading -> 1
-                    is UiState.Success -> medias.data.size.coerceAtLeast(1)
+                    is UiState.Success -> mediaState.data.size.coerceAtLeast(1)
                 }
             },
         )
@@ -292,7 +307,7 @@ internal fun MediaViewerScreen(
                                 state = pagerState,
                                 userScrollEnabled = !state.lockPager,
                                 key = {
-                                    when (val medias = state.medias) {
+                                    when (val mediaState = medias) {
                                         is UiState.Error -> {
                                             preview
                                         }
@@ -302,13 +317,13 @@ internal fun MediaViewerScreen(
                                         }
 
                                         is UiState.Success -> {
-                                            medias.data.getOrNull(it)?.previewKey()
+                                            mediaState.data.getOrNull(it)?.previewKey()
                                         }
                                     } ?: it
                                 },
                             ) { index ->
                                 AnimatedContent(
-                                    state.medias,
+                                    medias,
                                     transitionSpec = {
                                         fadeIn() togetherWith fadeOut()
                                     },
@@ -480,7 +495,7 @@ internal fun MediaViewerScreen(
                                     )
                                 }
                                 Spacer(modifier = Modifier.weight(1f))
-                                state.medias.onSuccess { medias ->
+                                medias.onSuccess { medias ->
                                     val current = medias.getOrNull(state.currentPage) ?: return@onSuccess
                                     Glassify(
                                         onClick = {
@@ -520,10 +535,10 @@ internal fun MediaViewerScreen(
                                                 if (!permissionState.status.isGranted) {
                                                     permissionState.launchPermissionRequest()
                                                 } else {
-                                                    state.save(current)
+                                                    saveMedia(current)
                                                 }
                                             } else {
-                                                state.save(current)
+                                                saveMedia(current)
                                             }
                                         },
                                         color = MaterialTheme.colorScheme.secondaryContainer,
@@ -538,7 +553,7 @@ internal fun MediaViewerScreen(
                                     AnimatedVisibility(current is UiMedia.Image) {
                                         Glassify(
                                             onClick = {
-                                                state.shareMedia(current)
+                                                shareMedia(current)
                                             },
                                             color = MaterialTheme.colorScheme.secondaryContainer,
                                             modifier = Modifier.size(40.dp),
@@ -554,7 +569,7 @@ internal fun MediaViewerScreen(
                             }
                         }
 
-                        val currentMedia = state.medias.takeSuccess()?.getOrNull(state.currentPage)
+                        val currentMedia = medias.takeSuccess()?.getOrNull(state.currentPage)
                         val isCurrentVideo = currentMedia is UiMedia.Video
                         val shouldShowBottomUi =
                             when {
@@ -672,7 +687,7 @@ internal fun MediaViewerScreen(
                                             }
                                         }
                                     }
-                                    state.medias.onSuccess { medias ->
+                                    medias.onSuccess { medias ->
                                         val current =
                                             remember(
                                                 medias,
@@ -780,13 +795,13 @@ internal fun MediaViewerScreen(
                                     if (!permissionState.status.isGranted) {
                                         permissionState.launchPermissionRequest()
                                     } else {
-                                        state.medias.onSuccess { medias ->
-                                            medias.getOrNull(state.currentPage)?.let(state::save)
+                                        medias.onSuccess { medias ->
+                                            medias.getOrNull(state.currentPage)?.let(saveMedia)
                                         }
                                     }
                                 } else {
-                                    state.medias.onSuccess { medias ->
-                                        medias.getOrNull(state.currentPage)?.let(state::save)
+                                    medias.onSuccess { medias ->
+                                        medias.getOrNull(state.currentPage)?.let(saveMedia)
                                     }
                                 }
                                 state.setShowSheet(false)
@@ -807,7 +822,7 @@ internal fun MediaViewerScreen(
                         Text(stringResource(id = R.string.media_menu_save))
                     },
                 )
-                state.medias.onSuccess { medias ->
+                medias.onSuccess { medias ->
                     if (medias.size > 1) {
                         ListItem(
                             modifier =
@@ -817,10 +832,10 @@ internal fun MediaViewerScreen(
                                             if (!permissionState.status.isGranted) {
                                                 permissionState.launchPermissionRequest()
                                             } else {
-                                                state.saveAll(medias)
+                                                saveAllMedia(medias)
                                             }
                                         } else {
-                                            state.saveAll(medias)
+                                            saveAllMedia(medias)
                                         }
                                         state.setShowSheet(false)
                                     },
@@ -848,7 +863,7 @@ internal fun MediaViewerScreen(
                             modifier =
                                 Modifier
                                     .clickable {
-                                        state.shareMedia(current)
+                                        shareMedia(current)
                                         state.setShowSheet(false)
                                     },
                             leadingContent = {
@@ -870,7 +885,7 @@ internal fun MediaViewerScreen(
                     }
                 }
 
-                state.medias.onSuccess { medias ->
+                medias.onSuccess { medias ->
                     val label = stringResource(R.string.media_menu_media_link)
                     val current = medias.getOrNull(state.currentPage) ?: return@onSuccess
                     ListItem(
@@ -1276,6 +1291,7 @@ private const val LONG_PRESS_DELAY_MS = 350L
 private const val SEEK_FEEDBACK_VISIBLE_MS = 450L
 private const val NORMAL_PLAYBACK_SPEED = 1f
 private const val FAST_PLAYBACK_SPEED = 2f
+private const val MEDIA_VIEWER_PRESENTER_KEY = "media_viewer"
 
 @OptIn(ExperimentalTelephotoApi::class)
 @Composable
@@ -1413,11 +1429,7 @@ private fun statusMediaPresenter(
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 private fun mediaViewerPresenter(
-    medias: UiState<ImmutableList<UiMedia>>,
     initialIndex: Int,
-    context: Context,
-    fileName: (UiMedia) -> String,
-    fileNames: (List<UiMedia>) -> Map<String, UiMedia>,
     scope: CoroutineScope = koinInject(),
     mediaDownloadManager: AndroidDownloadManager = koinInject(),
 ) = run {
@@ -1440,7 +1452,6 @@ private fun mediaViewerPresenter(
         mutableIntStateOf(initialIndex)
     }
     object {
-        val medias = medias
         val showUi = showUi
         val currentPage = currentPage
         val lockPager = lockPager
@@ -1474,17 +1485,23 @@ private fun mediaViewerPresenter(
             originalOrientation = value
         }
 
-        fun save(data: UiMedia) {
-            val targetFileName = fileName(data)
+        fun save(
+            data: UiMedia,
+            fileName: String,
+            context: Context,
+        ) {
             when (data) {
-                is UiMedia.Audio -> download(data.url, targetFileName, data.customHeaders)
-                is UiMedia.Gif -> download(data.url, targetFileName, data.customHeaders)
-                is UiMedia.Image -> save(data.url, targetFileName)
-                is UiMedia.Video -> download(data.url, targetFileName, data.customHeaders)
+                is UiMedia.Audio -> download(data.url, fileName, data.customHeaders, context)
+                is UiMedia.Gif -> download(data.url, fileName, data.customHeaders, context)
+                is UiMedia.Image -> save(data.url, fileName, context)
+                is UiMedia.Video -> download(data.url, fileName, data.customHeaders, context)
             }
         }
 
-        fun saveAll(data: List<UiMedia>) {
+        fun saveAll(
+            media: Map<String, UiMedia>,
+            context: Context,
+        ) {
             scope.launch {
                 withContext(Dispatchers.Main) {
                     Toast
@@ -1496,7 +1513,7 @@ private fun mediaViewerPresenter(
                 }
                 val result =
                     runCatching {
-                        mediaDownloadManager.downloadAllMedia(fileNames(data))
+                        mediaDownloadManager.downloadAllMedia(media)
                     }.getOrNull()
                 withContext(Dispatchers.Main) {
                     Toast
@@ -1515,7 +1532,11 @@ private fun mediaViewerPresenter(
             }
         }
 
-        fun shareMedia(data: UiMedia) {
+        fun shareMedia(
+            data: UiMedia,
+            fileName: String,
+            context: Context,
+        ) {
             when (data) {
                 is UiMedia.Audio -> {}
 
@@ -1526,7 +1547,7 @@ private fun mediaViewerPresenter(
                         shareImageMedia(
                             context = context,
                             media = data,
-                            fileName = fileName(data),
+                            fileName = fileName,
                         )
                     }
                 }
@@ -1539,6 +1560,7 @@ private fun mediaViewerPresenter(
             uri: String,
             fileName: String,
             customHeaders: Map<String, String>?,
+            context: Context,
         ) {
             scope.launch {
                 mediaDownloadManager.downloadMedia(
@@ -1593,6 +1615,7 @@ private fun mediaViewerPresenter(
         fun save(
             uri: String,
             fileName: String,
+            context: Context,
         ) {
             scope.launch {
                 context.imageLoader.diskCache?.openSnapshot(uri)?.use {

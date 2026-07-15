@@ -24,8 +24,9 @@ internal fun MediaLandscapeEffect(
                 setOriginalOrientation(
                     activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
                 )
+            } else {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             }
-            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         } else if (originalOrientation != null) {
             activity?.requestedOrientation = originalOrientation
             setOriginalOrientation(null)

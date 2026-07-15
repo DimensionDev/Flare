@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 
@@ -90,7 +91,7 @@ internal class ComposePostTool(
         val target = resolveComposeTarget(args) ?: return accountSelectionMessage(args, content, action, reference)
         val visibility = args.visibility.toPostVisibilityOrNull() ?: return "Unsupported visibility: ${args.visibility}."
         val config = target.dataSource.composeConfig(action.composeType)
-        val maxLength = config.text?.maxLength
+        val maxLength = config.text?.maxLength?.firstOrNull()
         if (maxLength != null && content.length > maxLength) {
             return "Post content is ${content.length} characters, but ${target.platformType.name} allows " +
                 "at most $maxLength for ${action.label}."

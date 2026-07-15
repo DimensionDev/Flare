@@ -1049,13 +1049,10 @@ private fun composePresenter(
         state.setText(textFieldState.text.toString())
     }
 
-    val remainingLength =
-        state.composeConfig
-            .mapNotNull {
-                it.text
-            }.map {
-                it.maxLength - textFieldState.text.length
-            }
+    val remainingLength: UiState<Int> =
+        state.textMaxLength
+            ?.let { UiState.Success(it - textFieldState.text.length) }
+            ?: UiState.Loading()
 
     val pollState =
         state.composeConfig

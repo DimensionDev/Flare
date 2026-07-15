@@ -37,12 +37,15 @@ import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.network.mastodon.DefaultMastodonMaxStatusCharactersProvider
+import dev.dimension.flare.data.network.mastodon.MastodonMaxStatusCharactersProvider
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.network.mastodon.mastodonMaxStatusCharactersFlow
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
@@ -73,6 +76,8 @@ internal open class MastodonDataSource(
     override val accountKey: MicroBlogKey,
     val instance: String,
     private val credentialFlow: Flow<MastodonCredential>,
+    private val maxStatusCharactersProvider: MastodonMaxStatusCharactersProvider =
+        DefaultMastodonMaxStatusCharactersProvider,
 ) : AuthenticatedMicroblogDataSource,
     NotificationTimelineDataSource,
     ComposeDataSource,
@@ -89,6 +94,14 @@ internal open class MastodonDataSource(
         MastodonService(
             baseUrl = "https://$instance/",
             accessTokenFlow = credentialFlow.map { it.accessToken },
+        )
+    }
+
+    private val maxStatusCharactersFlow by lazy {
+        mastodonMaxStatusCharactersFlow(
+            host = instance,
+            resources = service,
+            provider = maxStatusCharactersProvider,
         )
     }
 
@@ -433,7 +446,7 @@ internal open class MastodonDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(500),
+            text = ComposeConfig.Text(maxStatusCharactersFlow),
             media =
                 if (type == ComposeType.Quote) {
                     null

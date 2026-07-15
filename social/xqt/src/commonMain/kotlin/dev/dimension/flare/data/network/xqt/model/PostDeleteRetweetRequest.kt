@@ -15,6 +15,7 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
+import dev.dimension.flare.data.network.xqt.XQTMutationQueryIds
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,7 +28,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class PostDeleteRetweetRequest(
     @SerialName(value = "queryId")
-    val queryId: kotlin.String = "iQtK4dl5hBmXewYZuEOKVw",
+    val queryId: kotlin.String = XQTMutationQueryIds.DELETE_RETWEET,
     @SerialName(value = "variables")
     val variables: PostDeleteRetweetRequestVariables,
 )

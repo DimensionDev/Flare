@@ -7,6 +7,7 @@ import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.xqt.XQTMutationQueryIds
 import dev.dimension.flare.data.network.xqt.model.CreateBookmark200Response
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkResponse
@@ -62,7 +63,7 @@ internal interface PostApi {
      * @return [CreateRetweetResponse]
      */
     @POST("graphql/{pathQueryId}/CreateRetweet")
-    suspend fun postCreateRetweet(@Header("Content-Type") contentType: kotlin.String = "application/json", @Path("pathQueryId") pathQueryId: kotlin.String = "mbRO74GrOvSfRcJnlMapnQ", @Body postCreateRetweetRequest: PostCreateRetweetRequest): Response<PostCreateRetweet200Response>
+    suspend fun postCreateRetweet(@Header("Content-Type") contentType: kotlin.String = "application/json", @Path("pathQueryId") pathQueryId: kotlin.String = XQTMutationQueryIds.CREATE_RETWEET, @Body postCreateRetweetRequest: PostCreateRetweetRequest): Response<PostCreateRetweet200Response>
 
     /**
      * POST graphql/{pathQueryId}/CreateTweet
@@ -76,7 +77,7 @@ internal interface PostApi {
      * @return [CreateTweetResponse]
      */
     @POST("graphql/{pathQueryId}/CreateTweet")
-    suspend fun postCreateTweet(@Header("Content-Type") contentType: kotlin.String = "application/json", @Path("pathQueryId") pathQueryId: kotlin.String = "5CdvsV_zjv4L64XFifAglw", @Body postCreateTweetRequest: PostCreateTweetRequest): Response<PostCreateTweet200Response>
+    suspend fun postCreateTweet(@Header("Content-Type") contentType: kotlin.String = "application/json", @Path("pathQueryId") pathQueryId: kotlin.String = XQTMutationQueryIds.CREATE_TWEET, @Body postCreateTweetRequest: PostCreateTweetRequest): Response<PostCreateTweet200Response>
 
     /**
      * POST graphql/{pathQueryId}/DeleteBookmark
@@ -104,7 +105,7 @@ internal interface PostApi {
      * @return [DeleteRetweetResponse]
      */
     @POST("graphql/{pathQueryId}/DeleteRetweet")
-    suspend fun postDeleteRetweet(@Header("Content-Type") contentType: kotlin.String = "application/json", @Path("pathQueryId") pathQueryId: kotlin.String = "ZyZigVsNiFO6v1dEks1eWg", @Body postDeleteRetweetRequest: PostDeleteRetweetRequest): Response<PostDeleteRetweet200Response>
+    suspend fun postDeleteRetweet(@Header("Content-Type") contentType: kotlin.String = "application/json", @Path("pathQueryId") pathQueryId: kotlin.String = XQTMutationQueryIds.DELETE_RETWEET, @Body postDeleteRetweetRequest: PostDeleteRetweetRequest): Response<PostDeleteRetweet200Response>
 
     /**
      * POST graphql/{pathQueryId}/DeleteTweet

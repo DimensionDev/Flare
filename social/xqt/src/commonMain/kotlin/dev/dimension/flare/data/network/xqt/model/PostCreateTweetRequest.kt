@@ -15,6 +15,7 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
+import dev.dimension.flare.data.network.xqt.XQTMutationQueryIds
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -30,7 +31,7 @@ internal data class PostCreateTweetRequest(
     @SerialName(value = "features")
     val features: PostCreateTweetRequestFeatures,
     @SerialName(value = "queryId")
-    val queryId: kotlin.String = "PIZtQLRIYtSa9AtW_fI2Mw",
+    val queryId: kotlin.String = XQTMutationQueryIds.CREATE_TWEET,
     @SerialName(value = "variables")
     val variables: PostCreateTweetRequestVariables,
 )

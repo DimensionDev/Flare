@@ -31,4 +31,6 @@ internal data class ModuleEntry(
     @Serializable(with = SafeItemContentSerializer::class)
     @SerialName(value = "itemContent")
     val itemContent: ItemContentUnion? = null,
+    @SerialName(value = "feedbackInfo")
+    val feedbackInfo: FeedbackInfo? = null,
 )

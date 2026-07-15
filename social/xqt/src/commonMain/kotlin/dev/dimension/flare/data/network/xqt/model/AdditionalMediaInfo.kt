@@ -27,4 +27,14 @@ import kotlinx.serialization.Serializable
 internal data class AdditionalMediaInfo(
     @SerialName(value = "monetizable")
     val monetizable: kotlin.Boolean,
+    @SerialName(value = "call_to_actions")
+    val callToActions: AdditionalMediaInfoCallToActions? = null,
+    @SerialName(value = "description")
+    val description: kotlin.String? = null,
+    @SerialName(value = "embeddable")
+    val embeddable: kotlin.Boolean? = null,
+    @SerialName(value = "source_user")
+    val sourceUser: UserResultCore? = null,
+    @SerialName(value = "title")
+    val title: kotlin.String? = null,
 )

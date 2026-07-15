@@ -46,6 +46,10 @@ internal data class TimelineTimelineModule(
 //    val header: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
     @SerialName(value = "items")
     val items: kotlin.collections.List<ModuleItem>? = null,
+    @SerialName(value = "feedbackInfo")
+    val feedbackInfo: FeedbackInfo? = null,
+    @SerialName(value = "metadata")
+    val metadata: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null,
 ) : ContentUnion {
     /**
      *

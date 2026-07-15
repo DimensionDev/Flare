@@ -10,7 +10,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
+import dev.dimension.flare.data.network.xqt.model.TweetPreviewDisplay
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetUnavailable
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -85,8 +87,15 @@ internal class StatusDetailRemoteMediator(
                     conversationId =
                         when (tweet) {
                             is Tweet -> tweet.legacy?.conversationIdStr
-                            is TweetTombstone -> null
+
+                            is TweetPreviewDisplay,
+                            is TweetTombstone,
+                            -> null
+
+                            is TweetUnavailable -> null
+
                             is TweetWithVisibilityResults -> tweet.tweet.legacy?.conversationIdStr
+
                             null -> null
                         }
 
@@ -96,8 +105,15 @@ internal class StatusDetailRemoteMediator(
                             .filter {
                                 when (val result = it.tweets.tweetResults.result) {
                                     is TweetTombstone -> false
+
+                                    is TweetPreviewDisplay,
+                                    is TweetUnavailable,
+                                    -> false
+
                                     null -> false
+
                                     is Tweet -> result.legacy?.conversationIdStr == conversationId
+
                                     is TweetWithVisibilityResults -> result.tweet.legacy?.conversationIdStr == conversationId
                                 }
                             }

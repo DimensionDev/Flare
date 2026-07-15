@@ -44,6 +44,8 @@ internal data class PostCreateTweetRequestVariables(
     val attachmentUrl: kotlin.String? = null,
     @SerialName(value = "conversation_control")
     val conversationControl: PostCreateTweetRequestVariablesConversationControl? = null,
+    @SerialName(value = "disallowed_reply_options")
+    val disallowedReplyOptions: kotlinx.serialization.json.JsonElement? = null,
 )
 
 @Serializable

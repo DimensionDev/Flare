@@ -52,6 +52,8 @@ internal data class TimelineShowAlert(
 //    val iconDisplayInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
     @SerialName(value = "triggerDelayMs")
     val triggerDelayMs: kotlin.Int? = null,
+    @SerialName(value = "clientEventInfo")
+    val clientEventInfo: ClientEventInfo? = null,
 ) : InstructionUnion {
     /**
      *

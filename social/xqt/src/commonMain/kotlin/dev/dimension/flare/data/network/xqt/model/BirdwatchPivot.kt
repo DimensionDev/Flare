@@ -49,6 +49,10 @@ internal data class BirdwatchPivot(
     val title: kotlin.String,
     @SerialName(value = "visualStyle")
     val visualStyle: BirdwatchPivot.VisualStyle? = null,
+    @SerialName(value = "callToAction")
+    val callToAction: BirdwatchPivotCallToAction? = null,
+    @SerialName(value = "titleDetail")
+    val titleDetail: kotlin.String? = null,
 ) {
     /**
      *
@@ -61,7 +65,10 @@ internal data class BirdwatchPivot(
     ) {
         @SerialName(value = "BirdwatchV1Icon")
         birdwatchV1Icon("BirdwatchV1Icon"),
-    }
+
+        @SerialName(value = "BirdwatchCameraVideo")
+        BirdwatchCameraVideo("BirdwatchCameraVideo"),
+        }
 
     /**
      *
@@ -74,5 +81,8 @@ internal data class BirdwatchPivot(
     ) {
         @SerialName(value = "Default")
         default("Default"),
-    }
+
+        @SerialName(value = "Tentative")
+        Tentative("Tentative"),
+        }
 }

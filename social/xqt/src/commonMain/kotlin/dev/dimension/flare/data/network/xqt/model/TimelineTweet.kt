@@ -44,4 +44,8 @@ internal data class TimelineTweet(
 //    val socialContext: SocialContext? = null,
     @SerialName(value = "promotedMetadata")
     val promotedMetadata: JsonElement? = null,
+    @SerialName(value = "hasModeratedReplies")
+    val hasModeratedReplies: kotlin.Boolean? = null,
+    @SerialName(value = "highlights")
+    val highlights: Highlight? = null,
 ) : ItemContentUnion

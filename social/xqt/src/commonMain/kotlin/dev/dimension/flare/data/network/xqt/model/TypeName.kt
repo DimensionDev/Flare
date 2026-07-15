@@ -68,6 +68,60 @@ internal enum class TypeName(
 
     @SerialName(value = "UserUnavailable")
     userUnavailable("UserUnavailable"),
+
+    @SerialName(value = "ContextualTweetInterstitial")
+    ContextualTweetInterstitial("ContextualTweetInterstitial"),
+
+    @SerialName(value = "TimelineTombstone")
+    TimelineTombstone("TimelineTombstone"),
+
+    @SerialName(value = "TimelineTrend")
+    TimelineTrend("TimelineTrend"),
+
+    @SerialName(value = "TimelineNotification")
+    TimelineNotification("TimelineNotification"),
+
+    @SerialName(value = "TimelineNotificationAggregateUserActions")
+    TimelineNotificationAggregateUserActions("TimelineNotificationAggregateUserActions"),
+
+    @SerialName(value = "TweetPreviewDisplay")
+    TweetPreviewDisplay("TweetPreviewDisplay"),
+
+    @SerialName(value = "Community")
+    Community("Community"),
+
+    @SerialName(value = "CommunityDeleteActionUnavailable")
+    CommunityDeleteActionUnavailable("CommunityDeleteActionUnavailable"),
+
+    @SerialName(value = "CommunityJoinAction")
+    CommunityJoinAction("CommunityJoinAction"),
+
+    @SerialName(value = "CommunityJoinActionUnavailable")
+    CommunityJoinActionUnavailable("CommunityJoinActionUnavailable"),
+
+    @SerialName(value = "CommunityLeaveActionUnavailable")
+    CommunityLeaveActionUnavailable("CommunityLeaveActionUnavailable"),
+
+    @SerialName(value = "CommunityTweetPinActionUnavailable")
+    CommunityTweetPinActionUnavailable("CommunityTweetPinActionUnavailable"),
+
+    @SerialName(value = "CommunityTweetUnpinActionUnavailable")
+    CommunityTweetUnpinActionUnavailable("CommunityTweetUnpinActionUnavailable"),
+
+    @SerialName(value = "CommunityInvitesUnavailable")
+    CommunityInvitesUnavailable("CommunityInvitesUnavailable"),
+
+    @SerialName(value = "CommunityJoinRequestsUnavailable")
+    CommunityJoinRequestsUnavailable("CommunityJoinRequestsUnavailable"),
+
+    @SerialName(value = "CommunityUnavailable")
+    CommunityUnavailable("CommunityUnavailable"),
+
+    @SerialName(value = "ApiImage")
+    ApiImage("ApiImage"),
+
+    @SerialName(value = "TimelineRichTextUser")
+    TimelineRichTextUser("TimelineRichTextUser"),
     ;
 
     /**

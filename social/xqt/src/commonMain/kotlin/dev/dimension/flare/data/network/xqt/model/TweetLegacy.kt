@@ -98,4 +98,14 @@ internal data class TweetLegacy(
      */
     @SerialName("user")
     val user: InboxUser? = null,
+    @SerialName(value = "conversation_control")
+    val conversationControl: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null,
+    @SerialName(value = "place")
+    val place: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null,
+    @SerialName(value = "quoted_status_id_str")
+    val quotedStatusIdStr: kotlin.String? = null,
+    @SerialName(value = "quoted_status_permalink")
+    val quotedStatusPermalink: QuotedStatusPermalink? = null,
+    @SerialName(value = "scopes")
+    val scopes: TweetLegacyScopes? = null,
 )

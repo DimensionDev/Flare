@@ -27,4 +27,6 @@ import kotlinx.serialization.Serializable
 internal data class CreateRetweetResponse(
     @SerialName(value = "data")
     val `data`: CreateRetweetResponseData,
+    @SerialName(value = "errors")
+    val errors: kotlin.collections.List<ErrorResponse>? = null,
 )

@@ -27,4 +27,10 @@ import kotlinx.serialization.Serializable
 internal data class BirdwatchPivotNote(
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
+    @SerialName(value = "grok_translated_community_note_with_availability")
+    val grokTranslatedCommunityNoteWithAvailability: GrokTranslatedCommunityNoteWithAvailability? = null,
+    @SerialName(value = "is_community_note_translatable")
+    val isCommunityNoteTranslatable: kotlin.Boolean? = null,
+    @SerialName(value = "language")
+    val language: kotlin.String? = null,
 )

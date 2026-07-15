@@ -34,6 +34,8 @@ internal data class BirdwatchEntityRef(
     val url: String,
     @SerialName(value = "urlType")
     val urlType: BirdwatchEntityRef.UrlType,
+    @SerialName(value = "text")
+    val text: kotlin.String? = null,
 ) {
     /**
      *
@@ -46,7 +48,10 @@ internal data class BirdwatchEntityRef(
     ) {
         @SerialName(value = "TimelineUrl")
         timelineUrl("TimelineUrl"),
-    }
+
+        @SerialName(value = "TimelineRichTextHashtag")
+        TimelineRichTextHashtag("TimelineRichTextHashtag"),
+        }
 
     /**
      *

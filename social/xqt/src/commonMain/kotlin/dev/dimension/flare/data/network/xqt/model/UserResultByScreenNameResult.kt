@@ -40,4 +40,10 @@ internal data class UserResultByScreenNameResult(
 //    val profilemodules: JsonElement,
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
+    @SerialName(value = "core")
+    val core: UserResultByScreenNameCore? = null,
+    @SerialName(value = "privacy")
+    val privacy: UserResultPrivacy? = null,
+    @SerialName(value = "relationship_perspectives")
+    val relationshipPerspectives: UserResultRelationshipPerspectives? = null,
 )

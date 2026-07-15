@@ -27,4 +27,6 @@ import kotlinx.serialization.Serializable
 internal data class ListLatestTweetsTimelineResponse(
     @SerialName(value = "data")
     val `data`: ListTweetsTimelineData,
+    @SerialName(value = "errors")
+    val errors: kotlin.collections.List<ErrorResponse>? = null,
 )

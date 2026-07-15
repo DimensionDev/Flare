@@ -143,4 +143,14 @@ internal data class UserLegacy(
     val url: kotlin.String? = null,
     @SerialName(value = "verified_type")
     val verifiedType: kotlin.String? = null,
+    @SerialName(value = "time_zone")
+    val timeZone: kotlin.String? = null,
+    @SerialName(value = "utc_offset")
+    val utcOffset: kotlin.Int? = null,
+    @SerialName(value = "withheld_description")
+    val withheldDescription: kotlin.String? = null,
+    @SerialName(value = "withheld_scope")
+    val withheldScope: kotlin.String? = null,
+    @SerialName(value = "withheld_in_countries")
+    val withheldInCountries: kotlin.collections.List<kotlin.String>? = null,
 )

@@ -27,4 +27,6 @@ import kotlinx.serialization.Serializable
 internal data class UserTweetsResponse(
     @SerialName(value = "data")
     val `data`: UserTweetsData,
+    @SerialName(value = "errors")
+    val errors: kotlin.collections.List<ErrorResponse>? = null,
 )

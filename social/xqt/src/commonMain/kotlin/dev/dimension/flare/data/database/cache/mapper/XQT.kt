@@ -17,7 +17,9 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTweet
 import dev.dimension.flare.data.network.xqt.model.TimelineUser
 import dev.dimension.flare.data.network.xqt.model.Tweet
+import dev.dimension.flare.data.network.xqt.model.TweetPreviewDisplay
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetUnavailable
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserLegacy
@@ -271,8 +273,15 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                             id =
                                 when (entry.content.itemContent.tweetResults.result) {
                                     is Tweet -> entry.content.itemContent.tweetResults.result.restId
-                                    is TweetTombstone -> null
+
+                                    is TweetPreviewDisplay,
+                                    is TweetTombstone,
+                                    -> null
+
+                                    is TweetUnavailable -> null
+
                                     is TweetWithVisibilityResults -> entry.content.itemContent.tweetResults.result.tweet.restId
+
                                     null -> null
                                 },
                             parents = emptyList(),
@@ -300,8 +309,15 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                     id =
                                         when (item.tweetResults.result) {
                                             is Tweet -> item.tweetResults.result.restId
-                                            is TweetTombstone -> null
+
+                                            is TweetPreviewDisplay,
+                                            is TweetTombstone,
+                                            -> null
+
+                                            is TweetUnavailable -> null
+
                                             is TweetWithVisibilityResults -> item.tweetResults.result.tweet.restId
+
                                             null -> null
                                         },
                                     parents = emptyList(),
@@ -320,8 +336,15 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                         id =
                                             when (it.item.itemContent.tweetResults.result) {
                                                 is Tweet -> it.item.itemContent.tweetResults.result.restId
-                                                is TweetTombstone -> null
+
+                                                is TweetPreviewDisplay,
+                                                is TweetTombstone,
+                                                -> null
+
+                                                is TweetUnavailable -> null
+
                                                 is TweetWithVisibilityResults -> it.item.itemContent.tweetResults.result.tweet.restId
+
                                                 null -> null
                                             },
                                         parents = emptyList(),
@@ -337,6 +360,12 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                     }
 
                                     is TweetTombstone -> {
+                                        null
+                                    }
+
+                                    is TweetPreviewDisplay,
+                                    is TweetUnavailable,
+                                    -> {
                                         null
                                     }
 
@@ -359,8 +388,15 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                     id =
                                         when (val item = item.tweets.tweetResults.result) {
                                             is Tweet -> item.restId
-                                            is TweetTombstone -> null
+
+                                            is TweetPreviewDisplay,
+                                            is TweetTombstone,
+                                            -> null
+
+                                            is TweetUnavailable -> null
+
                                             is TweetWithVisibilityResults -> item.tweet.restId
+
                                             null -> null
                                         },
                                 )

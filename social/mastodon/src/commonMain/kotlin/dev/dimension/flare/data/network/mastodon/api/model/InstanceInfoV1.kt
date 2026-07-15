@@ -11,4 +11,5 @@ internal data class InstanceInfoV1(
     val shortDescription: String? = null,
     val description: String? = null,
     val version: String? = null,
+    val configuration: Configuration? = null,
 )

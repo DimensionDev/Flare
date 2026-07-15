@@ -6,6 +6,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 
 @Immutable
 public data class ComposeConfig public constructor(
@@ -19,11 +23,16 @@ public data class ComposeConfig public constructor(
 ) {
     @Immutable
     public data class Text public constructor(
-        val maxLength: Int,
+        val maxLength: Flow<Int>,
     ) {
+        public constructor(maxLength: Int) : this(flowOf(maxLength))
+
         internal fun merge(other: Text): Text =
             Text(
-                maxLength = minOf(maxLength, other.maxLength),
+                maxLength =
+                    combine(maxLength, other.maxLength) { current, candidate ->
+                        minOf(current, candidate)
+                    }.distinctUntilChanged(),
             )
     }
 

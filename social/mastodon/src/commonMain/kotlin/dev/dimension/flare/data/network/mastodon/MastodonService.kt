@@ -4,6 +4,7 @@ import dev.dimension.flare.common.MimeTypes
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.data.network.mastodon.api.FriendshipResources
+import dev.dimension.flare.data.network.mastodon.api.InstanceResources
 import dev.dimension.flare.data.network.mastodon.api.ListsResources
 import dev.dimension.flare.data.network.mastodon.api.LookupResources
 import dev.dimension.flare.data.network.mastodon.api.MastodonResources
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.network.mastodon.api.TimelineResources
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.data.network.mastodon.api.createAccountResources
 import dev.dimension.flare.data.network.mastodon.api.createFriendshipResources
+import dev.dimension.flare.data.network.mastodon.api.createInstanceResources
 import dev.dimension.flare.data.network.mastodon.api.createListsResources
 import dev.dimension.flare.data.network.mastodon.api.createLookupResources
 import dev.dimension.flare.data.network.mastodon.api.createMastodonResources
@@ -89,6 +91,7 @@ internal class MastodonService(
     StatusResources by config(baseUrl, accessTokenFlow).createStatusResources(),
     ListsResources by config(baseUrl, accessTokenFlow).createListsResources(),
     TrendsResources by config(baseUrl, accessTokenFlow).createTrendsResources(),
+    InstanceResources by config(baseUrl, accessTokenFlow).createInstanceResources(),
     MastodonResources by config(baseUrl, accessTokenFlow).createMastodonResources() {
     suspend fun upload(
         data: ByteArray,

@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.platform.adaptiveSideContentSize
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -60,6 +62,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,7 +105,7 @@ internal fun VVOStatusScreen(
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        Row {
+        Row(modifier = Modifier.fillMaxSize()) {
             if (bigScreen) {
                 val width by adaptiveSideContentSize()
                 AdaptiveCard(
@@ -125,24 +128,32 @@ internal fun VVOStatusScreen(
                         lineLimit = Int.MAX_VALUE,
                     ),
             ) {
-                LazyStatusVerticalStaggeredGrid(
-                    contentPadding = contentPadding,
+                RefreshContainer(
+                    isRefreshing = state.isRefreshing,
+                    onRefresh = state::refresh,
                     modifier = Modifier.fillMaxSize(),
-                ) {
-                    if (!bigScreen) {
-                        item {
-                            AdaptiveCard {
-                                StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                    indicatorPadding = contentPadding,
+                    content = {
+                        LazyStatusVerticalStaggeredGrid(
+                            contentPadding = contentPadding,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            if (!bigScreen) {
+                                item {
+                                    AdaptiveCard {
+                                        StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                                    }
+                                }
                             }
+                            reactionContent(
+                                comment = state.comment,
+                                repost = state.repost,
+                                detailType = state.type,
+                                onDetailTypeChange = state::onTypeChanged,
+                            )
                         }
-                    }
-                    reactionContent(
-                        comment = state.comment,
-                        repost = state.repost,
-                        detailType = state.type,
-                        onDetailTypeChange = state::onTypeChanged,
-                    )
-                }
+                    },
+                )
             }
         }
     }
@@ -247,6 +258,10 @@ private fun presenter(
     statusKey: MicroBlogKey,
     accountType: AccountType,
 ) = run {
+    val scope = rememberCoroutineScope()
+    var isRefreshing by remember {
+        mutableStateOf(false)
+    }
     var type by remember {
         mutableStateOf(DetailType.Comment)
     }
@@ -260,9 +275,28 @@ private fun presenter(
 
     object : VVOStatusDetailState by state {
         val type = type
+        val isRefreshing = isRefreshing
 
         fun onTypeChanged(value: DetailType) {
             type = value
+        }
+
+        fun refresh() {
+            if (isRefreshing) {
+                return
+            }
+            val refreshType = type
+            isRefreshing = true
+            scope.launch {
+                try {
+                    when (refreshType) {
+                        DetailType.Comment -> state.refreshComment()
+                        DetailType.Repost -> state.refreshRepost()
+                    }
+                } finally {
+                    isRefreshing = false
+                }
+            }
         }
     }
 }

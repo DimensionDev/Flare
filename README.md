@@ -35,7 +35,7 @@ Flare is an open-source, privacy-first social client that brings Mastodon, Missk
 Here're some features we're planning to implement in the future.
  - [x] Grouped Mixed timeline
  - [ ] Showing instance's announcement
- - [ ] Crossposting for repost
+ - [x] Crossposting for repost
  - [ ] Auto thread
  - [ ] AI powered features
    - [ ] Personal trends of the day

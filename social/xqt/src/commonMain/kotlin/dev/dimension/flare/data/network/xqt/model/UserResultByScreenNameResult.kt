@@ -35,7 +35,7 @@ internal data class UserResultByScreenNameResult(
     @SerialName(value = "id")
     val id: kotlin.String,
     @SerialName(value = "legacy")
-    val legacy: UserResultByScreenNameLegacy,
+    val legacy: UserResultByScreenNameLegacy? = null,
 //    @Contextual @SerialName(value = "profilemodules")
 //    val profilemodules: JsonElement,
     @SerialName(value = "rest_id")

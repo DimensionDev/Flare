@@ -1005,15 +1005,16 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
 
 internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelation {
-    with(data.userResultByScreenName.result.legacy) {
-        return UiRelation(
-            following = following ?: false,
-            isFans = followedBy ?: false,
-            blocking = blocking ?: false,
-            blockedBy = blockedBy ?: false,
-            muted = muting,
-        )
-    }
+    val result = data.userResultByScreenName.result
+    val relationship = result.relationshipPerspectives
+    val legacy = result.legacy
+    return UiRelation(
+        following = relationship?.following ?: legacy?.following ?: false,
+        isFans = relationship?.followedBy ?: legacy?.followedBy ?: false,
+        blocking = relationship?.blocking ?: legacy?.blocking ?: false,
+        blockedBy = relationship?.blockedBy ?: legacy?.blockedBy ?: false,
+        muted = muting,
+    )
 }
 
 private fun String.replaceWithOriginImageUrl() = this.replace("_normal.", ".")

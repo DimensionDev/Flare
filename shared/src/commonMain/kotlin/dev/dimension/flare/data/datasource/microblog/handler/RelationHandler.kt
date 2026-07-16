@@ -13,8 +13,14 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -109,6 +115,7 @@ public class RelationHandler(
                 updateRelation(
                     userKey = userKey,
                     defaultRelation = UiRelation(),
+                    awaitInvalidation = true,
                     update = { relation ->
                         relation.copy(
                             blocking = true,
@@ -162,6 +169,7 @@ public class RelationHandler(
                 updateRelation(
                     userKey = userKey,
                     defaultRelation = UiRelation(),
+                    awaitInvalidation = true,
                     update = { relation ->
                         relation.copy(
                             muted = true,
@@ -236,21 +244,32 @@ public class RelationHandler(
     private suspend fun updateRelation(
         userKey: MicroBlogKey,
         defaultRelation: UiRelation? = null,
+        awaitInvalidation: Boolean = false,
         update: (UiRelation) -> UiRelation,
     ): UiRelation? {
-        val currentRelation =
+        val relationFlow =
             database
                 .userDao()
                 .getUserRelation(
                     accountType = accountType as DbAccountType,
                     userKey = userKey,
-                ).firstOrNull()
-                ?.relation ?: defaultRelation ?: return null
+                )
+        val currentRelation = relationFlow.firstOrNull()?.relation ?: defaultRelation ?: return null
         val newRelation = update(currentRelation)
-        setRelation(
-            userKey = userKey,
-            relation = newRelation,
-        )
+        val writeRelation: suspend () -> Unit = {
+            setRelation(
+                userKey = userKey,
+                relation = newRelation,
+            )
+        }
+        if (awaitInvalidation) {
+            relationFlow.writeAndAwaitInvalidation(
+                expectedRelation = newRelation,
+                write = writeRelation,
+            )
+        } else {
+            writeRelation()
+        }
         return currentRelation
     }
 
@@ -267,18 +286,50 @@ public class RelationHandler(
         )
     }
 
+    private suspend fun Flow<DbUserRelation?>.writeAndAwaitInvalidation(
+        expectedRelation: UiRelation,
+        write: suspend () -> Unit,
+    ) = coroutineScope {
+        // Room dispatches table invalidation asynchronously after a write. Keep an observer active
+        // across the write so cache cleanup cannot acquire the writer before the relation is visible.
+        val initialEmission = CompletableDeferred<Unit>()
+        val updatedEmission = CompletableDeferred<Unit>()
+        var hasInitialEmission = false
+        val observer =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                collect { value ->
+                    if (!hasInitialEmission) {
+                        hasInitialEmission = true
+                        initialEmission.complete(Unit)
+                    } else if (value?.relation == expectedRelation) {
+                        updatedEmission.complete(Unit)
+                    }
+                }
+            }
+        try {
+            initialEmission.await()
+            write()
+            updatedEmission.await()
+        } finally {
+            observer.cancelAndJoin()
+        }
+    }
+
     private suspend fun deleteUserFromLocalCaches(
         userKey: MicroBlogKey,
         deleteUserHistory: Boolean,
     ) {
         val dbAccountType = accountType as DbAccountType
+        // Hydrating and inspecting every cached timeline can be expensive. Do it on a reader so the
+        // single writer connection is held only for the actual deletions.
+        val timelines =
+            database
+                .pagingTimelineDao()
+                .getByAccountTypeWithStatus(dbAccountType)
+                .filter { it.containsUser(userKey) }
+                .map { it.timeline }
+
         database.connect {
-            val timelines =
-                database
-                    .pagingTimelineDao()
-                    .getByAccountTypeWithStatus(dbAccountType)
-                    .filter { it.containsUser(userKey) }
-                    .map { it.timeline }
             if (timelines.isNotEmpty()) {
                 database.pagingTimelineDao().delete(timelines)
             }

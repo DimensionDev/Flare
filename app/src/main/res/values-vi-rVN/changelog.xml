@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Đã thêm hỗ trợ FANBOX.</li>
-                <li>Dòng thời gian hiện hỗ trợ menu nhấn giữ trên ảnh/video: tải xuống, tải xuống tất cả, chia sẻ và sao chép liên kết.</li>
-                <li>Đã thêm hỗ trợ thay đổi vị trí lưu phương tiện.</li>
-                <li>Đã thêm luồng đăng nhập lại có mục tiêu sau khi phiên hết hạn.</li>
+                <li>Đã thêm tùy chọn đăng chéo vào menu Chia sẻ, giúp bạn nhanh chóng đăng lại trên các nền tảng khác.</li>
                 <li>Sửa lỗi và cải thiện hiệu năng.</li>
             </ul>
         ]]></string>

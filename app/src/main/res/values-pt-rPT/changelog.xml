@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionado suporte para FANBOX.</li>
-                <li>A cronologia suporta agora menus de pressão longa em imagens/vídeos: transferir, transferir tudo, partilhar e copiar ligação.</li>
-                <li>Adicionado suporte para alterar a localização de gravação dos multimédia.</li>
-                <li>Adicionado um fluxo de novo início de sessão direcionado após a sessão expirar.</li>
+                <li>Adicionada uma opção de publicação cruzada ao menu Partilhar, permitindo publicar rapidamente noutras plataformas.</li>
                 <li>Correções de erros e melhorias de desempenho.</li>
             </ul>
         ]]></string>

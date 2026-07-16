@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano obsługę FANBOX.</li>
-                <li>Oś czasu obsługuje teraz menu po długim naciśnięciu obrazów/wideo: pobierz, pobierz wszystko, udostępnij i skopiuj link.</li>
-                <li>Dodano obsługę zmiany lokalizacji zapisu multimediów.</li>
-                <li>Dodano ukierunkowany proces ponownego logowania po wygaśnięciu sesji.</li>
+                <li>Dodano opcję publikowania krzyżowego w menu Udostępnij, aby szybko publikować posty na różnych platformach.</li>
                 <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>

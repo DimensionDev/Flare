@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til støtte for FANBOX.</li>
-                <li>Tidslinjen støtter nå langtrykkmenyer for bilder/videoer: last ned, last ned alle, del og kopier lenke.</li>
-                <li>Lagt til støtte for å endre lagringssted for medier.</li>
-                <li>Lagt til målrettet ny innlogging etter utløpt økt.</li>
+                <li>Lagt til et alternativ for krysspublisering i Del-menyen, slik at du raskt kan publisere på tvers av plattformer.</li>
                 <li>Feilrettinger og ytelsesforbedringer.</li>
             </ul>
         ]]></string>

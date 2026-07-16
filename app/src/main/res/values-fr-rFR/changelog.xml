@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s :</span>
             <ul>
-                <li>Ajout de la prise en charge de FANBOX.</li>
-                <li>La timeline prend désormais en charge le menu d\'appui long sur les images/vidéos : télécharger, tout télécharger, partager et copier le lien.</li>
-                <li>Ajout de la possibilité de modifier l\'emplacement d\'enregistrement des médias.</li>
-                <li>Ajout d\'un flux de reconnexion ciblée après expiration de la session.</li>
+                <li>Ajout d’une option de publication croisée dans le menu Partager pour republier rapidement sur d’autres plateformes.</li>
                 <li>Corrections de bugs et améliorations des performances.</li>
             </ul>
         ]]></string>

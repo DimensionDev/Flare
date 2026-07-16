@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>版本 %1$s：</span>
             <ul>
-                <li>新增 FANBOX 支持。</li>
-                <li>时间线现在支持长按图片/视频菜单：下载、全部下载、分享、复制链接。</li>
-                <li>支持修改媒体保存地址。</li>
-                <li>新增登录失效后的定向重新登录流程。</li>
+                <li>在分享菜单中新增“跨平台转发”选项，可以快速进行跨平台转发。</li>
                 <li>Bug 修复和性能改进。</li>
             </ul>
         ]]></string>

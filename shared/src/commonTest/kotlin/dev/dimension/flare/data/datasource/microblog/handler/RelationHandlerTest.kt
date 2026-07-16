@@ -26,7 +26,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
@@ -209,6 +211,60 @@ class RelationHandlerTest : RobolectricTest() {
             assertEquals(1, loader.blockCallCount)
             val saved = assertNotNull(db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first())
             assertTrue(saved.relation.blocking)
+        }
+
+    @Test
+    fun blockNotifiesProfileBeforeRemoteRequestAfterCacheCleanup() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val accountType = AccountType.Specific(accountKey)
+            val (_, otherStatusId) = saveTargetAndOtherPosts(pagingKey = "home")
+            db.userDao().insertUserRelation(
+                DbUserRelation(
+                    accountType = accountType,
+                    userKey = userKey,
+                    relation = UiRelation(blocking = false),
+                ),
+            )
+
+            val events = mutableListOf<String>()
+            val profileObserver =
+                launch {
+                    db
+                        .userDao()
+                        .getUserRelation(accountType, userKey)
+                        .filterNotNull()
+                        .first { it.relation.blocking }
+                    events += "profile_flow"
+                }
+            advanceUntilIdle()
+
+            loader.onBlock = {
+                events += "remote_request"
+                assertEquals(listOf("profile_flow", "remote_request"), events)
+                assertEquals(
+                    listOf(otherStatusId),
+                    db.pagingTimelineDao().getByPagingKey("home").map { it.statusId },
+                )
+                val persisted = assertNotNull(db.userDao().getUserRelation(accountType, userKey).first())
+                assertTrue(persisted.relation.blocking)
+            }
+
+            handler = RelationHandler(accountType = accountType, dataSource = loader)
+            handler.block(userKey)
+            advanceUntilIdle()
+
+            assertEquals(listOf("profile_flow", "remote_request"), events)
+            profileObserver.cancel()
         }
 
     @Test

@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunto il supporto a FANBOX.</li>
-                <li>La timeline ora supporta il menu con pressione prolungata su immagini/video: scarica, scarica tutto, condividi e copia link.</li>
-                <li>Aggiunto il supporto per modificare la posizione di salvataggio dei media.</li>
-                <li>Aggiunto un flusso di nuovo accesso mirato dopo la scadenza della sessione.</li>
+                <li>Aggiunta l’opzione di pubblicazione incrociata al menu Condividi, per ripubblicare rapidamente su altre piattaforme.</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

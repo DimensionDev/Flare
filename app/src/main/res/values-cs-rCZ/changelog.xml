@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Přidána podpora FANBOX.</li>
-                <li>Časová osa nyní podporuje nabídku po dlouhém stisknutí obrázků/videí: stáhnout, stáhnout vše, sdílet a zkopírovat odkaz.</li>
-                <li>Přidána možnost změnit umístění pro ukládání médií.</li>
-                <li>Přidán cílený tok opětovného přihlášení po vypršení relace.</li>
+                <li>Do nabídky Sdílet byla přidána možnost křížového publikování pro rychlé sdílení mezi platformami.</li>
                 <li>Opravy chyb a vylepšení výkonu.</li>
             </ul>
         ]]></string>

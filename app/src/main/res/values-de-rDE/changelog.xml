@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>FANBOX-Unterstützung hinzugefügt.</li>
-                <li>Die Timeline unterstützt jetzt Menüs beim langen Drücken von Bildern/Videos: Herunterladen, alle herunterladen, teilen und Link kopieren.</li>
-                <li>Der Speicherort für Medien kann jetzt geändert werden.</li>
-                <li>Gezieltes erneutes Anmelden nach abgelaufenen Sitzungen hinzugefügt.</li>
+                <li>Dem Teilen-Menü wurde eine Crossposting-Option hinzugefügt, mit der Beiträge schnell plattformübergreifend veröffentlicht werden können.</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>

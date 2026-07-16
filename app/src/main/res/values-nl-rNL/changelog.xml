@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Ondersteuning voor FANBOX toegevoegd.</li>
-                <li>De tijdlijn ondersteunt nu menu\'s bij lang drukken op afbeeldingen/video\'s: downloaden, alles downloaden, delen en link kopiëren.</li>
-                <li>Ondersteuning toegevoegd om de opslaglocatie voor media te wijzigen.</li>
-                <li>Een gerichte opnieuw-inloggen-flow toegevoegd na verlopen sessies.</li>
+                <li>Een crosspost-optie toegevoegd aan het menu Delen, zodat je snel op meerdere platforms kunt publiceren.</li>
                 <li>Bugfixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>

@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>FANBOX desteği eklendi.</li>
-                <li>Zaman akışı artık görsel/video uzun basma menülerini destekliyor: indir, tümünü indir, paylaş ve bağlantıyı kopyala.</li>
-                <li>Medya kaydetme konumunu değiştirme desteği eklendi.</li>
-                <li>Oturum süresi dolduktan sonra hedefli yeniden giriş akışı eklendi.</li>
+                <li>Paylaş menüsüne, farklı platformlarda hızlıca paylaşım yapmanızı sağlayan çapraz gönderi seçeneği eklendi.</li>
                 <li>Hata düzeltmeleri ve performans iyileştirmeleri.</li>
             </ul>
         ]]></string>

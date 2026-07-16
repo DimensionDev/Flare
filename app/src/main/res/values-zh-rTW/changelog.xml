@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>版本 %1$s：</span>
             <ul>
-                <li>新增 FANBOX 支援。</li>
-                <li>時間軸現在支援長按圖片/影片選單：下載、全部下載、分享、複製連結。</li>
-                <li>支援修改媒體儲存位置。</li>
-                <li>新增登入失效後的定向重新登入流程。</li>
+                <li>在分享選單中新增「跨平台轉發」選項，可快速進行跨平台轉發。</li>
                 <li>錯誤修正與效能改善。</li>
             </ul>
         ]]></string>

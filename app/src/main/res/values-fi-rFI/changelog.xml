@@ -5,10 +5,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Versio %1$s:</span>
             <ul>
-                <li>FANBOX-tuki lisätty.</li>
-                <li>Aikajana tukee nyt kuvien/videoiden pitkän painalluksen valikkoa: lataa, lataa kaikki, jaa ja kopioi linkki.</li>
-                <li>Lisätty tuki median tallennussijainnin muuttamiseen.</li>
-                <li>Lisätty kohdistettu uudelleenkirjautuminen vanhentuneen istunnon jälkeen.</li>
+                <li>Jaa-valikkoon lisättiin ristijulkaisuvalinta, jolla julkaisun voi jakaa nopeasti eri alustoille.</li>
                 <li>Virhekorjauksia ja suorituskykyparannuksia.</li>
             </ul>
         ]]></string>

@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added FANBOX support.</li>
-                <li>Timeline now supports long-press image/video menus: Download, Download all, Share, and Copy link.</li>
-                <li>Added support for changing the media save location.</li>
-                <li>Added a targeted relogin flow for expired sessions.</li>
+                <li>Added a Cross-post option to the Share menu, making it quick and easy to cross-post.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]></string>

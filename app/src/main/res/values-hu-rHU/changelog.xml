@@ -3,10 +3,7 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>FANBOX-támogatás hozzáadva.</li>
-                <li>Az idővonal mostantól támogatja a képek/videók hosszan nyomására megjelenő menüt: letöltés, összes letöltése, megosztás és hivatkozás másolása.</li>
-                <li>Hozzáadva a média mentési helyének módosítása.</li>
-                <li>Hozzáadva célzott újbóli bejelentkezési folyamat lejárt munkamenet esetén.</li>
+                <li>A Megosztás menü új keresztposztolási lehetőségével gyorsan közzéteheted a bejegyzést más platformokon.</li>
                 <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
             </ul>
         ]]></string>

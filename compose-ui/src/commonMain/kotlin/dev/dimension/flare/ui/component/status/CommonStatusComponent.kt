@@ -157,6 +157,7 @@ public fun CommonStatusComponent(
     modifier: Modifier = Modifier,
     isDetail: Boolean = false,
     isQuote: Boolean = false,
+    isClickable: Boolean = true,
     showMedia: Boolean = true,
     maxLines: Int? = null,
     showExpandButton: Boolean = true,
@@ -169,7 +170,7 @@ public fun CommonStatusComponent(
         modifier =
             Modifier
                 .let {
-                    if (isDetail) {
+                    if (isDetail || !isClickable) {
                         it
                     } else {
                         it.clickable {

@@ -46,6 +46,7 @@ public struct StatusView: View {
     private let data: UiTimelineV2.Post
     private let isDetail: Bool
     private let isQuote: Bool
+    private let isClickable: Bool
     private let withLeadingPadding: Bool
     private let showMedia: Bool
     private let maxLine: Int?
@@ -63,6 +64,7 @@ public struct StatusView: View {
         data: UiTimelineV2.Post,
         isDetail: Bool = false,
         isQuote: Bool = false,
+        isClickable: Bool = true,
         withLeadingPadding: Bool = false,
         showMedia: Bool = true,
         maxLine: Int? = nil,
@@ -76,6 +78,7 @@ public struct StatusView: View {
         self.data = data
         self.isDetail = isDetail
         self.isQuote = isQuote
+        self.isClickable = isClickable
         self.withLeadingPadding = withLeadingPadding
         self.showMedia = showMedia
         self.maxLine = maxLine
@@ -376,8 +379,10 @@ public struct StatusView: View {
             }
         }
         .contentShape(.rect)
-        .onTapGesture {
-            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+        .if(isClickable) { view in
+            view.onTapGesture {
+                data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+            }
         }
         .onChange(of: data.renderHash) { _, _ in
             contentWarningExpanded = false

@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -170,7 +171,7 @@ internal fun ComposeScreen(
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val state by producePresenter(key = "compose_${accountType}_${status}_$draftGroupId") {
+    val state by producePresenter(key = "compose") {
         composePresenter(
             context = context,
             accountType = accountType,
@@ -313,6 +314,10 @@ internal fun ComposeScreen(
             )
         }
         Column(
+            modifier =
+                Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
@@ -697,7 +702,9 @@ internal fun ComposeScreen(
                 replyState.onSuccess { state ->
                     val content = state.contentPostOrNull()
                     if (content != null) {
-                        Card {
+                        Card(
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                        ) {
                             CompositionLocalProvider(
                                 LocalTimelineAppearance provides
                                     LocalTimelineAppearance.current.copy(
@@ -716,6 +723,7 @@ internal fun ComposeScreen(
                                                 vertical = 8.dp,
                                             ).fillMaxWidth(),
                                     isQuote = true,
+                                    isClickable = false,
                                 )
                             }
                         }

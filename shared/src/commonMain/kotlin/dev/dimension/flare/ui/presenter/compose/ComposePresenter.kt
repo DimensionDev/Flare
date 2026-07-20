@@ -140,6 +140,10 @@ public class ComposePresenter(
         MutableStateFlow(status)
     }
 
+    private val statusFlow by lazy {
+        MutableStateFlow<UiState<UiTimelineV2>>(UiState.Loading())
+    }
+
     private val editingDraftGroupIdFlow by lazy {
         MutableStateFlow<String?>(draftGroupId)
     }
@@ -330,16 +334,12 @@ public class ComposePresenter(
         }
     }
 
-    private val statusFlow by lazy {
-        combine(activeStatusFlow, selectedComposeAccountKeysFlow) { composeStatus, accountKeys ->
-            composeStatus to accountKeys.firstOrNull()
-        }.flatMapLatest { (composeStatus, selectedAccountKey) ->
-            val resolvedAccountType =
-                when {
-                    selectedAccountKey != null -> AccountType.Specific(selectedAccountKey)
-                    accountType is AccountType.Specific -> accountType
-                    else -> null
-                }
+    private val statusSourceFlow by lazy {
+        observeComposeStatusTarget(
+            activeStatusFlow = activeStatusFlow,
+            selectedAccountKeysFlow = selectedComposeAccountKeysFlow,
+            fallbackAccountType = accountType,
+        ).flatMapLatest { (composeStatus, resolvedAccountType) ->
             if (composeStatus != null && resolvedAccountType != null) {
                 accountServiceFlow(
                     accountType = resolvedAccountType,
@@ -404,6 +404,10 @@ public class ComposePresenter(
     @Composable
     override fun body(): ComposeState {
         val scope = rememberCoroutineScope()
+        val loadedStatus by statusSourceFlow.flattenUiState()
+        LaunchedEffect(loadedStatus) {
+            statusFlow.value = loadedStatus
+        }
         val selectedUsers by selectedUsersFlow.collectAsUiState()
         val remainingUsers by otherUsersFlow.collectAsUiState()
         val accountUsers by accountUsersFlow.collectAsUiState()
@@ -887,6 +891,18 @@ internal fun observeSelectedComposeAccountKeys(
         selectedKeys
             .filter { key -> allAccounts.containsKey(key) }
             .toImmutableList()
+    }.distinctUntilChanged()
+
+internal fun observeComposeStatusTarget(
+    activeStatusFlow: Flow<ComposeStatus?>,
+    selectedAccountKeysFlow: Flow<ImmutableList<MicroBlogKey>>,
+    fallbackAccountType: AccountType?,
+): Flow<Pair<ComposeStatus?, AccountType.Specific?>> =
+    combine(activeStatusFlow, selectedAccountKeysFlow) { composeStatus, accountKeys ->
+        val resolvedAccountType =
+            accountKeys.firstOrNull()?.let(AccountType::Specific)
+                ?: fallbackAccountType as? AccountType.Specific
+        composeStatus to resolvedAccountType
     }.distinctUntilChanged()
 
 internal fun observeAllComposeAccounts(

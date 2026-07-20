@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.microblog
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runCurrent
@@ -31,5 +32,17 @@ class ComposeConfigTextTest {
 
             assertEquals(listOf(500, 400, 300), emissions)
             collection.cancel()
+        }
+
+    @Test
+    fun `merged text uses the strictest length rule`() =
+        runTest {
+            val merged =
+                ComposeConfig.Text
+                    .withLength(280) { if (it.startsWith("https://")) 23 else it.length * 2 }
+                    .merge(ComposeConfig.Text(500))
+
+            assertEquals(-2, merged.remainingLength("あ".repeat(141)).first())
+            assertEquals(200, merged.remainingLength("https://" + "a".repeat(292)).first())
         }
 }

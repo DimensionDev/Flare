@@ -338,8 +338,7 @@ struct MacComposeScreen: View {
             languageCodes: Array(presenter.state.languageCodes),
             selectedLanguages: $viewModel.languages,
             maxLanguageSelectionCount: languageMaxCount,
-            textCount: viewModel.text.count,
-            maxTextLength: textMaxLength,
+            remainingTextLength: remainingTextLength,
             onTogglePoll: {
                 viewModel.togglePoll()
                 if viewModel.pollViewModel.enabled {
@@ -406,8 +405,8 @@ struct MacComposeScreen: View {
         max(Int(presenter.state.mediaMaxCount) - mediaItems.count, 0)
     }
 
-    private var textMaxLength: Int? {
-        presenter.state.textMaxLength.map { Int(truncating: $0) }
+    private var remainingTextLength: Int? {
+        presenter.state.remainingLength.map { Int(truncating: $0) }
     }
 
     private var maxPollOptions: Int {

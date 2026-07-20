@@ -98,8 +98,7 @@
 	let languagePopoverWidth = $state(240);
 	let languagePopoverMaxHeight = $state(220);
 
-	const maxLength = $derived(compose.textMaxLength);
-	const remainingLength = $derived(maxLength === null ? null : maxLength - text.length);
+	const remainingLength = $derived(compose.remainingLength);
 	const selectedProfiles = $derived(successProfiles(compose.selectedUsers));
 	const otherProfiles = $derived(successProfiles(compose.otherUsers));
 	const accountProfiles = $derived([...selectedProfiles, ...otherProfiles]);

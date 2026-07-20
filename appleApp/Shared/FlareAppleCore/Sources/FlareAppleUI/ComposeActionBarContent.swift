@@ -14,8 +14,7 @@ public struct ComposeActionBarContent<MediaControl: View>: View {
     private let languageCodes: [String]
     private let selectedLanguages: Binding<[String]>
     private let maxLanguageSelectionCount: Int
-    private let textCount: Int
-    private let maxTextLength: Int?
+    private let remainingTextLength: Int?
     private let onTogglePoll: () -> Void
     private let onToggleContentWarning: () -> Void
     private let onSelectVisibility: (UiTimelineV2.PostVisibility) -> Void
@@ -34,8 +33,7 @@ public struct ComposeActionBarContent<MediaControl: View>: View {
         languageCodes: [String],
         selectedLanguages: Binding<[String]>,
         maxLanguageSelectionCount: Int,
-        textCount: Int,
-        maxTextLength: Int?,
+        remainingTextLength: Int?,
         onTogglePoll: @escaping () -> Void,
         onToggleContentWarning: @escaping () -> Void,
         onSelectVisibility: @escaping (UiTimelineV2.PostVisibility) -> Void,
@@ -53,8 +51,7 @@ public struct ComposeActionBarContent<MediaControl: View>: View {
         self.languageCodes = languageCodes
         self.selectedLanguages = selectedLanguages
         self.maxLanguageSelectionCount = maxLanguageSelectionCount
-        self.textCount = textCount
-        self.maxTextLength = maxTextLength
+        self.remainingTextLength = remainingTextLength
         self.onTogglePoll = onTogglePoll
         self.onToggleContentWarning = onToggleContentWarning
         self.onSelectVisibility = onSelectVisibility
@@ -118,9 +115,9 @@ public struct ComposeActionBarContent<MediaControl: View>: View {
 
             Spacer()
 
-            if let maxTextLength {
-                Text("\(textCount)/\(maxTextLength)")
-                    .foregroundStyle(textCount > maxTextLength ? .red : .gray)
+            if let remainingTextLength {
+                Text("\(remainingTextLength)")
+                    .foregroundStyle(remainingTextLength < 0 ? .red : .gray)
                     .monospacedDigit()
             }
         }

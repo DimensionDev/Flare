@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
@@ -25,6 +26,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlin.native.HiddenFromObjC
+
+// ponytail: bounded hydration avoids Room's 25-statement LRU; use flat SQL if one page ever fans out enough to hit it.
+private const val CACHE_CLEANUP_PAGE_SIZE = 100
 
 @HiddenFromObjC
 public class RelationHandler(
@@ -320,14 +324,22 @@ public class RelationHandler(
         deleteUserHistory: Boolean,
     ) {
         val dbAccountType = accountType as DbAccountType
-        // Hydrating and inspecting every cached timeline can be expensive. Do it on a reader so the
-        // single writer connection is held only for the actual deletions.
-        val timelines =
-            database
-                .pagingTimelineDao()
-                .getByAccountTypeWithStatus(dbAccountType)
+        val timelines = mutableListOf<DbPagingTimeline>()
+        var afterId: String? = null
+        do {
+            val page =
+                database
+                    .pagingTimelineDao()
+                    .getByAccountTypeWithStatus(
+                        accountType = dbAccountType,
+                        afterId = afterId,
+                        limit = CACHE_CLEANUP_PAGE_SIZE,
+                    )
+            page
                 .filter { it.containsUser(userKey) }
-                .map { it.timeline }
+                .mapTo(timelines) { it.timeline }
+            afterId = page.lastOrNull()?.timeline?._id
+        } while (page.size == CACHE_CLEANUP_PAGE_SIZE)
 
         database.connect {
             if (timelines.isNotEmpty()) {

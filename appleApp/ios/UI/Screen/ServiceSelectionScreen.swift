@@ -2,8 +2,8 @@ import SwiftUI
 import FlareAppleUI
 @preconcurrency import KotlinSharedUI
 import AuthenticationServices
+import Foundation
 import WebKit
-import Combine
 import FlareAppleCore
 
 private enum ServiceSelectionAnimation {
@@ -433,22 +433,8 @@ private struct LoginFlowView: View {
                 .transition(ServiceSelectionAnimation.inline)
         }
         .animation(ServiceSelectionAnimation.standard, value: flowAnimationKey)
-        .onReceive(
-            presenter.state.effects
-                .toPublisher()
-                .catch { _ in Empty<LoginEffect, Never>() }
-                .receive(on: DispatchQueue.main)
-        ) { effect in
-            switch onEnum(of: effect) {
-            case .openUrl(let openUrl):
-                authenticate(url: openUrl.url)
-            case .showQr(let showQr):
-                withAnimation(ServiceSelectionAnimation.standard) {
-                    qrContent = showQr.content
-                }
-            case .openWebCookieLogin(let webCookie):
-                webCookieUrl = webCookie.url
-            }
+        .task {
+            await collectEffects()
         }
         .sheet(isPresented: Binding(
             get: { webCookieUrl != nil },
@@ -472,6 +458,21 @@ private struct LoginFlowView: View {
                         self.webCookieUrl = nil
                     }, url: webCookieUrl)
                 }
+            }
+        }
+    }
+
+    private func collectEffects() async {
+        for await effect in presenter.state.effects {
+            switch onEnum(of: effect) {
+            case .openUrl(let openUrl):
+                await authenticate(url: openUrl.url)
+            case .showQr(let showQr):
+                withAnimation(ServiceSelectionAnimation.standard) {
+                    qrContent = showQr.content
+                }
+            case .openWebCookieLogin(let webCookie):
+                webCookieUrl = webCookie.url
             }
         }
     }
@@ -507,16 +508,25 @@ private struct LoginFlowView: View {
         ].joined(separator: "|")
     }
 
-    private func authenticate(url: String) {
-        Task {
-            guard let authURL = URL(string: url) else { return }
-            let response = try? await webAuthenticationSession.authenticate(
+    private func authenticate(url: String) async {
+        guard let authURL = URL(string: url) else {
+            presenter.state.onExternalAuthenticationDismissed(
+                error: URLError(.badURL).localizedDescription
+            )
+            return
+        }
+        do {
+            let response = try await webAuthenticationSession.authenticate(
                 using: authURL,
                 callbackURLScheme: authURL.isPixivOAuthUrl ? "pixiv" : APPSCHEMA
             )
-            if let responseString = response?.absoluteString {
-                presenter.state.resume(value: responseString)
-            }
+            presenter.state.resume(value: response.absoluteString)
+        } catch is CancellationError {
+            presenter.state.onExternalAuthenticationDismissed(error: nil)
+        } catch {
+            presenter.state.onExternalAuthenticationDismissed(
+                error: error.isCanceledWebAuthentication ? nil : error.localizedDescription
+            )
         }
     }
 }
@@ -526,6 +536,14 @@ private extension URL {
         scheme == "https" &&
             host == "app-api.pixiv.net" &&
             path == "/web/v1/login"
+    }
+}
+
+private extension Error {
+    var isCanceledWebAuthentication: Bool {
+        let error = self as NSError
+        return error.domain == ASWebAuthenticationSessionErrorDomain &&
+            error.code == ASWebAuthenticationSessionError.Code.canceledLogin.rawValue
     }
 }
 

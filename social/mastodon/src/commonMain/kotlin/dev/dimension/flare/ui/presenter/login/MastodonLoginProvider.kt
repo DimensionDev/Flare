@@ -208,6 +208,10 @@ private class MastodonOAuthLoginHandler(
         }
     }
 
+    override fun onExternalAuthenticationDismissed(error: String?) {
+        _state.value = oauthState(error = error)
+    }
+
     override fun clear() {
         _state.value = oauthState()
     }

@@ -402,6 +402,10 @@ private class BlueskyOAuthLoginHandler(
         }
     }
 
+    override fun onExternalAuthenticationDismissed(error: String?) {
+        _state.value = oauthState(error = error)
+    }
+
     override fun clear() {
         values.clear()
         request = null

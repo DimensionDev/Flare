@@ -149,6 +149,10 @@ private class MisskeyOAuthLoginHandler(
         }
     }
 
+    override fun onExternalAuthenticationDismissed(error: String?) {
+        _state.value = misskeyOAuthState(error = error)
+    }
+
     override fun clear() {
         _state.value = misskeyOAuthState()
     }

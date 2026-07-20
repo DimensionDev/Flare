@@ -160,6 +160,10 @@ private class PixivOAuthLoginHandler(
 
     override fun canResume(value: String): Boolean = value.isPixivOAuthCallback() && value.contains("code=")
 
+    override fun onExternalAuthenticationDismissed(error: String?) {
+        _state.value = oauthState(error = error)
+    }
+
     override fun clear() {
         _state.value = oauthState()
     }

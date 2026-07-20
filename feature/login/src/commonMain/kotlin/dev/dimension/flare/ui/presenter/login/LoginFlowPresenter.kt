@@ -29,6 +29,8 @@ public class LoginFlowPresenter(
 
         public fun canResume(value: String): Boolean
 
+        public fun onExternalAuthenticationDismissed(error: String?)
+
         public fun clear()
     }
 
@@ -65,6 +67,10 @@ public class LoginFlowPresenter(
             }
 
             override fun canResume(value: String): Boolean = handler.canResume(value)
+
+            override fun onExternalAuthenticationDismissed(error: String?) {
+                handler.onExternalAuthenticationDismissed(error)
+            }
 
             override fun clear() {
                 handler.clear()

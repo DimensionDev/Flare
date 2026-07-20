@@ -135,6 +135,10 @@ public interface LoginMethodHandler : AutoCloseable {
 
     public fun canResume(value: String): Boolean = true
 
+    public fun onExternalAuthenticationDismissed(error: String?) {
+        clear()
+    }
+
     public fun clear()
 
     override fun close() {

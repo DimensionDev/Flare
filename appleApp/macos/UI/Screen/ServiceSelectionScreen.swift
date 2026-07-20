@@ -1,6 +1,7 @@
 import SwiftUI
 import AuthenticationServices
 import Combine
+import Foundation
 import FlareAppleCore
 import FlareAppleUI
 @preconcurrency import KotlinSharedUI
@@ -13,7 +14,6 @@ private enum MacOSServiceSelectionAnimation {
 
 struct ServiceSelectionScreen: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     let toHome: () -> Void
 
@@ -167,17 +167,14 @@ struct ServiceSelectionScreen: View {
                         .foregroundStyle(.secondary)
                 }
 
-                LoginFlowView(
-                    handler: {
-                        state.createLoginHandler(
-                            platformType: node.platformType,
-                            host: node.host,
-                            methodType: selectedMethod.wrappedValue,
-                            redirectUri: nil,
-                        )
-                    },
-                    authenticateURL: authenticate(url:)
-                )
+                LoginFlowView {
+                    state.createLoginHandler(
+                        platformType: node.platformType,
+                        host: node.host,
+                        methodType: selectedMethod.wrappedValue,
+                        redirectUri: nil,
+                    )
+                }
                     .id("\(key)-\(selectedMethod.wrappedValue)")
 
                 LoginAgreementView(
@@ -296,21 +293,10 @@ struct ServiceSelectionScreen: View {
         }
     }
 
-    private func authenticate(url: String) async -> String? {
-        guard let authURL = URL(string: url) else {
-            return nil
-        }
-        let response = try? await webAuthenticationSession.authenticate(
-            using: authURL,
-            callbackURLScheme: authURL.isPixivOAuthUrl ? "pixiv" : APPSCHEMA
-        )
-        return response?.absoluteString
-    }
 }
 
 struct ReloginScreen: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     let target: ReloginTarget
     let toHome: () -> Void
@@ -393,12 +379,9 @@ struct ReloginScreen: View {
                     .labelsHidden()
                 }
 
-                LoginFlowView(
-                    handler: {
-                        state.createLoginHandler(methodType: selectedMethod.wrappedValue)
-                    },
-                    authenticateURL: authenticate(url:)
-                )
+                LoginFlowView {
+                    state.createLoginHandler(methodType: selectedMethod.wrappedValue)
+                }
                 .id("\(target.accountKey)-\(selectedMethod.wrappedValue)")
 
                 LoginAgreementView(urlString: state.agreementUrl())
@@ -407,30 +390,16 @@ struct ReloginScreen: View {
         }
     }
 
-    private func authenticate(url: String) async -> String? {
-        guard let authURL = URL(string: url) else {
-            return nil
-        }
-        let response = try? await webAuthenticationSession.authenticate(
-            using: authURL,
-            callbackURLScheme: authURL.isPixivOAuthUrl ? "pixiv" : APPSCHEMA
-        )
-        return response?.absoluteString
-    }
 }
 
 private struct LoginFlowView: View {
-    let authenticateURL: (String) async -> String?
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
 
-    init(
-        handler: @escaping () -> LoginMethodHandler,
-        authenticateURL: @escaping (String) async -> String?
-    ) {
-        self.authenticateURL = authenticateURL
+    init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
     }
 
@@ -472,22 +441,8 @@ private struct LoginFlowView: View {
             LoginErrorText(message: presenter.state.flowState.error)
         }
         .animation(MacOSServiceSelectionAnimation.standard, value: flowAnimationKey)
-        .onReceive(
-            presenter.state.effects
-                .toPublisher()
-                .catch { _ in Empty<LoginEffect, Never>() }
-                .receive(on: DispatchQueue.main)
-        ) { effect in
-            switch onEnum(of: effect) {
-            case .openUrl(let openUrl):
-                authenticate(url: openUrl.url)
-            case .showQr(let showQr):
-                withAnimation(MacOSServiceSelectionAnimation.standard) {
-                    qrContent = showQr.content
-                }
-            case .openWebCookieLogin(let webCookie):
-                webCookieUrl = webCookie.url
-            }
+        .task {
+            await collectEffects()
         }
         .sheet(isPresented: Binding(
             get: { webCookieUrl != nil },
@@ -525,6 +480,21 @@ private struct LoginFlowView: View {
         }
     }
 
+    private func collectEffects() async {
+        for await effect in presenter.state.effects {
+            switch onEnum(of: effect) {
+            case .openUrl(let openUrl):
+                await authenticate(url: openUrl.url)
+            case .showQr(let showQr):
+                withAnimation(MacOSServiceSelectionAnimation.standard) {
+                    qrContent = showQr.content
+                }
+            case .openWebCookieLogin(let webCookie):
+                webCookieUrl = webCookie.url
+            }
+        }
+    }
+
     private func progressButtonLabel(title: String, isLoading: Bool) -> some View {
         HStack(spacing: 8) {
             if isLoading {
@@ -555,12 +525,34 @@ private struct LoginFlowView: View {
         ].joined(separator: "|")
     }
 
-    private func authenticate(url: String) {
-        Task {
-            if let responseString = await authenticateURL(url) {
-                presenter.state.resume(value: responseString)
-            }
+    private func authenticate(url: String) async {
+        guard let authURL = URL(string: url) else {
+            presenter.state.onExternalAuthenticationDismissed(
+                error: URLError(.badURL).localizedDescription
+            )
+            return
         }
+        do {
+            let response = try await webAuthenticationSession.authenticate(
+                using: authURL,
+                callbackURLScheme: authURL.isPixivOAuthUrl ? "pixiv" : APPSCHEMA
+            )
+            presenter.state.resume(value: response.absoluteString)
+        } catch is CancellationError {
+            presenter.state.onExternalAuthenticationDismissed(error: nil)
+        } catch {
+            presenter.state.onExternalAuthenticationDismissed(
+                error: error.isCanceledWebAuthentication ? nil : error.localizedDescription
+            )
+        }
+    }
+}
+
+private extension Error {
+    var isCanceledWebAuthentication: Bool {
+        let error = self as NSError
+        return error.domain == ASWebAuthenticationSessionErrorDomain &&
+            error.code == ASWebAuthenticationSessionError.Code.canceledLogin.rawValue
     }
 }
 

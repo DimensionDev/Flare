@@ -9,7 +9,13 @@ public struct ComposeReferenceStatusPreview: View {
     }
 
     public var body: some View {
-        StatusView(data: data, isQuote: true, showMedia: false, forceHideActions: true)
+        StatusView(
+            data: data,
+            isQuote: true,
+            isClickable: false,
+            showMedia: false,
+            forceHideActions: true
+        )
             .padding()
             .clipShape(.rect(cornerRadius: 16))
             .overlay(

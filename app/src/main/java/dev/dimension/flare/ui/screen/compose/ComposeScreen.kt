@@ -716,6 +716,7 @@ internal fun ComposeScreen(
                                                 vertical = 8.dp,
                                             ).fillMaxWidth(),
                                     isQuote = true,
+                                    isClickable = false,
                                 )
                             }
                         }

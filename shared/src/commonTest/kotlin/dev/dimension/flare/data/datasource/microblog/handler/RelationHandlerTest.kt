@@ -268,6 +268,63 @@ class RelationHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun blockDeletesTargetPastFirstCacheCleanupPage() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val accountType = AccountType.Specific(accountKey)
+            val otherUser = createSampleUser().copy(key = MicroBlogKey(id = "other-user", host = "test.social"))
+            val otherTimelines =
+                (0 until 100).map { index ->
+                    TimelinePagingMapper
+                        .toDb(
+                            data =
+                                createSampleStatus(otherUser).copy(
+                                    accountType = accountType,
+                                    statusKey = MicroBlogKey(id = "other-status-$index", host = "test.social"),
+                                ),
+                            pagingKey = "home",
+                            sortId = index.toLong(),
+                        ).let { item ->
+                            item.copy(
+                                timeline = item.timeline.copy(_id = "a-${index.toString().padStart(3, '0')}"),
+                            )
+                        }
+                }
+            val targetTimeline =
+                TimelinePagingMapper
+                    .toDb(
+                        data =
+                            createSampleStatus(createSampleUser().copy(key = userKey)).copy(
+                                accountType = accountType,
+                                statusKey = MicroBlogKey(id = "target-status", host = "test.social"),
+                            ),
+                        pagingKey = "home",
+                        sortId = 100L,
+                    ).let { item ->
+                        item.copy(timeline = item.timeline.copy(_id = "z-target"))
+                    }
+            saveToDatabase(db, otherTimelines + targetTimeline)
+
+            handler = RelationHandler(accountType = accountType, dataSource = loader)
+            handler.block(userKey)
+            advanceUntilIdle()
+
+            val cached = db.pagingTimelineDao().getByPagingKey("home")
+            assertEquals(1, loader.blockCallCount)
+            assertEquals(100, cached.size)
+            assertTrue(cached.none { it.statusId == targetTimeline.timeline.statusId })
+        }
+
+    @Test
     fun blockFailureKeepsLocalDeletionAndRevertsRelation() =
         runTest {
             startKoin {

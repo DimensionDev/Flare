@@ -65,6 +65,26 @@ class NullableFallbackJsonContentConverterTest {
             }
         }
 
+    @Test
+    fun nestedPostFallbackFailureFallsBackToNullableParent() =
+        runTest {
+            val payload =
+                """
+                {
+                    "invitation":{"id":"room-id"},
+                    "id":"notification-id",
+                    "details":{"name":{"value":"not-a-string"}}
+                }
+                """.trimIndent()
+
+            val notification =
+                client(payload).get("https://example.com").body<TestNotificationWithDetails>()
+
+            assertEquals("notification-id", notification.id)
+            assertNull(notification.invitation)
+            assertNull(notification.details)
+        }
+
     private fun client(payload: String): HttpClient =
         HttpClient(MockEngine) {
             engine {
@@ -90,5 +110,17 @@ class NullableFallbackJsonContentConverterTest {
     @Serializable
     private data class TestRequiredNotification(
         val id: String,
+    )
+
+    @Serializable
+    private data class TestNotificationWithDetails(
+        val id: String,
+        val invitation: String? = null,
+        val details: TestNotificationDetails? = null,
+    )
+
+    @Serializable
+    private data class TestNotificationDetails(
+        val name: String,
     )
 }

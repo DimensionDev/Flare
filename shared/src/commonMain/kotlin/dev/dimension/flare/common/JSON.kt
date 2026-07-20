@@ -96,26 +96,32 @@ private fun sanitizeNullableMismatches(
     if (descriptor.isNullable && !descriptor.isCompatibleWith(element)) {
         return JsonNull
     }
-    return when {
-        element is JsonObject && descriptor.kind == StructureKind.CLASS -> {
-            sanitizeObject(descriptor, element)
-        }
+    val sanitized =
+        when {
+            element is JsonObject && descriptor.kind == StructureKind.CLASS -> {
+                sanitizeObject(descriptor, element)
+            }
 
-        element is JsonObject && descriptor.kind == StructureKind.OBJECT -> {
-            sanitizeObject(descriptor, element)
-        }
+            element is JsonObject && descriptor.kind == StructureKind.OBJECT -> {
+                sanitizeObject(descriptor, element)
+            }
 
-        element is JsonArray && descriptor.kind == StructureKind.LIST -> {
-            JsonArray(element.map { sanitizeNullableMismatches(descriptor.getElementDescriptor(0), it) })
-        }
+            element is JsonArray && descriptor.kind == StructureKind.LIST -> {
+                JsonArray(element.map { sanitizeNullableMismatches(descriptor.getElementDescriptor(0), it) })
+            }
 
-        element is JsonObject && descriptor.kind == StructureKind.MAP -> {
-            sanitizeMap(descriptor, element)
-        }
+            element is JsonObject && descriptor.kind == StructureKind.MAP -> {
+                sanitizeMap(descriptor, element)
+            }
 
-        else -> {
-            element
+            else -> {
+                element
+            }
         }
+    return if (descriptor.isNullable && !descriptor.isDeeplyCompatibleWith(sanitized)) {
+        JsonNull
+    } else {
+        sanitized
     }
 }
 
@@ -177,6 +183,68 @@ private fun SerialDescriptor.isCompatibleWith(element: JsonElement): Boolean =
             isPrimitiveCompatibleWith(element)
         }
     }
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun SerialDescriptor.isDeeplyCompatibleWith(element: JsonElement): Boolean {
+    if (element is JsonNull) {
+        return isNullable
+    }
+    if (!isCompatibleWith(element)) {
+        return false
+    }
+    return when (kind) {
+        StructureKind.CLASS,
+        StructureKind.OBJECT,
+        -> {
+            val values = element as JsonObject
+            repeat(elementsCount) { index ->
+                val value = values[getElementName(index)]
+                if (value == null) {
+                    if (!isElementOptional(index)) {
+                        return false
+                    }
+                } else if (!getElementDescriptor(index).isDeeplyCompatibleWith(value)) {
+                    return false
+                }
+            }
+            true
+        }
+
+        StructureKind.LIST -> {
+            val valueDescriptor = getElementDescriptor(0)
+            (element as JsonArray).all(valueDescriptor::isDeeplyCompatibleWith)
+        }
+
+        StructureKind.MAP -> {
+            val valueDescriptor = getElementDescriptor(1)
+            when (element) {
+                is JsonObject -> {
+                    element.values.all(valueDescriptor::isDeeplyCompatibleWith)
+                }
+
+                is JsonArray -> {
+                    element.size % 2 == 0 &&
+                        element.withIndex().all { (index, value) ->
+                            getElementDescriptor(index % 2).isDeeplyCompatibleWith(value)
+                        }
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+
+        SerialKind.ENUM -> {
+            val value = (element as JsonPrimitive).content
+            (0 until elementsCount).any { getElementName(it) == value }
+        }
+
+        else -> {
+            true
+        }
+    }
+}
 
 private fun SerialDescriptor.isPrimitiveCompatibleWith(element: JsonElement): Boolean {
     val primitive = element as? JsonPrimitive ?: return false

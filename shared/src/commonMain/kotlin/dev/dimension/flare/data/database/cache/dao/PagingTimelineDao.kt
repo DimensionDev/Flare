@@ -440,7 +440,7 @@ internal interface PagingTimelineDao {
     @Query("UPDATE DbPagingKey SET nextKey = :nextKey WHERE pagingKey = :pagingKey")
     suspend fun updatePagingKeyNextKey(
         pagingKey: String,
-        nextKey: String,
+        nextKey: String?,
     )
 
     @Query("UPDATE DbPagingKey SET prevKey = :prevKey WHERE pagingKey = :pagingKey")

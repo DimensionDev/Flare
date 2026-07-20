@@ -458,6 +458,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             )
         }
 
+    @OptIn(ExperimentalPagingApi::class)
     @Test
     fun timeMergePolicyKeepsOlderBufferedPageBehindNewerNextPage() =
         runTest {
@@ -503,27 +504,56 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         }
                     }
                 }
-            val mediator = MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time)
+            val state =
+                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                    pages = emptyList(),
+                    anchorPosition = null,
+                    config = PagingConfig(pageSize = 1),
+                    leadingPlaceholderCount = 0,
+                )
 
-            val refresh = mediator.load(pageSize = 1, request = PagingRequest.Refresh)
-            val firstAppend = mediator.load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
-            val secondAppend = mediator.load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+            fun mediator() =
+                TimelineRemoteMediator(
+                    loader = MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time),
+                    database = db,
+                    allowLongText = false,
+                )
 
-            assertEquals(
-                listOf("https://example.com/a_4000"),
-                refresh.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
-            )
+            val refreshMediator = mediator()
+            val refreshResult = refreshMediator.load(loadType = LoadType.REFRESH, state = state)
+            assertTrue(refreshResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val firstAppend =
+                MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time)
+                    .load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+            val retriedFirstAppend =
+                MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time)
+                    .load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+            val committedFirstAppend = mediator().load(loadType = LoadType.APPEND, state = state)
+            val committedSecondAppend = mediator().load(loadType = LoadType.APPEND, state = state)
+
             assertEquals(
                 listOf("https://example.com/a_3000"),
                 firstAppend.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
             )
+            assertEquals(firstAppend.data, retriedFirstAppend.data)
+            assertEquals(firstAppend.nextKey, retriedFirstAppend.nextKey)
+            assertTrue(committedFirstAppend is androidx.paging.RemoteMediator.MediatorResult.Success)
+            assertTrue(committedSecondAppend is androidx.paging.RemoteMediator.MediatorResult.Success)
             assertEquals(
-                listOf("https://example.com/b_2000"),
-                secondAppend.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
+                listOf(
+                    "https://example.com/a_4000",
+                    "https://example.com/a_3000",
+                    "https://example.com/b_2000",
+                ),
+                db
+                    .pagingTimelineDao()
+                    .getTimelinePage(refreshMediator.pagingKey, offset = 0, limit = 20)
+                    .mapNotNull { (it.status.status.data.content as? UiTimelineV2.Feed)?.url },
             )
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Append("a_next")), first.requests)
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), second.requests)
-            assertNull(secondAppend.nextKey)
+            assertNull(db.pagingTimelineDao().getPagingKey(refreshMediator.pagingKey)?.nextKey)
         }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -588,6 +618,77 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     (it.status.status.data.content as? UiTimelineV2.Feed)?.url
                 },
             )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun timeMergePolicySkipsOverlappingItemsAfterMediatorRecreation() =
+        runTest {
+            val overlapping = feed("https://example.com/overlapping", 4000L)
+            val loader =
+                FakeLoader("overlap") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(overlapping),
+                                nextKey = "overlap_next",
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            assertEquals("overlap_next", request.nextKey)
+                            PagingResult(
+                                data = listOf(overlapping, feed("https://example.com/older", 3000L)),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+            val state =
+                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                    pages = emptyList(),
+                    anchorPosition = null,
+                    config = PagingConfig(pageSize = 1),
+                    leadingPlaceholderCount = 0,
+                )
+            val refreshMediator =
+                TimelineRemoteMediator(
+                    loader = MixedRemoteMediator(db, listOf(loader), TimelineMergePolicy.Time),
+                    database = db,
+                    allowLongText = false,
+                )
+
+            val refreshResult = refreshMediator.load(loadType = LoadType.REFRESH, state = state)
+            assertTrue(refreshResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val appendMediator =
+                TimelineRemoteMediator(
+                    loader = MixedRemoteMediator(db, listOf(loader), TimelineMergePolicy.Time),
+                    database = db,
+                    allowLongText = false,
+                )
+            val appendResult = appendMediator.load(loadType = LoadType.APPEND, state = state)
+            assertTrue(appendResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val page =
+                db.pagingTimelineDao().getTimelinePage(
+                    pagingKey = appendMediator.pagingKey,
+                    offset = 0,
+                    limit = 20,
+                )
+            assertEquals(
+                listOf("https://example.com/overlapping", "https://example.com/older"),
+                page.mapNotNull { (it.status.status.data.content as? UiTimelineV2.Feed)?.url },
+            )
+            assertEquals(
+                listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Append("overlap_next")),
+                loader.requests,
+            )
+            assertNull(db.pagingTimelineDao().getPagingKey(appendMediator.pagingKey)?.nextKey)
         }
 
     @OptIn(ExperimentalPagingApi::class)

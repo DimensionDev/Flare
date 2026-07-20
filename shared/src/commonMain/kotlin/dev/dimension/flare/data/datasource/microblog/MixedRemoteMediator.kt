@@ -3,11 +3,16 @@ package dev.dimension.flare.data.datasource.microblog
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.ReportableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.async
@@ -29,19 +34,9 @@ internal class MixedRemoteMediator(
             }
         }
     private var currentMediators = mediators
-    private var timeSourceStates = mediators.map(::TimeSourceState)
-    private val emittedTimeItemIds = mutableSetOf<String>()
-    private val timeItemComparator =
-        Comparator<UiTimelineV2> { first, second ->
-            val timeComparison =
-                second.createdAt.value
-                    .toEpochMilliseconds()
-                    .compareTo(first.createdAt.value.toEpochMilliseconds())
-            if (timeComparison != 0) {
-                timeComparison
-            } else {
-                itemIdentity(first).compareTo(itemIdentity(second))
-            }
+    private val timeSources =
+        mediators.mapIndexed { index, mediator ->
+            TimeSource(mediator, "$pagingKey$TIME_STAGING_SUFFIX$index")
         }
 
     override var reportError: ((Throwable) -> Unit)? = null
@@ -109,13 +104,40 @@ internal class MixedRemoteMediator(
     ): PagingResult<UiTimelineV2> =
         coroutineScope {
             if (request is PagingRequest.Refresh) {
-                timeSourceStates = mediators.map(::TimeSourceState)
-                emittedTimeItemIds.clear()
+                resetTimeStaging()
             }
 
+            val seenStatusIds =
+                if (request is PagingRequest.Append) {
+                    database
+                        .pagingTimelineDao()
+                        .getByPagingKey(pagingKey)
+                        .mapTo(mutableSetOf()) { it.statusId }
+                } else {
+                    mutableSetOf()
+                }
+            if (seenStatusIds.isNotEmpty()) {
+                database.connect {
+                    timeSources.forEach { source ->
+                        val committed =
+                            database
+                                .pagingTimelineDao()
+                                .getByPagingKey(source.stagingKey)
+                                .filter { it.statusId in seenStatusIds }
+                        if (committed.isNotEmpty()) {
+                            database
+                                .pagingTimelineDao()
+                                .deletePresentationReferences(source.stagingKey, committed.map { it.statusId })
+                            database.pagingTimelineDao().delete(committed)
+                        }
+                    }
+                }
+            }
+
+            val timeSourceStates = loadTimeSourceStates()
             val loadedStates = mutableListOf<TimeSourceState>()
-            val data = mutableListOf<UiTimelineV2>()
-            while (data.size < pageSize) {
+            val selected = mutableListOf<DbPagingTimelineWithStatus>()
+            while (selected.size < pageSize) {
                 val blockedStates =
                     timeSourceStates.filter {
                         it.pending.isEmpty() && it.canLoad
@@ -137,20 +159,32 @@ internal class MixedRemoteMediator(
                                 async {
                                     val result =
                                         runCatching {
-                                            state.mediator.load(pageSize, subRequest)
+                                            state.source.mediator.load(pageSize, subRequest)
                                         }.getOrElse {
                                             reportError?.invoke(it)
                                             PagingResult(endOfPaginationReached = true)
                                         }
-                                    TimeSubResponse(state, result)
+                                    val stagedItems =
+                                        result.data.map { item ->
+                                            TimelinePagingMapper.toDb(
+                                                data = item,
+                                                pagingKey = state.source.stagingKey,
+                                                sortId = timeSortId(item),
+                                            )
+                                        }
+                                    TimeSubResponse(state, result, stagedItems)
                                 }
                             }.awaitAll()
 
                     database.connect {
+                        responses
+                            .flatMap { it.stagedItems }
+                            .takeIf { it.isNotEmpty() }
+                            ?.let { saveToDatabase(database, it) }
                         responses.forEach { response ->
                             database.pagingTimelineDao().insertPagingKey(
-                                dev.dimension.flare.data.database.cache.model.DbPagingKey(
-                                    pagingKey = subKey(response.state.mediator),
+                                DbPagingKey(
+                                    pagingKey = response.state.source.stagingKey,
                                     nextKey = response.result.nextKey,
                                     prevKey = response.result.previousKey,
                                 ),
@@ -160,7 +194,7 @@ internal class MixedRemoteMediator(
                     responses.forEach { response ->
                         response.state.initialized = true
                         response.state.nextKey = response.result.nextKey
-                        response.state.pending.addAll(response.result.data.sortedWith(timeItemComparator))
+                        response.state.pending.addAll(response.stagedItems.sortedBy { it.timeline.sortId })
                     }
                     loadedStates += statesToLoad
                     continue
@@ -169,37 +203,78 @@ internal class MixedRemoteMediator(
                 val source =
                     timeSourceStates
                         .filter { it.pending.isNotEmpty() }
-                        .minWithOrNull(
-                            Comparator { first, second ->
-                                timeItemComparator.compare(first.pending.first(), second.pending.first())
-                            },
-                        ) ?: break
+                        .minByOrNull {
+                            it.pending
+                                .first()
+                                .timeline
+                                .sortId
+                        } ?: break
                 val item = source.pending.removeFirst()
-                if (emittedTimeItemIds.add(itemIdentity(item))) {
-                    data += item
+                if (seenStatusIds.add(item.timeline.statusId)) {
+                    selected += item
                 }
             }
 
             val hasMore =
                 timeSourceStates.any {
-                    it.pending.isNotEmpty() || it.canLoad
+                    it.pending.any { item -> item.timeline.statusId !in seenStatusIds } || it.canLoad
                 }
             PagingResult(
-                data = data,
+                data = selected.map(::timeStagingToUi),
                 nextKey = if (hasMore) MIXED_NEXT_KEY else null,
                 previousKey = null,
             )
         }
 
+    private suspend fun loadTimeSourceStates(): List<TimeSourceState> =
+        timeSources.map { source ->
+            val pagingKey = database.pagingTimelineDao().getPagingKey(source.stagingKey)
+            TimeSourceState(
+                source = source,
+                pending =
+                    ArrayDeque(
+                        database.pagingTimelineDao().getTimelinePage(
+                            pagingKey = source.stagingKey,
+                            offset = 0,
+                            limit = Int.MAX_VALUE,
+                        ),
+                    ),
+                initialized = pagingKey != null,
+                nextKey = pagingKey?.nextKey,
+            )
+        }
+
+    private suspend fun resetTimeStaging() {
+        database.connect {
+            timeSources.forEach { source ->
+                database.pagingTimelineDao().deletePresentationReferences(source.stagingKey)
+                database.pagingTimelineDao().delete(source.stagingKey)
+                database.pagingTimelineDao().deletePagingKey(source.stagingKey)
+                database.pagingTimelineDao().deletePagingKey(subKey(source.mediator))
+            }
+        }
+    }
+
+    private fun timeStagingToUi(item: DbPagingTimelineWithStatus): UiTimelineV2 =
+        TimelinePagingMapper.toUi(
+            item = item,
+            pagingKey = item.timeline.pagingKey,
+            translationDisplayOptions = TIME_STAGING_TRANSLATION_OPTIONS,
+        )
+
     override suspend fun sortId(data: UiTimelineV2): Long? =
         if (mergePolicy == TimelineMergePolicy.Time) {
-            val createdAt = data.createdAt.value.toEpochMilliseconds()
-            val tieBreaker =
-                (itemIdentity(data).hashCode().toLong() - Int.MIN_VALUE.toLong()) % SORT_ID_TIE_BUCKET
-            -createdAt * SORT_ID_TIE_BUCKET + tieBreaker
+            timeSortId(data)
         } else {
             null
         }
+
+    private fun timeSortId(data: UiTimelineV2): Long {
+        val createdAt = data.createdAt.value.toEpochMilliseconds()
+        val tieBreaker =
+            (itemIdentity(data).hashCode().toLong() - Int.MIN_VALUE.toLong()) % SORT_ID_TIE_BUCKET
+        return -createdAt * SORT_ID_TIE_BUCKET + tieBreaker
+    }
 
     private fun merge(response: List<SubResponse>): List<UiTimelineV2> =
         when (mergePolicy) {
@@ -302,13 +377,17 @@ internal class MixedRemoteMediator(
         val result: PagingResult<UiTimelineV2>,
     )
 
-    private class TimeSourceState(
+    private data class TimeSource(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,
-    ) {
-        val pending = ArrayDeque<UiTimelineV2>()
-        var initialized = false
-        var nextKey: String? = null
+        val stagingKey: String,
+    )
 
+    private class TimeSourceState(
+        val source: TimeSource,
+        val pending: ArrayDeque<DbPagingTimelineWithStatus>,
+        var initialized: Boolean,
+        var nextKey: String?,
+    ) {
         val canLoad: Boolean
             get() = !initialized || nextKey != null
 
@@ -323,10 +402,18 @@ internal class MixedRemoteMediator(
     private data class TimeSubResponse(
         val state: TimeSourceState,
         val result: PagingResult<UiTimelineV2>,
+        val stagedItems: List<DbPagingTimelineWithStatus>,
     )
 
     private companion object {
         private const val MIXED_NEXT_KEY = "mixed_next_key"
         private const val SORT_ID_TIE_BUCKET = 10_000L
+        private const val TIME_STAGING_SUFFIX = ":time_staging:"
+        private val TIME_STAGING_TRANSLATION_OPTIONS =
+            TranslationDisplayOptions(
+                translationEnabled = false,
+                autoDisplayEnabled = false,
+                providerCacheKey = "",
+            )
     }
 }

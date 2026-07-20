@@ -81,7 +81,7 @@ internal abstract class BasePagingRemoteMediator<Key : Any, T : Any, R : Any>(
                     pagingKey = pagingKey,
                     prevKey = result.previousKey,
                 )
-            } else if (loadType == LoadType.APPEND && result.nextKey != null) {
+            } else if (loadType == LoadType.APPEND) {
                 database.pagingTimelineDao().updatePagingKeyNextKey(
                     pagingKey = pagingKey,
                     nextKey = result.nextKey,

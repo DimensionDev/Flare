@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.compose
 
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -84,6 +85,34 @@ class ComposeAccountSelectionFlowTest {
 
             val expectedEmissions: List<ImmutableList<MicroBlogKey>> =
                 listOf(persistentListOf(accountKey))
+            assertEquals(expectedEmissions, emissions)
+            collection.cancel()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `selecting fallback account does not restart status load`() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "example.com")
+            val status = ComposeStatus.Reply(MicroBlogKey(id = "status", host = "example.com"))
+            val activeStatusFlow = MutableStateFlow<ComposeStatus?>(status)
+            val selectedAccountKeysFlow =
+                MutableStateFlow<ImmutableList<MicroBlogKey>>(persistentListOf())
+            val emissions = mutableListOf<Pair<ComposeStatus?, AccountType.Specific?>>()
+            val collection =
+                observeComposeStatusTarget(
+                    activeStatusFlow = activeStatusFlow,
+                    selectedAccountKeysFlow = selectedAccountKeysFlow,
+                    fallbackAccountType = AccountType.Specific(accountKey),
+                ).onEach(emissions::add)
+                    .launchIn(backgroundScope)
+
+            runCurrent()
+            selectedAccountKeysFlow.value = persistentListOf(accountKey)
+            runCurrent()
+
+            val expectedEmissions: List<Pair<ComposeStatus?, AccountType.Specific?>> =
+                listOf(status to AccountType.Specific(accountKey))
             assertEquals(expectedEmissions, emissions)
             collection.cancel()
         }

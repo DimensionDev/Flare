@@ -171,7 +171,7 @@ internal fun ComposeScreen(
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val state by producePresenter(key = "compose_${accountType}_${status}_$draftGroupId") {
+    val state by producePresenter(key = "compose") {
         composePresenter(
             context = context,
             accountType = accountType,

@@ -29,6 +29,20 @@ internal class MixedRemoteMediator(
             }
         }
     private var currentMediators = mediators
+    private var timeSourceStates = mediators.map(::TimeSourceState)
+    private val emittedTimeItemIds = mutableSetOf<String>()
+    private val timeItemComparator =
+        Comparator<UiTimelineV2> { first, second ->
+            val timeComparison =
+                second.createdAt.value
+                    .toEpochMilliseconds()
+                    .compareTo(first.createdAt.value.toEpochMilliseconds())
+            if (timeComparison != 0) {
+                timeComparison
+            } else {
+                itemIdentity(first).compareTo(itemIdentity(second))
+            }
+        }
 
     override var reportError: ((Throwable) -> Unit)? = null
 
@@ -40,6 +54,8 @@ internal class MixedRemoteMediator(
         coroutineScope {
             if (request is PagingRequest.Prepend) {
                 PagingResult(endOfPaginationReached = true)
+            } else if (mergePolicy == TimelineMergePolicy.Time) {
+                loadTimeOrdered(pageSize, request)
             } else {
                 if (request is PagingRequest.Refresh) {
                     currentMediators = mediators
@@ -81,10 +97,98 @@ internal class MixedRemoteMediator(
                 PagingResult(
                     endOfPaginationReached = currentMediators.isEmpty(),
                     data = mixedTimelineResult,
-                    nextKey = if (currentMediators.isEmpty()) null else "mixed_next_key",
+                    nextKey = if (currentMediators.isEmpty()) null else MIXED_NEXT_KEY,
                     previousKey = null,
                 )
             }
+        }
+
+    private suspend fun loadTimeOrdered(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> =
+        coroutineScope {
+            if (request is PagingRequest.Refresh) {
+                timeSourceStates = mediators.map(::TimeSourceState)
+                emittedTimeItemIds.clear()
+            }
+
+            val loadedStates = mutableListOf<TimeSourceState>()
+            val data = mutableListOf<UiTimelineV2>()
+            while (data.size < pageSize) {
+                val blockedStates =
+                    timeSourceStates.filter {
+                        it.pending.isEmpty() && it.canLoad
+                    }
+                if (blockedStates.isNotEmpty()) {
+                    val statesToLoad =
+                        blockedStates.filter { state ->
+                            loadedStates.none { it === state }
+                        }
+                    if (statesToLoad.isEmpty()) {
+                        // ponytail: Let Paging append again instead of chasing sparse or empty remote pages in one load.
+                        break
+                    }
+
+                    val responses =
+                        statesToLoad
+                            .map { state ->
+                                val subRequest = state.nextRequest()
+                                async {
+                                    val result =
+                                        runCatching {
+                                            state.mediator.load(pageSize, subRequest)
+                                        }.getOrElse {
+                                            reportError?.invoke(it)
+                                            PagingResult(endOfPaginationReached = true)
+                                        }
+                                    TimeSubResponse(state, result)
+                                }
+                            }.awaitAll()
+
+                    database.connect {
+                        responses.forEach { response ->
+                            database.pagingTimelineDao().insertPagingKey(
+                                dev.dimension.flare.data.database.cache.model.DbPagingKey(
+                                    pagingKey = subKey(response.state.mediator),
+                                    nextKey = response.result.nextKey,
+                                    prevKey = response.result.previousKey,
+                                ),
+                            )
+                        }
+                    }
+                    responses.forEach { response ->
+                        response.state.initialized = true
+                        response.state.nextKey = response.result.nextKey
+                        response.state.pending.addAll(response.result.data.sortedWith(timeItemComparator))
+                    }
+                    loadedStates += statesToLoad
+                    continue
+                }
+
+                val source =
+                    timeSourceStates
+                        .filter { it.pending.isNotEmpty() }
+                        .minWithOrNull(
+                            Comparator { first, second ->
+                                timeItemComparator.compare(first.pending.first(), second.pending.first())
+                            },
+                        ) ?: break
+                val item = source.pending.removeFirst()
+                if (emittedTimeItemIds.add(itemIdentity(item))) {
+                    data += item
+                }
+            }
+
+            val hasMore =
+                timeSourceStates.any {
+                    it.pending.isNotEmpty() || it.canLoad
+                }
+            PagingResult(
+                data = data,
+                nextKey = if (hasMore) MIXED_NEXT_KEY else null,
+                previousKey = null,
+            )
         }
 
     override suspend fun sortId(data: UiTimelineV2): Long? =
@@ -198,7 +302,31 @@ internal class MixedRemoteMediator(
         val result: PagingResult<UiTimelineV2>,
     )
 
+    private class TimeSourceState(
+        val mediator: CacheableRemoteLoader<UiTimelineV2>,
+    ) {
+        val pending = ArrayDeque<UiTimelineV2>()
+        var initialized = false
+        var nextKey: String? = null
+
+        val canLoad: Boolean
+            get() = !initialized || nextKey != null
+
+        fun nextRequest(): PagingRequest =
+            if (initialized) {
+                PagingRequest.Append(checkNotNull(nextKey))
+            } else {
+                PagingRequest.Refresh
+            }
+    }
+
+    private data class TimeSubResponse(
+        val state: TimeSourceState,
+        val result: PagingResult<UiTimelineV2>,
+    )
+
     private companion object {
+        private const val MIXED_NEXT_KEY = "mixed_next_key"
         private const val SORT_ID_TIE_BUCKET = 10_000L
     }
 }

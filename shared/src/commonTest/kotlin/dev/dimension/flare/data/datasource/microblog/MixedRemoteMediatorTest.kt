@@ -458,6 +458,74 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             )
         }
 
+    @Test
+    fun timeMergePolicyKeepsOlderBufferedPageBehindNewerNextPage() =
+        runTest {
+            val first =
+                FakeLoader("a") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(feed("https://example.com/a_4000", 4000L)),
+                                nextKey = "a_next",
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            assertEquals("a_next", request.nextKey)
+                            PagingResult(
+                                data = listOf(feed("https://example.com/a_3000", 3000L)),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+            val second =
+                FakeLoader("b") { request ->
+                    when (request) {
+                        PagingRequest.Refresh -> {
+                            PagingResult(
+                                data = listOf(feed("https://example.com/b_2000", 2000L)),
+                                nextKey = null,
+                            )
+                        }
+
+                        is PagingRequest.Append -> {
+                            error("B should stay buffered without loading another page")
+                        }
+
+                        is PagingRequest.Prepend -> {
+                            error("No prepend expected")
+                        }
+                    }
+                }
+            val mediator = MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time)
+
+            val refresh = mediator.load(pageSize = 1, request = PagingRequest.Refresh)
+            val firstAppend = mediator.load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+            val secondAppend = mediator.load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+
+            assertEquals(
+                listOf("https://example.com/a_4000"),
+                refresh.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
+            )
+            assertEquals(
+                listOf("https://example.com/a_3000"),
+                firstAppend.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
+            )
+            assertEquals(
+                listOf("https://example.com/b_2000"),
+                secondAppend.data.mapNotNull { (it as? UiTimelineV2.Feed)?.url },
+            )
+            assertEquals(listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Append("a_next")), first.requests)
+            assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), second.requests)
+            assertNull(secondAppend.nextKey)
+        }
+
     @OptIn(ExperimentalPagingApi::class)
     @Test
     fun timeMergePolicyPersistsGlobalTimeOrderAcrossAppends() =

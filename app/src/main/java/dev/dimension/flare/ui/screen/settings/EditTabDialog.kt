@@ -213,6 +213,8 @@ private val UiStrings.androidStringRes: Int
 
             UiStrings.PostsWithReplies -> R.string.profile_tab_timeline_with_reply
 
+            UiStrings.Highlights -> R.string.profile_tab_highlights
+
             UiStrings.Media -> R.string.profile_tab_media
 
             UiStrings.Channel -> R.string.channel_title

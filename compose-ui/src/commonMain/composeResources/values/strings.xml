@@ -521,6 +521,7 @@
     <string name="all_rss_feeds_title">All Subscriptions</string>
     <string name="posts_title">Posts</string>
     <string name="posts_with_replies_title">Posts &amp; Replies</string>
+    <string name="profile_tab_highlights">Highlights</string>
     <string name="media_title">Media</string>
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Show exact timestamps on posts</string>

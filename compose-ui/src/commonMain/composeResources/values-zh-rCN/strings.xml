@@ -410,6 +410,7 @@
     <string name="all_rss_feeds_title">所有订阅</string>
     <string name="posts_title">帖子</string>
     <string name="posts_with_replies_title">帖子 &amp; 回复</string>
+    <string name="profile_tab_highlights">亮点</string>
     <string name="media_title">媒体</string>
     <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
     <string name="settings_appearance_absolute_timestamp_description">在帖子上显示确切的时间戳</string>

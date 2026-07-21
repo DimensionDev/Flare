@@ -119367,6 +119367,28 @@
         }
       }
     },
+    "profile_tab_highlights" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlights"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "亮点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "亮點"
+          }
+        }
+      }
+    },
     "profile_tab_likes" : {
       "extractionState" : "stale",
       "localizations" : {

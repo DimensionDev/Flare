@@ -47,6 +47,8 @@ export function localizedUiString(value: UiStrings): string {
 			return m.postsTitle();
 		case 'PostsWithReplies':
 			return m.profileTabTimelineWithReply();
+		case 'Highlights':
+			return m.profileTabHighlights();
 		case 'Media':
 			return m.profileTabMedia();
 		case 'Channel':

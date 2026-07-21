@@ -33,6 +33,7 @@
     <string name="profile_tab_timeline">动态</string>
     <string name="profile_tab_timeline_with_reply">动态与回复</string>
     <string name="profile_tab_likes">喜欢</string>
+    <string name="profile_tab_highlights">亮点</string>
     <string name="profile_tab_media">媒体</string>
     <string name="profile_blocked_gate_title">已拉黑的用户</string>
     <string name="profile_blocked_gate_description">你已拉黑此用户。其标签页和时间线会被隐藏，直到你手动选择显示。</string>

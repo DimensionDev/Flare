@@ -710,6 +710,15 @@ internal class XQTDataSource(
                     ),
             ),
             ProfileTab(
+                name = UiStrings.Highlights,
+                loader =
+                    UserHighlightsTimelineRemoteMediator(
+                        service = service,
+                        accountKey = accountKey,
+                        userKey = userKey,
+                    ),
+            ),
+            ProfileTab(
                 name = UiStrings.Media,
                 displayType = ProfileTab.DisplayType.Gallery,
                 loader = userTimeline(userKey, mediaOnly = true),

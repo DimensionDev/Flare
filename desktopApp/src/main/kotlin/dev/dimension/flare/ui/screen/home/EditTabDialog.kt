@@ -63,6 +63,7 @@ import dev.dimension.flare.pixiv_ranking_week_original_title
 import dev.dimension.flare.pixiv_ranking_week_rookie_title
 import dev.dimension.flare.pixiv_ranking_week_title
 import dev.dimension.flare.posts_title
+import dev.dimension.flare.profile_tab_highlights
 import dev.dimension.flare.profile_tab_media
 import dev.dimension.flare.profile_tab_timeline_with_reply
 import dev.dimension.flare.rss_title
@@ -261,6 +262,8 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.Posts -> Res.string.posts_title
 
             UiStrings.PostsWithReplies -> Res.string.profile_tab_timeline_with_reply
+
+            UiStrings.Highlights -> Res.string.profile_tab_highlights
 
             UiStrings.Media -> Res.string.profile_tab_media
 

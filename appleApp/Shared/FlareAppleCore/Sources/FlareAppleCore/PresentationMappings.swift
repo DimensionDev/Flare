@@ -144,6 +144,8 @@ public extension UiStrings {
             localizedPresentationString("matrix_following", fallback: "Following")
         case .postsWithReplies:
             localizedPresentationString("posts_with_replies_title", fallback: "Posts & Replies")
+        case .highlights:
+            localizedPresentationString("profile_tab_highlights", fallback: "Highlights")
         case .media:
             localizedPresentationString("appearance_media_group_title", fallback: "Media")
         }

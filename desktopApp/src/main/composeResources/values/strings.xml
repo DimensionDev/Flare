@@ -39,6 +39,7 @@
     <string name="profile_tab_timeline">Posts</string>
     <string name="profile_tab_timeline_with_reply">Posts and replies</string>
     <string name="profile_tab_likes">Likes</string>
+    <string name="profile_tab_highlights">Highlights</string>
     <string name="profile_tab_media">Media</string>
     <string name="profile_blocked_gate_title">Blocked profile</string>
     <string name="profile_blocked_gate_description">You blocked this user. Their tabs and timeline are hidden until you choose to show them.</string>

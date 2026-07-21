@@ -409,6 +409,7 @@
     <string name="all_rss_feeds_title">所有訂閱</string>
     <string name="posts_title">貼文</string>
     <string name="media_title">媒體</string>
+    <string name="profile_tab_highlights">亮點</string>
     <string name="settings_appearance_absolute_timestamp">絕對時間戳記</string>
     <string name="settings_appearance_absolute_timestamp_description">在貼文上顯示確切的時間戳記</string>
     <string name="channel_title">頻道</string>

@@ -269,6 +269,7 @@
   "profileTabTimeline": "Posts",
   "profileTabTimelineWithReply": "Replies",
   "profileTabLikes": "Likes",
+  "profileTabHighlights": "Highlights",
   "profileTabMedia": "Media",
   "profileTimelinesAriaLabel": "Profile timelines",
   "profileUnableToLoadTabs": "Unable to load profile tabs",

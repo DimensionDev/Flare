@@ -401,6 +401,7 @@
     <string name="profile_tab_timeline">貼文</string>
     <string name="profile_tab_timeline_with_reply">貼文與回覆</string>
     <string name="profile_tab_likes">喜愛</string>
+    <string name="profile_tab_highlights">亮點</string>
     <string name="profile_tab_media">媒體</string>
     <string name="tab_settings_title">分頁設定</string>
     <string name="dm_list_title">私訊</string>

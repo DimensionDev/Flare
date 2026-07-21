@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
@@ -132,7 +133,7 @@ class InitialTextResolverTest {
             sensitive = false,
             contentWarning = null,
             user = user,
-            content = content,
+            content = UiTranslatableText(content),
             actions = persistentListOf<ActionMenu>(),
             poll = null,
             statusKey = statusKey,

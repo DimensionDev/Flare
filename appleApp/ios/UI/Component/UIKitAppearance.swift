@@ -43,8 +43,13 @@ struct StatusUIKitAppearance: Equatable {
     let expandMediaSize: Bool
     let limitMediaGridToNine: Bool
     let aiAgentEnabled: Bool
+    let showOriginalWithTranslation: Bool
 
-    init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
+    init(
+        timeline: TimelineAppearance,
+        fontSizeDiff: Float = 0,
+        showOriginalWithTranslation: Bool = false
+    ) {
         preferredContentSizeCategory = contentSizeCategory(fontSizeDiff: fontSizeDiff)
         preferredContentSizeCategoryID = preferredContentSizeCategory.rawValue
         fullWidthPost = timeline.fullWidthPost
@@ -66,6 +71,7 @@ struct StatusUIKitAppearance: Equatable {
         expandMediaSize = timeline.expandMediaSize
         limitMediaGridToNine = timeline.limitMediaGridToNine
         aiAgentEnabled = timeline.aiConfig.agent
+        self.showOriginalWithTranslation = showOriginalWithTranslation
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
@@ -85,7 +91,8 @@ struct StatusUIKitAppearance: Equatable {
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
             lhs.expandMediaSize == rhs.expandMediaSize &&
             lhs.limitMediaGridToNine == rhs.limitMediaGridToNine &&
-            lhs.aiAgentEnabled == rhs.aiAgentEnabled
+            lhs.aiAgentEnabled == rhs.aiAgentEnabled &&
+            lhs.showOriginalWithTranslation == rhs.showOriginalWithTranslation
     }
 }
 
@@ -104,8 +111,16 @@ struct TimelineUIKitAppearance: Equatable {
         timelineDisplayMode == .card
     }
 
-    init(timeline: TimelineAppearance, fontSizeDiff: Float = 0) {
-        status = StatusUIKitAppearance(timeline: timeline, fontSizeDiff: fontSizeDiff)
+    init(
+        timeline: TimelineAppearance,
+        fontSizeDiff: Float = 0,
+        showOriginalWithTranslation: Bool = false
+    ) {
+        status = StatusUIKitAppearance(
+            timeline: timeline,
+            fontSizeDiff: fontSizeDiff,
+            showOriginalWithTranslation: showOriginalWithTranslation
+        )
         timelineDisplayMode = timeline.timelineDisplayMode
         timelineDisplayModeID = timeline.timelineDisplayMode.name
         videoAutoplay = timeline.videoAutoplay
@@ -123,15 +138,18 @@ struct GalleryUIKitAppearance: Equatable {
     let showMedia: Bool
     let avatarShape: AvatarShape
     let avatarShapeID: String
+    let showOriginalWithTranslation: Bool
 
-    init(timeline: TimelineAppearance) {
+    init(timeline: TimelineAppearance, showOriginalWithTranslation: Bool = false) {
         showMedia = timeline.showMedia
         avatarShape = timeline.avatarShape
         avatarShapeID = timeline.avatarShape.name
+        self.showOriginalWithTranslation = showOriginalWithTranslation
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.showMedia == rhs.showMedia &&
-            lhs.avatarShapeID == rhs.avatarShapeID
+            lhs.avatarShapeID == rhs.avatarShapeID &&
+            lhs.showOriginalWithTranslation == rhs.showOriginalWithTranslation
     }
 }

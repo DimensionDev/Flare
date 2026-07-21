@@ -247,6 +247,10 @@
     <string name="settings_ai_config_enable_agent">启用 AI Agent</string>
     <string name="settings_ai_config_agent_description">开启后，在已配置 OpenAI 兼容模型时，会在应用内相关位置显示 AI Agent 功能入口。</string>
     <string name="settings_ai_config_enable_pre_translation">启用自动翻译</string>
+    <string name="settings_translation_prefer_platform">优先使用平台译文</string>
+    <string name="settings_translation_prefer_platform_description">自动翻译时优先使用平台提供的可用译文。</string>
+    <string name="settings_translation_show_original_with_translation">同时显示原文和译文</string>
+    <string name="settings_translation_show_original_with_translation_description">在译文前同时显示原文。</string>
     <string name="settings_ai_config_pre_translation_description">在后台翻译新加载的时间轴和资料内容并缓存结果。这可能会消耗大量 Token。</string>
     <string name="settings_ai_config_enable_tldr">启用 AI 总结</string>
     <string name="settings_ai_config_tldr_description">使用 AI 总结长动态。适用于超过 500 字符的内容。</string>

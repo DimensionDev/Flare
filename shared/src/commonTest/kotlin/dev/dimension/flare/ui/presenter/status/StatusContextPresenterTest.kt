@@ -5,6 +5,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -96,7 +97,7 @@ class StatusContextPresenterTest {
             sensitive = false,
             contentWarning = null,
             user = null,
-            content = id.toUiPlainText(),
+            content = UiTranslatableText(id.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey = MicroBlogKey(id, "mastodon.example"),

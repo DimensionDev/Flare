@@ -51,6 +51,7 @@ import dev.dimension.flare.ui.model.UiMedia.Video
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderContent
@@ -796,7 +797,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 statusKey = message?.statusKey ?: renderedPost.statusKey,
                 user = repostUser,
                 images = persistentListOf(),
-                content = uiRichTextOf(emptyList()),
+                content = UiTranslatableText(original = uiRichTextOf(emptyList())),
                 contentWarning = null,
                 card = null,
                 poll = null,
@@ -883,7 +884,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
         card = findCard(this),
         statusKey = statusKey,
         sourceLanguages = sourceLanguages,
-        content = parseBlueskyJson(record, accountKey, sourceLanguages),
+        content = UiTranslatableText(original = parseBlueskyJson(record, accountKey, sourceLanguages)),
         poll = null,
         contentWarning = null,
         references =
@@ -1550,10 +1551,13 @@ private fun render(
                 statusKey = statusKey,
                 sourceLanguages = sourceLanguages,
                 content =
-                    parseBlueskyJson(
-                        record.value.value,
-                        accountKey,
-                        sourceLanguages,
+                    UiTranslatableText(
+                        original =
+                            parseBlueskyJson(
+                                record.value.value,
+                                accountKey,
+                                sourceLanguages,
+                            ),
                     ),
                 actions =
                     listOfNotNull(

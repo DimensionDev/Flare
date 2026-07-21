@@ -22,24 +22,27 @@ public fun createSampleStatus(user: UiProfile): UiTimelineV2.Post =
         contentWarning = null,
         user = user,
         content =
-            Element("body")
-                .apply {
-                    appendChild(
-                        TextNode(
-                            "Sample content for ${user.name.raw} on ${user.key.host} ",
-                        ),
-                    )
-                    appendChild(
-                        Element("a")
-                            .apply {
-                                attributes().put(
-                                    "href",
-                                    DeeplinkRoute.Search(AccountType.Specific(user.key), "#flare").toUri(),
-                                )
-                                addChildren(TextNode("#flare"))
-                            },
-                    )
-                }.toUi(),
+            UiTranslatableText(
+                original =
+                    Element("body")
+                        .apply {
+                            appendChild(
+                                TextNode(
+                                    "Sample content for ${user.name.raw} on ${user.key.host} ",
+                                ),
+                            )
+                            appendChild(
+                                Element("a")
+                                    .apply {
+                                        attributes().put(
+                                            "href",
+                                            DeeplinkRoute.Search(AccountType.Specific(user.key), "#flare").toUri(),
+                                        )
+                                        addChildren(TextNode("#flare"))
+                                    },
+                            )
+                        }.toUi(),
+            ),
         actions =
             persistentListOf(
                 ActionMenu.Item(

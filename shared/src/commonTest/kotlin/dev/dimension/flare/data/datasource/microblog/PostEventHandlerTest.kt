@@ -20,6 +20,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -284,7 +285,7 @@ class PostEventHandlerTest : RobolectricTest() {
             sensitive = false,
             contentWarning = null,
             user = createProfile(),
-            content = "post content".toUiPlainText(),
+            content = UiTranslatableText("post content".toUiPlainText()),
             actions = actions,
             poll = poll,
             statusKey = postKey,

@@ -120,7 +120,7 @@ class VVORenderTest {
             "quoted content",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 

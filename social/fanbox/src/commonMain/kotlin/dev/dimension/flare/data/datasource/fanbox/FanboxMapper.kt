@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
 import dev.dimension.flare.ui.render.RenderBlockStyle
@@ -183,7 +184,7 @@ internal fun FanboxCommentItem.toUiTimeline(
         sensitive = false,
         contentWarning = null,
         user = user?.toUiProfile(accountKey, creatorId = null, imageHeaders),
-        content = body.toUiPlainText(),
+        content = UiTranslatableText(original = body.toUiPlainText()),
         actions =
             persistentListOf(
                 ActionMenu.Item(

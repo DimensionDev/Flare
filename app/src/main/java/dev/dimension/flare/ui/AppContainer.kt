@@ -72,6 +72,8 @@ fun FlareApp(content: @Composable () -> Unit) {
                             translation = true,
                             tldr = appSettings.aiConfig.tldr,
                             agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
+                            showOriginalWithTranslation =
+                                appSettings.translateConfig.showOriginalWithTranslation,
                         ),
                 )
             },

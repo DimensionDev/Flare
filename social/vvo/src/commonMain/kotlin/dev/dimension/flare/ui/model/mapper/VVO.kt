@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.UiRichText
@@ -203,7 +204,10 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                         )
                     },
                 ).toImmutableList(),
-            content = renderVVOText(text.orEmpty(), accountKey, sourceLanguages = persistentListOf("zh-CN")),
+            content =
+                UiTranslatableText(
+                    original = renderVVOText(text.orEmpty(), accountKey, sourceLanguages = persistentListOf("zh-CN")),
+                ),
             sourceLanguages = persistentListOf("zh-CN"),
             actions =
                 listOfNotNull(
@@ -393,7 +397,10 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
                             type = ReferenceType.Quote,
                         )
                     }.toImmutableList(),
-            content = renderVVOText(text.orEmpty(), accountKey, sourceLanguages = persistentListOf("zh-CN")),
+            content =
+                UiTranslatableText(
+                    original = renderVVOText(text.orEmpty(), accountKey, sourceLanguages = persistentListOf("zh-CN")),
+                ),
             sourceLanguages = persistentListOf("zh-CN"),
             actions =
                 listOfNotNull(

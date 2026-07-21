@@ -220,6 +220,7 @@ private struct TimelinePagingRows: @MainActor RandomAccessCollection {
 public struct TimelineGalleryItemView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.showMedia) private var showMedia
+    @Environment(\.translateConfig) private var translateConfig
     @Environment(\.timelineMediaOpenAction) private var timelineMediaOpenAction
 
     private let item: UiTimelineV2?
@@ -268,6 +269,12 @@ public struct TimelineGalleryItemView: View {
 
     @ViewBuilder
     private func postTile(_ post: UiTimelineV2.Post) -> some View {
+        let contents: [UiRichText] = if post.translationDisplayState == .translated,
+                                        let translation = post.content.translation {
+            translateConfig.showOriginalWithTranslation ? [post.content.original, translation] : [translation]
+        } else {
+            [post.content.original]
+        }
         VStack(alignment: .leading, spacing: 8) {
             if showMedia, let media = post.images.first {
                 MediaView(data: media)
@@ -278,12 +285,18 @@ public struct TimelineGalleryItemView: View {
                             handleMediaTap(post: post, media: media)
                         }
                     )
-            } else if !post.content.isEmpty {
-                RichText(text: post.content)
-                    .font(.subheadline)
-                    .lineLimit(5)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 8)
+            } else if contents.contains(where: { !$0.isEmpty }) {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(Array(contents.enumerated()), id: \.offset) { _, content in
+                        if !content.isEmpty {
+                            RichText(text: content)
+                                .font(.subheadline)
+                                .lineLimit(5)
+                        }
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.top, 8)
             }
 
             if let user = post.user {

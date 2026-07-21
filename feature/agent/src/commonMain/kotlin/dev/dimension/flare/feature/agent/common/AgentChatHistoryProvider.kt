@@ -597,7 +597,8 @@ internal class AgentChatHistoryProvider(
             }
 
             postPreview != null -> {
-                postPreview.content.raw.trim()
+                postPreview.content.original.raw
+                    .trim()
             }
 
             label.isNotBlank() -> {

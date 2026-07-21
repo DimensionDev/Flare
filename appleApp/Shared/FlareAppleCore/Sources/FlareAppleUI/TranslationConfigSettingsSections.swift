@@ -177,7 +177,30 @@ private struct TranslationConfigSettingsSectionsContent: View {
             }
             .transition(.opacity.combined(with: .move(edge: .top)))
 
+            Toggle(
+                isOn: Binding(
+                    get: { state.presenter.state.showOriginalWithTranslation },
+                    set: { state.presenter.state.setShowOriginalWithTranslation(value: $0) }
+                )
+            ) {
+                Text("Show original with translation", bundle: FlareAppleUILocalization.bundle)
+                Text("Display the original text before its translation.", bundle: FlareAppleUILocalization.bundle)
+            }
+
             if state.presenter.state.preTranslate {
+                Toggle(
+                    isOn: Binding(
+                        get: { state.presenter.state.preferPlatformTranslation },
+                        set: { state.presenter.state.setPreferPlatformTranslation(value: $0) }
+                    )
+                ) {
+                    Text("Prefer platform translations", bundle: FlareAppleUILocalization.bundle)
+                    Text(
+                        "Use a platform-provided translation when one is available during auto-translate.",
+                        bundle: FlareAppleUILocalization.bundle
+                    )
+                }
+
                 Button {
                     state.beginEditingExcludedLanguages()
                 } label: {

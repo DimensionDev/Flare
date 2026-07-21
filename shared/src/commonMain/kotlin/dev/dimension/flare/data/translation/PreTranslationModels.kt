@@ -41,6 +41,8 @@ internal data class ActivePreTranslationSettings(
     val autoTranslateExcludedLanguages: List<String>,
     val appSettings: AppSettings,
     val providerCacheKey: String,
+    val preferPlatformTranslation: Boolean,
+    val executionKey: String,
 )
 
 internal data class PreparedTranslationCandidate(
@@ -52,4 +54,5 @@ internal data class PreparedTranslationCandidate(
     val sourceDocument: PreTranslationBatchPayload,
     val attemptCount: Int,
     val displayMode: TranslationDisplayMode,
+    val platformPayload: TranslationPayload? = null,
 )

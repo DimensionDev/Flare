@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model.mapper
 
 import de.cketti.codepoints.codePointCount
 import de.cketti.codepoints.deluxe.codePointSequence
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
@@ -39,6 +40,7 @@ import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
+import dev.dimension.flare.data.network.xqt.xTwitterClientLanguage
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -59,6 +61,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
@@ -662,7 +665,27 @@ internal fun Tweet.renderStatus(
             persistentListOf()
         }
     val sourceLanguages = listOfNotNull(legacy?.lang).toPersistentList()
-    val content = renderContent(accountKey, sourceLanguages)
+    val content =
+        UiTranslatableText(
+            original = renderContent(accountKey, sourceLanguages),
+            translation =
+                grokTranslatedPostWithAvailability
+                    ?.takeIf { it.isAvailable }
+                    ?.`data`
+                    ?.takeIf {
+                        val destinationLanguage = it.destinationLanguage?.let(::xTwitterClientLanguage)
+                        it.translation?.isNotBlank() == true &&
+                            destinationLanguage != null &&
+                            destinationLanguage == xTwitterClientLanguage(Locale.language)
+                    }?.let {
+                        renderRichText(
+                            text = requireNotNull(it.translation),
+                            entities = it.entities,
+                            accountKey = accountKey,
+                            sourceLanguages = listOfNotNull(it.destinationLanguage),
+                        )
+                    },
+        )
 
     val replyToHandle = legacy?.in_reply_to_screen_name?.let { "@$it" }
 

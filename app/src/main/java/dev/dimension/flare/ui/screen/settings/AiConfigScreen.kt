@@ -816,12 +816,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                 onClick = {
                     state.setPreTranslate(!state.preTranslate)
                 },
-                shapes =
-                    if (state.preTranslate || hasProviderSettings) {
-                        ListItemDefaults.item()
-                    } else {
-                        ListItemDefaults.last()
-                    },
+                shapes = ListItemDefaults.item(),
                 content = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_enable_pre_translation),
@@ -841,32 +836,75 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     )
                 },
             )
+            SegmentedListItem(
+                onClick = {
+                    state.setShowOriginalWithTranslation(!state.showOriginalWithTranslation)
+                },
+                shapes =
+                    if (state.preTranslate || hasProviderSettings) {
+                        ListItemDefaults.item()
+                    } else {
+                        ListItemDefaults.last()
+                    },
+                content = {
+                    Text(text = stringResource(id = R.string.settings_translation_show_original_with_translation))
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_translation_show_original_with_translation_description))
+                },
+                trailingContent = {
+                    Switch(
+                        checked = state.showOriginalWithTranslation,
+                        onCheckedChange = state::setShowOriginalWithTranslation,
+                    )
+                },
+            )
             AnimatedVisibility(state.preTranslate) {
-                SegmentedListItem(
-                    checked = state.showExcludedLanguagesDialog,
-                    onCheckedChange = { checked ->
-                        state.setShowExcludedLanguagesDialog(checked)
-                    },
-                    shapes =
-                        if (hasProviderSettings) {
-                            ListItemDefaults.item()
-                        } else {
-                            ListItemDefaults.last()
+                Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                    SegmentedListItem(
+                        onClick = {
+                            state.setPreferPlatformTranslation(!state.preferPlatformTranslation)
                         },
-                    content = {
-                        Text(text = excludedLanguagesTitle)
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.autoTranslateExcludedLanguages
-                                    .takeIf { it.isNotEmpty() }
-                                    ?.joinToString()
-                                    ?: emptyPlaceholder,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                )
+                        shapes = ListItemDefaults.item(),
+                        content = {
+                            Text(text = stringResource(id = R.string.settings_translation_prefer_platform))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_translation_prefer_platform_description))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = state.preferPlatformTranslation,
+                                onCheckedChange = state::setPreferPlatformTranslation,
+                            )
+                        },
+                    )
+                    SegmentedListItem(
+                        checked = state.showExcludedLanguagesDialog,
+                        onCheckedChange = { checked ->
+                            state.setShowExcludedLanguagesDialog(checked)
+                        },
+                        shapes =
+                            if (hasProviderSettings) {
+                                ListItemDefaults.item()
+                            } else {
+                                ListItemDefaults.last()
+                            },
+                        content = {
+                            Text(text = excludedLanguagesTitle)
+                        },
+                        supportingContent = {
+                            Text(
+                                text =
+                                    state.autoTranslateExcludedLanguages
+                                        .takeIf { it.isNotEmpty() }
+                                        ?.joinToString()
+                                        ?: emptyPlaceholder,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        },
+                    )
+                }
             }
             AnimatedVisibility(
                 visible = hasProviderSettings,

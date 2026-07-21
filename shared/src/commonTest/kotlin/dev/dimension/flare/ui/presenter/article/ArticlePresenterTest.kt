@@ -11,6 +11,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -124,7 +125,7 @@ class ArticlePresenterTest {
             sensitive = false,
             contentWarning = null,
             user = null,
-            content = statusKey.id.toUiPlainText(),
+            content = UiTranslatableText(statusKey.id.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

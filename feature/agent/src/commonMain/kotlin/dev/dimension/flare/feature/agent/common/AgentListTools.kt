@@ -668,7 +668,7 @@ private fun UiTimelineV2.Post.toListPostToolText(): String =
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
         appendLine("authorHandle: ${user?.handle?.raw.orEmpty()}")
-        appendLine("content: ${content.raw.take(MAX_LIST_TEXT_LENGTH)}")
+        appendLine("content: ${content.original.raw.take(MAX_LIST_TEXT_LENGTH)}")
         appendLine("imagesCount: ${images.size}")
         images.filterIsInstance<UiMedia.Image>().take(MAX_LIST_IMAGES).forEachIndexed { index, image ->
             appendLine("image${index + 1}Url: ${image.url}")

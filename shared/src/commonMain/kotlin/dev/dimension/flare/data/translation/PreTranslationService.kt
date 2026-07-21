@@ -11,6 +11,8 @@ import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
 import dev.dimension.flare.data.database.cache.model.TranslationEntityType
 import dev.dimension.flare.data.database.cache.model.TranslationPayload
 import dev.dimension.flare.data.database.cache.model.TranslationStatus
+import dev.dimension.flare.data.database.cache.model.effectiveTranslationCacheKey
+import dev.dimension.flare.data.database.cache.model.platformTranslationPayload
 import dev.dimension.flare.data.database.cache.model.sourceHash
 import dev.dimension.flare.data.database.cache.model.statusTranslationEntityKey
 import dev.dimension.flare.data.database.cache.model.translationEntityKey
@@ -99,7 +101,7 @@ internal class OnlinePreTranslationService(
         MutableStateFlow(
             PreTranslationExecutionSession(
                 generation = 0L,
-                providerCacheKey = "",
+                executionKey = "",
                 scope = createExecutionScope(),
             ),
         )
@@ -111,10 +113,10 @@ internal class OnlinePreTranslationService(
         }
         coroutineScope.launch {
             appDataStore.appSettingsStore.data
-                .map { it.translationProviderCacheKey() }
+                .map { it.preTranslationExecutionKey() }
                 .distinctUntilChanged()
-                .collect { providerCacheKey ->
-                    rotateExecutionSession(providerCacheKey)
+                .collect { executionKey ->
+                    rotateExecutionSession(executionKey)
                 }
         }
     }
@@ -133,6 +135,7 @@ internal class OnlinePreTranslationService(
                 targetLanguage = settings.targetLanguage,
                 autoTranslateExcludedLanguages = settings.autoTranslateExcludedLanguages,
                 providerCacheKey = settings.providerCacheKey,
+                preferPlatformTranslation = settings.preferPlatformTranslation,
                 allowLongText = allowLongText,
             )
         }
@@ -166,6 +169,7 @@ internal class OnlinePreTranslationService(
                 statusKey = statusKey,
                 targetLanguage = settings.targetLanguage,
                 providerCacheKey = settings.providerCacheKey,
+                preferPlatformTranslation = settings.preferPlatformTranslation,
             )
         }
     }
@@ -216,42 +220,42 @@ internal class OnlinePreTranslationService(
         )
     }
 
-    private suspend fun rotateExecutionSession(providerCacheKey: String): PreTranslationExecutionSession =
+    private suspend fun rotateExecutionSession(executionKey: String): PreTranslationExecutionSession =
         sessionMutex.withLock {
             val current = executionSession.value
-            if (current.providerCacheKey == providerCacheKey) {
+            if (current.executionKey == executionKey) {
                 return@withLock current
             }
             current.scope.coroutineContext[Job]?.cancel()
-            if (current.providerCacheKey.isNotEmpty()) {
+            if (current.executionKey.isNotEmpty()) {
                 database.translationDao().deleteInFlight()
             }
-            createExecutionSession(providerCacheKey).also {
+            createExecutionSession(executionKey).also {
                 executionSession.value = it
             }
         }
 
     private suspend fun executionSessionFor(settings: ActivePreTranslationSettings): PreTranslationExecutionSession? {
         executionSession.value
-            .takeIf { it.providerCacheKey == settings.providerCacheKey }
+            .takeIf { it.executionKey == settings.executionKey }
             ?.let {
                 return it
             }
-        val latestProviderCacheKey =
+        val latestExecutionKey =
             appDataStore.appSettingsStore.data
                 .first()
-                .translationProviderCacheKey()
-        if (latestProviderCacheKey != settings.providerCacheKey) {
+                .preTranslationExecutionKey()
+        if (latestExecutionKey != settings.executionKey) {
             return null
         }
-        return rotateExecutionSession(latestProviderCacheKey)
+        return rotateExecutionSession(latestExecutionKey)
     }
 
-    private fun createExecutionSession(providerCacheKey: String): PreTranslationExecutionSession {
+    private fun createExecutionSession(executionKey: String): PreTranslationExecutionSession {
         nextGeneration += 1
         return PreTranslationExecutionSession(
             generation = nextGeneration,
-            providerCacheKey = providerCacheKey,
+            executionKey = executionKey,
             scope = createExecutionScope(),
         )
     }
@@ -266,7 +270,7 @@ internal class OnlinePreTranslationService(
         currentCoroutineContext().ensureActive()
         if (
             executionSession.value.generation != session.generation ||
-            executionSession.value.providerCacheKey != session.providerCacheKey
+            executionSession.value.executionKey != session.executionKey
         ) {
             throw CancellationException("Pre-translation session rotated")
         }
@@ -281,13 +285,31 @@ internal class OnlinePreTranslationService(
             return
         }
         ensureCurrentExecutionSession(session)
-        markPending(candidates)
+        val (platformCandidates, providerCandidates) =
+            candidates.partition { it.platformPayload != null }
+        if (platformCandidates.isNotEmpty()) {
+            val updatedAt = Clock.System.now().toEpochMilliseconds()
+            database.translationDao().insertAll(
+                platformCandidates.map { candidate ->
+                    PreTranslationStoreSupport.toDbTranslation(
+                        candidate = candidate,
+                        status = TranslationStatus.Completed,
+                        updatedAt = updatedAt,
+                        payload = candidate.platformPayload,
+                    )
+                },
+            )
+        }
+        if (providerCandidates.isEmpty()) {
+            return
+        }
+        markPending(providerCandidates)
         session.semaphore.withPermit {
             ensureCurrentExecutionSession(session)
             translatePreparedCandidates(
                 session = session,
                 settings = settings,
-                candidates = candidates,
+                candidates = providerCandidates,
             )
         }
     }
@@ -309,6 +331,9 @@ internal class OnlinePreTranslationService(
             autoTranslateExcludedLanguages = appSettings.translateConfig.autoTranslateExcludedLanguages,
             appSettings = appSettings,
             providerCacheKey = appSettings.translationProviderCacheKey(),
+            preferPlatformTranslation =
+                appSettings.translateConfig.preTranslate && appSettings.translateConfig.preferPlatformTranslation,
+            executionKey = appSettings.preTranslationExecutionKey(),
         )
     }
 
@@ -328,6 +353,7 @@ internal class OnlinePreTranslationService(
         statusKey: dev.dimension.flare.model.MicroBlogKey,
         targetLanguage: String,
         providerCacheKey: String,
+        preferPlatformTranslation: Boolean,
     ): List<PreparedTranslationCandidate> {
         val dbAccountType = accountType as? dev.dimension.flare.model.DbAccountType ?: return emptyList()
         val status =
@@ -342,6 +368,7 @@ internal class OnlinePreTranslationService(
             targetLanguage = targetLanguage,
             autoTranslateExcludedLanguages = emptyList(),
             providerCacheKey = providerCacheKey,
+            preferPlatformTranslation = preferPlatformTranslation,
             allowLongText = true,
             preferredDisplayMode = TranslationDisplayMode.Translated,
         )
@@ -352,6 +379,7 @@ internal class OnlinePreTranslationService(
         targetLanguage: String,
         autoTranslateExcludedLanguages: List<String>,
         providerCacheKey: String,
+        preferPlatformTranslation: Boolean,
         allowLongText: Boolean,
         preferredDisplayMode: TranslationDisplayMode? = null,
     ): List<PreparedTranslationCandidate> {
@@ -371,6 +399,15 @@ internal class OnlinePreTranslationService(
         return buildList {
             deduplicated.forEach { status ->
                 val entityKey = status.translationEntityKey()
+                val platformPayload =
+                    status.content
+                        .platformTranslationPayload()
+                        ?.takeIf { preferPlatformTranslation }
+                val effectiveCacheKey =
+                    status.content.effectiveTranslationCacheKey(
+                        providerCacheKey = providerCacheKey,
+                        preferPlatformTranslation = preferPlatformTranslation,
+                    )
                 prepareCandidate(
                     entityType = TranslationEntityType.Status,
                     entityKey = entityKey,
@@ -379,11 +416,13 @@ internal class OnlinePreTranslationService(
                     existing = existingByKey[entityKey],
                     targetLanguage = targetLanguage,
                     autoTranslateExcludedLanguages = autoTranslateExcludedLanguages,
-                    providerCacheKey = providerCacheKey,
+                    providerCacheKey = effectiveCacheKey,
                     now = now,
                     allowLongText = allowLongText,
                     preferredDisplayMode = preferredDisplayMode,
-                )?.let(::add)
+                )?.let { candidate ->
+                    add(candidate.copy(platformPayload = platformPayload))
+                }
             }
         }
     }
@@ -700,7 +739,7 @@ internal class OnlinePreTranslationService(
 
 private data class PreTranslationExecutionSession(
     val generation: Long,
-    val providerCacheKey: String,
+    val executionKey: String,
     val scope: CoroutineScope,
     val semaphore: Semaphore = Semaphore(permits = 1),
 )

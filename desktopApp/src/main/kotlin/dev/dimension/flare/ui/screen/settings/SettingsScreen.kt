@@ -234,6 +234,10 @@ import dev.dimension.flare.settings_translation_ai_test_result
 import dev.dimension.flare.settings_translation_ai_test_title
 import dev.dimension.flare.settings_translation_auto_excluded_languages
 import dev.dimension.flare.settings_translation_description
+import dev.dimension.flare.settings_translation_prefer_platform
+import dev.dimension.flare.settings_translation_prefer_platform_description
+import dev.dimension.flare.settings_translation_show_original_with_translation
+import dev.dimension.flare.settings_translation_show_original_with_translation_description
 import dev.dimension.flare.settings_translation_title
 import dev.dimension.flare.tab_settings_drag
 import dev.dimension.flare.ui.component.AccountItem
@@ -1966,8 +1970,40 @@ internal fun SettingsScreen(
                         )
                     },
                 )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_translation_show_original_with_translation))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_translation_show_original_with_translation_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = state.aiConfigState.showOriginalWithTranslation,
+                            state.aiConfigState::setShowOriginalWithTranslation,
+                            textBefore = true,
+                        )
+                    },
+                )
                 AnimatedVisibility(state.aiConfigState.preTranslate) {
                     Column {
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_translation_prefer_platform))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_translation_prefer_platform_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = state.aiConfigState.preferPlatformTranslation,
+                                    state.aiConfigState::setPreferPlatformTranslation,
+                                    textBefore = true,
+                                )
+                            },
+                        )
                         ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {

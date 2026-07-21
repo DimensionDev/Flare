@@ -162,6 +162,28 @@
 						onchange={(event) => ai.setPreTranslate(checked(event))}
 					/>
 				</div>
+				<div class="list-row setting-row">
+					{@render Icon('Language')}
+					{@render Copy(m.settingsTranslationShowOriginal(), m.settingsTranslationShowOriginalDescription())}
+					<input
+						class="toggle toggle-primary"
+						type="checkbox"
+						checked={ai.showOriginalWithTranslation}
+						onchange={(event) => ai.setShowOriginalWithTranslation(checked(event))}
+					/>
+				</div>
+				{#if ai.preTranslate}
+					<div class="list-row setting-row">
+						{@render Icon('Globe')}
+						{@render Copy(m.settingsTranslationPreferPlatform(), m.settingsTranslationPreferPlatformDescription())}
+						<input
+							class="toggle toggle-primary"
+							type="checkbox"
+							checked={ai.preferPlatformTranslation}
+							onchange={(event) => ai.setPreferPlatformTranslation(checked(event))}
+						/>
+					</div>
+				{/if}
 			</div>
 
 			{#if ai.translateProvider === 'AI' || ai.preTranslate}

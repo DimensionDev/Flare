@@ -42,6 +42,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -380,7 +381,7 @@ internal class AgentToolsTest {
             assertTrue(inputRequest.requestId.startsWith("compose:new:"))
             assertEquals(1, inputRequest.options.size)
             assertEquals("confirm", inputRequest.options.first().id)
-            assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.raw)
+            assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.original.raw)
         }
 
     @Test
@@ -1195,7 +1196,7 @@ private fun createPost(
         sensitive = false,
         contentWarning = null,
         user = user,
-        content = content,
+        content = UiTranslatableText(content),
         actions = actions,
         poll = null,
         statusKey = statusKey,

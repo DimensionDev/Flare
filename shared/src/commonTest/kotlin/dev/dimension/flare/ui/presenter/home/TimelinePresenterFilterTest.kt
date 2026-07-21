@@ -9,6 +9,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -49,7 +50,7 @@ class TimelinePresenterFilterTest {
         val parent = createSampleStatus(parentUser)
         val filteredPost =
             base.copy(
-                content = "".toUiPlainText(),
+                content = UiTranslatableText("".toUiPlainText()),
                 images =
                     persistentListOf(
                         UiMedia.Image(
@@ -169,7 +170,7 @@ class TimelinePresenterFilterTest {
     fun matchesKeywordFiltersUsesRegexForRegexRules() {
         val status =
             createSampleStatus(createSampleUser()).copy(
-                content = "Hello Kotlin 2.0".toUiPlainText(),
+                content = UiTranslatableText("Hello Kotlin 2.0".toUiPlainText()),
             )
 
         assertFalse(
@@ -202,14 +203,14 @@ class TimelinePresenterFilterTest {
         val original =
             base.copy(
                 statusKey = base.statusKey.copy(id = "original"),
-                content = "Visible original #blocked".toUiPlainText(),
+                content = UiTranslatableText("Visible original #blocked".toUiPlainText()),
             )
         val repostWrapper =
             UiTimelineV2.TimelinePostItem(
                 post =
                     base.copy(
                         statusKey = original.statusKey.copy(id = "repost"),
-                        content = "".toUiPlainText(),
+                        content = UiTranslatableText("".toUiPlainText()),
                     ),
                 presentation = UiTimelineV2.PostPresentation(repost = original),
             )
@@ -232,19 +233,19 @@ class TimelinePresenterFilterTest {
         val nestedOriginal =
             base.copy(
                 statusKey = base.statusKey.copy(id = "nested-original"),
-                content = "Nested original #deepblocked".toUiPlainText(),
+                content = UiTranslatableText("Nested original #deepblocked".toUiPlainText()),
             )
         val directRepost =
             base.copy(
                 statusKey = base.statusKey.copy(id = "direct-repost"),
-                content = "".toUiPlainText(),
+                content = UiTranslatableText("".toUiPlainText()),
             )
         val repostWrapper =
             UiTimelineV2.TimelinePostItem(
                 post =
                     base.copy(
                         statusKey = base.statusKey.copy(id = "repost-wrapper"),
-                        content = "".toUiPlainText(),
+                        content = UiTranslatableText("".toUiPlainText()),
                     ),
                 presentation = UiTimelineV2.PostPresentation(repost = directRepost),
             )
@@ -265,7 +266,7 @@ class TimelinePresenterFilterTest {
     fun matchesKeywordFiltersIgnoresInvalidRegexRules() {
         val status =
             createSampleStatus(createSampleUser()).copy(
-                content = "Hello Kotlin".toUiPlainText(),
+                content = UiTranslatableText("Hello Kotlin".toUiPlainText()),
             )
 
         assertTrue(

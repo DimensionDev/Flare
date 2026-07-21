@@ -19,6 +19,7 @@ internal data class TranslationDisplayOptions(
     val translationEnabled: Boolean,
     val autoDisplayEnabled: Boolean,
     val providerCacheKey: String,
+    val preferPlatformTranslation: Boolean = false,
 )
 
 internal fun UiTimelineV2.applyTranslation(
@@ -62,10 +63,15 @@ internal fun UiTimelineV2.applyTranslation(
         )
     }
     val payload = translationPayload() ?: return this
+    val cacheKey =
+        effectiveTranslationCacheKey(
+            providerCacheKey = options.providerCacheKey,
+            preferPlatformTranslation = options.preferPlatformTranslation,
+        )
     val translation =
         translations.firstOrNull {
             it.targetLanguage == Locale.language &&
-                it.sourceHash == payload.sourceHash(options.providerCacheKey)
+                it.sourceHash == payload.sourceHash(cacheKey)
         }
 
     return when (this) {
@@ -131,8 +137,14 @@ internal fun UiTimelineV2.applyTranslation(
                         }
                     }
                 copy(
-                    content = if (shouldShowTranslated) translatedPayload.content ?: content else content,
-                    contentWarning = if (shouldShowTranslated) translatedPayload.contentWarning ?: contentWarning else contentWarning,
+                    content =
+                        translatedPayload?.let {
+                            content.copy(translation = it.content)
+                        } ?: content,
+                    contentWarning =
+                        translatedPayload?.let {
+                            contentWarning?.copy(translation = it.contentWarning)
+                        } ?: contentWarning,
                     translationDisplayState = displayState,
                     actions = actions.withTranslationMenuAction(menuAction, accountType, statusKey),
                 )
@@ -184,8 +196,8 @@ internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
 
         is UiTimelineV2.Post -> {
             TranslationPayload(
-                content = content,
-                contentWarning = contentWarning,
+                content = content.original,
+                contentWarning = contentWarning?.original,
             )
         }
 
@@ -217,6 +229,34 @@ internal fun TranslationPayload.sourceHash(providerCacheKey: String): String =
         append('\u0000')
         append(encodeJson(TranslationPayload.serializer()))
     }.stableTranslationHash()
+
+private fun UiTimelineV2.platformPostOrNull(): UiTimelineV2.Post? =
+    when (this) {
+        is UiTimelineV2.Post -> this
+        is UiTimelineV2.TimelinePostItem -> displayPost
+        else -> null
+    }
+
+private fun UiTimelineV2.Post.platformTranslationPayloadOrNull(): TranslationPayload? =
+    TranslationPayload(
+        content = content.translation,
+        contentWarning = contentWarning?.translation,
+    ).takeIf { it.content != null || it.contentWarning != null }
+
+internal fun UiTimelineV2.platformTranslationPayload(): TranslationPayload? = platformPostOrNull()?.platformTranslationPayloadOrNull()
+
+internal fun UiTimelineV2.effectiveTranslationCacheKey(
+    providerCacheKey: String,
+    preferPlatformTranslation: Boolean,
+): String {
+    if (!preferPlatformTranslation) {
+        return providerCacheKey
+    }
+    val post = platformPostOrNull() ?: return providerCacheKey
+    val platformPayload = post.platformTranslationPayloadOrNull() ?: return providerCacheKey
+    val payloadHash = platformPayload.encodeJson(TranslationPayload.serializer()).stableTranslationHash()
+    return "platform:${post.platformType.name}:$payloadHash"
+}
 
 private fun DbTranslation?.toDisplayState(): TranslationDisplayState =
     when (this?.status) {

@@ -29,11 +29,11 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationBatchDocument
 import dev.dimension.flare.data.translation.PreTranslationBatchPayload
-import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.data.translation.cacheKey
+import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -566,9 +566,9 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
     )
 
 private fun nonTargetLanguageTag(): String {
-    val target = requireNotNull(PreTranslationContentRules.canonicalTranslationLanguage(Locale.language))
+    val target = requireNotNull(canonicalTranslationLanguage(Locale.language))
     return listOf("fr-FR", "de-DE", "es-ES", "ja-JP", "zh-CN")
         .first { candidate ->
-            PreTranslationContentRules.canonicalTranslationLanguage(candidate) != target
+            canonicalTranslationLanguage(candidate) != target
         }
 }

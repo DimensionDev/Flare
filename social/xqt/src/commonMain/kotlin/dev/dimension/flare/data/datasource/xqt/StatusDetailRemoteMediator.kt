@@ -9,6 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequestFeatures
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetPreviewDisplay
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
@@ -78,6 +79,10 @@ internal class StatusDetailRemoteMediator(
                                         withCommunity = true,
                                         includePromotedContent = true,
                                         withVoice = true,
+                                    ).encodeJson(),
+                                features =
+                                    PostCreateTweetRequestFeatures(
+                                        responsiveWebTwitterArticleTweetConsumptionEnabled = true,
                                     ).encodeJson(),
                             ).body()
                             ?.data

@@ -114,7 +114,7 @@ class MisskeyRenderTest {
             "quoted content",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 
@@ -193,11 +193,11 @@ class MisskeyRenderTest {
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("user-reposter", message.user?.key?.id)
         assertTrue(
-            rendered.post.content.innerText
+            rendered.post.content.original.innerText
                 .isBlank(),
         )
         assertEquals("note-repost-wrapper", rendered.statusKey.id)
-        assertEquals("original content", repostInternal.content.innerText)
+        assertEquals("original content", repostInternal.content.original.innerText)
         assertEquals("note-original", repostInternal.statusKey.id)
     }
 
@@ -231,17 +231,17 @@ class MisskeyRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertTrue(
-            rendered.post.content.innerText
+            rendered.post.content.original.innerText
                 .isBlank(),
         )
         assertEquals("note-repost-wrapper-2", rendered.statusKey.id)
-        assertEquals("original payload", repostInternal.content.innerText)
+        assertEquals("original payload", repostInternal.content.original.innerText)
         assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted payload",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 
@@ -256,7 +256,7 @@ class MisskeyRenderTest {
 
         val rendered = rootPostOf(note.render(accountKey))
 
-        assertEquals("beforequotedafter", rendered.content.innerText)
+        assertEquals("beforequotedafter", rendered.content.original.innerText)
     }
 
     @Test

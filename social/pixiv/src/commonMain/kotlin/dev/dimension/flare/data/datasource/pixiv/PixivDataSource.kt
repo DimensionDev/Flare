@@ -344,10 +344,14 @@ internal class PixivDataSource(
                 accountType = post.accountType,
                 url = "https://www.pixiv.net/artworks/${post.statusKey.id}",
                 images = post.images.filterIsInstance<UiMedia.Image>().toImmutableList(),
-                title = post.contentWarning?.raw.orEmpty(),
+                title =
+                    post.contentWarning
+                        ?.original
+                        ?.raw
+                        .orEmpty(),
                 author = post.user,
                 createdAt = post.createdAt,
-                content = post.content.takeUnless { content -> content.isEmpty },
+                content = post.content.original.takeUnless { content -> content.isEmpty },
                 isBookmarked = favourited,
                 bookmarkAction =
                     ClickEvent.event(

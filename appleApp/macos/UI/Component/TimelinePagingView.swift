@@ -145,6 +145,7 @@ private extension UiTimelineV2.Post {
 }
 
 private struct MacTimelineMasonryView: View {
+    @Environment(\.translateConfig) private var translateConfig
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let columnCount: Int
@@ -187,7 +188,8 @@ private struct MacTimelineMasonryView: View {
                 count: count,
                 columnCount: columnCount,
                 columnWidth: columnWidth,
-                rowSpacing: rowSpacing
+                rowSpacing: rowSpacing,
+                showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
             )
             VStack(spacing: 12) {
                 columnsView(columns: columns, totalCount: count) { index in
@@ -281,6 +283,7 @@ private struct MacTimelineMasonryRowView: View {
 }
 
 private struct MacGalleryTimelineMasonryView: View {
+    @Environment(\.translateConfig) private var translateConfig
     let data: PagingState<UiTimelineV2>
     let columnCount: Int
     let availableWidth: CGFloat
@@ -318,7 +321,8 @@ private struct MacGalleryTimelineMasonryView: View {
                 count: count,
                 columnCount: columnCount,
                 columnWidth: columnWidth,
-                rowSpacing: spacing
+                rowSpacing: spacing,
+                showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
             )
             VStack(spacing: 12) {
                 columnsView(columns: columns, totalCount: count) { index in
@@ -407,14 +411,21 @@ private enum MacTimelineMasonryColumnBuilder {
         count: Int,
         columnCount: Int,
         columnWidth: CGFloat,
-        rowSpacing: CGFloat
+        rowSpacing: CGFloat,
+        showOriginalWithTranslation: Bool
     ) -> [MacTimelineMasonryColumn] {
         makeColumns(
             success: success,
             count: count,
             columnCount: columnCount,
             rowSpacing: rowSpacing,
-            estimateHeight: { item in timelineEstimatedHeight(for: item, columnWidth: columnWidth) }
+            estimateHeight: { item in
+                timelineEstimatedHeight(
+                    for: item,
+                    columnWidth: columnWidth,
+                    showOriginalWithTranslation: showOriginalWithTranslation
+                )
+            }
         )
     }
 
@@ -423,14 +434,21 @@ private enum MacTimelineMasonryColumnBuilder {
         count: Int,
         columnCount: Int,
         columnWidth: CGFloat,
-        rowSpacing: CGFloat
+        rowSpacing: CGFloat,
+        showOriginalWithTranslation: Bool
     ) -> [MacTimelineMasonryColumn] {
         makeColumns(
             success: success,
             count: count,
             columnCount: columnCount,
             rowSpacing: rowSpacing,
-            estimateHeight: { item in galleryEstimatedHeight(for: item, columnWidth: columnWidth) }
+            estimateHeight: { item in
+                galleryEstimatedHeight(
+                    for: item,
+                    columnWidth: columnWidth,
+                    showOriginalWithTranslation: showOriginalWithTranslation
+                )
+            }
         )
     }
 
@@ -455,17 +473,21 @@ private enum MacTimelineMasonryColumnBuilder {
         return rows.enumerated().map { MacTimelineMasonryColumn(id: $0.offset, rows: $0.element) }
     }
 
-    private static func timelineEstimatedHeight(for item: UiTimelineV2?, columnWidth: CGFloat) -> CGFloat {
+    private static func timelineEstimatedHeight(
+        for item: UiTimelineV2?,
+        columnWidth: CGFloat,
+        showOriginalWithTranslation: Bool
+    ) -> CGFloat {
         guard let item else { return 260 }
         switch onEnum(of: item) {
         case .post(let post):
             let mediaHeight = post.images.first.map { columnWidth / CGFloat(max($0.aspectRatio ?? 1, 0.3)) } ?? 0
-            let textHeight = min(CGFloat(post.content.raw.count) * 0.45, 160)
+            let textHeight = min(CGFloat(visibleContentLength(post, showOriginalWithTranslation)) * 0.45, 160)
             return 120 + mediaHeight + textHeight
         case .timelinePostItem(let item):
             let post = item.presentation.repost ?? item.post
             let mediaHeight = post.images.first.map { columnWidth / CGFloat(max($0.aspectRatio ?? 1, 0.3)) } ?? 0
-            let textHeight = min(CGFloat(post.content.raw.count) * 0.45, 160)
+            let textHeight = min(CGFloat(visibleContentLength(post, showOriginalWithTranslation)) * 0.45, 160)
             let parentPenalty = CGFloat(item.presentation.inlineParents.count) * 140
             return 120 + mediaHeight + textHeight + parentPenalty
         case .feed(let feed):
@@ -480,14 +502,18 @@ private enum MacTimelineMasonryColumnBuilder {
         }
     }
 
-    private static func galleryEstimatedHeight(for item: UiTimelineV2?, columnWidth: CGFloat) -> CGFloat {
+    private static func galleryEstimatedHeight(
+        for item: UiTimelineV2?,
+        columnWidth: CGFloat,
+        showOriginalWithTranslation: Bool
+    ) -> CGFloat {
         guard let item else { return 220 }
         switch onEnum(of: item) {
         case .post(let post):
             if let media = post.images.first {
                 return 48 + columnWidth / CGFloat(max(media.aspectRatio ?? 1, 0.3))
             }
-            return 140 + min(CGFloat(post.content.raw.count) * 0.35, 120)
+            return 140 + min(CGFloat(visibleContentLength(post, showOriginalWithTranslation)) * 0.35, 120)
         case .timelinePostItem:
             guard let post = item.timelineContentPost else {
                 return 180
@@ -495,7 +521,7 @@ private enum MacTimelineMasonryColumnBuilder {
             if let media = post.images.first {
                 return 48 + columnWidth / CGFloat(max(media.aspectRatio ?? 1, 0.3))
             }
-            return 140 + min(CGFloat(post.content.raw.count) * 0.35, 120)
+            return 140 + min(CGFloat(visibleContentLength(post, showOriginalWithTranslation)) * 0.35, 120)
         case .feed(let feed):
             if let media = feed.media {
                 return 48 + columnWidth / CGFloat(max(media.aspectRatio, 0.3))
@@ -506,5 +532,17 @@ private enum MacTimelineMasonryColumnBuilder {
         default:
             return 180
         }
+    }
+
+    private static func visibleContentLength(
+        _ post: UiTimelineV2.Post,
+        _ showOriginalWithTranslation: Bool
+    ) -> Int {
+        guard post.translationDisplayState == .translated, let translation = post.content.translation else {
+            return post.content.original.raw.count
+        }
+        return showOriginalWithTranslation
+            ? post.content.original.raw.count + translation.raw.count
+            : translation.raw.count
     }
 }

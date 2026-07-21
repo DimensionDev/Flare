@@ -232,7 +232,7 @@ private fun UiTimelineV2.Post.toNotificationPostToolText(): String =
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
         appendLine("authorHandle: ${user?.handle?.raw.orEmpty()}")
-        appendLine("content: ${content.raw.take(MAX_NOTIFICATION_TEXT_LENGTH)}")
+        appendLine("content: ${content.original.raw.take(MAX_NOTIFICATION_TEXT_LENGTH)}")
     }
 
 private fun UiTimelineV2.notificationPostOrNull(): UiTimelineV2.Post? =
@@ -308,7 +308,7 @@ private fun UiTimelineV2.UserList.toNotificationUserListToolText(): String =
         post?.let {
             appendLine("postAttachmentRef: ${it.agentAttachmentMarker()}")
             appendLine("postStatusKey: ${it.statusKey}")
-            appendLine("postContent: ${it.content.raw.take(MAX_NOTIFICATION_TEXT_LENGTH)}")
+            appendLine("postContent: ${it.content.original.raw.take(MAX_NOTIFICATION_TEXT_LENGTH)}")
         }
     }
 

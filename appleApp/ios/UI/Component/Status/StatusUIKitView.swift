@@ -125,9 +125,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var replyToContainerStorage: ReplyToRowView?
 
     private var contentWarningTextStorage: RichTextUIView?
+    private var contentWarningTranslationTextStorage: RichTextUIView?
     private var contentWarningToggleStorage: UIButton?
 
     private var bodyTextStorage: RichTextUIView?
+    private var bodyTranslationTextStorage: RichTextUIView?
     private var expandMoreButtonStorage: UIButton?
 
     private var translateViewStorage: StatusTranslateUIView?
@@ -244,6 +246,13 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         return view
     }
 
+    private func resolvedContentWarningTranslationText() -> RichTextUIView {
+        if let contentWarningTranslationTextStorage { return contentWarningTranslationTextStorage }
+        let view = RichTextUIView()
+        contentWarningTranslationTextStorage = view
+        return view
+    }
+
     private func resolvedContentWarningToggle() -> UIButton {
         if let contentWarningToggleStorage { return contentWarningToggleStorage }
         let button = UIButton(type: .system)
@@ -256,6 +265,13 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if let bodyTextStorage { return bodyTextStorage }
         let view = RichTextUIView()
         bodyTextStorage = view
+        return view
+    }
+
+    private func resolvedBodyTranslationText() -> RichTextUIView {
+        if let bodyTranslationTextStorage { return bodyTranslationTextStorage }
+        let view = RichTextUIView()
+        bodyTranslationTextStorage = view
         return view
     }
 
@@ -463,7 +479,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         let contentWidth = fittingContentColumnWidth(for: width)
         contentWarningTextStorage?.prepareForFitting(width: contentWidth)
+        contentWarningTranslationTextStorage?.prepareForFitting(width: contentWidth)
         bodyTextStorage?.prepareForFitting(width: contentWidth)
+        bodyTranslationTextStorage?.prepareForFitting(width: contentWidth)
         if let mediaViewStorage {
             mediaViewStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: mediaViewStorage.bounds.height)
         }
@@ -690,6 +708,23 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     private func buildContentColumnList(data: UiTimelineV2.Post) -> [UIView] {
         var items: [UIView] = []
+        let translationDisplayed = data.translationDisplayState == .translated
+        let contentWarnings: [UiRichText] = if let warning = data.contentWarning {
+            if translationDisplayed, let translation = warning.translation {
+                appearance.showOriginalWithTranslation ? [warning.original, translation] : [translation]
+            } else {
+                [warning.original]
+            }
+        } else {
+            []
+        }
+        let contents: [UiRichText] = if translationDisplayed, let translation = data.content.translation {
+            appearance.showOriginalWithTranslation ? [data.content.original, translation] : [translation]
+        } else {
+            [data.content.original]
+        }
+        let hasCW = contentWarnings.contains { !$0.isEmpty }
+        let shouldExpandTextByDefault = !hasCW && contents.reduce(0) { $0 + $1.innerText.count } <= 500
 
         // reply-to
         if let replyToHandle = data.replyToHandle {
@@ -699,18 +734,21 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         }
 
         // content warning
-        let hasCW = (data.contentWarning != nil) && (data.contentWarning?.isEmpty == false)
-        if hasCW, let cw = data.contentWarning {
-            let contentWarningText = resolvedContentWarningText()
-            contentWarningText.configure(
-                text: cw,
-                lineLimit: nil,
-                isTextSelectionEnabled: isDetail,
-                onOpenURL: openURL,
-                preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                contentKey: Int(data.renderHash)
-            )
-            items.append(contentWarningText)
+        if hasCW {
+            for (index, contentWarning) in contentWarnings.enumerated() where !contentWarning.isEmpty {
+                let contentWarningText = index == 0
+                    ? resolvedContentWarningText()
+                    : resolvedContentWarningTranslationText()
+                contentWarningText.configure(
+                    text: contentWarning,
+                    lineLimit: nil,
+                    isTextSelectionEnabled: isDetail,
+                    onOpenURL: openURL,
+                    preferredContentSizeCategory: appearance.preferredContentSizeCategory,
+                    contentKey: Int(data.renderHash) * 4 + index
+                )
+                items.append(contentWarningText)
+            }
             if !appearance.expandContentWarning {
                 let contentWarningToggle = resolvedContentWarningToggle()
                 contentWarningToggle.setTitle(
@@ -725,40 +763,44 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         // main body
         if expand || appearance.expandContentWarning || !hasCW {
-            if !data.content.isEmpty {
-                let bodyText = resolvedBodyText()
-                let bodyLineLimit: Int?
-                let bodySelectionEnabled: Bool
-                if isDetail {
-                    bodySelectionEnabled = true
-                    bodyLineLimit = nil
-                } else if (data.shouldExpandTextByDefault || expand) && maxLine >= 5 {
-                    bodySelectionEnabled = false
-                    bodyLineLimit = nil
-                } else {
-                    bodySelectionEnabled = false
-                    bodyLineLimit = Int(maxLine)
-                }
+            let bodyLineLimit: Int?
+            let bodySelectionEnabled: Bool
+            if isDetail {
+                bodySelectionEnabled = true
+                bodyLineLimit = nil
+            } else if (shouldExpandTextByDefault || expand) && maxLine >= 5 {
+                bodySelectionEnabled = false
+                bodyLineLimit = nil
+            } else {
+                bodySelectionEnabled = false
+                bodyLineLimit = Int(maxLine)
+            }
+            for (index, content) in contents.enumerated() where !content.isEmpty {
+                let bodyText = index == 0 ? resolvedBodyText() : resolvedBodyTranslationText()
                 bodyText.configure(
-                    text: data.content,
+                    text: content,
                     lineLimit: bodyLineLimit,
                     isTextSelectionEnabled: bodySelectionEnabled,
                     onOpenURL: openURL,
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash)
+                    contentKey: Int(data.renderHash) * 4 + 2 + index
                 )
                 items.append(bodyText)
-                if !data.shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
-                    items.append(resolvedExpandMoreButton())
-                }
+            }
+            if !shouldExpandTextByDefault,
+               contents.contains(where: { !$0.isEmpty }),
+               !isDetail,
+               !expand,
+               showExpandTextButton {
+                items.append(resolvedExpandMoreButton())
             }
         }
 
         // translate (detail-only)
         if isDetail, showTranslate {
             let translateView = resolvedTranslateView()
-            translateView.content = data.content
-            translateView.contentWarning = data.contentWarning
+            translateView.content = data.content.original
+            translateView.contentWarning = data.contentWarning?.original
             translateView.isSummaryAvailable = aiTldrEnabled
             translateView.onLocalHeightInvalidated = { [weak self] in
                 self?.notifyLocalHeightInvalidated()
@@ -1046,7 +1088,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     private func forwardOpenURL() {
         contentWarningTextStorage?.onOpenURL = openURL
+        contentWarningTranslationTextStorage?.onOpenURL = openURL
         bodyTextStorage?.onOpenURL = openURL
+        bodyTranslationTextStorage?.onOpenURL = openURL
         normalCardViewStorage?.onOpenURL = { [weak self] in self?.openURL?($0) }
         compatCardViewStorage?.onOpenURL = { [weak self] in self?.openURL?($0) }
         actionsViewStorage?.onOpenURL = { [weak self] in self?.openURL?($0) }

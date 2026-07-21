@@ -43,6 +43,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -339,7 +340,7 @@ class MicroblogTest : RobolectricTest() {
                 "quoted status",
                 rendered.presentation.quotes
                     .first()
-                    .content.raw,
+                    .content.original.raw,
             )
         }
 
@@ -847,13 +848,25 @@ class MicroblogTest : RobolectricTest() {
                 )
             val post = assertIs<UiTimelineV2.TimelinePostItem>(ui)
 
-            assertEquals("根帖子", post.post.content.raw)
+            assertEquals("root original", post.post.content.original.raw)
+            assertEquals(
+                "根帖子",
+                post.post.content.translation
+                    ?.raw,
+            )
             assertEquals(1, post.presentation.inlineParents.size)
+            assertEquals(
+                "parent original",
+                post.presentation.inlineParents
+                    .first()
+                    .content.original.raw,
+            )
             assertEquals(
                 "父帖子",
                 post.presentation.inlineParents
                     .first()
-                    .content.raw,
+                    .content.translation
+                    ?.raw,
             )
         }
 
@@ -1006,9 +1019,9 @@ class MicroblogTest : RobolectricTest() {
 
             assertEquals(wrapperPost.statusKey, rendered.post.statusKey)
             assertEquals(repostPost.statusKey, internalRepost.statusKey)
-            assertEquals(repostPost.content.raw, rendered.displayPost.content.raw)
+            assertEquals(repostPost.content.original.raw, rendered.displayPost.content.original.raw)
             assertEquals(repostPost.user?.key, rendered.displayPost.user?.key)
-            assertEquals(repostPost.content.raw, internalRepost.content.raw)
+            assertEquals(repostPost.content.original.raw, internalRepost.content.original.raw)
 
             val message = assertNotNull(rendered.presentation.message)
             val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
@@ -1187,15 +1200,15 @@ class MicroblogTest : RobolectricTest() {
             val repost = assertNotNull(rendered.presentation.repost)
 
             assertEquals(postA.statusKey, rendered.post.statusKey)
-            assertEquals("content-b", rendered.displayPost.content.raw)
-            assertEquals("content-b", repost.content.raw)
+            assertEquals("content-b", rendered.displayPost.content.original.raw)
+            assertEquals("content-b", repost.content.original.raw)
             assertEquals(postB.statusKey, repost.statusKey)
             assertEquals(1, rendered.presentation.quotes.size)
             assertEquals(
                 "content-c",
                 rendered.presentation.quotes
                     .first()
-                    .content.raw,
+                    .content.original.raw,
             )
             assertEquals(
                 postC.statusKey,
@@ -1288,7 +1301,7 @@ class MicroblogTest : RobolectricTest() {
             val internalRepost = assertNotNull(rendered.presentation.repost)
 
             assertEquals(wrapperPost.statusKey, rendered.post.statusKey)
-            assertEquals(repostPost.content.raw, rendered.displayPost.content.raw)
+            assertEquals(repostPost.content.original.raw, rendered.displayPost.content.original.raw)
             assertEquals(repostPost.statusKey, internalRepost.statusKey)
             assertEquals(1, rendered.presentation.quotes.size)
             assertEquals(
@@ -1301,7 +1314,7 @@ class MicroblogTest : RobolectricTest() {
                 "quoted content",
                 rendered.presentation.quotes
                     .first()
-                    .content.raw,
+                    .content.original.raw,
             )
         }
 
@@ -1568,8 +1581,8 @@ class MicroblogTest : RobolectricTest() {
                     translationDisplayOptions = translationDisplayOptions(),
                 )
 
-            assertEquals("长文译文", rootPostOf(timelineUi).content.raw)
-            assertEquals("长文译文", rootPostOf(detailUi).content.raw)
+            assertEquals("长文译文", rootPostOf(timelineUi).content.translation?.raw)
+            assertEquals("长文译文", rootPostOf(detailUi).content.translation?.raw)
         }
 
     @Test
@@ -1629,7 +1642,7 @@ class MicroblogTest : RobolectricTest() {
                     ),
                 )
 
-            assertEquals("source content", timelineUi.content.raw)
+            assertEquals("source content", timelineUi.content.original.raw)
             assertEquals(TranslationDisplayState.Hidden, timelineUi.translationDisplayState)
         }
 
@@ -1863,7 +1876,8 @@ class MicroblogTest : RobolectricTest() {
                     ),
                 )
 
-            assertEquals("translated content", timelineUi.content.raw)
+            assertEquals("source content", timelineUi.content.original.raw)
+            assertEquals("translated content", timelineUi.content.translation?.raw)
             val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
             val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
             assertEquals(
@@ -1940,7 +1954,7 @@ class MicroblogTest : RobolectricTest() {
                     ),
                 )
 
-            assertEquals("source content", timelineUi.content.raw)
+            assertEquals("source content", timelineUi.content.original.raw)
             val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
             val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
             assertEquals(
@@ -2022,7 +2036,7 @@ class MicroblogTest : RobolectricTest() {
                     ),
                 )
 
-            assertEquals("source content", timelineUi.content.raw)
+            assertEquals("source content", timelineUi.content.original.raw)
             val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
             val firstAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
             assertEquals(
@@ -2312,7 +2326,7 @@ class MicroblogTest : RobolectricTest() {
                 ),
             )
 
-        assertEquals("$id source", timelineUi.content.raw)
+        assertEquals("$id source", timelineUi.content.original.raw)
         assertEquals(TranslationDisplayState.Translating, timelineUi.translationDisplayState)
         val moreAction = assertIs<ActionMenu.Group>(timelineUi.actions.first())
         val translateAction = assertIs<ActionMenu.Item>(moreAction.actions.first())
@@ -2409,7 +2423,7 @@ class MicroblogTest : RobolectricTest() {
             sensitive = false,
             contentWarning = null,
             user = user,
-            content = text.toUiPlainText(),
+            content = UiTranslatableText(text.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

@@ -95,13 +95,13 @@ class BlueskyNotificationRenderTest {
         val repostUserList = assertIs<UiTimelineV2.UserList>(repostResult)
         assertNotNull(repostUserList.message)
         val repostPost = assertNotNull(repostUserList.post)
-        assertEquals("reposted content", repostPost.content.innerText)
+        assertEquals("reposted content", repostPost.content.original.innerText)
 
         val likeResult = listOf(likeNotification).render(accountKey, references).single()
         val likeUserList = assertIs<UiTimelineV2.UserList>(likeResult)
         assertNotNull(likeUserList.message)
         val likePost = assertNotNull(likeUserList.post)
-        assertEquals("reposted content", likePost.content.innerText)
+        assertEquals("reposted content", likePost.content.original.innerText)
     }
 
     @Test
@@ -155,7 +155,13 @@ class BlueskyNotificationRenderTest {
         assertEquals(2, userLists.size)
         assertEquals(
             setOf("first liked content", "second liked content"),
-            userLists.map { it.post?.content?.innerText }.toSet(),
+            userLists
+                .map {
+                    it.post
+                        ?.content
+                        ?.original
+                        ?.innerText
+                }.toSet(),
         )
         assertEquals(listOf(1, 1), userLists.map { it.users.size })
     }
@@ -216,7 +222,7 @@ class BlueskyNotificationRenderTest {
                     references = persistentMapOf(uri to post),
                 )
             val renderedPost = assertIs<UiTimelineV2.TimelinePostItem>(result.single())
-            assertEquals("post-$index", renderedPost.post.content.innerText)
+            assertEquals("post-$index", renderedPost.post.content.original.innerText)
             val message = assertNotNull(renderedPost.presentation.message)
             assertEquals(
                 "did:plc:author$index",

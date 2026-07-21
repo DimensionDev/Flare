@@ -305,7 +305,9 @@ internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
     val contents =
         buildSet {
             val hasVisualMedia = visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif || it is UiMedia.Video }
-            if (visiblePost.content.raw.isNotBlank() && !hasVisualMedia) {
+            if (visiblePost.content.original.raw
+                    .isNotBlank() && !hasVisualMedia
+            ) {
                 add(TimelinePostContent.Text)
             }
             if (visiblePost.images.any { it is UiMedia.Image || it is UiMedia.Gif }) {
@@ -325,8 +327,8 @@ internal fun UiTimelineV2.TimelinePostItem.traits(): TimelinePostTraits {
 }
 
 private fun UiTimelineV2.Post.isTimelineFilterEmpty(): Boolean =
-    content.raw.isBlank() &&
-        contentWarning?.raw.isNullOrBlank() &&
+    content.original.raw.isBlank() &&
+        contentWarning?.original?.raw.isNullOrBlank() &&
         images.isEmpty() &&
         poll == null &&
         card == null

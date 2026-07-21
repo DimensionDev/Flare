@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 @Immutable
 public data class ComposeConfig public constructor(
@@ -22,10 +23,18 @@ public data class ComposeConfig public constructor(
     val language: Language? = null,
 ) {
     @Immutable
-    public data class Text public constructor(
-        val maxLength: Flow<Int>,
+    public class Text private constructor(
+        public val maxLength: Flow<Int>,
+        private val remainingLengthProvider: (String) -> Flow<Int>,
     ) {
+        public constructor(maxLength: Flow<Int>) : this(
+            maxLength = maxLength,
+            remainingLengthProvider = { text -> maxLength.map { it - text.length } },
+        )
+
         public constructor(maxLength: Int) : this(flowOf(maxLength))
+
+        public fun remainingLength(text: String): Flow<Int> = remainingLengthProvider(text)
 
         internal fun merge(other: Text): Text =
             Text(
@@ -33,7 +42,23 @@ public data class ComposeConfig public constructor(
                     combine(maxLength, other.maxLength) { current, candidate ->
                         minOf(current, candidate)
                     }.distinctUntilChanged(),
+                remainingLengthProvider = { text ->
+                    combine(remainingLength(text), other.remainingLength(text)) { current, candidate ->
+                        minOf(current, candidate)
+                    }.distinctUntilChanged()
+                },
             )
+
+        public companion object {
+            public fun withLength(
+                maxLength: Int,
+                length: (String) -> Int,
+            ): Text =
+                Text(
+                    maxLength = flowOf(maxLength),
+                    remainingLengthProvider = { text -> flowOf(maxLength - length(text)) },
+                )
+        }
     }
 
     @Immutable

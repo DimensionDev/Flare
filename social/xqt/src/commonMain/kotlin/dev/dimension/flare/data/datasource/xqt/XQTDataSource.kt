@@ -670,7 +670,7 @@ internal class XQTDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(280),
+            text = ComposeConfig.Text.withLength(280, String::xWeightedLength),
             media =
                 ComposeConfig.Media(
                     maxCount = 4,

@@ -1101,8 +1101,8 @@ private fun composePresenter(
     }
 
     val remainingLength: UiState<Int> =
-        state.textMaxLength
-            ?.let { UiState.Success(it - textFieldState.text.length) }
+        state.remainingLength
+            ?.let { UiState.Success(it) }
             ?: UiState.Loading()
 
     val pollState =

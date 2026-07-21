@@ -301,13 +301,6 @@ public class ComposePresenter(
         MutableStateFlow("")
     }
 
-    private val textMaxLengthFlow: Flow<Int?> by lazy {
-        composeConfigFlow
-            .flatMapLatest { config ->
-                config.text?.maxLength?.map<Int, Int?> { it } ?: flowOf(null)
-            }.distinctUntilChanged()
-    }
-
     private val mediaSizeFlow by lazy {
         MutableStateFlow(0)
     }
@@ -315,10 +308,12 @@ public class ComposePresenter(
     private val remainingLengthFlow by lazy {
         combine(
             textFlow,
-            textMaxLengthFlow,
-        ) { text, maxLength ->
-            maxLength?.minus(text.length) ?: Int.MAX_VALUE
-        }
+            composeConfigFlow,
+        ) { text, config ->
+            text to config.text
+        }.flatMapLatest { (text, config) ->
+            config?.remainingLength(text)?.map<Int, Int?> { it } ?: flowOf(null)
+        }.distinctUntilChanged()
     }
 
     private val canSendFlow by lazy {
@@ -328,8 +323,17 @@ public class ComposePresenter(
             remainingLengthFlow,
             selectedComposeAccountKeysFlow,
             composeConfigFlow,
-        ) { text, mediaSize, remainingLength, selectedAccountKeys, composeConfig ->
-            (text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() && remainingLength >= 0) ||
+        ) {
+            text,
+            mediaSize,
+            remainingLength,
+            selectedAccountKeys,
+            composeConfig,
+            ->
+            (
+                text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() &&
+                    (remainingLength == null || remainingLength >= 0)
+            ) ||
                 ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
         }
     }
@@ -414,7 +418,7 @@ public class ComposePresenter(
         val emojiState by emojiFlow.flattenUiState()
         val enableCrossPost by enableCrossPostFlow.collectAsUiState()
         val composeConfig: UiState<ComposeConfig> by composeConfigFlow.collectAsUiState()
-        val textMaxLength by textMaxLengthFlow.collectAsState(null)
+        val remainingLength by remainingLengthFlow.collectAsState(null)
         val canSend by canSendFlow.collectAsState(false)
         val loadedDraftState by loadedDraftStateFlow.collectAsState()
         val editingDraftGroupId by editingDraftGroupIdFlow.collectAsState()
@@ -582,7 +586,7 @@ public class ComposePresenter(
             composeStatus = composeStatus,
             showDraft = showDraft,
             directSendState = directSendState,
-            textMaxLength = textMaxLength,
+            remainingLength = remainingLength,
             pollMaxOptions = pollMaxOptions,
             contentWarningEnabled = contentWarningEnabled,
             mediaEnabled = mediaEnabled,
@@ -981,7 +985,7 @@ public abstract class ComposeState(
     public val composeStatus: ComposeStatus?,
     public val showDraft: Boolean,
     public val directSendState: ComposeDirectSendState,
-    public val textMaxLength: Int?,
+    public val remainingLength: Int?,
     public val pollMaxOptions: Int?,
     public val contentWarningEnabled: Boolean,
     public val mediaEnabled: Boolean,

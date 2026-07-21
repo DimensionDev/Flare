@@ -249,8 +249,7 @@ struct ComposeScreen: View {
             languageCodes: Array(presenter.state.languageCodes),
             selectedLanguages: $viewModel.languages,
             maxLanguageSelectionCount: languageMaxCount,
-            textCount: viewModel.text.count,
-            maxTextLength: textMaxLength,
+            remainingTextLength: remainingTextLength,
             onTogglePoll: {
                 withAnimation {
                     viewModel.togglePoll()
@@ -567,8 +566,8 @@ struct ComposeScreen: View {
         return Array(visibilityState.data.allVisibilities)
     }
 
-    private var textMaxLength: Int? {
-        presenter.state.textMaxLength.map { Int(truncating: $0) }
+    private var remainingTextLength: Int? {
+        presenter.state.remainingLength.map { Int(truncating: $0) }
     }
 
     private var maxPollOptions: Int {

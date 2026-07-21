@@ -92,8 +92,9 @@ internal class ComposePostTool(
         val visibility = args.visibility.toPostVisibilityOrNull() ?: return "Unsupported visibility: ${args.visibility}."
         val config = target.dataSource.composeConfig(action.composeType)
         val maxLength = config.text?.maxLength?.firstOrNull()
-        if (maxLength != null && content.length > maxLength) {
-            return "Post content is ${content.length} characters, but ${target.platformType.name} allows " +
+        val remainingLength = config.text?.remainingLength(content)?.firstOrNull()
+        if (maxLength != null && remainingLength != null && remainingLength < 0) {
+            return "Post content is ${maxLength - remainingLength} characters, but ${target.platformType.name} allows " +
                 "at most $maxLength for ${action.label}."
         }
         if (visibility != UiTimelineV2.Post.Visibility.Public && config.visibility == null) {

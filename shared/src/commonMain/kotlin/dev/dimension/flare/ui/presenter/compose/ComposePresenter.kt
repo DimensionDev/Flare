@@ -609,10 +609,12 @@ public class ComposePresenter(
                             accounts = selectedAccounts,
                             data = data,
                             groupId = editingDraftGroupIdFlow.value ?: newDraftGroupId(),
+                            onPrepared = {
+                                withContext(Dispatchers.Main) {
+                                    onDispatched(true)
+                                }
+                            },
                         )
-                        withContext(Dispatchers.Main) {
-                            onDispatched(true)
-                        }
                     } else {
                         withContext(Dispatchers.Main) {
                             onDispatched(false)
@@ -767,13 +769,15 @@ public class ComposePresenter(
                             accounts = selectedAccounts,
                             data = data,
                             groupId = groupId,
+                            onSaved = {
+                                withContext(Dispatchers.Main) {
+                                    if (editingDraftGroupIdFlow.value.isNullOrEmpty() && groupId.isNotEmpty()) {
+                                        editingDraftGroupIdFlow.value = groupId
+                                    }
+                                    onDispatched(true)
+                                }
+                            },
                         )
-                        if (editingDraftGroupIdFlow.value.isNullOrEmpty() && groupId.isNotEmpty()) {
-                            editingDraftGroupIdFlow.value = groupId
-                        }
-                        withContext(Dispatchers.Main) {
-                            onDispatched(true)
-                        }
                     } else {
                         withContext(Dispatchers.Main) {
                             onDispatched(false)

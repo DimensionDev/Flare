@@ -38,6 +38,7 @@ internal class SendDraftUseCase(
 
     suspend operator fun invoke(
         bundle: ComposeDraftBundle,
+        onPrepared: suspend () -> Unit = {},
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         val persistedMedia = draftMediaStore.persist(bundle.groupId, bundle.template.medias)
@@ -59,8 +60,16 @@ internal class SendDraftUseCase(
                         medias = persistedMedia,
                     ),
             )
+        val data =
+            bundle.template.copy(
+                medias =
+                    draftMediaStore.restore(
+                        checkNotNull(draftRepository.draft(savedGroupId).firstOrNull()).medias,
+                    ),
+            )
+        onPrepared()
         sendDatas(
-            targets = bundle.accounts.map { ComposeTargetData(account = it, data = bundle.template) },
+            targets = bundle.accounts.map { ComposeTargetData(account = it, data = data) },
             groupId = savedGroupId,
             progress = progress,
         )

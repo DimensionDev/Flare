@@ -29,8 +29,14 @@ internal class ComposeUseCase(
         accounts: List<UiAccount>,
         data: ComposeData,
         groupId: String,
+        onPrepared: suspend () -> Unit = {},
     ) {
-        invoke(accounts = accounts, data = data, groupId = groupId) {
+        invoke(
+            accounts = accounts,
+            data = data,
+            groupId = groupId,
+            onPrepared = onPrepared,
+        ) {
             if (it is ComposeProgressState.Error) {
                 DebugRepository.error(it.throwable)
             }
@@ -56,6 +62,7 @@ internal class ComposeUseCase(
         accounts: List<UiAccount>,
         data: ComposeData,
         groupId: String,
+        onPrepared: suspend () -> Unit = {},
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         scope.launch {
@@ -74,6 +81,7 @@ internal class ComposeUseCase(
                 }
                 sendDraftUseCase(
                     bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId),
+                    onPrepared = onPrepared,
                     progress = progress,
                 )
             }
@@ -84,10 +92,12 @@ internal class ComposeUseCase(
         accounts: List<UiAccount>,
         data: ComposeData,
         groupId: String = newDraftGroupId(),
+        onSaved: suspend () -> Unit = {},
     ) {
         scope.launch {
             tryRun {
                 saveDraftUseCase(data.toComposeDraftBundle(accounts = accounts, groupId = groupId))
+                onSaved()
             }
         }
     }

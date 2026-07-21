@@ -40,6 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -258,37 +259,42 @@ class SendDraftUseCaseTest : RobolectricTest() {
         runTest {
             val account = mastodonAccount("alice", "mastodon.social")
             val sent = mutableListOf<SentCompose>()
-            val useCase = testUseCase(sent = sent) { _, _, _ -> }
+            var prepared = false
+            val medias =
+                listOf(
+                    media(name = "a.png", bytes = byteArrayOf(1), altText = "a"),
+                    media(name = "b.mov", bytes = byteArrayOf(2), type = FileType.Video, altText = "b"),
+                )
+            val useCase =
+                testUseCase(sent = sent) { _, data, _ ->
+                    assertTrue(prepared)
+                    data.medias.zip(medias).forEach { (sentMedia, sourceMedia) ->
+                        assertNotSame(sourceMedia.file, sentMedia.file)
+                    }
+                    assertContentEquals(byteArrayOf(1), data.medias[0].file.readBytes())
+                    assertContentEquals(byteArrayOf(2), data.medias[1].file.readBytes())
+                }
 
             useCase(
-                ComposeDraftBundle(
-                    accounts = listOf(account),
-                    groupId = "send-multi-media",
-                    template =
-                        ComposeData(
-                            content = "multi media",
-                            medias =
-                                listOf(
-                                    media(name = "a.png", bytes = byteArrayOf(1), altText = "a"),
-                                    media(name = "b.mov", bytes = byteArrayOf(2), type = FileType.Video, altText = "b"),
-                                ),
-                        ),
-                ),
+                bundle =
+                    ComposeDraftBundle(
+                        accounts = listOf(account),
+                        groupId = "send-multi-media",
+                        template =
+                            ComposeData(
+                                content = "multi media",
+                                medias = medias,
+                            ),
+                    ),
+                onPrepared = { prepared = true },
             ) {}
             advanceUntilIdle()
 
-            assertEquals(
-                2,
-                sent
-                    .single()
-                    .data.medias.size,
-            )
+            val sentMedias = sent.single().data.medias
+            assertEquals(2, sentMedias.size)
             assertEquals(
                 listOf("a", "b"),
-                sent
-                    .single()
-                    .data.medias
-                    .map { it.altText },
+                sentMedias.map { it.altText },
             )
             assertNull(repository.draft("send-multi-media").first())
         }

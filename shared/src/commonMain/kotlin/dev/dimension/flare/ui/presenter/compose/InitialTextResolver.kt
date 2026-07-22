@@ -38,7 +38,7 @@ internal object InitialTextResolver {
     ): InitialText? {
         if (quotes.any() && composeStatus is ComposeStatus.Quote) {
             return InitialText(
-                text = "//@${post.user?.name?.raw}:${post.content.raw}",
+                text = "//@${post.user?.name?.raw}:${post.content.original.raw}",
                 cursorPosition = 0,
             )
         }
@@ -59,7 +59,7 @@ internal object InitialTextResolver {
                 handleToAdd.add(it.canonical)
             }
         }
-        post.content.renderRuns
+        post.content.original.renderRuns
             .asSequence()
             .flatMap { content ->
                 when (content) {

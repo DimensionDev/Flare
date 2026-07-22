@@ -166,10 +166,15 @@ public class StatusInsightPresenter(
 }
 
 private fun UiTimelineV2.Post.insightUserMessageTitle(): String =
-    content.raw
+    content.original.raw
         .trim()
-        .ifBlank { contentWarning?.raw.orEmpty().trim() }
-        .ifBlank { card?.title.orEmpty().trim() }
+        .ifBlank {
+            contentWarning
+                ?.original
+                ?.raw
+                .orEmpty()
+                .trim()
+        }.ifBlank { card?.title.orEmpty().trim() }
         .ifBlank {
             user
                 ?.name

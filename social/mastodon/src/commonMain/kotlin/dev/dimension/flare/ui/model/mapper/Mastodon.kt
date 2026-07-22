@@ -36,6 +36,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.UiRichText
@@ -456,10 +457,11 @@ private fun Status.renderStatus(
         contentWarning =
             spoilerText
                 ?.takeIf { it.isNotEmpty() && it.isNotBlank() }
-                ?.toUiPlainText(sourceLanguages),
+                ?.toUiPlainText(sourceLanguages)
+                ?.let { UiTranslatableText(original = it) },
         user = actualUser,
         sourceLanguages = sourceLanguages,
-        content = parseMastodonContent(this, accountKey, host, sourceLanguages),
+        content = UiTranslatableText(original = parseMastodonContent(this, accountKey, host, sourceLanguages)),
         card =
             card?.url?.let { url ->
                 UiCard(

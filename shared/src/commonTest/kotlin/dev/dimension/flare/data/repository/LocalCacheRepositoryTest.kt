@@ -19,6 +19,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -177,7 +178,7 @@ class LocalCacheRepositoryTest : RobolectricTest() {
             sensitive = false,
             contentWarning = null,
             user = user,
-            content = text.toUiPlainText(),
+            content = UiTranslatableText(text.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

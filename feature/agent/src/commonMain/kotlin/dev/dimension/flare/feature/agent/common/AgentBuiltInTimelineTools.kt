@@ -199,8 +199,8 @@ private fun UiTimelineV2.Post.toBuiltInTimelinePostToolText(): String =
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
         appendLine("authorHandle: ${user?.handle?.raw.orEmpty()}")
-        appendLine("contentWarning: ${contentWarning?.raw.orEmpty()}")
-        appendLine("content: ${content.raw.take(MAX_BUILT_IN_TIMELINE_TEXT_LENGTH)}")
+        appendLine("contentWarning: ${contentWarning?.original?.raw.orEmpty()}")
+        appendLine("content: ${content.original.raw.take(MAX_BUILT_IN_TIMELINE_TEXT_LENGTH)}")
         appendLine("imagesCount: ${images.size}")
         images.filterIsInstance<UiMedia.Image>().take(MAX_BUILT_IN_TIMELINE_IMAGES).forEachIndexed { index, image ->
             appendLine("image${index + 1}Url: ${image.url}")

@@ -30,6 +30,7 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.toUiImage
@@ -85,6 +86,18 @@ private fun GalleryPostTile(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearance = LocalTimelineAppearance.current
+    val showOriginalWithTranslation = appearance.aiConfig.showOriginalWithTranslation
+    val translation = post.content.translation
+    val visibleContent =
+        if (post.translationDisplayState == TranslationDisplayState.Translated && translation != null) {
+            if (showOriginalWithTranslation) {
+                listOf(post.content.original, translation)
+            } else {
+                listOf(translation)
+            }
+        } else {
+            listOf(post.content.original)
+        }
     Column(
         modifier =
             modifier
@@ -123,13 +136,16 @@ private fun GalleryPostTile(
                     Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                if (!post.content.isEmpty) {
-                    RichText(
-                        text = post.content,
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = GALLERY_TEXT_MAX_LINES,
-                    )
+                visibleContent.forEach { content ->
+                    if (!content.isEmpty) {
+                        RichText(
+                            text = content,
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = GALLERY_TEXT_MAX_LINES,
+                        )
+                    }
                 }
             }
         }

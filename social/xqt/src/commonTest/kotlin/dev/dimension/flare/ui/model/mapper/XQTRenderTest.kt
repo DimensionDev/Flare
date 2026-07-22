@@ -1,8 +1,11 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
 import dev.dimension.flare.data.network.xqt.model.Entities
+import dev.dimension.flare.data.network.xqt.model.GrokTranslatedPost
+import dev.dimension.flare.data.network.xqt.model.GrokTranslatedPostWithAvailability
 import dev.dimension.flare.data.network.xqt.model.ItemResult
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.MediaOriginalInfo
@@ -17,10 +20,13 @@ import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserLegacy
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
+import dev.dimension.flare.data.network.xqt.model.XqtUrl
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -102,7 +108,7 @@ class XQTRenderTest {
             "quoted content",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 
@@ -135,7 +141,7 @@ class XQTRenderTest {
             "parent content",
             rendered.presentation.inlineParents
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
         assertEquals(
             "status-parent",
@@ -168,7 +174,7 @@ class XQTRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("user-reposter", message.user?.key?.id)
-        assertEquals("wrapper content", rendered.post.content.innerText)
+        assertEquals("wrapper content", rendered.post.content.original.innerText)
         assertEquals(
             "user-reposter",
             rendered.post.user
@@ -176,7 +182,7 @@ class XQTRenderTest {
                 ?.id,
         )
         assertEquals("status-repost-wrapper", rendered.statusKey.id)
-        assertEquals("original content", repostInternal.content.innerText)
+        assertEquals("original content", repostInternal.content.original.innerText)
         assertEquals("user-original", repostInternal.user?.key?.id)
         assertEquals("status-original", repostInternal.statusKey.id)
     }
@@ -211,14 +217,14 @@ class XQTRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("status-repost-wrapper-2", rendered.statusKey.id)
-        assertEquals("wrapper payload", rendered.post.content.innerText)
-        assertEquals("original payload", repostInternal.content.innerText)
+        assertEquals("wrapper payload", rendered.post.content.original.innerText)
+        assertEquals("original payload", repostInternal.content.original.innerText)
         assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted payload",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 
@@ -254,6 +260,89 @@ class XQTRenderTest {
         assertEquals("2029481529815253017", repostInternal.statusKey.id)
     }
 
+    @Test
+    fun platformTranslationUsesFullMatchingTranslationAndEntities() {
+        val shortUrl = "https://t.co/translated"
+        val expandedUrl = "https://example.com/translated"
+        val status =
+            createTweet(
+                id = "status-translated",
+                user = createUser("user-translated", "translated_user"),
+                text = "original content",
+                grokTranslation =
+                    GrokTranslatedPostWithAvailability(
+                        isAvailable = true,
+                        data =
+                            GrokTranslatedPost(
+                                destinationLanguage = Locale.language.replace('-', '_').uppercase(),
+                                previewTranslation = "truncated preview",
+                                translation = "full translation $shortUrl",
+                                entities =
+                                    Entities(
+                                        urls =
+                                            listOf(
+                                                XqtUrl(
+                                                    url = shortUrl,
+                                                    expandedUrl = expandedUrl,
+                                                ),
+                                            ),
+                                    ),
+                            ),
+                    ),
+            )
+
+        val rendered = rootPostOf(status.render(accountKey))
+        val translation = assertNotNull(rendered.content.translation)
+        val link =
+            translation.renderRuns
+                .filterIsInstance<RenderContent.Text>()
+                .flatMap { it.runs }
+                .filterIsInstance<RenderRun.Text>()
+                .first { it.style.link != null }
+
+        assertEquals("original content", rendered.content.original.innerText)
+        assertEquals("full translation example.com/translated", translation.innerText)
+        assertEquals(expandedUrl, link.style.link)
+    }
+
+    @Test
+    fun rejectsUnavailableEmptyPreviewOnlyAndWrongLanguageTranslations() {
+        val matchingLanguage = Locale.language
+        val wrongLanguage = if (matchingLanguage.startsWith("zz", ignoreCase = true)) "yy" else "zz"
+        val rejected =
+            listOf(
+                GrokTranslatedPostWithAvailability(
+                    isAvailable = false,
+                    data = GrokTranslatedPost(destinationLanguage = matchingLanguage, translation = "unavailable"),
+                ),
+                GrokTranslatedPostWithAvailability(
+                    isAvailable = true,
+                    data = GrokTranslatedPost(destinationLanguage = matchingLanguage, translation = "", previewTranslation = "preview"),
+                ),
+                GrokTranslatedPostWithAvailability(
+                    isAvailable = true,
+                    data = GrokTranslatedPost(destinationLanguage = matchingLanguage, previewTranslation = "preview only"),
+                ),
+                GrokTranslatedPostWithAvailability(
+                    isAvailable = true,
+                    data = GrokTranslatedPost(destinationLanguage = wrongLanguage, translation = "wrong language"),
+                ),
+            )
+
+        rejected.forEachIndexed { index, grokTranslation ->
+            val rendered =
+                rootPostOf(
+                    createTweet(
+                        id = "status-rejected-$index",
+                        user = createUser("user-rejected-$index", "rejected_$index"),
+                        text = "original",
+                        grokTranslation = grokTranslation,
+                    ).render(accountKey),
+                )
+            assertEquals(null, rendered.content.translation)
+        }
+    }
+
     private fun createTimeline(
         tweet: Tweet,
         parents: List<XQTTimeline> = emptyList(),
@@ -272,6 +361,7 @@ class XQTRenderTest {
         media: List<Media> = emptyList(),
         retweetedStatus: Tweet? = null,
         quotedStatus: Tweet? = null,
+        grokTranslation: GrokTranslatedPostWithAvailability? = null,
     ): Tweet =
         Tweet(
             restId = id,
@@ -295,6 +385,7 @@ class XQTRenderTest {
                     retweetedStatusResult = retweetedStatus?.let { ItemResult(result = it) },
                 ),
             quotedStatusResult = quotedStatus?.let { ItemResult(result = it) },
+            grokTranslatedPostWithAvailability = grokTranslation,
         )
 
     private fun createUser(

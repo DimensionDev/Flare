@@ -41,6 +41,8 @@ public data class AppSettings(
         val preTranslate: Boolean = false,
         val provider: Provider = Provider.GoogleWeb,
         val autoTranslateExcludedLanguages: List<String> = emptyList(),
+        val preferPlatformTranslation: Boolean = false,
+        val showOriginalWithTranslation: Boolean = false,
     ) {
         @Serializable
         public sealed interface Provider {

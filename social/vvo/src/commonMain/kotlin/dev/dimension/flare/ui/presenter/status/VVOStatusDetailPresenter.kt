@@ -148,10 +148,10 @@ private fun UiTimelineV2.withoutVvoQuotes(): UiTimelineV2 {
     )
 }
 
-private fun UiTimelineV2.withVvoExtendedText(content: UiRichText): UiTimelineV2 =
+private fun UiTimelineV2.withVvoExtendedText(originalContent: UiRichText): UiTimelineV2 =
     when (this) {
         is UiTimelineV2.Post -> {
-            copy(content = content)
+            copy(content = content.copy(original = originalContent))
         }
 
         is UiTimelineV2.TimelinePostItem -> {
@@ -160,11 +160,11 @@ private fun UiTimelineV2.withVvoExtendedText(content: UiRichText): UiTimelineV2 
                 copy(
                     presentation =
                         presentation.copy(
-                            repost = repost.copy(content = content),
+                            repost = repost.copy(content = repost.content.copy(original = originalContent)),
                         ),
                 )
             } else {
-                copy(post = post.copy(content = content))
+                copy(post = post.copy(content = post.content.copy(original = originalContent)))
             }
         }
 

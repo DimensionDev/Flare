@@ -97,7 +97,7 @@ class MastodonRenderTest {
             "quoted content",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 
@@ -329,9 +329,9 @@ class MastodonRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
-        assertEquals("wrapper content", rendered.post.content.innerText)
+        assertEquals("wrapper content", rendered.post.content.original.innerText)
         assertEquals("reblog-wrapper-1", rendered.statusKey.id)
-        assertEquals("original content", repost.content.innerText)
+        assertEquals("original content", repost.content.original.innerText)
         assertEquals("original-1", repost.statusKey.id)
     }
 
@@ -365,15 +365,15 @@ class MastodonRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
-        assertEquals("wrapper", rendered.post.content.innerText)
+        assertEquals("wrapper", rendered.post.content.original.innerText)
         assertEquals("reblog-wrapper-2", rendered.statusKey.id)
-        assertEquals("original content", repost.content.innerText)
+        assertEquals("original content", repost.content.original.innerText)
         assertEquals(1, rendered.presentation.quotes.size)
         assertEquals(
             "quoted content",
             rendered.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 

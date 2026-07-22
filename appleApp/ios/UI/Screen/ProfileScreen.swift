@@ -272,6 +272,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
 
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.globalAppearance) private var globalAppearance
+    @Environment(\.translateConfig) private var translateConfig
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -299,7 +300,8 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     private func apply(to controller: UITimelineCollectionViewController, context: Context) {
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
-            fontSizeDiff: globalAppearance.fontSizeDiff
+            fontSizeDiff: globalAppearance.fontSizeDiff,
+            showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
         controller.networkKind = networkKind
         controller.columnCount = 1

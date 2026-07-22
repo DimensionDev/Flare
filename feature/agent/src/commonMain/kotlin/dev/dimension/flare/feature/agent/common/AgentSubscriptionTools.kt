@@ -788,7 +788,7 @@ private fun UiTimelineV2.Post.toSubscriptionPostToolText(): String =
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
         appendLine("authorHandle: ${user?.handle?.raw.orEmpty()}")
-        appendLine("content: ${content.raw.take(MAX_SUBSCRIPTION_ITEM_TEXT_LENGTH)}")
+        appendLine("content: ${content.original.raw.take(MAX_SUBSCRIPTION_ITEM_TEXT_LENGTH)}")
     }
 
 private fun DocumentData.toRssArticleToolText(

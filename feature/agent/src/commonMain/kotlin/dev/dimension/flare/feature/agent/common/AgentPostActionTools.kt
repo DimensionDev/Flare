@@ -140,7 +140,7 @@ internal class ExecutePostActionTool(
                     post.user?.let { user ->
                         appendLine("author=${user.name.raw.takeIf { name -> name.isNotBlank() } ?: user.handle.canonical}")
                     }
-                    appendLine("summary=${post.content.raw.take(160)}")
+                    appendLine("summary=${post.content.original.raw.take(160)}")
                 }
             session.inputRequestStore.set(
                 AgentPendingInputRequest(
@@ -277,7 +277,7 @@ private suspend fun AgentToolSession.postActionTargetSelectionMessage(args: Post
             appendLine("  platform=${post.platformType.name}")
             appendLine("  targetStatus=${post.statusKey}")
             appendLine("  author=${post.user?.let { user -> user.name.raw.takeIf { it.isNotBlank() } ?: user.handle.canonical }.orEmpty()}")
-            appendLine("  summary=${post.content.raw.take(120)}")
+            appendLine("  summary=${post.content.original.raw.take(120)}")
         }
     }.trim()
 }

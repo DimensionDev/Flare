@@ -19,6 +19,8 @@ internal object TranslationSettingsSupport {
             translationEnabled = true,
             autoDisplayEnabled = settings.translateConfig.preTranslate,
             providerCacheKey = settings.translationProviderCacheKey(),
+            preferPlatformTranslation =
+                settings.translateConfig.preTranslate && settings.translateConfig.preferPlatformTranslation,
         )
 }
 

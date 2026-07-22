@@ -7,6 +7,27 @@ import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
 import dev.dimension.flare.ui.render.UiRichText
 
+public fun canonicalTranslationLanguage(language: String): String? {
+    val normalized = language.trim().lowercase().replace('_', '-')
+    if (normalized.isBlank()) {
+        return null
+    }
+    val parts = normalized.split('-').filter { it.isNotBlank() }
+    if (parts.isEmpty()) {
+        return null
+    }
+    val primary = parts.first()
+    if (primary != "zh") {
+        return primary
+    }
+    val regionOrScript = parts.drop(1)
+    return when {
+        regionOrScript.any { it == "hant" } || regionOrScript.any { it in setOf("tw", "hk", "mo") } -> "zh-hant"
+        regionOrScript.any { it == "hans" } || regionOrScript.any { it in setOf("cn", "sg") } -> "zh-hans"
+        else -> "zh"
+    }
+}
+
 internal object PreTranslationContentRules {
     private val protectedTranslationPattern =
         Regex("""https?://\S+|@[A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+)?|#[\p{L}\p{N}_]+""")
@@ -55,27 +76,6 @@ internal object PreTranslationContentRules {
     fun isNonTranslatableOnly(payload: TranslationPayload): Boolean {
         val fields = listOfNotNull(payload.content, payload.contentWarning, payload.title, payload.description)
         return fields.isNotEmpty() && fields.all(::isNonTranslatableOnly)
-    }
-
-    internal fun canonicalTranslationLanguage(language: String): String? {
-        val normalized = language.trim().lowercase().replace('_', '-')
-        if (normalized.isBlank()) {
-            return null
-        }
-        val parts = normalized.split('-').filter { it.isNotBlank() }
-        if (parts.isEmpty()) {
-            return null
-        }
-        val primary = parts.first()
-        if (primary != "zh") {
-            return primary
-        }
-        val regionOrScript = parts.drop(1)
-        return when {
-            regionOrScript.any { it == "hant" } || regionOrScript.any { it in setOf("tw", "hk", "mo") } -> "zh-hant"
-            regionOrScript.any { it == "hans" } || regionOrScript.any { it in setOf("cn", "sg") } -> "zh-hans"
-            else -> "zh"
-        }
     }
 
     private fun isNonTranslatableOnly(richText: UiRichText): Boolean {

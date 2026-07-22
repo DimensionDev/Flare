@@ -8,10 +8,10 @@ import kotlin.test.assertTrue
 class PreTranslationContentRulesTest {
     @Test
     fun canonicalTranslationLanguage_normalizesCommonVariants() {
-        assertEquals("en", PreTranslationContentRules.canonicalTranslationLanguage("en-US"))
-        assertEquals("en", PreTranslationContentRules.canonicalTranslationLanguage("en_GB"))
-        assertEquals("zh-hans", PreTranslationContentRules.canonicalTranslationLanguage("zh-CN"))
-        assertEquals("zh-hant", PreTranslationContentRules.canonicalTranslationLanguage("zh-TW"))
+        assertEquals("en", canonicalTranslationLanguage("en-US"))
+        assertEquals("en", canonicalTranslationLanguage("en_GB"))
+        assertEquals("zh-hans", canonicalTranslationLanguage("zh-CN"))
+        assertEquals("zh-hant", canonicalTranslationLanguage("zh-TW"))
     }
 
     @Test

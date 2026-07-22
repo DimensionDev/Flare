@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.parseHtml
@@ -42,22 +43,28 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
         platformType = PlatformType.Pixiv,
         images = toUiMedia().toPersistentList(),
         sensitive = xRestrict > 0 || sanityLevel >= 6,
-        contentWarning = title.toUiPlainText(),
+        contentWarning = UiTranslatableText(original = title.toUiPlainText()),
         user = user.toUiProfile(accountKey),
         content =
-            buildString {
-                append(caption)
-                if (tags.isNotEmpty()) {
-                    append("\n\n")
-                    append(
-                        tags.joinToString(" ") {
-                            "<a href=\"${DeeplinkRoute.Search(AccountType.Specific(accountKey), "#${it.name}").toUri()}\">#${it.name}</a>"
-                        },
-                    )
-                }
-            }.trim().let {
-                parseHtml(it).toUi()
-            },
+            UiTranslatableText(
+                original =
+                    buildString {
+                        append(caption)
+                        if (tags.isNotEmpty()) {
+                            append("\n\n")
+                            append(
+                                tags.joinToString(" ") {
+                                    "<a href=\"${DeeplinkRoute.Search(
+                                        AccountType.Specific(accountKey),
+                                        "#${it.name}",
+                                    ).toUri()}\">#${it.name}</a>"
+                                },
+                            )
+                        }
+                    }.trim().let {
+                        parseHtml(it).toUi()
+                    },
+            ),
         actions =
             persistentListOf(
                 ActionMenu.Item(
@@ -117,7 +124,7 @@ internal fun PixivComment.toUiTimeline(
         sensitive = false,
         contentWarning = null,
         user = user.toUiProfile(accountKey),
-        content = comment.stripPixivHtml().toUiPlainText(),
+        content = UiTranslatableText(original = comment.stripPixivHtml().toUiPlainText()),
         actions = persistentListOf(),
         poll = null,
         statusKey = pixivCommentKey(illustKey, id),

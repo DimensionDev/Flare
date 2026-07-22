@@ -35,10 +35,10 @@ import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.network.ai.AiCompletionService
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.translation.OnlinePreTranslationService
-import dev.dimension.flare.data.translation.PreTranslationContentRules
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
+import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -50,6 +50,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.TranslationDocument
 import dev.dimension.flare.ui.render.TranslationTokenKind
 import dev.dimension.flare.ui.render.toUi
@@ -79,6 +80,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -1674,6 +1676,168 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         }
 
     @Test
+    fun platformTranslationSkipsProviderAndPreferenceChangeUsesProviderCache() =
+        runTest {
+            val appDataStore = AppDataStore(fileStorage)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig =
+                        aiPreTranslateConfig().copy(
+                            preferPlatformTranslation = true,
+                        ),
+                )
+            }
+            var providerCalls = 0
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+            val service: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = scope,
+                    batchTranslator = { _, _, _, sourceDocument, targetLanguage, _ ->
+                        providerCalls += 1
+                        completedTranslationJson(sourceDocument, targetLanguage)
+                    },
+                )
+            try {
+                val accountKey = MicroBlogKey("platform-account", "x.com")
+                val post =
+                    createPost(
+                        accountType = AccountType.Specific(accountKey),
+                        user = profile(MicroBlogKey("platform-user", "x.com"), "User"),
+                        statusKey = MicroBlogKey("platform-status", "x.com"),
+                        text = "source content",
+                    ).copy(
+                        platformType = PlatformType.xQt,
+                        content =
+                            UiTranslatableText(
+                                original = "source content".toUiPlainText(),
+                                translation = "platform translation".toUiPlainText(listOf(Locale.language)),
+                            ),
+                    )
+                val status =
+                    TimelinePagingMapper
+                        .toDb(post, pagingKey = "home")
+                        .status.status.data
+
+                service.enqueueStatuses(listOf(status))
+
+                val platformTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = status.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Completed }
+                    }
+                assertEquals(0, providerCalls)
+                assertEquals("platform translation", platformTranslation.payload?.content?.raw)
+
+                appDataStore.appSettingsStore.updateData {
+                    it.copy(
+                        translateConfig = it.translateConfig.copy(preferPlatformTranslation = false),
+                    )
+                }
+                service.enqueueStatuses(listOf(status))
+
+                val providerTranslation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = status.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first {
+                                it.status == TranslationStatus.Completed &&
+                                    it.sourceHash != platformTranslation.sourceHash
+                            }
+                    }
+                assertEquals(1, providerCalls)
+                assertNotEquals(platformTranslation.sourceHash, providerTranslation.sourceHash)
+                assertEquals("source content (${Locale.language})", providerTranslation.payload?.content?.raw)
+            } finally {
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun platformTranslationStillHonorsExcludedSourceLanguages() =
+        runTest {
+            val excludedLanguage = nonTargetLanguageTag()
+            val appDataStore = AppDataStore(fileStorage)
+            appDataStore.appSettingsStore.updateData {
+                it.copy(
+                    language = Locale.language,
+                    translateConfig =
+                        aiPreTranslateConfig().copy(
+                            preferPlatformTranslation = true,
+                            autoTranslateExcludedLanguages = listOf(excludedLanguage),
+                        ),
+                )
+            }
+            var providerCalls = 0
+            val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+            val service: PreTranslationService =
+                OnlinePreTranslationService(
+                    database = db,
+                    appDataStore = appDataStore,
+                    aiCompletionService = AiCompletionService(OpenAIService(), TestOnDeviceAI()),
+                    coroutineScope = scope,
+                    batchTranslator = { _, _, _, sourceDocument, targetLanguage, _ ->
+                        providerCalls += 1
+                        completedTranslationJson(sourceDocument, targetLanguage)
+                    },
+                )
+            try {
+                val accountKey = MicroBlogKey("excluded-platform-account", "x.com")
+                val post =
+                    createPost(
+                        accountType = AccountType.Specific(accountKey),
+                        user = profile(MicroBlogKey("excluded-platform-user", "x.com"), "User"),
+                        statusKey = MicroBlogKey("excluded-platform-status", "x.com"),
+                        text = "source content",
+                    ).copy(
+                        platformType = PlatformType.xQt,
+                        sourceLanguages = persistentListOf(excludedLanguage),
+                        content =
+                            UiTranslatableText(
+                                original = "source content".toUiPlainText(),
+                                translation = "platform translation".toUiPlainText(listOf(Locale.language)),
+                            ),
+                    )
+                val status =
+                    TimelinePagingMapper
+                        .toDb(post, pagingKey = "home")
+                        .status.status.data
+
+                service.enqueueStatuses(listOf(status))
+
+                val translation =
+                    withTimeout(5_000) {
+                        db
+                            .translationDao()
+                            .find(
+                                entityType = TranslationEntityType.Status,
+                                entityKey = status.id,
+                                targetLanguage = Locale.language,
+                            ).filterNotNull()
+                            .first { it.status == TranslationStatus.Skipped }
+                    }
+                assertEquals(0, providerCalls)
+                assertEquals(PreTranslationStoreSupport.SKIPPED_EXCLUDED_LANGUAGE_REASON, translation.statusReason)
+            } finally {
+                scope.coroutineContext[Job]?.cancelAndJoin()
+            }
+        }
+
+    @Test
     fun preTranslationBatchDocumentAllowsMissingTargetLanguageInResponse() {
         val document =
             """{"version":1,"items":[]}""".decodeJson(
@@ -2156,7 +2320,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             sensitive = false,
             contentWarning = null,
             user = user,
-            content = text.toUiPlainText(),
+            content = UiTranslatableText(text.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,
@@ -2355,9 +2519,9 @@ private fun TranslationDocument.translated(targetLanguage: String): TranslationD
     )
 
 private fun nonTargetLanguageTag(): String {
-    val target = requireNotNull(PreTranslationContentRules.canonicalTranslationLanguage(Locale.language))
+    val target = requireNotNull(canonicalTranslationLanguage(Locale.language))
     return listOf("fr-FR", "de-DE", "es-ES", "ja-JP", "zh-CN")
         .first { candidate ->
-            PreTranslationContentRules.canonicalTranslationLanguage(candidate) != target
+            canonicalTranslationLanguage(candidate) != target
         }
 }

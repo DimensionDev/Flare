@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
@@ -191,7 +192,7 @@ class SerializationFormatBenchmarkTest {
         assertEquals(expected.statusKey, actual.statusKey)
         val expectedPost = assertIs<UiTimelineV2.Post>(expected)
         val actualPost = assertIs<UiTimelineV2.Post>(actual)
-        assertEquals(expectedPost.content.raw, actualPost.content.raw)
+        assertEquals(expectedPost.content.original.raw, actualPost.content.original.raw)
         assertEquals(expectedPost.actions.size, actualPost.actions.size)
         assertEquals(expectedPost.images.size, actualPost.images.size)
         assertEquals(expectedPost.references.size, actualPost.references.size)
@@ -334,9 +335,9 @@ class SerializationFormatBenchmarkTest {
                     )
                 }.toPersistentList(),
             sensitive = false,
-            contentWarning = "cw-$text".toUiPlainText(),
+            contentWarning = UiTranslatableText("cw-$text".toUiPlainText()),
             user = user,
-            content = text.toUiPlainText(),
+            content = UiTranslatableText(text.toUiPlainText()),
             actions = createActions(statusKey),
             poll = createPoll(statusKey, accountKey),
             statusKey = statusKey,

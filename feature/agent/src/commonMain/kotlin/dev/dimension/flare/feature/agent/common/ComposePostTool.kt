@@ -12,6 +12,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -250,7 +251,7 @@ internal class ComposePostTool(
                 appendLine("  platform=${post.platformType.name}")
                 appendLine("  targetStatus=${post.statusKey}")
                 appendLine("  author=${post.user?.composeDisplayLabel().orEmpty()}")
-                appendLine("  summary=${post.content.raw.take(120)}")
+                appendLine("  summary=${post.content.original.raw.take(120)}")
             }
         }.trim()
     }
@@ -454,7 +455,7 @@ internal class ComposePostTool(
                 it.post?.user?.composeDisplayLabel()?.takeIf { label -> label.isNotBlank() }?.let { label ->
                     appendLine("targetAuthor=$label")
                 }
-                it.post?.content?.raw?.take(160)?.takeIf { summary -> summary.isNotBlank() }?.let { summary ->
+                it.post?.content?.original?.raw?.take(160)?.takeIf { summary -> summary.isNotBlank() }?.let { summary ->
                     appendLine("targetSummary=$summary")
                 }
             }
@@ -477,9 +478,9 @@ internal class ComposePostTool(
             platformType = platformType,
             images = persistentListOf(),
             sensitive = data.sensitive,
-            contentWarning = data.spoilerText?.toUiPlainText(),
+            contentWarning = data.spoilerText?.toUiPlainText()?.let { UiTranslatableText(original = it) },
             user = userPreview,
-            content = data.content.toUiPlainText(),
+            content = UiTranslatableText(original = data.content.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey =

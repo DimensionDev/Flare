@@ -163,6 +163,10 @@
     <string name="settings_ai_config_enable_tldr">启用 AI 摘要</string>
     <string name="settings_ai_config_tldr_description">使用 AI 总结长动态。适用于超过 500 字符的动态。</string>
     <string name="settings_ai_config_enable_pre_translation">启用自动翻译</string>
+    <string name="settings_translation_prefer_platform">优先使用平台译文</string>
+    <string name="settings_translation_prefer_platform_description">自动翻译时优先使用平台提供的可用译文。</string>
+    <string name="settings_translation_show_original_with_translation">同时显示原文和译文</string>
+    <string name="settings_translation_show_original_with_translation_description">在译文前同时显示原文。</string>
     <string name="settings_ai_config_pre_translation_description">在后台翻译新加载的时间轴和个人资料内容并缓存结果。这可能会消耗大量额度 (Token)。</string>
     <string name="settings_ai_config_translate_prompt">翻译提示词</string>
     <string name="settings_ai_config_tldr_prompt">摘要提示词</string>

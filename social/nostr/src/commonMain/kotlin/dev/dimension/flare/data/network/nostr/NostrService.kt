@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
@@ -1788,14 +1789,17 @@ internal class NostrService(
         val statusKey = MicroBlogKey(id, NOSTR_HOST)
         val stats = interactionStats[id] ?: InteractionStats()
         val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
-        val contentWarning = contentWarningReason()?.toUiPlainText()
+        val contentWarning = contentWarningReason()?.toUiPlainText()?.let { UiTranslatableText(original = it) }
         return UiTimelineV2.Post(
             platformType = PlatformType.Nostr,
             images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
             contentWarning = contentWarning,
             user = profile,
-            content = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
+            content =
+                UiTranslatableText(
+                    original = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
+                ),
             actions =
                 buildList {
                     if (canSign) {
@@ -2261,7 +2265,7 @@ internal class NostrService(
             user = actor,
             images = persistentListOf(),
             contentWarning = null,
-            content = uiRichTextOf(emptyList()),
+            content = UiTranslatableText(original = uiRichTextOf(emptyList())),
             poll = null,
             card = null,
             references =

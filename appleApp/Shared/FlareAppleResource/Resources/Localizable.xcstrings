@@ -159608,6 +159608,46 @@
           }
         }
       }
+    },
+    "Display the original text before its translation." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在译文前同时显示原文。"
+          }
+        }
+      }
+    },
+    "Prefer platform translations" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "优先使用平台译文"
+          }
+        }
+      }
+    },
+    "Show original with translation" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同时显示原文和译文"
+          }
+        }
+      }
+    },
+    "Use a platform-provided translation when one is available during auto-translate." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动翻译时优先使用平台提供的可用译文。"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

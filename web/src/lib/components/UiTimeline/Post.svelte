@@ -54,6 +54,12 @@
     const timelineAppearanceState = $derived(
         environmentSettings.timelineAppearance(),
     );
+    const appSettingsState = $derived(environmentSettings.appSettings());
+    const showOriginalWithTranslation = $derived(
+        appSettingsState.type === "Success"
+            ? appSettingsState.data.translateConfig.showOriginalWithTranslation
+            : false,
+    );
     const appearance = $derived(
         timelineAppearanceState.type === "Success"
             ? timelineAppearanceState.data
@@ -88,20 +94,40 @@
             !isQuote &&
             post.user !== null,
     );
+    const visibleContentWarnings = $derived(
+        post.contentWarning
+            ? post.translationDisplayState === "Translated" && post.contentWarning.translation
+                ? showOriginalWithTranslation
+                    ? [post.contentWarning.original, post.contentWarning.translation]
+                    : [post.contentWarning.translation]
+                : [post.contentWarning.original]
+            : [],
+    );
+    const visibleContents = $derived(
+        post.translationDisplayState === "Translated" && post.content.translation
+            ? showOriginalWithTranslation
+                ? [post.content.original, post.content.translation]
+                : [post.content.translation]
+            : [post.content.original],
+    );
     const hasContentWarning = $derived(
-        Boolean(post.contentWarning && !post.contentWarning.isEmpty),
+        visibleContentWarnings.some((content) => !content.isEmpty),
     );
     const contentVisible = $derived(
         !hasContentWarning || contentExpanded || appearance.expandContentWarning,
     );
     const lineLimit = $derived(Math.max(appearance.lineLimit || 5, 1));
+    const shouldExpandTextByDefault = $derived(
+        !hasContentWarning &&
+            visibleContents.reduce((length, content) => length + content.innerText.length, 0) <= 500,
+    );
     const shouldClampBody = $derived(
         !bodyExpanded &&
             !isDetail &&
             !isQuote &&
-            !post.shouldExpandTextByDefault &&
+            !shouldExpandTextByDefault &&
             lineLimit > 0 &&
-            !post.content.isEmpty &&
+            visibleContents.some((content) => !content.isEmpty) &&
             contentVisible,
     );
     const shouldShowBodyExpand = $derived(shouldClampBody && bodyOverflows);
@@ -135,6 +161,7 @@
         const shouldMeasure = shouldClampBody;
         postKey(post);
         lineLimit;
+        showOriginalWithTranslation;
 
         if (!element || !shouldMeasure) {
             bodyOverflows = false;
@@ -143,7 +170,8 @@
 
         tick().then(() => {
             if (bodyTextElement !== element || !shouldMeasure) return;
-            bodyOverflows = element.scrollHeight > element.clientHeight + 1;
+            bodyOverflows = Array.from(element.querySelectorAll<HTMLElement>(".post-text-block"))
+                .some((block) => block.scrollHeight > block.clientHeight + 1);
         });
     });
 
@@ -235,12 +263,16 @@
                     </div>
                 {/if}
 
-                {#if hasContentWarning && post.contentWarning}
+                {#if hasContentWarning}
                     <div class="content-warning rounded-box border border-base-300">
-                        <RichText
-                            text={post.contentWarning}
-                            className="warning-text"
-                        />
+                        {#each visibleContentWarnings as contentWarning}
+                            {#if !contentWarning.isEmpty}
+                                <RichText
+                                    text={contentWarning}
+                                    className="warning-text"
+                                />
+                            {/if}
+                        {/each}
                         {#if !appearance.expandContentWarning}
                             <button
                                 class="btn btn-link btn-xs h-auto min-h-0 rounded-box p-0 text-button"
@@ -253,17 +285,22 @@
                     </div>
                 {/if}
 
-                {#if contentVisible && !post.content.isEmpty}
+                {#if contentVisible && visibleContents.some((content) => !content.isEmpty)}
                     <div
                         bind:this={bodyTextElement}
-                        class:clamped={shouldClampBody}
                         class="post-text"
                         style={`--line-limit: ${lineLimit};`}
                     >
-                        <RichText
-                            text={post.content}
-                            className="rich-body"
-                        />
+                        {#each visibleContents as content}
+                            {#if !content.isEmpty}
+                                <div class:clamped={shouldClampBody} class="post-text-block">
+                                    <RichText
+                                        text={content}
+                                        className="rich-body"
+                                    />
+                                </div>
+                            {/if}
+                        {/each}
                     </div>
                     {#if shouldShowBodyExpand}
                         <button
@@ -335,7 +372,7 @@
                     <div class="quote-box rounded-box border border-base-300">
                         {#each quotes as quote, index (postKey(quote))}
                             <div class="quote-item">
-                                <PostQuote {quote} {appearance} />
+                                <PostQuote {quote} {appearance} {showOriginalWithTranslation} />
                             </div>
                             {#if index < quotes.length - 1}
                                 <div class="divider quote-divider" aria-hidden="true"></div>
@@ -549,6 +586,8 @@
     }
 
     .post-text {
+        display: grid;
+        gap: 0.25rem;
         color: var(--post-text-readable);
         font-size: 0.96rem;
         line-height: 1.5;
@@ -568,7 +607,7 @@
         line-height: 1.35;
     }
 
-    .post-text.clamped {
+    .post-text-block.clamped {
         display: -webkit-box;
         overflow: hidden;
         -webkit-box-orient: vertical;

@@ -245,12 +245,12 @@ public sealed class UiTimelineV2 {
         val platformType: PlatformType,
         val images: SerializableImmutableList<UiMedia>,
         val sensitive: Boolean,
-        val contentWarning: UiRichText?,
+        val contentWarning: UiTranslatableText?,
         val user: UiProfile?,
         public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
-        val content: UiRichText,
+        val content: UiTranslatableText,
         val actions: SerializableImmutableList<ActionMenu>,
         val poll: UiPoll?,
         public override val statusKey: MicroBlogKey,
@@ -273,11 +273,11 @@ public sealed class UiTimelineV2 {
                     append(it)
                     append(" ")
                 }
-                contentWarning?.raw?.let {
+                contentWarning?.original?.raw?.let {
                     append(it)
                     append(" ")
                 }
-                content.raw.let {
+                content.original.raw.let {
                     append(it)
                     append(" ")
                 }
@@ -287,19 +287,18 @@ public sealed class UiTimelineV2 {
             clickEvent.onClicked
         }
 
-        val shouldExpandTextByDefault: Boolean by lazy {
-            (contentWarning == null || contentWarning.isEmpty) && !content.isLongText
-        }
         override val renderHash: Int by lazy {
             renderHashBuilder()
                 .add(itemKey)
                 .add(platformType)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
-                .add(contentWarning?.renderSummaryHash())
+                .add(contentWarning?.original?.renderSummaryHash())
+                .add(contentWarning?.translation?.renderSummaryHash())
                 .add(sourceLanguages)
                 .add(translationDisplayState)
-                .add(content.renderSummaryHash())
+                .add(content.original.renderSummaryHash())
+                .add(content.translation?.renderSummaryHash())
                 .add(actions.renderSummaryHash { it.renderSummaryHash() })
                 .add(poll?.renderSummaryHash())
                 .add(statusKey)
@@ -482,8 +481,10 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
         .add(itemKey)
         .add(platformType)
         .add(user?.renderSummaryHash())
-        .add(contentWarning?.renderSummaryHash())
-        .add(content.renderSummaryHash())
+        .add(contentWarning?.original?.renderSummaryHash())
+        .add(contentWarning?.translation?.renderSummaryHash())
+        .add(content.original.renderSummaryHash())
+        .add(content.translation?.renderSummaryHash())
         .add(images.renderSummaryHash { it.renderSummaryHash() })
         .add(sensitive)
         .add(poll?.renderSummaryHash())

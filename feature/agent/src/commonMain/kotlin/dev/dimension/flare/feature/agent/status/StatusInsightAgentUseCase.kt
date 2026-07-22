@@ -264,8 +264,8 @@ internal class StatusInsightAgentUseCase(
             appendLine("visibility: ${visibility?.name.orEmpty()}")
             appendLine("authorName: ${user?.name?.raw.orEmpty()}")
             appendLine("authorHandle: ${user?.handle?.raw.orEmpty()}")
-            appendLine("contentWarning: ${contentWarning?.raw.orEmpty()}")
-            appendLine("content: ${content.raw}")
+            appendLine("contentWarning: ${contentWarning?.original?.raw.orEmpty()}")
+            appendLine("content: ${content.original.raw}")
             appendLine("replyToHandle: ${replyToHandle.orEmpty()}")
             appendLine("sourceChannel: ${sourceChannel?.name.orEmpty()}")
             appendLine("imagesCount: ${images.size}")
@@ -295,10 +295,15 @@ internal class StatusInsightAgentUseCase(
         }
 
     private fun UiTimelineV2.Post.insightConversationTitle(): String =
-        content.raw
+        content.original.raw
             .trim()
-            .ifBlank { contentWarning?.raw.orEmpty().trim() }
-            .ifBlank { card?.title.orEmpty().trim() }
+            .ifBlank {
+                contentWarning
+                    ?.original
+                    ?.raw
+                    .orEmpty()
+                    .trim()
+            }.ifBlank { card?.title.orEmpty().trim() }
             .ifBlank {
                 user
                     ?.name

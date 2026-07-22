@@ -17,6 +17,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.aiConfig) private var aiConfig
+    @Environment(\.translateConfig) private var translateConfig
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
@@ -45,7 +46,8 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.topContentInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
-            fontSizeDiff: globalAppearance.fontSizeDiff
+            fontSizeDiff: globalAppearance.fontSizeDiff,
+            showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
         controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in
@@ -66,7 +68,8 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.topContentInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
-            fontSizeDiff: globalAppearance.fontSizeDiff
+            fontSizeDiff: globalAppearance.fontSizeDiff,
+            showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
         controller.aiTldrEnabled = aiConfig.tldr
         controller.openURL = { url in

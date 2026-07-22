@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -136,6 +137,7 @@ import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -334,6 +336,7 @@ public fun CommonStatusComponent(
                         poll = item.poll,
                         maxLines = Int.MAX_VALUE,
                         showExpandButton = showExpandButton,
+                        translationDisplayed = item.translationDisplayState == TranslationDisplayState.Translated,
                     )
                 }
             } else {
@@ -341,24 +344,19 @@ public fun CommonStatusComponent(
                     content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
-                    maxLines =
-                        maxLines
-                            ?: if (item.shouldExpandTextByDefault) {
-                                Int.MAX_VALUE
-                            } else {
-                                appearanceSettings.lineLimit
-                            },
+                    maxLines = maxLines,
                     showExpandButton = showExpandButton,
+                    translationDisplayed = item.translationDisplayState == TranslationDisplayState.Translated,
                 )
             }
 
-            if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
+            if (isDetail && !item.content.original.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
                     item = item,
                     statusKey = item.itemKey ?: item.hashCode().toString(),
-                    contentWarning = item.contentWarning,
-                    rawContent = item.content.innerText,
-                    content = item.content,
+                    contentWarning = item.contentWarning?.original,
+                    rawContent = item.content.original.innerText,
+                    content = item.content.original,
                 )
             }
 
@@ -1107,75 +1105,121 @@ private fun StatusReplyComponent(
 
 @Composable
 private fun StatusContentComponent(
-    content: UiRichText,
-    contentWarning: UiRichText?,
+    content: UiTranslatableText,
+    contentWarning: UiTranslatableText?,
     poll: UiPoll?,
-    maxLines: Int,
+    maxLines: Int?,
     showExpandButton: Boolean,
+    translationDisplayed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
+    val showOriginalWithTranslation = appearanceSettings.aiConfig.showOriginalWithTranslation
+    val translation = content.translation
+    val visibleContent =
+        if (translationDisplayed && translation != null) {
+            if (showOriginalWithTranslation) {
+                listOf(content.original, translation)
+            } else {
+                listOf(translation)
+            }
+        } else {
+            listOf(content.original)
+        }
+    val visibleContentWarning =
+        contentWarning
+            ?.let { warning ->
+                val warningTranslation = warning.translation
+                if (translationDisplayed && warningTranslation != null) {
+                    if (showOriginalWithTranslation) {
+                        listOf(warning.original, warningTranslation)
+                    } else {
+                        listOf(warningTranslation)
+                    }
+                } else {
+                    listOf(warning.original)
+                }
+            }.orEmpty()
+    val shouldExpandTextByDefault =
+        visibleContentWarning.all { it.isEmpty } &&
+            visibleContent.sumOf { it.innerText.length } <= 500
+    val effectiveMaxLines =
+        resolveStatusContentMaxLines(
+            explicitMaxLines = maxLines,
+            defaultMaxLines = appearanceSettings.lineLimit,
+            shouldExpandTextByDefault = shouldExpandTextByDefault,
+        )
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
     var showSoftExpand by rememberSaveable {
         mutableStateOf(false)
     }
+    LaunchedEffect(visibleContent, effectiveMaxLines, expanded) {
+        showSoftExpand = false
+    }
     Column(
         modifier = modifier,
     ) {
         val expandContentWarning = appearanceSettings.expandContentWarning
-        contentWarning?.let {
-            if (it.raw.isNotEmpty()) {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    RichText(
-                        text = it,
-                    )
-                    if (!expandContentWarning) {
-                        PlatformFilledTonalButton(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth(),
-                            onClick = {
-                                expanded = !expanded
-                            },
-                        ) {
-                            if (expanded) {
-                                PlatformText(stringResource(Res.string.mastodon_item_show_less))
-                            } else {
-                                PlatformText(stringResource(Res.string.mastodon_item_show_more))
-                            }
+        if (visibleContentWarning.any { !it.isEmpty }) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                visibleContentWarning.forEach { warning ->
+                    if (!warning.isEmpty) {
+                        RichText(text = warning)
+                    }
+                }
+                if (!expandContentWarning) {
+                    PlatformFilledTonalButton(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
+                        onClick = {
+                            expanded = !expanded
+                        },
+                    ) {
+                        if (expanded) {
+                            PlatformText(stringResource(Res.string.mastodon_item_show_less))
+                        } else {
+                            PlatformText(stringResource(Res.string.mastodon_item_show_more))
                         }
                     }
                 }
             }
         }
-        AnimatedVisibility(visible = expanded || expandContentWarning || contentWarning?.raw.isNullOrEmpty()) {
-            Column {
-                if (!content.isEmpty) {
-                    RichText(
-                        text = content,
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines =
-                            if (expanded || maxLines == Int.MAX_VALUE) {
-                                Int.MAX_VALUE
-                            } else {
-                                maxLines
+        AnimatedVisibility(visible = expanded || expandContentWarning || visibleContentWarning.all { it.isEmpty }) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                visibleContent.forEach { visibleText ->
+                    if (!visibleText.isEmpty) {
+                        RichText(
+                            text = visibleText,
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines =
+                                if (expanded || effectiveMaxLines == Int.MAX_VALUE) {
+                                    Int.MAX_VALUE
+                                } else {
+                                    effectiveMaxLines
+                                },
+                            onTextLayout = {
+                                if (
+                                    it.hasVisualOverflow &&
+                                    !expanded &&
+                                    effectiveMaxLines != Int.MAX_VALUE &&
+                                    showExpandButton
+                                ) {
+                                    showSoftExpand = true
+                                }
                             },
-                        onTextLayout = {
-                            showSoftExpand =
-                                it.hasVisualOverflow &&
-                                !expanded &&
-                                maxLines != Int.MAX_VALUE &&
-                                showExpandButton
-                        },
-                    )
+                        )
+                    }
+                }
+                if (visibleContent.any { !it.isEmpty }) {
                     if (showSoftExpand) {
                         PlatformTextButton(
                             onClick = {
@@ -1199,6 +1243,12 @@ private fun StatusContentComponent(
         }
     }
 }
+
+internal fun resolveStatusContentMaxLines(
+    explicitMaxLines: Int?,
+    defaultMaxLines: Int,
+    shouldExpandTextByDefault: Boolean,
+): Int = explicitMaxLines ?: if (shouldExpandTextByDefault) Int.MAX_VALUE else defaultMaxLines
 
 @Composable
 private fun StatusPollComponent(

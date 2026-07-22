@@ -41,6 +41,7 @@ public struct StatusView: View {
     @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
     @Environment(\.timelineAppearance.lineLimit) private var appearanceLineLimit
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
+    @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineMediaOpenAction) private var timelineMediaOpenAction
     private let data: UiTimelineV2.Post
@@ -58,7 +59,7 @@ public struct StatusView: View {
     private let quotes: [UiTimelineV2.Post]
     @State private var contentWarningExpanded = false
     @State private var textExpanded = false
-    @State private var textOverflows = false
+    @State private var overflowingTextIndexes: Set<Int> = []
 
     public init(
         data: UiTimelineV2.Post,
@@ -97,11 +98,23 @@ public struct StatusView: View {
         let parents = inlineParents
         let user = data.user
         let replyToHandle = data.replyToHandle
-        let contentWarning = data.contentWarning
-        let contentWarningIsEmpty = contentWarning?.isEmpty ?? true
-        let content = data.content
-        let contentIsEmpty = content.isEmpty
-        let shouldExpandTextByDefault = data.shouldExpandTextByDefault
+        let translationDisplayed = data.translationDisplayState == .translated
+        let contentWarnings: [UiRichText] = if let warning = data.contentWarning {
+            if translationDisplayed, let translation = warning.translation {
+                translateConfig.showOriginalWithTranslation ? [warning.original, translation] : [translation]
+            } else {
+                [warning.original]
+            }
+        } else {
+            []
+        }
+        let contentWarningIsEmpty = contentWarnings.allSatisfy(\.isEmpty)
+        let contents: [UiRichText] = if translationDisplayed, let translation = data.content.translation {
+            translateConfig.showOriginalWithTranslation ? [data.content.original, translation] : [translation]
+        } else {
+            [data.content.original]
+        }
+        let shouldExpandTextByDefault = contentWarningIsEmpty && contents.reduce(0) { $0 + $1.innerText.count } <= 500
         let poll = data.poll
         let images = Array(data.images)
         let hasImages = !images.isEmpty
@@ -220,12 +233,16 @@ public struct StatusView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         }
-                        if let contentWarning, !contentWarningIsEmpty {
-                            RichText(text: contentWarning)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .if(isDetail) { view in
-                                    view.textSelection(.enabled)
+                        if !contentWarningIsEmpty {
+                            ForEach(Array(contentWarnings.enumerated()), id: \.offset) { _, contentWarning in
+                                if !contentWarning.isEmpty {
+                                    RichText(text: contentWarning)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        .if(isDetail) { view in
+                                            view.textSelection(.enabled)
+                                        }
                                 }
+                            }
                             
                             if !expandContentWarning {
                                 Button {
@@ -233,7 +250,7 @@ public struct StatusView: View {
                                         contentWarningExpanded.toggle()
                                         if !contentWarningExpanded {
                                             textExpanded = false
-                                            textOverflows = false
+                                            overflowingTextIndexes.removeAll()
                                         }
                                     }
                                 } label: {
@@ -249,32 +266,39 @@ public struct StatusView: View {
                         }
 
                         if contentWarningExpanded || expandContentWarning || contentWarningIsEmpty {
-                            if !contentIsEmpty {
-                                CollapsibleRichText(
-                                    text: content,
-                                    lineLimit: contentLineLimit,
-                                    isExpanded: textExpanded,
-                                    isTextSelectionEnabled: isDetail
-                                ) { overflows in
-                                    if textOverflows != overflows {
-                                        textOverflows = overflows
-                                    }
-                                }
-                                if textOverflows, canExpandLineLimitedContent {
-                                    Button {
-                                        withAnimation {
-                                            textExpanded = true
+                            ForEach(Array(contents.enumerated()), id: \.offset) { index, content in
+                                if !content.isEmpty {
+                                    CollapsibleRichText(
+                                        text: content,
+                                        lineLimit: contentLineLimit,
+                                        isExpanded: textExpanded,
+                                        isTextSelectionEnabled: isDetail
+                                    ) { overflows in
+                                        if overflows {
+                                            overflowingTextIndexes.insert(index)
+                                        } else {
+                                            overflowingTextIndexes.remove(index)
                                         }
-                                    } label: {
-                                        Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
                                     }
-                                    .buttonStyle(.borderless)
                                 }
+                            }
+                            if !overflowingTextIndexes.isEmpty, canExpandLineLimitedContent {
+                                Button {
+                                    withAnimation {
+                                        textExpanded = true
+                                    }
+                                } label: {
+                                    Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
+                                }
+                                .buttonStyle(.borderless)
                             }
                         }
                         
                         if isDetail, showTranslate {
-                            StatusTranslateView(content: content, contentWarning: contentWarning)
+                            StatusTranslateView(
+                                content: data.content.original,
+                                contentWarning: data.contentWarning?.original
+                            )
                         }
                         
                         if let poll, showMedia {
@@ -387,11 +411,15 @@ public struct StatusView: View {
         .onChange(of: data.renderHash) { _, _ in
             contentWarningExpanded = false
             textExpanded = false
-            textOverflows = false
+            overflowingTextIndexes.removeAll()
         }
         .onChange(of: effectiveLineLimit) { _, _ in
             textExpanded = false
-            textOverflows = false
+            overflowingTextIndexes.removeAll()
+        }
+        .onChange(of: translateConfig.showOriginalWithTranslation) { _, _ in
+            textExpanded = false
+            overflowingTextIndexes.removeAll()
         }
     }
     

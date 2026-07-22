@@ -11,6 +11,7 @@ import FlareAppleCore
 struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
     @Environment(\.timelineAppearance) private var timelineAppearance
+    @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
     @Environment(\.refresh) private var refreshAction: RefreshAction?
 
@@ -29,14 +30,20 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
         controller.update(data: data)
-        controller.appearance = GalleryUIKitAppearance(timeline: timelineAppearance)
+        controller.appearance = GalleryUIKitAppearance(
+            timeline: timelineAppearance,
+            showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
+        )
     }
 
     private func apply(to controller: UIGalleryTimelineController) {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
-        controller.appearance = GalleryUIKitAppearance(timeline: timelineAppearance)
+        controller.appearance = GalleryUIKitAppearance(
+            timeline: timelineAppearance,
+            showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
+        )
         controller.openURL = { url in openURL.callAsFunction(url) }
     }
 }
@@ -959,6 +966,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
     var onOpenURL: ((URL) -> Void)? {
         didSet {
             bodyText.onOpenURL = onOpenURL
+            bodyTranslationText.onOpenURL = onOpenURL
             userName.onOpenURL = onOpenURL
         }
     }
@@ -985,6 +993,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
     }()
     private let textContainer = UIView()
     private let bodyText = RichTextUIView()
+    private let bodyTranslationText = RichTextUIView()
     private let userRow = UIStackView()
     private let avatar = AvatarUIView()
     private let userName = RichTextUIView()
@@ -1029,15 +1038,25 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         bodyText.fixedVertical = true
         bodyText.setContentHuggingPriority(.required, for: .vertical)
         bodyText.setContentCompressionResistancePriority(.required, for: .vertical)
+        bodyTranslationText.baseTextStyle = .subheadline
+        bodyTranslationText.lineLimit = 5
+        bodyTranslationText.fixedVertical = true
+        bodyTranslationText.setContentHuggingPriority(.required, for: .vertical)
+        bodyTranslationText.setContentCompressionResistancePriority(.required, for: .vertical)
         textContainer.setContentHuggingPriority(.required, for: .vertical)
         textContainer.setContentCompressionResistancePriority(.required, for: .vertical)
         bodyText.translatesAutoresizingMaskIntoConstraints = false
+        bodyTranslationText.translatesAutoresizingMaskIntoConstraints = false
         textContainer.addSubview(bodyText)
+        textContainer.addSubview(bodyTranslationText)
         NSLayoutConstraint.activate([
             bodyText.topAnchor.constraint(equalTo: textContainer.topAnchor, constant: 8),
             bodyText.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 8),
             bodyText.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -8),
-            bodyText.bottomAnchor.constraint(equalTo: textContainer.bottomAnchor),
+            bodyTranslationText.topAnchor.constraint(equalTo: bodyText.bottomAnchor, constant: 4),
+            bodyTranslationText.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 8),
+            bodyTranslationText.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -8),
+            bodyTranslationText.bottomAnchor.constraint(equalTo: textContainer.bottomAnchor),
         ])
         stack.addArrangedSubview(textContainer)
 
@@ -1079,6 +1098,8 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         playBadgeBackground.isHidden = true
         avatar.set(url: nil)
         bodyText.text = nil
+        bodyTranslationText.text = nil
+        bodyTranslationText.isHidden = true
         userName.text = nil
         onOpenURL = nil
     }
@@ -1092,6 +1113,8 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         imageView.cancel()
         textContainer.isHidden = true
         bodyText.text = nil
+        bodyTranslationText.text = nil
+        bodyTranslationText.isHidden = true
         mediaPreviewURL = nil
         imageAspectConstraint?.isActive = false
         imageAspectConstraint = nil
@@ -1109,9 +1132,21 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
                 imageAspectConstraint = imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor, multiplier: 1 / ratio)
                 imageAspectConstraint?.isActive = true
             }
-        } else if !post.content.isEmpty {
-            textContainer.isHidden = false
-            bodyText.text = post.content
+        } else {
+            let contents: [UiRichText] = if post.translationDisplayState == .translated,
+                                            let translation = post.content.translation {
+                appearance.showOriginalWithTranslation ? [post.content.original, translation] : [translation]
+            } else {
+                [post.content.original]
+            }
+            if contents.contains(where: { !$0.isEmpty }) {
+                textContainer.isHidden = false
+                bodyText.text = contents[0]
+                if contents.count > 1 {
+                    bodyTranslationText.text = contents[1]
+                    bodyTranslationText.isHidden = false
+                }
+            }
         }
 
         if let user = post.user {

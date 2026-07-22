@@ -80,7 +80,8 @@ private extension TimelineAppearance {
             aiConfig: TimelineAppearance.AiConfig(
                 translation: true,
                 tldr: appSettings.aiConfig.tldr,
-                agent: appSettings.aiConfig.agent && appSettings.aiConfig.type.openAIModel?.isEmpty == false
+                agent: appSettings.aiConfig.agent && appSettings.aiConfig.type.openAIModel?.isEmpty == false,
+                showOriginalWithTranslation: appSettings.translateConfig.showOriginalWithTranslation
             ),
             lineLimit: lineLimit,
             showTranslateButton: showTranslateButton

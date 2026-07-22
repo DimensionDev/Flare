@@ -157,7 +157,7 @@ class StatusDetailRemoteMediatorTest {
             "quoted post",
             post.presentation.quotes
                 .first()
-                .content.innerText,
+                .content.original.innerText,
         )
     }
 

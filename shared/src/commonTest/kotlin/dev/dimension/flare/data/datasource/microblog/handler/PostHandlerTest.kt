@@ -42,6 +42,7 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.mapper.vvoLike
@@ -234,7 +235,7 @@ class PostHandlerTest : RobolectricTest() {
 
             val cachedPost = assertNotNull(cached as? UiTimelineV2.Post)
             assertEquals(postKey, cachedPost.statusKey)
-            assertEquals("wrapper content", cachedPost.content.raw)
+            assertEquals("wrapper content", cachedPost.content.original.raw)
             assertEquals(0, fakeLoader.statusCallCount)
         }
 
@@ -374,7 +375,7 @@ class PostHandlerTest : RobolectricTest() {
                     },
                 )
             assertEquals(postKey, timelineItem.post.statusKey)
-            assertEquals("outer content", timelineItem.post.content.raw)
+            assertEquals("outer content", timelineItem.post.content.original.raw)
             assertEquals(
                 quoteKey,
                 timelineItem.presentation.quotes
@@ -385,7 +386,7 @@ class PostHandlerTest : RobolectricTest() {
                 "quoted content",
                 timelineItem.presentation.quotes
                     .single()
-                    .content.raw,
+                    .content.original.raw,
             )
         }
 
@@ -439,13 +440,14 @@ class PostHandlerTest : RobolectricTest() {
                             .asTimelinePostItem()
                             ?.displayPost
                             ?.content
+                            ?.original
                             ?.raw == "updated outer content"
                     }
                 }
 
             val updatedTimelineItem = assertNotNull(updated).asTimelinePostItem()
             assertNotNull(updatedTimelineItem)
-            assertEquals("updated outer content", updatedTimelineItem.displayPost.content.raw)
+            assertEquals("updated outer content", updatedTimelineItem.displayPost.content.original.raw)
             assertEquals(
                 quoteKey,
                 updatedTimelineItem.presentation.quotes
@@ -739,8 +741,9 @@ class PostHandlerTest : RobolectricTest() {
                     .filterIsInstance<CacheState.Success<UiTimelineV2>>()
                     .map { it.data.asTimelinePostItem()?.displayPost }
                     .filterNotNull()
-                    .first { it.content.raw == "$longText (${Locale.language})" }
-            assertEquals("$longText (${Locale.language})", translated.content.raw)
+                    .first { it.content.translation?.raw == "$longText (${Locale.language})" }
+            assertEquals(longText, translated.content.original.raw)
+            assertEquals("$longText (${Locale.language})", translated.content.translation?.raw)
         }
 
     private suspend fun Cacheable<UiTimelineV2>.firstSuccess(predicate: (UiTimelineV2) -> Boolean = { true }): UiTimelineV2 =
@@ -772,7 +775,7 @@ class PostHandlerTest : RobolectricTest() {
             sensitive = false,
             contentWarning = null,
             user = null,
-            content = text.toUiPlainText(),
+            content = UiTranslatableText(text.toUiPlainText()),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

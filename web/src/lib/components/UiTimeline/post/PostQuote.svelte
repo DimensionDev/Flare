@@ -11,13 +11,22 @@
 	let {
 		quote,
 		appearance,
+		showOriginalWithTranslation,
 	}: {
 		quote: UiTimelineV2Post;
 		appearance: TimelineAppearance;
+		showOriginalWithTranslation: boolean;
 	} = $props();
 
 	const deepLink = useDeepLink();
 	const quoteClickable = $derived(deepLink.canPerformClickEvent(quote.clickEvent));
+	const visibleContents = $derived(
+		quote.translationDisplayState === 'Translated' && quote.content.translation
+			? showOriginalWithTranslation
+				? [quote.content.original, quote.content.translation]
+				: [quote.content.translation]
+			: [quote.content.original],
+	);
 
 	function performQuoteClick(event: MouseEvent): void {
 		if (!quoteClickable || shouldIgnorePostContainerClick(event)) return;
@@ -48,9 +57,13 @@
 	onkeydown={performQuoteKeydown}
 >
 	<PostHeader post={quote} {appearance} sideAvatarVisible={false} quoteHeader={true} />
-	{#if !quote.content.isEmpty}
+	{#if visibleContents.some((content) => !content.isEmpty)}
 		<div class="quote-text">
-			<RichText text={quote.content} className="rich-body" />
+			{#each visibleContents as content}
+				{#if !content.isEmpty}
+					<RichText text={content} className="rich-body" />
+				{/if}
+			{/each}
 		</div>
 	{/if}
 	{#if quote.images.length > 0}
@@ -72,6 +85,8 @@
 	}
 
 	.quote-text {
+		display: grid;
+		gap: 0.25rem;
 		color: var(--post-text-readable);
 		font-size: 0.86rem;
 		line-height: 1.42;

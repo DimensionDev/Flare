@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.network.xqt
 
 import dev.dimension.flare.common.JSON_WITH_ENCODE_DEFAULT
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
+import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.DmApi
 import dev.dimension.flare.data.network.xqt.api.GuestApi
@@ -158,7 +160,7 @@ internal class XQTService(
                         append("sec-fetch-site", "cross-site")
                         append("sec-gpc", "1")
                         append("upgrade-insecure-requests", "1")
-                        append("accept-language", "en-US,en;q=0.9")
+                        append("accept-language", Locale.language.ifBlank { "en" })
                         append("dnt", "1")
                         append("host", "x" + ".com")
                     }
@@ -190,7 +192,7 @@ private val XQTHeaderPlugin =
             val chocolate = chocolateFlow?.firstOrNull()
             request.headers {
                 append("Authorization", "Bearer $token")
-                append("x-twitter-client-language", "en")
+                append("x-twitter-client-language", xTwitterClientLanguage(Locale.language))
                 append(
                     "Sec-Ch-Ua",
                     "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\"",
@@ -253,3 +255,19 @@ private val XQTHeaderPlugin =
             }
         }
     }
+
+internal fun xTwitterClientLanguage(locale: String): String {
+    val normalized = locale.trim().replace('_', '-')
+    if (normalized.equals("en-GB", ignoreCase = true)) {
+        return "en-GB"
+    }
+    return when (val language = canonicalTranslationLanguage(normalized)) {
+        "zh", "zh-hans" -> "zh-cn"
+        "zh-hant" -> "zh-tw"
+        "ms" -> "msa"
+        "nb", "nn", "no" -> "no"
+        "fil", "tl" -> "tl"
+        null, "und" -> "en"
+        else -> language
+    }
+}

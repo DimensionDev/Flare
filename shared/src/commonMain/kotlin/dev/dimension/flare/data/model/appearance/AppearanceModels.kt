@@ -61,6 +61,7 @@ public data class TimelineAppearance(
         val translation: Boolean = false,
         val tldr: Boolean = false,
         val agent: Boolean = false,
+        val showOriginalWithTranslation: Boolean = false,
     )
 }
 

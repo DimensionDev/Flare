@@ -21,7 +21,7 @@ public data class UiDMRoom public constructor(
             UiDMItem.Message.Deleted -> ""
             null -> ""
             is UiDMItem.Message.Media -> ""
-            is UiDMItem.Message.Status -> message.status.content.raw
+            is UiDMItem.Message.Status -> message.status.content.original.raw
         }
     }
     val id: String by lazy {

@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
@@ -543,7 +544,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
             if (!cw.isNullOrEmpty() && !text.isNullOrEmpty()) {
-                parseMisskeyText(cw, accountKey, emojis, remoteHost)
+                UiTranslatableText(original = parseMisskeyText(cw, accountKey, emojis, remoteHost))
             } else {
                 null
             },
@@ -577,13 +578,16 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 },
             ).toImmutableList(),
         content =
-            if (!text.isNullOrEmpty()) {
-                parseMisskeyText(text, accountKey, emojis, remoteHost)
-            } else if (!cw.isNullOrEmpty()) {
-                parseMisskeyText(cw, accountKey, emojis, remoteHost)
-            } else {
-                "".toUiPlainText()
-            },
+            UiTranslatableText(
+                original =
+                    if (!text.isNullOrEmpty()) {
+                        parseMisskeyText(text, accountKey, emojis, remoteHost)
+                    } else if (!cw.isNullOrEmpty()) {
+                        parseMisskeyText(cw, accountKey, emojis, remoteHost)
+                    } else {
+                        "".toUiPlainText()
+                    },
+            ),
         actions =
             listOfNotNull(
                 ActionMenu.Item(

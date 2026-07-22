@@ -284,6 +284,10 @@
     <string name="settings_ai_config_agent_description">Show AI Agent entry points in relevant places when an OpenAI-compatible model is configured.</string>
     <string name="settings_ai_config_enable_pre_translation">Enable auto-translate</string>
     <string name="settings_ai_config_pre_translation_description">Translate newly loaded timeline and profile content in the background and cache the results. This can use a large number of tokens.</string>
+    <string name="settings_translation_prefer_platform">Prefer platform translations</string>
+    <string name="settings_translation_prefer_platform_description">Use a platform-provided translation when one is available during auto-translate.</string>
+    <string name="settings_translation_show_original_with_translation">Show original with translation</string>
+    <string name="settings_translation_show_original_with_translation_description">Display the original text before its translation.</string>
     <string name="settings_ai_config_enable_tldr">Enable AI summaries</string>
     <string name="settings_ai_config_tldr_description">Summarize long posts with AI. Available for posts longer than 500 characters.</string>
     <string name="settings_ai_config_translate_provider">Translation Provider</string>

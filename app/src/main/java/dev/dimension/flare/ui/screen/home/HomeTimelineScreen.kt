@@ -60,6 +60,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,6 +73,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
@@ -81,6 +85,7 @@ import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
@@ -91,6 +96,7 @@ import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.Glassify
+import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -118,6 +124,7 @@ import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import dev.dimension.flare.ui.component.Text as FlareText
@@ -448,7 +455,10 @@ internal fun HomeTimelineScreen(
                                     contentPadding = contentPadding,
                                     modifier = Modifier.fillMaxWidth(),
                                     changeLogState = state,
+                                    isHomeTimeline = true,
                                     isCurrentlyVisible = pagerState.currentPage == index,
+                                    autoRefreshInterval =
+                                        LocalAppSettings.current.homeTimelineAutoRefreshInterval,
                                 )
                             }
                         }
@@ -530,7 +540,9 @@ internal fun TimelineItemContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     changeLogState: ChangeLogState? = null,
+    isHomeTimeline: Boolean = false,
     isCurrentlyVisible: Boolean = true,
+    autoRefreshInterval: TimelineAutoRefreshInterval = TimelineAutoRefreshInterval.DISABLED,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
     val isBigScreen = isBigScreen()
@@ -549,8 +561,24 @@ internal fun TimelineItemContent(
     val state =
         rememberTimelineItemPresenterWithLazyListState(
             item = item,
+            isHomeTimeline = isHomeTimeline,
             lazyStaggeredGridState = lazyStaggeredGridState,
         )
+    val latestState by rememberUpdatedState(state)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(isHomeTimeline, autoRefreshInterval, isCurrentlyVisible, lifecycleOwner) {
+        if (!isHomeTimeline || !isCurrentlyVisible || autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
+            return@LaunchedEffect
+        }
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                delay(autoRefreshInterval.minutes * 60_000L)
+                if (!latestState.isRefreshing) {
+                    latestState.refreshSuspend()
+                }
+            }
+        }
+    }
     if (isCurrentlyVisible) {
         RegisterTabCallback(
             lazyListState = state.lazyListState,

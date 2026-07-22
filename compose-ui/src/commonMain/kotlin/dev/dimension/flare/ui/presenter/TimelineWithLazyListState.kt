@@ -39,10 +39,11 @@ public interface TimelineWithLazyListState : TimelineItemPresenter.State {
 @Composable
 public fun rememberTimelineItemPresenterWithLazyListState(
     item: UiTimelineTabItem,
+    isHomeTimeline: Boolean = false,
     lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ): TimelineWithLazyListState {
-    val baseState by producePresenter("timeline_${item.id}") {
-        remember { TimelineItemPresenter(item) }.invoke()
+    val baseState by producePresenter("timeline_${item.id}_$isHomeTimeline") {
+        remember(item, isHomeTimeline) { TimelineItemPresenter(item, isHomeTimeline) }.invoke()
     }
     return rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState)
 }

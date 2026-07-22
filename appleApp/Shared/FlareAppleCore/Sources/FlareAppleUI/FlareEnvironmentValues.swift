@@ -31,6 +31,10 @@ private struct TranslateConfigKey: EnvironmentKey {
     static let defaultValue = AppSettings.TranslateConfig()
 }
 
+private struct AppSettingsKey: EnvironmentKey {
+    static let defaultValue = AppSettings.companion.default
+}
+
 private struct NetworkKindKey: EnvironmentKey {
     static let defaultValue: NetworkKind = .cellular
 }
@@ -58,6 +62,11 @@ public extension EnvironmentValues {
     var translateConfig: AppSettings.TranslateConfig {
         get { self[TranslateConfigKey.self] }
         set { self[TranslateConfigKey.self] = newValue }
+    }
+
+    var appSettings: AppSettings {
+        get { self[AppSettingsKey.self] }
+        set { self[AppSettingsKey.self] = newValue }
     }
 
     var networkKind: NetworkKind {

@@ -38,8 +38,10 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class TimelinePresenterBindingTest {
     private lateinit var root: Path
@@ -117,6 +119,32 @@ class TimelinePresenterBindingTest {
                 ),
                 observed,
             )
+        }
+
+    @Test
+    fun launchRefreshSettingOnlyAppliesToHomeTimeline() =
+        runTest {
+            var settingReads = 0
+            val disabledSetting =
+                suspend {
+                    settingReads += 1
+                    false
+                }
+
+            assertTrue(
+                shouldRefreshTimelineOnInitialize(
+                    isHomeTimeline = false,
+                    refreshHomeTimelineOnLaunch = disabledSetting,
+                ),
+            )
+            assertEquals(0, settingReads)
+            assertFalse(
+                shouldRefreshTimelineOnInitialize(
+                    isHomeTimeline = true,
+                    refreshHomeTimelineOnLaunch = disabledSetting,
+                ),
+            )
+            assertEquals(1, settingReads)
         }
 
     @Test

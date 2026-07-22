@@ -258,7 +258,7 @@ struct RootView: View {
     }
 
     private func routeWithLatestTimelinePresentation(_ route: Route) -> Route {
-        guard case .timeline(let selectedTimeline) = route,
+        guard case .timeline(let selectedTimeline, isHome: true) = route,
               case .success(let data) = onEnum(of: homeTimelineWithTabsPresenter.state.tabState),
               let latestTimeline = data.data
                 .cast(UiTimelineTabItem.self)
@@ -266,7 +266,7 @@ struct RootView: View {
         else {
             return route
         }
-        return .timeline(latestTimeline)
+        return .timeline(latestTimeline, isHome: true)
     }
 
     private func handleMainWindowNavigationRequest(_ request: MacMainWindowNavigationRequest?) {

@@ -1,6 +1,9 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
+import androidx.paging.PagingState
+import androidx.paging.RemoteMediator.MediatorResult
 import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
@@ -21,6 +24,7 @@ internal class TimelineRemoteMediator(
     private val allowLongText: Boolean,
     private val notifyError: (Throwable) -> Unit = {},
     private val preTranslationService: PreTranslationService = NoopPreTranslationService,
+    private val refreshOnInitialize: suspend () -> Boolean = { true },
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
         DbPagingTimelineWithStatus,
@@ -29,6 +33,8 @@ internal class TimelineRemoteMediator(
         database = database,
     ),
     RemoteLoader<DbPagingTimelineWithStatus> {
+    private var suppressInitialPrepend = false
+
     override val pagingKey: String
         get() = loader.pagingKey
 
@@ -42,16 +48,34 @@ internal class TimelineRemoteMediator(
         notifyError(e)
     }
 
-    override suspend fun initialize(): InitializeAction =
-        if (loader.supportPrepend) {
-            if (database.pagingTimelineDao().anyPaging(loader.pagingKey)) {
-                InitializeAction.SKIP_INITIAL_REFRESH
-            } else {
-                InitializeAction.LAUNCH_INITIAL_REFRESH
-            }
+    override suspend fun initialize(): InitializeAction {
+        val hasCache = database.pagingTimelineDao().anyPaging(loader.pagingKey)
+        if (!hasCache) {
+            return InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
+
+        val shouldRefresh = refreshOnInitialize()
+        suppressInitialPrepend = loader.supportPrepend && !shouldRefresh
+        return if (!shouldRefresh || loader.supportPrepend) {
+            InitializeAction.SKIP_INITIAL_REFRESH
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         }
+    }
+
+    override suspend fun doLoad(
+        loadType: LoadType,
+        state: PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>,
+    ): MediatorResult {
+        if (loadType == LoadType.PREPEND && suppressInitialPrepend) {
+            suppressInitialPrepend = false
+            return MediatorResult.Success(endOfPaginationReached = true)
+        }
+        if (loadType == LoadType.REFRESH) {
+            suppressInitialPrepend = false
+        }
+        return super.doLoad(loadType, state)
+    }
 
     override suspend fun load(
         pageSize: Int,

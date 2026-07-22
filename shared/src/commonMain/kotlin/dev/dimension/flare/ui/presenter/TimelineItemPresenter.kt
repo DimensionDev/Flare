@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 
 public class TimelineItemPresenter(
     private val timelineTabItem: UiTimelineTabItem,
+    private val isHomeTimeline: Boolean = false,
 ) : PresenterBase<TimelineItemPresenter.State>() {
     private val timelinePresenterFactory by koinInject<TimelinePresenterFactory>()
 
@@ -28,7 +29,7 @@ public class TimelineItemPresenter(
     }
 
     private val timelinePresenter by lazy {
-        timelinePresenterFactory.create(timelineTabItem)
+        timelinePresenterFactory.create(timelineTabItem, isHomeTimeline)
     }
 
     @Composable

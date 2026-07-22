@@ -26,6 +26,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +44,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
 import dev.dimension.flare.model.AccountType
@@ -50,6 +52,7 @@ import dev.dimension.flare.refresh
 import dev.dimension.flare.tab_settings_add_tab
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
+import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.TabIcon
@@ -82,6 +85,7 @@ import io.github.composefluent.component.SelectorBarItem
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
@@ -215,8 +219,24 @@ internal fun HomeTimelineScreen(
             state.selectedTab.onSuccess { currentTab ->
                 val currentTabTimelineState =
                     key(currentTab.id) {
-                        rememberTimelineItemPresenterWithLazyListState(currentTab)
+                        rememberTimelineItemPresenterWithLazyListState(
+                            item = currentTab,
+                            isHomeTimeline = true,
+                        )
                     }
+                val autoRefreshInterval = LocalAppSettings.current.homeTimelineAutoRefreshInterval
+                val latestTimelineState by rememberUpdatedState(currentTabTimelineState)
+                LaunchedEffect(currentTab.id, autoRefreshInterval) {
+                    if (autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
+                        return@LaunchedEffect
+                    }
+                    while (true) {
+                        delay(autoRefreshInterval.minutes * 60_000L)
+                        if (!latestTimelineState.isRefreshing) {
+                            latestTimelineState.refreshSuspend()
+                        }
+                    }
+                }
                 val timelineAppearance = LocalTimelineAppearance.current
                 CompositionLocalProvider(
                     LocalTimelineAppearance provides

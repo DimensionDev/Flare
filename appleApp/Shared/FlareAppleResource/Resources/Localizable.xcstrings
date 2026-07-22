@@ -111957,7 +111957,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved to Files"
+            "value" : "Saved"
           }
         },
         "fi" : {
@@ -119071,7 +119071,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Analyzing this profile…"
+            "value" : "Analyzing this profile..."
           }
         },
         "fi" : {
@@ -131936,6 +131936,138 @@
         }
       }
     },
+    "settings_auto_refresh_disabled" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉"
+          }
+        }
+      }
+    },
+    "settings_auto_refresh_fifteen_minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every 15 minutes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 15 分钟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 15 分鐘"
+          }
+        }
+      }
+    },
+    "settings_auto_refresh_five_minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every 5 minutes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 5 分钟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 5 分鐘"
+          }
+        }
+      }
+    },
+    "settings_auto_refresh_one_hour" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every hour"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每小时"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每小時"
+          }
+        }
+      }
+    },
+    "settings_auto_refresh_one_minute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every minute"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 1 分钟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 1 分鐘"
+          }
+        }
+      }
+    },
+    "settings_auto_refresh_thirty_minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every 30 minutes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 30 分钟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每 30 分鐘"
+          }
+        }
+      }
+    },
     "settings_behavior_description" : {
       "localizations" : {
         "af" : {
@@ -131989,7 +132121,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Browser and link handling preferences"
+            "value" : "Timeline refresh, browser, and link handling preferences"
           }
         },
         "fi" : {
@@ -132109,13 +132241,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "浏览器和链接处理偏好"
+            "value" : "时间线刷新、浏览器和链接处理偏好"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "瀏覽器與連結處理偏好"
+            "value" : "時間軸重新整理、瀏覽器與連結處理偏好"
           }
         }
       }
@@ -132300,6 +132432,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "行為"
+          }
+        }
+      }
+    },
+    "settings_home_timeline_auto_refresh_interval" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-refresh home timeline"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动刷新首页时间线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動重新整理首頁時間軸"
+          }
+        }
+      }
+    },
+    "settings_home_timeline_auto_refresh_interval_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh the currently selected timeline while the home screen is open"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首页打开时，定时刷新当前选中的时间线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首頁開啟時，定時重新整理目前選取的時間軸"
           }
         }
       }
@@ -133560,6 +133736,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱私權政策"
+          }
+        }
+      }
+    },
+    "settings_refresh_home_timeline_on_launch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh home timeline on launch"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动时刷新首页时间线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟動時重新整理首頁時間軸"
+          }
+        }
+      }
+    },
+    "settings_refresh_home_timeline_on_launch_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetch new posts when Flare opens"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开 Flare 时获取新内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟 Flare 時取得新內容"
           }
         }
       }

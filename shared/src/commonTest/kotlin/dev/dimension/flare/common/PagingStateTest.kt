@@ -2,6 +2,7 @@ package dev.dimension.flare.common
 
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -9,6 +10,25 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PagingStateTest {
+    @Test
+    fun onlySuccessfulPagingStateCanBeRefreshing() {
+        assertFalse(PagingState.Loading<Any>().isRefreshing)
+        assertFalse(
+            PagingState.Success
+                .ImmutableSuccess(
+                    data = persistentListOf(Unit),
+                    isRefreshing = false,
+                ).isRefreshing,
+        )
+        assertTrue(
+            PagingState.Success
+                .ImmutableSuccess(
+                    data = persistentListOf(Unit),
+                    isRefreshing = true,
+                ).isRefreshing,
+        )
+    }
+
     @Test
     fun unresolvedEmptySnapshotIsNotResolvedEmpty() {
         val snapshot =

@@ -82,7 +82,7 @@ struct HomeTimelineScreen: View {
                             tabs.first { $0.id == id }
                         } ?? tabs[0]
                         ZStack {
-                            TimelineScreen(tabItem: tab, allowGalleryMode: true)
+                            TimelineScreen(tabItem: tab, allowGalleryMode: true, isHomeTimeline: true)
                                 .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
                                 .id(tab.id)
                         }

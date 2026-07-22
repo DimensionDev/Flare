@@ -215,6 +215,7 @@ public struct AppearanceDisplaySettingsSection: View {
 public struct BehaviorSettingsSection<LinkOpenDefaultsLink: View>: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     @Environment(\.globalAppearance) private var globalAppearance
+    @Environment(\.appSettings) private var appSettings
     private let linkOpenDefaultsLink: () -> LinkOpenDefaultsLink
 
     public init(@ViewBuilder linkOpenDefaultsLink: @escaping () -> LinkOpenDefaultsLink) {
@@ -223,6 +224,35 @@ public struct BehaviorSettingsSection<LinkOpenDefaultsLink: View>: View {
 
     public var body: some View {
         Section {
+            Toggle(isOn: Binding(get: {
+                appSettings.refreshHomeTimelineOnLaunch
+            }, set: { newValue in
+                presenter.state.updateRefreshHomeTimelineOnLaunch(value: newValue)
+            })) {
+                Text("settings_refresh_home_timeline_on_launch", bundle: FlareAppleUILocalization.bundle)
+                Text("settings_refresh_home_timeline_on_launch_description", bundle: FlareAppleUILocalization.bundle)
+            }
+            Picker(selection: Binding(get: {
+                appSettings.homeTimelineAutoRefreshInterval
+            }, set: { newValue in
+                presenter.state.updateHomeTimelineAutoRefreshInterval(value: newValue)
+            })) {
+                Text("settings_auto_refresh_disabled", bundle: FlareAppleUILocalization.bundle)
+                    .tag(TimelineAutoRefreshInterval.disabled)
+                Text("settings_auto_refresh_one_minute", bundle: FlareAppleUILocalization.bundle)
+                    .tag(TimelineAutoRefreshInterval.oneMinute)
+                Text("settings_auto_refresh_five_minutes", bundle: FlareAppleUILocalization.bundle)
+                    .tag(TimelineAutoRefreshInterval.fiveMinutes)
+                Text("settings_auto_refresh_fifteen_minutes", bundle: FlareAppleUILocalization.bundle)
+                    .tag(TimelineAutoRefreshInterval.fifteenMinutes)
+                Text("settings_auto_refresh_thirty_minutes", bundle: FlareAppleUILocalization.bundle)
+                    .tag(TimelineAutoRefreshInterval.thirtyMinutes)
+                Text("settings_auto_refresh_one_hour", bundle: FlareAppleUILocalization.bundle)
+                    .tag(TimelineAutoRefreshInterval.oneHour)
+            } label: {
+                Text("settings_home_timeline_auto_refresh_interval", bundle: FlareAppleUILocalization.bundle)
+                Text("settings_home_timeline_auto_refresh_interval_description", bundle: FlareAppleUILocalization.bundle)
+            }
             #if os(iOS)
             Toggle(isOn: Binding(get: {
                 globalAppearance.inAppBrowser

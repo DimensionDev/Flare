@@ -552,6 +552,7 @@ private struct MacBehaviorSettingsPane: View {
             title: "settings_behavior_title",
             subtitle: "settings_behavior_description"
         ) {
+            BehaviorSettingsSection()
             MacLinkOpenDefaultsInlineSection(presenter: linkOpenDefaultsPresenter)
         }
     }

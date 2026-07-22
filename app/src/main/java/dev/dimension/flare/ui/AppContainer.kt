@@ -14,6 +14,7 @@ import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.ui.common.BindAmberSignerLauncher
+import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.takeSuccessOr
@@ -62,6 +63,7 @@ fun FlareApp(content: @Composable () -> Unit) {
     val appSettings = state.appSettings.takeSuccessOr(AppSettings(""))
     val openAIConfig = appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
     CompositionLocalProvider(
+        LocalAppSettings provides appSettings,
         LocalUriHandler provides uriHandler,
         LocalGlobalAppearance provides globalAppearance,
         LocalTimelineAppearance provides

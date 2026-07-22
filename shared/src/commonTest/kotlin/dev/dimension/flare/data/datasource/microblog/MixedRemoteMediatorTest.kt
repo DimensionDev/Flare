@@ -16,6 +16,7 @@ import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
@@ -268,6 +269,55 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 androidx.paging.RemoteMediator.InitializeAction.SKIP_INITIAL_REFRESH,
                 mediator.initialize(),
             )
+        }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun timelineMediatorSuppressesLaunchRefreshWhenDisabled() =
+        runTest {
+            val loader =
+                FakeLoader(
+                    pagingKey = "refresh_disabled",
+                    supportPrepend = true,
+                ) {
+                    error("Launch refresh should be suppressed")
+                }
+            val mediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = db,
+                    allowLongText = false,
+                    refreshOnInitialize = { false },
+                )
+            saveToDatabase(
+                db,
+                listOf(TimelinePagingMapper.toDb(feed("https://example.com/cached", 1000L), pagingKey = loader.pagingKey)),
+            )
+            db.pagingTimelineDao().insertPagingKey(
+                DbPagingKey(
+                    pagingKey = loader.pagingKey,
+                    prevKey = "newer",
+                ),
+            )
+
+            assertEquals(
+                androidx.paging.RemoteMediator.InitializeAction.SKIP_INITIAL_REFRESH,
+                mediator.initialize(),
+            )
+            val result =
+                mediator.load(
+                    loadType = LoadType.PREPEND,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+
+            assertTrue(assertIs<androidx.paging.RemoteMediator.MediatorResult.Success>(result).endOfPaginationReached)
+            assertTrue(loader.requests.isEmpty())
         }
 
     @OptIn(ExperimentalPagingApi::class)

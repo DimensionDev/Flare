@@ -680,6 +680,13 @@
     <string name="deeplink_account_selection_save_default">始终这样打开</string>
     <string name="settings_link_open_defaults_title">链接打开方式</string>
     <string name="settings_link_open_defaults_description">按主机选择支持链接的默认打开方式</string>
+    <string name="settings_mxga_filter_title">MXGA 过滤</string>
+    <string name="settings_mxga_filter_description">使用 MXGA 的公开账号名单和文字规则隐藏匹配的 X 帖子。启用后每 24 小时检查一次更新。</string>
+    <string name="settings_mxga_refresh_title">刷新 MXGA 规则</string>
+    <string name="settings_mxga_refreshing">正在刷新…</string>
+    <string name="settings_mxga_last_refreshed">上次刷新：%1$s</string>
+    <string name="settings_mxga_never_refreshed">尚未刷新</string>
+    <string name="settings_mxga_learn_more">什么是 MXGA？</string>
     <string name="settings_link_open_default_title">%1$s 链接的默认方式</string>
     <string name="settings_link_open_default_description">选择 Flare 可处理的支持链接如何打开</string>
     <string name="settings_link_open_default_ask_every_time">每次询问</string>

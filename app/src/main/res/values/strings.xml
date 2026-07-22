@@ -637,6 +637,13 @@
     <string name="deeplink_account_selection_save_default">Always open this way</string>
     <string name="settings_link_open_defaults_title">Link opening</string>
     <string name="settings_link_open_defaults_description">Choose defaults for supported links by host</string>
+    <string name="settings_mxga_filter_title">MXGA filtering</string>
+    <string name="settings_mxga_filter_description">Hide matching X posts using MXGA’s public account list and text rules. When enabled, updates are checked every 24 hours.</string>
+    <string name="settings_mxga_refresh_title">Refresh MXGA rules</string>
+    <string name="settings_mxga_refreshing">Refreshing…</string>
+    <string name="settings_mxga_last_refreshed">Last refreshed %1$s</string>
+    <string name="settings_mxga_never_refreshed">Not refreshed yet</string>
+    <string name="settings_mxga_learn_more">What is MXGA?</string>
     <string name="settings_link_open_default_title">Default for %1$s links</string>
     <string name="settings_link_open_default_description">Choose how supported links open when Flare can handle them</string>
     <string name="settings_link_open_default_ask_every_time">Ask every time</string>

@@ -208,6 +208,13 @@ import dev.dimension.flare.settings_link_open_defaults_description
 import dev.dimension.flare.settings_link_open_defaults_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
+import dev.dimension.flare.settings_mxga_filter_description
+import dev.dimension.flare.settings_mxga_filter_title
+import dev.dimension.flare.settings_mxga_last_refreshed
+import dev.dimension.flare.settings_mxga_learn_more
+import dev.dimension.flare.settings_mxga_never_refreshed
+import dev.dimension.flare.settings_mxga_refresh_title
+import dev.dimension.flare.settings_mxga_refreshing
 import dev.dimension.flare.settings_nostr_relays_manage
 import dev.dimension.flare.settings_post_action_fixed_width
 import dev.dimension.flare.settings_post_action_fixed_width_description
@@ -267,9 +274,11 @@ import dev.dimension.flare.ui.presenter.settings.AiReasoningEffortOption
 import dev.dimension.flare.ui.presenter.settings.AiTranslationTestPresenter
 import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.LinkOpenDefaultsPresenter
+import dev.dimension.flare.ui.presenter.settings.MxgaSettingsPresenter
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.presenter.settings.TranslateProviderOption
+import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.ExperimentalFluentApi
@@ -311,6 +320,7 @@ import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableColumn
 import java.io.File
 import java.util.Locale
+import kotlin.time.Instant
 
 @OptIn(ExperimentalFluentApi::class)
 @Composable
@@ -359,6 +369,9 @@ internal fun SettingsScreen(
     }
     val linkOpenDefaultsState by producePresenter("link_open_defaults_settings") {
         remember { LinkOpenDefaultsPresenter() }.invoke()
+    }
+    val mxgaState by producePresenter("mxga_settings") {
+        remember { MxgaSettingsPresenter() }.invoke()
     }
     val linkOpenTargets = linkOpenDefaultsState.targets.takeSuccessOr(persistentListOf())
     var pendingDeleteAccountKey by remember { mutableStateOf<MicroBlogKey?>(null) }
@@ -1209,6 +1222,58 @@ internal fun SettingsScreen(
                         target = target,
                         state = linkOpenDefaultsState,
                     )
+                }
+            }
+
+            if (mxgaState.hasXQtAccount) {
+                Header("MXGA")
+                CardExpanderItem(
+                    onClick = { mxgaState.setEnabled(!mxgaState.isEnabled) },
+                    heading = {
+                        Text(stringResource(Res.string.settings_mxga_filter_title))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_mxga_filter_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = mxgaState.isEnabled,
+                            onCheckStateChange = mxgaState::setEnabled,
+                            textBefore = true,
+                        )
+                    },
+                )
+                CardExpanderItem(
+                    onClick = mxgaState::refresh,
+                    heading = {
+                        Text(stringResource(Res.string.settings_mxga_refresh_title))
+                    },
+                    caption = {
+                        Text(
+                            when {
+                                mxgaState.isRefreshing -> {
+                                    stringResource(Res.string.settings_mxga_refreshing)
+                                }
+
+                                mxgaState.lastCheckedAt <= 0L -> {
+                                    stringResource(Res.string.settings_mxga_never_refreshed)
+                                }
+
+                                else -> {
+                                    stringResource(
+                                        Res.string.settings_mxga_last_refreshed,
+                                        Instant
+                                            .fromEpochMilliseconds(mxgaState.lastCheckedAt)
+                                            .toUi()
+                                            .relative,
+                                    )
+                                }
+                            },
+                        )
+                    },
+                )
+                HyperlinkButton("https://github.com/foru17/make-x-great-again") {
+                    Text(stringResource(Res.string.settings_mxga_learn_more))
                 }
             }
 

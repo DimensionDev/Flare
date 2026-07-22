@@ -224,6 +224,13 @@
     <string name="settings_appearance_display_group_subtitle">Timestamps, source badges, and link previews</string>
     <string name="settings_behavior_title">Behavior</string>
     <string name="settings_behavior_description">Browser and link handling preferences</string>
+    <string name="settings_mxga_filter_title">MXGA filtering</string>
+    <string name="settings_mxga_filter_description">Hide matching X posts using MXGA’s public account list and text rules. When enabled, updates are checked every 24 hours.</string>
+    <string name="settings_mxga_refresh_title">Refresh MXGA rules</string>
+    <string name="settings_mxga_refreshing">Refreshing…</string>
+    <string name="settings_mxga_last_refreshed">Last refreshed %1$s</string>
+    <string name="settings_mxga_never_refreshed">Not refreshed yet</string>
+    <string name="settings_mxga_learn_more">What is MXGA?</string>
     <string name="settings_appearance_media_group_title">Media</string>
     <string name="settings_appearance_media_group_subtitle">Media visibility, playback, and sensitive content</string>
     <string name="settings_storage_title">Storage</string>

@@ -598,6 +598,13 @@
     <string name="bluesky_login_fix_delegation_scopes_button">修復 Tranquil 權限</string>
     <string name="settings_behavior_title">行為</string>
     <string name="settings_behavior_description">瀏覽器與連結處理偏好</string>
+    <string name="settings_mxga_filter_title">MXGA 過濾</string>
+    <string name="settings_mxga_filter_description">使用 MXGA 的公開帳號名單和文字規則隱藏符合的 X 貼文。啟用後每 24 小時檢查一次更新。</string>
+    <string name="settings_mxga_refresh_title">重新整理 MXGA 規則</string>
+    <string name="settings_mxga_refreshing">正在重新整理…</string>
+    <string name="settings_mxga_last_refreshed">上次重新整理：%1$s</string>
+    <string name="settings_mxga_never_refreshed">尚未重新整理</string>
+    <string name="settings_mxga_learn_more">什麼是 MXGA？</string>
     <string name="article_content_gate_subscription_title">需要支持後閱讀</string>
     <string name="article_content_gate_subscription_description">這篇文章僅對支持者開放。請在瀏覽器中開啟原頁面，支持創作者後閱讀全文。</string>
     <string name="article_content_gate_subscription_description_with_fee">這篇文章僅對 ¥%1$d 起的支持者開放。請在瀏覽器中開啟原頁面，支持創作者後閱讀全文。</string>

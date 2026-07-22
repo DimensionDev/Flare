@@ -1,9 +1,15 @@
 import FlareAppleCore
+import Foundation
 import KotlinSharedUI
 import SwiftUI
 
+#if os(iOS)
+import UIKit
+#endif
+
 public struct LocalFilterSettingsView: View {
     @StateObject private var presenter = KotlinPresenter(presenter: LocalFilterPresenter())
+    @StateObject private var mxgaPresenter = KotlinPresenter(presenter: MxgaSettingsPresenter())
     @State private var selectedFilter: UiKeywordFilter?
     @State private var showingAddFilter = false
 
@@ -60,10 +66,11 @@ public struct LocalFilterSettingsView: View {
     private var content: some View {
         StateView(state: presenter.state.items) { filters in
             let list = filters.cast(UiKeywordFilter.self)
-            if list.isEmpty {
-                ListEmptyView()
-            } else {
-                List {
+            List {
+                MxgaSettingsSection(presenter: mxgaPresenter)
+                if list.isEmpty && !mxgaPresenter.state.hasXQtAccount {
+                    ListEmptyView()
+                } else {
                     ForEach(list, id: \.keyword) { item in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(item.keyword)
@@ -130,6 +137,76 @@ public struct LocalFilterSettingsView: View {
             } icon: {
                 Image(fontAwesome: .plus)
             }
+        }
+    }
+}
+
+private struct MxgaSettingsSection: View {
+    @ObservedObject var presenter: KotlinPresenter<MxgaSettingsState>
+    @Environment(\.openURL) private var openURL
+
+    private let projectURL = URL(string: "https://github.com/foru17/make-x-great-again")!
+
+    var body: some View {
+        if presenter.state.hasXQtAccount {
+            Section {
+                Toggle(isOn: Binding(get: {
+                    presenter.state.isEnabled
+                }, set: { value in
+                    presenter.state.setEnabled(value: value)
+                })) {
+                    Text("settings_mxga_filter_title", bundle: FlareAppleUILocalization.bundle)
+                    Text("settings_mxga_filter_description", bundle: FlareAppleUILocalization.bundle)
+                }
+
+                Button {
+                    presenter.state.refresh()
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("settings_mxga_refresh_title", bundle: FlareAppleUILocalization.bundle)
+                                .foregroundStyle(.primary)
+                            refreshStatus
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if presenter.state.isRefreshing {
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(presenter.state.isRefreshing)
+            } header: {
+                Text(verbatim: "MXGA")
+            } footer: {
+                Button {
+                    #if os(iOS)
+                    UIApplication.shared.open(projectURL)
+                    #else
+                    openURL(projectURL)
+                    #endif
+                } label: {
+                    Text("settings_mxga_learn_more", bundle: FlareAppleUILocalization.bundle)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var refreshStatus: some View {
+        if presenter.state.isRefreshing {
+            Text("settings_mxga_refreshing", bundle: FlareAppleUILocalization.bundle)
+        } else if presenter.state.lastCheckedAt > 0 {
+            HStack(spacing: 4) {
+                Text("settings_mxga_last_refreshed", bundle: FlareAppleUILocalization.bundle)
+                Text(
+                    Date(timeIntervalSince1970: TimeInterval(presenter.state.lastCheckedAt) / 1_000),
+                    style: .relative
+                )
+            }
+        } else {
+            Text("settings_mxga_never_refreshed", bundle: FlareAppleUILocalization.bundle)
         }
     }
 }

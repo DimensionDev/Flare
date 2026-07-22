@@ -606,6 +606,13 @@
     <string name="pixiv_private_favourites_title">私密收藏</string>
     <string name="settings_behavior_title">行为</string>
     <string name="settings_behavior_description">浏览器和链接处理偏好</string>
+    <string name="settings_mxga_filter_title">MXGA 过滤</string>
+    <string name="settings_mxga_filter_description">使用 MXGA 的公开账号名单和文字规则隐藏匹配的 X 帖子。启用后每 24 小时检查一次更新。</string>
+    <string name="settings_mxga_refresh_title">刷新 MXGA 规则</string>
+    <string name="settings_mxga_refreshing">正在刷新…</string>
+    <string name="settings_mxga_last_refreshed">上次刷新：%1$s</string>
+    <string name="settings_mxga_never_refreshed">尚未刷新</string>
+    <string name="settings_mxga_learn_more">什么是 MXGA？</string>
     <string name="article_content_gate_subscription_title">需要支持后阅读</string>
     <string name="article_content_gate_subscription_description">这篇文章仅对支持者开放。请在浏览器中打开原页面，支持创作者后阅读全文。</string>
     <string name="article_content_gate_subscription_description_with_fee">这篇文章仅对 ¥%1$d 起的支持者开放。请在浏览器中打开原页面，支持创作者后阅读全文。</string>

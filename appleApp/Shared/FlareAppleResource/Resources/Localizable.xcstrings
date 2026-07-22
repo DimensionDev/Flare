@@ -38910,6 +38910,16 @@
         }
       }
     },
+    "Display the original text before its translation." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在译文前同时显示原文。"
+          }
+        }
+      }
+    },
     "dm_conversation" : {
       "localizations" : {
         "af" : {
@@ -118444,6 +118454,16 @@
         }
       }
     },
+    "Prefer platform translations" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "优先使用平台译文"
+          }
+        }
+      }
+    },
     "profile_blocked_gate_description" : {
       "localizations" : {
         "af" : {
@@ -133184,6 +133204,160 @@
         }
       }
     },
+    "settings_mxga_filter_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide matching X posts using MXGA’s public account list and text rules. When enabled, updates are checked every 24 hours."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 MXGA 的公开账号名单和文字规则隐藏匹配的 X 帖子。启用后每 24 小时检查一次更新。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 MXGA 的公開帳號名單和文字規則隱藏符合的 X 貼文。啟用後每 24 小時檢查一次更新。"
+          }
+        }
+      }
+    },
+    "settings_mxga_filter_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MXGA filtering"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MXGA 过滤"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MXGA 過濾"
+          }
+        }
+      }
+    },
+    "settings_mxga_last_refreshed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last refreshed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次刷新："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次重新整理："
+          }
+        }
+      }
+    },
+    "settings_mxga_learn_more" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What is MXGA?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "什么是 MXGA？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "什麼是 MXGA？"
+          }
+        }
+      }
+    },
+    "settings_mxga_never_refreshed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not refreshed yet"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未刷新"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未重新整理"
+          }
+        }
+      }
+    },
+    "settings_mxga_refresh_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh MXGA rules"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新 MXGA 规则"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新整理 MXGA 規則"
+          }
+        }
+      }
+    },
+    "settings_mxga_refreshing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refreshing…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在刷新…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在重新整理…"
+          }
+        }
+      }
+    },
     "settings_privacy_policy" : {
       "localizations" : {
         "af" : {
@@ -137446,6 +137620,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示原文"
+          }
+        }
+      }
+    },
+    "Show original with translation" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同时显示原文和译文"
           }
         }
       }
@@ -157740,6 +157924,16 @@
         }
       }
     },
+    "Use a platform-provided translation when one is available during auto-translate." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动翻译时优先使用平台提供的可用译文。"
+          }
+        }
+      }
+    },
     "Use api.deepl.com instead of the free endpoint" : {
       "localizations" : {
         "af" : {
@@ -159583,46 +159777,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "轉發"
-          }
-        }
-      }
-    },
-    "Display the original text before its translation." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在译文前同时显示原文。"
-          }
-        }
-      }
-    },
-    "Prefer platform translations" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "优先使用平台译文"
-          }
-        }
-      }
-    },
-    "Show original with translation" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "同时显示原文和译文"
-          }
-        }
-      }
-    },
-    "Use a platform-provided translation when one is available during auto-translate." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自动翻译时优先使用平台提供的可用译文。"
           }
         }
       }

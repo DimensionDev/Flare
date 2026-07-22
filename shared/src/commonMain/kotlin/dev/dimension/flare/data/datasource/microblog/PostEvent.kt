@@ -16,7 +16,6 @@ import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.mapper.tumblrLike
-import dev.dimension.flare.ui.model.mapper.tumblrRepost
 import dev.dimension.flare.ui.model.mapper.vvoFavorite
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.model.mapper.vvoLikeComment
@@ -498,19 +497,7 @@ public sealed interface PostEvent {
         @Serializable
         public data class Repost(
             public override val postKey: MicroBlogKey,
-            public val reposted: Boolean,
-            public val count: Long = 0,
-            public val accountKey: MicroBlogKey,
-        ) : Tumblr,
-            UpdatePostActionMenuEvent {
-            public override fun nextActionMenu(): ActionMenu.Item =
-                ActionMenu.tumblrRepost(
-                    statusKey = postKey,
-                    reposted = !reposted,
-                    count = (count + if (!reposted) 1 else -1).coerceAtLeast(0),
-                    accountKey = accountKey,
-                )
-        }
+        ) : Tumblr
     }
 }
 

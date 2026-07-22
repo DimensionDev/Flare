@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.tumblr
 
+import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -241,7 +242,7 @@ internal class TumblrDataSource(
             buildList {
                 addAll(
                     data.content
-                        .chunked(TUMBLR_TEXT_BLOCK_MAX_LENGTH)
+                        .chunkedByCodePoints(TUMBLR_TEXT_BLOCK_MAX_LENGTH)
                         .filter { it.isNotBlank() }
                         .map { text ->
                             TumblrNpfBlock(
@@ -256,7 +257,7 @@ internal class TumblrDataSource(
                         TumblrNpfBlock(
                             type = blockType,
                             media = listOf(npfMedia),
-                            altText = altText?.take(TUMBLR_TEXT_BLOCK_MAX_LENGTH),
+                            altText = altText?.takeCodePoints(TUMBLR_TEXT_BLOCK_MAX_LENGTH),
                         ),
                     )
                 }
@@ -318,9 +319,6 @@ internal class TumblrDataSource(
     }
 
     private suspend fun handleRepost(event: PostEvent.Tumblr.Repost) {
-        if (event.reposted) {
-            return
-        }
         val parts = event.postKey.toTumblrPostKeyParts()
         val post = service.post(parts.blogName, parts.postId) ?: error("Tumblr post not found: ${event.postKey}")
         val key = post.reblogKey ?: error("Tumblr reblog key is missing")
@@ -378,3 +376,8 @@ internal fun UiTimelineV2.Post.Visibility.toTumblrState(): String =
         UiTimelineV2.Post.Visibility.Private -> "private"
         else -> error("Tumblr does not support $this post visibility")
     }
+
+internal fun String.chunkedByCodePoints(size: Int): List<String> =
+    codePointSequence().chunked(size) { codePoints -> codePoints.joinToString(separator = "") }.toList()
+
+internal fun String.takeCodePoints(count: Int): String = codePointSequence().take(count).joinToString(separator = "")

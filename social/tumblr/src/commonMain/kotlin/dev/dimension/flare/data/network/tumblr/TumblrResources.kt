@@ -10,6 +10,7 @@ import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import io.ktor.client.request.forms.MultiPartFormDataContent
+import kotlinx.serialization.json.JsonElement
 
 internal interface TumblrAuthResources {
     @POST("oauth2/token")
@@ -102,7 +103,7 @@ internal interface TumblrResources {
         @Header("Authorization") authorization: String,
         @Field("id") postId: String,
         @Field("reblog_key") reblogKey: String,
-    ): TumblrEnvelope<TumblrActionResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @POST("user/unlike")
     @FormUrlEncoded
@@ -110,7 +111,7 @@ internal interface TumblrResources {
         @Header("Authorization") authorization: String,
         @Field("id") postId: String,
         @Field("reblog_key") reblogKey: String,
-    ): TumblrEnvelope<TumblrActionResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @POST("blog/{blogIdentifier}/post/reblog")
     @FormUrlEncoded
@@ -121,21 +122,21 @@ internal interface TumblrResources {
         @Field("reblog_key") reblogKey: String,
         @Field("comment") comment: String? = null,
         @Field("state") state: String? = null,
-    ): TumblrEnvelope<TumblrPostMutationResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @POST("user/follow")
     @FormUrlEncoded
     suspend fun follow(
         @Header("Authorization") authorization: String,
         @Field("url") blogUrl: String,
-    ): TumblrEnvelope<TumblrFollowResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @POST("user/unfollow")
     @FormUrlEncoded
     suspend fun unfollow(
         @Header("Authorization") authorization: String,
         @Field("url") blogUrl: String,
-    ): TumblrEnvelope<TumblrActionResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @POST("blog/{blogIdentifier}/post/delete")
     @FormUrlEncoded
@@ -143,7 +144,7 @@ internal interface TumblrResources {
         @Header("Authorization") authorization: String,
         @Path("blogIdentifier") blogIdentifier: String,
         @Field("id") postId: String,
-    ): TumblrEnvelope<TumblrActionResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @POST("blog/{blogIdentifier}/posts")
     suspend fun createPost(
@@ -151,7 +152,7 @@ internal interface TumblrResources {
         @Path("blogIdentifier") blogIdentifier: String,
         @Body request: TumblrCreatePostRequest,
         @Header("Content-Type") contentType: String = "application/json",
-    ): TumblrEnvelope<TumblrPostMutationResponse>
+    ): TumblrEnvelope<JsonElement>
 
     @Multipart
     @POST("blog/{blogIdentifier}/posts")
@@ -159,5 +160,5 @@ internal interface TumblrResources {
         @Header("Authorization") authorization: String,
         @Path("blogIdentifier") blogIdentifier: String,
         @Body body: MultiPartFormDataContent,
-    ): TumblrEnvelope<TumblrPostMutationResponse>
+    ): TumblrEnvelope<JsonElement>
 }

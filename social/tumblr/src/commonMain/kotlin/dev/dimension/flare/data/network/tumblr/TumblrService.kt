@@ -4,9 +4,10 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.platform.TumblrCredential
-import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -19,13 +20,6 @@ import kotlin.time.Duration.Companion.minutes
 private const val TUMBLR_API_BASE_URL = "https://api.tumblr.com/v2/"
 private const val TUMBLR_USER_AGENT = "Flare/1.0 (+https://github.com/DimensionDev/Flare)"
 private const val DEFAULT_PAGE_SIZE = 20
-
-private val TumblrHeaderPlugin =
-    createClientPlugin("TumblrHeaderPlugin") {
-        onRequest { request, _ ->
-            request.headers.append(HttpHeaders.UserAgent, TUMBLR_USER_AGENT)
-        }
-    }
 
 internal class TumblrService(
     private val credentialFlow: Flow<TumblrCredential>? = null,
@@ -290,7 +284,9 @@ internal class TumblrService(
 private fun tumblrKtorfit() =
     ktorfit(TUMBLR_API_BASE_URL) {
         expectSuccess = true
-        install(TumblrHeaderPlugin)
+        defaultRequest {
+            header(HttpHeaders.UserAgent, TUMBLR_USER_AGENT)
+        }
     }
 
 private fun <T> TumblrEnvelope<T>.requiredResponse(): T = response ?: error("Tumblr response is missing")

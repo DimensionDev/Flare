@@ -4,7 +4,6 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.network.tumblr.TumblrBlog
-import dev.dimension.flare.data.network.tumblr.TumblrNote
 import dev.dimension.flare.data.network.tumblr.TumblrNpfAttribution
 import dev.dimension.flare.data.network.tumblr.TumblrNpfBlock
 import dev.dimension.flare.data.network.tumblr.TumblrNpfFormatting
@@ -72,9 +71,9 @@ class TumblrMapperTest {
         assertEquals(PlatformType.Tumblr, timelinePost.platformType)
         assertEquals(tumblrPostKey("staff", "123"), timelinePost.statusKey)
         assertEquals(AccountType.Specific(accountKey), timelinePost.accountType)
-        assertEquals("Hello Tumblr\nExample Story", timelinePost.content.raw)
+        assertEquals("Hello Tumblr\nExample Story", timelinePost.content.original.raw)
         val inlineImageCount =
-            timelinePost.content.renderRuns
+            timelinePost.content.original.renderRuns
                 .filterIsInstance<RenderContent.BlockImage>()
                 .size
         assertEquals(0, inlineImageCount)
@@ -107,22 +106,8 @@ class TumblrMapperTest {
                 content = listOf(textBlock("Hello")),
                 reblogKey = "abc123",
                 noteCount = 7,
-                replyCount = 2,
                 reblogCount = 3,
                 likeCount = 5,
-                notes =
-                    listOf(
-                        TumblrNote(type = "reply"),
-                        TumblrNote(type = "comment"),
-                        TumblrNote(type = "reblog"),
-                        TumblrNote(type = "reblogged"),
-                        TumblrNote(type = "posted"),
-                        TumblrNote(type = "like"),
-                        TumblrNote(type = "liked"),
-                        TumblrNote(type = "like"),
-                        TumblrNote(type = "like"),
-                        TumblrNote(type = "like"),
-                    ),
                 liked = false,
                 canLike = true,
                 canReblog = true,
@@ -162,9 +147,6 @@ class TumblrMapperTest {
             listOf(
                 PostActionFamily.Comment,
                 PostActionFamily.Share,
-                PostActionFamily.MuteUser,
-                PostActionFamily.BlockUser,
-                PostActionFamily.Report,
             ),
             overflowFamilies,
         )
@@ -236,7 +218,7 @@ class TumblrMapperTest {
 
         val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
 
-        assertEquals("Hello Tumblr\n#Tumblr #KMP #two words", timelinePost.content.raw)
+        assertEquals("Hello Tumblr\n#Tumblr #KMP #two words", timelinePost.content.original.raw)
     }
 
     @Test
@@ -357,9 +339,11 @@ class TumblrMapperTest {
             )
 
         val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
-        val inlineImages = timelinePost.content.renderRuns.filterIsInstance<RenderContent.BlockImage>()
+        val inlineImages =
+            timelinePost.content.original.renderRuns
+                .filterIsInstance<RenderContent.BlockImage>()
 
-        assertEquals("Before\nAfter", timelinePost.content.raw)
+        assertEquals("Before\nAfter", timelinePost.content.original.raw)
         assertEquals(0, timelinePost.images.size)
         assertEquals(
             listOf(
@@ -392,7 +376,11 @@ class TumblrMapperTest {
             )
 
         val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
-        val textContent = assertIs<RenderContent.Text>(timelinePost.content.renderRuns.single())
+        val textContent =
+            assertIs<RenderContent.Text>(
+                timelinePost.content.original.renderRuns
+                    .single(),
+            )
         val runs = textContent.runs.filterIsInstance<RenderRun.Text>()
 
         assertEquals("Bold", runs[0].text)
@@ -433,10 +421,10 @@ class TumblrMapperTest {
         val rendered = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey))
         val quote = rendered.presentation.quotes.single()
 
-        assertEquals("My reblog comment", rendered.post.content.raw)
+        assertEquals("My reblog comment", rendered.post.content.original.raw)
         assertEquals(tumblrPostKey("original", "original-1"), quote.statusKey)
         assertEquals("Original Blog", quote.user?.name?.raw)
-        assertEquals("Original text", quote.content.raw)
+        assertEquals("Original text", quote.content.original.raw)
         val quoteImage = assertIs<UiMedia.Image>(quote.images.single())
         assertEquals("https://64.media.tumblr.com/original.jpg", quoteImage.url)
         val reference = rendered.post.references.single()
@@ -468,7 +456,7 @@ class TumblrMapperTest {
         val rendered = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey))
         val quote = rendered.presentation.quotes.single()
 
-        assertEquals("Original text\n#Original Tag #NPF", quote.content.raw)
+        assertEquals("Original text\n#Original Tag #NPF", quote.content.original.raw)
     }
 
     @Test
@@ -492,7 +480,7 @@ class TumblrMapperTest {
         val rendered = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey))
         val quote = rendered.presentation.quotes.single()
 
-        assertEquals("Original text\n#Post Tag", quote.content.raw)
+        assertEquals("Original text\n#Post Tag", quote.content.original.raw)
     }
 
     @Test
@@ -563,7 +551,7 @@ class TumblrMapperTest {
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, assertIs<UiTimelineV2.Message.Type.Localized>(message.type).data)
         assertEquals(tumblrPostKey("me", "reblog-2"), message.statusKey)
         assertEquals(tumblrPostKey("original", "original-2"), repost.statusKey)
-        assertEquals("Original text", repost.content.raw)
+        assertEquals("Original text", repost.content.original.raw)
         assertEquals(1, rendered.post.references.size)
     }
 
@@ -589,8 +577,8 @@ class TumblrMapperTest {
         val rendered = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey))
         val quote = rendered.presentation.quotes.single()
 
-        assertEquals("", rendered.post.content.raw)
-        assertEquals("Original text\n#Quoted Tag #NPF", quote.content.raw)
+        assertEquals("", rendered.post.content.original.raw)
+        assertEquals("Original text\n#Quoted Tag #NPF", quote.content.original.raw)
     }
 
     @Test
@@ -675,7 +663,7 @@ class TumblrMapperTest {
             )
 
         val content = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post.content
-        val runs = assertIs<RenderContent.Text>(content.renderRuns.single()).runs.filterIsInstance<RenderRun.Text>()
+        val runs = assertIs<RenderContent.Text>(content.original.renderRuns.single()).runs.filterIsInstance<RenderRun.Text>()
         assertEquals("😀a ", runs[0].text)
         assertEquals("link", runs[1].text)
         assertEquals("https://example.com", runs[1].style.link)
@@ -710,18 +698,18 @@ class TumblrMapperTest {
             )
 
         val rendered = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey))
-        assertEquals("Parent comment", assertNotNull(rendered.presentation.repost).content.raw)
+        assertEquals("Parent comment", assertNotNull(rendered.presentation.repost).content.original.raw)
         assertEquals(
             "Root text",
             rendered.presentation.inlineParents
                 .single()
-                .content.raw,
+                .content.original.raw,
         )
         val rootRun =
             assertIs<RenderContent.Text>(
                 rendered.presentation.inlineParents
                     .single()
-                    .content.renderRuns
+                    .content.original.renderRuns
                     .single(),
             ).runs
                 .filterIsInstance<RenderRun.Text>()
@@ -754,7 +742,7 @@ class TumblrMapperTest {
 
         val quote = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).presentation.quotes.single()
         assertEquals("gone-blog", quote.user?.handle?.raw)
-        assertEquals("Third\nFirst", quote.content.raw)
+        assertEquals("Third\nFirst", quote.content.original.raw)
         assertIs<ClickEvent.Noop>(quote.clickEvent)
     }
 
@@ -780,15 +768,15 @@ class TumblrMapperTest {
                         TumblrNpfLayout(
                             type = "ask",
                             blocks = listOf(1),
-                            attribution = TumblrNpfAttribution(type = "blog", blog = TumblrBlog(name = "asker")),
+                            attribution = TumblrNpfAttribution(blog = TumblrBlog(name = "asker")),
                         ),
                     ),
             )
 
         val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
-        assertEquals("Image caption\nQuestion\nAnswer", timelinePost.content.raw)
+        assertEquals("Image caption\nQuestion\nAnswer", timelinePost.content.original.raw)
         assertTrue(
-            timelinePost.content.renderRuns
+            timelinePost.content.original.renderRuns
                 .filterIsInstance<RenderContent.Text>()
                 .any { it.block.isBlockQuote },
         )
@@ -805,14 +793,13 @@ class TumblrMapperTest {
     }
 
     @Test
-    fun noteMetadataIsNotUsedAsAnActionTotal() {
+    fun noteCountDoesNotDriveRepostOrLikeTotals() {
         val post =
             TumblrPost(
                 idString = "notes",
                 blogName = "staff",
                 reblogKey = "key",
                 noteCount = 42,
-                notes = listOf(TumblrNote(type = "like")),
             )
 
         val actions = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post.actions

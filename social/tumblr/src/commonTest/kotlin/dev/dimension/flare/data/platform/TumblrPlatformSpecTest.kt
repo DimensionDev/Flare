@@ -16,10 +16,10 @@ class TumblrPlatformSpecTest {
             listOf(
                 "https://www.tumblr.com/{blogName}/{id}",
                 "https://www.tumblr.com/{blogName}/{id}/{slug}",
-                "https://{blogname}.tumblr.com/post/{id}",
-                "https://{blogname}.tumblr.com/post/{id}/{slug}",
+                "https://{blogName}.tumblr.com/post/{id}",
+                "https://{blogName}.tumblr.com/post/{id}/{slug}",
                 "https://www.tumblr.com/{blogName}",
-                "https://{blogname}.tumblr.com",
+                "https://{blogName}.tumblr.com",
             ),
             patterns,
         )

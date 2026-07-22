@@ -39,39 +39,3 @@ public fun ActionMenu.Companion.tumblrLike(
             ),
         actionFamily = PostActionFamily.Like,
     )
-
-public fun ActionMenu.Companion.tumblrRepost(
-    statusKey: MicroBlogKey,
-    reposted: Boolean,
-    count: Long,
-    accountKey: MicroBlogKey,
-): ActionMenu.Item =
-    ActionMenu.Item(
-        updateKey = "tumblr_repost_$statusKey",
-        icon = if (reposted) UiIcon.Unretweet else UiIcon.Retweet,
-        text =
-            ActionMenu.Item.Text.Localized(
-                if (reposted) {
-                    ActionMenu.Item.Text.Localized.Type.Unretweet
-                } else {
-                    ActionMenu.Item.Text.Localized.Type.Retweet
-                },
-            ),
-        count = UiNumber(count),
-        color = if (reposted) ActionMenu.Item.Color.PrimaryColor else null,
-        clickEvent =
-            if (reposted) {
-                ClickEvent.Noop
-            } else {
-                ClickEvent.event(
-                    accountKey,
-                    PostEvent.Tumblr.Repost(
-                        postKey = statusKey,
-                        reposted = reposted,
-                        count = count,
-                        accountKey = accountKey,
-                    ),
-                )
-            },
-        actionFamily = PostActionFamily.Repost,
-    )

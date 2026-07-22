@@ -1,9 +1,10 @@
 package dev.dimension.flare.data.datasource.tumblr
 
+import de.cketti.codepoints.codePointCount
+import de.cketti.codepoints.offsetByCodePoints
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
-import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.tumblr.TumblrBlog
 import dev.dimension.flare.data.network.tumblr.TumblrLegacyPhoto
 import dev.dimension.flare.data.network.tumblr.TumblrLegacyPhotoSize
@@ -27,6 +28,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.mapper.tumblrLike
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
@@ -71,7 +73,10 @@ internal fun TumblrPost.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2 {
             sensitive = false,
             contentWarning = null,
             user = (blog ?: TumblrBlog(name = postBlogName)).toUiProfile(accountKey),
-            content = renderedContent.richText.takeUnless { it.isEmpty } ?: summary.orEmpty().toUiPlainText(),
+            content =
+                UiTranslatableText(
+                    original = renderedContent.richText.takeUnless { it.isEmpty } ?: summary.orEmpty().toUiPlainText(),
+                ),
             actions = actions,
             poll = null,
             statusKey = statusKey,
@@ -301,25 +306,6 @@ private fun TumblrPost.actionMenus(
                             actionFamily = PostActionFamily.Delete,
                         ),
                     )
-                } else {
-                    add(ActionMenu.Divider)
-                    addAll(
-                        userActionsMenu(
-                            accountKey = accountKey,
-                            userKey = userKey,
-                            handle = "@${userKey.id}@$TUMBLR_HOST",
-                        ),
-                    )
-                    add(ActionMenu.Divider)
-                    add(
-                        ActionMenu.Item(
-                            icon = UiIcon.Report,
-                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                            color = ActionMenu.Item.Color.Red,
-                            clickEvent = ClickEvent.Noop,
-                            actionFamily = PostActionFamily.Report,
-                        ),
-                    )
                 }
             }
         if (overflow.isNotEmpty()) {
@@ -351,9 +337,6 @@ private fun tumblrRepeatableRepostAction(
                 accountKey,
                 PostEvent.Tumblr.Repost(
                     postKey = statusKey,
-                    reposted = false,
-                    count = count,
-                    accountKey = accountKey,
                 ),
             ),
         actionFamily = PostActionFamily.Repost,
@@ -577,7 +560,7 @@ private fun TumblrTrailItem.toReferencedPost(
         sensitive = false,
         contentWarning = null,
         user = trailBlog.toUiProfile(accountKey),
-        content = content.richText,
+        content = UiTranslatableText(original = content.richText),
         actions = persistentListOf(),
         poll = null,
         statusKey = statusKey,
@@ -796,26 +779,8 @@ private fun List<TumblrNpfFormattingRange>.toRenderTextStyle(baseStyle: RenderTe
 private fun TumblrNpfFormattingBlog.toTumblrBlogUrl(): String? =
     url ?: name?.normalizedTumblrBlogName()?.let { "https://www.tumblr.com/$it" }
 
-private fun String.charIndexForCodePointOffset(offset: Int): Int {
-    var charIndex = 0
-    var codePointIndex = 0
-    while (charIndex < length && codePointIndex < offset) {
-        val current = this[charIndex]
-        val next = getOrNull(charIndex + 1)
-        charIndex +=
-            if (current.isHighSurrogateChar() && next?.isLowSurrogateChar() == true) {
-                2
-            } else {
-                1
-            }
-        codePointIndex++
-    }
-    return charIndex.coerceIn(0, length)
-}
-
-private fun Char.isHighSurrogateChar(): Boolean = this in '\uD800'..'\uDBFF'
-
-private fun Char.isLowSurrogateChar(): Boolean = this in '\uDC00'..'\uDFFF'
+private fun String.charIndexForCodePointOffset(offset: Int): Int =
+    offsetByCodePoints(index = 0, codePointOffset = offset.coerceIn(0, codePointCount()))
 
 private fun List<TumblrNpfBlock>.collectText(): String =
     buildString {
@@ -903,7 +868,7 @@ private fun UiTimelineV2.Post.mediaDeduplicationKeys(): Set<String> =
         images.forEach { media ->
             add(media.deduplicationKey())
         }
-        content.imageUrls.forEach { url ->
+        content.original.imageUrls.forEach { url ->
             add("image:$url")
         }
     }
@@ -974,7 +939,7 @@ private fun TumblrNpfBlock.toVideoMedia(): UiMedia.Video? {
     val blockProvider = provider
     val fallbackWidth = width?.toFloat() ?: 0f
     val fallbackHeight = height?.toFloat() ?: 0f
-    return media
+    return (media + TumblrNpfMedia(url = url, width = width, height = height))
         .firstNotNullOfOrNull { media ->
             media.toVideoMedia(
                 poster = poster,
@@ -982,16 +947,8 @@ private fun TumblrNpfBlock.toVideoMedia(): UiMedia.Video? {
                 fallbackDescription = fallbackDescription,
                 fallbackWidth = fallbackWidth,
                 fallbackHeight = fallbackHeight,
-                requirePlayableVideoUrl = true,
             )
-        } ?: toVideoMediaFromBlock(
-        poster = poster,
-        provider = blockProvider,
-        fallbackDescription = fallbackDescription,
-        fallbackWidth = fallbackWidth,
-        fallbackHeight = fallbackHeight,
-        requirePlayableVideoUrl = true,
-    )
+        }
 }
 
 private fun TumblrNpfMedia.toVideoMedia(
@@ -1000,49 +957,15 @@ private fun TumblrNpfMedia.toVideoMedia(
     fallbackDescription: String?,
     fallbackWidth: Float,
     fallbackHeight: Float,
-    requirePlayableVideoUrl: Boolean = false,
 ): UiMedia.Video? {
     val url = url ?: return null
-    if (
-        requirePlayableVideoUrl &&
-        !url.isLikelyPlayableVideoUrl(
-            type = type,
-            provider = provider,
-        )
-    ) {
+    if (!url.isLikelyPlayableVideoUrl(type = type, provider = provider)) {
         return null
     }
     return UiMedia.Video(
         url = url,
         thumbnailUrl = poster ?: url,
         description = fallbackDescription,
-        width = width?.toFloat() ?: fallbackWidth,
-        height = height?.toFloat() ?: fallbackHeight,
-    )
-}
-
-private fun TumblrNpfBlock.toVideoMediaFromBlock(
-    poster: String?,
-    provider: String?,
-    fallbackDescription: String?,
-    fallbackWidth: Float,
-    fallbackHeight: Float,
-    requirePlayableVideoUrl: Boolean = false,
-): UiMedia.Video? {
-    val url = url ?: return null
-    if (
-        requirePlayableVideoUrl &&
-        !url.isLikelyPlayableVideoUrl(
-            type = null,
-            provider = provider,
-        )
-    ) {
-        return null
-    }
-    return UiMedia.Video(
-        url = url,
-        thumbnailUrl = poster ?: posterUrl() ?: url,
-        description = title ?: description ?: fallbackDescription,
         width = width?.toFloat() ?: fallbackWidth,
         height = height?.toFloat() ?: fallbackHeight,
     )

@@ -67,6 +67,17 @@ class TumblrDataSourceTest {
     }
 
     @Test
+    fun composeTextLimitsCountUnicodeCodePoints() {
+        val boundary = "a".repeat(4095) + "😀"
+
+        assertEquals(
+            listOf(boundary, "b"),
+            (boundary + "b").chunkedByCodePoints(4096),
+        )
+        assertEquals(boundary, (boundary + "b").takeCodePoints(4096))
+    }
+
+    @Test
     fun replyComposeIsRejectedInsteadOfCreatingReblog() =
         runTest {
             val dataSource = dataSource()

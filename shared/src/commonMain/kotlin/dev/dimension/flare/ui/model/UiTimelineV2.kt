@@ -360,8 +360,8 @@ public sealed class UiTimelineV2 {
             Home,
             Followers,
             Specified,
-            Private,
             Channel,
+            Private,
         }
     }
 

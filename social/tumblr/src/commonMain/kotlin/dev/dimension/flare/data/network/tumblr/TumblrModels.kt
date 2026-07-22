@@ -12,7 +12,6 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -22,23 +21,7 @@ import kotlinx.serialization.json.put
 
 @Serializable
 internal data class TumblrEnvelope<T>(
-    val meta: TumblrMeta? = null,
     val response: T? = null,
-    val errors: List<TumblrApiError>? = null,
-)
-
-@Serializable
-internal data class TumblrMeta(
-    val status: Int? = null,
-    val msg: String? = null,
-)
-
-@Serializable
-internal data class TumblrApiError(
-    val title: String? = null,
-    val code: Int? = null,
-    val detail: String? = null,
-    val message: String? = null,
 )
 
 @Serializable
@@ -61,11 +44,6 @@ internal data class TumblrUserInfoResponse(
 
 @Serializable
 internal data class TumblrUser(
-    val name: String? = null,
-    val likes: Long? = null,
-    val following: Long? = null,
-    @SerialName("default_post_format")
-    val defaultPostFormat: String? = null,
     val blogs: List<TumblrBlog> = emptyList(),
 )
 
@@ -77,55 +55,16 @@ internal data class TumblrBlogInfoResponse(
 @Serializable
 internal data class TumblrBlogPage(
     val blogs: List<TumblrBlog> = emptyList(),
-    @SerialName("total_blogs")
-    val totalBlogs: Long? = null,
 )
 
 @Serializable
 internal data class TumblrFollowerPage(
     val users: List<TumblrBlog> = emptyList(),
-    @SerialName("total_users")
-    val totalUsers: Long? = null,
 )
 
 @Serializable
 internal data class TumblrPostsPage(
     val posts: List<TumblrPost> = emptyList(),
-    @SerialName("total_posts")
-    val totalPosts: Long? = null,
-)
-
-@Serializable(with = TumblrActionResponseSerializer::class)
-internal data class TumblrActionResponse(
-    val id: String? = null,
-    val url: String? = null,
-    val name: String? = null,
-    val message: String? = null,
-    val liked: Boolean? = null,
-    val following: Boolean? = null,
-)
-
-@Serializable
-internal data class TumblrFollowResponse(
-    val blog: TumblrBlog? = null,
-)
-
-@Serializable
-internal data class TumblrPostMutationResponse(
-    val id: String? = null,
-    @SerialName("id_string")
-    val idString: String? = null,
-    val state: String? = null,
-    @SerialName("display_text")
-    val displayText: String? = null,
-    @SerialName("post_url")
-    val postUrl: String? = null,
-    @SerialName("short_url")
-    val shortUrl: String? = null,
-    @SerialName("blog_name")
-    val blogName: String? = null,
-    @SerialName("reblog_key")
-    val reblogKey: String? = null,
 )
 
 @Serializable
@@ -135,13 +74,10 @@ internal data class TumblrBlog(
     val description: String? = null,
     val url: String? = null,
     val uuid: String? = null,
-    @SerialName("updated")
-    val updatedEpochSeconds: Long? = null,
     val followers: Long? = null,
     @SerialName("total_posts")
     val totalPosts: Long? = null,
     val posts: Long? = null,
-    val following: Boolean? = null,
     val followed: Boolean? = null,
     val primary: Boolean? = null,
     val theme: TumblrBlogTheme? = null,
@@ -149,8 +85,6 @@ internal data class TumblrBlog(
 
 @Serializable
 internal data class TumblrBlogTheme(
-    @SerialName("avatar_shape")
-    val avatarShape: String? = null,
     @SerialName("header_image")
     val headerImage: String? = null,
 )
@@ -160,7 +94,6 @@ internal data class TumblrPost(
     val id: Long? = null,
     @SerialName("id_string")
     val idString: String? = null,
-    val type: String? = null,
     val state: String? = null,
     @SerialName("blog_name")
     val blogName: String? = null,
@@ -172,7 +105,6 @@ internal data class TumblrPost(
     val shortUrl: String? = null,
     @SerialName("timestamp")
     val timestampEpochSeconds: Long? = null,
-    val date: String? = null,
     val summary: String? = null,
     val content: List<TumblrNpfBlock> = emptyList(),
     val trail: List<TumblrTrailItem> = emptyList(),
@@ -184,15 +116,6 @@ internal data class TumblrPost(
     val tags: List<String> = emptyList(),
     @SerialName("note_count")
     val noteCount: Long? = null,
-    val notes: List<TumblrNote> = emptyList(),
-    @SerialName("reply_count")
-    val replyCount: Long? = null,
-    @SerialName("replies_count")
-    val repliesCount: Long? = null,
-    @SerialName("comment_count")
-    val commentCount: Long? = null,
-    @SerialName("comments_count")
-    val commentsCount: Long? = null,
     @SerialName("reblog_count")
     val reblogCount: Long? = null,
     @SerialName("reblogs_count")
@@ -208,13 +131,6 @@ internal data class TumblrPost(
     val canLike: Boolean? = null,
     @SerialName("can_reblog")
     val canReblog: Boolean? = null,
-    @SerialName("is_blocks_post_format")
-    val isBlocksPostFormat: Boolean? = null,
-)
-
-@Serializable
-internal data class TumblrNote(
-    val type: String? = null,
 )
 
 @Serializable
@@ -255,31 +171,7 @@ internal data class TumblrLegacyPhotoSize(
 @Serializable
 internal data class TumblrCreatePostRequest(
     val content: List<TumblrNpfBlock>,
-    val layout: List<TumblrNpfLayout>? = null,
     val state: String? = null,
-    @SerialName("publish_on")
-    val publishOn: String? = null,
-    val date: String? = null,
-    val tags: String? = null,
-    @SerialName("source_url")
-    val sourceUrl: String? = null,
-    @SerialName("send_to_twitter")
-    val sendToTwitter: Boolean? = null,
-    @SerialName("is_private")
-    val isPrivate: Boolean? = null,
-    val slug: String? = null,
-    @SerialName("interactability_reblog")
-    val interactabilityReblog: String? = null,
-    @SerialName("parent_tumblelog_uuid")
-    val parentTumblelogUuid: String? = null,
-    @SerialName("parent_post_id")
-    val parentPostId: String? = null,
-    @SerialName("reblog_key")
-    val reblogKey: String? = null,
-    @SerialName("hide_trail")
-    val hideTrail: Boolean? = null,
-    @SerialName("exclude_trail_items")
-    val excludeTrailItems: List<Int>? = null,
 )
 
 @Serializable(with = TumblrNpfBlockSerializer::class)
@@ -292,14 +184,7 @@ internal data class TumblrNpfBlock(
     val caption: String? = null,
     val url: String? = null,
     val description: String? = null,
-    val author: String? = null,
-    @SerialName("site_name")
-    val siteName: String? = null,
-    val artist: String? = null,
-    val album: String? = null,
     val provider: String? = null,
-    @SerialName("embed_url")
-    val embedUrl: String? = null,
     val media: List<TumblrNpfMedia> = emptyList(),
     val poster: List<TumblrNpfMedia> = emptyList(),
     @SerialName("alt_text")
@@ -308,11 +193,8 @@ internal data class TumblrNpfBlock(
     val thumbnailUrl: String? = null,
     val width: Int? = null,
     val height: Int? = null,
-    @SerialName("indent_level")
-    val indentLevel: Int? = null,
     @SerialName("embed_iframe")
     val embedIframe: TumblrNpfEmbedIframe? = null,
-    val raw: JsonObject? = null,
 )
 
 @Serializable
@@ -322,14 +204,12 @@ internal data class TumblrNpfFormatting(
     val end: Int? = null,
     val url: String? = null,
     val blog: TumblrNpfFormattingBlog? = null,
-    val hex: String? = null,
 )
 
 @Serializable
 internal data class TumblrNpfFormattingBlog(
     val name: String? = null,
     val url: String? = null,
-    val uuid: String? = null,
 )
 
 @Serializable
@@ -353,28 +233,17 @@ internal data class TumblrNpfLayout(
     // Older trail payloads used `rows` directly instead of `display`.
     val rows: List<List<Int>> = emptyList(),
     val blocks: List<Int> = emptyList(),
-    @SerialName("truncate_after")
-    val truncateAfter: Int? = null,
     val attribution: TumblrNpfAttribution? = null,
 )
 
 @Serializable
 internal data class TumblrNpfLayoutDisplay(
     val blocks: List<Int> = emptyList(),
-    val mode: TumblrNpfLayoutMode? = null,
-)
-
-@Serializable
-internal data class TumblrNpfLayoutMode(
-    val type: String? = null,
 )
 
 @Serializable
 internal data class TumblrNpfAttribution(
-    val type: String? = null,
-    val url: String? = null,
     val blog: TumblrBlog? = null,
-    val post: TumblrTrailPost? = null,
 )
 
 internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
@@ -399,21 +268,14 @@ internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
             caption = obj.stringOrNull("caption"),
             url = obj.stringOrNull("url"),
             description = obj.stringOrNull("description"),
-            author = obj.stringOrNull("author"),
-            siteName = obj.stringOrNull("site_name"),
-            artist = obj.stringOrNull("artist"),
-            album = obj.stringOrNull("album"),
             provider = obj.stringOrNull("provider"),
-            embedUrl = obj.stringOrNull("embed_url"),
             media = obj.mediaList("media"),
             poster = obj.mediaList("poster"),
             altText = obj.stringOrNull("alt_text"),
             thumbnailUrl = obj.stringOrNull("thumbnail_url"),
             width = obj.intOrNull("width"),
             height = obj.intOrNull("height"),
-            indentLevel = obj.intOrNull("indent_level"),
             embedIframe = obj.objectOrNull("embed_iframe")?.let { TumblrNpfEmbedIframe(url = it.stringOrNull("url")) },
-            raw = obj,
         )
     }
 
@@ -434,12 +296,7 @@ internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
                 value.caption?.let { put("caption", it) }
                 value.url?.let { put("url", it) }
                 value.description?.let { put("description", it) }
-                value.author?.let { put("author", it) }
-                value.siteName?.let { put("site_name", it) }
-                value.artist?.let { put("artist", it) }
-                value.album?.let { put("album", it) }
                 value.provider?.let { put("provider", it) }
-                value.embedUrl?.let { put("embed_url", it) }
                 if (value.media.isNotEmpty()) {
                     put("media", value.media.toNpfMediaJsonElement(asArray = value.type != "video" && value.type != "audio"))
                 }
@@ -450,7 +307,6 @@ internal object TumblrNpfBlockSerializer : KSerializer<TumblrNpfBlock> {
                 value.thumbnailUrl?.let { put("thumbnail_url", it) }
                 value.width?.let { put("width", it) }
                 value.height?.let { put("height", it) }
-                value.indentLevel?.let { put("indent_level", it) }
                 value.embedIframe?.url?.let { url ->
                     put(
                         "embed_iframe",
@@ -518,37 +374,3 @@ private fun JsonObject.arrayOrNull(name: String): JsonArray? = get(name) as? Jso
 private fun JsonObject.stringOrNull(name: String): String? = (get(name) as? JsonPrimitive)?.contentOrNull
 
 private fun JsonObject.intOrNull(name: String): Int? = (get(name) as? JsonPrimitive)?.intOrNull
-
-internal object TumblrActionResponseSerializer : KSerializer<TumblrActionResponse> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("TumblrActionResponse")
-
-    override fun deserialize(decoder: Decoder): TumblrActionResponse {
-        val input = decoder as? JsonDecoder ?: return TumblrActionResponse()
-        val obj = input.decodeJsonElement() as? JsonObject ?: return TumblrActionResponse()
-        return TumblrActionResponse(
-            id = (obj["id"] as? JsonPrimitive)?.contentOrNull,
-            url = (obj["url"] as? JsonPrimitive)?.contentOrNull,
-            name = (obj["name"] as? JsonPrimitive)?.contentOrNull,
-            message = (obj["message"] as? JsonPrimitive)?.contentOrNull,
-            liked = (obj["liked"] as? JsonPrimitive)?.booleanOrNull,
-            following = (obj["following"] as? JsonPrimitive)?.booleanOrNull,
-        )
-    }
-
-    override fun serialize(
-        encoder: Encoder,
-        value: TumblrActionResponse,
-    ) {
-        val output = encoder as? JsonEncoder ?: return
-        output.encodeJsonElement(
-            buildJsonObject {
-                value.id?.let { put("id", it) }
-                value.url?.let { put("url", it) }
-                value.name?.let { put("name", it) }
-                value.message?.let { put("message", it) }
-                value.liked?.let { put("liked", it) }
-                value.following?.let { put("following", it) }
-            },
-        )
-    }
-}

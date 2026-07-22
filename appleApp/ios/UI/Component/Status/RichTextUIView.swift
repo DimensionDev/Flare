@@ -17,12 +17,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         didSet {
             guard !isBatchUpdating, oldValue != lineLimit else { return }
             updateHorizontalLayoutPolicy()
-            let wasUsingHardTruncatedText = oldValue != nil && hasHardTruncatedText
-            if wasUsingHardTruncatedText || usesHardTruncatedText {
-                update()
-            } else {
-                updateTextViews()
-            }
+            updateTextViews()
         }
     }
     var isTextSelectionEnabled: Bool = false {
@@ -64,9 +59,12 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private var measurementBlocks: [RichTextMeasurementBlock] = []
     private var renderGeneration = 0
     private var lastLayoutWidth: CGFloat = 0
+    private var naturalStackSizeCache: [Int: CGSize] = [:]
     private var isBatchUpdating = false
     private var lastStructuralSignature: StructuralSignature?
     private var traitRegistration: UITraitChangeRegistration?
+    private var stackBottomConstraint: NSLayoutConstraint?
+    private var collapseAboveLineCount: Int?
 
     private struct StructuralSignature: Equatable {
         let contentKey: Int?
@@ -75,14 +73,12 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         let baseTextStyle: UIFont.TextStyle
         let baseTextColor: UIColor
         let preferredContentSizeCategory: UIContentSizeCategory
-        let usesHardTruncatedText: Bool
 
         static func == (lhs: StructuralSignature, rhs: StructuralSignature) -> Bool {
             guard lhs.isTextSelectionEnabled == rhs.isTextSelectionEnabled,
                   lhs.baseTextStyle == rhs.baseTextStyle,
                   lhs.baseTextColor.isEqual(rhs.baseTextColor),
-                  lhs.preferredContentSizeCategory == rhs.preferredContentSizeCategory,
-                  lhs.usesHardTruncatedText == rhs.usesHardTruncatedText else {
+                  lhs.preferredContentSizeCategory == rhs.preferredContentSizeCategory else {
                 return false
             }
             if let l = lhs.contentKey, let r = rhs.contentKey {
@@ -116,11 +112,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
 
     private func commonInit() {
         addSubview(stack)
+        let bottomConstraint = stack.bottomAnchor.constraint(equalTo: bottomAnchor)
+        stackBottomConstraint = bottomConstraint
         NSLayoutConstraint.activate([
             stack.topAnchor.constraint(equalTo: topAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            bottomConstraint,
         ])
         setContentHuggingPriority(.required, for: .vertical)
         setContentCompressionResistancePriority(.required, for: .vertical)
@@ -145,13 +143,16 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         baseTextStyle: UIFont.TextStyle = .body,
         baseTextColor: UIColor = .label,
         preferredContentSizeCategory: UIContentSizeCategory = .medium,
-        contentKey: Int? = nil
+        contentKey: Int? = nil,
+        collapseAboveLineCount: Int? = nil
     ) {
         let oldLineLimit = self.lineLimit
+        let oldCollapseAboveLineCount = self.collapseAboveLineCount
         isBatchUpdating = true
         self.text = text
         self.contentKey = contentKey
         self.lineLimit = lineLimit
+        self.collapseAboveLineCount = collapseAboveLineCount
         self.isTextSelectionEnabled = isTextSelectionEnabled
         self.onOpenURL = onOpenURL
         self.baseTextStyle = baseTextStyle
@@ -159,8 +160,9 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         self.preferredContentSizeCategory = preferredContentSizeCategory
         isBatchUpdating = false
 
-        if oldLineLimit != lineLimit {
+        if oldLineLimit != lineLimit || oldCollapseAboveLineCount != collapseAboveLineCount {
             updateHorizontalLayoutPolicy()
+            updateVerticalLayoutPolicy()
         }
         update()
     }
@@ -172,8 +174,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             isTextSelectionEnabled: isTextSelectionEnabled,
             baseTextStyle: baseTextStyle,
             baseTextColor: baseTextColor,
-            preferredContentSizeCategory: preferredContentSizeCategory,
-            usesHardTruncatedText: usesHardTruncatedText
+            preferredContentSizeCategory: preferredContentSizeCategory
         )
         guard force || lastStructuralSignature != structuralSignature else {
             updateTextViews()
@@ -184,13 +185,6 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         clearStack()
 
         guard let text else {
-            invalidateIntrinsicContentSize()
-            return
-        }
-
-        if usesHardTruncatedText, let truncatedText = text.truncatedText {
-            inlineImages.removeAll(keepingCapacity: true)
-            addPlainTextContent(truncatedText)
             invalidateIntrinsicContentSize()
             return
         }
@@ -216,6 +210,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func clearStack() {
         textBlocks = []
         measurementBlocks = []
+        naturalStackSizeCache.removeAll(keepingCapacity: true)
         lastLayoutWidth = 0
         stack.arrangedSubviews.forEach {
             stack.removeArrangedSubview($0)
@@ -288,17 +283,45 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             : (bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width)
         guard width > 0 else { return .zero }
 
+        let size = naturalStackSize(for: width)
+        guard hasCollapsedOverflow(fullHeight: size.height), let lineLimit else {
+            return size
+        }
+        return CGSize(width: size.width, height: min(size.height, lineHeight * CGFloat(max(lineLimit, 1))))
+    }
+
+    private func naturalStackSize(for width: CGFloat) -> CGSize {
+        let widthKey = Self.measurementWidthKey(width)
+        if let cached = naturalStackSizeCache[widthKey] {
+            return cached
+        }
         var height: CGFloat = 0
         var measuredWidth: CGFloat = 0
         for (index, block) in measurementBlocks.enumerated() {
-            let size = block.measuredSize(width: width, lineLimit: lineLimit)
+            let size = block.measuredSize(width: width, lineLimit: renderedLineLimit)
             if index > 0 {
                 height += stack.spacing
             }
             height += ceil(size.height)
             measuredWidth = max(measuredWidth, size.width)
         }
-        return CGSize(width: measuredWidth, height: height)
+        let size = CGSize(width: measuredWidth, height: height)
+        naturalStackSizeCache[widthKey] = size
+        return size
+    }
+
+    func hasCollapsedOverflow(for width: CGFloat) -> Bool {
+        guard width.isFinite, width > 0 else { return false }
+        return hasCollapsedOverflow(fullHeight: naturalStackSize(for: width).height)
+    }
+
+    private func hasCollapsedOverflow(fullHeight: CGFloat) -> Bool {
+        guard let collapseAboveLineCount else { return false }
+        return fullHeight > lineHeight * CGFloat(max(collapseAboveLineCount, 1)) + 1
+    }
+
+    private var lineHeight: CGFloat {
+        ceil(preferredFont(forTextStyle: baseTextStyle).lineHeight)
     }
 
     func singleLineContentSize() -> CGSize {
@@ -314,7 +337,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         var height: CGFloat = 0
         var measuredWidth: CGFloat = 0
         for (index, block) in measurementBlocks.enumerated() {
-            let size = block.singleLineSize(lineLimit: lineLimit)
+            let size = block.singleLineSize(lineLimit: renderedLineLimit)
             if index > 0 {
                 height += stack.spacing
             }
@@ -341,16 +364,11 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     }
 
     private var exposesHorizontalIntrinsicSize: Bool {
-        lineLimit == 1
+        renderedLineLimit == 1
     }
 
-    private var usesHardTruncatedText: Bool {
-        lineLimit != nil && hasHardTruncatedText
-    }
-
-    private var hasHardTruncatedText: Bool {
-        guard let truncatedText = text?.truncatedText else { return false }
-        return !truncatedText.isEmpty
+    private var renderedLineLimit: Int? {
+        collapseAboveLineCount == nil ? lineLimit : nil
     }
 
     fileprivate static let singleLineMeasurementWidth: CGFloat = 10_000
@@ -363,6 +381,13 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func updateHorizontalLayoutPolicy() {
         setContentHuggingPriority(exposesHorizontalIntrinsicSize ? .required : .defaultLow, for: .horizontal)
         setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        invalidateIntrinsicContentSize()
+    }
+
+    private func updateVerticalLayoutPolicy() {
+        let clipsWholeRichText = collapseAboveLineCount != nil
+        stackBottomConstraint?.isActive = !clipsWholeRichText
+        clipsToBounds = clipsWholeRichText
         invalidateIntrinsicContentSize()
     }
 
@@ -411,21 +436,6 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         }
     }
 
-    private func addPlainTextContent(_ text: String) {
-        let attributedText = NSAttributedString(string: text, attributes: baseAttributes())
-        let renderer = makeLabel(
-            attributedText: attributedText,
-            alignment: .natural
-        )
-        let measurement = RichTextTextMeasurement(
-            attributedText: attributedText,
-            fallbackTextStyle: baseTextStyle
-        )
-        textBlocks.append(RenderedTextBlock(content: .plain(text), renderer: renderer, measurement: measurement))
-        stack.addArrangedSubview(renderer.renderedView)
-        measurementBlocks.append(.text(measurement, renderer: renderer))
-    }
-
     private func addTextContent(_ content: RenderContent.Text) {
         let attributedText = attributedString(for: content)
         let renderer = makeTextRenderer(
@@ -454,6 +464,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         imageView.onOpenURL = onOpenURL
         imageView.onAspectRatioChanged = { [weak self, measurement] ratio in
             measurement.update(aspectRatio: ratio)
+            self?.naturalStackSizeCache.removeAll(keepingCapacity: true)
             self?.lastLayoutWidth = 0
             self?.invalidateIntrinsicContentSize()
             self?.setNeedsLayout()
@@ -606,8 +617,6 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         for block in textBlocks {
             let attributedText: NSAttributedString
             switch block.content {
-            case .plain(let text):
-                attributedText = NSAttributedString(string: text, attributes: baseAttributes())
             case .platform(let content):
                 attributedText = attributedString(for: content)
             case .render(let content):
@@ -616,6 +625,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
             block.renderer.applyAttributedText(attributedText)
             block.measurement.update(attributedText: attributedText)
         }
+        naturalStackSizeCache.removeAll(keepingCapacity: true)
         lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
@@ -846,7 +856,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         textView.configure(
             attributedText: attributedText,
             alignment: alignment,
-            lineLimit: lineLimit,
+            lineLimit: renderedLineLimit,
             selectionEnabled: isTextSelectionEnabled,
             linkColor: linkColor(),
             onOpenURL: onOpenURL
@@ -859,7 +869,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
         label.configure(
             attributedText: attributedText,
             alignment: alignment,
-            lineLimit: lineLimit
+            lineLimit: renderedLineLimit
         )
         return label
     }
@@ -885,6 +895,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
                 imageView.onOpenURL = onOpenURL
             }
         }
+        naturalStackSizeCache.removeAll(keepingCapacity: true)
         lastLayoutWidth = 0
         invalidateIntrinsicContentSize()
     }
@@ -892,7 +903,7 @@ final class RichTextUIView: UIView, TimelineHeightProviding {
     private func updateTextViews(in view: UIView) {
         if let renderer = view as? RichTextTextRendering {
             renderer.update(
-                lineLimit: lineLimit,
+                lineLimit: renderedLineLimit,
                 selectionEnabled: isTextSelectionEnabled,
                 linkColor: linkColor(),
                 onOpenURL: onOpenURL
@@ -909,7 +920,6 @@ private struct RenderedTextBlock {
 }
 
 private enum RenderedTextBlockContent {
-    case plain(String)
     case platform(PlatformTextTextContent)
     case render(RenderContent.Text)
 }

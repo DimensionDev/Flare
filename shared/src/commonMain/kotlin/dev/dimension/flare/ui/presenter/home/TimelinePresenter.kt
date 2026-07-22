@@ -42,7 +42,9 @@ import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.MxgaRepository
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.data.repository.isMxgaMatch
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
@@ -82,6 +84,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val appDataStore: AppDataStore by koinInject()
     private val preTranslationService: PreTranslationService by koinInject()
     private val settingsRepository: SettingsRepository by koinInject()
+    private val mxgaRepository: MxgaRepository by koinInject()
 
     private val localFilterRepository: LocalFilterRepository by koinInject()
     private val inAppNotification: InAppNotification by koinInject()
@@ -97,6 +100,12 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
             settingsRepository = settingsRepository,
             timelineTabItemId = timelineTabItemId,
         )
+    }
+
+    private val mxgaEnabledFlow: Flow<Boolean> by lazy {
+        settingsRepository.appSettings
+            .map { it.mxgaEnabled }
+            .distinctUntilChanged()
     }
 
     private val translationSettingsFlow: Flow<TranslationDisplayOptions> by lazy {
@@ -150,10 +159,17 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                         ).cachedIn(scope)
                     }
                 }.flatMapLatest { pager ->
-                    combine(filterFlow, timelineFilterConfigFlow) { filterList, timelineFilterConfig ->
+                    combine(
+                        filterFlow,
+                        timelineFilterConfigFlow,
+                        mxgaEnabledFlow,
+                        mxgaRepository.snapshot,
+                    ) { filterList, timelineFilterConfig, mxgaEnabled, mxgaSnapshot ->
                         pager
                             .filter { item ->
-                                item.matchesKeywordFilters(filterList) && item.matchesTimelineFilter(timelineFilterConfig)
+                                item.matchesKeywordFilters(filterList) &&
+                                    item.matchesTimelineFilter(timelineFilterConfig) &&
+                                    (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot))
                             }.map {
                                 transform(it)
                             }

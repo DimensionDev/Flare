@@ -11,6 +11,7 @@ public data class AppSettings(
     val language: String = "",
     val translateConfig: TranslateConfig = TranslateConfig(),
     val linkOpenDefaults: LinkOpenDefaults = LinkOpenDefaults(),
+    val mxgaEnabled: Boolean = false,
 ) {
     @Serializable
     public data class LinkOpenDefaults(

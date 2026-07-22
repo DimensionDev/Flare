@@ -7,6 +7,7 @@ import dev.dimension.flare.data.network.tumblr.TumblrBlog
 import dev.dimension.flare.data.network.tumblr.TumblrNpfAttribution
 import dev.dimension.flare.data.network.tumblr.TumblrNpfBlock
 import dev.dimension.flare.data.network.tumblr.TumblrNpfFormatting
+import dev.dimension.flare.data.network.tumblr.TumblrNpfFormattingBlog
 import dev.dimension.flare.data.network.tumblr.TumblrNpfLayout
 import dev.dimension.flare.data.network.tumblr.TumblrNpfLayoutDisplay
 import dev.dimension.flare.data.network.tumblr.TumblrNpfMedia
@@ -207,7 +208,7 @@ class TumblrMapperTest {
     }
 
     @Test
-    fun independentTagsAreAppendedToContent() {
+    fun independentTagsAreAppendedAsRichText() {
         val post =
             TumblrPost(
                 idString = "tags-1",
@@ -218,7 +219,11 @@ class TumblrMapperTest {
 
         val timelinePost = assertIs<UiTimelineV2.TimelinePostItem>(post.toUiTimeline(accountKey)).post
 
-        assertEquals("Hello Tumblr\n#Tumblr #KMP #two words", timelinePost.content.original.raw)
+        val richText = timelinePost.content.original
+        assertEquals("Hello Tumblr\n#Tumblr #KMP #two words", richText.raw)
+        val hashtag = assertIs<RenderRun.Text>(assertIs<RenderContent.Text>(richText.renderRuns.last()).runs.first())
+        val search = assertIs<DeeplinkRoute.Search>(DeeplinkRoute.parse(assertNotNull(hashtag.style.link)))
+        assertEquals("#Tumblr", search.query)
     }
 
     @Test
@@ -364,12 +369,18 @@ class TumblrMapperTest {
                 content =
                     listOf(
                         textBlock(
-                            text = "Bold italic link",
+                            text = "Bold italic link @staff",
                             formatting =
                                 listOf(
                                     TumblrNpfFormatting(type = "bold", start = 0, end = 4),
                                     TumblrNpfFormatting(type = "italic", start = 4, end = 11),
                                     TumblrNpfFormatting(type = "link", start = 11, end = 16, url = "https://example.com"),
+                                    TumblrNpfFormatting(
+                                        type = "mention",
+                                        start = 17,
+                                        end = 23,
+                                        blog = TumblrNpfFormattingBlog(name = "Staff"),
+                                    ),
                                 ),
                         ),
                     ),
@@ -389,6 +400,9 @@ class TumblrMapperTest {
         assertTrue(runs[1].style.italic)
         assertEquals(" link", runs[2].text)
         assertEquals("https://example.com", runs[2].style.link)
+        val mention = runs.single { it.text == "@staff" }
+        val profile = assertIs<DeeplinkRoute.Profile.User>(DeeplinkRoute.parse(assertNotNull(mention.style.link)))
+        assertEquals(tumblrUserKey("staff"), profile.userKey)
     }
 
     @Test

@@ -41,6 +41,7 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlin.time.Clock
@@ -51,7 +52,7 @@ internal fun TumblrPost.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2 {
     val statusKey = tumblrPostKey(postBlogName, resolvedId())
     val baseText = content.collectText(layout).ifBlank { fallbackTextParts().joinToString(separator = "\n") }.trim()
     val shouldMoveRootTagsToQuote = baseText.isBlank() && tags.isNotEmpty() && trail.isNotEmpty()
-    val renderedContent = renderContent(tags = if (shouldMoveRootTagsToQuote) emptyList() else tags)
+    val renderedContent = renderContent(accountKey, tags = if (shouldMoveRootTagsToQuote) emptyList() else tags)
     val ownText = renderedContent.text
     val createdAt = createdAtInstant().toUi()
     val hasReblogComment = baseText.isNotBlank() || shouldMoveRootTagsToQuote
@@ -388,8 +389,12 @@ private data class TumblrNpfFormattingRange(
     val blog: TumblrNpfFormattingBlog?,
 )
 
-private fun TumblrPost.renderContent(tags: List<String> = this.tags): TumblrRenderedPostContent =
+private fun TumblrPost.renderContent(
+    accountKey: MicroBlogKey,
+    tags: List<String> = this.tags,
+): TumblrRenderedPostContent =
     renderContent(
+        accountKey = accountKey,
         content = content,
         layout = layout,
         tags = tags,
@@ -399,14 +404,19 @@ private fun TumblrPost.renderContent(tags: List<String> = this.tags): TumblrRend
 
 private fun TumblrPost.fallbackTextParts(): List<String> = listOfNotNull(title, body, caption).filter { it.isNotBlank() }
 
-private fun TumblrTrailItem.renderContent(fallbackTags: List<String> = emptyList()): TumblrRenderedPostContent =
+private fun TumblrTrailItem.renderContent(
+    accountKey: MicroBlogKey,
+    fallbackTags: List<String> = emptyList(),
+): TumblrRenderedPostContent =
     renderContent(
+        accountKey = accountKey,
         content = content,
         layout = layout,
         tags = tags.ifEmpty { post?.tags.orEmpty() }.ifEmpty { fallbackTags },
     )
 
 private fun renderContent(
+    accountKey: MicroBlogKey,
     content: List<TumblrNpfBlock>,
     layout: List<TumblrNpfLayout>,
     tags: List<String>,
@@ -415,7 +425,8 @@ private fun renderContent(
 ): TumblrRenderedPostContent {
     val orderedContent = content.inLayoutDisplayOrder(layout)
     val visibleContent = orderedContent.map { it.value }
-    val tagLine = tags.toTumblrTagLine()
+    val normalizedTags = tags.toTumblrTags()
+    val tagLine = normalizedTags.joinToString(separator = " ")
     val text =
         visibleContent
             .collectText()
@@ -425,6 +436,7 @@ private fun renderContent(
     val shouldInlineImages = visibleContent.shouldInlineAllImages()
     val renderedNpfContent =
         orderedContent.renderNpfContent(
+            accountKey = accountKey,
             inlineImages = shouldInlineImages,
             askLayout = layout.firstOrNull { it.type == "ask" },
         )
@@ -433,9 +445,8 @@ private fun renderContent(
             part.takeIf { it.isNotBlank() }?.toRenderTextContent()
         }
     val tagRuns =
-        tagLine
-            .takeIf { it.isNotBlank() }
-            ?.toRenderTextContent()
+        normalizedTags
+            .toTumblrTagContent(accountKey)
             ?.let(::listOf)
             .orEmpty()
     val renderRuns =
@@ -489,7 +500,7 @@ private fun String.appendTumblrTagLine(tagLine: String): String {
     }
 }
 
-private fun List<String>.toTumblrTagLine(): String =
+private fun List<String>.toTumblrTags(): List<String> =
     mapNotNull { tag ->
         tag
             .trim()
@@ -498,7 +509,20 @@ private fun List<String>.toTumblrTagLine(): String =
             .takeIf { it.isNotBlank() }
             ?.let { "#$it" }
     }.distinct()
-        .joinToString(separator = " ")
+
+private fun List<String>.toTumblrTagContent(accountKey: MicroBlogKey): RenderContent.Text? =
+    takeIf { it.isNotEmpty() }?.let { tags ->
+        RenderContent.Text(
+            runs =
+                tags
+                    .mapIndexed { index, tag ->
+                        RenderRun.Text(
+                            text = if (index == 0) tag else " $tag",
+                            style = RenderTextStyle(link = DeeplinkRoute.Search(AccountType.Specific(accountKey), tag).toUri()),
+                        )
+                    }.toPersistentList(),
+        )
+    }
 
 private fun List<TumblrNpfBlock>.shouldInlineAllImages(): Boolean {
     var hasTextBefore = false
@@ -548,7 +572,7 @@ private fun TumblrTrailItem.toReferencedPost(
     val resolvablePostId = post?.id
     val trailPostId = resolvablePostId ?: "broken-${parentStatusKey.id.substringAfterLast(':')}-$trailIndex"
     val statusKey = tumblrPostKey(trailBlogName, trailPostId)
-    val content = renderContent(fallbackTags = fallbackTags)
+    val content = renderContent(accountKey, fallbackTags = fallbackTags)
 
     if (content.text.isBlank() && content.media.isEmpty() && content.card == null) {
         return null
@@ -585,6 +609,7 @@ private fun TumblrTrailItem.toReferencedPost(
 }
 
 private fun List<IndexedValue<TumblrNpfBlock>>.renderNpfContent(
+    accountKey: MicroBlogKey,
     inlineImages: Boolean,
     askLayout: TumblrNpfLayout?,
 ): TumblrNpfRenderedContent {
@@ -653,7 +678,7 @@ private fun List<IndexedValue<TumblrNpfBlock>>.renderNpfContent(
 
             else -> {
                 block
-                    .toRenderTextContent()
+                    .toRenderTextContent(accountKey)
                     ?.let { content ->
                         if (isAskBlock) {
                             content.copy(block = content.block.copy(isBlockQuote = true))
@@ -670,7 +695,7 @@ private fun List<IndexedValue<TumblrNpfBlock>>.renderNpfContent(
     )
 }
 
-private fun TumblrNpfBlock.toRenderTextContent(): RenderContent.Text? {
+private fun TumblrNpfBlock.toRenderTextContent(accountKey: MicroBlogKey): RenderContent.Text? {
     val text = displayText().takeIf { it.isNotBlank() } ?: return null
     val baseStyle =
         if (type == "link" && url != null) {
@@ -679,7 +704,7 @@ private fun TumblrNpfBlock.toRenderTextContent(): RenderContent.Text? {
             RenderTextStyle()
         }
     return RenderContent.Text(
-        runs = text.toRenderTextRuns(formatting, baseStyle).toPersistentList(),
+        runs = text.toRenderTextRuns(formatting, baseStyle, accountKey).toPersistentList(),
         block = toRenderBlockStyle(),
     )
 }
@@ -709,6 +734,7 @@ private fun TumblrNpfBlock.toRenderBlockStyle(): RenderBlockStyle =
 private fun String.toRenderTextRuns(
     formatting: List<TumblrNpfFormatting>,
     baseStyle: RenderTextStyle,
+    accountKey: MicroBlogKey,
 ): List<RenderRun.Text> {
     if (isEmpty()) return emptyList()
     val ranges = formatting.toRanges(this)
@@ -736,7 +762,7 @@ private fun String.toRenderTextRuns(
             val activeRanges = ranges.filter { range -> start >= range.start && start < range.end }
             RenderRun.Text(
                 text = segment,
-                style = activeRanges.toRenderTextStyle(baseStyle),
+                style = activeRanges.toRenderTextStyle(baseStyle, accountKey),
             )
         }.ifEmpty {
             listOf(RenderRun.Text(text = this, style = baseStyle))
@@ -758,7 +784,10 @@ private fun List<TumblrNpfFormatting>.toRanges(text: String): List<TumblrNpfForm
         )
     }
 
-private fun List<TumblrNpfFormattingRange>.toRenderTextStyle(baseStyle: RenderTextStyle): RenderTextStyle {
+private fun List<TumblrNpfFormattingRange>.toRenderTextStyle(
+    baseStyle: RenderTextStyle,
+    accountKey: MicroBlogKey,
+): RenderTextStyle {
     var style = baseStyle
     forEach { range ->
         style =
@@ -768,7 +797,7 @@ private fun List<TumblrNpfFormattingRange>.toRenderTextStyle(baseStyle: RenderTe
                 "strikethrough" -> style.copy(strikethrough = true)
                 "small" -> style.copy(small = true)
                 "link" -> style.copy(link = range.url ?: style.link)
-                "mention" -> style.copy(link = range.blog?.toTumblrBlogUrl() ?: style.link)
+                "mention" -> style.copy(link = range.blog?.toTumblrProfileUri(accountKey) ?: style.link)
                 "code" -> style.copy(code = true, monospace = true)
                 else -> style
             }
@@ -776,8 +805,17 @@ private fun List<TumblrNpfFormattingRange>.toRenderTextStyle(baseStyle: RenderTe
     return style
 }
 
-private fun TumblrNpfFormattingBlog.toTumblrBlogUrl(): String? =
-    url ?: name?.normalizedTumblrBlogName()?.let { "https://www.tumblr.com/$it" }
+private fun TumblrNpfFormattingBlog.toTumblrProfileUri(accountKey: MicroBlogKey): String? =
+    (name?.takeIf { it.isNotBlank() } ?: url)
+        ?.normalizedTumblrBlogName()
+        ?.takeIf { it.isNotBlank() }
+        ?.let { blogName ->
+            DeeplinkRoute.Profile
+                .User(
+                    accountType = AccountType.Specific(accountKey),
+                    userKey = tumblrUserKey(blogName),
+                ).toUri()
+        }
 
 private fun String.charIndexForCodePointOffset(offset: Int): Int =
     offsetByCodePoints(index = 0, codePointOffset = offset.coerceIn(0, codePointCount()))

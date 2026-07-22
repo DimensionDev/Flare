@@ -283,6 +283,8 @@ struct ServiceSelectionScreen: View {
             return "Pixiv"
         case .fanbox:
             return "FANBOX"
+        case .tumblr:
+            return "Tumblr"
         }
     }
 }

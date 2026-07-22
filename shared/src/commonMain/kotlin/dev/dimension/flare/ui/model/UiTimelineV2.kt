@@ -361,6 +361,7 @@ public sealed class UiTimelineV2 {
             Followers,
             Specified,
             Channel,
+            Private,
         }
     }
 

@@ -326,6 +326,7 @@ internal open class MastodonDataSource(
                         UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
                         UiTimelineV2.Post.Visibility.Followers -> Visibility.Private
                         UiTimelineV2.Post.Visibility.Specified -> Visibility.Direct
+                        UiTimelineV2.Post.Visibility.Private -> error("Mastodon does not support private compose visibility")
                         UiTimelineV2.Post.Visibility.Channel -> Visibility.Public
                     },
                 inReplyToID = inReplyToID,
@@ -471,7 +472,7 @@ internal open class MastodonDataSource(
                     accountKey = accountKey,
                 ),
             contentWarning = ComposeConfig.ContentWarning,
-            visibility = ComposeConfig.Visibility,
+            visibility = ComposeConfig.Visibility(),
             language = ComposeConfig.Language(1),
         )
 

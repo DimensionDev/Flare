@@ -587,16 +587,30 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         }
 
         // Content column (vertical, spacing 8)
-        for (i, child) in contentColumnChildren.enumerated() {
+        updateExpandMoreButtonVisibility(contentWidth: contentWidth)
+        let visibleContentColumnChildren = contentColumnChildren.filter { !$0.isHidden }
+        for (i, child) in visibleContentColumnChildren.enumerated() {
             let h = childHeight(of: child, for: contentWidth)
             if assignFrames { child.frame = CGRect(x: contentX, y: innerY, width: contentWidth, height: h) }
             innerY += h
-            if i < contentColumnChildren.count - 1 {
+            if i < visibleContentColumnChildren.count - 1 {
                 innerY += Self.contentColumnSpacing
             }
         }
 
         return max(innerY, y)
+    }
+
+    private func updateExpandMoreButtonVisibility(contentWidth: CGFloat) {
+        guard let button = expandMoreButtonStorage,
+              contentColumnChildren.contains(where: { $0 === button }) else {
+            return
+        }
+        let bodyViews = [bodyTextStorage, bodyTranslationTextStorage].compactMap { $0 }
+        button.isHidden = !bodyViews.contains { bodyView in
+            contentColumnChildren.contains(where: { $0 === bodyView }) &&
+                bodyView.hasCollapsedOverflow(for: contentWidth)
+        }
     }
 
     // MARK: - SwiftUI-equivalent computed
@@ -724,7 +738,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             [data.content.original]
         }
         let hasCW = contentWarnings.contains { !$0.isEmpty }
-        let shouldExpandTextByDefault = !hasCW && contents.reduce(0) { $0 + $1.innerText.count } <= 500
 
         // reply-to
         if let replyToHandle = data.replyToHandle {
@@ -764,16 +777,20 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // main body
         if expand || appearance.expandContentWarning || !hasCW {
             let bodyLineLimit: Int?
+            let collapseAboveLineCount: Int?
             let bodySelectionEnabled: Bool
             if isDetail {
                 bodySelectionEnabled = true
                 bodyLineLimit = nil
-            } else if (shouldExpandTextByDefault || expand) && maxLine >= 5 {
+                collapseAboveLineCount = nil
+            } else if expand {
                 bodySelectionEnabled = false
                 bodyLineLimit = nil
+                collapseAboveLineCount = nil
             } else {
                 bodySelectionEnabled = false
                 bodyLineLimit = Int(maxLine)
+                collapseAboveLineCount = maxLine >= 5 ? 10 : maxLine
             }
             for (index, content) in contents.enumerated() where !content.isEmpty {
                 let bodyText = index == 0 ? resolvedBodyText() : resolvedBodyTranslationText()
@@ -783,12 +800,12 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     isTextSelectionEnabled: bodySelectionEnabled,
                     onOpenURL: openURL,
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + 2 + index
+                    contentKey: Int(data.renderHash) * 4 + 2 + index,
+                    collapseAboveLineCount: collapseAboveLineCount
                 )
                 items.append(bodyText)
             }
-            if !shouldExpandTextByDefault,
-               contents.contains(where: { !$0.isEmpty }),
+            if contents.contains(where: { !$0.isEmpty }),
                !isDetail,
                !expand,
                showExpandTextButton {

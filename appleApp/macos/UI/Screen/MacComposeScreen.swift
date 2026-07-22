@@ -1403,6 +1403,8 @@ private extension UiProfile {
             return .pixiv
         case .fanbox:
             return .fanbox
+        case .tumblr:
+            return .tumblr
         case .xQt:
             return .x
         case .vvo:

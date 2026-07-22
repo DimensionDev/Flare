@@ -6,26 +6,36 @@ import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.test.runTest
+import okio.Path
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class PlatformOAuthPendingRepositoryTest {
-    private val root = createTestRootPath()
-    private val repository =
-        PlatformOAuthPendingRepository(
-            AppDataStore(
-                OkioFileStorage(
-                    fileSystem = createTestFileSystem(),
-                    root = root,
+    private lateinit var root: Path
+    private lateinit var repository: PlatformOAuthPendingRepository
+
+    @BeforeTest
+    fun setup() {
+        root = createTestRootPath()
+        repository =
+            PlatformOAuthPendingRepository(
+                AppDataStore(
+                    OkioFileStorage(
+                        fileSystem = createTestFileSystem(),
+                        root = root,
+                    ),
                 ),
-            ),
-        )
+            )
+    }
 
     @AfterTest
     fun tearDown() {
-        deleteTestRootPath(root)
+        if (::root.isInitialized) {
+            deleteTestRootPath(root)
+        }
     }
 
     @Test

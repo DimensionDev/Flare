@@ -283,6 +283,8 @@ public extension UiIcon {
             .pixiv
         case .fanbox:
             .pixiv
+        case .tumblr:
+            .tumblr
         case .list:
             .list
         case .feeds, .rss:

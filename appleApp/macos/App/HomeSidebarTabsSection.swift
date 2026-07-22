@@ -84,7 +84,7 @@ struct HomeSidebarTabsSection: View {
                     remove(tab)
                 }
             )
-            .tag(Route.timeline(tab))
+            .tag(Route.timeline(tab, isHome: true))
         } else {
             HomeSidebarEditableTabRow(
                 tab: tab,
@@ -98,7 +98,7 @@ struct HomeSidebarTabsSection: View {
                     remove(tab)
                 }
             )
-            .tag(Route.timeline(tab))
+            .tag(Route.timeline(tab, isHome: true))
         }
     }
 
@@ -185,8 +185,8 @@ struct HomeSidebarTabsSection: View {
             editableTabs = liveTabs
         }
         editableTabs.removeAll { $0.id == tab.id }
-        if selectedTab == .timeline(tab) {
-            selectedTab = editableTabs.first.map { .timeline($0) }
+        if selectedTab == .timeline(tab, isHome: true) {
+            selectedTab = editableTabs.first.map { .timeline($0, isHome: true) }
         }
         persist()
     }
@@ -199,8 +199,8 @@ struct HomeSidebarTabsSection: View {
             return
         }
         editableTabs[index] = updatedTab
-        if selectedTab == .timeline(initialTab) {
-            selectedTab = .timeline(updatedTab)
+        if selectedTab == .timeline(initialTab, isHome: true) {
+            selectedTab = .timeline(updatedTab, isHome: true)
         }
         persist()
     }
@@ -216,11 +216,11 @@ struct HomeSidebarTabsSection: View {
 
     private func normalizeSelection(previousHomeTabIDs: [String]?) {
         guard let currentSelection = selectedTab else {
-            selectedTab = liveTabs.first.map { .timeline($0) }
+            selectedTab = liveTabs.first.map { .timeline($0, isHome: true) }
             return
         }
 
-        guard case .timeline(let selectedTimeline) = currentSelection else {
+        guard case .timeline(let selectedTimeline, isHome: true) = currentSelection else {
             return
         }
 
@@ -232,7 +232,7 @@ struct HomeSidebarTabsSection: View {
             return
         }
 
-        selectedTab = liveTabs.first.map { .timeline($0) }
+        selectedTab = liveTabs.first.map { .timeline($0, isHome: true) }
     }
 }
 

@@ -12,7 +12,14 @@ public data class AppSettings(
     val translateConfig: TranslateConfig = TranslateConfig(),
     val linkOpenDefaults: LinkOpenDefaults = LinkOpenDefaults(),
     val mxgaEnabled: Boolean = false,
+    val refreshHomeTimelineOnLaunch: Boolean = true,
+    val homeTimelineAutoRefreshInterval: TimelineAutoRefreshInterval = TimelineAutoRefreshInterval.DISABLED,
 ) {
+    public companion object {
+        // for SwiftUI environment defaults
+        public val default: AppSettings = AppSettings(version = "")
+    }
+
     @Serializable
     public data class LinkOpenDefaults(
         val rules: List<Rule> = emptyList(),
@@ -112,4 +119,16 @@ public data class AppSettings(
             ) : Type
         }
     }
+}
+
+@Serializable
+public enum class TimelineAutoRefreshInterval(
+    public val minutes: Int,
+) {
+    DISABLED(0),
+    FIVE_MINUTES(5),
+    FIFTEEN_MINUTES(15),
+    THIRTY_MINUTES(30),
+    ONE_HOUR(60),
+    ONE_MINUTE(1),
 }

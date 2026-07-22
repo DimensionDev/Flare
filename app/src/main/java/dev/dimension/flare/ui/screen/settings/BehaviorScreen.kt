@@ -25,6 +25,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
@@ -37,6 +39,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
+import dev.dimension.flare.ui.presenter.SettingsPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LinkOpenDefaultsPresenter
 import dev.dimension.flare.ui.theme.first
@@ -45,6 +48,7 @@ import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -54,7 +58,10 @@ internal fun BehaviorScreen(
     onBack: () -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val state by producePresenter { appearancePresenter() }
+    val state by producePresenter("behavior_settings") {
+        remember { SettingsPresenter() }.invoke()
+    }
+    val appSettings = state.appSettings.takeSuccessOr(AppSettings(version = ""))
     val globalAppearance = LocalGlobalAppearance.current
     FlareScaffold(
         topBar = {
@@ -82,9 +89,53 @@ internal fun BehaviorScreen(
         ) {
             SegmentedListItem(
                 onClick = {
-                    state.update(AppearanceKeys.InAppBrowser, !globalAppearance.inAppBrowser)
+                    state.updateRefreshHomeTimelineOnLaunch(!appSettings.refreshHomeTimelineOnLaunch)
                 },
                 shapes = ListItemDefaults.first(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_refresh_home_timeline_on_launch))
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_refresh_home_timeline_on_launch_description))
+                },
+                trailingContent = {
+                    Switch(
+                        checked = appSettings.refreshHomeTimelineOnLaunch,
+                        onCheckedChange = state::updateRefreshHomeTimelineOnLaunch,
+                    )
+                },
+            )
+            SingleChoiceSettingsItem(
+                headline = {
+                    Text(text = stringResource(id = R.string.settings_home_timeline_auto_refresh_interval))
+                },
+                supporting = {
+                    Text(text = stringResource(id = R.string.settings_home_timeline_auto_refresh_interval_description))
+                },
+                items =
+                    persistentMapOf(
+                        TimelineAutoRefreshInterval.DISABLED to
+                            stringResource(id = R.string.settings_auto_refresh_disabled),
+                        TimelineAutoRefreshInterval.ONE_MINUTE to
+                            stringResource(id = R.string.settings_auto_refresh_one_minute),
+                        TimelineAutoRefreshInterval.FIVE_MINUTES to
+                            stringResource(id = R.string.settings_auto_refresh_five_minutes),
+                        TimelineAutoRefreshInterval.FIFTEEN_MINUTES to
+                            stringResource(id = R.string.settings_auto_refresh_fifteen_minutes),
+                        TimelineAutoRefreshInterval.THIRTY_MINUTES to
+                            stringResource(id = R.string.settings_auto_refresh_thirty_minutes),
+                        TimelineAutoRefreshInterval.ONE_HOUR to
+                            stringResource(id = R.string.settings_auto_refresh_one_hour),
+                    ),
+                selected = appSettings.homeTimelineAutoRefreshInterval,
+                onSelected = state::updateHomeTimelineAutoRefreshInterval,
+                shapes = ListItemDefaults.item(),
+            )
+            SegmentedListItem(
+                onClick = {
+                    state.update(AppearanceKeys.InAppBrowser, !globalAppearance.inAppBrowser)
+                },
+                shapes = ListItemDefaults.item(),
                 content = {
                     Text(text = stringResource(id = R.string.settings_appearance_in_app_browser))
                 },

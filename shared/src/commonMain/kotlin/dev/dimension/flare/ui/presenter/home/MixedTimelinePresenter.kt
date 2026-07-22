@@ -94,7 +94,8 @@ public class MixedTimelinePresenter(
 
 public class SystemHomeMixedTimelinePresenter(
     id: String,
-) : TimelinePresenter(tabId = id) {
+    isHomeTimeline: Boolean = false,
+) : TimelinePresenter(tabId = id, isHomeTimeline = isHomeTimeline) {
     private val groupId = id
 
     private val database: CacheDatabase by koinInject()

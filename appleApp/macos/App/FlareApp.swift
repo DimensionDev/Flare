@@ -210,7 +210,7 @@ private struct MacAppCommands: Commands {
                     let tabs: [UiTimelineTabItem] = data.data.cast(UiTimelineTabItem.self)
                     ForEach(tabs, id: \.id) { tab in
                         Button {
-                            openMainWindow(route: .timeline(tab))
+                            openMainWindow(route: .timeline(tab, isHome: true))
                         } label: {
                             Text(tab.title.text)
                         }

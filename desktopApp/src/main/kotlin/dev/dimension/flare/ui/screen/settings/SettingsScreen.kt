@@ -57,6 +57,8 @@ import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
@@ -198,9 +200,17 @@ import dev.dimension.flare.settings_appearance_timeline_display_mode_plain
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
 import dev.dimension.flare.settings_appearance_video_autoplay_description
+import dev.dimension.flare.settings_auto_refresh_disabled
+import dev.dimension.flare.settings_auto_refresh_fifteen_minutes
+import dev.dimension.flare.settings_auto_refresh_five_minutes
+import dev.dimension.flare.settings_auto_refresh_one_hour
+import dev.dimension.flare.settings_auto_refresh_one_minute
+import dev.dimension.flare.settings_auto_refresh_thirty_minutes
 import dev.dimension.flare.settings_behavior_title
 import dev.dimension.flare.settings_draft_box_description
 import dev.dimension.flare.settings_draft_box_title
+import dev.dimension.flare.settings_home_timeline_auto_refresh_interval
+import dev.dimension.flare.settings_home_timeline_auto_refresh_interval_description
 import dev.dimension.flare.settings_language_description
 import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_link_open_default_ask_every_time
@@ -219,6 +229,8 @@ import dev.dimension.flare.settings_nostr_relays_manage
 import dev.dimension.flare.settings_post_action_fixed_width
 import dev.dimension.flare.settings_post_action_fixed_width_description
 import dev.dimension.flare.settings_privacy_policy
+import dev.dimension.flare.settings_refresh_home_timeline_on_launch
+import dev.dimension.flare.settings_refresh_home_timeline_on_launch_description
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
 import dev.dimension.flare.settings_services_title
@@ -253,6 +265,7 @@ import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
+import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RichText
@@ -374,6 +387,7 @@ internal fun SettingsScreen(
         remember { MxgaSettingsPresenter() }.invoke()
     }
     val linkOpenTargets = linkOpenDefaultsState.targets.takeSuccessOr(persistentListOf())
+    val appSettings = LocalAppSettings.current
     var pendingDeleteAccountKey by remember { mutableStateOf<MicroBlogKey?>(null) }
     var pendingDeleteAccountLabel by remember { mutableStateOf<String?>(null) }
 
@@ -623,7 +637,7 @@ internal fun SettingsScreen(
                                     )
                                 },
                                 onClick = {
-                                    state.setLanguage(it)
+                                    state.updateAppSettings { copy(language = it) }
                                     isFlyoutVisible = false
                                 },
                             )
@@ -1202,6 +1216,69 @@ internal fun SettingsScreen(
             }
 
             Header(stringResource(Res.string.settings_behavior_title))
+            CardExpanderItem(
+                icon = null,
+                heading = {
+                    Text(stringResource(Res.string.settings_refresh_home_timeline_on_launch))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_refresh_home_timeline_on_launch_description))
+                },
+                trailing = {
+                    Switcher(
+                        checked = appSettings.refreshHomeTimelineOnLaunch,
+                        onCheckStateChange = { value ->
+                            state.updateAppSettings { copy(refreshHomeTimelineOnLaunch = value) }
+                        },
+                        textBefore = true,
+                    )
+                },
+            )
+            CardExpanderItem(
+                icon = null,
+                heading = {
+                    Text(stringResource(Res.string.settings_home_timeline_auto_refresh_interval))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_home_timeline_auto_refresh_interval_description))
+                },
+                trailing = {
+                    val items =
+                        persistentMapOf(
+                            TimelineAutoRefreshInterval.DISABLED to Res.string.settings_auto_refresh_disabled,
+                            TimelineAutoRefreshInterval.ONE_MINUTE to Res.string.settings_auto_refresh_one_minute,
+                            TimelineAutoRefreshInterval.FIVE_MINUTES to Res.string.settings_auto_refresh_five_minutes,
+                            TimelineAutoRefreshInterval.FIFTEEN_MINUTES to Res.string.settings_auto_refresh_fifteen_minutes,
+                            TimelineAutoRefreshInterval.THIRTY_MINUTES to Res.string.settings_auto_refresh_thirty_minutes,
+                            TimelineAutoRefreshInterval.ONE_HOUR to Res.string.settings_auto_refresh_one_hour,
+                        )
+                    MenuFlyoutContainer(
+                        flyout = {
+                            items.forEach { (interval, label) ->
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(label)) },
+                                    onClick = {
+                                        state.updateAppSettings { copy(homeTimelineAutoRefreshInterval = interval) }
+                                        isFlyoutVisible = false
+                                    },
+                                )
+                            }
+                        },
+                        content = {
+                            DropDownButton(
+                                onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                content = {
+                                    items[appSettings.homeTimelineAutoRefreshInterval]?.let {
+                                        Text(stringResource(it))
+                                    }
+                                },
+                            )
+                        },
+                        adaptivePlacement = true,
+                        placement = FlyoutPlacement.BottomAlignedEnd,
+                    )
+                },
+            )
             var behaviorExpanded by remember { mutableStateOf(false) }
             Expander(
                 icon = null,
@@ -2470,11 +2547,9 @@ private fun presenter(
             aboutExpanded = value
         }
 
-        fun setLanguage(tag: String) {
+        fun updateAppSettings(block: AppSettings.() -> AppSettings) {
             scope.launch {
-                settingsRepository.updateAppSettings {
-                    copy(language = tag)
-                }
+                settingsRepository.updateAppSettings(block)
             }
         }
     }

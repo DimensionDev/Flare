@@ -15,7 +15,7 @@ enum Route: Hashable, Identifiable {
     case directMessages
     case agentChat(String, String?)
     case localHistoryAgent(String, String?, String)
-    case timeline(UiTimelineTabItem)
+    case timeline(UiTimelineTabItem, isHome: Bool = false)
     case composeNew
     case composeCrossPost(MacComposePrefill)
     case composeDraft(String)
@@ -68,8 +68,8 @@ enum Route: Hashable, Identifiable {
     
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
-        case (.timeline(let lhs), .timeline(let rhs)):
-            return lhs.id == rhs.id
+        case (.timeline(let lhs, let lhsIsHome), .timeline(let rhs, let rhsIsHome)):
+            return lhs.id == rhs.id && lhsIsHome == rhsIsHome
         case (.mediaRaw(let lhsMedias, let lhsIndex, let lhsPreview), .mediaRaw(let rhsMedias, let rhsIndex, let rhsPreview)):
             return lhsIndex == rhsIndex &&
                 lhsPreview == rhsPreview &&
@@ -91,9 +91,10 @@ enum Route: Hashable, Identifiable {
             hasher.combine("accountNotification")
             hasher.combine(accountKey.host)
             hasher.combine(accountKey.id)
-        case .timeline(let item):
+        case .timeline(let item, let isHome):
             hasher.combine("timeline")
             hasher.combine(item.id)
+            hasher.combine(isHome)
         case .relogin(let accountKey, let platformType):
             hasher.combine("relogin")
             hasher.combine(accountKey.id)
@@ -164,8 +165,8 @@ enum Route: Hashable, Identifiable {
                 target: target,
                 onNavigate: onNavigate
             )
-        case .timeline(let item):
-            TimelineScreen(tabItem: item, allowGalleryMode: true)
+        case .timeline(let item, let isHome):
+            TimelineScreen(tabItem: item, allowGalleryMode: true, isHomeTimeline: isHome)
                 .navigationTitle(item.title.text)
         case .composeNew,
                 .composeCrossPost,

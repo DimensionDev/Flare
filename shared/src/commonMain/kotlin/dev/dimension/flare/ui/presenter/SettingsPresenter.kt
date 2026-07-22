@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
@@ -108,6 +109,18 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateShowNumbers(value: Boolean) = update(AppearanceKeys.ShowNumbers, value)
 
+            override fun updateRefreshHomeTimelineOnLaunch(value: Boolean) {
+                updateAppSettings {
+                    copy(refreshHomeTimelineOnLaunch = value)
+                }
+            }
+
+            override fun updateHomeTimelineAutoRefreshInterval(value: TimelineAutoRefreshInterval) {
+                updateAppSettings {
+                    copy(homeTimelineAutoRefreshInterval = value)
+                }
+            }
+
             override fun updateAppSettings(block: AppSettings.() -> AppSettings) {
                 scope.launch {
                     withContext(Dispatchers.Main) {
@@ -177,6 +190,10 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updatePostActionFixedWidth(value: Boolean)
 
         public fun updateShowNumbers(value: Boolean)
+
+        public fun updateRefreshHomeTimelineOnLaunch(value: Boolean)
+
+        public fun updateHomeTimelineAutoRefreshInterval(value: TimelineAutoRefreshInterval)
 
         @WebIgnore
         public fun updateAppSettings(block: AppSettings.() -> AppSettings)

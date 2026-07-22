@@ -720,13 +720,17 @@ private fun <T : TimelineSpec.Data> TimelineTarget<T>.toSource(
 internal class TimelinePresenterFactory(
     private val timelineResolver: TimelineResolver,
 ) {
-    fun create(item: UiTimelineTabItem): TimelinePresenter =
+    fun create(
+        item: UiTimelineTabItem,
+        isHomeTimeline: Boolean = false,
+    ): TimelinePresenter =
         if (item.isSystemHomeMixedTimeline) {
-            SystemHomeMixedTimelinePresenter(item.id)
+            SystemHomeMixedTimelinePresenter(item.id, isHomeTimeline)
         } else {
             TimelinePresenter(
                 tabId = item.id,
                 loader = timelineResolver.resolveLoader(item),
+                isHomeTimeline = isHomeTimeline,
             )
         }
 }

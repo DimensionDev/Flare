@@ -61,6 +61,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -94,6 +95,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     }
 
     private val timelineTabItemId: String?
+    private val isHomeTimeline: Boolean
 
     private val timelineFilterConfigFlow: Flow<TimelineFilterConfig> by lazy {
         observeTimelineFilterConfig(
@@ -116,10 +118,12 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         tabId: String? = null,
         loader: Flow<RemoteLoader<UiTimelineV2>> = flowOf(notSupported()),
         options: TimelinePresenterOptions = TimelinePresenterOptions(),
+        isHomeTimeline: Boolean = false,
     ) : super() {
         this.baseLoader = loader
         this.options = options
         this.timelineTabItemId = tabId
+        this.isHomeTimeline = isHomeTimeline
     }
 
     internal open fun allowLongTextTranslationDisplay(loader: RemoteLoader<UiTimelineV2>): Boolean =
@@ -196,6 +200,11 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                 inAppNotification.onError(Message.LoginExpired, e)
                             }
                         },
+                        refreshOnInitialize = {
+                            shouldRefreshTimelineOnInitialize(isHomeTimeline) {
+                                settingsRepository.appSettings.first().refreshHomeTimelineOnLaunch
+                            }
+                        },
                     ),
                 pagingSourceFactory = {
                     OffsetFromStartPagingSource(
@@ -249,6 +258,11 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
         }
     }
 }
+
+internal suspend fun shouldRefreshTimelineOnInitialize(
+    isHomeTimeline: Boolean,
+    refreshHomeTimelineOnLaunch: suspend () -> Boolean,
+): Boolean = !isHomeTimeline || refreshHomeTimelineOnLaunch()
 
 @Immutable
 public interface TimelineState {

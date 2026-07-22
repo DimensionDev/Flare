@@ -7,14 +7,25 @@ struct TimelineScreen: View {
     @Environment(\.openWindow) private var openWindow
     let tabItem: UiTimelineTabItem
     let allowGalleryMode: Bool
+    let isHomeTimeline: Bool
     @StateObject private var presenter: KotlinPresenter<TimelineItemPresenterState>
     @Environment(\.timelineAppearance) private var timelineAppearance
+    @Environment(\.appSettings) private var appSettings
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
 
-    init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false) {
+    init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
         self.tabItem = tabItem
         self.allowGalleryMode = allowGalleryMode
-        _presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
+        self.isHomeTimeline = isHomeTimeline
+        _presenter = .init(
+            wrappedValue: .init(
+                presenter: TimelineItemPresenter(
+                    timelineTabItem: tabItem,
+                    isHomeTimeline: isHomeTimeline
+                )
+            )
+        )
     }
 
     var body: some View {
@@ -27,6 +38,9 @@ struct TimelineScreen: View {
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
         .refreshable {
             try? await presenter.state.refreshSuspend()
+        }
+        .task(id: "\(isHomeTimeline)-\(appSettings.homeTimelineAutoRefreshInterval.minutes)-\(scenePhase)") {
+            try? await autoRefresh()
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -60,6 +74,17 @@ struct TimelineScreen: View {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private func autoRefresh() async throws {
+        let minutes = appSettings.homeTimelineAutoRefreshInterval.minutes
+        guard isHomeTimeline, minutes > 0, scenePhase == .active else { return }
+        while true {
+            try await Task.sleep(for: .seconds(minutes * 60))
+            if !presenter.state.isRefreshing {
+                try? await presenter.state.refreshSuspend()
             }
         }
     }

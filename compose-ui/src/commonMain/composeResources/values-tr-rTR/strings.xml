@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Gönderi</string>
     <string name="profile_misskey_header_status_count">%1$s Gönderi</string>
     <string name="profile_header_button_follow">Takip Et</string>
+    <string name="profile_header_button_request_follow">Takip isteği gönder</string>
     <string name="profile_header_button_following">Takip Ediliyor</string>
     <string name="profile_header_button_requested">İstek Gönderildi</string>
     <string name="profile_header_button_blocked">Engellendi</string>
@@ -77,6 +78,10 @@
     <string name="status_sensitive_media">Hassas içerik</string>
     <string name="show_media">Medyayı göster</string>
     <string name="hide_media">Medyayı gizle</string>
+    <string name="media_menu_download">İndir</string>
+    <string name="media_menu_download_all">Tümünü indir</string>
+    <string name="media_menu_share_image">Görüntüyü paylaş</string>
+    <string name="media_menu_copy_link">Bağlantıyı kopyala</string>
     <string name="login_expired">Oturum süresi doldu</string>
     <string name="login_expired_message">Tekrar giriş yapmak için dokunun</string>
     <string name="login_expired_relogin">Tekrar giriş yap</string>
@@ -358,6 +363,7 @@
     <string name="bluesky_login_password_hint">Şifre</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA jetonu</string>
     <string name="bluesky_login_oauth_button">OAuth ile giriş yap</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil izinlerini düzelt</string>
     <string name="bluesky_login_use_password_button">Şifre kullan</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth hala kararsız olabilir. Sorun yaşarsanız bunun yerine şifre ile girişi kullanın.</string>
     <string name="login_button">Giriş yap</string>
@@ -403,13 +409,11 @@
     <string name="liked_title">Beğenilenler</string>
     <string name="all_rss_feeds_title">Tüm Abonelikler</string>
     <string name="posts_title">Gönderiler</string>
+    <string name="posts_with_replies_title">Gönderiler ve yanıtlar</string>
     <string name="media_title">Medya</string>
     <string name="settings_appearance_absolute_timestamp">Mutlak zaman damgası</string>
     <string name="settings_appearance_absolute_timestamp_description">Gönderilerde tam zaman damgalarını göster</string>
     <string name="channel_title">Kanal</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Takip isteği gönder</string>
-    <string name="posts_with_replies_title">Gönderiler ve yanıtlar</string>
     <string name="pixiv_ranking_week_title">Haftalık sıralama</string>
     <string name="pixiv_ranking_month_title">Aylık sıralama</string>
     <string name="pixiv_ranking_day_male_title">Erkek sıralaması</string>
@@ -417,15 +421,9 @@
     <string name="pixiv_ranking_week_original_title">Orijinal sıralama</string>
     <string name="pixiv_ranking_week_rookie_title">Yeni başlayanlar sıralaması</string>
     <string name="pixiv_ranking_day_manga_title">Manga sıralaması</string>
-    <string name="illustrations_title">İllüstrasyonlar</string>
-    <string name="manga_title">Manga</string>
-    <string name="media_menu_download">İndir</string>
-    <string name="media_menu_download_all">Tümünü indir</string>
-    <string name="media_menu_share_image">Görüntüyü paylaş</string>
-    <string name="media_menu_copy_link">Bağlantıyı kopyala</string>
-    <string name="bluesky_login_fix_delegation_scopes_button">Tranquil izinlerini düzelt</string>
     <string name="pixiv_private_following_title">Gizli takip</string>
     <string name="pixiv_private_bookmarks_title">Gizli yer imleri</string>
+    <string name="illustrations_title">İllüstrasyonlar</string>
     <string name="fanbox_supported_title">Destekleniyor</string>
     <string name="fanbox_recommended_creators_title">Önerilen içerik üreticiler</string>
 </resources>

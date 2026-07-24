@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Conteúdo sensível</string>
     <string name="show_media">Mostrar média</string>
     <string name="hide_media">Ocultar média</string>
+    <string name="media_menu_download">Descarregar</string>
+    <string name="media_menu_download_all">Descarregar tudo</string>
+    <string name="media_menu_share_image">Partilhar imagem</string>
+    <string name="media_menu_copy_link">Copiar hiperligação</string>
     <string name="login_expired">Sessão expirada</string>
     <string name="login_expired_message">Toque para iniciar sessão novamente</string>
     <string name="login_expired_relogin">Iniciar sessão novamente</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Palavra-passe</string>
     <string name="bluesky_login_auth_factor_token_hint">Token 2FA</string>
     <string name="bluesky_login_oauth_button">Iniciar sessão com OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corrigir permissões do Tranquil</string>
     <string name="bluesky_login_use_password_button">Usar palavra-passe</string>
     <string name="bluesky_login_oauth_hint">O Bluesky OAuth ainda pode estar instável. Se encontrar problemas, use o início de sessão com palavra-passe.</string>
     <string name="login_button">Entrar</string>
@@ -405,6 +410,7 @@
     <string name="all_rss_feeds_title">Todas as subscrições</string>
     <string name="posts_title">Publicações</string>
     <string name="posts_with_replies_title">Publicações &amp; Respostas</string>
+    <string name="profile_tab_highlights">Destaques</string>
     <string name="media_title">Multimédia</string>
     <string name="settings_appearance_absolute_timestamp">Carimbo de data/hora absoluto</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostrar horários exatos nas publicações</string>
@@ -416,16 +422,11 @@
     <string name="pixiv_ranking_week_original_title">Classificação original</string>
     <string name="pixiv_ranking_week_rookie_title">Classificação Inicial</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
-    <string name="illustrations_title">Ilustrações</string>
-    <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="media_menu_download">Descarregar</string>
-    <string name="media_menu_download_all">Descarregar tudo</string>
-    <string name="media_menu_share_image">Partilhar imagem</string>
-    <string name="media_menu_copy_link">Copiar hiperligação</string>
-    <string name="bluesky_login_fix_delegation_scopes_button">Corrigir permissões do Tranquil</string>
     <string name="pixiv_private_following_title">Seguindo privado</string>
     <string name="pixiv_private_bookmarks_title">Marcadores privados</string>
+    <string name="pixiv_private_favourites_title">Favoritos Privados</string>
+    <string name="illustrations_title">Ilustrações</string>
+    <string name="manga_title">Manga</string>
     <string name="fanbox_supported_title">A apoiar</string>
     <string name="fanbox_recommended_creators_title">Criadores recomendados</string>
 </resources>

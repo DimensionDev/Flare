@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Tekrar hoş geldiniz!</string>
+    <string name="changelog_message">Son girişinizden bu yana bazı değişiklikler yaptık. Ayrıntılar:</string>
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
@@ -7,6 +9,4 @@
                 <li>Hata düzeltmeleri ve performans iyileştirmeleri.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Tekrar hoş geldiniz!</string>
-    <string name="changelog_message">Son girişinizden bu yana bazı değişiklikler yaptık. Ayrıntılar:</string>
 </resources>

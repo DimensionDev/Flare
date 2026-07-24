@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="changelog_title">Добре дошли отново!</string>
+    <string name="changelog_message">Направихме някои промени от последното ви влизане. Ето подробностите:</string>
     <string name="changelog_current"><![CDATA[
             <span>Версия %1$s:</span>
             <ul>
@@ -8,5 +9,4 @@
                 <li>Поправки на грешки и подобрения в производителността.</li>
             </ul>
         ]]></string>
-    <string name="changelog_message">Направихме някои промени от последното ви влизане. Ето подробностите:</string>
 </resources>

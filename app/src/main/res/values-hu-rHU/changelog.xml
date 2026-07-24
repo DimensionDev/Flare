@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Üdv újra!</string>
+    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
@@ -7,6 +9,4 @@
                 <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Üdv újra!</string>
-    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
 </resources>

@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s Bài đăng</string>
     <string name="profile_misskey_header_status_count">%1$s Bài đăng</string>
     <string name="profile_header_button_follow">Theo dõi</string>
+    <string name="profile_header_button_request_follow">Yêu cầu theo dõi</string>
     <string name="profile_header_button_following">Đang theo dõi</string>
     <string name="profile_header_button_requested">Đã gửi yêu cầu</string>
     <string name="profile_header_button_blocked">Đã chặn</string>
@@ -77,6 +78,10 @@
     <string name="status_sensitive_media">Nội dung nhạy cảm</string>
     <string name="show_media">Hiện phương tiện</string>
     <string name="hide_media">Ẩn phương tiện</string>
+    <string name="media_menu_download">Tải xuống</string>
+    <string name="media_menu_download_all">Tải xuống tất cả</string>
+    <string name="media_menu_share_image">Chia sẻ ảnh</string>
+    <string name="media_menu_copy_link">Sao chép liên kết</string>
     <string name="login_expired">Phiên đăng nhập đã hết hạn</string>
     <string name="login_expired_message">Nhấn để đăng nhập lại</string>
     <string name="login_expired_relogin">Đăng nhập lại</string>
@@ -358,6 +363,7 @@
     <string name="bluesky_login_password_hint">Mật khẩu</string>
     <string name="bluesky_login_auth_factor_token_hint">Mã 2FA</string>
     <string name="bluesky_login_oauth_button">Đăng nhập bằng OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Sửa quyền Tranquil</string>
     <string name="bluesky_login_use_password_button">Dùng mật khẩu</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth có thể vẫn chưa ổn định. Nếu bạn gặp sự cố, hãy sử dụng đăng nhập bằng mật khẩu để thay thế.</string>
     <string name="login_button">Đăng nhập</string>
@@ -403,13 +409,11 @@
     <string name="liked_title">Đã thích</string>
     <string name="all_rss_feeds_title">Tất cả đăng ký</string>
     <string name="posts_title">Bài đăng</string>
+    <string name="posts_with_replies_title">Bài viết và trả lời</string>
     <string name="media_title">Phương tiện</string>
     <string name="settings_appearance_absolute_timestamp">Dấu thời gian tuyệt đối</string>
     <string name="settings_appearance_absolute_timestamp_description">Hiển thị thời gian chính xác trên bài đăng</string>
     <string name="channel_title">Kênh</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">Yêu cầu theo dõi</string>
-    <string name="posts_with_replies_title">Bài viết và trả lời</string>
     <string name="pixiv_ranking_week_title">Xếp hạng tuần</string>
     <string name="pixiv_ranking_month_title">Xếp hạng tháng</string>
     <string name="pixiv_ranking_day_male_title">Xếp hạng nam</string>
@@ -417,15 +421,9 @@
     <string name="pixiv_ranking_week_original_title">Xếp hạng nguyên bản</string>
     <string name="pixiv_ranking_week_rookie_title">Xếp hạng tân binh</string>
     <string name="pixiv_ranking_day_manga_title">Xếp hạng manga</string>
-    <string name="illustrations_title">Minh họa</string>
-    <string name="manga_title">Manga</string>
-    <string name="media_menu_download">Tải xuống</string>
-    <string name="media_menu_download_all">Tải xuống tất cả</string>
-    <string name="media_menu_share_image">Chia sẻ ảnh</string>
-    <string name="media_menu_copy_link">Sao chép liên kết</string>
-    <string name="bluesky_login_fix_delegation_scopes_button">Sửa quyền Tranquil</string>
     <string name="pixiv_private_following_title">Đang theo dõi riêng tư</string>
     <string name="pixiv_private_bookmarks_title">Dấu trang riêng tư</string>
+    <string name="illustrations_title">Minh họa</string>
     <string name="fanbox_supported_title">Đang hỗ trợ</string>
     <string name="fanbox_recommended_creators_title">Nhà sáng tạo được đề xuất</string>
 </resources>

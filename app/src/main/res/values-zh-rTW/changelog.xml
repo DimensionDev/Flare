@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">歡迎回來！</string>
+    <string name="changelog_message">自你上次登入以來我們做了一些變更。詳情如下：</string>
     <string name="changelog_current"><![CDATA[
             <span>版本 %1$s：</span>
             <ul>
@@ -7,6 +9,4 @@
                 <li>錯誤修正與效能改善。</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">歡迎回來！</string>
-    <string name="changelog_message">自你上次登入以來我們做了一些變更。詳情如下：</string>
 </resources>

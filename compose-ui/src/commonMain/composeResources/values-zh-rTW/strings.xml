@@ -363,6 +363,7 @@
     <string name="bluesky_login_password_hint">密碼</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA 權杖</string>
     <string name="bluesky_login_oauth_button">使用 OAuth 登入</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">修復 Tranquil 權限</string>
     <string name="bluesky_login_use_password_button">使用密碼</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth 可能仍不穩定。如果遇到問題，請改用密碼登入。</string>
     <string name="login_button">登入</string>
@@ -408,13 +409,12 @@
     <string name="liked_title">已讚</string>
     <string name="all_rss_feeds_title">所有訂閱</string>
     <string name="posts_title">貼文</string>
-    <string name="media_title">媒體</string>
+    <string name="posts_with_replies_title">貼文和回覆</string>
     <string name="profile_tab_highlights">亮點</string>
+    <string name="media_title">媒體</string>
     <string name="settings_appearance_absolute_timestamp">絕對時間戳記</string>
     <string name="settings_appearance_absolute_timestamp_description">在貼文上顯示確切的時間戳記</string>
     <string name="channel_title">頻道</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="posts_with_replies_title">貼文和回覆</string>
     <string name="pixiv_ranking_week_title">週排名</string>
     <string name="pixiv_ranking_month_title">月排名</string>
     <string name="pixiv_ranking_day_male_title">男性排名</string>
@@ -422,12 +422,11 @@
     <string name="pixiv_ranking_week_original_title">原創排名</string>
     <string name="pixiv_ranking_week_rookie_title">新人排名</string>
     <string name="pixiv_ranking_day_manga_title">漫畫排名</string>
-    <string name="illustrations_title">插畫</string>
-    <string name="manga_title">漫畫</string>
-    <string name="bluesky_login_fix_delegation_scopes_button">修復 Tranquil 權限</string>
     <string name="pixiv_private_following_title">私人追蹤</string>
     <string name="pixiv_private_bookmarks_title">私人書籤</string>
     <string name="pixiv_private_favourites_title">私人收藏</string>
+    <string name="illustrations_title">插畫</string>
+    <string name="manga_title">漫畫</string>
     <string name="fanbox_supported_title">支援中</string>
     <string name="fanbox_recommended_creators_title">推薦創作者</string>
 </resources>

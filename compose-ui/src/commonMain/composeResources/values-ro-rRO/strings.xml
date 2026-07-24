@@ -78,6 +78,10 @@
     <string name="status_sensitive_media">Conținut sensibil</string>
     <string name="show_media">Arată media</string>
     <string name="hide_media">Ascunde media</string>
+    <string name="media_menu_download">Descarcă</string>
+    <string name="media_menu_download_all">Descarcă tot</string>
+    <string name="media_menu_share_image">Distribuie imaginea</string>
+    <string name="media_menu_copy_link">Copiază link-ul</string>
     <string name="login_expired">Sesiune de autentificare expirată</string>
     <string name="login_expired_message">Atinge pentru a te autentifica din nou</string>
     <string name="login_expired_relogin">Autentifică-te din nou</string>
@@ -359,6 +363,7 @@
     <string name="bluesky_login_password_hint">Parolă</string>
     <string name="bluesky_login_auth_factor_token_hint">Token 2FA</string>
     <string name="bluesky_login_oauth_button">Autentificare cu OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">Corectează permisiunile Tranquil</string>
     <string name="bluesky_login_use_password_button">Folosește parola</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth poate fi încă instabil. Dacă întâmpini probleme, folosește în schimb autentificarea cu parolă.</string>
     <string name="login_button">Autentificare</string>
@@ -405,6 +410,7 @@
     <string name="all_rss_feeds_title">Toate abonamentele</string>
     <string name="posts_title">Postări</string>
     <string name="posts_with_replies_title">Postări &amp; Răspunsuri</string>
+    <string name="profile_tab_highlights">Evidențieri</string>
     <string name="media_title">Media</string>
     <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
     <string name="settings_appearance_absolute_timestamp_description">Arată marcajele temporale exacte pe postări</string>
@@ -416,16 +422,11 @@
     <string name="pixiv_ranking_week_original_title">Clasament original</string>
     <string name="pixiv_ranking_week_rookie_title">Clasament Rookie</string>
     <string name="pixiv_ranking_day_manga_title">Manga Ranking</string>
-    <string name="illustrations_title">Ilustraţii</string>
-    <string name="manga_title">Manga</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="media_menu_download">Descarcă</string>
-    <string name="media_menu_download_all">Descarcă tot</string>
-    <string name="media_menu_share_image">Distribuie imaginea</string>
-    <string name="media_menu_copy_link">Copiază link-ul</string>
-    <string name="bluesky_login_fix_delegation_scopes_button">Corectează permisiunile Tranquil</string>
     <string name="pixiv_private_following_title">Urmăriri private</string>
     <string name="pixiv_private_bookmarks_title">Marcaje private</string>
+    <string name="pixiv_private_favourites_title">Favorite private</string>
+    <string name="illustrations_title">Ilustraţii</string>
+    <string name="manga_title">Manga</string>
     <string name="fanbox_supported_title">Susținut</string>
     <string name="fanbox_recommended_creators_title">Creatori recomandați</string>
 </resources>

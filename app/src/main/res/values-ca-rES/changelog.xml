@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Et donem la benvinguda de nou!</string>
+    <string name="changelog_message">Hem fet alguns canvis des de l\'última vegada que vas iniciar sessió. Aquests són els detalls:</string>
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
@@ -7,6 +9,4 @@
                 <li>Correccions d\'errors i millores de rendiment.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Et donem la benvinguda de nou!</string>
-    <string name="changelog_message">Hem fet alguns canvis des de l\'última vegada que vas iniciar sessió. Aquests són els detalls:</string>
 </resources>

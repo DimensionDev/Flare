@@ -9,6 +9,7 @@
     <string name="profile_header_toots_count">%1$s פוסטים</string>
     <string name="profile_misskey_header_status_count">%1$s פוסטים</string>
     <string name="profile_header_button_follow">מעקב</string>
+    <string name="profile_header_button_request_follow">בקש לעקוב</string>
     <string name="profile_header_button_following">במעקב</string>
     <string name="profile_header_button_requested">נשלחה בקשה</string>
     <string name="profile_header_button_blocked">חסום</string>
@@ -77,6 +78,10 @@
     <string name="status_sensitive_media">תוכן רגיש</string>
     <string name="show_media">הצג מדיה</string>
     <string name="hide_media">הסתר מדיה</string>
+    <string name="media_menu_download">הורד</string>
+    <string name="media_menu_download_all">הורד הכל</string>
+    <string name="media_menu_share_image">שתף תמונה</string>
+    <string name="media_menu_copy_link">העתק קישור</string>
     <string name="login_expired">פג תוקף חיבור הכניסה</string>
     <string name="login_expired_message">הקש כדי להיכנס שוב</string>
     <string name="login_expired_relogin">התחבר שוב</string>
@@ -358,6 +363,7 @@
     <string name="bluesky_login_password_hint">סיסמה</string>
     <string name="bluesky_login_auth_factor_token_hint">קוד אימות דו-שלבי</string>
     <string name="bluesky_login_oauth_button">התחבר באמצעות OAuth</string>
+    <string name="bluesky_login_fix_delegation_scopes_button">תקן הרשאות Tranquil</string>
     <string name="bluesky_login_use_password_button">השתמש בסיסמה</string>
     <string name="bluesky_login_oauth_hint">Bluesky OAuth עשוי להיות לא יציב עדיין. אם נתקלת בבעיות, השתמש בהתחברות עם סיסמה במקום.</string>
     <string name="login_button">התחברות</string>
@@ -403,13 +409,11 @@
     <string name="liked_title">אהבתי</string>
     <string name="all_rss_feeds_title">כל המינויים</string>
     <string name="posts_title">פוסטים</string>
+    <string name="posts_with_replies_title">פוסטים ותגובות</string>
     <string name="media_title">מדיה</string>
     <string name="settings_appearance_absolute_timestamp">חותמת זמן מוחלטת</string>
     <string name="settings_appearance_absolute_timestamp_description">הצג חותמות זמן מדויקות בפוסטים</string>
     <string name="channel_title">ערוץ</string>
-    <string name="app_name" translatable="false">Flare</string>
-    <string name="profile_header_button_request_follow">בקש לעקוב</string>
-    <string name="posts_with_replies_title">פוסטים ותגובות</string>
     <string name="pixiv_ranking_week_title">דירוג שבועי</string>
     <string name="pixiv_ranking_month_title">דירוג חודשי</string>
     <string name="pixiv_ranking_day_male_title">דירוג גברים</string>
@@ -417,15 +421,10 @@
     <string name="pixiv_ranking_week_original_title">דירוג מקורי</string>
     <string name="pixiv_ranking_week_rookie_title">דירוג חדשים</string>
     <string name="pixiv_ranking_day_manga_title">דירוג מנגה</string>
-    <string name="illustrations_title">איורים</string>
-    <string name="manga_title">מנגה</string>
-    <string name="media_menu_download">הורד</string>
-    <string name="media_menu_download_all">הורד הכל</string>
-    <string name="media_menu_share_image">שתף תמונה</string>
-    <string name="media_menu_copy_link">העתק קישור</string>
-    <string name="bluesky_login_fix_delegation_scopes_button">תקן הרשאות Tranquil</string>
     <string name="pixiv_private_following_title">מעקב פרטי</string>
     <string name="pixiv_private_bookmarks_title">סימניות פרטיות</string>
+    <string name="illustrations_title">איורים</string>
+    <string name="manga_title">מנגה</string>
     <string name="fanbox_supported_title">נתמך</string>
     <string name="fanbox_recommended_creators_title">יוצרים מומלצים</string>
 </resources>

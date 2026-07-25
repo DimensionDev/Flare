@@ -3,11 +3,12 @@ import UIKit
 
 func makeFlareUIKitTextView(
     payload: FlareTextPayload,
-    children: [FlareUiNodeSnapshot]
+    children: [FlareUiNodeSnapshot],
+    resources: FlareAppleResources
 ) -> UIView {
     let label = UILabel()
     label.numberOfLines = 0
     label.textAlignment = .natural
-    label.text = payload.value
+    label.text = resources.string(payload.value)
     return label
 }

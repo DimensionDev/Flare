@@ -4,6 +4,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.UiComposable
+import dev.dimension.flare.flareui.AndroidFlareResourceResolver
 import dev.dimension.flare.flareui.ButtonProps
 
 @Composable
@@ -12,11 +13,12 @@ import dev.dimension.flare.flareui.ButtonProps
 internal fun renderButtonCompose(
     props: ButtonProps,
     children: List<ComposeTreeNode>,
+    resources: AndroidFlareResourceResolver,
 ) {
     Button(
         onClick = props.onClick,
         enabled = props.enabled,
     ) {
-        Text(props.label)
+        Text(resolveFlareText(props.label, resources))
     }
 }

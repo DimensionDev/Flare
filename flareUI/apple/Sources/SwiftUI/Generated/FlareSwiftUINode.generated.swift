@@ -5,6 +5,7 @@ import SwiftUI
 
 struct FlareSwiftUINode: View {
     let node: FlareUiNodeSnapshot
+    let resources: FlareAppleResources
 
     @ViewBuilder
     var body: some View {
@@ -12,22 +13,32 @@ struct FlareSwiftUINode: View {
         case .button:
             FlareSwiftUIButtonRenderer(
                 payload: node.payload as! FlareButtonPayload,
-                children: node.children
+                children: node.children,
+                resources: resources
             )
         case .column:
             FlareSwiftUIColumnRenderer(
                 payload: node.payload as! FlareColumnPayload,
-                children: node.children
+                children: node.children,
+                resources: resources
+            )
+        case .icon:
+            FlareSwiftUIIconRenderer(
+                payload: node.payload as! FlareIconPayload,
+                children: node.children,
+                resources: resources
             )
         case .row:
             FlareSwiftUIRowRenderer(
                 payload: node.payload as! FlareRowPayload,
-                children: node.children
+                children: node.children,
+                resources: resources
             )
         case .text:
             FlareSwiftUITextRenderer(
                 payload: node.payload as! FlareTextPayload,
-                children: node.children
+                children: node.children,
+                resources: resources
             )
         default:
             EmptyView()

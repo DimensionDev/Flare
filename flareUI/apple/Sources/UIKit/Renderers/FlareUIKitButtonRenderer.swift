@@ -3,10 +3,11 @@ import UIKit
 
 func makeFlareUIKitButtonView(
     payload: FlareButtonPayload,
-    children: [FlareUiNodeSnapshot]
+    children: [FlareUiNodeSnapshot],
+    resources: FlareAppleResources
 ) -> UIView {
     let button = FlareUIKitButton(type: .system)
-    button.setTitle(payload.label, for: .normal)
+    button.setTitle(resources.string(payload.label), for: .normal)
     button.isEnabled = payload.enabled
     button.addAction(
         UIAction { _ in

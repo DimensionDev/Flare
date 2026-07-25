@@ -29,6 +29,7 @@ targetTemplates:
   FlareUIDemoApp:
     settings:
       base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
         FRAMEWORK_SEARCH_PATHS:
           - "$(inherited)"
           - "$(SRCROOT)/../apple-framework/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
@@ -42,6 +43,10 @@ targets:
     platform: iOS
     sources:
       - path: Sources/iOS
+      - path: ../shared/build/generated/flareui/resources/apple/demo.xcstrings
+        buildPhase: resources
+      - path: ../shared/build/generated/flareui/resources/apple/DemoResources.xcassets
+        buildPhase: resources
     dependencies:
       - target: FlareUIApple/FlareUISwiftUI_iOS
         embed: false
@@ -61,6 +66,10 @@ targets:
     platform: macOS
     sources:
       - path: Sources/macOS
+      - path: ../shared/build/generated/flareui/resources/apple/demo.xcstrings
+        buildPhase: resources
+      - path: ../shared/build/generated/flareui/resources/apple/DemoResources.xcassets
+        buildPhase: resources
     dependencies:
       - target: FlareUIApple/FlareUISwiftUI_macOS
         embed: false

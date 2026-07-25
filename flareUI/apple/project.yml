@@ -39,6 +39,7 @@ targets:
     platform: [iOS, macOS]
     sources:
       - path: Sources/SwiftUI
+      - path: Sources/Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.swiftui
@@ -50,6 +51,7 @@ targets:
     platform: iOS
     sources:
       - path: Sources/UIKit
+      - path: Sources/Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.uikit
@@ -61,6 +63,7 @@ targets:
     platform: macOS
     sources:
       - path: Sources/AppKit
+      - path: Sources/Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.appkit

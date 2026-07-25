@@ -2,7 +2,7 @@
 
 This is a proof of concept for defining a small UI with Compose Runtime and
 rendering it with platform UI toolkits. The current widget vocabulary is only
-`Column`, `Row`, `Text`, and `Button`.
+`Column`, `Row`, `Text`, `Button`, and `Icon`.
 
 The runtime libraries and runnable demos are deliberately separate. None of the
 demo code is linked into the existing Flare Android or Apple applications.
@@ -11,13 +11,13 @@ demo code is linked into the existing Flare Android or Apple applications.
 
 | Path | Responsibility |
 | --- | --- |
-| `core` | One Kotlin file per component plus the shared Compose Runtime, registry, and Applier |
+| `core` | One Kotlin file per component plus resource references, Compose Runtime, registry, and Applier |
 | `codegen` | KSP discovery, generated registries/routers/payloads, and one-time renderer scaffolding |
 | `android-compose` | Maps the widget tree to Compose Material 3 |
 | `android-view` | Maps the widget tree to `LinearLayout`, `MaterialTextView`, and `MaterialButton` |
 | `apple-runtime` | Runs a composition and exposes immutable snapshots to Swift |
 | `apple` | Independent XcodeGen project with SwiftUI, UIKit, and AppKit framework targets |
-| `demo/shared` | Stateful UI definition shared by every demo |
+| `demo/shared` | Stateful UI and consumer-owned strings/SVG shared by every demo |
 | `demo/androidApp` | Standalone Android app containing Compose and View screens |
 | `demo/apple-framework` | Standalone `FlareUIDemoKit` framework and demo factory |
 | `demo/appleApp` | XcodeGen app project with only iOS and macOS demo entry points |
@@ -61,6 +61,7 @@ vocabulary:
 | `Row` | Wrap content, place children from start to end, align children to top, no spacing |
 | `Text` | Use intrinsic size and leading multiline alignment |
 | `Button` | Use intrinsic content size, center its label, and add no sibling spacing |
+| `Icon` | Use the source vector's intrinsic size and native template tint |
 
 Android Views, SwiftUI, UIKit, and AppKit implement these same layout rules.
 Visual styling remains native to each toolkit. UIKit excludes `UIButton`'s
@@ -91,7 +92,7 @@ should use a theme derived from `Theme.Material3`; the demo uses
 Generate all backend glue and both ignored Xcode projects:
 
 ```shell
-./gradlew :flareUI:codegen:generateFlareUiCode
+./gradlew :flareUI:codegen:generateFlareUiCode :flareUI:demo:shared:generateFlareUiResources
 xcodegen generate --spec flareUI/apple/project.yml
 xcodegen generate --spec flareUI/demo/appleApp/project.yml
 ```
@@ -161,12 +162,85 @@ coverage cannot silently ship. Generated Kotlin lives under each module's
 `build/generated/flareui` directory. Generated Swift routers live in each
 toolkit's `Sources/.../Generated` folder so XcodeGen includes them automatically.
 
+## Consumer-owned resources
+
+Flare UI defines only platform-neutral references (`FlareStringResource`,
+`FlareImageResource`, and `FlareText`). It contains no product strings, SVGs,
+resource bundles, or generated application accessors.
+
+A consuming KMP module opts in to resource generation:
+
+```kotlin
+plugins {
+    id("dev.dimension.flare.ui-resources")
+}
+
+flareUiResources {
+    namespace.set("profile")
+    accessorName.set("ProfileResources")
+}
+```
+
+That module owns one input tree:
+
+```text
+src/commonMain/flareResources/
+├── values/strings.xml
+├── values-ja/strings.xml
+├── values-b+zh+Hans/strings.xml
+└── images/avatar_placeholder.svg
+```
+
+The task generates typed common accessors, Android `R` resources plus a
+resolver, and an Apple string catalog plus asset catalog. Android therefore
+uses its normal locale-qualified resources, while iOS and macOS use the
+generated `.xcstrings` and `.xcassets`.
+
+The shared definition references only the generated typed values:
+
+```kotlin
+Text(ProfileResources.Strings.title)
+Icon(
+    image = ProfileResources.Images.avatarPlaceholder,
+    contentDescription = ProfileResources.Strings.avatarDescription,
+)
+```
+
+The application injects the generated Android resolver:
+
+```kotlin
+FlareComposeContent(resources = ProfileAndroidResources) {
+    ProfileContent()
+}
+
+FlareViewHost(
+    context = this,
+    resourceResolver = ProfileAndroidResources,
+)
+```
+
+Apple applications add the generated catalog directories to their resource
+build phase and pass the owning bundle:
+
+```swift
+FlareSwiftUIHost(
+    host: contentFactory.createHost(),
+    resources: .init(bundle: .main)
+)
+```
+
+`FlareAppleResources(bundleForNamespace:)` can route namespaces to separate
+feature bundles without making the renderer depend on those features. The
+current SVG converter deliberately supports the portable demo subset:
+`svg`/`g`/`path`, no transformed groups. Unsupported input fails generation
+instead of silently rendering differently on Android and Apple.
+
 ## Reuse the runtime
 
 Android Compose:
 
 ```kotlin
-FlareComposeContent {
+FlareComposeContent(resources = MyAndroidResources) {
     MySharedContent()
 }
 ```
@@ -175,7 +249,10 @@ Android Views:
 
 ```kotlin
 setContentView(
-    FlareViewHost(this).apply {
+    FlareViewHost(
+        context = this,
+        resourceResolver = MyAndroidResources,
+    ).apply {
         setContent {
             MySharedContent()
         }
@@ -195,11 +272,15 @@ the demo factory:
 ```swift
 import FlareUISwiftUI
 
-FlareSwiftUIHost(host: contentFactory.createHost())
+FlareSwiftUIHost(
+    host: contentFactory.createHost(),
+    resources: .init(bundle: .main)
+)
 ```
 
-The UIKit equivalent is `FlareUIKitHostView(host:)` from `FlareUIUIKit`.
-On macOS, use `FlareAppKitHostView(host:)` from `FlareUIAppKit`.
+The UIKit equivalent is `FlareUIKitHostView(host:resources:)` from
+`FlareUIUIKit`. On macOS, use `FlareAppKitHostView(host:resources:)` from
+`FlareUIAppKit`.
 
 ## Extending the widget vocabulary
 
@@ -219,7 +300,7 @@ callbacks and callbacks that do not return `Unit`.
 Generated files grow linearly with the vocabulary, while the stable runtime,
 hosts, and handwritten component renderers do not.
 
-This demo intentionally does not define modifiers, design tokens,
-accessibility, focus, navigation, list virtualization, or state restoration.
-Those semantics should be added from concrete product requirements rather than
-by copying every API from the five host toolkits.
+This demo intentionally does not define modifiers, design tokens, a general
+accessibility model, focus, navigation, list virtualization, or state
+restoration. Those semantics should be added from concrete product requirements
+rather than by copying every API from the five host toolkits.

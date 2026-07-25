@@ -13,6 +13,9 @@ import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.UiComposable
+import androidx.compose.ui.res.stringResource
+import dev.dimension.flare.flareui.AndroidFlareResourceResolver
+import dev.dimension.flare.flareui.FlareText
 import dev.dimension.flare.flareui.FlareUiApplier
 import dev.dimension.flare.flareui.FlareUiContent
 import dev.dimension.flare.flareui.ProvideWidgetRegistry
@@ -25,7 +28,10 @@ import dev.dimension.flare.flareui.WidgetType
  */
 @Composable
 @UiComposable
-public fun FlareComposeContent(content: FlareUiContent) {
+public fun FlareComposeContent(
+    resources: AndroidFlareResourceResolver = AndroidFlareResourceResolver.None,
+    content: FlareUiContent,
+) {
     val parent = rememberCompositionContext()
     val root = remember { ComposeTreeNode(type = null) }
     val registry = remember { composeWidgetRegistry() }
@@ -44,7 +50,10 @@ public fun FlareComposeContent(content: FlareUiContent) {
 
     root.children.forEach { child ->
         key(child) {
-            renderGeneratedComposeNode(child)
+            renderGeneratedComposeNode(
+                node = child,
+                resources = resources,
+            )
         }
     }
 }
@@ -113,13 +122,32 @@ internal class ComposeTreeNode(
 
 @Composable
 @UiComposable
-internal fun renderComposeChildren(children: List<ComposeTreeNode>) {
+internal fun renderComposeChildren(
+    children: List<ComposeTreeNode>,
+    resources: AndroidFlareResourceResolver,
+) {
     children.forEach { child ->
         key(child) {
-            renderGeneratedComposeNode(child)
+            renderGeneratedComposeNode(
+                node = child,
+                resources = resources,
+            )
         }
     }
 }
+
+@Composable
+@UiComposable
+internal fun resolveFlareText(
+    value: FlareText,
+    resources: AndroidFlareResourceResolver,
+): String =
+    value.literal
+        ?: stringResource(
+            resources.stringId(
+                requireNotNull(value.resource),
+            ),
+        )
 
 internal inline fun <reified P : Any> ComposeTreeNode.requireValue(): P =
     value as? P

@@ -3,11 +3,15 @@ import AppKit
 
 func makeFlareAppKitRowView(
     payload: FlareRowPayload,
-    children: [FlareUiNodeSnapshot]
+    children: [FlareUiNodeSnapshot],
+    resources: FlareAppleResources
 ) -> NSView {
     let stack = NSStackView(
         views: children.map {
-            makeFlareAppKitNodeView(for: $0)
+            makeFlareAppKitNodeView(
+                for: $0,
+                resources: resources
+            )
         }
     )
     stack.orientation = .horizontal

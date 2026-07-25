@@ -5,10 +5,15 @@ import AppKit
 @MainActor
 public final class FlareAppKitHostView: NSView {
     private let host: FlareUiTreeHost
+    private let resources: FlareAppleResources
     private let rootStack = NSStackView()
 
-    public init(host: FlareUiTreeHost) {
+    public init(
+        host: FlareUiTreeHost,
+        resources: FlareAppleResources = .init(bundle: .main)
+    ) {
         self.host = host
+        self.resources = resources
         super.init(frame: .zero)
         configureRootStack()
         host.setOnTreeChanged { [weak self] nodes in
@@ -48,7 +53,10 @@ public final class FlareAppKitHostView: NSView {
     private func render(_ nodes: [FlareUiNodeSnapshot]) {
         rootStack.setViews(
             nodes.map {
-                makeFlareAppKitNodeView(for: $0)
+                makeFlareAppKitNodeView(
+                    for: $0,
+                    resources: resources
+                )
             },
             in: .center
         )

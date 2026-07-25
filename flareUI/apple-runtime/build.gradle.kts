@@ -18,7 +18,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(projects.flareUI.core)
+                api(projects.flareUI.core)
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

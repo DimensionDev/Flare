@@ -4,9 +4,10 @@ import SwiftUI
 struct FlareSwiftUITextRenderer: View {
     let payload: FlareTextPayload
     let children: [FlareUiNodeSnapshot]
+    let resources: FlareAppleResources
 
     var body: some View {
-        Text(payload.value)
+        Text(resources.string(payload.value))
             .multilineTextAlignment(.leading)
     }
 }

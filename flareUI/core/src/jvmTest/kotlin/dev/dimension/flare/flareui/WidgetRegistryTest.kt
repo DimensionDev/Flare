@@ -36,12 +36,12 @@ class WidgetRegistryTest {
 
         val column = root.children.single()
         assertEquals(ColumnType, column.type)
-        assertEquals("Title", assertIs<TextProps>(column.children[0].value).value)
+        assertEquals("Title", assertIs<TextProps>(column.children[0].value).value.literal)
 
         val row = column.children[1]
         assertEquals(RowType, row.type)
         val button = assertIs<ButtonProps>(row.children[1].value)
-        assertEquals("Tap", button.label)
+        assertEquals("Tap", button.label.literal)
 
         button.onClick()
         assertEquals(1, clicks)

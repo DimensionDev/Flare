@@ -3,10 +3,11 @@ import AppKit
 
 func makeFlareAppKitButtonView(
     payload: FlareButtonPayload,
-    children: [FlareUiNodeSnapshot]
+    children: [FlareUiNodeSnapshot],
+    resources: FlareAppleResources
 ) -> NSView {
     let button = FlareAppKitButton(
-        title: payload.label,
+        title: resources.string(payload.label),
         onClick: {
             payload.performClick()
         }

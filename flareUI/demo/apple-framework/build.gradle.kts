@@ -23,6 +23,7 @@ kotlin {
                 baseName = "FlareUIDemoKit"
                 isStatic = true
                 export(projects.flareUI.appleRuntime)
+                export(projects.flareUI.core)
             }
         }
 
@@ -39,4 +40,5 @@ kotlin {
 tasks.matching { task -> task.name == "embedAndSignAppleFrameworkForXcode" }
     .configureEach {
         dependsOn(":flareUI:codegen:verifyFlareUiRenderers")
+        dependsOn(":flareUI:demo:shared:generateFlareUiResources")
     }

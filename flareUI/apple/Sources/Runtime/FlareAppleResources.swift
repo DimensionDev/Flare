@@ -1,4 +1,3 @@
-@preconcurrency import FlareUIDemoKit
 import Foundation
 
 /// Resolves resource references without making Flare UI own any resources.
@@ -18,26 +17,25 @@ public struct FlareAppleResources {
         self.bundleForNamespace = bundleForNamespace
     }
 
-    func string(_ value: FlareText) -> String {
-        if let literal = value.literal {
+    public func string(_ value: FlareUIText) -> String {
+        switch value {
+        case let .literal(literal):
             return literal
+        case let .resource(resource):
+            return bundle(for: resource.key.resourceNamespace)
+                .localizedString(
+                    forKey: resource.key.name,
+                    value: resource.key.name,
+                    table: resource.key.platformNamespace
+                )
         }
-        guard let resource = value.resource else {
-            preconditionFailure("FlareText has neither a literal nor a resource")
-        }
-        return bundle(for: resource.key.namespace_)
-            .localizedString(
-                forKey: resource.key.name,
-                value: resource.key.name,
-                table: resource.key.platformNamespace
-            )
     }
 
-    func bundle(for namespace: String) -> Bundle {
+    public func bundle(for namespace: String) -> Bundle {
         bundleForNamespace(namespace)
     }
 
-    func imageName(_ resource: FlareImageResource) -> String {
+    public func imageName(_ resource: FlareUIImageResource) -> String {
         resource.key.platformName
     }
 }

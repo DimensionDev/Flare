@@ -3,6 +3,10 @@ import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
+val flareUiVersion = "0.1.0-SNAPSHOT"
+val flareUiCore = "dev.dimension.flareui:core:$flareUiVersion"
+val flareUiAppleRuntime = "dev.dimension.flareui:apple-runtime:$flareUiVersion"
+
 plugins {
     id("dev.dimension.flare.multiplatform-library")
     alias(libs.plugins.kotlin.multiplatform)
@@ -51,6 +55,8 @@ kotlin {
                 commonExportedProjects.forEach { exportedProject ->
                     export(exportedProject)
                 }
+                export(flareUiCore)
+                export(flareUiAppleRuntime)
 
                 if (appleTarget.name.startsWith("ios")) {
                     export(projects.social.nostr)
@@ -74,6 +80,8 @@ kotlin {
                 api(projects.feature.subscription)
                 api(projects.feature.tab)
                 api(projects.feature.agent)
+                api(flareUiCore)
+                api(flareUiAppleRuntime)
                 implementation(libs.compose.runtime)
 // START Non-FOSS component
                 implementation(libs.crashkios.crashlytics)

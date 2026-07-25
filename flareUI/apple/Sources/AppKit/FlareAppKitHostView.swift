@@ -1,15 +1,16 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(AppKit)
+import FlareUIRuntime
 import AppKit
 
 /// Renders a Flare UI tree with native AppKit views.
 @MainActor
 public final class FlareAppKitHostView: NSView {
-    private let host: FlareUiTreeHost
+    private let host: any FlareUITreeHost
     private let resources: FlareAppleResources
     private let rootStack = NSStackView()
 
     public init(
-        host: FlareUiTreeHost,
+        host: any FlareUITreeHost,
         resources: FlareAppleResources = .init(bundle: .main)
     ) {
         self.host = host
@@ -30,8 +31,8 @@ public final class FlareAppKitHostView: NSView {
         rootStack.fittingSize
     }
 
-    deinit {
-        host.setOnTreeChanged(listener: nil)
+    isolated deinit {
+        host.setOnTreeChanged(nil)
         host.dispose()
     }
 
@@ -50,7 +51,7 @@ public final class FlareAppKitHostView: NSView {
         ])
     }
 
-    private func render(_ nodes: [FlareUiNodeSnapshot]) {
+    private func render(_ nodes: [FlareUINode]) {
         rootStack.setViews(
             nodes.map {
                 makeFlareAppKitNodeView(
@@ -63,3 +64,4 @@ public final class FlareAppKitHostView: NSView {
         invalidateIntrinsicContentSize()
     }
 }
+#endif

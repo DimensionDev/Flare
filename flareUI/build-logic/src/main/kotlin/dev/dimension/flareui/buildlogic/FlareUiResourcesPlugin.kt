@@ -1,4 +1,4 @@
-package dev.dimension.flare.buildlogic
+package dev.dimension.flareui.buildlogic
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.variant.KotlinMultiplatformAndroidComponentsExtension
@@ -305,7 +305,7 @@ private fun writeCommonAccessors(
                 appendLine("        public val ${name.toKotlinIdentifier()}: FlareStringResource =")
                 appendLine("            FlareStringResource(")
                 appendLine("                FlareResourceKey(")
-                appendLine("                    namespace = ${namespace.asKotlinString()},")
+                appendLine("                    resourceNamespace = ${namespace.asKotlinString()},")
                 appendLine("                    name = ${name.asKotlinString()},")
                 appendLine("                ),")
                 appendLine("            )")
@@ -317,7 +317,7 @@ private fun writeCommonAccessors(
                 appendLine("        public val ${name.toKotlinIdentifier()}: FlareImageResource =")
                 appendLine("            FlareImageResource(")
                 appendLine("                FlareResourceKey(")
-                appendLine("                    namespace = ${namespace.asKotlinString()},")
+                appendLine("                    resourceNamespace = ${namespace.asKotlinString()},")
                 appendLine("                    name = ${name.asKotlinString()},")
                 appendLine("                ),")
                 appendLine("            )")

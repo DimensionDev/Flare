@@ -1,0 +1,35 @@
+[versions]
+activity-compose = "1.13.0"
+agp = "9.3.0"
+compileSdk = "37"
+compose-bom = "2026.06.01"
+desugar-jdk-libs = "2.1.5"
+java = "25"
+junit = "4.13.2"
+kotlin = "2.4.0"
+kotlinx-coroutines = "1.11.0"
+ksp = "2.3.10"
+material-components = "1.14.0"
+minSdk = "26"
+robolectric = "4.16.1"
+
+[libraries]
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-runtime = { module = "androidx.compose.runtime:runtime" }
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar-jdk-libs" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+material-components = { module = "com.google.android.material:material", version.ref = "material-components" }
+material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-alpha24" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+ui = { module = "androidx.compose.ui:ui" }
+ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

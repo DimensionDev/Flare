@@ -40,7 +40,7 @@ class FlareUiTreeHostTest {
 
         assertEquals(
             "Count: 1",
-            (nodes.single().children[0].payload as FlareTextPayload).value,
+            (nodes.single().children[0].payload as FlareTextPayload).value.literal,
         )
         host.dispose()
     }

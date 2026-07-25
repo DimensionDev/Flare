@@ -1,4 +1,4 @@
-@preconcurrency import FlareUIDemoKit
+import FlareUIRuntime
 import SwiftUI
 
 /// Renders a Flare UI tree with native SwiftUI primitives.
@@ -7,10 +7,10 @@ public struct FlareSwiftUIHost: View {
     private let resources: FlareAppleResources
 
     public init(
-        host: FlareUiTreeHost,
-        resources: FlareAppleResources = .init(bundle: .main)
+        resources: FlareAppleResources = .init(bundle: .main),
+        makeHost: @escaping @MainActor () -> any FlareUITreeHost
     ) {
-        _model = StateObject(wrappedValue: FlareTreeModel(host: host))
+        _model = StateObject(wrappedValue: FlareTreeModel(makeHost: makeHost))
         self.resources = resources
     }
 

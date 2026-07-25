@@ -1,9 +1,9 @@
 import com.google.devtools.ksp.gradle.KspAATask
-import dev.dimension.flare.buildlogic.FlarePlatform
-import dev.dimension.flare.buildlogic.flare
+import dev.dimension.flareui.buildlogic.FlareUiPlatform
+import dev.dimension.flareui.buildlogic.flareUi
 
 plugins {
-    id("dev.dimension.flare.multiplatform-library")
+    id("dev.dimension.flareui.multiplatform-library")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose.compiler)
@@ -12,23 +12,23 @@ plugins {
 
 val repositoryRoot = rootProject.layout.projectDirectory
 val generatedComposeSources =
-    project(":flareUI:android-compose").layout.buildDirectory
+    project(":android-compose").layout.buildDirectory
         .dir("generated/flareui/kotlin")
 val generatedViewSources =
-    project(":flareUI:android-view").layout.buildDirectory
+    project(":android-view").layout.buildDirectory
         .dir("generated/flareui/kotlin")
 val generatedAppleSources =
-    project(":flareUI:apple-runtime").layout.buildDirectory
+    project(":apple-runtime").layout.buildDirectory
         .dir("generated/flareui/kotlin")
 
 kotlin {
-    flare {
+    flareUi {
         namespace = "dev.dimension.flare.flareui.core"
         platforms(
-            FlarePlatform.ANDROID,
-            FlarePlatform.JVM,
-            FlarePlatform.IOS,
-            FlarePlatform.MACOS,
+            FlareUiPlatform.ANDROID,
+            FlareUiPlatform.JVM,
+            FlareUiPlatform.IOS,
+            FlareUiPlatform.MACOS,
         )
     }
 
@@ -48,7 +48,7 @@ kotlin {
 }
 
 dependencies {
-    add("kspJvm", projects.flareUI.codegen)
+    add("kspJvm", project(":codegen"))
 }
 
 ksp {
@@ -69,13 +69,20 @@ tasks.withType<KspAATask>()
         outputs.dir(generatedAppleSources)
         outputs.files(
             repositoryRoot.file(
-                "flareUI/apple/Sources/SwiftUI/Generated/FlareSwiftUINode.generated.swift",
+                "apple/Sources/SwiftUI/Generated/FlareSwiftUINode.generated.swift",
             ),
             repositoryRoot.file(
-                "flareUI/apple/Sources/UIKit/Generated/FlareUIKitNodeFactory.generated.swift",
+                "apple/Sources/UIKit/Generated/FlareUIKitNodeFactory.generated.swift",
             ),
             repositoryRoot.file(
-                "flareUI/apple/Sources/AppKit/Generated/FlareAppKitNodeFactory.generated.swift",
+                "apple/Sources/AppKit/Generated/FlareAppKitNodeFactory.generated.swift",
+            ),
+            repositoryRoot.file(
+                "apple/Sources/Runtime/Generated/FlareUINodes.generated.swift",
+            ),
+            repositoryRoot.file(
+                "apple/Sources/KotlinBridge/Generated/" +
+                    "FlareUIKotlinNodeBridge.generated.swift",
             ),
         )
     }

@@ -1,9 +1,11 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(UIKit)
+import FlareUIRuntime
 import UIKit
 
+@MainActor
 func makeFlareUIKitTextView(
-    payload: FlareTextPayload,
-    children: [FlareUiNodeSnapshot],
+    payload: FlareUITextPayload,
+    children: [FlareUINode],
     resources: FlareAppleResources
 ) -> UIView {
     let label = UILabel()
@@ -12,3 +14,4 @@ func makeFlareUIKitTextView(
     label.text = resources.string(payload.value)
     return label
 }
+#endif

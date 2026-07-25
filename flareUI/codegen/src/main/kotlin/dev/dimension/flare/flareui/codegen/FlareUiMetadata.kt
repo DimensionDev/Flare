@@ -31,3 +31,6 @@ internal val ComponentMetadata.kindName: String
 
 internal val ComponentMetadata.payloadName: String
     get() = "Flare${className}Payload"
+
+internal val ComponentMetadata.swiftPayloadName: String
+    get() = "FlareUI${className}Payload"

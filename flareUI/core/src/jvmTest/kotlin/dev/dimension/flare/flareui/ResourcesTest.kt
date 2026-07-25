@@ -10,7 +10,7 @@ class ResourcesTest {
     fun derivesStablePlatformNames() {
         val key =
             FlareResourceKey(
-                namespace = "profile.header",
+                resourceNamespace = "profile.header",
                 name = "avatar_placeholder",
             )
 
@@ -24,7 +24,7 @@ class ResourcesTest {
         val resource =
             FlareStringResource(
                 FlareResourceKey(
-                    namespace = "profile",
+                    resourceNamespace = "profile",
                     name = "title",
                 ),
             )
@@ -42,7 +42,7 @@ class ResourcesTest {
     fun rejectsInvalidResourceNames() {
         assertFailsWith<IllegalArgumentException> {
             FlareResourceKey(
-                namespace = "profile",
+                resourceNamespace = "profile",
                 name = "Invalid Name",
             )
         }

@@ -9,21 +9,21 @@ import androidx.compose.runtime.Immutable
  */
 @Immutable
 public data class FlareResourceKey(
-    public val namespace: String,
+    public val resourceNamespace: String,
     public val name: String,
 ) {
     init {
-        require(namespace.isNotBlank()) { "A resource namespace cannot be blank." }
+        require(resourceNamespace.isNotBlank()) { "A resource namespace cannot be blank." }
         require(name.matches(RESOURCE_NAME)) {
             "A resource name must match ${RESOURCE_NAME.pattern}: $name"
         }
     }
 
     public val qualifiedName: String
-        get() = "$namespace.$name"
+        get() = "$resourceNamespace.$name"
 
     public val platformNamespace: String
-        get() = namespace.toPlatformIdentifier()
+        get() = resourceNamespace.toPlatformIdentifier()
 
     public val platformName: String
         get() = "${platformNamespace}__$name"

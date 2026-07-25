@@ -1,11 +1,11 @@
-import dev.dimension.flare.buildlogic.flare
+import dev.dimension.flareui.buildlogic.flareUiApplication
 
 plugins {
-    id("dev.dimension.flare.android-application")
+    id("dev.dimension.flareui.android-application")
     alias(libs.plugins.compose.compiler)
 }
 
-flare {
+flareUiApplication {
     namespace = "dev.dimension.flare.flareui.demo.android"
     applicationId = "dev.dimension.flare.flareui.demo"
 }
@@ -18,9 +18,9 @@ android {
 }
 
 dependencies {
-    implementation(projects.flareUI.demo.shared)
-    implementation(projects.flareUI.androidCompose)
-    implementation(projects.flareUI.androidView)
+    implementation(project(":demo:shared"))
+    implementation(project(":android-compose"))
+    implementation(project(":android-view"))
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)

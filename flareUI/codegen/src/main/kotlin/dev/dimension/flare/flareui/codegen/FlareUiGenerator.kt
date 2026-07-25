@@ -10,31 +10,43 @@ internal class GeneratorWorkspace(
     fun generate(components: List<ComponentMetadata>) {
         writeGenerated(
             relativePath =
-                "flareUI/android-compose/build/generated/flareui/kotlin/" +
+                "android-compose/build/generated/flareui/kotlin/" +
                     "dev/dimension/flare/flareui/compose/GeneratedComposeWidgets.kt",
             content = renderComposeGlue(components),
         )
         writeGenerated(
             relativePath =
-                "flareUI/android-view/build/generated/flareui/kotlin/" +
+                "android-view/build/generated/flareui/kotlin/" +
                     "dev/dimension/flare/flareui/view/GeneratedViewWidgets.kt",
             content = renderAndroidViewGlue(components),
         )
         writeGenerated(
             relativePath =
-                "flareUI/apple-runtime/build/generated/flareui/kotlin/" +
+                "apple-runtime/build/generated/flareui/kotlin/" +
                     "dev/dimension/flare/flareui/apple/GeneratedAppleWidgets.kt",
             content = renderAppleRuntimeGlue(components),
         )
         writeGenerated(
             relativePath =
-                "flareUI/apple/Sources/SwiftUI/Generated/" +
+                "apple/Sources/Runtime/Generated/" +
+                    "FlareUINodes.generated.swift",
+            content = renderSwiftRuntimeModels(components),
+        )
+        writeGenerated(
+            relativePath =
+                "apple/Sources/KotlinBridge/Generated/" +
+                    "FlareUIKotlinNodeBridge.generated.swift",
+            content = renderKotlinBridge(components),
+        )
+        writeGenerated(
+            relativePath =
+                "apple/Sources/SwiftUI/Generated/" +
                     "FlareSwiftUINode.generated.swift",
             content = renderSwiftUiRouter(components),
         )
         writeGenerated(
             relativePath =
-                "flareUI/apple/Sources/UIKit/Generated/" +
+                "apple/Sources/UIKit/Generated/" +
                     "FlareUIKitNodeFactory.generated.swift",
             content =
                 renderAppleViewFactory(
@@ -45,7 +57,7 @@ internal class GeneratorWorkspace(
         )
         writeGenerated(
             relativePath =
-                "flareUI/apple/Sources/AppKit/Generated/" +
+                "apple/Sources/AppKit/Generated/" +
                     "FlareAppKitNodeFactory.generated.swift",
             content =
                 renderAppleViewFactory(
@@ -69,27 +81,27 @@ internal class GeneratorWorkspace(
         listOf(
             RendererTarget(
                 path =
-                    "flareUI/android-compose/src/androidMain/kotlin/" +
+                    "android-compose/src/androidMain/kotlin/" +
                         "dev/dimension/flare/flareui/compose/renderers/" +
                         "${component.className}ComposeRenderer.kt",
                 content = renderComposeScaffold(component),
             ),
             RendererTarget(
                 path =
-                    "flareUI/android-view/src/androidMain/kotlin/" +
+                    "android-view/src/androidMain/kotlin/" +
                         "dev/dimension/flare/flareui/view/renderers/" +
                         "${component.className}ViewRenderer.kt",
                 content = renderAndroidViewScaffold(component),
             ),
             RendererTarget(
                 path =
-                    "flareUI/apple/Sources/SwiftUI/Renderers/" +
+                    "apple/Sources/SwiftUI/Renderers/" +
                         "FlareSwiftUI${component.className}Renderer.swift",
                 content = renderSwiftUiScaffold(component),
             ),
             RendererTarget(
                 path =
-                    "flareUI/apple/Sources/UIKit/Renderers/" +
+                    "apple/Sources/UIKit/Renderers/" +
                         "FlareUIKit${component.className}Renderer.swift",
                 content =
                     renderAppleViewScaffold(
@@ -100,7 +112,7 @@ internal class GeneratorWorkspace(
             ),
             RendererTarget(
                 path =
-                    "flareUI/apple/Sources/AppKit/Renderers/" +
+                    "apple/Sources/AppKit/Renderers/" +
                         "FlareAppKit${component.className}Renderer.swift",
                 content =
                     renderAppleViewScaffold(
@@ -366,30 +378,26 @@ private fun PropertyMetadata.eventMethodName(): String {
 private fun renderSwiftUiRouter(components: List<ComponentMetadata>): String =
     buildString {
         appendGeneratedHeader()
-        appendLine("@preconcurrency import FlareUIDemoKit")
+        appendLine("import FlareUIRuntime")
         appendLine("import SwiftUI")
         appendLine()
         appendLine("struct FlareSwiftUINode: View {")
-        appendLine("    let node: FlareUiNodeSnapshot")
+        appendLine("    let node: FlareUINode")
         appendLine("    let resources: FlareAppleResources")
         appendLine()
         appendLine("    @ViewBuilder")
         appendLine("    var body: some View {")
-        appendLine("        switch node.kind {")
+        appendLine("        switch node.payload {")
         components.forEach { component ->
-            appendLine("        case .${component.id}:")
+            appendLine("        case let .${component.id}(payload):")
             appendLine(
                 "            FlareSwiftUI${component.className}Renderer(",
             )
-            appendLine(
-                "                payload: node.payload as! ${component.payloadName},",
-            )
+            appendLine("                payload: payload,")
             appendLine("                children: node.children,")
             appendLine("                resources: resources")
             appendLine("            )")
         }
-        appendLine("        default:")
-        appendLine("            EmptyView()")
         appendLine("        }")
         appendLine("    }")
         appendLine("}")
@@ -402,30 +410,29 @@ private fun renderAppleViewFactory(
 ): String =
     buildString {
         appendGeneratedHeader()
-        appendLine("@preconcurrency import FlareUIDemoKit")
+        appendLine("#if canImport($toolkit)")
+        appendLine("import FlareUIRuntime")
         appendLine("import $toolkit")
         appendLine()
+        appendLine("@MainActor")
         appendLine("func makeFlare${toolkit}NodeView(")
-        appendLine("    for node: FlareUiNodeSnapshot,")
+        appendLine("    for node: FlareUINode,")
         appendLine("    resources: FlareAppleResources")
         appendLine(") -> $viewType {")
-        appendLine("    switch node.kind {")
+        appendLine("    switch node.payload {")
         components.forEach { component ->
-            appendLine("    case .${component.id}:")
+            appendLine("    case let .${component.id}(payload):")
             appendLine(
                 "        return makeFlare${toolkit}${component.className}View(",
             )
-            appendLine(
-                "            payload: node.payload as! ${component.payloadName},",
-            )
+            appendLine("            payload: payload,")
             appendLine("            children: node.children,")
             appendLine("            resources: resources")
             appendLine("        )")
         }
-        appendLine("    default:")
-        appendLine("        return $viewType()")
         appendLine("    }")
         appendLine("}")
+        appendLine("#endif")
     }
 
 private fun renderComposeScaffold(component: ComponentMetadata): String =
@@ -480,15 +487,15 @@ private fun renderAndroidViewScaffold(component: ComponentMetadata): String =
 
 private fun renderSwiftUiScaffold(component: ComponentMetadata): String =
     buildString {
-        appendLine("@preconcurrency import FlareUIDemoKit")
+        appendLine("import FlareUIRuntime")
         appendLine("import SwiftUI")
         appendLine()
         appendLine("// $INCOMPLETE_RENDERER_MARKER")
         appendLine(
             "struct FlareSwiftUI${component.className}Renderer: View {",
         )
-        appendLine("    let payload: ${component.payloadName}")
-        appendLine("    let children: [FlareUiNodeSnapshot]")
+        appendLine("    let payload: ${component.swiftPayloadName}")
+        appendLine("    let children: [FlareUINode]")
         appendLine("    let resources: FlareAppleResources")
         appendLine()
         appendLine("    var body: some View {")
@@ -503,20 +510,264 @@ private fun renderAppleViewScaffold(
     viewType: String,
 ): String =
     buildString {
-        appendLine("@preconcurrency import FlareUIDemoKit")
+        appendLine("#if canImport($toolkit)")
+        appendLine("import FlareUIRuntime")
         appendLine("import $toolkit")
         appendLine()
         appendLine("// $INCOMPLETE_RENDERER_MARKER")
+        appendLine("@MainActor")
         appendLine("func makeFlare${toolkit}${component.className}View(")
-        appendLine("    payload: ${component.payloadName},")
-        appendLine("    children: [FlareUiNodeSnapshot],")
+        appendLine("    payload: ${component.swiftPayloadName},")
+        appendLine("    children: [FlareUINode],")
         appendLine("    resources: FlareAppleResources")
         appendLine(") -> $viewType {")
         appendLine("    $viewType()")
         appendLine("}")
+        appendLine("#endif")
+    }
+
+private fun renderSwiftRuntimeModels(components: List<ComponentMetadata>): String =
+    buildString {
+        appendGeneratedHeader()
+        appendLine("import Foundation")
+        appendLine()
+        appendLine("public struct FlareUINode: Identifiable {")
+        appendLine("    public let id: Int64")
+        appendLine("    public let payload: FlareUINodePayload")
+        appendLine("    public let children: [FlareUINode]")
+        appendLine()
+        appendLine("    public init(")
+        appendLine("        id: Int64,")
+        appendLine("        payload: FlareUINodePayload,")
+        appendLine("        children: [FlareUINode]")
+        appendLine("    ) {")
+        appendLine("        self.id = id")
+        appendLine("        self.payload = payload")
+        appendLine("        self.children = children")
+        appendLine("    }")
+        appendLine("}")
+        appendLine()
+        appendLine("public enum FlareUINodePayload {")
+        components.forEach { component ->
+            appendLine(
+                "    case ${component.id}(${component.swiftPayloadName})",
+            )
+        }
+        appendLine("}")
+
+        components.forEach { component ->
+            appendLine()
+            appendSwiftPayload(component)
+        }
+    }
+
+private fun StringBuilder.appendSwiftPayload(component: ComponentMetadata) {
+    appendLine("public struct ${component.swiftPayloadName} {")
+    if (component.properties.isEmpty()) {
+        appendLine("    public init() {}")
+        appendLine("}")
+        return
+    }
+    component.properties.forEach { property ->
+        if (property.eventParameters == null) {
+            appendLine(
+                "    public let ${property.name}: ${property.type.swiftType()}",
+            )
+        } else {
+            appendLine(
+                "    private let ${property.name}: ${property.swiftClosureType()}",
+            )
+        }
+    }
+    appendLine()
+    appendLine("    public init(")
+    component.properties.forEach { property ->
+        val escaping =
+            if (property.eventParameters == null) "" else "@escaping "
+        val type =
+            property.eventParameters?.let {
+                property.swiftClosureType()
+            } ?: property.type.swiftType()
+        appendLine("        ${property.name}: $escaping$type,")
+    }
+    appendLine("    ) {")
+    component.properties.forEach { property ->
+        appendLine("        self.${property.name} = ${property.name}")
+    }
+    appendLine("    }")
+
+    component.properties
+        .filter { property -> property.eventParameters != null }
+        .forEach { property ->
+            val parameters = requireNotNull(property.eventParameters)
+            appendLine()
+            appendLine("    @MainActor")
+            if (parameters.isEmpty()) {
+                appendLine(
+                    "    public func ${property.eventMethodName()}() {",
+                )
+                appendLine("        ${property.name}()")
+            } else {
+                appendLine(
+                    "    public func ${property.eventMethodName()}(",
+                )
+                parameters.forEach { parameter ->
+                    appendLine(
+                        "        ${parameter.name}: ${parameter.type.swiftType()},",
+                    )
+                }
+                appendLine("    ) {")
+                val arguments =
+                    parameters.joinToString { parameter -> parameter.name }
+                appendLine("        ${property.name}($arguments)")
+            }
+            appendLine("    }")
+        }
+    appendLine("}")
+}
+
+private fun renderKotlinBridge(components: List<ComponentMetadata>): String =
+    buildString {
+        appendGeneratedHeader()
+        appendLine("@preconcurrency import FlareUIKotlinRuntime")
+        appendLine("import FlareUIRuntime")
+        appendLine()
+        appendLine("@MainActor")
+        appendLine("func mapFlareUIKotlinNode(")
+        appendLine("    _ node: FlareUiNodeSnapshot")
+        appendLine(") -> FlareUINode {")
+        appendLine("    let children = node.children.map(mapFlareUIKotlinNode)")
+        components.forEach { component ->
+            appendLine("    if case .${component.id} = node.kind {")
+            if (component.properties.isNotEmpty()) {
+                appendLine(
+                    "        let payload = node.payload as! ${component.payloadName}",
+                )
+            }
+            appendLine("        return FlareUINode(")
+            appendLine("            id: node.id,")
+            appendLine("            payload: .${component.id}(")
+            if (component.properties.isEmpty()) {
+                appendLine("                ${component.swiftPayloadName}()")
+            } else {
+                appendLine("                ${component.swiftPayloadName}(")
+                component.properties.forEach { property ->
+                    appendLine(
+                        "                    ${property.name}: " +
+                            "${property.swiftBridgeExpression()},",
+                    )
+                }
+                appendLine("                )")
+            }
+            appendLine("            ),")
+            appendLine("            children: children")
+            appendLine("        )")
+            appendLine("    }")
+        }
+        appendLine(
+            "    preconditionFailure(\"Unsupported Kotlin Flare UI node kind\")",
+        )
+        appendLine("}")
+    }
+
+private fun PropertyMetadata.swiftBridgeExpression(): String {
+    val parameters = eventParameters
+    if (parameters != null) {
+        if (parameters.isEmpty()) {
+            return "{ payload.${eventMethodName()}() }"
+        }
+        val names = parameters.joinToString { parameter -> parameter.name }
+        val arguments =
+            parameters.joinToString { parameter ->
+                "${parameter.name}: ${parameter.name}"
+            }
+        return "{ $names in payload.${eventMethodName()}($arguments) }"
+    }
+    return when (type) {
+        "dev.dimension.flare.flareui.FlareText" -> {
+            "mapFlareUIKotlinText(payload.$name)"
+        }
+
+        "dev.dimension.flare.flareui.FlareText?" -> {
+            "payload.$name.map(mapFlareUIKotlinText)"
+        }
+
+        "dev.dimension.flare.flareui.FlareImageResource" -> {
+            "mapFlareUIKotlinImage(payload.$name)"
+        }
+
+        else -> {
+            "payload.$name"
+        }
+    }
+}
+
+private fun PropertyMetadata.swiftClosureType(): String {
+    val parameters = requireNotNull(eventParameters)
+    val input =
+        if (parameters.isEmpty()) {
+            "()"
+        } else {
+            parameters.joinToString(
+                prefix = "(",
+                postfix = ")",
+            ) { parameter -> parameter.type.swiftType() }
+        }
+    return "@MainActor $input -> Void"
+}
+
+private fun String.swiftType(): String =
+    when (this) {
+        "kotlin.Boolean" -> {
+            "Bool"
+        }
+
+        "kotlin.String" -> {
+            "String"
+        }
+
+        "kotlin.Byte" -> {
+            "Int8"
+        }
+
+        "kotlin.Short" -> {
+            "Int16"
+        }
+
+        "kotlin.Int" -> {
+            "Int32"
+        }
+
+        "kotlin.Long" -> {
+            "Int64"
+        }
+
+        "kotlin.Float" -> {
+            "Float"
+        }
+
+        "kotlin.Double" -> {
+            "Double"
+        }
+
+        "dev.dimension.flare.flareui.FlareText" -> {
+            "FlareUIText"
+        }
+
+        "dev.dimension.flare.flareui.FlareText?" -> {
+            "FlareUIText?"
+        }
+
+        "dev.dimension.flare.flareui.FlareImageResource" -> {
+            "FlareUIImageResource"
+        }
+
+        else -> {
+            error("Unsupported Swift bridge type: $this")
+        }
     }
 
 private fun StringBuilder.appendGeneratedHeader() {
-    appendLine("// Generated by :flareUI:codegen:generateFlareUiCode. Do not edit.")
+    appendLine("// Generated by :codegen:generateFlareUiCode. Do not edit.")
     appendLine()
 }

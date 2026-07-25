@@ -18,11 +18,12 @@ local.properties
 signing.properties
 
 build/
+.build/
+.swiftpm/
 */Podfile.lock
 */Pods/*
 */Flare.xcworkspace/*
 */Flare.xcodeproj/*
-/flareUI/apple/FlareUIApple.xcodeproj/
 /flareUI/demo/appleApp/FlareUIDemo.xcodeproj/
 shared/shared.podspec
 .kotlin

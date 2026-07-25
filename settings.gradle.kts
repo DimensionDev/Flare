@@ -1,5 +1,8 @@
 pluginManagement {
     includeBuild("build-logic")
+    includeBuild("flareUI/build-logic") {
+        name = "flare-ui-build-logic"
+    }
     repositories {
         google()
         mavenCentral()
@@ -22,6 +25,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Flare"
+includeBuild("flareUI")
 include(":app")
 include(":shared")
 include(":social:bluesky")
@@ -38,14 +42,6 @@ include(":feature:login")
 include(":feature:subscription")
 include(":feature:tab")
 include(":compose-ui")
-include(":flareUI:core")
-include(":flareUI:codegen")
-include(":flareUI:android-compose")
-include(":flareUI:android-view")
-include(":flareUI:apple-runtime")
-include(":flareUI:demo:shared")
-include(":flareUI:demo:androidApp")
-include(":flareUI:demo:apple-framework")
 include(":apple-shared")
 include(":web-shared")
 include(":web-presenter-processor")

@@ -1,12 +1,15 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(AppKit)
+import FlareUIRuntime
 import AppKit
 
+@MainActor
 func makeFlareAppKitTextView(
-    payload: FlareTextPayload,
-    children: [FlareUiNodeSnapshot],
+    payload: FlareUITextPayload,
+    children: [FlareUINode],
     resources: FlareAppleResources
 ) -> NSView {
     NSTextField(
         wrappingLabelWithString: resources.string(payload.value)
     )
 }
+#endif

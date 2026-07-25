@@ -19,42 +19,53 @@ val generateFlareUiCode =
         group = "flare ui"
         description = "Generates Flare UI registries, Apple payloads, and native router glue."
 
-        dependsOn(":flareUI:core:kspKotlinJvm")
+        dependsOn(":core:kspKotlinJvm")
     }
 
 val rendererDirectories =
     listOf(
         repositoryRoot.dir(
-            "flareUI/android-compose/src/androidMain/kotlin/" +
+            "android-compose/src/androidMain/kotlin/" +
                 "dev/dimension/flare/flareui/compose/renderers",
         ),
         repositoryRoot.dir(
-            "flareUI/android-view/src/androidMain/kotlin/" +
+            "android-view/src/androidMain/kotlin/" +
                 "dev/dimension/flare/flareui/view/renderers",
         ),
-        repositoryRoot.dir("flareUI/apple/Sources/SwiftUI/Renderers"),
-        repositoryRoot.dir("flareUI/apple/Sources/UIKit/Renderers"),
-        repositoryRoot.dir("flareUI/apple/Sources/AppKit/Renderers"),
+        repositoryRoot.dir("apple/Sources/SwiftUI/Renderers"),
+        repositoryRoot.dir("apple/Sources/UIKit/Renderers"),
+        repositoryRoot.dir("apple/Sources/AppKit/Renderers"),
     )
 
 val generatedGlueFiles =
     listOf(
         repositoryRoot.file(
-            "flareUI/android-compose/build/generated/flareui/kotlin/" +
+            "android-compose/build/generated/flareui/kotlin/" +
                 "dev/dimension/flare/flareui/compose/GeneratedComposeWidgets.kt",
         ),
         repositoryRoot.file(
-            "flareUI/android-view/build/generated/flareui/kotlin/" +
+            "android-view/build/generated/flareui/kotlin/" +
                 "dev/dimension/flare/flareui/view/GeneratedViewWidgets.kt",
         ),
         repositoryRoot.file(
-            "flareUI/apple/Sources/SwiftUI/Generated/FlareSwiftUINode.generated.swift",
+            "apple/Sources/SwiftUI/Generated/FlareSwiftUINode.generated.swift",
         ),
         repositoryRoot.file(
-            "flareUI/apple/Sources/UIKit/Generated/FlareUIKitNodeFactory.generated.swift",
+            "apple/Sources/UIKit/Generated/FlareUIKitNodeFactory.generated.swift",
         ),
         repositoryRoot.file(
-            "flareUI/apple/Sources/AppKit/Generated/FlareAppKitNodeFactory.generated.swift",
+            "apple/Sources/AppKit/Generated/FlareAppKitNodeFactory.generated.swift",
+        ),
+    )
+
+val generatedSupportFiles =
+    listOf(
+        repositoryRoot.file(
+            "apple/Sources/Runtime/Generated/FlareUINodes.generated.swift",
+        ),
+        repositoryRoot.file(
+            "apple/Sources/KotlinBridge/Generated/" +
+                "FlareUIKotlinNodeBridge.generated.swift",
         ),
     )
 
@@ -67,7 +78,19 @@ val verifyFlareUiRenderers =
 
         inputs.files(rendererDirectories)
         inputs.files(generatedGlueFiles)
+        inputs.files(generatedSupportFiles)
         doLast {
+            val missingGeneratedFiles =
+                (generatedGlueFiles + generatedSupportFiles)
+                    .filterNot { file -> file.asFile.isFile }
+                    .map { file -> file.asFile.relativeTo(repositoryRoot.asFile) }
+            check(missingGeneratedFiles.isEmpty()) {
+                missingGeneratedFiles.joinToString(
+                    prefix = "Missing generated Flare UI files:\n- ",
+                    separator = "\n- ",
+                )
+            }
+
             val incomplete =
                 rendererDirectories
                     .flatMap { directory ->

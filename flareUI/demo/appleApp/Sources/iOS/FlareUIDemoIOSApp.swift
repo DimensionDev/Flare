@@ -1,4 +1,5 @@
 @preconcurrency import FlareUIDemoKit
+import FlareUIDemoKotlinBridge
 import FlareUISwiftUI
 import FlareUIUIKit
 import SwiftUI
@@ -38,11 +39,14 @@ private struct SwiftUIDemoScreen: View {
     var body: some View {
         ScrollView {
             FlareSwiftUIHost(
-                host: FlareUiAppleDemo.shared.createHost(),
                 resources: .init(bundle: .main)
-            )
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+            ) {
+                FlareUIKotlinTreeHost(
+                    host: FlareUiAppleDemo.shared.createHost()
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
         }
         .navigationTitle("SwiftUI")
         .navigationBarTitleDisplayMode(.inline)
@@ -66,7 +70,9 @@ private struct UIKitDemoScreen: View {
 private struct FlareUIKitDemo: UIViewRepresentable {
     func makeUIView(context: Context) -> FlareUIKitHostView {
         FlareUIKitHostView(
-            host: FlareUiAppleDemo.shared.createHost(),
+            host: FlareUIKotlinTreeHost(
+                host: FlareUiAppleDemo.shared.createHost()
+            ),
             resources: .init(bundle: .main)
         )
     }

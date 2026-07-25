@@ -21,9 +21,9 @@ settings:
     SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
     SWIFT_VERSION: "6.0"
 
-projectReferences:
-  FlareUIApple:
-    path: ../../apple/FlareUIApple.xcodeproj
+packages:
+  FlareUI:
+    path: ../../apple
 
 targetTemplates:
   FlareUIDemoApp:
@@ -37,6 +37,37 @@ targetTemplates:
         OTHER_LDFLAGS: "$(inherited) -framework FlareUIDemoKit"
 
 targets:
+  FlareUIDemoKotlinBridge:
+    type: framework.static
+    platform: auto
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: ../../apple/Sources/KotlinBridge
+    dependencies:
+      - package: FlareUI
+        product: FlareUIRuntime
+    preBuildScripts:
+      - name: Compile Kotlin
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../../.."
+          export ARCHS=arm64
+          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+            ./gradlew -p flareUI "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :demo:apple-framework:embedAndSignAppleFrameworkForXcode
+          else
+            ./gradlew -p flareUI :demo:apple-framework:embedAndSignAppleFrameworkForXcode
+          fi
+    settings:
+      base:
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../apple-framework/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: YES
+        OTHER_SWIFT_FLAGS: "$(inherited) -module-alias FlareUIKotlinRuntime=FlareUIDemoKit"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.kotlinbridge
+        PRODUCT_MODULE_NAME: FlareUIDemoKotlinBridge
+        PRODUCT_NAME: FlareUIDemoKotlinBridge
+
   iOSDemo:
     templates: [FlareUIDemoApp]
     type: application
@@ -48,10 +79,12 @@ targets:
       - path: ../shared/build/generated/flareui/resources/apple/DemoResources.xcassets
         buildPhase: resources
     dependencies:
-      - target: FlareUIApple/FlareUISwiftUI_iOS
-        embed: false
-      - target: FlareUIApple/FlareUIUIKit
-        embed: false
+      - package: FlareUI
+        product: FlareUISwiftUI
+      - package: FlareUI
+        product: FlareUIUIKit
+      - target: FlareUIDemoKotlinBridge
+        destinationFilters: [iOS]
     settings:
       base:
         INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
@@ -71,10 +104,12 @@ targets:
       - path: ../shared/build/generated/flareui/resources/apple/DemoResources.xcassets
         buildPhase: resources
     dependencies:
-      - target: FlareUIApple/FlareUISwiftUI_macOS
-        embed: false
-      - target: FlareUIApple/FlareUIAppKit
-        embed: false
+      - package: FlareUI
+        product: FlareUISwiftUI
+      - package: FlareUI
+        product: FlareUIAppKit
+      - target: FlareUIDemoKotlinBridge
+        destinationFilters: [macOS]
     settings:
       base:
         INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
@@ -86,17 +121,6 @@ schemes:
     build:
       targets:
         iOSDemo: all
-      preActions:
-        - name: Generate Flare UI code and compile Kotlin framework
-          settingsTarget: iOSDemo
-          script: &flareUiDemoBuildScript |
-            cd "$SRCROOT/../../.."
-            export ARCHS=arm64
-            if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
-              ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :flareUI:demo:apple-framework:embedAndSignAppleFrameworkForXcode
-            else
-              ./gradlew :flareUI:demo:apple-framework:embedAndSignAppleFrameworkForXcode
-            fi
     run:
       config: Debug
     profile:
@@ -110,10 +134,6 @@ schemes:
     build:
       targets:
         macOSDemo: all
-      preActions:
-        - name: Generate Flare UI code and compile Kotlin framework
-          settingsTarget: macOSDemo
-          script: *flareUiDemoBuildScript
     run:
       config: Debug
     profile:

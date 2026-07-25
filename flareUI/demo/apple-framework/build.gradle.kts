@@ -1,18 +1,18 @@
-import dev.dimension.flare.buildlogic.FlarePlatform
-import dev.dimension.flare.buildlogic.flare
+import dev.dimension.flareui.buildlogic.FlareUiPlatform
+import dev.dimension.flareui.buildlogic.flareUi
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
-    id("dev.dimension.flare.multiplatform-library")
+    id("dev.dimension.flareui.multiplatform-library")
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
-    flare {
+    flareUi {
         platforms(
-            FlarePlatform.IOS,
-            FlarePlatform.MACOS,
+            FlareUiPlatform.IOS,
+            FlareUiPlatform.MACOS,
         )
     }
 
@@ -22,16 +22,16 @@ kotlin {
             appleTarget.binaries.framework {
                 baseName = "FlareUIDemoKit"
                 isStatic = true
-                export(projects.flareUI.appleRuntime)
-                export(projects.flareUI.core)
+                export(project(":apple-runtime"))
+                export(project(":core"))
             }
         }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.flareUI.appleRuntime)
-                implementation(projects.flareUI.demo.shared)
+                api(project(":apple-runtime"))
+                implementation(project(":demo:shared"))
             }
         }
     }
@@ -39,6 +39,6 @@ kotlin {
 
 tasks.matching { task -> task.name == "embedAndSignAppleFrameworkForXcode" }
     .configureEach {
-        dependsOn(":flareUI:codegen:verifyFlareUiRenderers")
-        dependsOn(":flareUI:demo:shared:generateFlareUiResources")
+        dependsOn(":codegen:verifyFlareUiRenderers")
+        dependsOn(":demo:shared:generateFlareUiResources")
     }

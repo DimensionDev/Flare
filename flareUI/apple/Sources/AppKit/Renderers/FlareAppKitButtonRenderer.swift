@@ -1,9 +1,11 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(AppKit)
+import FlareUIRuntime
 import AppKit
 
+@MainActor
 func makeFlareAppKitButtonView(
-    payload: FlareButtonPayload,
-    children: [FlareUiNodeSnapshot],
+    payload: FlareUIButtonPayload,
+    children: [FlareUINode],
     resources: FlareAppleResources
 ) -> NSView {
     let button = FlareAppKitButton(
@@ -42,3 +44,4 @@ private final class FlareAppKitButton: NSButton {
         onClick()
     }
 }
+#endif

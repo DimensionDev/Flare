@@ -1,14 +1,15 @@
 import Combine
-@preconcurrency import FlareUIDemoKit
+import FlareUIRuntime
 
 /// Observation glue used by the SwiftUI renderer.
 @MainActor
 final class FlareTreeModel: ObservableObject {
-    @Published private(set) var nodes: [FlareUiNodeSnapshot]
+    @Published private(set) var nodes: [FlareUINode]
 
-    private let host: FlareUiTreeHost
+    private let host: any FlareUITreeHost
 
-    init(host: FlareUiTreeHost) {
+    init(makeHost: @MainActor () -> any FlareUITreeHost) {
+        let host = makeHost()
         self.host = host
         nodes = host.snapshot()
         host.setOnTreeChanged { [weak self] nodes in
@@ -16,8 +17,8 @@ final class FlareTreeModel: ObservableObject {
         }
     }
 
-    deinit {
-        host.setOnTreeChanged(listener: nil)
+    isolated deinit {
+        host.setOnTreeChanged(nil)
         host.dispose()
     }
 }

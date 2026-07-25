@@ -1,9 +1,9 @@
-@preconcurrency import FlareUIDemoKit
+import FlareUIRuntime
 import SwiftUI
 
 struct FlareSwiftUIRowRenderer: View {
-    let payload: FlareRowPayload
-    let children: [FlareUiNodeSnapshot]
+    let payload: FlareUIRowPayload
+    let children: [FlareUINode]
     let resources: FlareAppleResources
 
     var body: some View {

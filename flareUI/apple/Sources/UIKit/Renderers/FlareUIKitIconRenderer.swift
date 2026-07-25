@@ -1,15 +1,17 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(UIKit)
+import FlareUIRuntime
 import UIKit
 
+@MainActor
 func makeFlareUIKitIconView(
-    payload: FlareIconPayload,
-    children: [FlareUiNodeSnapshot],
+    payload: FlareUIIconPayload,
+    children: [FlareUINode],
     resources: FlareAppleResources
 ) -> UIView {
     let image =
         UIImage(
             named: resources.imageName(payload.image),
-            in: resources.bundle(for: payload.image.key.namespace_),
+            in: resources.bundle(for: payload.image.key.resourceNamespace),
             compatibleWith: nil
         )?
         .withRenderingMode(.alwaysTemplate)
@@ -25,3 +27,4 @@ func makeFlareUIKitIconView(
     }
     return imageView
 }
+#endif

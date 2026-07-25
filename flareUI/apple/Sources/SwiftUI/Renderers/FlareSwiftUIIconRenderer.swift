@@ -1,16 +1,16 @@
-@preconcurrency import FlareUIDemoKit
+import FlareUIRuntime
 import SwiftUI
 
 struct FlareSwiftUIIconRenderer: View {
-    let payload: FlareIconPayload
-    let children: [FlareUiNodeSnapshot]
+    let payload: FlareUIIconPayload
+    let children: [FlareUINode]
     let resources: FlareAppleResources
 
     @ViewBuilder
     var body: some View {
         let image = Image(
             resources.imageName(payload.image),
-            bundle: resources.bundle(for: payload.image.key.namespace_)
+            bundle: resources.bundle(for: payload.image.key.resourceNamespace)
         )
         .renderingMode(.template)
 

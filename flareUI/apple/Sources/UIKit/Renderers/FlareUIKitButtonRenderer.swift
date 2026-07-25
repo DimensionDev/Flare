@@ -1,9 +1,11 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(UIKit)
+import FlareUIRuntime
 import UIKit
 
+@MainActor
 func makeFlareUIKitButtonView(
-    payload: FlareButtonPayload,
-    children: [FlareUiNodeSnapshot],
+    payload: FlareUIButtonPayload,
+    children: [FlareUINode],
     resources: FlareAppleResources
 ) -> UIView {
     let button = FlareUIKitButton(type: .system)
@@ -35,3 +37,4 @@ private final class FlareUIKitButton: UIButton {
         titleLabel?.frame = bounds
     }
 }
+#endif

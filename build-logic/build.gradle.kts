@@ -29,9 +29,5 @@ gradlePlugin {
             id = "dev.dimension.flare.root-conventions"
             implementationClass = "dev.dimension.flare.buildlogic.FlareRootConventionsPlugin"
         }
-        create("flareUiResources") {
-            id = "dev.dimension.flare.ui-resources"
-            implementationClass = "dev.dimension.flare.buildlogic.FlareUiResourcesPlugin"
-        }
     }
 }

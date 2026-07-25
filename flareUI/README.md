@@ -4,19 +4,27 @@ This is a proof of concept for defining a small UI with Compose Runtime and
 rendering it with platform UI toolkits. The current widget vocabulary is only
 `Column`, `Row`, `Text`, `Button`, and `Icon`.
 
-The runtime libraries and runnable demos are deliberately separate. None of the
-demo code is linked into the existing Flare Android or Apple applications.
+`flareUI` is its own Gradle build: it owns its settings, version catalog, build
+logic, code generator, runtime modules, and demos. It does not reference any
+Flare module, root version catalog, or root convention plugin. The Flare
+repository consumes it as an included build; the dependency points only from
+the application toward Flare UI.
 
 ## Layout
 
 | Path | Responsibility |
 | --- | --- |
+| `settings.gradle.kts`, `gradle/libs.versions.toml` | Standalone build and dependency versions |
+| `build-logic` | Flare UI conventions and the consumer resource plugin |
 | `core` | One Kotlin file per component plus resource references, Compose Runtime, registry, and Applier |
 | `codegen` | KSP discovery, generated registries/routers/payloads, and one-time renderer scaffolding |
 | `android-compose` | Maps the widget tree to Compose Material 3 |
 | `android-view` | Maps the widget tree to `LinearLayout`, `MaterialTextView`, and `MaterialButton` |
 | `apple-runtime` | Runs a composition and exposes immutable snapshots to Swift |
-| `apple` | Independent XcodeGen project with SwiftUI, UIKit, and AppKit framework targets |
+| `apple/Package.swift` | Local Swift package manifest |
+| `apple/Sources/Runtime` | Swift-only tree/resource boundary distributed as `FlareUIRuntime` |
+| `apple/Sources/SwiftUI`, `UIKit`, `AppKit` | Native renderer targets distributed by SwiftPM |
+| `apple/Sources/KotlinBridge` | Generated consumer bridge from one Kotlin umbrella framework into `FlareUIRuntime` |
 | `demo/shared` | Stateful UI and consumer-owned strings/SVG shared by every demo |
 | `demo/androidApp` | Standalone Android app containing Compose and View screens |
 | `demo/apple-framework` | Standalone `FlareUIDemoKit` framework and demo factory |
@@ -36,19 +44,79 @@ definition and link only the renderer frameworks available on their platform.
 ## Dependency direction
 
 ```text
-core ──KSP/codegen──┬── android-compose glue
-                   ├── android-view glue
-                   ├── apple-runtime payloads
+core ──KSP/codegen──┬── android-compose
+                   ├── android-view
+                   ├── apple-runtime
+                   ├── Swift runtime models and Kotlin bridge
                    └── SwiftUI/UIKit/AppKit routers
 
-core ── apple-runtime ── demo/apple-framework ──┬── apple
-                              ▲                 │     │
-                              └── demo/shared   └─────┴── demo/appleApp
+consumer content ── core
+consumer Apple umbrella framework ── core + apple-runtime
+consumer Kotlin bridge ── module alias ── consumer Apple umbrella framework
+SwiftUI/UIKit/AppKit ── FlareUIRuntime ←── consumer Kotlin bridge
 ```
 
 There is no runtime backend plug-in system. Each app selects its renderer when
 it is assembled, while the iOS demo keeps both of its already-linked renderers
 only to make comparison convenient.
+
+## Consume the standalone build
+
+A source checkout can be attached to another Gradle build with:
+
+```kotlin
+pluginManagement {
+    includeBuild("flareUI/build-logic") {
+        name = "flare-ui-build-logic"
+    }
+}
+
+includeBuild("flareUI")
+```
+
+Consumer modules then use normal coordinates rather than reaching into Flare
+UI with cross-project paths:
+
+```kotlin
+implementation("dev.dimension.flareui:core:0.1.0-SNAPSHOT")
+implementation("dev.dimension.flareui:android-compose:0.1.0-SNAPSHOT")
+```
+
+The current repository uses this form for `apple-shared`. Publishing those
+same coordinates later does not require changing consumer source code.
+
+## Consume the local Apple package
+
+Add `flareUI/apple` as a local package dependency in Xcode, or declare the
+same path in XcodeGen:
+
+```yaml
+packages:
+  FlareUI:
+    path: ../flareUI/apple
+```
+
+The package exposes four libraries:
+
+- `FlareUIRuntime`: Swift-only node, host, and resource contracts.
+- `FlareUISwiftUI`: iOS and macOS SwiftUI renderer.
+- `FlareUIUIKit`: iOS UIKit renderer.
+- `FlareUIAppKit`: macOS AppKit renderer.
+
+The package deliberately does not contain a prebuilt Kotlin framework. A KMP
+application must keep exactly one Kotlin/Native umbrella framework, export
+Flare UI's `core` and `apple-runtime` modules from it, and compile the generated
+`apple/Sources/KotlinBridge` files in a small consumer target. That target
+depends on `FlareUIRuntime` and maps the logical import to the application's
+framework:
+
+```text
+-module-alias FlareUIKotlinRuntime=MyKotlinFramework
+```
+
+Keeping this adapter consumer-side prevents two Kotlin/Native runtimes from
+being linked into the same application. A non-Kotlin client can instead
+implement the public `FlareUITreeHost` protocol directly.
 
 ## Default layout semantics
 
@@ -73,13 +141,13 @@ do not become gaps inside a zero-spacing `Row`.
 Build the standalone APK:
 
 ```shell
-./gradlew :flareUI:demo:androidApp:assembleDebug
+./gradlew -p flareUI :demo:androidApp:assembleDebug
 ```
 
 Install it on a connected device or emulator:
 
 ```shell
-./gradlew :flareUI:demo:androidApp:installDebug
+./gradlew -p flareUI :demo:androidApp:installDebug
 ```
 
 The launcher presents two entries: Compose UI and Android Views.
@@ -89,11 +157,10 @@ should use a theme derived from `Theme.Material3`; the demo uses
 
 ## Run iOS and macOS
 
-Generate all backend glue and both ignored Xcode projects:
+Generate backend glue, resources, and the ignored demo project:
 
 ```shell
-./gradlew :flareUI:codegen:generateFlareUiCode :flareUI:demo:shared:generateFlareUiResources
-xcodegen generate --spec flareUI/apple/project.yml
+./gradlew -p flareUI :codegen:generateFlareUiCode :demo:shared:generateFlareUiResources
 xcodegen generate --spec flareUI/demo/appleApp/project.yml
 ```
 
@@ -102,18 +169,23 @@ Open `flareUI/demo/appleApp/FlareUIDemo.xcodeproj`, then choose:
 - `FlareUIDemo-iOS` for the SwiftUI/UIKit navigation demo.
 - `FlareUIDemo-macOS` for the SwiftUI/AppKit navigation demo.
 
-The app project references `flareUI/apple/FlareUIApple.xcodeproj`. That project
-provides the following independently buildable static frameworks:
+The app project references `flareUI/apple` as a local Swift package and
+selects these products:
 
 - `FlareUISwiftUI` for iOS and macOS.
 - `FlareUIUIKit` for iOS.
 - `FlareUIAppKit` for macOS.
 
-Both generated Xcode projects are ignored, while the generated Swift routers
-are checked in. Each shared scheme runs
-`:flareUI:demo:apple-framework:embedAndSignAppleFrameworkForXcode`
-before building any Xcode target; that task regenerates all backend glue
-before compiling the Kotlin framework.
+The generated demo project is ignored, while the Swift package manifest,
+runtime models, routers, and bridge are checked in. The consumer bridge runs
+`:demo:apple-framework:embedAndSignAppleFrameworkForXcode`
+as its pre-build step; that task regenerates all backend glue before compiling
+the Kotlin framework.
+
+Only the consumer bridge imports the logical module
+`FlareUIKotlinRuntime`. Xcode maps that name to the consumer's single Kotlin
+umbrella framework: `FlareUIDemoKit` in the demo and `KotlinSharedUI` in the
+Flare app. The SPM runtime and renderers contain no Kotlin import.
 
 ## Component generation
 
@@ -141,18 +213,19 @@ the props type, constructor properties, and callback events directly from that
 declaration. It passes this model straight to the generator; there is no
 intermediate schema file.
 
-`:flareUI:codegen:generateFlareUiCode` then generates:
+`:codegen:generateFlareUiCode` then generates:
 
 - Compose and Android View registry/dispatch glue.
 - The Apple node enum, typed payload classes, event methods, snapshot mapping,
   and registry.
+- Swift-only node/payload models and the Kotlin-to-Swift consumer bridge.
 - SwiftUI, UIKit, and AppKit routers.
 - A renderer file for each toolkit if that file does not already exist.
 
 The last item is deliberately create-only. Running generation again never
 overwrites a handwritten renderer. A new renderer starts with a
 `FLARE_UI_RENDERER_TODO` marker, and
-`:flareUI:codegen:verifyFlareUiRenderers` fails until all five implementations
+`:codegen:verifyFlareUiRenderers` fails until all five implementations
 are completed. Native rendering semantics remain handwritten because they
 cannot be inferred from a props class; all repetitive registration and routing
 is generated.
@@ -172,7 +245,7 @@ A consuming KMP module opts in to resource generation:
 
 ```kotlin
 plugins {
-    id("dev.dimension.flare.ui-resources")
+    id("dev.dimension.flareui.resources")
 }
 
 flareUiResources {
@@ -224,9 +297,10 @@ build phase and pass the owning bundle:
 
 ```swift
 FlareSwiftUIHost(
-    host: contentFactory.createHost(),
     resources: .init(bundle: .main)
-)
+) {
+    contentFactory.createHost()
+}
 ```
 
 `FlareAppleResources(bundleForNamespace:)` can route namespaces to separate
@@ -271,11 +345,13 @@ the demo factory:
 
 ```swift
 import FlareUISwiftUI
+import MyFlareUIKotlinBridge
 
 FlareSwiftUIHost(
-    host: contentFactory.createHost(),
     resources: .init(bundle: .main)
-)
+) {
+    FlareUIKotlinTreeHost(host: contentFactory.createHost())
+}
 ```
 
 The UIKit equivalent is `FlareUIKitHostView(host:resources:)` from
@@ -288,9 +364,9 @@ Adding a widget no longer touches a central list, registry, `switch`, JSON
 schema, or Apple snapshot model:
 
 1. Add one annotated component file in `core`.
-2. Run `:flareUI:codegen:generateFlareUiCode`.
+2. Run `:codegen:generateFlareUiCode` from the standalone build.
 3. Fill in the five create-only renderer files generated for that component.
-4. Run `:flareUI:codegen:verifyFlareUiRenderers`.
+4. Run `:codegen:verifyFlareUiRenderers`.
 
 The component's public Compose Runtime function decides whether it accepts
 children. Function-valued props are exported as typed Apple payload actions;

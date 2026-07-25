@@ -1,9 +1,11 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(UIKit)
+import FlareUIRuntime
 import UIKit
 
+@MainActor
 func makeFlareUIKitRowView(
-    payload: FlareRowPayload,
-    children: [FlareUiNodeSnapshot],
+    payload: FlareUIRowPayload,
+    children: [FlareUINode],
     resources: FlareAppleResources
 ) -> UIView {
     let stack = UIStackView(
@@ -19,3 +21,4 @@ func makeFlareUIKitRowView(
     stack.spacing = 0
     return stack
 }
+#endif

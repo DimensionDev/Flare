@@ -1,15 +1,16 @@
-@preconcurrency import FlareUIDemoKit
+#if canImport(UIKit)
+import FlareUIRuntime
 import UIKit
 
 /// Renders a Flare UI tree with native UIKit views.
 @MainActor
 public final class FlareUIKitHostView: UIView {
-    private let host: FlareUiTreeHost
+    private let host: any FlareUITreeHost
     private let resources: FlareAppleResources
     private let rootStack = UIStackView()
 
     public init(
-        host: FlareUiTreeHost,
+        host: any FlareUITreeHost,
         resources: FlareAppleResources = .init(bundle: .main)
     ) {
         self.host = host
@@ -26,8 +27,8 @@ public final class FlareUIKitHostView: UIView {
         fatalError("Use init(host:) instead")
     }
 
-    deinit {
-        host.setOnTreeChanged(listener: nil)
+    isolated deinit {
+        host.setOnTreeChanged(nil)
         host.dispose()
     }
 
@@ -46,7 +47,7 @@ public final class FlareUIKitHostView: UIView {
         ])
     }
 
-    private func render(_ nodes: [FlareUiNodeSnapshot]) {
+    private func render(_ nodes: [FlareUINode]) {
         for view in rootStack.arrangedSubviews {
             rootStack.removeArrangedSubview(view)
             view.removeFromSuperview()
@@ -61,3 +62,4 @@ public final class FlareUIKitHostView: UIView {
         }
     }
 }
+#endif

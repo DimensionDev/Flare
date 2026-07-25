@@ -9,8 +9,10 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.flareui.Button
 import dev.dimension.flare.flareui.Column
 import dev.dimension.flare.flareui.FlareUiComposable
+import dev.dimension.flare.flareui.Icon
 import dev.dimension.flare.flareui.Row
 import dev.dimension.flare.flareui.Text
+import dev.dimension.flare.flareui.demo.shared.resources.DemoResources
 
 /**
  * A small stateful screen shared by every demo backend.
@@ -22,8 +24,14 @@ public fun FlareUiDemo() {
     var showDetails by remember { mutableStateOf(false) }
 
     Column {
-        Text("Flare UI")
-        Text("One definition, five native renderers")
+        Row {
+            Icon(
+                image = DemoResources.Images.flareMark,
+                contentDescription = DemoResources.Strings.logoDescription,
+            )
+            Text(DemoResources.Strings.title)
+        }
+        Text(DemoResources.Strings.subtitle)
         Row {
             Button(
                 label = "−",
@@ -38,17 +46,22 @@ public fun FlareUiDemo() {
         }
         Row {
             Button(
-                label = if (showDetails) "Hide details" else "Show details",
+                label =
+                    if (showDetails) {
+                        DemoResources.Strings.hideDetails
+                    } else {
+                        DemoResources.Strings.showDetails
+                    },
                 onClick = { showDetails = !showDetails },
             )
             Button(
-                label = "Reset",
+                label = DemoResources.Strings.reset,
                 enabled = count != 0,
                 onClick = { count = 0 },
             )
         }
         if (showDetails) {
-            Text("The state and events live in shared Compose Runtime code.")
+            Text(DemoResources.Strings.details)
         }
     }
 }

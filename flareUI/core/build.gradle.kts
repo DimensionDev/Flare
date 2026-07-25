@@ -1,3 +1,4 @@
+import com.google.devtools.ksp.gradle.KspAATask
 import dev.dimension.flare.buildlogic.FlarePlatform
 import dev.dimension.flare.buildlogic.flare
 
@@ -54,8 +55,15 @@ ksp {
     arg("flareUiRepositoryRoot", repositoryRoot.asFile.absolutePath)
 }
 
-tasks.matching { task -> task.name == "kspKotlinJvm" }
+tasks.withType<KspAATask>()
+    .matching { task -> task.name == "kspKotlinJvm" }
     .configureEach {
+        // The generator writes complete cross-module registries in one pass.
+        // An incremental KSP round only exposes changed symbols and would
+        // otherwise overwrite those registries with a partial component set.
+        kspConfig.incremental.set(false)
+        outputs.upToDateWhen { false }
+
         outputs.dir(generatedComposeSources)
         outputs.dir(generatedViewSources)
         outputs.dir(generatedAppleSources)

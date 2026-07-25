@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="details">状态、事件、字符串和 SVG 都定义在消费模块中。</string>
+    <string name="hide_details">隐藏详情</string>
+    <string name="logo_description">Flare UI 资源图标</string>
+    <string name="reset">重置</string>
+    <string name="show_details">显示详情</string>
+    <string name="subtitle">一份定义，五种原生渲染器</string>
+    <string name="title">Flare UI</string>
+</resources>

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 public data class ButtonProps(
-    public val label: String,
+    public val label: FlareText,
     public val enabled: Boolean,
     public val onClick: () -> Unit,
 )
@@ -18,6 +18,34 @@ public data object ButtonType : WidgetType<ButtonProps>("Button")
 public fun Button(
     label: String,
     enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    EmitButton(
+        label = FlareText.literal(label),
+        enabled = enabled,
+        onClick = onClick,
+    )
+}
+
+@Composable
+@FlareUiComposable
+public fun Button(
+    label: FlareStringResource,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    EmitButton(
+        label = FlareText.resource(label),
+        enabled = enabled,
+        onClick = onClick,
+    )
+}
+
+@Composable
+@FlareUiComposable
+private fun EmitButton(
+    label: FlareText,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     EmitWidget(

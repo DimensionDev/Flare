@@ -3,6 +3,7 @@ package dev.dimension.flare.flareui.compose
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.UiComposable
+import dev.dimension.flare.flareui.AndroidFlareResourceResolver
 import dev.dimension.flare.flareui.TextProps
 
 @Composable
@@ -11,6 +12,7 @@ import dev.dimension.flare.flareui.TextProps
 internal fun renderTextCompose(
     props: TextProps,
     children: List<ComposeTreeNode>,
+    resources: AndroidFlareResourceResolver,
 ) {
-    Text(props.value)
+    Text(resolveFlareText(props.value, resources))
 }

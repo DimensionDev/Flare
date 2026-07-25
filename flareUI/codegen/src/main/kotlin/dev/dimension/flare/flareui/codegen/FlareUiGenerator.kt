@@ -145,6 +145,7 @@ private fun renderComposeGlue(components: List<ComponentMetadata>): String =
         appendLine()
         appendLine("import androidx.compose.runtime.Composable")
         appendLine("import androidx.compose.ui.UiComposable")
+        appendLine("import dev.dimension.flare.flareui.AndroidFlareResourceResolver")
         appendLine("import dev.dimension.flare.flareui.WidgetRegistry")
         appendLine()
         appendLine("internal fun generatedComposeWidgetRegistry(): WidgetRegistry =")
@@ -159,7 +160,10 @@ private fun renderComposeGlue(components: List<ComponentMetadata>): String =
         appendLine()
         appendLine("@Composable")
         appendLine("@UiComposable")
-        appendLine("internal fun renderGeneratedComposeNode(node: ComposeTreeNode) {")
+        appendLine("internal fun renderGeneratedComposeNode(")
+        appendLine("    node: ComposeTreeNode,")
+        appendLine("    resources: AndroidFlareResourceResolver,")
+        appendLine(") {")
         appendLine("    when (node.type) {")
         components.forEach { component ->
             appendLine("        ${component.type} ->")
@@ -170,6 +174,7 @@ private fun renderComposeGlue(components: List<ComponentMetadata>): String =
                 "                props = node.requireValue<${component.propsType}>(),",
             )
             appendLine("                children = node.children,")
+            appendLine("                resources = resources,")
             appendLine("            )")
         }
         appendLine()
@@ -186,11 +191,13 @@ private fun renderAndroidViewGlue(components: List<ComponentMetadata>): String =
         appendLine("package dev.dimension.flare.flareui.view")
         appendLine()
         appendLine("import android.content.Context")
+        appendLine("import dev.dimension.flare.flareui.AndroidFlareResourceResolver")
         appendLine("import dev.dimension.flare.flareui.WidgetRegistry")
         appendLine()
-        appendLine(
-            "public fun androidViewWidgetRegistry(context: Context): WidgetRegistry =",
-        )
+        appendLine("public fun androidViewWidgetRegistry(")
+        appendLine("    context: Context,")
+        appendLine("    resources: AndroidFlareResourceResolver,")
+        appendLine("): WidgetRegistry =")
         appendLine("    WidgetRegistry.build {")
         components.forEach { component ->
             appendLine("        bind(")
@@ -202,7 +209,7 @@ private fun renderAndroidViewGlue(components: List<ComponentMetadata>): String =
                 "            update = { props: ${component.propsType} ->",
             )
             appendLine(
-                "                update${component.className}View(this, props)",
+                "                update${component.className}View(this, props, resources)",
             )
             appendLine("            },")
             appendLine("        )")
@@ -364,6 +371,7 @@ private fun renderSwiftUiRouter(components: List<ComponentMetadata>): String =
         appendLine()
         appendLine("struct FlareSwiftUINode: View {")
         appendLine("    let node: FlareUiNodeSnapshot")
+        appendLine("    let resources: FlareAppleResources")
         appendLine()
         appendLine("    @ViewBuilder")
         appendLine("    var body: some View {")
@@ -376,7 +384,8 @@ private fun renderSwiftUiRouter(components: List<ComponentMetadata>): String =
             appendLine(
                 "                payload: node.payload as! ${component.payloadName},",
             )
-            appendLine("                children: node.children")
+            appendLine("                children: node.children,")
+            appendLine("                resources: resources")
             appendLine("            )")
         }
         appendLine("        default:")
@@ -396,9 +405,10 @@ private fun renderAppleViewFactory(
         appendLine("@preconcurrency import FlareUIDemoKit")
         appendLine("import $toolkit")
         appendLine()
-        appendLine(
-            "func makeFlare${toolkit}NodeView(for node: FlareUiNodeSnapshot) -> $viewType {",
-        )
+        appendLine("func makeFlare${toolkit}NodeView(")
+        appendLine("    for node: FlareUiNodeSnapshot,")
+        appendLine("    resources: FlareAppleResources")
+        appendLine(") -> $viewType {")
         appendLine("    switch node.kind {")
         components.forEach { component ->
             appendLine("    case .${component.id}:")
@@ -408,7 +418,8 @@ private fun renderAppleViewFactory(
             appendLine(
                 "            payload: node.payload as! ${component.payloadName},",
             )
-            appendLine("            children: node.children")
+            appendLine("            children: node.children,")
+            appendLine("            resources: resources")
             appendLine("        )")
         }
         appendLine("    default:")
@@ -430,6 +441,9 @@ private fun renderComposeScaffold(component: ComponentMetadata): String =
         appendLine("internal fun render${component.className}Compose(")
         appendLine("    props: ${component.propsType},")
         appendLine("    children: List<ComposeTreeNode>,")
+        appendLine(
+            "    resources: dev.dimension.flare.flareui.AndroidFlareResourceResolver,",
+        )
         appendLine(") {")
         appendLine(
             "    error(\"Implement the ${component.id} Compose renderer\")",
@@ -454,6 +468,9 @@ private fun renderAndroidViewScaffold(component: ComponentMetadata): String =
         appendLine("internal fun update${component.className}View(")
         appendLine("    node: AndroidViewNode,")
         appendLine("    props: ${component.propsType},")
+        appendLine(
+            "    resources: dev.dimension.flare.flareui.AndroidFlareResourceResolver,",
+        )
         appendLine(") {")
         appendLine(
             "    error(\"Implement the ${component.id} Android View update\")",
@@ -472,6 +489,7 @@ private fun renderSwiftUiScaffold(component: ComponentMetadata): String =
         )
         appendLine("    let payload: ${component.payloadName}")
         appendLine("    let children: [FlareUiNodeSnapshot]")
+        appendLine("    let resources: FlareAppleResources")
         appendLine()
         appendLine("    var body: some View {")
         appendLine("        EmptyView()")
@@ -491,7 +509,8 @@ private fun renderAppleViewScaffold(
         appendLine("// $INCOMPLETE_RENDERER_MARKER")
         appendLine("func makeFlare${toolkit}${component.className}View(")
         appendLine("    payload: ${component.payloadName},")
-        appendLine("    children: [FlareUiNodeSnapshot]")
+        appendLine("    children: [FlareUiNodeSnapshot],")
+        appendLine("    resources: FlareAppleResources")
         appendLine(") -> $viewType {")
         appendLine("    $viewType()")
         appendLine("}")

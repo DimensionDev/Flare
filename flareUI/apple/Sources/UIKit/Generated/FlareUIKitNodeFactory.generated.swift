@@ -3,27 +3,40 @@
 @preconcurrency import FlareUIDemoKit
 import UIKit
 
-func makeFlareUIKitNodeView(for node: FlareUiNodeSnapshot) -> UIView {
+func makeFlareUIKitNodeView(
+    for node: FlareUiNodeSnapshot,
+    resources: FlareAppleResources
+) -> UIView {
     switch node.kind {
     case .button:
         return makeFlareUIKitButtonView(
             payload: node.payload as! FlareButtonPayload,
-            children: node.children
+            children: node.children,
+            resources: resources
         )
     case .column:
         return makeFlareUIKitColumnView(
             payload: node.payload as! FlareColumnPayload,
-            children: node.children
+            children: node.children,
+            resources: resources
+        )
+    case .icon:
+        return makeFlareUIKitIconView(
+            payload: node.payload as! FlareIconPayload,
+            children: node.children,
+            resources: resources
         )
     case .row:
         return makeFlareUIKitRowView(
             payload: node.payload as! FlareRowPayload,
-            children: node.children
+            children: node.children,
+            resources: resources
         )
     case .text:
         return makeFlareUIKitTextView(
             payload: node.payload as! FlareTextPayload,
-            children: node.children
+            children: node.children,
+            resources: resources
         )
     default:
         return UIView()

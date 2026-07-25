@@ -38,7 +38,10 @@ private struct MacDemoRoot: View {
 private struct SwiftUIDemoScreen: View {
     var body: some View {
         ScrollView {
-            FlareSwiftUIHost(host: FlareUiAppleDemo.shared.createHost())
+            FlareSwiftUIHost(
+                host: FlareUiAppleDemo.shared.createHost(),
+                resources: .init(bundle: .main)
+            )
                 .padding(24)
                 .frame(
                     maxWidth: .infinity,
@@ -65,7 +68,10 @@ private struct AppKitDemoScreen: View {
 
 private struct FlareAppKitDemo: NSViewRepresentable {
     func makeNSView(context: Context) -> FlareAppKitHostView {
-        FlareAppKitHostView(host: FlareUiAppleDemo.shared.createHost())
+        FlareAppKitHostView(
+            host: FlareUiAppleDemo.shared.createHost(),
+            resources: .init(bundle: .main)
+        )
     }
 
     func updateNSView(

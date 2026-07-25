@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="details">状態、イベント、文字列、SVG は利用側のモジュールで定義されています。</string>
+    <string name="hide_details">詳細を隠す</string>
+    <string name="logo_description">Flare UI リソースアイコン</string>
+    <string name="reset">リセット</string>
+    <string name="show_details">詳細を表示</string>
+    <string name="subtitle">1つの定義、5つのネイティブレンダラー</string>
+    <string name="title">Flare UI</string>
+</resources>

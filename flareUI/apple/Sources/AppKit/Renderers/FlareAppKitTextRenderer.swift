@@ -3,7 +3,10 @@ import AppKit
 
 func makeFlareAppKitTextView(
     payload: FlareTextPayload,
-    children: [FlareUiNodeSnapshot]
+    children: [FlareUiNodeSnapshot],
+    resources: FlareAppleResources
 ) -> NSView {
-    NSTextField(wrappingLabelWithString: payload.value)
+    NSTextField(
+        wrappingLabelWithString: resources.string(payload.value)
+    )
 }

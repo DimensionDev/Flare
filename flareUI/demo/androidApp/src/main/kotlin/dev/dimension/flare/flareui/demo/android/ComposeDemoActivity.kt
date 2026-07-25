@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.flareui.compose.FlareComposeContent
 import dev.dimension.flare.flareui.demo.FlareUiDemo
+import dev.dimension.flare.flareui.demo.shared.resources.DemoAndroidResources
 
 public class ComposeDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,9 @@ public class ComposeDemoActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.padding(24.dp)) {
-                        FlareComposeContent {
+                        FlareComposeContent(
+                            resources = DemoAndroidResources,
+                        ) {
                             FlareUiDemo()
                         }
                     }

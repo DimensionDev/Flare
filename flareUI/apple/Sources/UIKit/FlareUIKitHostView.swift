@@ -5,10 +5,15 @@ import UIKit
 @MainActor
 public final class FlareUIKitHostView: UIView {
     private let host: FlareUiTreeHost
+    private let resources: FlareAppleResources
     private let rootStack = UIStackView()
 
-    public init(host: FlareUiTreeHost) {
+    public init(
+        host: FlareUiTreeHost,
+        resources: FlareAppleResources = .init(bundle: .main)
+    ) {
         self.host = host
+        self.resources = resources
         super.init(frame: .zero)
         configureRootStack()
         host.setOnTreeChanged { [weak self] nodes in
@@ -48,7 +53,10 @@ public final class FlareUIKitHostView: UIView {
         }
         for node in nodes {
             rootStack.addArrangedSubview(
-                makeFlareUIKitNodeView(for: node)
+                makeFlareUIKitNodeView(
+                    for: node,
+                    resources: resources
+                )
             )
         }
     }

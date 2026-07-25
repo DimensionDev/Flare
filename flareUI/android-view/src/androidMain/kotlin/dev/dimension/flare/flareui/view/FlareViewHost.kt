@@ -8,6 +8,8 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.BroadcastFrameClock
 import androidx.compose.runtime.Composition
 import androidx.compose.runtime.Recomposer
+import dev.dimension.flare.flareui.AndroidFlareResourceResolver
+import dev.dimension.flare.flareui.FlareText
 import dev.dimension.flare.flareui.FlareUiApplier
 import dev.dimension.flare.flareui.FlareUiContent
 import dev.dimension.flare.flareui.ProvideWidgetRegistry
@@ -28,13 +30,18 @@ public class FlareViewHost
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
+        private val resourceResolver: AndroidFlareResourceResolver =
+            AndroidFlareResourceResolver.None,
     ) : FrameLayout(context, attrs, defStyleAttr) {
         private var composition: Composition? = null
         private var recomposer: Recomposer? = null
         private var recomposerScope: CoroutineScope? = null
         private var content: FlareUiContent? = null
         private val widgetRegistry: WidgetRegistry by lazy {
-            androidViewWidgetRegistry(context)
+            androidViewWidgetRegistry(
+                context = context,
+                resources = resourceResolver,
+            )
         }
 
         public fun setContent(content: FlareUiContent) {
@@ -125,3 +132,14 @@ public class FlareViewHost
             }
         }
     }
+
+internal fun Context.resolveFlareText(
+    value: FlareText,
+    resources: AndroidFlareResourceResolver,
+): String =
+    value.literal
+        ?: getString(
+            resources.stringId(
+                requireNotNull(value.resource),
+            ),
+        )

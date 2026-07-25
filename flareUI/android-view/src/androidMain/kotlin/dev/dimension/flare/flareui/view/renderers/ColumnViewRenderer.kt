@@ -3,6 +3,7 @@ package dev.dimension.flare.flareui.view
 import android.content.Context
 import android.view.Gravity
 import android.widget.LinearLayout
+import dev.dimension.flare.flareui.AndroidFlareResourceResolver
 
 internal fun createColumnView(context: Context): AndroidViewNode =
     AndroidViewNode(
@@ -18,4 +19,5 @@ internal fun createColumnView(context: Context): AndroidViewNode =
 internal fun updateColumnView(
     node: AndroidViewNode,
     props: Unit,
+    resources: AndroidFlareResourceResolver,
 ): Unit = Unit

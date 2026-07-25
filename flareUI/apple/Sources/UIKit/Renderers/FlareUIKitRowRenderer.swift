@@ -3,11 +3,15 @@ import UIKit
 
 func makeFlareUIKitRowView(
     payload: FlareRowPayload,
-    children: [FlareUiNodeSnapshot]
+    children: [FlareUiNodeSnapshot],
+    resources: FlareAppleResources
 ) -> UIView {
     let stack = UIStackView(
         arrangedSubviews: children.map {
-            makeFlareUIKitNodeView(for: $0)
+            makeFlareUIKitNodeView(
+                for: $0,
+                resources: resources
+            )
         }
     )
     stack.axis = .horizontal

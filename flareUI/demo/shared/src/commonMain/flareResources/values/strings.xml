@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="details">The state, events, strings, and SVG live in the consuming module.</string>
+    <string name="hide_details">Hide details</string>
+    <string name="logo_description">Flare UI resource icon</string>
+    <string name="reset">Reset</string>
+    <string name="show_details">Show details</string>
+    <string name="subtitle">One definition, five native renderers</string>
+    <string name="title">Flare UI</string>
+</resources>

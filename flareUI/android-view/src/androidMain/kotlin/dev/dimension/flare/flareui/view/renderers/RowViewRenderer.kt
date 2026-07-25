@@ -3,6 +3,7 @@ package dev.dimension.flare.flareui.view
 import android.content.Context
 import android.view.Gravity
 import android.widget.LinearLayout
+import dev.dimension.flare.flareui.AndroidFlareResourceResolver
 
 internal fun createRowView(context: Context): AndroidViewNode =
     AndroidViewNode(
@@ -19,4 +20,5 @@ internal fun createRowView(context: Context): AndroidViewNode =
 internal fun updateRowView(
     node: AndroidViewNode,
     props: Unit,
+    resources: AndroidFlareResourceResolver,
 ): Unit = Unit

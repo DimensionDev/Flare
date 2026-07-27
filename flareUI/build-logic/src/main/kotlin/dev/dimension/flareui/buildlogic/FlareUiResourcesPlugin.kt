@@ -2,6 +2,7 @@ package dev.dimension.flareui.buildlogic
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.variant.KotlinMultiplatformAndroidComponentsExtension
+import com.android.ide.common.vectordrawable.Svg2Vector
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -19,7 +20,9 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.w3c.dom.Element
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.charset.StandardCharsets
 import javax.xml.parsers.DocumentBuilderFactory
 
 abstract class FlareUiResourcesExtension {
@@ -361,7 +364,7 @@ private fun writeAndroidResources(
     images.forEach { image ->
         drawableDirectory
             .resolve("${androidResourceName(namespace, image.nameWithoutExtension)}.xml")
-            .writeText(renderAndroidVector(image))
+            .writeText(convertSvgToAndroidVector(image))
     }
 
     val androidAccessorName =
@@ -514,88 +517,30 @@ $entries
         """.trimIndent() + "\n"
 }
 
-private fun renderAndroidVector(svg: File): String {
-    val root = parseXml(svg).documentElement
-    check(root.tagName == "svg") {
-        "$svg must have an <svg> root."
-    }
-    val viewBox =
-        root.getAttribute("viewBox")
-            .split(WHITESPACE)
-            .filter(String::isNotBlank)
-            .map(String::toDouble)
-    check(viewBox.size == 4 && viewBox[0] == 0.0 && viewBox[1] == 0.0) {
-        "$svg must use a four-value viewBox starting at 0 0."
-    }
-    val width = root.getAttribute("width").numericDimension("width", svg)
-    val height = root.getAttribute("height").numericDimension("height", svg)
-    val paths = mutableListOf<Element>()
-    collectSvgPaths(root, svg, paths)
-    check(paths.isNotEmpty()) {
-        "$svg must contain at least one <path>."
-    }
-
-    return buildString {
-        appendLine("""<?xml version="1.0" encoding="utf-8"?>""")
-        appendLine(
-            """<vector xmlns:android="http://schemas.android.com/apk/res/android"""",
-        )
-        appendLine("""    android:width="${width}dp"""")
-        appendLine("""    android:height="${height}dp"""")
-        appendLine("""    android:viewportWidth="${viewBox[2].compactNumber()}"""")
-        appendLine("""    android:viewportHeight="${viewBox[3].compactNumber()}">""")
-        paths.forEach { path ->
-            val pathData = path.getAttribute("d")
-            check(pathData.isNotBlank()) {
-                "$svg contains a path without data."
+internal fun convertSvgToAndroidVector(svg: File): String {
+    val source = svg.readText()
+    val converterInput =
+        if (CURRENT_COLOR in source) {
+            File.createTempFile("flareui-svg2vector-", ".svg").apply {
+                writeText(source.replace(CURRENT_COLOR, TEMPLATE_COLOR))
             }
-            val fill = path.getAttribute("fill").ifBlank { "#FF000000" }.androidColor()
-            val stroke = path.getAttribute("stroke").takeIf(String::isNotBlank)?.androidColor()
-            appendLine("    <path")
-            appendLine("""        android:pathData="${pathData.xmlEscaped()}"""")
-            if (fill != null) {
-                appendLine("""        android:fillColor="$fill"""")
-            }
-            if (stroke != null) {
-                appendLine("""        android:strokeColor="$stroke"""")
-                path.getAttribute("stroke-width")
-                    .takeIf(String::isNotBlank)
-                    ?.let { value ->
-                        appendLine("""        android:strokeWidth="$value"""")
-                    }
-            }
-            path.getAttribute("fill-rule")
-                .takeIf { value -> value == "evenodd" }
-                ?.let {
-                    appendLine("""        android:fillType="evenOdd"""")
-                }
-            appendLine("        />")
+        } else {
+            svg
         }
-        appendLine("</vector>")
-    }
-}
 
-private fun collectSvgPaths(
-    element: Element,
-    file: File,
-    paths: MutableList<Element>,
-) {
-    for (index in 0 until element.childNodes.length) {
-        val child = element.childNodes.item(index) as? Element ?: continue
-        when (child.tagName) {
-            "path" -> paths += child
-            "g" -> {
-                check(child.getAttribute("transform").isBlank()) {
-                    "$file contains a transformed group, which Android VectorDrawable generation does not support."
-                }
-                collectSvgPaths(child, file, paths)
+    return try {
+        val output = ByteArrayOutputStream()
+        val diagnostics =
+            output.use { stream ->
+                Svg2Vector.parseSvgToXml(converterInput.toPath(), stream)
             }
-            "title", "desc" -> Unit
-            else ->
-                error(
-                    "$file contains unsupported <${child.tagName}>. " +
-                        "Only svg, g, path, title, and desc are supported.",
-                )
+        check(diagnostics.isBlank()) {
+            "Unable to convert $svg to Android VectorDrawable:\n${diagnostics.trim()}"
+        }
+        output.toByteArray().toString(StandardCharsets.UTF_8)
+    } finally {
+        if (converterInput != svg) {
+            converterInput.delete()
         }
     }
 }
@@ -616,27 +561,6 @@ private fun DirectoryProperty.clean(): File =
 
 private fun File.packageDirectory(packageName: String): File =
     resolve(packageName.replace('.', '/')).apply(File::mkdirs)
-
-private fun String.numericDimension(
-    name: String,
-    file: File,
-): String {
-    val value = removeSuffix("px")
-    check(value.toDoubleOrNull() != null) {
-        "$file must declare a numeric $name."
-    }
-    return value
-}
-
-private fun String.androidColor(): String? =
-    when (this) {
-        "none" -> null
-        "currentColor" -> "#FF000000"
-        else -> this
-    }
-
-private fun Double.compactNumber(): String =
-    if (this % 1.0 == 0.0) toLong().toString() else toString()
 
 private fun String.toAppleLocale(): String =
     if (startsWith("b+")) {
@@ -715,8 +639,9 @@ private fun String.jsonEscaped(): String =
     }
 
 private val RESOURCE_NAME = Regex("[a-z][a-z0-9_]*")
-private val WHITESPACE = Regex("\\s+")
 private val IDENTIFIER_SEPARATOR = Regex("[^A-Za-z0-9]+|_+")
+private const val CURRENT_COLOR = "currentColor"
+private const val TEMPLATE_COLOR = "#000000"
 private val KOTLIN_KEYWORDS =
     setOf(
         "as",

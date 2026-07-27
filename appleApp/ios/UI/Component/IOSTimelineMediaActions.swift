@@ -127,10 +127,13 @@ enum IOSTimelineMediaActions {
         post: UiTimelineV2.Post,
         media: any UiMedia
     ) -> String {
-        MediaFileNamePolicy.shared.statusMediaFileName(
+        let medias = Array(post.images)
+        let mediaIndex = medias.firstIndex { $0.url == media.url } ?? 0
+        return MediaFileNamePolicy.shared.statusMediaFileName(
             statusKey: post.statusKey.description(),
             userHandle: post.user?.handle.canonical ?? "unknown",
-            media: media
+            media: media,
+            mediaIndex: Int32(mediaIndex)
         )
     }
 

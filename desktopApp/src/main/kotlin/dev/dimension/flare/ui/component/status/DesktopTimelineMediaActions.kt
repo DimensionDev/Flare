@@ -111,4 +111,5 @@ private fun UiTimelineV2.Post.statusMediaFileName(media: UiMedia): String =
         statusKey = statusKey.toString(),
         userHandle = user?.handle?.canonical ?: "unknown",
         media = media,
+        mediaIndex = images.indexOf(media).coerceAtLeast(0),
     )

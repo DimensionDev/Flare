@@ -53,7 +53,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let aiTldrEnabled: Bool
         let showParents: Bool
         let parentKeys: [String]
+        let parentRenderHashes: [Int32]
         let quoteKeys: [String]
+        let quoteRenderHashes: [Int32]
         let appearance: StatusUIKitAppearance
 
         init(
@@ -85,7 +87,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             self.aiTldrEnabled = aiTldrEnabled
             self.showParents = showParents
             self.parentKeys = inlineParents.map { String(describing: $0.statusKey) }
+            self.parentRenderHashes = inlineParents.map { $0.renderHash }
             self.quoteKeys = quotes.map { String(describing: $0.statusKey) }
+            self.quoteRenderHashes = quotes.map { $0.renderHash }
             self.appearance = appearance
         }
     }

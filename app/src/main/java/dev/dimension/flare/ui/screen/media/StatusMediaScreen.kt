@@ -194,6 +194,12 @@ internal fun StatusMediaScreen(
                 statusKey = statusKey.toString(),
                 userHandle = status?.user?.handle?.canonical ?: "unknown",
                 media = media,
+                mediaIndex =
+                    state.medias
+                        .takeSuccess()
+                        ?.indexOf(media)
+                        ?.coerceAtLeast(0)
+                        ?: 0,
             )
         },
         fileNames = { medias ->

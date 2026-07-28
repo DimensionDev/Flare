@@ -436,10 +436,12 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
 
     private func fileName(for media: any UiMedia) -> String {
         if let statusKey = shareContext?.statusKey {
+            let mediaIndex = medias.firstIndex { $0.url == media.url } ?? 0
             return MediaFileNamePolicy.shared.statusMediaFileName(
                 statusKey: statusKey,
                 userHandle: shareContext?.userHandle ?? "unknown",
-                media: media
+                media: media,
+                mediaIndex: Int32(mediaIndex)
             )
         }
         return MediaFileNamePolicy.shared.rawMediaFileName(media: media)

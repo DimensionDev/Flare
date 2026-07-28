@@ -8,25 +8,29 @@ public object MediaFileNamePolicy {
         statusKey: String,
         userHandle: String,
         media: UiMedia,
-    ): String {
-        val key = sanitizeFileName(statusKey)
-        val handle = sanitizeFileName(userHandle)
-        val extension = extensionFromUrl(url = media.url, fallbackExtension = media.fallbackExtension)
-        return "${key}_$handle.$extension"
-    }
+        mediaIndex: Int,
+    ): String =
+        statusMediaBaseFileName(
+            statusKey = statusKey,
+            userHandle = userHandle,
+            media = media,
+        ).withIndexSuffix(
+            index = mediaIndex.coerceAtLeast(0) + 1,
+            width = 2,
+        )
 
     public fun statusMediaFileNames(
         statusKey: String,
         userHandle: String,
         medias: List<UiMedia>,
-    ): Map<String, UiMedia> {
-        val key = sanitizeFileName(statusKey)
-        val handle = sanitizeFileName(userHandle)
-        return indexedMediaFileNames(medias) { media ->
-            val extension = extensionFromUrl(url = media.url, fallbackExtension = media.fallbackExtension)
-            "${key}_$handle.$extension"
+    ): Map<String, UiMedia> =
+        indexedMediaFileNames(medias) { media ->
+            statusMediaBaseFileName(
+                statusKey = statusKey,
+                userHandle = userHandle,
+                media = media,
+            )
         }
-    }
 
     public fun rawMediaFileName(media: UiMedia): String {
         val path = media.url.cleanUrlPath()
@@ -144,6 +148,17 @@ public object MediaFileNamePolicy {
         val name = substringAfterLast("/").substringAfterLast("\\")
         val lastDotIndex = name.lastIndexOf('.')
         return lastDotIndex > 0 && lastDotIndex < name.length - 1
+    }
+
+    private fun statusMediaBaseFileName(
+        statusKey: String,
+        userHandle: String,
+        media: UiMedia,
+    ): String {
+        val key = sanitizeFileName(statusKey)
+        val handle = sanitizeFileName(userHandle)
+        val extension = extensionFromUrl(url = media.url, fallbackExtension = media.fallbackExtension)
+        return "${key}_$handle.$extension"
     }
 
     private fun indexedMediaFileNames(

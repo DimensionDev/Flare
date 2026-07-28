@@ -16,10 +16,11 @@ class MediaFileNamePolicyTest {
                 statusKey = "at://did:plc:4ifi6votp7ohf4qre6phovym/app.bsky.feed.post/3mh2lxk5wmc2b",
                 userHandle = "alice/bob:bsky.social",
                 media = media,
+                mediaIndex = 0,
             )
 
         assertEquals(
-            "at___did_plc_4ifi6votp7ohf4qre6phovym_app.bsky.feed.post_3mh2lxk5wmc2b_alice_bob_bsky.social.png",
+            "at___did_plc_4ifi6votp7ohf4qre6phovym_app.bsky.feed.post_3mh2lxk5wmc2b_alice_bob_bsky.social_01.png",
             fileName,
         )
     }
@@ -33,9 +34,37 @@ class MediaFileNamePolicyTest {
                 statusKey = "post123",
                 userHandle = "alice",
                 media = media,
+                mediaIndex = 1,
             )
 
-        assertEquals("post123_alice.jpeg", fileName)
+        assertEquals("post123_alice_02.jpeg", fileName)
+    }
+
+    @Test
+    fun statusMediaFileNameDistinguishesImagesFromTheSameStatus() {
+        val medias =
+            listOf(
+                UiMedia.Image(url = "https://pbs.twimg.com/media/first.jpg"),
+                UiMedia.Image(url = "https://pbs.twimg.com/media/second.jpg"),
+            )
+
+        val fileNames =
+            medias.mapIndexed { index, media ->
+                MediaFileNamePolicy.statusMediaFileName(
+                    statusKey = "tweet123",
+                    userHandle = "alice",
+                    media = media,
+                    mediaIndex = index,
+                )
+            }
+
+        assertEquals(
+            listOf(
+                "tweet123_alice_01.jpg",
+                "tweet123_alice_02.jpg",
+            ),
+            fileNames,
+        )
     }
 
     @Test

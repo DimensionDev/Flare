@@ -635,6 +635,7 @@ private fun presenter(
                         statusKey = statusKey.toString(),
                         userHandle = userHandle,
                         media = item,
+                        mediaIndex = status.images.indexOf(item).coerceAtLeast(0),
                     )
                 val targetFile =
                     DesktopSaveDialog.chooseFile(

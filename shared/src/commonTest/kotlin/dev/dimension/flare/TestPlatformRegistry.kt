@@ -99,7 +99,7 @@ private val testExtraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>> =
         accountResourceTimelineSpec(TimelineSpecIds.MISSKEY_CHANNEL, UiStrings.Channel, UiIcon.Channel),
         accountBasedTimelineSpec(TimelineSpecIds.BLUESKY_BOOKMARK, UiStrings.Bookmark, UiIcon.Bookmark),
         accountResourceTimelineSpec(TimelineSpecIds.BLUESKY_FEED, UiStrings.Feeds, UiIcon.Bluesky),
-        accountBasedTimelineSpec(TimelineSpecIds.XQT_FEATURED, UiStrings.Featured, UiIcon.Featured),
+        accountBasedTimelineSpec(TimelineSpecIds.XQT_FEATURED, UiStrings.ForYou, UiIcon.Featured),
         accountBasedTimelineSpec(TimelineSpecIds.XQT_BOOKMARK, UiStrings.Bookmark, UiIcon.Bookmark),
         accountBasedTimelineSpec(TimelineSpecIds.XQT_DEVICE_FOLLOW, UiStrings.List, UiIcon.List),
         accountBasedTimelineSpec(TimelineSpecIds.VVO_FAVORITE, UiStrings.Favourite, UiIcon.Favourite),

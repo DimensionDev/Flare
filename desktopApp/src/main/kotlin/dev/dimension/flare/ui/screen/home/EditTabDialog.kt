@@ -41,10 +41,12 @@ import dev.dimension.flare.home_tab_discover_title
 import dev.dimension.flare.home_tab_favorite_title
 import dev.dimension.flare.home_tab_featured_title
 import dev.dimension.flare.home_tab_feeds_title
+import dev.dimension.flare.home_tab_for_you_title
 import dev.dimension.flare.home_tab_home_title
 import dev.dimension.flare.home_tab_list_title
 import dev.dimension.flare.home_tab_me_title
 import dev.dimension.flare.home_tab_notifications_title
+import dev.dimension.flare.home_tab_popular_title
 import dev.dimension.flare.illustrations_title
 import dev.dimension.flare.liked_title
 import dev.dimension.flare.manga_title
@@ -236,6 +238,10 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.MastodonPublic -> Res.string.mastodon_tab_public_title
 
             UiStrings.Featured -> Res.string.home_tab_featured_title
+
+            UiStrings.ForYou -> Res.string.home_tab_for_you_title
+
+            UiStrings.Popular -> Res.string.home_tab_popular_title
 
             UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
 

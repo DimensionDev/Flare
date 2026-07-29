@@ -38,10 +38,12 @@ import dev.dimension.flare.compose.ui.home_tab_favorite_title
 import dev.dimension.flare.compose.ui.home_tab_featured_title
 import dev.dimension.flare.compose.ui.home_tab_feeds_title
 import dev.dimension.flare.compose.ui.home_tab_following_title
+import dev.dimension.flare.compose.ui.home_tab_for_you_title
 import dev.dimension.flare.compose.ui.home_tab_home_title
 import dev.dimension.flare.compose.ui.home_tab_list_title
 import dev.dimension.flare.compose.ui.home_tab_me_title
 import dev.dimension.flare.compose.ui.home_tab_notifications_title
+import dev.dimension.flare.compose.ui.home_tab_popular_title
 import dev.dimension.flare.compose.ui.illustrations_title
 import dev.dimension.flare.compose.ui.liked_title
 import dev.dimension.flare.compose.ui.login_button
@@ -302,6 +304,10 @@ internal val UiStrings.res: StringResource
             UiStrings.MastodonPublic -> Res.string.mastodon_tab_public_title
 
             UiStrings.Featured -> Res.string.home_tab_featured_title
+
+            UiStrings.ForYou -> Res.string.home_tab_for_you_title
+
+            UiStrings.Popular -> Res.string.home_tab_popular_title
 
             UiStrings.Bookmark -> Res.string.home_tab_bookmarks_title
 

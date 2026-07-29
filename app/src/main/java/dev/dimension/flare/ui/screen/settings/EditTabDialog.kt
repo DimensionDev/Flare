@@ -187,6 +187,10 @@ private val UiStrings.androidStringRes: Int
 
             UiStrings.Featured -> R.string.home_tab_featured_title
 
+            UiStrings.ForYou -> R.string.home_tab_for_you_title
+
+            UiStrings.Popular -> R.string.home_tab_popular_title
+
             UiStrings.Bookmark -> R.string.home_tab_bookmarks_title
 
             UiStrings.Favourite -> R.string.home_tab_favorite_title

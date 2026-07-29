@@ -508,6 +508,8 @@
     <string name="mastodon_tab_local_title">Local</string>
     <string name="mastodon_tab_public_title">Public</string>
     <string name="home_tab_featured_title">Featured</string>
+    <string name="home_tab_for_you_title">For You</string>
+    <string name="home_tab_popular_title">Popular</string>
     <string name="home_tab_bookmarks_title">Bookmarks</string>
     <string name="home_tab_favorite_title">Favorites</string>
     <string name="home_tab_following_title">Following</string>

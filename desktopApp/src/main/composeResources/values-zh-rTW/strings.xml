@@ -15,6 +15,8 @@
     <string name="mastodon_tab_local_title">本站</string>
     <string name="mastodon_tab_public_title">跨站</string>
     <string name="home_tab_featured_title">精選</string>
+    <string name="home_tab_for_you_title">為你推薦</string>
+    <string name="home_tab_popular_title">熱門</string>
     <string name="home_tab_bookmarks_title">書籤</string>
     <string name="home_tab_favorite_title">最愛</string>
     <string name="home_tab_list_title">列表</string>

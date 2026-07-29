@@ -18,8 +18,9 @@ import kotlinx.serialization.Serializable
 internal class HomeTimelineRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
+    private val enableRanking: Boolean = false,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "home_$accountKey"
+    override val pagingKey: String = if (enableRanking) "popular_$accountKey" else "home_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
@@ -32,6 +33,7 @@ internal class HomeTimelineRemoteMediator(
                         variables =
                             HomeTimelineRequest(
                                 count = pageSize.toLong(),
+                                enableRanking = enableRanking,
                             ).encodeJson(),
                     )
                 }
@@ -47,6 +49,7 @@ internal class HomeTimelineRemoteMediator(
                         variables =
                             HomeTimelineRequest(
                                 count = pageSize.toLong(),
+                                enableRanking = enableRanking,
                                 cursor = request.nextKey,
                             ).encodeJson(),
                     )
@@ -184,6 +187,7 @@ internal class BookmarkTimelineRemoteMediator(
 internal data class HomeTimelineRequest(
     @Required
     val count: Long? = null,
+    val enableRanking: Boolean = false,
     val cursor: String? = null,
     @Required
     val includePromotedContent: Boolean = true,

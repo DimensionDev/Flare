@@ -6,13 +6,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlareUIDemo">
         <activity
-            android:name=".ViewDemoActivity"
+            android:name=".AndroidViewDemoActivity"
             android:exported="false"
-            android:label="Android Views" />
+            android:label="Android View" />
         <activity
             android:name=".ComposeDemoActivity"
             android:exported="false"
-            android:label="Compose UI" />
+            android:label="Jetpack Compose" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

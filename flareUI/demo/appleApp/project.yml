@@ -6,7 +6,6 @@ options:
   defaultConfig: Debug
   deploymentTarget:
     iOS: "17.0"
-    macOS: "14.0"
 
 configs:
   Debug: debug
@@ -17,123 +16,56 @@ settings:
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: NO
     "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
-    "EXCLUDED_ARCHS[sdk=macosx*]": x86_64
     SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
     SWIFT_VERSION: "6.0"
 
 packages:
-  FlareUI:
-    path: ../../apple
+  FlareUIApple:
+    path: ../..
 
-targetTemplates:
-  FlareUIDemoApp:
+targets:
+  iOSDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/iOS
+    dependencies:
+      - package: FlareUIApple
+        product: FlareUISwiftUI
+      - package: FlareUIApple
+        product: FlareUIFoundationSwiftUI
+      - package: FlareUIApple
+        product: FlareUIBadgeSwiftUI
     settings:
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: ""
         FRAMEWORK_SEARCH_PATHS:
           - "$(inherited)"
-          - "$(SRCROOT)/../apple-framework/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+          - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
         GENERATE_INFOPLIST_FILE: YES
-        OTHER_LDFLAGS: "$(inherited) -framework FlareUIDemoKit"
-
-targets:
-  FlareUIDemoKotlinBridge:
-    type: framework.static
-    platform: auto
-    supportedDestinations: [iOS, macOS]
-    sources:
-      - path: ../../apple/Sources/KotlinBridge
-    dependencies:
-      - package: FlareUI
-        product: FlareUIRuntime
-    preBuildScripts:
-      - name: Compile Kotlin
-        basedOnDependencyAnalysis: false
-        script: |
-          cd "$SRCROOT/../../.."
-          export ARCHS=arm64
-          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
-            ./gradlew -p flareUI "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :demo:apple-framework:embedAndSignAppleFrameworkForXcode
-          else
-            ./gradlew -p flareUI :demo:apple-framework:embedAndSignAppleFrameworkForXcode
-          fi
-    settings:
-      base:
-        FRAMEWORK_SEARCH_PATHS:
-          - "$(inherited)"
-          - "$(SRCROOT)/../apple-framework/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
-        GENERATE_INFOPLIST_FILE: YES
-        OTHER_SWIFT_FLAGS: "$(inherited) -module-alias FlareUIKotlinRuntime=FlareUIDemoKit"
-        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.kotlinbridge
-        PRODUCT_MODULE_NAME: FlareUIDemoKotlinBridge
-        PRODUCT_NAME: FlareUIDemoKotlinBridge
-
-  iOSDemo:
-    templates: [FlareUIDemoApp]
-    type: application
-    platform: iOS
-    sources:
-      - path: Sources/iOS
-      - path: ../shared/build/generated/flareui/resources/apple/demo.xcstrings
-        buildPhase: resources
-      - path: ../shared/build/generated/flareui/resources/apple/DemoResources.xcassets
-        buildPhase: resources
-    dependencies:
-      - package: FlareUI
-        product: FlareUISwiftUI
-      - package: FlareUI
-        product: FlareUIUIKit
-      - target: FlareUIDemoKotlinBridge
-        destinationFilters: [iOS]
-    settings:
-      base:
         INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        OTHER_LDFLAGS: "$(inherited) -framework FlareUI"
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.ios
         PRODUCT_NAME: Flare UI Demo
         TARGETED_DEVICE_FAMILY: "1,2"
 
-  macOSDemo:
-    templates: [FlareUIDemoApp]
-    type: application
-    platform: macOS
-    sources:
-      - path: Sources/macOS
-      - path: ../shared/build/generated/flareui/resources/apple/demo.xcstrings
-        buildPhase: resources
-      - path: ../shared/build/generated/flareui/resources/apple/DemoResources.xcassets
-        buildPhase: resources
-    dependencies:
-      - package: FlareUI
-        product: FlareUISwiftUI
-      - package: FlareUI
-        product: FlareUIAppKit
-      - target: FlareUIDemoKotlinBridge
-        destinationFilters: [macOS]
-    settings:
-      base:
-        INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
-        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.macos
-        PRODUCT_NAME: Flare UI Demo
-
 schemes:
   FlareUIDemo-iOS:
     build:
+      preActions:
+        - name: Compile Kotlin
+          settingsTarget: iOSDemo
+          script: |
+            cd "$SRCROOT/../../.."
+            export ARCHS=arm64
+            if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+              ./gradlew -p flareUI "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :demo:shared:embedAndSignAppleFrameworkForXcode
+            else
+              ./gradlew -p flareUI :demo:shared:embedAndSignAppleFrameworkForXcode
+            fi
       targets:
         iOSDemo: all
-    run:
-      config: Debug
-    profile:
-      config: Release
-    analyze:
-      config: Debug
-    archive:
-      config: Release
-
-  FlareUIDemo-macOS:
-    build:
-      targets:
-        macOSDemo: all
     run:
       config: Debug
     profile:

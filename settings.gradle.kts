@@ -1,8 +1,5 @@
 pluginManagement {
     includeBuild("build-logic")
-    includeBuild("flareUI/build-logic") {
-        name = "flare-ui-build-logic"
-    }
     repositories {
         google()
         mavenCentral()

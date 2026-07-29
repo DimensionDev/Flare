@@ -49,8 +49,6 @@ settings:
       VALIDATE_PRODUCT: YES
 
 packages:
-  FlareUI:
-    path: ../flareUI/apple
   ChatLayout:
     url: https://github.com/ekazaev/ChatLayout
     exactVersion: 2.4.2
@@ -175,10 +173,6 @@ targets:
         destinationFilters: [iOS]
       - target: FlareAppleUI
         destinationFilters: [iOS]
-      - package: FlareUI
-        product: FlareUISwiftUI
-      - target: FlareUIKotlinBridge
-        destinationFilters: [iOS]
       - target: FlareAppleResource
         embed: true
         link: false
@@ -271,10 +265,6 @@ targets:
       - target: FlareAppleCore
         destinationFilters: [macOS]
       - target: FlareAppleUI
-        destinationFilters: [macOS]
-      - package: FlareUI
-        product: FlareUISwiftUI
-      - target: FlareUIKotlinBridge
         destinationFilters: [macOS]
       - target: FlareAppleResource
         embed: true
@@ -400,38 +390,6 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         OTHER_LDFLAGS: "$(inherited) -lsqlite3"
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleui
-
-  FlareUIKotlinBridge:
-    type: framework.static
-    platform: auto
-    supportedDestinations: [iOS, macOS]
-    sources:
-      - path: ../flareUI/apple/Sources/KotlinBridge
-    dependencies:
-      - package: FlareUI
-        product: FlareUIRuntime
-    preBuildScripts:
-      - name: Compile Kotlin
-        basedOnDependencyAnalysis: false
-        script: |
-          cd "$SRCROOT/.."
-          if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
-            ./gradlew "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :apple-shared:embedAndSignAppleFrameworkForXcode
-          else
-            ./gradlew :apple-shared:embedAndSignAppleFrameworkForXcode
-          fi
-    settings:
-      base:
-        CLANG_ENABLE_MODULE_VERIFIER: YES
-        DEAD_CODE_STRIPPING: YES
-        FRAMEWORK_SEARCH_PATHS:
-          - "$(inherited)"
-          - "$(SRCROOT)/../apple-shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
-        GENERATE_INFOPLIST_FILE: YES
-        OTHER_SWIFT_FLAGS: "$(inherited) -module-alias FlareUIKotlinRuntime=KotlinSharedUI"
-        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.kotlinbridge
-        PRODUCT_MODULE_NAME: FlareUIKotlinBridge
-        PRODUCT_NAME: FlareUIKotlinBridge
 
 schemes:
   iOS:

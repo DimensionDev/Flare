@@ -1,30 +1,37 @@
-import dev.dimension.flareui.buildlogic.flareUiApplication
+import org.gradle.api.JavaVersion
 
 plugins {
-    id("dev.dimension.flareui.android-application")
-    alias(libs.plugins.compose.compiler)
-}
-
-flareUiApplication {
-    namespace = "dev.dimension.flare.flareui.demo.android"
-    applicationId = "dev.dimension.flare.flareui.demo"
+    alias(libs.plugins.android.application)
 }
 
 android {
+    namespace = "dev.dimension.flare.flareui.demo.android"
+    compileSdk {
+        version = release(libs.versions.compileSdk.get().toInt()) {
+            minorApiLevel = 0
+        }
+    }
     defaultConfig {
+        applicationId = "dev.dimension.flare.flareui.demo"
+        minSdk {
+            version = release(libs.versions.minSdk.get().toInt())
+        }
+        targetSdk {
+            version = release(libs.versions.compileSdk.get().toInt())
+        }
         versionCode = 1
         versionName = "1.0"
+    }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
     }
 }
 
 dependencies {
     implementation(project(":demo:shared"))
-    implementation(project(":android-compose"))
-    implementation(project(":android-view"))
-    implementation(libs.activity.compose)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.material3)
-    implementation(libs.material.components)
+    implementation(libs.androidx.activity)
+    testImplementation(libs.junit)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

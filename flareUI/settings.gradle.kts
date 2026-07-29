@@ -16,13 +16,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "flare-ui"
 
-include(":core")
+include(":flare-runtime")
+project(":flare-runtime").projectDir = file("runtime")
 include(":codegen")
-include(":android-compose")
-include(":android-view")
-include(":apple-runtime")
-include(":demo:shared")
+include(":foundation")
+include(":plugins:badge")
+include(":benchmark:android")
+include(":benchmark:apple-shared")
 include(":demo:androidApp")
-include(":demo:apple-framework")
+include(":demo:shared")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

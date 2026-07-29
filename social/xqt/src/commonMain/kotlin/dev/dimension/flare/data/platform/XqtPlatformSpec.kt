@@ -69,13 +69,26 @@ public data object XqtPlatformSpec :
     internal val featuredTimelineSpec =
         TimelineSpec(
             id = TimelineSpecIds.XQT_FEATURED,
-            title = UiStrings.Featured,
+            title = UiStrings.ForYou,
             icon = UiIcon.Featured.asType(),
             serializer = TimelineSpec.AccountBasedData.serializer(),
             targetId = { it.accountKey.toString() },
             loaderFactory =
                 accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
                     featuredTimelineLoader()
+                },
+        )
+
+    internal val popularTimelineSpec =
+        TimelineSpec(
+            id = XQT_POPULAR_TIMELINE_SPEC_ID,
+            title = UiStrings.Popular,
+            icon = UiIcon.World.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            loaderFactory =
+                accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
+                    popularTimelineLoader()
                 },
         )
 
@@ -89,6 +102,19 @@ public data object XqtPlatformSpec :
             loaderFactory =
                 accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
                     bookmarkTimelineLoader()
+                },
+        )
+
+    internal val likedTimelineSpec =
+        TimelineSpec(
+            id = XQT_LIKED_TIMELINE_SPEC_ID,
+            title = UiStrings.Liked,
+            icon = UiIcon.Heart.asType(),
+            serializer = TimelineSpec.AccountBasedData.serializer(),
+            targetId = { it.accountKey.toString() },
+            loaderFactory =
+                accountLoader<XQTDataSource, TimelineSpec.AccountBasedData> {
+                    likedTimelineLoader()
                 },
         )
 
@@ -110,7 +136,9 @@ public data object XqtPlatformSpec :
             CommonTimelineSpecs.home,
             CommonTimelineSpecs.list,
             featuredTimelineSpec,
+            popularTimelineSpec,
             bookmarkTimelineSpec,
+            likedTimelineSpec,
             deviceFollowTimelineSpec,
         )
 
@@ -177,6 +205,9 @@ public data object XqtPlatformSpec :
 private data class XqtProfileDeepLink(
     val handle: String,
 )
+
+private const val XQT_POPULAR_TIMELINE_SPEC_ID = "xqt.popular"
+private const val XQT_LIKED_TIMELINE_SPEC_ID = "xqt.liked"
 
 @Serializable
 private data class XqtPostDeepLink(

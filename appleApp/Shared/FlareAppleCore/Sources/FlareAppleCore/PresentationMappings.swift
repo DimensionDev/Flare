@@ -53,6 +53,10 @@ public extension UiStrings {
             localizedPresentationString("mastodon_tab_public_title", fallback: "Public")
         case .featured:
             localizedPresentationString("home_tab_featured_title", fallback: "Featured")
+        case .forYou:
+            localizedPresentationString("home_tab_for_you_title", fallback: "For You")
+        case .popular:
+            localizedPresentationString("home_tab_popular_title", fallback: "Popular")
         case .bookmark:
             localizedPresentationString("home_tab_bookmarks_title", fallback: "Bookmarks")
         case .favourite:

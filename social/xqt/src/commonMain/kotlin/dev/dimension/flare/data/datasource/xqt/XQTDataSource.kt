@@ -326,11 +326,14 @@ internal class XQTDataSource(
                     icon = IconType.FavIcon(accountKey.host),
                     title = UiText.Raw("X"),
                 ),
-            XqtPlatformSpec.featuredTimelineSpec
-                .candidate(
-                    data = TimelineSpec.AccountBasedData(accountKey),
-                    icon = IconType.FavIcon(accountKey.host),
-                ),
+            XqtPlatformSpec.featuredTimelineSpec.candidate(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+            XqtPlatformSpec.popularTimelineSpec.candidate(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
         )
     }
 
@@ -344,7 +347,12 @@ internal class XQTDataSource(
                 data = TimelineSpec.AccountBasedData(accountKey),
                 icon = IconType.FavIcon(accountKey.host),
             ),
+            XqtPlatformSpec.popularTimelineSpec.candidate(
+                data = TimelineSpec.AccountBasedData(accountKey),
+                icon = IconType.FavIcon(accountKey.host),
+            ),
             XqtPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+            XqtPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
             XqtPlatformSpec.deviceFollowTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
         )
     }
@@ -352,11 +360,19 @@ internal class XQTDataSource(
     override val shortcuts by lazy {
         persistentListOf(
             ShortcutSpec(
-                title = UiStrings.Featured,
+                title = UiStrings.ForYou,
                 icon = UiIcon.Featured,
                 target =
                     ShortcutSpec.Target.Timeline(
                         XqtPlatformSpec.featuredTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Popular,
+                icon = UiIcon.World,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        XqtPlatformSpec.popularTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -365,6 +381,14 @@ internal class XQTDataSource(
                 target =
                     ShortcutSpec.Target.Timeline(
                         XqtPlatformSpec.bookmarkTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
+                    ),
+            ),
+            ShortcutSpec(
+                title = UiStrings.Liked,
+                icon = UiIcon.Heart,
+                target =
+                    ShortcutSpec.Target.Timeline(
+                        XqtPlatformSpec.likedTimelineSpec.candidate(TimelineSpec.AccountBasedData(accountKey)),
                     ),
             ),
             ShortcutSpec(
@@ -405,10 +429,24 @@ internal class XQTDataSource(
             accountKey,
         )
 
+    fun popularTimelineLoader() =
+        HomeTimelineRemoteMediator(
+            service,
+            accountKey,
+            enableRanking = true,
+        )
+
     fun bookmarkTimelineLoader() =
         BookmarkTimelineRemoteMediator(
             service,
             accountKey,
+        )
+
+    fun likedTimelineLoader() =
+        UserLikesTimelineRemoteMediator(
+            userKey = accountKey,
+            service = service,
+            accountKey = accountKey,
         )
 
     fun deviceFollowTimelineLoader() =

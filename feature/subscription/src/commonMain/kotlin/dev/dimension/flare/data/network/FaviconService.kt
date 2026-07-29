@@ -20,52 +20,62 @@ internal object FaviconService {
             tryRun {
                 client.get(actualUrl).bodyAsText()
             }.getOrNull() ?: return null
-        val parsedUrl = Url(actualUrl)
-        val document = Ksoup.parse(webContent)
-        val icons =
-            document
-                .select(
-                    """
-                    link[rel~=(?i)(?:^|\s)(?:icon|apple-touch-icon(?:-precomposed)?|mask-icon)(?:\s|$)],
-                    link[rel~=(?i)^(?=.*\bshortcut\b)(?=.*\bicon\b).*$]
-                    """.trimIndent(),
-                )
-        val iconLink =
-            icons.maxByOrNull {
-                it
-                    .attribute("sizes")
-                    ?.value
-                    ?.split('x')
-                    ?.firstOrNull()
-                    ?.toIntOrNull() ?: 0
-            }
-        if (iconLink == null) {
-            val favIcon = "https://${parsedUrl.host}/favicon.ico"
-            val hasFavIcon =
-                tryRun {
-                    val response = client.get(favIcon)
-                    if (response.status.value !in 200..299) {
-                        throw Exception("Failed to fetch favicon: ${response.status}")
-                    }
-                }
-            return if (hasFavIcon.isSuccess) {
-                favIcon
-            } else {
-                null
-            }
+        findFaviconUrl(actualUrl, webContent)?.let {
+            return it
         }
-
-        val iconHref = iconLink.attr("href").ifBlank { return null }
-        return if (iconHref.startsWith("http")) {
-            iconHref
-        } else if (iconHref.startsWith("/")) {
-            if (iconHref.startsWith("//")) {
-                "https:$iconHref"
-            } else {
-                "https://${parsedUrl.host}$iconHref"
+        val parsedUrl = Url(actualUrl)
+        val favIcon = "https://${parsedUrl.host}/favicon.ico"
+        val hasFavIcon =
+            tryRun {
+                val response = client.get(favIcon)
+                if (response.status.value !in 200..299) {
+                    throw Exception("Failed to fetch favicon: ${response.status}")
+                }
             }
+        return if (hasFavIcon.isSuccess) {
+            favIcon
         } else {
-            "https://${parsedUrl.host}/$iconHref"
+            null
         }
     }
 }
+
+internal fun findFaviconUrl(
+    pageUrl: String,
+    webContent: String,
+): String? {
+    val parsedUrl = Url(pageUrl)
+    val document = Ksoup.parse(webContent)
+    val iconLink =
+        document
+            .select(
+                """
+                link[rel~=(?i)(?:^|\s)icon(?:\s|$)],
+                link[rel~=(?i)^(?=.*\bshortcut\b)(?=.*\bicon\b).*$]
+                """.trimIndent(),
+            ).largestIcon()
+            ?: document
+                .select(
+                    """
+                    link[rel~=(?i)(?:^|\s)(?:apple-touch-icon(?:-precomposed)?|mask-icon)(?:\s|$)]
+                    """.trimIndent(),
+                ).largestIcon()
+            ?: return null
+    val iconHref = iconLink.attr("href").ifBlank { return null }
+    return when {
+        iconHref.startsWith("http", ignoreCase = true) -> iconHref
+        iconHref.startsWith("//") -> "https:$iconHref"
+        iconHref.startsWith("/") -> "https://${parsedUrl.host}$iconHref"
+        else -> "https://${parsedUrl.host}/$iconHref"
+    }
+}
+
+private fun com.fleeksoft.ksoup.select.Elements.largestIcon() =
+    maxByOrNull {
+        it
+            .attribute("sizes")
+            ?.value
+            ?.split('x')
+            ?.firstOrNull()
+            ?.toIntOrNull() ?: 0
+    }

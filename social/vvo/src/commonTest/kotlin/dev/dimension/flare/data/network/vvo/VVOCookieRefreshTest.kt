@@ -18,6 +18,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
@@ -299,6 +301,7 @@ class VVOCookieRefreshTest {
             val refreshedCookie = "MLOGIN=1; SUB=new-sub"
             val credentialFlow = MutableStateFlow(VVoCredential(chocolate = oldCookie))
             val bothLoggedOutReached = CompletableDeferred<Unit>()
+            val requestStateMutex = Mutex()
             var oldConfigCalls = 0
             var refreshCalls = 0
             val refreshCookies = mutableListOf<String?>()
@@ -315,26 +318,36 @@ class VVOCookieRefreshTest {
                         mockHttpClientFactory { request ->
                             when (request.url.encodedPath) {
                                 "/" -> {
-                                    refreshCalls += 1
-                                    refreshCookies += request.headers[HttpHeaders.Cookie]
-                                    when (refreshCalls) {
+                                    val refreshCallIndex =
+                                        requestStateMutex.withLock {
+                                            refreshCookies += request.headers[HttpHeaders.Cookie]
+                                            ++refreshCalls
+                                        }
+                                    when (refreshCallIndex) {
                                         1 -> {
                                             setCookieResponse("SUB=new-sub; Path=/; Domain=.weibo.cn; HttpOnly")
                                         }
 
                                         else -> {
-                                            error("Unexpected refresh call count: $refreshCalls")
+                                            error("Unexpected refresh call count: $refreshCallIndex")
                                         }
                                     }
                                 }
 
                                 "/api/config" -> {
                                     val cookie = request.headers[HttpHeaders.Cookie]
-                                    configCookies += cookie
+                                    val oldConfigCallIndex =
+                                        requestStateMutex.withLock {
+                                            configCookies += cookie
+                                            if (cookie == oldCookie) {
+                                                ++oldConfigCalls
+                                            } else {
+                                                null
+                                            }
+                                        }
                                     when (cookie) {
                                         oldCookie -> {
-                                            val callIndex = ++oldConfigCalls
-                                            when (callIndex) {
+                                            when (oldConfigCallIndex) {
                                                 1 -> {
                                                     withTimeout(5_000) {
                                                         bothLoggedOutReached.await()
@@ -346,7 +359,7 @@ class VVOCookieRefreshTest {
                                                 }
 
                                                 else -> {
-                                                    error("Unexpected old config call count: $callIndex")
+                                                    error("Unexpected old config call count: $oldConfigCallIndex")
                                                 }
                                             }
                                             configResponse(login = false)

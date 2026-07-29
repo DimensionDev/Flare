@@ -25,6 +25,7 @@ build/
 */Flare.xcworkspace/*
 */Flare.xcodeproj/*
 /flareUI/demo/appleApp/FlareUIDemo.xcodeproj/
+/flareUI/benchmark/apple/FlareUIAppleBenchmark.xcodeproj/
 shared/shared.podspec
 .kotlin
 .history

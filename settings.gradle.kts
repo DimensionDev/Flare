@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Flare"
+includeBuild("flareUI")
 include(":app")
 include(":shared")
 include(":social:bluesky")

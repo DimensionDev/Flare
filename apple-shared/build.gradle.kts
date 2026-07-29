@@ -51,7 +51,6 @@ kotlin {
                 commonExportedProjects.forEach { exportedProject ->
                     export(exportedProject)
                 }
-
                 if (appleTarget.name.startsWith("ios")) {
                     export(projects.social.nostr)
                 }

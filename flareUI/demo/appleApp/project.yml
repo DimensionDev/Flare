@@ -1,0 +1,76 @@
+name: FlareUIDemo
+
+options:
+  minimumXcodeGenVersion: 2.45.4
+  developmentLanguage: en
+  defaultConfig: Debug
+  deploymentTarget:
+    iOS: "17.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_VERSION: "6.0"
+
+packages:
+  FlareUIApple:
+    path: ../..
+
+targets:
+  iOSDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/iOS
+    dependencies:
+      - package: FlareUIApple
+        product: FlareUISwiftUI
+      - package: FlareUIApple
+        product: FlareUIFoundationSwiftUI
+      - package: FlareUIApple
+        product: FlareUIBadgeSwiftUI
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        OTHER_LDFLAGS: "$(inherited) -framework FlareUI"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.ios
+        PRODUCT_NAME: Flare UI Demo
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+schemes:
+  FlareUIDemo-iOS:
+    build:
+      preActions:
+        - name: Compile Kotlin
+          settingsTarget: iOSDemo
+          script: |
+            cd "$SRCROOT/../../.."
+            export ARCHS=arm64
+            if [ -n "${GRADLE_JVM_ARGS:-}" ]; then
+              ./gradlew -p flareUI "-Dorg.gradle.jvmargs=$GRADLE_JVM_ARGS" :demo:shared:embedAndSignAppleFrameworkForXcode
+            else
+              ./gradlew -p flareUI :demo:shared:embedAndSignAppleFrameworkForXcode
+            fi
+      targets:
+        iOSDemo: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

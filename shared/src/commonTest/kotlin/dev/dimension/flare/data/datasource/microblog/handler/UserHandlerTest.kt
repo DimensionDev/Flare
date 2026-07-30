@@ -35,6 +35,7 @@ import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.deleteTestRootPath
+import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -56,7 +57,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest

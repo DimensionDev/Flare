@@ -1,9 +1,8 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
@@ -12,9 +11,7 @@ import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -29,13 +26,7 @@ class NostrRichTextParserTest {
     @BeforeTest
     fun setUp() {
         stopKoin()
-        startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
-        }
+        startKoin()
     }
 
     @AfterTest

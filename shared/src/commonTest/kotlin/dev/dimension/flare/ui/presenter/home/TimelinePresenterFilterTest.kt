@@ -5,6 +5,7 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.KeywordFilterPattern
+import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
@@ -14,7 +15,6 @@ import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.createSampleUser
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest

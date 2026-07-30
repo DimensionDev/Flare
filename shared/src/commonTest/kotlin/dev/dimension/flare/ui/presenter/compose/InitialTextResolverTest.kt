@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.compose
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -15,7 +16,6 @@ import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest

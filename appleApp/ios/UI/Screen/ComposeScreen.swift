@@ -74,20 +74,29 @@ struct ComposeScreen: View {
                         Divider()
                     }
                     
-                    TextField(text: $viewModel.text, axis: .vertical) {
-                        Text("compose_placeholder")
-                    }
-                    .textInputAutocapitalization(.sentences)
-                    .keyboardType(.twitter)
-                    .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18, .v26, .v27)) { textField in
-                        self.uiTextView = textField
-                        applyCursorIfPossible()
-                    }
-                    .textFieldStyle(.plain)
-                    .focused($keyboardFocused)
-                    .onAppear {
-                        requestDefaultFocus()
-                    }
+                    TextEditor(text: $viewModel.text)
+                        .font(.body)
+                        .scrollContentBackground(.hidden)
+                        .textInputAutocapitalization(.sentences)
+                        .keyboardType(.twitter)
+                        .introspect(.textEditor, on: .iOS(.v16, .v17, .v18, .v26, .v27)) { textView in
+                            self.uiTextView = textView
+                            applyCursorIfPossible()
+                        }
+                        .frame(minHeight: 120)
+                        .focused($keyboardFocused)
+                        .overlay(alignment: .topLeading) {
+                            if viewModel.text.isEmpty {
+                                Text("compose_placeholder")
+                                    .foregroundStyle(.tertiary)
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 8)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                        .onAppear {
+                            requestDefaultFocus()
+                        }
                     Spacer()
                     if mediaViewModel.items.count > 0 {
                         ScrollView(.horizontal) {

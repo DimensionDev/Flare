@@ -21,6 +21,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import sh.christian.ozone.BlueskyJson
@@ -105,6 +107,7 @@ class BlueskyAuthPluginTest {
                     ),
                 )
             val bothExpiredReachedMock = CompletableDeferred<Unit>()
+            val expiredCallsMutex = Mutex()
             var expiredCalls = 0
             var refreshCalls = 0
 
@@ -141,7 +144,7 @@ class BlueskyAuthPluginTest {
                         else -> {
                             when (authorization) {
                                 "Bearer access-old" -> {
-                                    val callIndex = ++expiredCalls
+                                    val callIndex = expiredCallsMutex.withLock { ++expiredCalls }
                                     when (callIndex) {
                                         1 -> {
                                             // Park the first request inside the mock until the

@@ -2,11 +2,14 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
+import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformRuntimeData
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,12 +18,26 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.KSerializer
 import org.koin.core.annotation.Configuration
+import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.koin.dsl.KoinAppDeclaration
+import org.koin.plugin.module.dsl.startKoin as startKoinWithModules
+
+@KoinApplication(configurations = ["test"])
+internal class NostrTestKoinApplication
+
+internal fun startKoin(appDeclaration: KoinAppDeclaration? = null) = startKoinWithModules<NostrTestKoinApplication>(appDeclaration)
 
 @Module
-@Configuration
+@Configuration("test")
 internal class NostrTestKoinModule {
+    @Single
+    fun platformRuntimeData(): PlatformRuntimeData = PlatformRuntimeData(emptyList(), emptyList())
+
+    @Single
+    fun platformFormatter(): PlatformFormatter = TestFormatter()
+
     @Single
     fun coroutineScope(): CoroutineScope = CoroutineScope(Dispatchers.IO)
 

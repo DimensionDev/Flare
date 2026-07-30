@@ -2,8 +2,8 @@ package dev.dimension.flare.ui.presenter.home.rss
 
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
-import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
+import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -11,9 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -27,15 +25,7 @@ class ExportOPMLPresenterTest {
 
     @BeforeTest
     fun setup() {
-        subscriptionRepository = FakeSubscriptionRepository()
-
-        startKoin {
-            modules(
-                module {
-                    single<SubscriptionRepository> { subscriptionRepository }
-                },
-            )
-        }
+        subscriptionRepository = startKoin().koin.get()
     }
 
     @AfterTest

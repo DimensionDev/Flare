@@ -1,3 +1,5 @@
+import org.koin.compiler.plugin.KoinGradleExtension
+
 plugins {
     id("dev.dimension.flare.root-conventions")
     alias(libs.plugins.android.library) apply false
@@ -14,4 +16,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.nucleus) apply false
     alias(libs.plugins.koin.compiler) apply false
+}
+
+subprojects {
+    pluginManager.withPlugin("io.insert-koin.compiler.plugin") {
+        extensions.configure<KoinGradleExtension> {
+            logSeverity.set("info")
+            versionCheckSeverity.set("info")
+        }
+    }
 }

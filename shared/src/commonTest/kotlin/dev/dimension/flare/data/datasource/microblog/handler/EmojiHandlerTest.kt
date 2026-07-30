@@ -9,6 +9,8 @@ import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
+import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest
@@ -52,7 +53,7 @@ class EmojiHandlerTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
+                    testSingle { db }
                 },
             )
         }

@@ -10,6 +10,8 @@ import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -25,7 +27,6 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest
@@ -50,8 +51,8 @@ class LocalCacheRepositoryTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
-                    single<PlatformFormatter> { TestFormatter() }
+                    testSingle { db }
+                    testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )
         }

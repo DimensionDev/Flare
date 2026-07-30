@@ -1,19 +1,16 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrSignerCredential
+import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.test.runTest
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -28,13 +25,7 @@ class NostrServiceTest {
     @BeforeTest
     fun setUp() {
         stopKoin()
-        startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
-        }
+        startKoin()
     }
 
     @AfterTest

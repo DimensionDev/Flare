@@ -32,6 +32,8 @@ import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
+import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
@@ -46,7 +48,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import okio.FileSystem
 import okio.Path
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest
@@ -74,7 +75,7 @@ class SettingsImportExportPresenterTest {
         startKoin {
             modules(
                 module {
-                    single { settingsRepository }
+                    testSingle { settingsRepository }
                 },
             )
         }

@@ -36,6 +36,7 @@ import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -99,14 +100,14 @@ class UserHandlerTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
-                    single { appDataStore }
-                    single<CoroutineScope> { CoroutineScope(Dispatchers.Unconfined) }
-                    single<OnDeviceAI> { onDeviceAI }
-                    single { OpenAIService() }
-                    single { AiCompletionService(get(), get()) }
-                    single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
-                    single<PlatformFormatter> { TestFormatter() }
+                    testSingle { db }
+                    testSingle { appDataStore }
+                    testSingle<CoroutineScope> { CoroutineScope(Dispatchers.Unconfined) }
+                    testSingle<OnDeviceAI> { onDeviceAI }
+                    testSingle { OpenAIService() }
+                    testSingle { AiCompletionService(get(), get()) }
+                    testSingle<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
+                    testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )
         }

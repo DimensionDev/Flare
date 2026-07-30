@@ -6,6 +6,7 @@ import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.KeywordFilterPattern
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
@@ -30,7 +31,7 @@ class TimelinePresenterFilterTest {
         startKoin {
             modules(
                 module {
-                    single<PlatformFormatter> { TestFormatter() }
+                    testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )
         }

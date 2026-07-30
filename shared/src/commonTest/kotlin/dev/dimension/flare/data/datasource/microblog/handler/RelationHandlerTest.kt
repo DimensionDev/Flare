@@ -14,6 +14,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -74,8 +75,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }
@@ -108,8 +109,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }
@@ -137,8 +138,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }
@@ -167,8 +168,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }
@@ -197,8 +198,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }
@@ -219,9 +220,9 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -273,9 +274,9 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -330,9 +331,9 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -382,9 +383,9 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -425,8 +426,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }
@@ -454,8 +455,8 @@ class RelationHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
                     },
                 )
             }

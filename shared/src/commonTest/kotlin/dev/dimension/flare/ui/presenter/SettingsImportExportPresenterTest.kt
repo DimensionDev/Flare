@@ -33,6 +33,7 @@ import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.testPlatformRuntimeData
@@ -74,7 +75,7 @@ class SettingsImportExportPresenterTest {
         startKoin {
             modules(
                 module {
-                    single { settingsRepository }
+                    testSingle { settingsRepository }
                 },
             )
         }

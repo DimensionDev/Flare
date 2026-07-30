@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -59,8 +60,8 @@ class ListMemberHandlerTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
-                    single<PlatformFormatter> {
+                    testSingle { db }
+                    testSingle<PlatformFormatter> {
                         object : PlatformFormatter {
                             override fun formatNumber(number: Long) = number.toString()
 

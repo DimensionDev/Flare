@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -76,9 +77,9 @@ class PostEventHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -103,9 +104,9 @@ class PostEventHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -150,9 +151,9 @@ class PostEventHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -178,9 +179,9 @@ class PostEventHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }
@@ -226,9 +227,9 @@ class PostEventHandlerTest : RobolectricTest() {
             startKoin {
                 modules(
                     module {
-                        single { db }
-                        single<CoroutineScope> { this@runTest }
-                        single<PlatformFormatter> { TestFormatter() }
+                        testSingle { db }
+                        testSingle<CoroutineScope> { this@runTest }
+                        testSingle<PlatformFormatter> { TestFormatter() }
                     },
                 )
             }

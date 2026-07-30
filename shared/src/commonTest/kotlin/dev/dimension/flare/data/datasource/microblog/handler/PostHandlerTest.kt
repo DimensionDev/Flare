@@ -34,6 +34,7 @@ import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -123,14 +124,14 @@ class PostHandlerTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
-                    single { appDataStore }
-                    single<CoroutineScope> { detachedScope }
-                    single<OnDeviceAI> { onDeviceAI }
-                    single { OpenAIService() }
-                    single { AiCompletionService(get(), get()) }
-                    single<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
-                    single<PlatformFormatter> { TestFormatter() }
+                    testSingle { db }
+                    testSingle { appDataStore }
+                    testSingle<CoroutineScope> { detachedScope }
+                    testSingle<OnDeviceAI> { onDeviceAI }
+                    testSingle { OpenAIService() }
+                    testSingle { AiCompletionService(get(), get()) }
+                    testSingle<PreTranslationService> { OnlinePreTranslationService(get(), get(), get(), get()) }
+                    testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )
         }

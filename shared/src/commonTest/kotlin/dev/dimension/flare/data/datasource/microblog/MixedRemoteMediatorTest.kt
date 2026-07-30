@@ -42,6 +42,7 @@ import dev.dimension.flare.data.translation.aiPreTranslateConfig
 import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -100,7 +101,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single<PlatformFormatter> { TestFormatter() }
+                    testSingle<PlatformFormatter> { TestFormatter() }
                 },
             )
         }

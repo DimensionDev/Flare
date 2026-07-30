@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -44,7 +45,7 @@ class SerializationFormatBenchmarkAppleTest {
         startKoin {
             modules(
                 module {
-                    single<dev.dimension.flare.ui.humanizer.PlatformFormatter> { TestFormatter() }
+                    testSingle<dev.dimension.flare.ui.humanizer.PlatformFormatter> { TestFormatter() }
                 },
             )
         }

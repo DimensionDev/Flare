@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
@@ -52,7 +53,7 @@ class EmojiHandlerTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
+                    testSingle { db }
                 },
             )
         }

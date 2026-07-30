@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -54,7 +55,7 @@ class ListHandlerTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
+                    testSingle { db }
                 },
             )
         }

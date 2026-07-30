@@ -12,13 +12,18 @@ import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.koin.core.definition.Definition
 import org.koin.dsl.KoinAppDeclaration
+import org.koin.core.module.Module as KoinModule
 import org.koin.plugin.module.dsl.startKoin as startKoinWithModules
 
 @KoinApplication(configurations = ["test"])
 internal class SharedTestKoinApplication
 
 internal fun startKoin(appDeclaration: KoinAppDeclaration? = null) = startKoinWithModules<SharedTestKoinApplication>(appDeclaration)
+
+// Koin 1.1.0 emits duplicate Native DSL hints when test-local types are registered more than once.
+internal inline fun <reified T> KoinModule.testSingle(noinline definition: Definition<T>) = single(definition = definition)
 
 @Module
 @Configuration("test")

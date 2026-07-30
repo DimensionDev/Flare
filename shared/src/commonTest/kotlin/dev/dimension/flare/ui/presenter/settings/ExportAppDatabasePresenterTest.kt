@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.di.startKoin
+import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -47,7 +48,7 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
         startKoin {
             modules(
                 module {
-                    single { db }
+                    testSingle { db }
                 },
             )
         }

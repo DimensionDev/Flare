@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Lade till ett alternativ för korspublicering i menyn Dela, så att du snabbt kan publicera på flera plattformar.</li>
+                <li>Lade till översättningar från plattformen och ett alternativ för att visa originaltexten tillsammans med översättningen.</li>
+                <li>Lade till inställningar för uppdatering av hemtidslinjen och valfri MXGA-filtrering av X-inlägg.</li>
+                <li>Inställningen ”Sortera efter tid” för blandade tidslinjer har rättats, så att inlägg nu visas i sin faktiska kronologiska ordning.</li>
                 <li>Buggfixar och prestandaförbättringar.</li>
             </ul>
         ]]></string>

@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versio %1$s:</span>
             <ul>
-                <li>Jaa-valikkoon lisättiin ristijulkaisuvalinta, jolla julkaisun voi jakaa nopeasti eri alustoille.</li>
+                <li>Lisättiin alustan tarjoamat käännökset ja mahdollisuus näyttää alkuperäinen teksti käännöksen rinnalla.</li>
+                <li>Lisättiin kotiaikajanan päivitysasetukset ja valinnainen MXGA-suodatus X-julkaisuille.</li>
+                <li>Yhdistettyjen aikajanojen ”Lajittele ajan mukaan” -asetus on korjattu, ja julkaisut näkyvät nyt todellisessa aikajärjestyksessään.</li>
                 <li>Virhekorjauksia ja suorituskykyparannuksia.</li>
             </ul>
         ]]></string>

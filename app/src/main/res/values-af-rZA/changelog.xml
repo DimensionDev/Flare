@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Weergawe %1$s:</span>
             <ul>
-                <li>’n Kruisplasing-opsie is by die Deel-kieslys gevoeg, sodat jy vinnig tussen platforms kan plaas.</li>
+                <li>Platformverskafde vertalings en ’n opsie om die oorspronklike teks saam met die vertaling te wys, is bygevoeg.</li>
+                <li>Kontroles vir die verfrissing van die tuistydlyn en opsionele MXGA-filtrering vir X-plasings is bygevoeg.</li>
+                <li>Die “Sorteer volgens tyd”-instelling vir gemengde tydlyne is reggestel; plasings verskyn nou in hul werklike chronologiese volgorde.</li>
                 <li>Foutoplossings en prestasieverbeterings.</li>
             </ul>
         ]]></string>

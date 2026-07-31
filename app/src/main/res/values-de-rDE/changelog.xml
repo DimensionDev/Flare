@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Dem Teilen-Menü wurde eine Crossposting-Option hinzugefügt, mit der Beiträge schnell plattformübergreifend veröffentlicht werden können.</li>
+                <li>Übersetzungen der Plattform und eine Option, Originaltext und Übersetzung gemeinsam anzuzeigen, wurden hinzugefügt.</li>
+                <li>Einstellungen zum Aktualisieren der Start-Timeline und eine optionale MXGA-Filterung für X-Beiträge wurden hinzugefügt.</li>
+                <li>Die Einstellung „Nach Zeit sortieren“ für gemischte Timelines wurde korrigiert; Beiträge erscheinen jetzt in ihrer tatsächlichen chronologischen Reihenfolge.</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>

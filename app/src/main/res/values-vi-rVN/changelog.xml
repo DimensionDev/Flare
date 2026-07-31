@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Đã thêm tùy chọn đăng chéo vào menu Chia sẻ, giúp bạn nhanh chóng đăng lại trên các nền tảng khác.</li>
+                <li>Đã thêm bản dịch do nền tảng cung cấp và tùy chọn hiển thị văn bản gốc cùng bản dịch.</li>
+                <li>Đã thêm tùy chọn làm mới dòng thời gian chính và bộ lọc MXGA tùy chọn cho bài đăng X.</li>
+                <li>Đã sửa cài đặt “Sắp xếp theo thời gian” cho dòng thời gian hỗn hợp; bài đăng giờ hiển thị theo đúng thứ tự thời gian thực tế.</li>
                 <li>Sửa lỗi và cải thiện hiệu năng.</li>
             </ul>
         ]]></string>

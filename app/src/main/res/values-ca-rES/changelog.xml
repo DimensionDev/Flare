@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’ha afegit l’opció de publicació creuada al menú de compartir per publicar ràpidament entre plataformes.</li>
+                <li>S’han afegit traduccions proporcionades per la plataforma i una opció per mostrar el text original juntament amb la traducció.</li>
+                <li>S’han afegit controls d’actualització de la cronologia d’inici i el filtratge MXGA opcional per a les publicacions d’X.</li>
+                <li>S’ha corregit l’opció «Ordena per hora» de les cronologies mixtes; ara les publicacions apareixen en el seu ordre cronològic real.</li>
                 <li>Correccions d\'errors i millores de rendiment.</li>
             </ul>
         ]]></string>

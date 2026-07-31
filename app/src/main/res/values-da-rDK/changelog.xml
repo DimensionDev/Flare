@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Tilføjet en mulighed for krydspostering i menuen Del, så du hurtigt kan publicere på tværs af platforme.</li>
+                <li>Tilføjet oversættelser fra platformen og en mulighed for at vise originalteksten sammen med oversættelsen.</li>
+                <li>Tilføjet indstillinger for opdatering af hjemmetidslinjen og valgfri MXGA-filtrering af X-opslag.</li>
+                <li>Indstillingen “Sortér efter tid” for blandede tidslinjer er rettet, så opslag nu vises i deres faktiske kronologiske rækkefølge.</li>
                 <li>Fejlrettelser og forbedringer af ydeevnen.</li>
             </ul>
         ]]></string>

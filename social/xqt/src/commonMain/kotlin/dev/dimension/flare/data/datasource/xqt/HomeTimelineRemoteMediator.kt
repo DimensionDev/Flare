@@ -55,15 +55,13 @@ internal class HomeTimelineRemoteMediator(
                     )
                 }
             }.body()
-        val instructions =
+        val timeline =
             response
                 ?.data
                 ?.home
                 ?.homeTimelineUrt
-                ?.instructions
-                .orEmpty()
-        val cursor = instructions.cursor()
-        val tweet = instructions.tweets()
+        val cursor = timeline?.instructions.orEmpty().cursor()
+        val tweet = timeline?.tweets().orEmpty()
 
         return PagingResult(
             endOfPaginationReached = tweet.isEmpty(),
@@ -111,19 +109,17 @@ internal class FeaturedTimelineRemoteMediator(
                     )
                 }
             }.body()
-        val instructions =
+        val timeline =
             response
                 ?.data
                 ?.home
                 ?.homeTimelineUrt
-                ?.instructions
-                .orEmpty()
-        val tweet = instructions.tweets()
+        val tweet = timeline?.tweets().orEmpty()
 
         return PagingResult(
             endOfPaginationReached = tweet.isEmpty(),
             data = tweet.mapNotNull { it.render(accountKey) },
-            nextKey = instructions.cursor(),
+            nextKey = timeline?.instructions.orEmpty().cursor(),
         )
     }
 }
@@ -166,19 +162,17 @@ internal class BookmarkTimelineRemoteMediator(
                     )
                 }
             }.body()
-        val instructions =
+        val timeline =
             response
                 ?.data
                 ?.bookmarkTimelineV2
                 ?.timeline
-                ?.instructions
-                .orEmpty()
-        val tweet = instructions.tweets()
+        val tweet = timeline?.tweets().orEmpty()
 
         return PagingResult(
             endOfPaginationReached = tweet.isEmpty(),
             data = tweet.mapNotNull { it.render(accountKey) },
-            nextKey = instructions.cursor(),
+            nextKey = timeline?.instructions.orEmpty().cursor(),
         )
     }
 }

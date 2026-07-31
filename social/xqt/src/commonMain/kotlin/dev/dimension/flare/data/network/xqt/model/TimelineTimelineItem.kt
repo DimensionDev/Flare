@@ -39,6 +39,6 @@ internal data class TimelineTimelineItem(
     val itemContent: ItemContentUnion? = null,
     @SerialName(value = "clientEventInfo")
     val clientEventInfo: ClientEventInfo? = null,
-//    @Contextual @SerialName(value = "feedbackInfo")
-//    val feedbackInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @SerialName(value = "feedbackInfo")
+    val feedbackInfo: FeedbackInfo? = null,
 ) : ContentUnion

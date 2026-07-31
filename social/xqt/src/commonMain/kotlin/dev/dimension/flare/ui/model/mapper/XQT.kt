@@ -8,6 +8,7 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
@@ -19,6 +20,7 @@ import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
 import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
+import dev.dimension.flare.data.network.xqt.model.TimelineFeedbackActionValue
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTwitterList
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -75,6 +77,7 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
+import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -408,6 +411,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
                     ?.toTweetOrNull()
             }.map { it.renderStatus(accountKey = accountKey) }
             .toImmutableList()
+    val retweetTweet = retweetUnion?.toTweetOrNull()
 
     val currentTweet =
         result
@@ -416,13 +420,15 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
                 accountKey = accountKey,
                 parents = parentStatuses,
                 quote = quote,
+                notInterestedAction = notInterestedAction.takeIf { retweetTweet == null },
             ) ?: return null
     val retweet =
-        retweetUnion
-            ?.toTweetOrNull()
+        retweetTweet
             ?.renderStatus(
                 accountKey = accountKey,
                 quote = quote,
+                notInterestedAction = notInterestedAction,
+                notInterestedPostKey = currentTweet.statusKey,
             )
     val user = currentTweet.user
     val message =
@@ -471,10 +477,38 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
     }
 }
 
+private fun TimelineFeedbackActionValue.toNotInterestedMenuItem(
+    accountKey: MicroBlogKey,
+    statusKey: MicroBlogKey,
+): ActionMenu.Item? {
+    val url = feedbackUrl ?: return null
+    val metadata =
+        Url("https://x.com$url")
+            .parameters["action_metadata"]
+            ?.takeIf { it.isNotEmpty() }
+            ?: return null
+    val label = prompt?.takeIf { it.isNotBlank() } ?: return null
+    return ActionMenu.Item(
+        updateKey = "xqt_not_interested_${statusKey}_${metadata.hashCode()}",
+        icon = UiIcon.Report,
+        text = ActionMenu.Item.Text.Raw(label),
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.XQT.NotInterested(
+                    postKey = statusKey,
+                    actionMetadata = metadata,
+                ),
+            ),
+    )
+}
+
 internal fun Tweet.renderStatus(
     accountKey: MicroBlogKey,
     parents: List<UiTimelineV2.Post> = emptyList(),
     quote: UiTimelineV2.Post? = null,
+    notInterestedAction: TimelineFeedbackActionValue? = null,
+    notInterestedPostKey: MicroBlogKey? = null,
 ): UiTimelineV2.Post {
     val actualParents = parents.toImmutableList()
     val actualQuote = quote ?: quotedStatusResult?.result?.toTweetOrNull()?.renderStatus(accountKey = accountKey)
@@ -817,6 +851,14 @@ internal fun Tweet.renderStatus(
                         ),
                     actions =
                         buildList {
+                            notInterestedAction
+                                ?.toNotInterestedMenuItem(
+                                    accountKey = accountKey,
+                                    statusKey = notInterestedPostKey ?: statusKey,
+                                )?.let {
+                                    add(it)
+                                    add(ActionMenu.Divider)
+                                }
                             add(
                                 ActionMenu.xqtBookmark(
                                     statusKey = statusKey,

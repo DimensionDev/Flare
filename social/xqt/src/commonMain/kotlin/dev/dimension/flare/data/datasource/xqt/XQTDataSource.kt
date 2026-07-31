@@ -296,6 +296,18 @@ internal class XQTDataSource(
                     )
                 }
             }
+
+            is PostEvent.XQT.NotInterested -> {
+                val response =
+                    service.postTimelineFeedback(
+                        feedbackType = "DontLike",
+                        actionMetadata = event.actionMetadata,
+                    )
+                check(response.isSuccessful) {
+                    "X timeline feedback failed with HTTP ${response.code}"
+                }
+                updater.deleteFromCache(event.postKey)
+            }
         }
     }
 

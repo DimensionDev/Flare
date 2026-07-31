@@ -1,14 +1,17 @@
 package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.data.network.xqt.model.CursorType
+import dev.dimension.flare.data.network.xqt.model.FeedbackInfo
 import dev.dimension.flare.data.network.xqt.model.InboxConversation
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineEntry
 import dev.dimension.flare.data.network.xqt.model.InboxUser
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.ItemResult
+import dev.dimension.flare.data.network.xqt.model.Timeline
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntry
 import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
+import dev.dimension.flare.data.network.xqt.model.TimelineFeedbackActionValue
 import dev.dimension.flare.data.network.xqt.model.TimelinePinEntry
 import dev.dimension.flare.data.network.xqt.model.TimelineTerminateTimeline
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineCursor
@@ -214,9 +217,28 @@ internal data class XQTTimeline(
     val tweets: TimelineTweet,
     val id: String?,
     val sortedIndex: Long,
+    val notInterestedAction: TimelineFeedbackActionValue? = null,
 )
 
-internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQTTimeline> =
+internal fun Timeline.tweets(includePin: Boolean = true): List<XQTTimeline> =
+    instructions.tweets(
+        includePin = includePin,
+        feedbackActions =
+            responseObjects
+                ?.feedbackActions
+                .orEmpty()
+                .associate { it.key to it.value },
+    )
+
+private fun FeedbackInfo?.notInterestedAction(feedbackActions: Map<String, TimelineFeedbackActionValue>): TimelineFeedbackActionValue? =
+    this?.feedbackKeys?.firstNotNullOfOrNull { key ->
+        feedbackActions[key]?.takeIf { it.feedbackType == "DontLike" }
+    }
+
+internal fun List<InstructionUnion>.tweets(
+    includePin: Boolean = true,
+    feedbackActions: Map<String, TimelineFeedbackActionValue> = emptyMap(),
+): List<XQTTimeline> =
     flatMap { union ->
         when (union) {
             is TimelineAddEntries -> {
@@ -285,6 +307,10 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                     null -> null
                                 },
                             parents = emptyList(),
+                            notInterestedAction =
+                                entry.content.feedbackInfo.notInterestedAction(
+                                    feedbackActions,
+                                ),
                         )
                     } else {
                         null
@@ -297,10 +323,11 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                     listOf()
                 } else {
                     if (entry.content.items.size == 1) {
-                        val item =
+                        val moduleEntry =
                             entry.content.items
                                 .first()
-                                .item.itemContent
+                                .item
+                        val item = moduleEntry.itemContent
                         if (item is TimelineTweet) {
                             listOf(
                                 XQTTimeline(
@@ -321,6 +348,11 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                             null -> null
                                         },
                                     parents = emptyList(),
+                                    notInterestedAction =
+                                        (
+                                            moduleEntry.feedbackInfo
+                                                ?: entry.content.feedbackInfo
+                                        ).notInterestedAction(feedbackActions),
                                 ),
                             )
                         } else {
@@ -348,6 +380,11 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                                 null -> null
                                             },
                                         parents = emptyList(),
+                                        notInterestedAction =
+                                            (
+                                                it.item.feedbackInfo
+                                                    ?: entry.content.feedbackInfo
+                                            ).notInterestedAction(feedbackActions),
                                     )
                                 } else {
                                     null
@@ -399,6 +436,7 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
 
                                             null -> null
                                         },
+                                    notInterestedAction = item.notInterestedAction,
                                 )
                             }
                     }

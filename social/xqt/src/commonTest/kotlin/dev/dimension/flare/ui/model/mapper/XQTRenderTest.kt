@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.model.mapper
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.GrokTranslatedPost
 import dev.dimension.flare.data.network.xqt.model.GrokTranslatedPostWithAvailability
@@ -13,6 +15,7 @@ import dev.dimension.flare.data.network.xqt.model.MediaSize
 import dev.dimension.flare.data.network.xqt.model.MediaSizes
 import dev.dimension.flare.data.network.xqt.model.MediaVideoInfo
 import dev.dimension.flare.data.network.xqt.model.MediaVideoInfoVariant
+import dev.dimension.flare.data.network.xqt.model.TimelineFeedbackActionValue
 import dev.dimension.flare.data.network.xqt.model.TimelineTweet
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetLegacy
@@ -25,6 +28,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.postEventOrNull
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import org.koin.core.context.startKoin
@@ -343,15 +347,94 @@ class XQTRenderTest {
         }
     }
 
+    @Test
+    fun timelineFeedbackRendersNotInterestedMenuAction() {
+        val rendered =
+            rootPostOf(
+                createTimeline(
+                    tweet =
+                        createTweet(
+                            id = "status-feedback",
+                            user = createUser("user-feedback", "feedback_user"),
+                            text = "recommended post",
+                        ),
+                    notInterestedAction = notInterestedAction(),
+                ).render(accountKey)!!,
+            )
+        val event = rendered.notInterestedEvent()
+
+        assertEquals("status-feedback", event.postKey.id)
+        assertEquals("abc+def==", event.actionMetadata)
+    }
+
+    @Test
+    fun retweetTimelineFeedbackUsesDisplayedPostButTargetsWrapper() {
+        val original =
+            createTweet(
+                id = "original-status",
+                user = createUser("original-user", "original_user"),
+                text = "original post",
+            )
+        val wrapper =
+            createTweet(
+                id = "retweet-wrapper",
+                user = createUser("retweet-user", "retweet_user"),
+                text = "original post",
+                retweetedStatus = original,
+            )
+
+        val item =
+            timelinePostItemOf(
+                createTimeline(
+                    tweet = wrapper,
+                    notInterestedAction = notInterestedAction(),
+                ).render(accountKey)!!,
+            )
+        val event = item.displayPost.notInterestedEvent()
+
+        assertEquals("original-status", item.displayPost.statusKey.id)
+        assertEquals("retweet-wrapper", event.postKey.id)
+    }
+
+    private fun notInterestedAction() =
+        TimelineFeedbackActionValue(
+            feedbackType = "DontLike",
+            feedbackUrl =
+                "/2/timeline/feedback.json" +
+                    "?feedback_type=DontLike&action_metadata=abc%2Bdef%3D%3D",
+            prompt = "Not interested in this post",
+        )
+
+    private fun UiTimelineV2.Post.notInterestedEvent(): PostEvent.XQT.NotInterested {
+        val moreMenu =
+            actions
+                .filterIsInstance<ActionMenu.Group>()
+                .first {
+                    it.displayItem.text ==
+                        ActionMenu.Item.Text.Localized(
+                            ActionMenu.Item.Text.Localized.Type.More,
+                        )
+                }
+        val item =
+            moreMenu.actions
+                .filterIsInstance<ActionMenu.Item>()
+                .first {
+                    it.text == ActionMenu.Item.Text.Raw("Not interested in this post")
+                }
+        return assertIs(item.clickEvent.postEventOrNull()?.postEvent)
+    }
+
     private fun createTimeline(
         tweet: Tweet,
         parents: List<XQTTimeline> = emptyList(),
+        notInterestedAction: TimelineFeedbackActionValue? = null,
     ): XQTTimeline =
         XQTTimeline(
             parents = parents,
             tweets = TimelineTweet(tweetResults = ItemResult(result = tweet)),
             id = tweet.restId,
             sortedIndex = 1L,
+            notInterestedAction = notInterestedAction,
         )
 
     private fun createTweet(

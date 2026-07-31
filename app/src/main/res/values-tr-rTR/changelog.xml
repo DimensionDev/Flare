@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Paylaş menüsüne, farklı platformlarda hızlıca paylaşım yapmanızı sağlayan çapraz gönderi seçeneği eklendi.</li>
+                <li>Platform tarafından sağlanan çeviriler ve özgün metni çeviriyle birlikte gösterme seçeneği eklendi.</li>
+                <li>Ana zaman akışı yenileme ayarları ve X gönderileri için isteğe bağlı MXGA filtreleme eklendi.</li>
+                <li>Karma zaman akışlarındaki “Zamana göre sırala” ayarı düzeltildi; gönderiler artık gerçek kronolojik sıralarıyla gösteriliyor.</li>
                 <li>Hata düzeltmeleri ve performans iyileştirmeleri.</li>
             </ul>
         ]]></string>

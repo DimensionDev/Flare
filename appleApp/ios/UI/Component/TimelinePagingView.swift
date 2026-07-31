@@ -12,6 +12,7 @@ struct UITimelinePagingView: View {
     let key: String
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
+    let accessoryItems: [UITimelineCollectionViewAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
 
     init(
@@ -20,6 +21,7 @@ struct UITimelinePagingView: View {
         key: String,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
+        accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
         suppressInitialRefreshIndicator: Bool = false
     ) {
         self.data = data
@@ -27,6 +29,7 @@ struct UITimelinePagingView: View {
         self.key = key
         self.topContentInset = topContentInset
         self.allowGalleryMode = allowGalleryMode
+        self.accessoryItems = accessoryItems
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
     }
 
@@ -46,6 +49,7 @@ struct UITimelinePagingView: View {
                         detailStatusKey: detailStatusKey,
                         topContentInset: topContentInset,
                         columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1),
+                        accessoryItems: accessoryItems,
                         suppressInitialRefreshIndicator: suppressInitialRefreshIndicator
                     )
                     .ignoresSafeArea(edges: .vertical)
@@ -63,6 +67,7 @@ struct UITimelinePagingView: View {
             data: data,
             detailStatusKey: detailStatusKey,
             topContentInset: topContentInset,
+            accessoryItems: accessoryItems,
             suppressInitialRefreshIndicator: suppressInitialRefreshIndicator
         )
         .ignoresSafeArea(edges: .vertical)

@@ -3,6 +3,8 @@ import FlareAppleUI
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
 import SwiftUIBackports
+import UIKit
+import Combine
 
 struct HomeTimelineScreen: View {
     let toServiceSelect: () -> Void
@@ -20,6 +22,9 @@ struct HomeTimelineScreen: View {
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var canComposePresenter = KotlinPresenter(presenter: CanComposePresenter())
+    @StateObject private var changeLogPresenter: KotlinPresenter<ChangeLogPresenterState>
+    @StateObject private var changeLogAccessoryHost: ChangeLogAccessoryHost
+    private let currentVersion: String
 
     init(
         toServiceSelect: @escaping () -> Void,
@@ -34,6 +39,20 @@ struct HomeTimelineScreen: View {
         self.toSecondaryMenu = toSecondaryMenu
         self.onNavigate = onNavigate
         self._presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter()))
+        let currentVersion =
+            Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        self.currentVersion = currentVersion
+        let changeLogPresenter = KotlinPresenter<ChangeLogPresenterState>(
+            presenter: ChangeLogPresenter(currentVersion: currentVersion)
+        )
+        self._changeLogPresenter = .init(
+            wrappedValue: changeLogPresenter
+        )
+        self._changeLogAccessoryHost = .init(
+            wrappedValue: ChangeLogAccessoryHost(version: currentVersion) {
+                changeLogPresenter.state.dismissChangeLog()
+            }
+        )
     }
 
     var body: some View {
@@ -81,10 +100,28 @@ struct HomeTimelineScreen: View {
                         let tab = selectedTabId.flatMap { id in
                             tabs.first { $0.id == id }
                         } ?? tabs[0]
+                        let resolvedTimelineAppearance =
+                            tab.resolveTimelineAppearance(base: timelineAppearance)
                         ZStack {
-                            TimelineScreen(tabItem: tab, allowGalleryMode: true, isHomeTimeline: true)
-                                .environment(\.timelineAppearance, tab.resolveTimelineAppearance(base: timelineAppearance))
+                            TimelineScreen(
+                                tabItem: tab,
+                                allowGalleryMode: true,
+                                isHomeTimeline: true,
+                                accessoryItems: resolvedTimelineAppearance.timelineDisplayMode == .gallery
+                                    ? []
+                                    : changeLogAccessoryItems
+                            )
+                                .environment(\.timelineAppearance, resolvedTimelineAppearance)
                                 .id(tab.id)
+                        }
+                        .safeAreaInset(edge: .top, spacing: 0) {
+                            if resolvedTimelineAppearance.timelineDisplayMode == .gallery,
+                               shouldShowChangeLog {
+                                ChangeLogNotice(version: currentVersion) {
+                                    changeLogPresenter.state.dismissChangeLog()
+                                }
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                            }
                         }
                         .onChange(of: tabs.map { $0.id }, initial: true) { _, tabIds in
                             if let selectedTabId, tabIds.contains(selectedTabId) {
@@ -190,6 +227,25 @@ struct HomeTimelineScreen: View {
         }
     }
 
+    private var shouldShowChangeLog: Bool {
+        guard case .success(let state) = onEnum(
+            of: changeLogPresenter.state.shouldShowChangeLog
+        ) else {
+            return false
+        }
+        return state.data.boolValue
+    }
+
+    private var changeLogAccessoryItems: [UITimelineCollectionViewAccessoryItem] {
+        guard shouldShowChangeLog else { return [] }
+        return [
+            UITimelineCollectionViewAccessoryItem(
+                id: "change_log_\(currentVersion)",
+                view: changeLogAccessoryHost.view
+            ),
+        ]
+    }
+
     @ToolbarContentBuilder
     private var leadingToolbarContent: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
@@ -230,6 +286,119 @@ struct HomeTimelineScreen: View {
                     .font(.title2)
             }
         }
+    }
+}
+
+private struct ChangeLogNotice: View {
+    let version: String
+    let onDismiss: () -> Void
+
+    private var message: String {
+        let format = String(
+            localized: "changelog_current",
+            defaultValue: "Version %@:\n• Bug fixes and performance improvements."
+        )
+        return String(format: format, locale: .current, version)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("changelog_title")
+                .font(.headline)
+            Text("changelog_message")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Text(message)
+                .font(.body)
+                .fixedSize(horizontal: false, vertical: true)
+            Button("Ok", action: onDismiss)
+                .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(uiColor: .separator).opacity(0.35), lineWidth: 0.5)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+}
+
+private final class ChangeLogAccessoryHost: ObservableObject {
+    let view = ChangeLogHostedAccessoryView()
+
+    init(version: String, onDismiss: @escaping () -> Void) {
+        view.update(
+            AnyView(
+                ChangeLogNotice(
+                    version: version,
+                    onDismiss: onDismiss
+                )
+            )
+        )
+    }
+}
+
+private final class ChangeLogHostedAccessoryView: UIView {
+    private let host = UIHostingController(rootView: AnyView(EmptyView()))
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    func update(_ rootView: AnyView) {
+        host.rootView = rootView
+        host.view.invalidateIntrinsicContentSize()
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil {
+            host.willMove(toParent: nil)
+            host.removeFromParent()
+        } else if let parent = findParentViewController(), host.parent !== parent {
+            host.willMove(toParent: nil)
+            host.removeFromParent()
+            parent.addChild(host)
+            host.didMove(toParent: parent)
+        }
+    }
+
+    private func commonInit() {
+        backgroundColor = .clear
+        host.view.backgroundColor = .clear
+        host.view.translatesAutoresizingMaskIntoConstraints = false
+        if #available(iOS 16.0, *) {
+            host.sizingOptions = [.intrinsicContentSize]
+        }
+        addSubview(host.view)
+        NSLayoutConstraint.activate([
+            host.view.topAnchor.constraint(equalTo: topAnchor),
+            host.view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            host.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            host.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+
+    private func findParentViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let current = responder {
+            if let viewController = current as? UIViewController {
+                return viewController
+            }
+            responder = current.next
+        }
+        return nil
     }
 }
 

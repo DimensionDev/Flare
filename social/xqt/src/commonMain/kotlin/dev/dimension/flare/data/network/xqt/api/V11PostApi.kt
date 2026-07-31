@@ -14,6 +14,12 @@ import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.UpdateAccountSettingsResponse
 
 internal interface V11PostApi {
+    @POST("2/timeline/feedback.json")
+    suspend fun postTimelineFeedback(
+        @Query("feedback_type") feedbackType: String,
+        @Query("action_metadata") actionMetadata: String,
+    ): Response<Unit>
+
     /**
      * POST 1.1/friendships/create.json
      *

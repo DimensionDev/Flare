@@ -327,6 +327,12 @@ public sealed interface PostEvent {
                     accountKey = accountKey,
                 )
         }
+
+        @Serializable
+        public data class NotInterested(
+            public override val postKey: MicroBlogKey,
+            public val actionMetadata: String,
+        ) : XQT
     }
 
     @Serializable

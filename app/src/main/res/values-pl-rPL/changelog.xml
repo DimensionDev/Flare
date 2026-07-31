@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano opcję publikowania krzyżowego w menu Udostępnij, aby szybko publikować posty na różnych platformach.</li>
+                <li>Dodano tłumaczenia dostarczane przez platformę i opcję wyświetlania oryginalnego tekstu razem z tłumaczeniem.</li>
+                <li>Dodano ustawienia odświeżania głównej osi czasu i opcjonalne filtrowanie MXGA dla postów z X.</li>
+                <li>Naprawiono ustawienie „Sortuj według czasu” dla mieszanych osi czasu; posty są teraz wyświetlane w rzeczywistej kolejności chronologicznej.</li>
                 <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>

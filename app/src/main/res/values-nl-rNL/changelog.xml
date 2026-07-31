@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Een crosspost-optie toegevoegd aan het menu Delen, zodat je snel op meerdere platforms kunt publiceren.</li>
+                <li>Vertalingen van het platform en een optie om de oorspronkelijke tekst samen met de vertaling te tonen zijn toegevoegd.</li>
+                <li>Instellingen voor het vernieuwen van de starttijdlijn en optionele MXGA-filtering voor X-berichten zijn toegevoegd.</li>
+                <li>De instelling ‘Sorteren op tijd’ voor gemengde tijdlijnen is hersteld; berichten verschijnen nu in hun werkelijke chronologische volgorde.</li>
                 <li>Bugfixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>

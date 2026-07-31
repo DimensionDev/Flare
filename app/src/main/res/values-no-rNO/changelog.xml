@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til et alternativ for krysspublisering i Del-menyen, slik at du raskt kan publisere på tvers av plattformer.</li>
+                <li>Lagt til oversettelser fra plattformen og et alternativ for å vise originalteksten sammen med oversettelsen.</li>
+                <li>Lagt til innstillinger for oppdatering av hjemmetidslinjen og valgfri MXGA-filtrering av X-innlegg.</li>
+                <li>Innstillingen «Sorter etter tid» for blandede tidslinjer er rettet, slik at innlegg nå vises i faktisk kronologisk rekkefølge.</li>
                 <li>Feilrettinger og ytelsesforbedringer.</li>
             </ul>
         ]]></string>

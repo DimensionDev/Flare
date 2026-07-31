@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added a Cross-post option to the Share menu, making it quick and easy to cross-post.</li>
+                <li>Added platform-provided translations and an option to show the original text together with its translation.</li>
+                <li>Added home timeline refresh controls and optional MXGA filtering for X posts.</li>
+                <li>Fixed the “Sort by time” setting for mixed timelines so posts now appear in their actual chronological order.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]></string>

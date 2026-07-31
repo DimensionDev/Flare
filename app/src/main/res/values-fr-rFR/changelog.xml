@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s :</span>
             <ul>
-                <li>Ajout d’une option de publication croisée dans le menu Partager pour republier rapidement sur d’autres plateformes.</li>
+                <li>Ajout des traductions fournies par la plateforme et d’une option permettant d’afficher le texte original avec sa traduction.</li>
+                <li>Ajout de réglages d’actualisation du fil d’accueil et d’un filtrage MXGA facultatif pour les publications X.</li>
+                <li>Le réglage « Trier par date » des fils mixtes a été corrigé : les publications suivent désormais leur ordre chronologique réel.</li>
                 <li>Corrections de bugs et améliorations des performances.</li>
             </ul>
         ]]></string>

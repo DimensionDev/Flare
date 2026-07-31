@@ -429,6 +429,18 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         return ceil(size.height) + 1
     }
 
+    private func sectionIdentifier(at index: Int) -> Int? {
+        guard dataSource != nil else { return nil }
+        let identifiers = dataSource.snapshot().sectionIdentifiers
+        guard identifiers.indices.contains(index) else { return nil }
+        return identifiers[index]
+    }
+
+    private func isFullWidthSection(at index: Int) -> Bool {
+        guard let identifier = sectionIdentifier(at: index) else { return false }
+        return identifier == Self.sectionAccessories || identifier == Self.sectionFooter
+    }
+
     private func pruneHeightCache(keepingItemIDs: Set<String>) {
         let existing = Set(heightCacheKeysByItemID.keys)
         let removed = existing.subtracting(keepingItemIDs)
@@ -1495,7 +1507,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             return CGSize(width: collectionView.bounds.width, height: 200)
         }
         let section = indexPath.section
-        let columns = section == Self.sectionFooter ? 1 : max(columnCount, 1)
+        let columns = isFullWidthSection(at: section) ? 1 : max(columnCount, 1)
         let insets = layout.sectionInset
         let available = collectionView.bounds.width - insets.left - insets.right
         let totalSpacing = CGFloat(columns - 1) * layout.minimumColumnSpacing
@@ -1503,6 +1515,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         guard let itemID = dataSource.itemIdentifier(for: indexPath) else {
             return CGSize(width: width, height: 200)
+        }
+
+        if itemID.hasPrefix(Self.accessoryPrefix),
+           let accessory = accessoryItemMap[itemID] {
+            let height = max(
+                measuredCompressedCardHeight(accessory.view, width: width),
+                1
+            )
+            return CGSize(width: width, height: height)
         }
 
         switch itemID {
@@ -1566,7 +1587,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         layout collectionViewLayout: UICollectionViewLayout,
         columnCountFor section: Int
     ) -> Int {
-        section == Self.sectionFooter ? 1 : max(columnCount, 1)
+        isFullWidthSection(at: section) ? 1 : max(columnCount, 1)
     }
 
     // MARK: - UICollectionViewDelegate

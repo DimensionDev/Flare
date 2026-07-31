@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunta l’opzione di pubblicazione incrociata al menu Condividi, per ripubblicare rapidamente su altre piattaforme.</li>
+                <li>Aggiunte le traduzioni fornite dalla piattaforma e un’opzione per mostrare il testo originale insieme alla traduzione.</li>
+                <li>Aggiunti i controlli di aggiornamento della timeline Home e il filtro MXGA opzionale per i post di X.</li>
+                <li>È stata corretta l’impostazione “Ordina per data” delle timeline miste: ora i post seguono il loro effettivo ordine cronologico.</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

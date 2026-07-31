@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versiunea %1$s:</span>
             <ul>
-                <li>A fost adăugată o opțiune de publicare încrucișată în meniul Partajare, pentru publicarea rapidă pe mai multe platforme.</li>
+                <li>Au fost adăugate traduceri furnizate de platformă și opțiunea de a afișa textul original împreună cu traducerea.</li>
+                <li>Au fost adăugate controale pentru reîmprospătarea cronologiei principale și filtrare MXGA opțională pentru postările X.</li>
+                <li>A fost remediată setarea „Sortare după timp” pentru cronologiile mixte; postările apar acum în ordinea cronologică reală.</li>
                 <li>Remedieri de erori și îmbunătățiri de performanță.</li>
             </ul>
         ]]></string>

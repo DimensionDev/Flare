@@ -31,6 +31,6 @@ internal data class Timeline(
     val instructions: kotlin.collections.List<InstructionUnion>,
 //    @Contextual @SerialName(value = "metadata")
 //    val metadata: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-//    @Contextual @SerialName(value = "responseObjects")
-//    val responseObjects: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @SerialName(value = "responseObjects")
+    val responseObjects: TimelineResponseObjects? = null,
 )

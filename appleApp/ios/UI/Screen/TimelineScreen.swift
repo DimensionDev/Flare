@@ -7,14 +7,21 @@ struct TimelineScreen: View {
     let tabItem: UiTimelineTabItem
     let allowGalleryMode: Bool
     let isHomeTimeline: Bool
+    let accessoryItems: [UITimelineCollectionViewAccessoryItem]
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
-    init(tabItem: UiTimelineTabItem, allowGalleryMode: Bool = false, isHomeTimeline: Bool = false) {
+    init(
+        tabItem: UiTimelineTabItem,
+        allowGalleryMode: Bool = false,
+        isHomeTimeline: Bool = false,
+        accessoryItems: [UITimelineCollectionViewAccessoryItem] = []
+    ) {
         self.tabItem = tabItem
         self.allowGalleryMode = allowGalleryMode
         self.isHomeTimeline = isHomeTimeline
+        self.accessoryItems = accessoryItems
         self._presenter = .init(
             wrappedValue: .init(
                 presenter: TimelineItemPresenter(
@@ -25,7 +32,13 @@ struct TimelineScreen: View {
         )
     }
     var body: some View {
-        UITimelinePagingView(data: presenter.state.listState, detailStatusKey: nil, key: presenter.key, allowGalleryMode: allowGalleryMode)
+        UITimelinePagingView(
+            data: presenter.state.listState,
+            detailStatusKey: nil,
+            key: presenter.key,
+            allowGalleryMode: allowGalleryMode,
+            accessoryItems: accessoryItems
+        )
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }

@@ -3,7 +3,9 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>A Megosztás menü új keresztposztolási lehetőségével gyorsan közzéteheted a bejegyzést más platformokon.</li>
+                <li>Platform által biztosított fordítások és az eredeti szöveg fordítással együtt való megjelenítésének lehetősége.</li>
+                <li>Új beállítások a kezdőlap idővonalának frissítéséhez, valamint opcionális MXGA-szűrés az X-bejegyzésekhez.</li>
+                <li>Javítottuk a vegyes idővonalak „Rendezés idő szerint” beállítását; a bejegyzések mostantól a tényleges időrendjükben jelennek meg.</li>
                 <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
             </ul>
         ]]></string>

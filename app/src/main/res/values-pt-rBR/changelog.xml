@@ -5,7 +5,9 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionada uma opção de publicação cruzada ao menu Compartilhar, permitindo republicar rapidamente em outras plataformas.</li>
+                <li>Adicionadas traduções fornecidas pela plataforma e uma opção para mostrar o texto original junto com a tradução.</li>
+                <li>Adicionados controles de atualização da timeline inicial e filtragem MXGA opcional para publicações do X.</li>
+                <li>A configuração “Ordenar por horário” das timelines mistas foi corrigida; agora as publicações aparecem na ordem cronológica real.</li>
                 <li>Correções de bugs e melhorias de desempenho.</li>
             </ul>
         ]]></string>

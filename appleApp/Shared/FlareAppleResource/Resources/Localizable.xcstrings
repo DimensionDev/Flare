@@ -31175,6 +31175,558 @@
         }
       }
     },
+    "changelog_current" : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weergawe %@:\n• Platformverskafde vertalings en ’n opsie om die oorspronklike teks saam met die vertaling te wys, is bygevoeg.\n• Kontroles vir die verfrissing van die tuistydlyn en opsionele MXGA-filtrering vir X-plasings is bygevoeg.\n• Die “Sorteer volgens tyd”-instelling vir gemengde tydlyne is reggestel; plasings verskyn nou in hul werklike chronologiese volgorde.\n• Foutoplossings en prestasieverbeterings."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإصدار %@:\n• تمت إضافة ترجمات مقدّمة من المنصة وخيار لعرض النص الأصلي مع ترجمته.\n• تمت إضافة عناصر تحكم لتحديث الخط الزمني الرئيسي وفلترة MXGA الاختيارية لمنشورات X.\n• تم إصلاح إعداد «الترتيب حسب الوقت» للخطوط الزمنية المختلطة، وأصبحت المنشورات تظهر الآن بترتيبها الزمني الفعلي.\n• إصلاحات للأخطاء وتحسينات في الأداء."
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версия %@:\n• Добавени са преводи от платформата и опция за показване на оригиналния текст заедно с превода.\n• Добавени са настройки за опресняване на началната времева линия и незадължително MXGA филтриране за публикации в X.\n• Поправена е настройката „Сортиране по време“ за смесените времеви линии и публикациите вече се показват в действителния им хронологичен ред.\n• Поправки на грешки и подобрения в производителността."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versió %@:\n• S’han afegit traduccions proporcionades per la plataforma i una opció per mostrar el text original juntament amb la traducció.\n• S’han afegit controls d’actualització de la cronologia d’inici i el filtratge MXGA opcional per a les publicacions d’X.\n• S’ha corregit l’opció «Ordena per hora» de les cronologies mixtes; ara les publicacions apareixen en el seu ordre cronològic real.\n• Correccions d'errors i millores de rendiment."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verze %@:\n• Přidány překlady poskytované platformou a možnost zobrazit původní text společně s překladem.\n• Přidáno ovládání obnovování domovské časové osy a volitelné filtrování MXGA pro příspěvky na X.\n• Opraveno nastavení „Řadit podle času“ pro smíšené časové osy; příspěvky se nyní zobrazují ve skutečném chronologickém pořadí.\n• Opravy chyb a vylepšení výkonu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@:\n• Tilføjet oversættelser fra platformen og en mulighed for at vise originalteksten sammen med oversættelsen.\n• Tilføjet indstillinger for opdatering af hjemmetidslinjen og valgfri MXGA-filtrering af X-opslag.\n• Indstillingen “Sortér efter tid” for blandede tidslinjer er rettet, så opslag nu vises i deres faktiske kronologiske rækkefølge.\n• Fejlrettelser og forbedringer af ydeevnen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@:\n• Übersetzungen der Plattform und eine Option, Originaltext und Übersetzung gemeinsam anzuzeigen, wurden hinzugefügt.\n• Einstellungen zum Aktualisieren der Start-Timeline und eine optionale MXGA-Filterung für X-Beiträge wurden hinzugefügt.\n• Die Einstellung „Nach Zeit sortieren“ für gemischte Timelines wurde korrigiert; Beiträge erscheinen jetzt in ihrer tatsächlichen chronologischen Reihenfolge.\n• Fehlerbehebungen und Leistungsverbesserungen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έκδοση %@:\n• Προστέθηκαν μεταφράσεις από την πλατφόρμα και επιλογή εμφάνισης του πρωτότυπου κειμένου μαζί με τη μετάφραση.\n• Προστέθηκαν ρυθμίσεις ανανέωσης της αρχικής χρονογραμμής και προαιρετικό φιλτράρισμα MXGA για αναρτήσεις του X.\n• Διορθώθηκε η ρύθμιση «Ταξινόμηση κατά χρόνο» για τις μικτές χρονογραμμές, ώστε οι αναρτήσεις να εμφανίζονται πλέον στην πραγματική χρονολογική τους σειρά.\n• Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@:\n• Added platform-provided translations and an option to show the original text together with its translation.\n• Added home timeline refresh controls and optional MXGA filtering for X posts.\n• Fixed the “Sort by time” setting for mixed timelines so posts now appear in their actual chronological order.\n• Bug fixes and performance improvements."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versio %@:\n• Lisättiin alustan tarjoamat käännökset ja mahdollisuus näyttää alkuperäinen teksti käännöksen rinnalla.\n• Lisättiin kotiaikajanan päivitysasetukset ja valinnainen MXGA-suodatus X-julkaisuille.\n• Yhdistettyjen aikajanojen ”Lajittele ajan mukaan” -asetus on korjattu, ja julkaisut näkyvät nyt todellisessa aikajärjestyksessään.\n• Virhekorjauksia ja suorituskykyparannuksia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@ :\n• Ajout des traductions fournies par la plateforme et d’une option permettant d’afficher le texte original avec sa traduction.\n• Ajout de réglages d’actualisation du fil d’accueil et d’un filtrage MXGA facultatif pour les publications X.\n• Le réglage « Trier par date » des fils mixtes a été corrigé : les publications suivent désormais leur ordre chronologique réel.\n• Corrections de bugs et améliorations des performances."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גרסה %@:\n• נוספו תרגומים שמספקת הפלטפורמה ואפשרות להציג את הטקסט המקורי יחד עם התרגום.\n• נוספו הגדרות לרענון ציר הזמן הראשי וסינון MXGA אופציונלי לפוסטים ב-X.\n• תוקנה ההגדרה „מיון לפי זמן” בצירי זמן משולבים, וכעת הפוסטים מוצגים לפי הסדר הכרונולוגי האמיתי שלהם.\n• תיקוני באגים ושיפורי ביצועים."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ verzió:\n• Platform által biztosított fordítások és az eredeti szöveg fordítással együtt való megjelenítésének lehetősége.\n• Új beállítások a kezdőlap idővonalának frissítéséhez, valamint opcionális MXGA-szűrés az X-bejegyzésekhez.\n• Javítottuk a vegyes idővonalak „Rendezés idő szerint” beállítását; a bejegyzések mostantól a tényleges időrendjükben jelennek meg.\n• Hibajavítások és teljesítménybeli fejlesztések."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versione %@:\n• Aggiunte le traduzioni fornite dalla piattaforma e un’opzione per mostrare il testo originale insieme alla traduzione.\n• Aggiunti i controlli di aggiornamento della timeline Home e il filtro MXGA opzionale per i post di X.\n• È stata corretta l’impostazione “Ordina per data” delle timeline miste: ora i post seguono il loro effettivo ordine cronologico.\n• Correzioni di bug e miglioramenti delle prestazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョン %@:\n• プラットフォーム提供の翻訳と、原文を翻訳と一緒に表示するオプションを追加しました。\n• ホームタイムラインの更新設定と、X の投稿を対象とする任意の MXGA フィルターを追加しました。\n• 混合タイムラインの「時刻順」設定を修正し、投稿が実際の時系列順に並ぶようになりました。\n• バグ修正とパフォーマンス改善。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전 %@:\n• 플랫폼에서 제공하는 번역과 원문을 번역문과 함께 표시하는 옵션을 추가했습니다.\n• 홈 타임라인 새로 고침 설정과 X 게시물용 선택적 MXGA 필터를 추가했습니다.\n• 혼합 타임라인의 ‘시간순 정렬’ 설정을 수정해 게시물이 이제 실제 시간 순서대로 표시됩니다.\n• 버그 수정 및 성능 개선."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versjon %@:\n• Lagt til oversettelser fra plattformen og et alternativ for å vise originalteksten sammen med oversettelsen.\n• Lagt til innstillinger for oppdatering av hjemmetidslinjen og valgfri MXGA-filtrering av X-innlegg.\n• Innstillingen «Sorter etter tid» for blandede tidslinjer er rettet, slik at innlegg nå vises i faktisk kronologisk rekkefølge.\n• Feilrettinger og ytelsesforbedringer."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versie %@:\n• Vertalingen van het platform en een optie om de oorspronkelijke tekst samen met de vertaling te tonen zijn toegevoegd.\n• Instellingen voor het vernieuwen van de starttijdlijn en optionele MXGA-filtering voor X-berichten zijn toegevoegd.\n• De instelling ‘Sorteren op tijd’ voor gemengde tijdlijnen is hersteld; berichten verschijnen nu in hun werkelijke chronologische volgorde.\n• Bugfixes en prestatieverbeteringen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wersja %@:\n• Dodano tłumaczenia dostarczane przez platformę i opcję wyświetlania oryginalnego tekstu razem z tłumaczeniem.\n• Dodano ustawienia odświeżania głównej osi czasu i opcjonalne filtrowanie MXGA dla postów z X.\n• Naprawiono ustawienie „Sortuj według czasu” dla mieszanych osi czasu; posty są teraz wyświetlane w rzeczywistej kolejności chronologicznej.\n• Poprawki błędów i ulepszenia wydajności."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %@:\n• Foram adicionadas traduções fornecidas pela plataforma e uma opção para mostrar o texto original juntamente com a tradução.\n• Foram adicionados controlos de atualização da cronologia inicial e filtragem MXGA opcional para publicações do X.\n• A definição «Ordenar por hora» das cronologias mistas foi corrigida; as publicações aparecem agora na ordem cronológica real.\n• Correções de erros e melhorias de desempenho."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %@:\n• Adicionadas traduções fornecidas pela plataforma e uma opção para mostrar o texto original junto com a tradução.\n• Adicionados controles de atualização da timeline inicial e filtragem MXGA opcional para publicações do X.\n• A configuração “Ordenar por horário” das timelines mistas foi corrigida; agora as publicações aparecem na ordem cronológica real.\n• Correções de bugs e melhorias de desempenho."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versiunea %@:\n• Au fost adăugate traduceri furnizate de platformă și opțiunea de a afișa textul original împreună cu traducerea.\n• Au fost adăugate controale pentru reîmprospătarea cronologiei principale și filtrare MXGA opțională pentru postările X.\n• A fost remediată setarea „Sortare după timp” pentru cronologiile mixte; postările apar acum în ordinea cronologică reală.\n• Remedieri de erori și îmbunătățiri de performanță."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версия %@:\n• Добавлены переводы от платформы и возможность показывать исходный текст вместе с переводом.\n• Добавлены настройки обновления домашней ленты и необязательная MXGA-фильтрация публикаций X.\n• Исправлена настройка «Сортировка по времени» для смешанных лент: публикации теперь отображаются в фактическом хронологическом порядке.\n• Исправления ошибок и улучшения производительности."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верзија %@:\n• Додати су преводи које обезбеђује платформа и опција за приказ оригиналног текста заједно са преводом.\n• Додате су контроле за освежавање почетне временске линије и опционо MXGA филтрирање X објава.\n• Исправљена је поставка „Сортирај по времену“ за мешовите временске линије; објаве се сада приказују стварним хронолошким редом.\n• Исправке грешака и побољшања перформанси."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@:\n• Lade till översättningar från plattformen och ett alternativ för att visa originaltexten tillsammans med översättningen.\n• Lade till inställningar för uppdatering av hemtidslinjen och valfri MXGA-filtrering av X-inlägg.\n• Inställningen ”Sortera efter tid” för blandade tidslinjer har rättats, så att inlägg nu visas i sin faktiska kronologiska ordning.\n• Buggfixar och prestandaförbättringar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sürüm %@:\n• Platform tarafından sağlanan çeviriler ve özgün metni çeviriyle birlikte gösterme seçeneği eklendi.\n• Ana zaman akışı yenileme ayarları ve X gönderileri için isteğe bağlı MXGA filtreleme eklendi.\n• Karma zaman akışlarındaki “Zamana göre sırala” ayarı düzeltildi; gönderiler artık gerçek kronolojik sıralarıyla gösteriliyor.\n• Hata düzeltmeleri ve performans iyileştirmeleri."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версія %@:\n• Додано переклади від платформи й можливість показувати оригінальний текст разом із перекладом.\n• Додано налаштування оновлення домашньої стрічки й необов’язкову MXGA-фільтрацію дописів X.\n• Виправлено налаштування «Сортувати за часом» для змішаних стрічок: дописи тепер відображаються у фактичному хронологічному порядку.\n• Виправлення помилок і покращення продуктивності."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phiên bản %@:\n• Đã thêm bản dịch do nền tảng cung cấp và tùy chọn hiển thị văn bản gốc cùng bản dịch.\n• Đã thêm tùy chọn làm mới dòng thời gian chính và bộ lọc MXGA tùy chọn cho bài đăng X.\n• Đã sửa cài đặt “Sắp xếp theo thời gian” cho dòng thời gian hỗn hợp; bài đăng giờ hiển thị theo đúng thứ tự thời gian thực tế.\n• Sửa lỗi và cải thiện hiệu năng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %@：\n• 新增平台提供的翻译，并可同时显示原文和译文。\n• 新增首页时间线刷新设置和可选的 MXGA 过滤，可隐藏匹配的 X 帖子。\n• 修复混合时间线的“按时间排序”设置，内容现在会按真实时间顺序排列。\n• Bug 修复和性能改进。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %@：\n• 新增平台提供的翻譯，並可同時顯示原文與譯文。\n• 新增首頁時間軸重新整理設定及可選的 MXGA 過濾，可隱藏符合規則的 X 貼文。\n• 修正混合時間軸的「依時間排序」設定，內容現在會依實際時間順序排列。\n• 錯誤修正與效能改善。"
+          }
+        }
+      }
+    },
+    "changelog_message" : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ons het 'n paar veranderinge aangebring sedert jy laas aangemeld het. Hier is die besonderhede:"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لقد قمنا ببعض التغييرات منذ آخر تسجيل دخولك. وفيما يلي التفاصيل:"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Направихме някои промени от последното ви влизане. Ето подробностите:"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hem fet alguns canvis des de l'última vegada que vas iniciar sessió. Aquests són els detalls:"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Od posledního přihlášení jsme provedli nějaké změny. Zde jsou detaily:"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vi har foretaget nogle ændringer siden du sidst er logget ind. Her er detaljerne:"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seit der letzten Anmeldung haben wir einige Änderungen vorgenommen. Hier sind die Details:"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έχουμε κάνει κάποιες αλλαγές από τότε που συνδεθήκατε την τελευταία φορά. Εδώ είναι οι λεπτομέρειες:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We have made some changes since you last logged in. Here are the details:"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olemme tehneet joitakin muutoksia, koska olet viimeksi kirjautunut sisään. Tässä on yksityiskohdat:"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous avons apporté quelques changements depuis votre dernière connexion. Voici les détails :"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ביצענו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbiamo apportato alcune modifiche dall’ultimo accesso. Ecco i dettagli:"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後にログインしてからいくつかの変更がありました。詳細は次のとおりです:"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "마지막 로그인 이후 몇 가지 변경 사항이 있습니다. 자세한 내용은 다음과 같습니다:"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vi har gjort noen endringer siden sist du logget inn. Her er detaljer:"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We hebben enkele wijzigingen aangebracht sinds de laatste keer dat u bent ingelogd. Hier zijn de details:"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wprowadziliśmy pewne zmiany od ostatniego logowania. Oto szczegóły:"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fizemos algumas alterações desde a última vez que você entrou. Aqui estão os detalhes:"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fizemos algumas alterações desde a última vez que você entrou. Aqui estão os detalhes:"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мы внесли некоторые изменения с момента последнего входа. Ниже приведены подробности:"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Направили смо неке измене од ваше последње пријаве. Ево детаља:"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vi har gjort några ändringar sedan du senast loggade in. Här är detaljerna:"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son girişinizden bu yana bazı değişiklikler yaptık. Ayrıntılar:"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ми внесли деякі зміни після моменту, коли ви увійшли в систему. Детальніше:"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chúng tôi đã thực hiện một số thay đổi kể từ lần đăng nhập trước của bạn. Chi tiết như sau:"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自您上次登录以来，我们已经做了一些更改。以下是详细信息："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自你上次登入以來我們做了一些變更。詳情如下："
+          }
+        }
+      }
+    },
+    "changelog_title" : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welkom terug!"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرحبا بعودتك!"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добре дошли отново!"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et donem la benvinguda de nou!"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vítejte zpět!"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velkommen tilbage!"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen zurück!"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καλώς ήρθατε!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome back!"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tervetuloa takaisin!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bon retour !"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ברוך שובך!"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üdv újra!"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bentornato!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おかえりなさい！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 오신 것을 환영합니다!"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velkommen tilbake!"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welkom terug!"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Witaj ponownie!"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bem-vindo de volta!"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bem-vindo de volta!"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bine ai revenit!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "С возвращением!"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добро дошли назад!"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välkommen tillbaka!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar hoş geldiniz!"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "З поверненням!"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chào mừng trở lại!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "欢迎回来！"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歡迎回來！"
+          }
+        }
+      }
+    },
     "comment" : {
       "localizations" : {
         "af" : {
@@ -48503,50 +49055,6 @@
         }
       }
     },
-    "home_tab_for_you_title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For You"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "为你推荐"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "為你推薦"
-          }
-        }
-      }
-    },
-    "home_tab_popular_title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Popular"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "热门"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "熱門"
-          }
-        }
-      }
-    },
     "home_tab_featured_title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48728,6 +49236,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "精選"
+          }
+        }
+      }
+    },
+    "home_tab_for_you_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For You"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为你推荐"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為你推薦"
           }
         }
       }
@@ -49281,6 +49811,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知"
+          }
+        }
+      }
+    },
+    "home_tab_popular_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Popular"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "热门"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "熱門"
           }
         }
       }
@@ -112001,7 +112553,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Saved"
+            "value" : "Saved to Files"
           }
         },
         "fi" : {
@@ -119115,7 +119667,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Analyzing this profile..."
+            "value" : "Analyzing this profile…"
           }
         },
         "fi" : {

@@ -151,9 +151,7 @@ struct HomeTimelineScreen: View {
                                                     }
                                                     .labelStyle(.titleAndIcon)
                                                 }
-                                                .padding(.bottom, 9)
-                                                .ignoresSafeArea(edges: .bottom)
-                                                .safeAreaInset(edge: .bottom) {
+                                                .safeAreaInset(edge: .bottom, spacing: 3) {
                                                     if tab.id == item.id {
                                                         Capsule()
                                                             .fill(Color.accentColor)

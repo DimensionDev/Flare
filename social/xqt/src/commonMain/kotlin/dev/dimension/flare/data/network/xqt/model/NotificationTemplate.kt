@@ -23,6 +23,8 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
+import dev.dimension.flare.data.network.xqt.model.TimelineNotificationTweetRef
+import dev.dimension.flare.data.network.xqt.model.TimelineNotificationUserRef
 import dev.dimension.flare.data.network.xqt.model.TypeName
 
 import kotlinx.serialization.Serializable
@@ -44,13 +46,12 @@ internal data class NotificationTemplate (
     val typename: TypeName? = null,
 
     @SerialName(value = "from_users")
-    val fromUsers: kotlin.collections.List<@Contextual kotlinx.serialization.json.JsonElement>? = null,
+    val fromUsers: kotlin.collections.List<TimelineNotificationUserRef>? = null,
 
     @SerialName(value = "target_objects")
-    val targetObjects: kotlin.collections.List<@Contextual kotlinx.serialization.json.JsonElement>? = null
+    val targetObjects: kotlin.collections.List<TimelineNotificationTweetRef>? = null
 
 ) {
 
 
 }
-

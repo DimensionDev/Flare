@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
@@ -9,9 +10,10 @@ import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.renderNotifications
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 internal class NotificationPagingSource(
-    private val locale: String,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: () -> Unit,
@@ -38,13 +40,26 @@ internal class NotificationPagingSource(
                     request.nextKey
                 }
             }
-        val response =
-            service.getNotificationsAll(
-                xTwitterClientLanguage = locale,
-                cursor = cursor,
-            )
+        val instructions =
+            service
+                .getNotificationsTimeline(
+                    variables =
+                        NotificationsTimelineRequest(
+                            timelineType = "All",
+                            count = pageSize,
+                            cursor = cursor,
+                        ).encodeJson(),
+                ).body()
+                ?.data
+                ?.viewerV2
+                ?.userResults
+                ?.result
+                ?.notificationTimeline
+                ?.timeline
+                ?.instructions
+                .orEmpty()
 
-        val topCursor = response.cursor(type = CursorType.top)
+        val topCursor = instructions.cursor(type = CursorType.top)
         if (topCursor != null) {
             service.postNotificationsAllLastSeenCursor(topCursor)
         }
@@ -53,8 +68,8 @@ internal class NotificationPagingSource(
             onClearMarker.invoke()
         }
 
-        val notifications = response.renderNotifications(accountKey)
-        val nextCursor = response.cursor()
+        val notifications = instructions.renderNotifications(accountKey)
+        val nextCursor = instructions.cursor()
 
         return PagingResult(
             data = notifications,
@@ -62,3 +77,11 @@ internal class NotificationPagingSource(
         )
     }
 }
+
+@Serializable
+internal data class NotificationsTimelineRequest(
+    @SerialName("timeline_type")
+    val timelineType: String,
+    val count: Int,
+    val cursor: String? = null,
+)

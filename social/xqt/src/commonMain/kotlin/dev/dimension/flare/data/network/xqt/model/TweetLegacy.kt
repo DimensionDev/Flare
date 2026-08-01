@@ -88,6 +88,8 @@ internal data class TweetLegacy(
     val possiblySensitiveEditable: kotlin.Boolean? = false,
     @SerialName(value = "retweeted_status_result")
     val retweetedStatusResult: ItemResult? = null,
+    @SerialName(value = "retweeted_status_id_str")
+    val retweetedStatusIdStr: kotlin.String? = null,
     @SerialName(value = "self_thread")
     val selfThread: SelfThread? = null,
     val in_reply_to_screen_name: String? = null,

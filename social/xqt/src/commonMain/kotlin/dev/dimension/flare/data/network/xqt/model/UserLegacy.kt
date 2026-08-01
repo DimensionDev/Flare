@@ -66,7 +66,7 @@ internal data class UserLegacy(
     @SerialName(value = "blocked_by")
     val blockedBy: kotlin.Boolean = false,
     @SerialName(value = "blocking")
-    val blocking: kotlin.Boolean = false,
+    val blocking: kotlin.Boolean? = false,
     @SerialName(value = "can_dm")
     val canDm: kotlin.Boolean = false,
     @SerialName(value = "can_media_tag")
@@ -121,6 +121,10 @@ internal data class UserLegacy(
     val translatorType: kotlin.String? = null,
     @SerialName(value = "verified")
     val verified: kotlin.Boolean = false,
+    @SerialName(value = "ext_is_blue_verified")
+    val extIsBlueVerified: kotlin.Boolean? = null,
+    @SerialName(value = "ext_verified_type")
+    val extVerifiedType: kotlin.String? = null,
     @SerialName(value = "want_retweets")
     val wantRetweets: kotlin.Boolean = false,
     @SerialName(value = "follow_request_sent")

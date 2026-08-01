@@ -470,7 +470,6 @@ internal class XQTDataSource(
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         if (type == NotificationFilter.All) {
             NotificationPagingSource(
-                locale = "en",
                 service = service,
                 accountKey = accountKey,
                 onClearMarker = {

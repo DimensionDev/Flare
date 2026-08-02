@@ -40,13 +40,12 @@ import kotlinx.serialization.Contextual
 internal data class UrtEndpointOptions (
 
     @SerialName(value = "requestParams")
-    val requestParams: kotlin.collections.List<UrtEndpointRequestParams>,
+    val requestParams: kotlin.collections.List<UrtEndpointRequestParams> = emptyList(),
 
     @SerialName(value = "title")
-    val title: kotlin.String
+    val title: kotlin.String? = null
 
 ) {
 
 
 }
-

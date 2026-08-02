@@ -480,14 +480,14 @@ internal fun List<InstructionUnion>.conversationTweets(): List<XQTTimeline> =
         }
     }
 
-internal fun List<InstructionUnion>.cursor() =
+internal fun List<InstructionUnion>.cursor(type: CursorType = CursorType.bottom) =
     flatMap {
         when (it) {
             is TimelineAddEntries -> {
                 it.propertyEntries.mapNotNull {
                     when (it.content) {
                         is TimelineTimelineCursor -> {
-                            if (it.content.cursorType == CursorType.bottom) {
+                            if (it.content.cursorType == type) {
                                 it.content.value
                             } else {
                                 null
@@ -513,66 +513,75 @@ internal fun List<InstructionUnion>.isBottomEnd() =
             it.direction == TimelineTerminateTimeline.Direction.bottom || it.direction == TimelineTerminateTimeline.Direction.topAndBottom
         } != null
 
-internal fun TopLevel.tweets(): List<XQTTimeline> =
-    timeline
+internal fun TopLevel.tweets(): List<XQTTimeline> {
+    val tweetsById = globalObjects?.tweets.orEmpty()
+    val usersById = globalObjects?.users.orEmpty()
+
+    fun resolveUser(userId: String?): UserResultCore? {
+        val id = userId ?: return null
+        val legacy = usersById[id] ?: return null
+        return UserResultCore(
+            userResults =
+                UserResults(
+                    result =
+                        User(
+                            legacy = legacy,
+                            isBlueVerified = legacy.extIsBlueVerified ?: legacy.verified,
+                            restId = id,
+                        ),
+                ),
+        )
+    }
+
+    fun resolveTweet(
+        tweetId: String,
+        resolving: Set<String> = emptySet(),
+    ): Tweet? {
+        if (tweetId in resolving) return null
+        val legacy = tweetsById[tweetId] ?: return null
+        val nextResolving = resolving + tweetId
+        val retweetedStatus =
+            legacy.retweetedStatusResult
+                ?: legacy.retweetedStatusIdStr
+                    ?.let { resolveTweet(it, nextResolving) }
+                    ?.let { ItemResult(result = it) }
+        val quotedStatus =
+            legacy.quotedStatusIdStr
+                ?.let { resolveTweet(it, nextResolving) }
+                ?.let { ItemResult(result = it) }
+
+        return Tweet(
+            restId = legacy.idStr,
+            core = resolveUser(legacy.userIdStr),
+            legacy = legacy.copy(retweetedStatusResult = retweetedStatus),
+            quotedStatusResult = quotedStatus,
+        )
+    }
+
+    return timeline
         ?.instructions
         ?.asSequence()
-        ?.flatMap {
-            it.addEntries?.entries.orEmpty()
-        }?.mapNotNull { entry ->
-            val id =
+        ?.flatMap { it.addEntries?.entries.orEmpty() }
+        ?.mapNotNull { entry ->
+            val tweetId =
                 entry.content
                     ?.item
                     ?.content
                     ?.tweet
                     ?.id
-            val index = entry.sortIndex?.toLong()
-            if (id != null && index != null) {
-                id to index
-            } else {
-                null
-            }
-        }?.mapNotNull { (id, index) ->
-            globalObjects?.tweets?.get(id)?.let {
-                it to index
-            }
-        }?.map { (tweetLegacy, index) ->
-            // build tweet
-            Tweet(
-                restId = tweetLegacy.idStr,
-                core =
-                    tweetLegacy.userIdStr?.let {
-                        globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
-                            UserResultCore(
-                                userResults =
-                                    UserResults(
-                                        result =
-                                            User(
-                                                legacy = it,
-                                                isBlueVerified = it.verified,
-                                                restId = tweetLegacy.userIdStr,
-                                            ),
-                                    ),
-                            )
-                        }
-                    },
-                legacy = tweetLegacy,
-            ) to index
+                    ?: return@mapNotNull null
+            val index = entry.sortIndex?.toLongOrNull() ?: return@mapNotNull null
+            resolveTweet(tweetId)?.let { it to index }
         }?.map { (tweet, index) ->
             XQTTimeline(
-                tweets =
-                    TimelineTweet(
-                        tweetResults =
-                            ItemResult(
-                                result = tweet,
-                            ),
-                    ),
+                tweets = TimelineTweet(tweetResults = ItemResult(result = tweet)),
                 id = tweet.restId,
                 sortedIndex = index,
                 parents = emptyList(),
             )
         }?.toList()
         .orEmpty()
+}
 
 internal fun List<InstructionUnion>.users(): List<User> =
     flatMap { union ->

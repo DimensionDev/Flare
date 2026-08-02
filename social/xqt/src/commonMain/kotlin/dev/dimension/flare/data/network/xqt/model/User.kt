@@ -46,7 +46,7 @@ internal data class User(
     @SerialName(value = "is_blue_verified")
     val isBlueVerified: kotlin.Boolean = false,
     @SerialName(value = "legacy")
-    val legacy: UserLegacy,
+    val legacy: UserLegacy = UserLegacy(),
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
 //    @SerialName(value = "super_follow_eligible")

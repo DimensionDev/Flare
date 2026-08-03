@@ -132,6 +132,7 @@ final class StatusVisibilityImageView: UIImageView {
         case .followers: icon = .lock
         case .specified: icon = .at
         case .channel:   icon = .tv
+        case .private:   icon = .lock
         default:         icon = .globe
         }
         image = UIImage(fontAwesome: icon)

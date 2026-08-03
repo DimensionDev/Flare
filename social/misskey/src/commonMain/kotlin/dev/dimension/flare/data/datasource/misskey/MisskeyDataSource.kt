@@ -483,6 +483,7 @@ internal class MisskeyDataSource(
                         UiTimelineV2.Post.Visibility.Home -> "home"
                         UiTimelineV2.Post.Visibility.Followers -> "followers"
                         UiTimelineV2.Post.Visibility.Specified -> "specified"
+                        UiTimelineV2.Post.Visibility.Private -> error("Misskey does not support private compose visibility")
                         UiTimelineV2.Post.Visibility.Channel -> "public"
                     },
                 renoteId = renoteId,
@@ -590,7 +591,7 @@ internal class MisskeyDataSource(
                     accountKey = accountKey,
                 ),
             contentWarning = ComposeConfig.ContentWarning,
-            visibility = ComposeConfig.Visibility,
+            visibility = ComposeConfig.Visibility(),
         )
 
     fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =

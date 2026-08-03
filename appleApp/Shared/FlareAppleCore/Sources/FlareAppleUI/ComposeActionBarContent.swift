@@ -282,6 +282,8 @@ private extension UiTimelineV2.PostVisibility {
             "status_visibility_specified"
         case .channel:
             "status_visibility_public"
+        case .private:
+            "tumblr_visibility_private"
         }
     }
 
@@ -297,6 +299,8 @@ private extension UiTimelineV2.PostVisibility {
             "status_visibility_specified_description"
         case .channel:
             "status_visibility_public_description"
+        case .private:
+            "tumblr_visibility_private_description"
         }
     }
 }

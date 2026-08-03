@@ -8,6 +8,7 @@ import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.platform.PixivPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
+import dev.dimension.flare.data.platform.TumblrPlatformSpec
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.model.PlatformRuntimeData
@@ -36,6 +37,7 @@ internal fun runtimeData(allRssTimelineLoaderFactory: AllRssTimelineLoaderFactor
                 BlueskyPlatformSpec,
                 FanboxPlatformSpec,
                 PixivPlatformSpec,
+                TumblrPlatformSpec,
                 XqtPlatformSpec,
                 VvoPlatformSpec,
             ),

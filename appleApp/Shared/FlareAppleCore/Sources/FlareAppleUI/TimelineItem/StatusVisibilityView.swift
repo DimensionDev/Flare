@@ -16,6 +16,7 @@ public struct StatusVisibilityView: View {
         case .followers: Image(fontAwesome: .lock)
         case .specified: Image(fontAwesome: .at)
         case .channel:   Image(fontAwesome: .tv)
+        case .private:   Image(fontAwesome: .lock)
         }
     }
 }

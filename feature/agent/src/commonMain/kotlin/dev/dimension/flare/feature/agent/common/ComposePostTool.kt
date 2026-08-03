@@ -98,8 +98,12 @@ internal class ComposePostTool(
             return "Post content is ${maxLength - remainingLength} characters, but ${target.platformType.name} allows " +
                 "at most $maxLength for ${action.label}."
         }
-        if (visibility != UiTimelineV2.Post.Visibility.Public && config.visibility == null) {
+        val visibilityConfig = config.visibility
+        if (visibility != UiTimelineV2.Post.Visibility.Public && visibilityConfig == null) {
             return "${target.platformType.name} does not expose visibility selection for ${action.label} posts."
+        }
+        if (visibilityConfig != null && visibility !in visibilityConfig.allVisibilities) {
+            return "${target.platformType.name} does not support ${visibility.name} visibility for ${action.label} posts."
         }
         if (args.spoilerText.isNotBlank() && config.contentWarning == null) {
             return "${target.platformType.name} does not expose content warning selection for ${action.label} posts."

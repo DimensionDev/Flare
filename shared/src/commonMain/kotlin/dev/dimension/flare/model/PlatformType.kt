@@ -20,6 +20,7 @@ public enum class PlatformType {
     VVo,
     Nostr,
     Fanbox,
+    Tumblr,
 }
 
 @Immutable

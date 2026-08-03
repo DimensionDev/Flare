@@ -1587,6 +1587,10 @@ internal val UiTimelineV2.Post.Visibility.localName: Int
                 R.string.misskey_visibility_specified
             }
 
+            UiTimelineV2.Post.Visibility.Private -> {
+                R.string.tumblr_visibility_private
+            }
+
             UiTimelineV2.Post.Visibility.Channel -> {
                 R.string.misskey_visibility_public
             }
@@ -1609,6 +1613,10 @@ internal val UiTimelineV2.Post.Visibility.localDescription: Int
 
             UiTimelineV2.Post.Visibility.Specified -> {
                 R.string.misskey_visibility_specified_description
+            }
+
+            UiTimelineV2.Post.Visibility.Private -> {
+                R.string.tumblr_visibility_private_description
             }
 
             UiTimelineV2.Post.Visibility.Channel -> {

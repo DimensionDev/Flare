@@ -39,11 +39,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
@@ -872,6 +876,15 @@ public fun StatusVisibilityComponent(
             )
         }
 
+        UiTimelineV2.Post.Visibility.Private -> {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Lock,
+                contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
+                modifier = modifier,
+                tint = tint,
+            )
+        }
+
         UiTimelineV2.Post.Visibility.Specified -> {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
@@ -1140,23 +1153,16 @@ private fun StatusContentComponent(
                     listOf(warning.original)
                 }
             }.orEmpty()
-    val shouldExpandTextByDefault =
-        visibleContentWarning.all { it.isEmpty } &&
-            visibleContent.sumOf { it.innerText.length } <= 500
-    val effectiveMaxLines =
-        resolveStatusContentMaxLines(
-            explicitMaxLines = maxLines,
-            defaultMaxLines = appearanceSettings.lineLimit,
-            shouldExpandTextByDefault = shouldExpandTextByDefault,
-        )
+    val effectiveMaxLines = (maxLines ?: appearanceSettings.lineLimit).coerceAtLeast(1)
+    val collapseThresholdLines = maxLines?.coerceAtLeast(1) ?: 10
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
-    var showSoftExpand by rememberSaveable {
-        mutableStateOf(false)
+    var overflowingTextIndexes by remember {
+        mutableStateOf(emptySet<Int>())
     }
     LaunchedEffect(visibleContent, effectiveMaxLines, expanded) {
-        showSoftExpand = false
+        overflowingTextIndexes = emptySet()
     }
     Column(
         modifier = modifier,
@@ -1195,32 +1201,32 @@ private fun StatusContentComponent(
         }
         AnimatedVisibility(visible = expanded || expandContentWarning || visibleContentWarning.all { it.isEmpty }) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                visibleContent.forEach { visibleText ->
+                visibleContent.forEachIndexed { index, visibleText ->
                     if (!visibleText.isEmpty) {
-                        RichText(
-                            text = visibleText,
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines =
-                                if (expanded || effectiveMaxLines == Int.MAX_VALUE) {
-                                    Int.MAX_VALUE
-                                } else {
-                                    effectiveMaxLines
+                        if (expanded || effectiveMaxLines == Int.MAX_VALUE) {
+                            RichText(
+                                text = visibleText,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        } else {
+                            CollapsibleRichText(
+                                text = visibleText,
+                                lineLimit = effectiveMaxLines,
+                                collapseThresholdLines = collapseThresholdLines,
+                                onOverflowChanged = { overflows ->
+                                    overflowingTextIndexes =
+                                        if (overflows) {
+                                            overflowingTextIndexes + index
+                                        } else {
+                                            overflowingTextIndexes - index
+                                        }
                                 },
-                            onTextLayout = {
-                                if (
-                                    it.hasVisualOverflow &&
-                                    !expanded &&
-                                    effectiveMaxLines != Int.MAX_VALUE &&
-                                    showExpandButton
-                                ) {
-                                    showSoftExpand = true
-                                }
-                            },
-                        )
+                            )
+                        }
                     }
                 }
                 if (visibleContent.any { !it.isEmpty }) {
-                    if (showSoftExpand) {
+                    if (overflowingTextIndexes.isNotEmpty() && showExpandButton) {
                         PlatformTextButton(
                             onClick = {
                                 expanded = true
@@ -1244,11 +1250,72 @@ private fun StatusContentComponent(
     }
 }
 
-internal fun resolveStatusContentMaxLines(
-    explicitMaxLines: Int?,
-    defaultMaxLines: Int,
-    shouldExpandTextByDefault: Boolean,
-): Int = explicitMaxLines ?: if (shouldExpandTextByDefault) Int.MAX_VALUE else defaultMaxLines
+@Composable
+private fun CollapsibleRichText(
+    text: UiRichText,
+    lineLimit: Int,
+    collapseThresholdLines: Int,
+    onOverflowChanged: (Boolean) -> Unit,
+) {
+    val lineHeight =
+        with(LocalDensity.current) {
+            PlatformTextStyle.current.lineHeight
+                .roundToPx()
+                .coerceAtLeast(1)
+        }
+    var fullHeight by remember(text) { mutableStateOf(0) }
+    val overflows = shouldCollapseRichText(fullHeight, lineHeight, collapseThresholdLines)
+    LaunchedEffect(overflows) {
+        onOverflowChanged(overflows)
+    }
+    Layout(
+        modifier = Modifier.fillMaxWidth().clipToBounds(),
+        content = {
+            RichText(
+                text = text,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .onSizeChanged { fullHeight = it.height },
+            )
+        },
+    ) { measurables, constraints ->
+        val placeable =
+            measurables.single().measure(
+                constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity),
+            )
+        val height =
+            collapsedRichTextHeight(
+                fullHeight = placeable.height,
+                lineHeight = lineHeight,
+                lineLimit = lineLimit,
+                collapseThresholdLines = collapseThresholdLines,
+            )
+        layout(placeable.width, height.coerceIn(constraints.minHeight, constraints.maxHeight)) {
+            placeable.placeRelative(0, 0)
+        }
+    }
+}
+
+internal fun shouldCollapseRichText(
+    fullHeight: Int,
+    lineHeight: Int,
+    collapseThresholdLines: Int,
+): Boolean =
+    fullHeight.toLong() >
+        lineHeight.coerceAtLeast(1).toLong() * collapseThresholdLines.coerceAtLeast(1)
+
+internal fun collapsedRichTextHeight(
+    fullHeight: Int,
+    lineHeight: Int,
+    lineLimit: Int,
+    collapseThresholdLines: Int,
+): Int =
+    if (shouldCollapseRichText(fullHeight, lineHeight, collapseThresholdLines)) {
+        minOf(fullHeight.toLong(), lineHeight.coerceAtLeast(1).toLong() * lineLimit.coerceAtLeast(1)).toInt()
+    } else {
+        fullHeight
+    }
 
 @Composable
 private fun StatusPollComponent(

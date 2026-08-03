@@ -66,6 +66,7 @@ public enum class UiIcon {
     Pixiv,
     Fanbox,
     Eye,
+    Tumblr,
 }
 
 /**
@@ -82,6 +83,7 @@ public val TabPickerUiIcons: List<UiIcon> =
         UiIcon.Misskey,
         UiIcon.Bluesky,
         UiIcon.Pixiv,
+        UiIcon.Tumblr,
         UiIcon.Weibo,
         UiIcon.Nostr,
         UiIcon.X,

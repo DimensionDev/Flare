@@ -10,8 +10,12 @@ import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.supervisorScope
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
@@ -174,21 +178,46 @@ public class LoginPlatformRegistry(
     public suspend fun detectPlatformType(host: String): NodeData {
         val hostCleaned = normalizeHost(host)
         require(hostCleaned.isNotBlank()) { "Host is blank" }
-        return all
-            .map { it.detector }
-            .distinct()
-            .sortedByDescending { it.priority }
-            .firstNotNullOfOrNull { detector ->
-                runCatching {
-                    detector.detect(hostCleaned)
-                }.getOrElse {
-                    if (it is CancellationException) {
-                        throw it
+        val detectors =
+            all
+                .map { it.detector }
+                .distinct()
+                .sortedByDescending { it.priority }
+
+        return supervisorScope {
+            val pending =
+                detectors
+                    .map { detector ->
+                        async(start = CoroutineStart.UNDISPATCHED) {
+                            try {
+                                detector.detect(hostCleaned)
+                            } catch (error: CancellationException) {
+                                throw error
+                            } catch (_: Throwable) {
+                                null
+                            }
+                        }
+                    }.toMutableList()
+
+            try {
+                while (pending.isNotEmpty()) {
+                    val (completed, detected) =
+                        select {
+                            pending.forEach { deferred ->
+                                deferred.onAwait { deferred to it }
+                            }
+                        }
+                    pending.remove(completed)
+                    if (detected != null) {
+                        return@supervisorScope detected
                     }
-                    null
                 }
+
+                throw IllegalArgumentException("Unsupported platform: $hostCleaned")
+            } finally {
+                pending.forEach { it.cancel() }
             }
-            ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
+        }
     }
 
     private fun normalizeHost(host: String): String =

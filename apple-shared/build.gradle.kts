@@ -28,6 +28,7 @@ kotlin {
             projects.social.mastodon,
             projects.social.misskey,
             projects.social.pixiv,
+            projects.social.tumblr,
             projects.social.vvo,
             projects.social.xqt,
             projects.feature.loginApi,
@@ -67,6 +68,7 @@ kotlin {
                 api(projects.social.mastodon)
                 api(projects.social.misskey)
                 api(projects.social.pixiv)
+                api(projects.social.tumblr)
                 api(projects.social.vvo)
                 api(projects.social.xqt)
                 api(projects.feature.loginApi)

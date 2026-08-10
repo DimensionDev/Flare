@@ -437,7 +437,7 @@ class MastodonRenderTest {
 }
 
 @Module
-private class MastodonRenderTestModule {
+internal class MastodonRenderTestModule {
     @Single
     fun platformFormatter(): PlatformFormatter = TestFormatter()
 }

@@ -153,7 +153,7 @@ class VVORenderTest {
 }
 
 @Module
-private class VvoRenderTestModule {
+internal class VvoRenderTestModule {
     @Single
     fun platformFormatter(): PlatformFormatter = TestFormatter()
 }

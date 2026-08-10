@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
@@ -25,7 +24,6 @@ import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.XqtUrl
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.postEventOrNull
@@ -33,7 +31,7 @@ import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -47,11 +45,7 @@ class XQTRenderTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(XqtRenderTestModule::class)
         }
     }
 

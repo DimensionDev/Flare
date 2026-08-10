@@ -127,7 +127,6 @@ public struct StatusView: View {
         let hasEmojiReactions = !emojiReactions.isEmpty
         let visibility = data.visibility
         let translationDisplayState = data.translationDisplayState
-        let platformType = data.platformType
         let createdAt = data.createdAt
         let actions = Array(data.actions)
         let accountType = data.accountType
@@ -185,7 +184,7 @@ public struct StatusView: View {
                                 topEndContent(
                                     visibility: visibility,
                                     translationDisplayState: translationDisplayState,
-                                    platformType: platformType,
+                                    platformIcon: data.platformIcon,
                                     createdAt: createdAt,
                                     accountType: accountType,
                                     statusKey: statusKey
@@ -198,7 +197,7 @@ public struct StatusView: View {
                                 topEndContent(
                                     visibility: visibility,
                                     translationDisplayState: translationDisplayState,
-                                    platformType: platformType,
+                                    platformIcon: data.platformIcon,
                                     createdAt: createdAt,
                                     accountType: accountType,
                                     statusKey: statusKey
@@ -211,7 +210,7 @@ public struct StatusView: View {
                                 topEndContent(
                                     visibility: visibility,
                                     translationDisplayState: translationDisplayState,
-                                    platformType: platformType,
+                                    platformIcon: data.platformIcon,
                                     createdAt: createdAt,
                                     accountType: accountType,
                                     statusKey: statusKey
@@ -426,7 +425,7 @@ public struct StatusView: View {
     private func topEndContent(
         visibility: UiTimelineV2.PostVisibility?,
         translationDisplayState: TranslationDisplayState,
-        platformType: PlatformType,
+        platformIcon: UiIcon,
         createdAt: UiDateTime,
         accountType: AccountType,
         statusKey: MicroBlogKey
@@ -443,40 +442,9 @@ public struct StatusView: View {
                     .foregroundStyle(.secondary)
             }
             if showPlatformLogo {
-                switch platformType {
-                case .mastodon:
-                    Image(fontAwesome: .mastodon)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .misskey:
-                    Image(fontAwesome: .misskey)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .bluesky:
-                    Image(fontAwesome: .bluesky)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .xQt:
-                    Image(fontAwesome: .xTwitter)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .vvo:
-                    Image(fontAwesome: .weibo)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .nostr:
-                    Image(fontAwesome: .nostr)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .pixiv:
-                    Image(fontAwesome: .pixiv)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                case .fanbox:
-                    Image(fontAwesome: .pixiv)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                Image(fontAwesome: platformIcon.fontAwesomeIcon)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             if !isDetail {
                 DateTimeText(data: createdAt)

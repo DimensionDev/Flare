@@ -8,16 +8,15 @@ import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsNotificationReason
 import com.atproto.repo.StrongRef
-import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.di.BlueskyTestKoinModule
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
@@ -40,11 +39,7 @@ class BlueskyNotificationRenderTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(BlueskyTestKoinModule::class)
         }
     }
 

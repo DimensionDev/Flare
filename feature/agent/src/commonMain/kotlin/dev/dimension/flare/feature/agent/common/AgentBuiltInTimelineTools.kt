@@ -28,7 +28,7 @@ internal class ListBuiltInTimelinesTool(
         val query = args.query.trim()
         val targets =
             session.builtInTimelineTargets
-                .filterBuiltInTimelineTargetsByPlatformNames(args.platforms)
+                .filterBuiltInTimelineTargetsByPlatformNames(args.platforms, session.platformRegistry)
                 .filter { target ->
                     query.isBlank() ||
                         target.id.contains(query, ignoreCase = true) ||
@@ -82,8 +82,8 @@ internal class LoadBuiltInTimelineTool(
 
     override suspend fun execute(args: Args): String {
         val target =
-            session.builtInTimelineTargets.resolveBuiltInTimelineTarget(args)
-                ?: return builtInTimelineSelectionMessage(session.builtInTimelineTargets, args)
+            session.builtInTimelineTargets.resolveBuiltInTimelineTarget(args, session.platformRegistry)
+                ?: return builtInTimelineSelectionMessage(session.builtInTimelineTargets, args, session.platformRegistry)
         val maxItems = args.maxItems.builtInTimelineToolLimit()
         val items = runCatching { target.loadTimeline(maxItems) }.getOrElse { emptyList() }
         session.messagePartStore.addPosts(items.mapNotNull { it.agentContentPostOrNull() })
@@ -108,18 +108,19 @@ private fun AgentBuiltInTimelineTarget.toBuiltInTimelineToolText(): String =
         appendLine("specId: $specId")
         appendLine("title: $title")
         appendLine("accountKey: $accountKey")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
     }
 
 private fun List<AgentBuiltInTimelineTarget>.resolveBuiltInTimelineTarget(
     args: LoadBuiltInTimelineTool.Args,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
 ): AgentBuiltInTimelineTarget? {
     val requestedAccount = microBlogKeyOrNull(args.accountId, args.accountHost)
     val timelineId = args.timelineId.trim()
     val specId = args.specId.trim()
     val title = args.title.trim()
     val targets =
-        filterBuiltInTimelineTargetsByPlatformNames(args.platforms)
+        filterBuiltInTimelineTargetsByPlatformNames(args.platforms, platformRegistry)
             .filter { target -> requestedAccount == null || target.accountKey == requestedAccount }
             .filter { target -> timelineId.isBlank() || target.id == timelineId }
             .filter { target -> specId.isBlank() || target.specId.equals(specId, ignoreCase = true) }
@@ -130,10 +131,11 @@ private fun List<AgentBuiltInTimelineTarget>.resolveBuiltInTimelineTarget(
 private fun builtInTimelineSelectionMessage(
     targets: List<AgentBuiltInTimelineTarget>,
     args: LoadBuiltInTimelineTool.Args,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
 ): String {
     val candidates =
         targets
-            .filterBuiltInTimelineTargetsByPlatformNames(args.platforms)
+            .filterBuiltInTimelineTargetsByPlatformNames(args.platforms, platformRegistry)
             .take(MAX_BUILT_IN_TIMELINE_SELECTION_ITEMS)
     if (candidates.isEmpty()) {
         return noBuiltInTimelineTargetsMessage(args.platforms)
@@ -194,7 +196,7 @@ private fun UiTimelineV2.Post.toBuiltInTimelinePostToolText(): String =
     buildString {
         appendLine("itemType: post")
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("statusKey: $statusKey")
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
@@ -213,7 +215,7 @@ private fun UiProfile.toBuiltInTimelineUserToolText(message: UiTimelineV2.Messag
         appendLine("itemType: user")
         message?.let { appendLine("messageStatusKey: ${it.statusKey}") }
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("userKey: $key")
         appendLine("displayName: ${name.raw}")
         appendLine("handle: ${handle.raw}")

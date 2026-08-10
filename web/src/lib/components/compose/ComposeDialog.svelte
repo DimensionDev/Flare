@@ -33,12 +33,6 @@
 		maxHeight: number;
 	};
 
-	const defaultMediaLimit: MediaCompressionLimit = {
-		maxSize: 1 * 1024 * 1024,
-		maxWidth: 2000,
-		maxHeight: 2000,
-	};
-
 	let {
 		onClose,
 		routeUrl = null,
@@ -108,7 +102,11 @@
 	const visiblePollOptions = $derived(pollOptions);
 	const currentVisibility = $derived(visibilityOverride ?? compose.visibility);
 	const maxMediaCount = $derived(compose.mediaMaxCount > 0 ? compose.mediaMaxCount : 4);
-	const selectedMediaLimit = $derived(mediaCompressionLimit(selectedProfiles));
+	const selectedMediaLimit = $derived<MediaCompressionLimit>({
+		maxSize: Number(compose.mediaCompressionMaxSizeBytes),
+		maxWidth: compose.mediaCompressionMaxWidth,
+		maxHeight: compose.mediaCompressionMaxHeight,
+	});
 	const pollAllowed = $derived(compose.pollMaxOptions !== null);
 	const canPoll = $derived(pollAllowed && selectedMedia.length === 0);
 	const canAddMedia = $derived(
@@ -163,7 +161,7 @@
 	}
 
 	function handleText(profile: UiProfile): string {
-		return profile.handle.canonical || profile.handle.raw || profile.handleWithoutAtAndHost;
+		return profile.handle.canonical || profile.handle.raw;
 	}
 
 	function initials(profile: UiProfile): string {
@@ -175,45 +173,6 @@
 
 	function profileKey(profile: UiProfile): string {
 		return `${profile.key.id}:${profile.key.host}`;
-	}
-
-	function platformIcon(platformType: UiProfile['platformType']): string {
-		switch (platformType) {
-			case 'xQt':
-				return 'World';
-			case 'VVo':
-				return 'World';
-			default:
-				return platformType;
-		}
-	}
-
-	function platformMediaLimit(platformType: UiProfile['platformType']): MediaCompressionLimit {
-		switch (platformType) {
-			case 'Mastodon':
-				return { maxSize: 16 * 1024 * 1024, maxWidth: 2880, maxHeight: 2880 };
-			case 'Misskey':
-				return { maxSize: 200 * 1024 * 1024, maxWidth: 8192, maxHeight: 8192 };
-			case 'Bluesky':
-				return { maxSize: 1 * 1024 * 1024, maxWidth: 2000, maxHeight: 2000 };
-			case 'xQt':
-			case 'VVo':
-				return { maxSize: 5 * 1024 * 1024, maxWidth: 4096, maxHeight: 4096 };
-			default:
-				return defaultMediaLimit;
-		}
-	}
-
-	function mediaCompressionLimit(profiles: UiProfile[]): MediaCompressionLimit {
-		const limits = profiles.map((profile) => platformMediaLimit(profile.platformType));
-		if (limits.length === 0) return defaultMediaLimit;
-		return limits.reduce(
-			(limit, item) => ({
-				maxSize: Math.min(limit.maxSize, item.maxSize),
-				maxWidth: Math.min(limit.maxWidth, item.maxWidth),
-				maxHeight: Math.min(limit.maxHeight, item.maxHeight),
-			})
-		);
 	}
 
 	function isProfileSelected(profile: UiProfile): boolean {
@@ -687,7 +646,7 @@
 										{/if}
 									</span>
 									<span class="platform-badge bg-base-100 text-base-content">
-										<FaIcon name={platformIcon(profile.platformType)} size={10} />
+										<FaIcon name={profile.platformIcon} size={10} />
 									</span>
 								</span>
 							{/each}

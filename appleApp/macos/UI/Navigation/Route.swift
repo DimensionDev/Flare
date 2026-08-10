@@ -9,7 +9,7 @@ enum Route: Hashable, Identifiable {
     case accountNotification(MicroBlogKey)
     case discover
     case serviceSelect
-    case relogin(MicroBlogKey, PlatformType)
+    case relogin(MicroBlogKey, String)
     case localHistory
     case agentHistory
     case directMessages
@@ -74,10 +74,10 @@ enum Route: Hashable, Identifiable {
             return lhsIndex == rhsIndex &&
                 lhsPreview == rhsPreview &&
                 lhsMedias.map { $0.url } == rhsMedias.map { $0.url }
-        case (.relogin(let lhsAccountKey, let lhsPlatformType), .relogin(let rhsAccountKey, let rhsPlatformType)):
+        case (.relogin(let lhsAccountKey, let lhsPlatformId), .relogin(let rhsAccountKey, let rhsPlatformId)):
             return lhsAccountKey.id == rhsAccountKey.id &&
                 lhsAccountKey.host == rhsAccountKey.host &&
-                lhsPlatformType == rhsPlatformType
+                lhsPlatformId == rhsPlatformId
         case (.composeCrossPost(let lhs), .composeCrossPost(let rhs)):
             return lhs == rhs
         default:
@@ -95,11 +95,11 @@ enum Route: Hashable, Identifiable {
             hasher.combine("timeline")
             hasher.combine(item.id)
             hasher.combine(isHome)
-        case .relogin(let accountKey, let platformType):
+        case .relogin(let accountKey, let platformId):
             hasher.combine("relogin")
             hasher.combine(accountKey.id)
             hasher.combine(accountKey.host)
-            hasher.combine(platformType)
+            hasher.combine(platformId)
         case .composeCrossPost(let prefill):
             hasher.combine("composeCrossPost")
             hasher.combine(prefill)
@@ -132,9 +132,9 @@ enum Route: Hashable, Identifiable {
             }
         case .serviceSelect:
             ServiceSelectionScreen(toHome: goBack)
-        case .relogin(let accountKey, let platformType):
+        case .relogin(let accountKey, let platformId):
             ReloginScreen(
-                target: ReloginTarget(accountKey: accountKey, platformType: platformType),
+                target: ReloginTarget(accountKey: accountKey, platformId: platformId),
                 toHome: goBack
             )
         case .localHistory:
@@ -427,7 +427,7 @@ extension Route {
     static func fromDeepLinkRoute(deeplinkRoute: DeeplinkRoute) -> Route? {
         switch onEnum(of: deeplinkRoute) {
         case .relogin(let data):
-            .relogin(data.accountKey, data.platformType)
+            .relogin(data.accountKey, data.platformId)
         case .login:
             .serviceSelect
         case .timeline(let data):

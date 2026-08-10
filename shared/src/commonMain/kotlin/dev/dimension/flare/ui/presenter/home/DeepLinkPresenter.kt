@@ -45,9 +45,12 @@ public class DeepLinkPresenter(
     private val deepLinkFlow by lazy {
         accountRepository.allAccounts.map {
             it
-                .associateWith {
-                    platformRegistry.require(it.platformType).deepLinks(it.accountKey)
-                }.toImmutableMap()
+                .mapNotNull { account ->
+                    platformRegistry
+                        .get(account.platformId)
+                        ?.let { spec -> account to spec.deepLinks(account.accountKey) }
+                }.toMap()
+                .toImmutableMap()
         }
     }
 

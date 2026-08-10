@@ -8,7 +8,6 @@
 		createAccountsPresenter,
 		type AccountsStateAccountItem,
 		type MicroBlogKey,
-		type PlatformType,
 		type UiProfile,
 	} from '@flare/web-presenters/accounts.svelte';
 
@@ -22,7 +21,9 @@
 	}
 
 	function accountTitle(item: AccountsStateAccountItem): string {
-		return item.profile.type === 'Success' ? profileNameText(item.profile.data) : item.account.accountKey.id;
+		return item.profile.type === 'Success'
+			? profileNameText(item.profile.data)
+			: item.account.platformDisplayName;
 	}
 
 	function accountDescription(item: AccountsStateAccountItem): string {
@@ -33,23 +34,6 @@
 
 	function accountKeyText(key: MicroBlogKey): string {
 		return key.host ? `${key.id}@${key.host}` : key.id;
-	}
-
-	function platformIcon(platformType: PlatformType): string {
-		switch (platformType) {
-			case 'Mastodon':
-				return 'Mastodon';
-			case 'Bluesky':
-				return 'Bluesky';
-			case 'Misskey':
-				return 'Misskey';
-			case 'xQt':
-				return 'World';
-			case 'VVo':
-				return 'World';
-			default:
-				return 'World';
-		}
 	}
 
 	function requestRemoveAccount(item: AccountsStateAccountItem): void {
@@ -90,7 +74,7 @@
 									</div>
 								{:else}
 									<div class="account-avatar bg-base-200 text-base-content">
-										<FaIcon name={platformIcon(item.account.platformType)} size={18} />
+										<FaIcon name={item.account.platformIcon} size={18} />
 									</div>
 									<div class="account-copy">
 										<span class="account-title">{accountTitle(item)}</span>
@@ -182,7 +166,7 @@
 					{:else}
 						<div class="flex items-center gap-3">
 							<span class="account-avatar bg-base-200 text-base-content">
-								<FaIcon name={platformIcon(pendingRemoval.account.platformType)} size={18} />
+								<FaIcon name={pendingRemoval.account.platformIcon} size={18} />
 							</span>
 							<span class="account-copy">
 								<span class="account-title">{accountTitle(pendingRemoval)}</span>

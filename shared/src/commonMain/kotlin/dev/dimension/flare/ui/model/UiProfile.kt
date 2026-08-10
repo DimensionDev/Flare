@@ -3,15 +3,14 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
-import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -22,7 +21,9 @@ public data class UiProfile public constructor(
     val handle: UiHandle,
     val avatar: UiMedia.Image?,
     private val nameInternal: UiRichText,
-    val platformType: PlatformType,
+    @SerialName("platformType")
+    val platformId: String,
+    val platformIcon: UiIcon = UiIcon.World,
     public val clickEvent: ClickEvent,
     public val banner: UiMedia.Image?,
     public val description: UiRichText?,
@@ -38,7 +39,8 @@ public data class UiProfile public constructor(
         handle: UiHandle,
         avatar: String,
         nameInternal: UiRichText,
-        platformType: PlatformType,
+        platformId: String,
+        platformIcon: UiIcon = UiIcon.World,
         clickEvent: ClickEvent,
         banner: String?,
         description: UiRichText?,
@@ -52,7 +54,8 @@ public data class UiProfile public constructor(
         handle = handle,
         avatar = avatar.toUiImage(),
         nameInternal = nameInternal,
-        platformType = platformType,
+        platformId = platformId,
+        platformIcon = platformIcon,
         clickEvent = clickEvent,
         banner = banner.toUiImage(),
         description = description,
@@ -66,7 +69,7 @@ public data class UiProfile public constructor(
     // If name is blank, use handle without @ as display name
     val name: UiRichText by lazy {
         if (nameInternal.raw.isEmpty() || nameInternal.raw.isBlank()) {
-            handleWithoutAtAndHost.toUiPlainText(sourceLanguages)
+            handleWithoutAt.toUiPlainText(sourceLanguages)
         } else {
             nameInternal
         }
@@ -76,23 +79,16 @@ public data class UiProfile public constructor(
         clickEvent.onClicked
     }
 
-    internal fun mergeWith(existing: UiProfile): UiProfile =
-        UiProfile(
+    internal fun mergeWith(existing: UiProfile): UiProfile {
+        val keepExistingHandle = handle.raw.isBlank()
+        val keepExistingName = nameInternal.raw.isBlank()
+        return UiProfile(
             key = key,
-            handle =
-                if (handle.raw.isBlank() || (isNostrFallbackHandle() && !existing.isNostrFallbackHandle())) {
-                    existing.handle
-                } else {
-                    handle
-                },
+            handle = if (keepExistingHandle) existing.handle else handle,
             avatar = avatar ?: existing.avatar,
-            nameInternal =
-                if (nameInternal.raw.isBlank() || (isNostrFallbackName() && !existing.isNostrFallbackName())) {
-                    existing.nameInternal
-                } else {
-                    nameInternal
-                },
-            platformType = platformType,
+            nameInternal = if (keepExistingName) existing.nameInternal else nameInternal,
+            platformId = platformId,
+            platformIcon = platformIcon,
             clickEvent = clickEvent,
             banner = banner ?: existing.banner,
             description = description ?: existing.description,
@@ -101,16 +97,7 @@ public data class UiProfile public constructor(
             mark = (existing.mark + mark).distinct().toPersistentList(),
             bottomContent = bottomContent.mergeWith(existing.bottomContent),
         )
-
-    private fun isNostrFallbackHandle(): Boolean =
-        platformType == PlatformType.Nostr &&
-            handle.raw == derivedNostrFallbackName()
-
-    private fun isNostrFallbackName(): Boolean =
-        platformType == PlatformType.Nostr &&
-            nameInternal.raw == derivedNostrFallbackName()
-
-    private fun derivedNostrFallbackName(): String? = runCatching { bech32PublicKey(key.id).take(16) }.getOrNull()
+    }
 
     @Serializable
     @Immutable
@@ -133,16 +120,6 @@ public data class UiProfile public constructor(
 
     val handleWithoutAt: String by lazy {
         handle.normalizedRaw
-    }
-
-    val handleWithoutAtAndHost: String by lazy {
-        handleWithoutAt.let {
-            if (platformType == PlatformType.Bluesky) {
-                it.removeSuffix(".bsky.social")
-            } else {
-                it
-            }
-        }
     }
 
     val host: String? by lazy {
@@ -187,7 +164,7 @@ public fun createSampleUser(): UiProfile =
             ),
         avatar = "https://example.com/avatar.jpg".toUiImage(),
         nameInternal = "".toUiPlainText(),
-        platformType = PlatformType.Mastodon,
+        platformId = "Mastodon",
         clickEvent = ClickEvent.Noop,
         banner = "https://example.com/banner.jpg".toUiImage(),
         description = null,

@@ -1,10 +1,10 @@
 package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.RefreshSessionResponse
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
 import io.ktor.client.call.body
@@ -115,7 +115,7 @@ internal class BlueskyAuthPlugin(
                         if (retryCount > 3) {
                             throw LoginExpiredException(
                                 plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
-                                PlatformType.Bluesky,
+                                BLUESKY_PLATFORM_ID,
                             )
                         }
 
@@ -145,7 +145,7 @@ internal class BlueskyAuthPlugin(
                                 if (it is AtpException && it.error?.error == "invalid_grant") {
                                     throw LoginExpiredException(
                                         plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
-                                        PlatformType.Bluesky,
+                                        BLUESKY_PLATFORM_ID,
                                     )
                                 } else {
                                     null
@@ -171,7 +171,7 @@ internal class BlueskyAuthPlugin(
                         } else {
                             throw LoginExpiredException(
                                 plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
-                                PlatformType.Bluesky,
+                                BLUESKY_PLATFORM_ID,
                             )
                         }
                     }

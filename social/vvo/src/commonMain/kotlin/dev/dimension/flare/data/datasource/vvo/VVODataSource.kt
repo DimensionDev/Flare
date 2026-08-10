@@ -36,13 +36,13 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
+import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiIcon
@@ -58,6 +58,13 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+
+private val MEDIA_COMPRESSION =
+    ComposeConfig.Media.Compression(
+        maxSizeBytes = 5L * 1024 * 1024,
+        maxWidth = 4096,
+        maxHeight = 4096,
+    )
 
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(
@@ -432,6 +439,7 @@ internal class VVODataSource(
                     false,
                     altTextMaxLength = -1,
                     allowMediaOnly = false,
+                    compression = MEDIA_COMPRESSION,
                 ),
             emoji =
                 ComposeConfig.Emoji(
@@ -538,8 +546,8 @@ internal class VVODataSource(
             if (isImage) {
                 imageCompressor.compress(
                     imageBytes = bytes,
-                    maxSize = 5 * 1024 * 1024,
-                    maxDimensions = 4096 to 4096,
+                    maxSize = MEDIA_COMPRESSION.maxSizeBytes,
+                    maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
                 )
             } else {
                 bytes
@@ -558,7 +566,7 @@ internal class VVODataSource(
         if (config.data?.login != true) {
             throw LoginExpiredException(
                 accountKey = accountKey,
-                platformType = PlatformType.VVo,
+                platformId = VVO_PLATFORM_ID,
             )
         }
         return requireNotNull(config.data.st) { "st is null" }

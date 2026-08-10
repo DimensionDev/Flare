@@ -7,11 +7,11 @@ import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformCapability
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiIcon
@@ -26,16 +26,21 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
+internal const val XQT_PLATFORM_ID: String = "xQt"
+
 @HiddenFromObjC
 public data object XqtPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by XQTLoginProvider {
-    public override val type: PlatformType = PlatformType.xQt
-    public override val metadata: PlatformTypeMetadata =
-        PlatformTypeMetadata(
+    public override val platformId: String = XQT_PLATFORM_ID
+    public override val metadata: PlatformMetadata =
+        PlatformMetadata(
             displayName = "X",
             icon = UiIcon.X,
+            agentAliases = listOf("x", "x.com", "twitter", "twitter.com", "推特"),
         )
+    public override val order: Int = 60
+    public override val capabilities: Set<PlatformCapability> = setOf(PlatformCapability.MxgaFiltering)
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> {
         val profile =
@@ -151,7 +156,7 @@ public data object XqtPlatformSpec :
     override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = throw UnsupportedOperationException("$platformId guest data source is not supported yet")
 
     private fun profileDeepLink(
         accountKey: MicroBlogKey,

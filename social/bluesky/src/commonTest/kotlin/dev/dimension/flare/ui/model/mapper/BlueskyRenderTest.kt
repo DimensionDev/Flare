@@ -15,16 +15,15 @@ import app.bsky.feed.ReasonRepost
 import app.bsky.feed.ReplyRef
 import app.bsky.feed.ReplyRefParentUnion
 import app.bsky.feed.ReplyRefRootUnion
-import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.di.BlueskyTestKoinModule
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
@@ -45,17 +44,26 @@ class BlueskyRenderTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(BlueskyTestKoinModule::class)
         }
     }
 
     @AfterTest
     fun tearDown() {
         stopKoin()
+    }
+
+    @Test
+    fun profileRenderUsesShortHandleAsMissingDisplayName() {
+        val profile =
+            ProfileViewBasic(
+                did = Did("did:plc:alice"),
+                handle = Handle("alice.bsky.social"),
+                displayName = null,
+            ).render(accountKey)
+
+        assertEquals("alice", profile.name.raw)
+        assertEquals("alice.bsky.social", profile.handle.raw)
     }
 
     @Test

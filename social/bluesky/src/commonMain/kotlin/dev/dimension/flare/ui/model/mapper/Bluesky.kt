@@ -34,9 +34,9 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
@@ -878,7 +878,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val sourceLanguages = record.sourceLanguages()
     val quote = findQuote(accountKey, this)
     return UiTimelineV2.Post(
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
         user = user,
         images = findMedias(this),
         card = findCard(this),
@@ -1066,6 +1066,15 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     )
 }
 
+private fun blueskyProfileName(
+    displayName: String?,
+    handle: String,
+): UiRichText =
+    displayName
+        .orEmpty()
+        .ifBlank { handle.removeSuffix(".bsky.social") }
+        .toUiPlainText()
+
 internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
@@ -1074,7 +1083,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
         )
     return UiProfile(
         avatar = avatar?.uri.toUiImage(),
-        nameInternal = displayName.orEmpty().toUiPlainText(),
+        nameInternal = blueskyProfileName(displayName, handle.handle),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1091,7 +1100,8 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
             ),
         mark = persistentListOf(),
         bottomContent = null,
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1111,7 +1121,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.toUiImage(),
-        nameInternal = displayName.orEmpty().toUiPlainText(),
+        nameInternal = blueskyProfileName(displayName, handle.handle),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1128,7 +1138,8 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
             ),
         mark = persistentListOf(),
         bottomContent = null,
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1148,7 +1159,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.toUiImage(),
-        nameInternal = displayName.orEmpty().toUiPlainText(),
+        nameInternal = blueskyProfileName(displayName, handle.handle),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1165,7 +1176,8 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
             ),
         mark = persistentListOf(),
         bottomContent = null,
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1185,7 +1197,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.toUiImage(),
-        nameInternal = displayName.orEmpty().toUiPlainText(),
+        nameInternal = blueskyProfileName(displayName, handle.handle),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1202,7 +1214,8 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
             ),
         mark = persistentListOf(),
         bottomContent = null,
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1686,7 +1699,7 @@ private fun render(
                     record.value.labels.orEmpty().any {
                         it.`val` in sensitiveLabels
                     },
-                platformType = PlatformType.Bluesky,
+                platformId = BLUESKY_PLATFORM_ID,
                 accountType = AccountType.Specific(accountKey),
                 clickEvent =
                     ClickEvent.Deeplink(

@@ -191,7 +191,7 @@ struct RootView: View {
                         LoginExpiredToastOverlay(
                             toast: inAppNotification.loginExpiredToast,
                             onRelogin: { toast in
-                                reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                                reloginRoute = .relogin(toast.accountKey, toast.platformId)
                                 inAppNotification.dismissLoginExpiredToast(id: toast.id)
                             },
                             onDismiss: { id in

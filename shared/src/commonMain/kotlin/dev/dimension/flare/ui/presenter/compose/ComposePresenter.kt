@@ -27,8 +27,11 @@ import dev.dimension.flare.data.repository.draftFileItem
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.ComposeInitialTextContext
+import dev.dimension.flare.model.InitialText
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.PlatformCapability
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDraft
@@ -82,6 +85,7 @@ public class ComposePresenter(
     private val restoreDraftUseCase: RestoreDraftUseCase by koinInject()
     private val draftRepository: DraftRepository by koinInject()
     private val ioScope: CoroutineScope by koinInject()
+    private val platformRegistry: PlatformRegistry by koinInject()
     private val shouldPersistSelectedAccounts: Boolean =
         accountType == null && status == null && draftGroupId == null
 
@@ -231,13 +235,13 @@ public class ComposePresenter(
                 status
                     .takeSuccess()
                     ?.contentPostOrNull()
-                    ?.platformType
+                    ?.platformId
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
                 .filterNot { account ->
                     selectedAccountKeys.contains(account.accountKey) ||
-                        (statusPlatform != null && account.platformType != statusPlatform)
+                        (statusPlatform != null && account.platformId != statusPlatform)
                 }.map {
                     it.accountKey
                 }
@@ -267,14 +271,14 @@ public class ComposePresenter(
                 status
                     .takeSuccess()
                     ?.contentPostOrNull()
-                    ?.platformType
+                    ?.platformId
             allAccounts
                 .values
                 .mapNotNull { it.takeSuccess() }
                 .filter { account ->
                     selectedAccountKeys.contains(account.accountKey) ||
                         statusPlatform == null ||
-                        account.platformType == statusPlatform
+                        account.platformId == statusPlatform
                 }.mapNotNull { account ->
                     allUsers[account.accountKey]
                 }.toImmutableList()
@@ -366,7 +370,11 @@ public class ComposePresenter(
             .map { statusState ->
                 statusState.map { post ->
                     val timelinePost = post.asTimelinePostItem()
-                    if (timelinePost != null && timelinePost.displayPost.platformType == PlatformType.VVo &&
+                    if (timelinePost != null &&
+                        platformRegistry.supports(
+                            timelinePost.displayPost.platformId,
+                            PlatformCapability.FirstEmbeddedQuoteTarget,
+                        ) &&
                         status is ComposeStatus.Quote
                     ) {
                         timelinePost.presentation.quotes.firstOrNull() ?: timelinePost.displayPost
@@ -387,13 +395,21 @@ public class ComposePresenter(
                         statusState.mapNotNull { post ->
                             val timelinePost = post.asTimelinePostItem()
                             if (timelinePost != null) {
-                                InitialTextResolver.resolve(
-                                    post = timelinePost.displayPost,
-                                    quotes = timelinePost.presentation.quotes,
-                                    composeStatus = status,
-                                    currentUserHandle = user.handle,
-                                    selectedAccountKey = accountType.accountKey,
-                                )
+                                platformRegistry
+                                    .get(timelinePost.displayPost.platformId)
+                                    ?.resolveInitialText(
+                                        ComposeInitialTextContext(
+                                            post = timelinePost.displayPost,
+                                            quotes = timelinePost.presentation.quotes,
+                                            composeType =
+                                                when (status) {
+                                                    is ComposeStatus.Quote -> ComposeType.Quote
+                                                    is ComposeStatus.Reply -> ComposeType.Reply
+                                                },
+                                            currentUserHandle = user.handle,
+                                            selectedAccountKey = accountType.accountKey,
+                                        ),
+                                    )
                             } else {
                                 null
                             }
@@ -537,6 +553,12 @@ public class ComposePresenter(
                 ?.media
                 ?.maxCount
                 ?: 0
+        val mediaCompression =
+            composeConfig
+                .takeSuccess()
+                ?.media
+                ?.compression
+                ?: ComposeConfig.Media.Compression()
         val languageCodes =
             composeConfig
                 .takeSuccess()
@@ -592,6 +614,9 @@ public class ComposePresenter(
             mediaEnabled = mediaEnabled,
             mediaCanSensitive = mediaCanSensitive,
             mediaMaxCount = mediaMaxCount,
+            mediaCompressionMaxSizeBytes = mediaCompression.maxSizeBytes,
+            mediaCompressionMaxWidth = mediaCompression.maxWidth,
+            mediaCompressionMaxHeight = mediaCompression.maxHeight,
             languageCodes = languageCodes,
             emojiAccountType = webEmojiAccountType,
             emojis = webEmojis,
@@ -995,6 +1020,9 @@ public abstract class ComposeState(
     public val mediaEnabled: Boolean,
     public val mediaCanSensitive: Boolean,
     public val mediaMaxCount: Int,
+    public val mediaCompressionMaxSizeBytes: Long,
+    public val mediaCompressionMaxWidth: Int,
+    public val mediaCompressionMaxHeight: Int,
     public val languageCodes: ImmutableList<String>,
     public val emojiAccountType: AccountType?,
     public val emojis: ImmutableList<UiEmoji>,
@@ -1039,12 +1067,6 @@ public abstract class ComposeState(
         onDispatched: (Boolean) -> Unit,
     )
 }
-
-@Immutable
-public data class InitialText internal constructor(
-    val text: String,
-    val cursorPosition: Int,
-)
 
 @Immutable
 public data class ComposeDirectSendState(

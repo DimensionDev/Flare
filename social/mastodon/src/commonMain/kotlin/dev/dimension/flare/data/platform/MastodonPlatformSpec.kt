@@ -13,13 +13,15 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.ComposeInitialTextContext
+import dev.dimension.flare.model.InitialText
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.SubscriptionTimelineSpec
+import dev.dimension.flare.model.resolveReplyParticipantInitialText
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -33,16 +35,23 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
+internal const val MASTODON_PLATFORM_ID: String = "Mastodon"
+
 @HiddenFromObjC
 public data object MastodonPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by MastodonLoginProvider {
-    public override val type: PlatformType = PlatformType.Mastodon
-    public override val metadata: PlatformTypeMetadata =
-        PlatformTypeMetadata(
+    public override val platformId: String = MASTODON_PLATFORM_ID
+    public override val metadata: PlatformMetadata =
+        PlatformMetadata(
             displayName = "Mastodon",
             icon = UiIcon.Mastodon,
+            agentAliases = listOf("masto", "fediverse", "长毛象", "联邦宇宙"),
         )
+    public override val order: Int = 10
+    public override val isDefaultGuest: Boolean = true
+
+    override fun resolveInitialText(context: ComposeInitialTextContext): InitialText? = context.resolveReplyParticipantInitialText()
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(

@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 public class ServiceSelectPresenter(
@@ -20,22 +18,18 @@ public class ServiceSelectPresenter(
         return object : ServiceSelectState, NodeInfoState by nodeInfoState {
             override val loading: Boolean = false
 
-            override fun platformIcon(platformType: PlatformType): UiIcon = loginPlatformRegistry.require(platformType).metadata.icon
-
             override fun agreementUrl(
-                platformType: PlatformType,
+                platformId: String,
                 host: String,
-            ): String? = loginPlatformRegistry.require(platformType).agreementUrl(host)
-
-            override fun loginMethods(platformType: PlatformType): List<LoginMethodSpec> = loginPlatformRegistry.methods(platformType)
+            ): String? = loginPlatformRegistry.require(platformId).agreementUrl(host)
 
             override fun createLoginHandler(
-                platformType: PlatformType,
+                platformId: String,
                 host: String,
                 methodType: LoginMethodType,
                 redirectUri: String?,
             ): LoginMethodHandler =
-                loginPlatformRegistry.require(platformType).createHandler(
+                loginPlatformRegistry.require(platformId).createHandler(
                     LoginContext(
                         host = host,
                         methodType = methodType,
@@ -53,17 +47,13 @@ public class ServiceSelectPresenter(
 public interface ServiceSelectState : NodeInfoState {
     public val loading: Boolean
 
-    public fun platformIcon(platformType: PlatformType): UiIcon
-
     public fun agreementUrl(
-        platformType: PlatformType,
+        platformId: String,
         host: String,
     ): String?
 
-    public fun loginMethods(platformType: PlatformType): List<LoginMethodSpec>
-
     public fun createLoginHandler(
-        platformType: PlatformType,
+        platformId: String,
         host: String,
         methodType: LoginMethodType,
         redirectUri: String? = null,

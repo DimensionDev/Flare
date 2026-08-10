@@ -8,7 +8,7 @@ import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.network.mastodon.MastodonPlatformDetector
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.data.platform.MASTODON_PLATFORM_ID
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
@@ -16,8 +16,7 @@ import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstance
@@ -36,8 +35,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Clock
 
 public data object MastodonLoginProvider : LoginPlatformProvider {
-    override val platformType: PlatformType = PlatformType.Mastodon
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = MASTODON_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = MastodonPlatformSpec.metadata
     override val detector: PlatformDetector = MastodonPlatformDetector
     override val methods: List<LoginMethodSpec> =
@@ -91,7 +90,7 @@ public data object MastodonLoginProvider : LoginPlatformProvider {
                     description = it.description,
                     iconUrl = null,
                     domain = it.domain,
-                    type = platformType,
+                    platformId = platformId,
                     bannerUrl = it.proxiedThumbnail,
                     usersCount = it.totalUsers,
                 )
@@ -108,7 +107,7 @@ public data object MastodonLoginProvider : LoginPlatformProvider {
                         description = it.title,
                         iconUrl = it.thumbnail?.url,
                         domain = domain,
-                        type = platformType,
+                        platformId = platformId,
                         bannerUrl = it.thumbnail?.url,
                         usersCount = it.usage?.users?.activeMonth ?: 0,
                     ),
@@ -122,7 +121,7 @@ public data object MastodonLoginProvider : LoginPlatformProvider {
             description = domain,
             iconUrl = null,
             domain = domain,
-            type = platformType,
+            platformId = platformId,
             bannerUrl = null,
             usersCount = 0,
         )
@@ -190,16 +189,16 @@ private class MastodonOAuthLoginHandler(
             val pendingOAuth =
                 pendingRepository
                     .get(
-                        platformType = PlatformType.Mastodon,
+                        platformId = MASTODON_PLATFORM_ID,
                         host = context.host,
                     )?.toMastodonPending()
                     ?: pendingRepository
-                        .latest(PlatformType.Mastodon)
+                        .latest(MASTODON_PLATFORM_ID)
                         ?.toMastodonPending()
                     ?: error("No pending OAuth")
             tryPendingOAuth(pendingOAuth, code)
             pendingRepository.clear(
-                platformType = PlatformType.Mastodon,
+                platformId = MASTODON_PLATFORM_ID,
                 host = pendingOAuth.host,
             )
             context.onSuccess()
@@ -249,7 +248,7 @@ private class MastodonOAuthLoginHandler(
         accountService.addAccount(
             UiAccount(
                 accountKey = accountKey,
-                platformType = PlatformType.Mastodon,
+                platformId = MASTODON_PLATFORM_ID,
             ),
             credential =
                 MastodonCredential(
@@ -299,7 +298,7 @@ private object MastodonLoginStore {
 
 private fun MastodonLoginStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Mastodon,
+        platformId = MASTODON_PLATFORM_ID,
         host = host,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes =

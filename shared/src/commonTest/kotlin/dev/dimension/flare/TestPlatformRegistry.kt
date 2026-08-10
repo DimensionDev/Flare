@@ -12,13 +12,13 @@ import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformCapability
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.model.xqtOldHost
@@ -167,28 +167,29 @@ private fun subscriptionTimelineSpec(): TimelineSpec<SubscriptionTimelineData> =
 private fun unavailableLoader(id: String): Nothing = throw UnsupportedOperationException("$id loader is not available in tests")
 
 private abstract class TestDeepLinkPlatformSpec(
-    final override val type: PlatformType,
+    final override val platformId: String,
     displayName: String,
     icon: UiIcon,
+    final override val isDefaultGuest: Boolean = false,
 ) : PlatformSpec {
-    final override val metadata: PlatformTypeMetadata =
-        PlatformTypeMetadata(
+    final override val metadata: PlatformMetadata =
+        PlatformMetadata(
             displayName = displayName,
             icon = icon,
         )
     final override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 
     final override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
-        throw UnsupportedOperationException("${type.name} data source is not available in tests")
+        throw UnsupportedOperationException("$platformId data source is not available in tests")
 
     final override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not available in tests")
+    ): MicroblogDataSource = throw UnsupportedOperationException("$platformId guest data source is not available in tests")
 }
 
 private data object TestNostrPlatformSpec : TestDeepLinkPlatformSpec(
-    type = PlatformType.Nostr,
+    platformId = "Nostr",
     displayName = "Nostr",
     icon = UiIcon.Nostr,
 ) {
@@ -196,7 +197,7 @@ private data object TestNostrPlatformSpec : TestDeepLinkPlatformSpec(
 }
 
 private data object TestBlueskyPlatformSpec : TestDeepLinkPlatformSpec(
-    type = PlatformType.Bluesky,
+    platformId = "Bluesky",
     displayName = "Bluesky",
     icon = UiIcon.Bluesky,
 ) {
@@ -210,9 +211,10 @@ private data object TestBlueskyPlatformSpec : TestDeepLinkPlatformSpec(
 }
 
 private data object TestMastodonPlatformSpec : TestDeepLinkPlatformSpec(
-    type = PlatformType.Mastodon,
+    platformId = "Mastodon",
     displayName = "Mastodon",
     icon = UiIcon.Mastodon,
+    isDefaultGuest = true,
 ) {
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(
@@ -235,7 +237,7 @@ private data object TestMastodonPlatformSpec : TestDeepLinkPlatformSpec(
 }
 
 private data object TestMisskeyPlatformSpec : TestDeepLinkPlatformSpec(
-    type = PlatformType.Misskey,
+    platformId = "Misskey",
     displayName = "Misskey",
     icon = UiIcon.Misskey,
 ) {
@@ -260,10 +262,12 @@ private data object TestMisskeyPlatformSpec : TestDeepLinkPlatformSpec(
 }
 
 private data object TestXqtPlatformSpec : TestDeepLinkPlatformSpec(
-    type = PlatformType.xQt,
+    platformId = "xQt",
     displayName = "X",
     icon = UiIcon.X,
 ) {
+    override val capabilities: Set<PlatformCapability> = setOf(PlatformCapability.MxgaFiltering)
+
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> {
         val profile =
             listOf(
@@ -295,7 +299,7 @@ private data object TestXqtPlatformSpec : TestDeepLinkPlatformSpec(
 }
 
 private data object TestVvoPlatformSpec : TestDeepLinkPlatformSpec(
-    type = PlatformType.VVo,
+    platformId = "VVo",
     displayName = vvo,
     icon = UiIcon.Weibo,
 ) {

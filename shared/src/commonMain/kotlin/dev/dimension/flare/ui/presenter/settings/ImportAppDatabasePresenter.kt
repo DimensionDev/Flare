@@ -6,6 +6,7 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.model.requireValidPlatformId
 import dev.dimension.flare.ui.presenter.ImportState
 import dev.dimension.flare.ui.presenter.PresenterBase
 
@@ -52,6 +53,7 @@ public class ImportAppDatabasePresenter(
     private fun validateImportData(export: AppDatabaseExport) {
         // Validate account data
         export.accounts.forEach { account ->
+            requireValidPlatformId(account.platformId)
             require(account.credential_json.isNotBlank()) {
                 "Invalid account data: credential_json cannot be empty"
             }

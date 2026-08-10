@@ -17,9 +17,10 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformCapability
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformRegistry
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -30,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.firstOrNull
@@ -56,27 +58,39 @@ internal class AccountRepository internal constructor(
     @Provided internal val platformRegistry: PlatformRegistry,
 ) {
     internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
-        appDatabase
-            .accountDao()
-            .activeAccount()
-            .distinctUntilChangedBy {
-                it?.account_key
-            }.map {
-                it?.toUi()
-            }.map {
-                if (it == null) {
+        combine(
+            appDatabase.accountDao().activeAccount(platformRegistry.all.map { it.platformId }),
+            appDatabase.accountDao().allAccounts(),
+        ) { active, accounts ->
+            when {
+                active != null -> {
+                    UiState.Success(active.toUi(platformRegistry))
+                }
+
+                accounts.isNotEmpty() -> {
+                    UiState.Error(
+                        NoAvailableAccountException(accounts.map { it.platformId }.distinct()),
+                    )
+                }
+
+                else -> {
                     UiState.Error(NoActiveAccountException)
-                } else {
-                    UiState.Success(it)
                 }
             }
+        }.distinctUntilChangedBy { state ->
+            when (state) {
+                is UiState.Success -> state.data.accountKey
+                is UiState.Error -> state.throwable
+                is UiState.Loading -> state
+            }
+        }
     }
     internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
         appDatabase
             .accountDao()
             .sortedAccounts()
             .map {
-                it.map { it.toUi() }.toImmutableList()
+                it.map { it.toUi(platformRegistry) }.toImmutableList()
             }.distinctUntilChanged()
     }
     private val dataSourceCacheMutex = Mutex()
@@ -123,7 +137,7 @@ internal class AccountRepository internal constructor(
                 last_active = Clock.System.now().toEpochMilliseconds(),
             ) ?: DbAccount(
                 account_key = account.accountKey,
-                platform_type = account.platformType,
+                platformId = account.platformId,
                 credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
                 sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
@@ -164,13 +178,18 @@ internal class AccountRepository internal constructor(
             }
         }
 
-    internal fun setActiveAccount(accountKey: MicroBlogKey) =
-        coroutineScope.launch {
+    internal suspend fun setActiveAccount(accountKey: MicroBlogKey) {
+        val account = appDatabase.accountDao().getAccount(accountKey)
+        if (account != null) {
+            if (!platformRegistry.isRegistered(account.platformId)) {
+                throw UnsupportedPlatformException(account.platformId)
+            }
             appDatabase.accountDao().setLastActive(
                 accountKey,
                 Clock.System.now().toEpochMilliseconds(),
             )
         }
+    }
 
     internal fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
@@ -209,7 +228,7 @@ internal class AccountRepository internal constructor(
             if (it == null) {
                 UiState.Error(NoActiveAccountException)
             } else {
-                UiState.Success(it.toUi())
+                UiState.Success(it.toUi(platformRegistry))
             }
         }
 
@@ -218,7 +237,7 @@ internal class AccountRepository internal constructor(
             .accountDao()
             .get(accountKey)
             .firstOrNull()
-            ?.toUi()
+            ?.toUi(platformRegistry)
 
     internal inline fun <reified T : Any> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
         credentialFlow(
@@ -239,6 +258,9 @@ internal class AccountRepository internal constructor(
             }
 
     internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource {
+        if (!account.platformAvailable) {
+            throw UnsupportedPlatformException(account.platformId)
+        }
         val existingDataSource =
             dataSourceCacheMutex.withLock {
                 dataSourceCache[account.accountKey]
@@ -252,7 +274,7 @@ internal class AccountRepository internal constructor(
                 ?: throw NoSuchElementException("Account not found: ${account.accountKey}")
         val dataSource =
             platformRegistry
-                .require(account.platformType)
+                .require(account.platformId)
                 .createDataSource(
                     RepositoryPlatformDataSourceContext(
                         accountKey = account.accountKey,
@@ -298,25 +320,34 @@ internal class AccountRepository internal constructor(
     }
 }
 
-private fun DbAccount.toUi(): UiAccount =
+private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount =
     UiAccount(
         accountKey = account_key,
-        platformType = platform_type,
+        platformId = platformId,
+        platformDisplayName = platformRegistry.metadataOrFallback(platformId).displayName,
+        platformIcon = platformRegistry.metadataOrFallback(platformId).icon,
+        platformAvailable = platformRegistry.isRegistered(platformId),
+        supportsRelayManagement = platformRegistry.supports(platformId, PlatformCapability.RelayManagement),
     )
 
 @HiddenFromObjC
 public data object NoActiveAccountException : Exception("No active account.")
 
+@HiddenFromObjC
+public class NoAvailableAccountException(
+    public val platformIds: List<String>,
+) : Exception("No available account. Unregistered platforms: ${platformIds.joinToString()}")
+
 @Immutable
 public data class LoginExpiredException(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
 ) : Exception("Login expired.")
 
 @Immutable
 public data class RequireReLoginException(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
 ) : Exception("Login required.")
 
 @Composable
@@ -369,7 +400,7 @@ internal fun accountServiceFlow(
     when (accountType) {
         AccountType.Guest -> {
             flowOf(
-                repository.platformRegistry.require(PlatformType.Mastodon).guestDataSource(
+                repository.platformRegistry.defaultGuest.guestDataSource(
                     host = "mastodon.social",
                     locale = Locale.language,
                 ),
@@ -378,7 +409,7 @@ internal fun accountServiceFlow(
 
         is AccountType.GuestHost -> {
             flowOf(
-                repository.platformRegistry.require(PlatformType.Mastodon).guestDataSource(
+                repository.platformRegistry.defaultGuest.guestDataSource(
                     host = accountType.host,
                     locale = Locale.language,
                 ),
@@ -403,6 +434,7 @@ internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> 
 internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
     repository.allAccounts.map { accounts ->
         accounts
+            .filter { it.platformAvailable }
             .map {
                 repository.getOrCreateDataSource(it)
             }.toImmutableList()

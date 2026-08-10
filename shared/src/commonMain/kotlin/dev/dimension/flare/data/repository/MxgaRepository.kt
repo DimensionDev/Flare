@@ -5,7 +5,8 @@ import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.network.httpClientEngine
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.PlatformCapability
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
 import io.ktor.client.HttpClient
@@ -288,9 +289,12 @@ internal data class MxgaSignals(
     val text: String,
 )
 
-internal fun UiTimelineV2.isMxgaMatch(snapshot: MxgaSnapshot): Boolean {
+internal fun UiTimelineV2.isMxgaMatch(
+    snapshot: MxgaSnapshot,
+    platformRegistry: PlatformRegistry,
+): Boolean {
     val post = contentPostOrNull() ?: return false
-    if (post.platformType != PlatformType.xQt) return false
+    if (!platformRegistry.supports(post.platformId, PlatformCapability.MxgaFiltering)) return false
     val user = post.user ?: return false
     return snapshot.matches(
         MxgaSignals(

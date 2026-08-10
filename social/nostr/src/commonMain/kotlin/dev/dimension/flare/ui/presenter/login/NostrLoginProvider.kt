@@ -1,18 +1,17 @@
 package dev.dimension.flare.ui.presenter.login
 
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrPlatformDetector
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.defaultNostrRelays
+import dev.dimension.flare.data.platform.NOSTR_PLATFORM_ID
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstance
@@ -34,8 +33,8 @@ public data object NostrLoginProvider :
     LoginPlatformProvider {
     private val amberSignerBridge: AmberSignerBridge by koinInject()
 
-    override val platformType: PlatformType = PlatformType.Nostr
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = NOSTR_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = NostrPlatformSpec.metadata
     override val detector: PlatformDetector = NostrPlatformDetector
     override val methods: List<LoginMethodSpec>
@@ -78,7 +77,7 @@ public data object NostrLoginProvider :
                                 "it is super simple and scalable and therefore has a chance of working.",
                         iconUrl = null,
                         domain = "nostr",
-                        type = platformType,
+                        platformId = platformId,
                         bannerUrl = null,
                         usersCount = 0,
                     ),
@@ -87,7 +86,7 @@ public data object NostrLoginProvider :
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${platformType.name} is not supported yet")
+        throw UnsupportedOperationException("$platformId is not supported yet")
 
     override fun createHandler(context: LoginContext): LoginMethodHandler =
         when (context.methodType) {
@@ -303,7 +302,7 @@ private class NostrExternalSignerLoginHandler(
                 account =
                     UiAccount(
                         accountKey = accountKey,
-                        platformType = PlatformType.Nostr,
+                        platformId = NOSTR_PLATFORM_ID,
                     ),
                 credential =
                     NostrCredential(
@@ -361,7 +360,7 @@ private suspend fun loginWith(
         account =
             UiAccount(
                 accountKey = accountKey,
-                platformType = PlatformType.Nostr,
+                platformId = NOSTR_PLATFORM_ID,
             ),
         credential =
             NostrCredential(

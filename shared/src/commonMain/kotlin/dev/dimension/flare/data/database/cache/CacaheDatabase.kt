@@ -8,7 +8,7 @@ import androidx.room3.RoomDatabaseConstructor
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 
-internal const val CACHE_DATABASE_VERSION = 44
+internal const val CACHE_DATABASE_VERSION = 46
 
 @Database(
     entities = [
@@ -36,7 +36,6 @@ internal const val CACHE_DATABASE_VERSION = 44
 )
 @ColumnTypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
-    dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
     dev.dimension.flare.data.database.adapter.AccountTypeConverter::class,
     dev.dimension.flare.data.database.cache.model.EmojiContentConverter::class,
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,

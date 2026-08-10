@@ -4,7 +4,7 @@ import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,7 +12,9 @@ import kotlinx.serialization.Serializable
 internal data class DbAccount(
     @PrimaryKey val account_key: MicroBlogKey,
     val credential_json: String,
-    val platform_type: PlatformType,
+    @SerialName("platform_type")
+    @ColumnInfo(name = "platform_type")
+    val platformId: String,
     val last_active: Long,
     @ColumnInfo(
         defaultValue = "0",

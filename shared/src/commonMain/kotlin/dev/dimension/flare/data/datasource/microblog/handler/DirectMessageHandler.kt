@@ -158,7 +158,7 @@ public class DirectMessageHandler(
         message: String,
     ) {
         coroutineScope.launch {
-            val tempMessage = createSendingDirectMessage(accountKey, roomKey, message, loader.platformType)
+            val tempMessage = createSendingDirectMessage(accountKey, roomKey, message, loader.platformId)
             database.messageDao().insertMessages(listOf(tempMessage))
             tryRun {
                 loader.sendMessage(
@@ -340,7 +340,7 @@ public class DirectMessageHandler(
             rooms.map { room ->
                 DbMessageRoom(
                     roomKey = room.key,
-                    platformType = loader.platformType,
+                    platformId = loader.platformId,
                     messageKey = room.lastMessage?.key,
                 )
             },
@@ -392,7 +392,7 @@ public class DirectMessageHandler(
             listOf(
                 DbMessageRoom(
                     roomKey = roomKey,
-                    platformType = loader.platformType,
+                    platformId = loader.platformId,
                     messageKey = latest?.messageKey,
                 ),
             ),

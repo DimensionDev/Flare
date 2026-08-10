@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.platform.NOSTR_PLATFORM_ID
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrSignerCredential
 import dev.dimension.flare.data.platform.effectivePubkeyHex
@@ -14,7 +15,6 @@ import dev.dimension.flare.data.platform.effectiveSigner
 import dev.dimension.flare.data.platform.normalized
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
@@ -596,6 +596,7 @@ internal class NostrService(
     }
 
     internal suspend fun loadProfile(targetPubkey: String): UiProfile {
+        val cachedProfile = cache.getProfiles(listOf(targetPubkey))[targetPubkey]
         val metadata =
             loadMetadata(
                 authors = listOf(targetPubkey),
@@ -603,6 +604,7 @@ internal class NostrService(
         return profileOf(
             pubKey = targetPubkey,
             metadata = metadata,
+            cachedProfile = cachedProfile,
         )
     }
 
@@ -757,6 +759,7 @@ internal class NostrService(
                 profileOf(
                     pubKey = pubkey,
                     metadata = metadata,
+                    cachedProfile = null,
                 )
             }.sortedBy { profile ->
                 profile.name.raw.indexOf(normalizedQuery, ignoreCase = true).let {
@@ -1201,6 +1204,7 @@ internal class NostrService(
                         profileOf(
                             pubKey = pubKey,
                             metadata = metadata[pubKey],
+                            cachedProfile = null,
                         )
                     }
                 }
@@ -1637,11 +1641,7 @@ internal class NostrService(
                 when (event) {
                     is TextNoteEvent -> {
                         event.toUi(
-                            profile =
-                                profiles[event.pubKey] ?: profileOf(
-                                    event.pubKey,
-                                    null,
-                                ),
+                            profile = profiles.getValue(event.pubKey),
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
@@ -1673,11 +1673,7 @@ internal class NostrService(
             when (event) {
                 is TextNoteEvent -> {
                     event.toUiTimelineItem(
-                        profile =
-                            profiles[event.pubKey] ?: profileOf(
-                                event.pubKey,
-                                null,
-                            ),
+                        profile = profiles.getValue(event.pubKey),
                         eventsById = eventsById,
                         profiles = profiles,
                         interactionStats = interactionStats,
@@ -1734,11 +1730,7 @@ internal class NostrService(
                 when (event) {
                     is TextNoteEvent -> {
                         event.toUi(
-                            profile =
-                                profiles[event.pubKey] ?: profileOf(
-                                    event.pubKey,
-                                    null,
-                                ),
+                            profile = profiles.getValue(event.pubKey),
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
@@ -1791,7 +1783,7 @@ internal class NostrService(
         val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
         val contentWarning = contentWarningReason()?.toUiPlainText()?.let { UiTranslatableText(original = it) }
         return UiTimelineV2.Post(
-            platformType = PlatformType.Nostr,
+            platformId = NOSTR_PLATFORM_ID,
             images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
             contentWarning = contentWarning,
@@ -2212,7 +2204,7 @@ internal class NostrService(
     ): UiTimelineV2? {
         val boostedEvent = resolvedBoostedEvent(eventsById)
         val boostedPost = boostedEvent?.let { resolveEvent(it, visited) } ?: return null
-        val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+        val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
         val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey)
         return UiTimelineV2.TimelinePostItem(
@@ -2238,7 +2230,7 @@ internal class NostrService(
     ): UiTimelineV2? {
         val boostedEvent = resolvedBoostedEvent(eventsById)
         val boostedPost = boostedEvent?.let { resolveEvent(it, visited) } ?: return null
-        val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+        val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
         val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey)
         return UiTimelineV2.TimelinePostItem(
@@ -2348,7 +2340,7 @@ internal class NostrService(
             is TextNoteEvent -> {
                 val post =
                     toUiTimelineItem(
-                        profile = profiles[pubKey] ?: profileOf(pubKey, null),
+                        profile = profiles.getValue(pubKey),
                         eventsById = eventsById,
                         profiles = profiles,
                         interactionStats = interactionStats,
@@ -2360,10 +2352,7 @@ internal class NostrService(
                 post.withPresentationMessage(
                     notificationMessage(
                         actor =
-                            post.asTimelinePostItem()?.displayPost?.user ?: profiles[pubKey] ?: profileOf(
-                                pubKey,
-                                null,
-                            ),
+                            post.asTimelinePostItem()?.displayPost?.user ?: profiles.getValue(pubKey),
                         statusKey = MicroBlogKey(id, NOSTR_HOST),
                         createdAt = createdAt,
                         icon = if (hasParent) UiIcon.Reply else UiIcon.Mention,
@@ -2392,7 +2381,7 @@ internal class NostrService(
                         ?: return null
                 target.withPresentationMessage(
                     notificationMessage(
-                        actor = profiles[pubKey] ?: profileOf(pubKey, null),
+                        actor = profiles.getValue(pubKey),
                         statusKey = MicroBlogKey(id, NOSTR_HOST),
                         createdAt = createdAt,
                         icon = UiIcon.Like,
@@ -2411,7 +2400,7 @@ internal class NostrService(
                 val boosted =
                     resolvedBoostedEvent(eventsById)?.let { resolveEvent(it, setOf(id)) }
                         ?: return null
-                val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+                val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
                 UiTimelineV2.TimelinePostItem(
                     post = boosted.toRepostWrapperPost(actor, wrapperStatusKey),
@@ -2440,7 +2429,7 @@ internal class NostrService(
                 val boosted =
                     resolvedBoostedEvent(eventsById)?.let { resolveEvent(it, setOf(id)) }
                         ?: return null
-                val actor = profiles[pubKey] ?: profileOf(pubKey, null)
+                val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
                 UiTimelineV2.TimelinePostItem(
                     post = boosted.toRepostWrapperPost(actor, wrapperStatusKey),
@@ -2590,16 +2579,23 @@ internal class NostrService(
             event is RepostEvent ||
             event is GenericRepostEvent
 
-    private fun profileOf(
+    internal fun profileOf(
         pubKey: String,
         metadata: UserMetadata?,
+        cachedProfile: UiProfile?,
     ): UiProfile {
         val bestName = metadata?.bestName().orEmpty()
         val npub = nostrBech32PublicKey(pubKey)
+        val defaultHandle = npub.take(16)
         val handleRaw =
             metadata?.name?.takeIf { it.isNotBlank() }
                 ?: metadata?.nip05?.substringBefore("@")?.takeIf { it.isNotBlank() }
-                ?: bestName.ifBlank { npub.take(16) }
+                ?: bestName.takeIf { it.isNotBlank() }
+                ?: cachedProfile?.handle?.raw?.takeIf { it.isNotBlank() }
+                ?: defaultHandle
+        val name =
+            bestName.takeIf { it.isNotBlank() }
+                ?: cachedProfile?.name?.raw.orEmpty()
         return UiProfile(
             key = MicroBlogKey(pubKey, NOSTR_HOST),
             handle =
@@ -2608,8 +2604,9 @@ internal class NostrService(
                     host = NOSTR_HOST,
                 ),
             avatar = metadata?.picture.toUiImage(),
-            nameInternal = bestName.ifBlank { npub.take(16) }.toUiPlainText(),
-            platformType = PlatformType.Nostr,
+            nameInternal = name.toUiPlainText(),
+            platformId = NOSTR_PLATFORM_ID,
+            platformIcon = dev.dimension.flare.ui.model.UiIcon.Nostr,
             clickEvent =
                 ClickEvent.Deeplink(
                     DeeplinkRoute.Profile.User(

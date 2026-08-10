@@ -783,7 +783,7 @@ private fun UiTimelineV2.Post.toSubscriptionPostToolText(): String =
     buildString {
         appendLine("itemType: post")
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("statusKey: $statusKey")
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")

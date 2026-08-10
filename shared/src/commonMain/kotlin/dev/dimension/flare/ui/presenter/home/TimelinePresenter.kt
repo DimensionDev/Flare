@@ -48,6 +48,7 @@ import dev.dimension.flare.data.repository.isMxgaMatch
 import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -86,6 +87,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
     private val preTranslationService: PreTranslationService by koinInject()
     private val settingsRepository: SettingsRepository by koinInject()
     private val mxgaRepository: MxgaRepository by koinInject()
+    private val platformRegistry: PlatformRegistry by koinInject()
 
     private val localFilterRepository: LocalFilterRepository by koinInject()
     private val inAppNotification: InAppNotification by koinInject()
@@ -173,7 +175,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                             .filter { item ->
                                 item.matchesKeywordFilters(filterList) &&
                                     item.matchesTimelineFilter(timelineFilterConfig) &&
-                                    (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot))
+                                    (!mxgaEnabled || !item.isMxgaMatch(mxgaSnapshot, platformRegistry))
                             }.map {
                                 transform(it)
                             }

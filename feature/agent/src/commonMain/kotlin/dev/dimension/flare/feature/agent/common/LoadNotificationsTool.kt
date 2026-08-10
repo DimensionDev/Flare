@@ -44,7 +44,7 @@ internal class LoadNotificationsTool(
 
     override suspend fun execute(args: Args): String {
         val filter = args.filter.toNotificationFilterOrNull() ?: return "Unsupported notification filter: ${args.filter}."
-        val targets = session.notificationTargets.resolveNotificationTargets(args)
+        val targets = session.notificationTargets.resolveNotificationTargets(args, session.platformRegistry)
         if (targets.isEmpty()) {
             return noNotificationTargetsMessage(args)
         }
@@ -55,7 +55,7 @@ internal class LoadNotificationsTool(
                 unsupportedTargets.forEach { target ->
                     appendLine(
                         "- accountKey=${target.accountKey}, " +
-                            "platform=${target.platformType.name}, " +
+                            "platform=${target.platformId}, " +
                             "supported=${target.dataSource.supportedNotificationFilter.joinToString()}",
                     )
                 }
@@ -106,7 +106,7 @@ internal class LoadNotificationsTool(
         return buildString {
             appendLine("Notifications")
             appendLine("filter: ${filter.name}")
-            appendLine("accounts loaded: ${targets.joinToString { "${it.platformType.name}:${it.accountKey}" }}")
+            appendLine("accounts loaded: ${targets.joinToString { "${it.platformId}:${it.accountKey}" }}")
             appendLine("source: live notification timeline data source; local cache not used")
             appendLine()
             if (items.isEmpty()) {
@@ -115,7 +115,7 @@ internal class LoadNotificationsTool(
             }
             results.forEach { result ->
                 appendLine("Account: ${result.target.accountKey}")
-                appendLine("Platform: ${result.target.platformType.name}")
+                appendLine("Platform: ${result.target.platformId}")
                 if (result.items.isEmpty()) {
                     appendLine("No notification items were returned for this account.")
                 } else {
@@ -140,15 +140,18 @@ private data class NotificationToolResult(
     val items: List<UiTimelineV2>,
 )
 
-private fun List<AgentNotificationTarget>.resolveNotificationTargets(args: LoadNotificationsTool.Args): List<AgentNotificationTarget> {
+private fun List<AgentNotificationTarget>.resolveNotificationTargets(
+    args: LoadNotificationsTool.Args,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
+): List<AgentNotificationTarget> {
     val requestedAccount =
         args.accountId
             .trim()
             .takeIf { it.isNotBlank() }
             ?.let { MicroBlogKey(id = it, host = args.accountHost.trim()) }
     val platformTargets =
-        distinctBy { it.accountKey to it.platformType }
-            .filterNotificationTargetsByPlatformNames(args.platforms)
+        distinctBy { it.accountKey to it.platformId }
+            .filterNotificationTargetsByPlatformNames(args.platforms, platformRegistry)
     return when (requestedAccount) {
         null -> platformTargets
         else -> platformTargets.filter { it.accountKey == requestedAccount }
@@ -227,7 +230,7 @@ private fun UiTimelineV2.Post.toNotificationPostToolText(): String =
     buildString {
         appendLine("itemType: post")
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("statusKey: $statusKey")
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
@@ -287,7 +290,7 @@ private fun UiTimelineV2.User.toNotificationUserToolText(): String =
         message?.let { append(it.toNotificationMessageSummary()) }
         appendLine("itemType: user")
         appendLine("attachmentRef: ${value.agentAttachmentMarker()}")
-        appendLine("platform: ${value.platformType.name}")
+        appendLine("platform: ${value.platformId}")
         appendLine("userKey: ${value.key}")
         appendLine("displayName: ${value.name.raw}")
         appendLine("handle: ${value.handle.raw}")

@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -95,14 +94,14 @@ internal class ComposePostTool(
         val maxLength = config.text?.maxLength?.firstOrNull()
         val remainingLength = config.text?.remainingLength(content)?.firstOrNull()
         if (maxLength != null && remainingLength != null && remainingLength < 0) {
-            return "Post content is ${maxLength - remainingLength} characters, but ${target.platformType.name} allows " +
+            return "Post content is ${maxLength - remainingLength} characters, but ${target.platformId} allows " +
                 "at most $maxLength for ${action.label}."
         }
         if (visibility != UiTimelineV2.Post.Visibility.Public && config.visibility == null) {
-            return "${target.platformType.name} does not expose visibility selection for ${action.label} posts."
+            return "${target.platformId} does not expose visibility selection for ${action.label} posts."
         }
         if (args.spoilerText.isNotBlank() && config.contentWarning == null) {
-            return "${target.platformType.name} does not expose content warning selection for ${action.label} posts."
+            return "${target.platformId} does not expose content warning selection for ${action.label} posts."
         }
 
         val data =
@@ -140,7 +139,7 @@ internal class ComposePostTool(
             appendLine("Post sent successfully.")
             appendLine("Action: ${action.label}")
             appendLine("Account: ${target.accountKey}")
-            appendLine("Platform: ${target.platformType.name}")
+            appendLine("Platform: ${target.platformId}")
             reference?.let {
                 appendLine("Target status: ${it.statusKey}")
             }
@@ -158,7 +157,7 @@ internal class ComposePostTool(
             if (args.platforms.isEmpty()) {
                 session.composeTargets
             } else {
-                session.composeTargets.filterComposeTargetsByPlatformNames(args.platforms)
+                session.composeTargets.filterComposeTargetsByPlatformNames(args.platforms, session.platformRegistry)
             }
         return when {
             requestedAccount != null -> targets.firstOrNull { it.accountKey == requestedAccount }
@@ -248,7 +247,7 @@ internal class ComposePostTool(
             postTargets.forEach { post ->
                 appendLine("- optionId=post:${post.agentAttachmentRef()}")
                 appendLine("  optionKind=post")
-                appendLine("  platform=${post.platformType.name}")
+                appendLine("  platform=${post.platformId}")
                 appendLine("  targetStatus=${post.statusKey}")
                 appendLine("  author=${post.user?.composeDisplayLabel().orEmpty()}")
                 appendLine("  summary=${post.content.original.raw.take(120)}")
@@ -269,12 +268,12 @@ internal class ComposePostTool(
             if (args.platforms.isEmpty()) {
                 session.composeTargets
             } else {
-                session.composeTargets.filterComposeTargetsByPlatformNames(args.platforms)
+                session.composeTargets.filterComposeTargetsByPlatformNames(args.platforms, session.platformRegistry)
             }
         if (targets.isEmpty()) {
             return "No compose-capable account matches the requested platforms: ${args.platforms.joinToString()}."
         }
-        val platformGroups = targets.groupBy { it.platformType }
+        val platformGroups = targets.groupBy { it.platformId }
         if (args.platforms.isEmpty() && platformGroups.size > 1) {
             return platformSelectionMessage(
                 args = args,
@@ -304,7 +303,7 @@ internal class ComposePostTool(
                                     appendLine("action=${action.label}")
                                     appendLine("accountId=${target.accountKey.id}")
                                     appendLine("accountHost=${target.accountKey.host}")
-                                    appendLine("platform=${target.platformType.name}")
+                                    appendLine("platform=${target.platformId}")
                                     reference?.let {
                                         appendLine("targetStatusId=${it.statusKey.id}")
                                         appendLine("targetStatusHost=${it.statusKey.host}")
@@ -328,7 +327,7 @@ internal class ComposePostTool(
                 appendLine("- optionId=account:${target.accountKey}")
                 appendLine("  optionKind=account")
                 appendLine("  accountKey=${target.accountKey}")
-                appendLine("  platform=${target.platformType.name}")
+                appendLine("  platform=${target.platformId}")
                 appendLine("  displayName=${userPreview?.name?.raw.orEmpty()}")
                 appendLine("  handle=${userPreview?.handle?.canonical.orEmpty()}")
             }
@@ -340,22 +339,22 @@ internal class ComposePostTool(
         content: String,
         action: ComposeAction,
         reference: ComposeReference?,
-        platformGroups: Map<PlatformType, List<AgentComposeTarget>>,
+        platformGroups: Map<String, List<AgentComposeTarget>>,
     ): String {
         val request =
             AgentPendingInputRequest(
                 requestId = "compose-platform:${action.label}:${content.hashCode()}:${reference?.statusKey}",
                 options =
                     platformGroups.entries
-                        .sortedBy { it.key.name }
-                        .map { (platformType, targets) ->
+                        .sortedBy { it.key }
+                        .map { (platformId, targets) ->
                             AgentPendingInputRequest.Option(
-                                id = "platform:${platformType.name}",
+                                id = "platform:$platformId",
                                 value =
                                     buildString {
                                         appendLine("event=compose_platform_selected")
                                         appendLine("action=${action.label}")
-                                        appendLine("platforms=${platformType.name}")
+                                        appendLine("platforms=$platformId")
                                         reference?.let {
                                             appendLine("targetStatusId=${it.statusKey.id}")
                                             appendLine("targetStatusHost=${it.statusKey.host}")
@@ -376,11 +375,11 @@ internal class ComposePostTool(
             appendLine("inputRequestId=${request.requestId}")
             appendLine("inputRequestOptions:")
             platformGroups.entries
-                .sortedBy { it.key.name }
-                .forEach { (platformType, targets) ->
-                    appendLine("- optionId=platform:${platformType.name}")
+                .sortedBy { it.key }
+                .forEach { (platformId, targets) ->
+                    appendLine("- optionId=platform:$platformId")
                     appendLine("  optionKind=platform")
-                    appendLine("  platform=${platformType.name}")
+                    appendLine("  platform=$platformId")
                     appendLine("  accountCount=${targets.size}")
                 }
         }.trim()
@@ -405,7 +404,7 @@ internal class ComposePostTool(
                                 appendLine("action=${action.label}")
                                 appendLine("accountId=${accountKey.id}")
                                 appendLine("accountHost=${accountKey.host}")
-                                appendLine("platform=${platformType.name}")
+                                appendLine("platform=$platformId")
                                 reference?.let {
                                     appendLine("targetStatusId=${it.statusKey.id}")
                                     appendLine("targetStatusHost=${it.statusKey.host}")
@@ -446,7 +445,7 @@ internal class ComposePostTool(
             appendLine("accountKey=$accountKey")
             appendLine("accountId=${accountKey.id}")
             appendLine("accountHost=${accountKey.host}")
-            appendLine("platform=${platformType.name}")
+            appendLine("platform=$platformId")
             appendLine("visibility=${data.visibility.name}")
             reference?.let {
                 appendLine("targetStatus=${it.statusKey}")
@@ -475,7 +474,7 @@ internal class ComposePostTool(
         userPreview: UiProfile?,
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            platformType = platformType,
+            platformId = platformId,
             images = persistentListOf(),
             sensitive = data.sensitive,
             contentWarning = data.spoilerText?.toUiPlainText()?.let { UiTranslatableText(original = it) },
@@ -501,7 +500,7 @@ internal class ComposePostTool(
     private suspend fun AgentComposeTarget.loadUserPreview(): UiProfile? =
         session.userTargets
             .firstOrNull { target ->
-                target.accountKey == accountKey && target.platformType == platformType
+                target.accountKey == accountKey && target.platformId == platformId
             }?.let { target ->
                 runCatching {
                     target.loadUserById(accountKey.id)
@@ -519,7 +518,7 @@ internal class ComposePostTool(
                 .filterIsInstance<AgentMessagePart.PostCard>()
                 .map { it.post.agentDisplayPost() }
                 .forEach(::add)
-        }.distinctBy { it.platformType to it.statusKey }
+        }.distinctBy { it.platformId to it.statusKey }
 
     private suspend fun findPostByRef(ref: String): UiTimelineV2.Post? {
         val normalizedRef = ref.normalizedPostRef()
@@ -533,7 +532,7 @@ internal class ComposePostTool(
             post.statusKey == key
         }
 
-    private fun AgentComposeTarget.composeAccountLabel(): String = "${platformType.name} / $accountKey"
+    private fun AgentComposeTarget.composeAccountLabel(): String = "$platformId / $accountKey"
 
     private fun UiProfile.composeDisplayLabel(): String =
         listOf(
@@ -615,9 +614,9 @@ private fun UiTimelineV2.Post.agentPostRefAliases(): Set<String> =
         add(statusKey.toString())
         add("${statusKey.host}:${statusKey.id}")
         add("${statusKey.id}:${statusKey.host}")
-        add("${platformType.name}:$statusKey")
-        add("${platformType.name}:${statusKey.host}:${statusKey.id}")
-        add("${platformType.name}:${statusKey.id}:${statusKey.host}")
+        add("$platformId:$statusKey")
+        add("$platformId:${statusKey.host}:${statusKey.id}")
+        add("$platformId:${statusKey.id}:${statusKey.host}")
     }
 
 private fun String.normalizedPostRef(): String =

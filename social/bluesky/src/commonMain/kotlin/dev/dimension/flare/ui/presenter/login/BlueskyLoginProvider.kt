@@ -12,14 +12,13 @@ import dev.dimension.flare.data.network.bluesky.delegationControllerDidOrNull
 import dev.dimension.flare.data.network.bluesky.missingFlareOAuthScopes
 import dev.dimension.flare.data.network.bluesky.repairTranquilDelegationScopes
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstance
@@ -49,8 +48,8 @@ private const val PASSWORD_FIELD = "password"
 private const val OTP_FIELD = "otp"
 
 public data object BlueskyLoginProvider : LoginPlatformProvider {
-    override val platformType: PlatformType = PlatformType.Bluesky
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = BLUESKY_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = BlueskyPlatformSpec.metadata
     override val detector: PlatformDetector = BlueskyPlatformDetector
     override val methods: List<LoginMethodSpec> =
@@ -80,7 +79,7 @@ public data object BlueskyLoginProvider : LoginPlatformProvider {
                                 "and create content, without a single intermediary.",
                         iconUrl = null,
                         domain = "bsky.social",
-                        type = platformType,
+                        platformId = platformId,
                         bannerUrl = null,
                         usersCount = 0,
                     ),
@@ -89,7 +88,7 @@ public data object BlueskyLoginProvider : LoginPlatformProvider {
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${platformType.name} is not supported yet")
+        throw UnsupportedOperationException("$platformId is not supported yet")
 
     override fun createHandler(context: LoginContext): LoginMethodHandler =
         when (context.methodType) {
@@ -268,7 +267,7 @@ private class BlueskyPasswordLoginHandler(
             account =
                 UiAccount(
                     accountKey = accountKey,
-                    platformType = PlatformType.Bluesky,
+                    platformId = BLUESKY_PLATFORM_ID,
                 ),
             credential = credential,
             serializer = BlueskyCredential.serializer(),
@@ -377,7 +376,7 @@ private class BlueskyOAuthLoginHandler(
             val state = Url(value).parameters["state"]
             val pending =
                 pendingRepository
-                    .all(PlatformType.Bluesky)
+                    .all(BLUESKY_PLATFORM_ID)
                     .firstOrNull { it.attributes["state"] == state }
                     ?: error("No pending authorization request")
             resumeOAuth(
@@ -519,7 +518,7 @@ private class BlueskyOAuthLoginHandler(
             account =
                 UiAccount(
                     accountKey = accountKey,
-                    platformType = PlatformType.Bluesky,
+                    platformId = BLUESKY_PLATFORM_ID,
                 ),
             credential = credential,
             serializer = BlueskyCredential.serializer(),
@@ -572,7 +571,7 @@ private fun OAuthAuthorizationRequest.toPlatformOAuthPending(
     redirectUri: String,
 ): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
         host = host,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes =

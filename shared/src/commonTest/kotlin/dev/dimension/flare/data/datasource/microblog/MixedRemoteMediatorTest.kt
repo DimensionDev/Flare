@@ -46,7 +46,6 @@ import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
@@ -1761,7 +1760,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         statusKey = MicroBlogKey("platform-status", "x.com"),
                         text = "source content",
                     ).copy(
-                        platformType = PlatformType.xQt,
+                        platformId = "xQt",
                         content =
                             UiTranslatableText(
                                 original = "source content".toUiPlainText(),
@@ -1855,7 +1854,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         statusKey = MicroBlogKey("excluded-platform-status", "x.com"),
                         text = "source content",
                     ).copy(
-                        platformType = PlatformType.xQt,
+                        platformId = "xQt",
                         sourceLanguages = persistentListOf(excludedLanguage),
                         content =
                             UiTranslatableText(
@@ -2338,7 +2337,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 ),
             avatar = "https://${key.host}/${key.id}.png",
             nameInternal = name.toUiPlainText(),
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             clickEvent = ClickEvent.Noop,
             banner = null,
             description = null,
@@ -2366,7 +2365,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     )
                 } ?: persistentListOf()
         return UiTimelineV2.Post(
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,

@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -10,6 +9,25 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class UiProfileMergeTest {
+    @Test
+    fun `blank identity keeps richer profile data`() {
+        val existing =
+            createProfile(
+                handle = "alice",
+                name = "Alice",
+            )
+        val incomplete =
+            createProfile(
+                handle = "",
+                name = "",
+            )
+
+        val merged = incomplete.mergeWith(existing)
+
+        assertEquals("alice", merged.handle.raw)
+        assertEquals("Alice", merged.name.raw)
+    }
+
     @Test
     fun `merge keeps existing xqt location when newer profile omits it`() {
         val existing =
@@ -61,18 +79,21 @@ class UiProfileMergeTest {
         assertEquals("Tokyo", bottomContent.items.getValue(UiProfile.BottomContent.Iconify.Icon.Location).raw)
     }
 
-    private fun createProfile(bottomContent: UiProfile.BottomContent?) =
-        UiProfile(
-            key = MicroBlogKey(id = "user", host = "x.com"),
-            handle = UiHandle(raw = "user", host = "x.com"),
-            avatar = "https://example.com/avatar.jpg",
-            nameInternal = "User".toUiPlainText(),
-            platformType = PlatformType.xQt,
-            clickEvent = ClickEvent.Noop,
-            banner = null,
-            description = null,
-            matrices = UiProfile.Matrices(fansCount = 1, followsCount = 2, statusesCount = 3),
-            mark = persistentListOf(),
-            bottomContent = bottomContent,
-        )
+    private fun createProfile(
+        bottomContent: UiProfile.BottomContent? = null,
+        handle: String = "user",
+        name: String = "User",
+    ) = UiProfile(
+        key = MicroBlogKey(id = "user", host = "x.com"),
+        handle = UiHandle(raw = handle, host = "x.com"),
+        avatar = "https://example.com/avatar.jpg",
+        nameInternal = name.toUiPlainText(),
+        platformId = "xQt",
+        clickEvent = ClickEvent.Noop,
+        banner = null,
+        description = null,
+        matrices = UiProfile.Matrices(fansCount = 1, followsCount = 2, statusesCount = 3),
+        mark = persistentListOf(),
+        bottomContent = bottomContent,
+    )
 }

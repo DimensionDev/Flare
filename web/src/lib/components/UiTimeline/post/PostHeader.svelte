@@ -5,7 +5,7 @@
 	import type { UiTimelineV2Post } from '@flare/web-presenters/timeline.svelte';
 	import PostAvatar from './PostAvatar.svelte';
 	import RichText from '$lib/components/RichText.svelte';
-	import { platformIcon, translationLabel, visibilityIcon, visibilityLabel } from './postUtils';
+	import { translationLabel, visibilityIcon, visibilityLabel } from './postUtils';
 
 	let {
 		post,
@@ -88,8 +88,8 @@
 				</span>
 			{/if}
 			{#if appearance.showPlatformLogo}
-				<span class="meta-icon" title={post.platformType}>
-					<FaIcon name={platformIcon(post.platformType)} size={14} />
+				<span class="meta-icon" title={post.platformId}>
+					<FaIcon name={post.platformIcon} size={14} />
 				</span>
 			{/if}
 			{#if !detailHeader}

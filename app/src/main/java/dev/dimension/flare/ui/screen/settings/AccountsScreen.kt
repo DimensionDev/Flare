@@ -58,7 +58,7 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
@@ -69,6 +69,8 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.toImageVector
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isError
@@ -250,7 +252,7 @@ internal fun AccountsScreen(
                                                 showMenu = false
                                             },
                                         ) {
-                                            if (account.platformType == PlatformType.Nostr) {
+                                            if (account.supportsRelayManagement) {
                                                 DropdownMenuItem(
                                                     text = {
                                                         Text(
@@ -439,7 +441,9 @@ fun AccountItem(
                     elevation = elevation,
                     shapes = shapes,
                     content = {
-                        if (throwable is LoginExpiredException) {
+                        if (throwable is UnsupportedPlatformException) {
+                            Text(text = throwable.platformId)
+                        } else if (throwable is LoginExpiredException) {
                             Text(
                                 text =
                                     stringResource(
@@ -452,15 +456,26 @@ fun AccountItem(
                         }
                     },
                     leadingContent = {
-                        ThemedIcon(
-                            FontAwesomeIcons.Solid.FaceSadTear,
-                            contentDescription = stringResource(id = R.string.account_item_error_title),
-                            color = ThemeIconData.Color.ImperialMagenta,
-                            size = avatarSize,
-                        )
+                        if (throwable is UnsupportedPlatformException) {
+                            ThemedIcon(
+                                UiIcon.World.toImageVector(),
+                                contentDescription = throwable.platformId,
+                                color = ThemeIconData.Color.ImperialMagenta,
+                                size = avatarSize,
+                            )
+                        } else {
+                            ThemedIcon(
+                                FontAwesomeIcons.Solid.FaceSadTear,
+                                contentDescription = stringResource(id = R.string.account_item_error_title),
+                                color = ThemeIconData.Color.ImperialMagenta,
+                                size = avatarSize,
+                            )
+                        }
                     },
                     supportingContent = {
-                        if (throwable is LoginExpiredException) {
+                        if (throwable is UnsupportedPlatformException) {
+                            Text(text = throwable.accountKey?.toString() ?: throwable.platformId)
+                        } else if (throwable is LoginExpiredException) {
                             Text(text = throwable.accountKey.toString())
                         } else {
                             Text(text = stringResource(id = R.string.account_item_error_message))
@@ -474,7 +489,7 @@ fun AccountItem(
                                         toRelogin(
                                             ReloginTarget(
                                                 accountKey = throwable.accountKey,
-                                                platformType = throwable.platformType,
+                                                platformId = throwable.platformId,
                                             ),
                                         )
                                     },

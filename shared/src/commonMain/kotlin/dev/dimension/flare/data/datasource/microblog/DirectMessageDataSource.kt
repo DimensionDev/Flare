@@ -5,7 +5,6 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.datasource.microblog.handler.DirectMessageHandler
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
@@ -72,8 +71,8 @@ internal fun createSendingDirectMessage(
     accountKey: MicroBlogKey,
     roomKey: MicroBlogKey,
     message: String,
-    platformType: PlatformType,
-    user: UiProfile = fallbackDirectMessageUser(accountKey, platformType),
+    platformId: String,
+    user: UiProfile = fallbackDirectMessageUser(accountKey, platformId),
 ) = MicroBlogKey(Uuid.random().toString(), accountKey.host).let { messageKey ->
     val timestamp = Clock.System.now()
     DbMessageItem(
@@ -98,14 +97,14 @@ internal fun createSendingDirectMessage(
 
 private fun fallbackDirectMessageUser(
     accountKey: MicroBlogKey,
-    platformType: PlatformType,
+    platformId: String,
 ): UiProfile =
     UiProfile(
         key = accountKey,
         handle = UiHandle(raw = accountKey.id, host = accountKey.host),
         avatar = null,
         nameInternal = accountKey.id.toUiPlainText(),
-        platformType = platformType,
+        platformId = platformId,
         clickEvent = ClickEvent.Noop,
         banner = null,
         description = null,

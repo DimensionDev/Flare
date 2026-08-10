@@ -4,7 +4,6 @@ import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
-import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -13,14 +12,14 @@ import kotlin.test.assertNull
 
 class PlatformOAuthPendingRepositoryTest {
     private val root = createTestRootPath()
+    private val fileStorage =
+        OkioFileStorage(
+            fileSystem = createTestFileSystem(),
+            root = root,
+        )
     private val repository =
         PlatformOAuthPendingRepository(
-            AppDataStore(
-                OkioFileStorage(
-                    fileSystem = createTestFileSystem(),
-                    root = root,
-                ),
-            ),
+            AppDataStore(fileStorage),
         )
 
     @AfterTest
@@ -33,7 +32,7 @@ class PlatformOAuthPendingRepositoryTest {
         runTest {
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "mastodon.social",
                     createdAtEpochMillis = 100,
                     attributes = mapOf("client_id" to "old"),
@@ -41,7 +40,7 @@ class PlatformOAuthPendingRepositoryTest {
             )
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "mastodon.social",
                     createdAtEpochMillis = 200,
                     attributes = mapOf("client_id" to "new"),
@@ -50,7 +49,7 @@ class PlatformOAuthPendingRepositoryTest {
 
             val pending =
                 repository.get(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "mastodon.social",
                 )
 
@@ -63,27 +62,27 @@ class PlatformOAuthPendingRepositoryTest {
         runTest {
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "old.example",
                     createdAtEpochMillis = 100,
                 ),
             )
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "new.example",
                     createdAtEpochMillis = 200,
                 ),
             )
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Misskey,
+                    platformId = "Misskey",
                     host = "misskey.example",
                     createdAtEpochMillis = 300,
                 ),
             )
 
-            val pending = repository.latest(PlatformType.Mastodon)
+            val pending = repository.latest("Mastodon")
 
             assertEquals("new.example", pending?.host)
         }
@@ -93,30 +92,50 @@ class PlatformOAuthPendingRepositoryTest {
         runTest {
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "mastodon.social",
                     createdAtEpochMillis = 100,
                 ),
             )
             repository.save(
                 PlatformOAuthPending(
-                    platformType = PlatformType.Misskey,
+                    platformId = "Misskey",
                     host = "misskey.io",
                     createdAtEpochMillis = 200,
                 ),
             )
 
             repository.clear(
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
                 host = "mastodon.social",
             )
 
             assertNull(
                 repository.get(
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     host = "mastodon.social",
                 ),
             )
-            assertEquals("misskey.io", repository.latest(PlatformType.Misskey)?.host)
+            assertEquals("misskey.io", repository.latest("Misskey")?.host)
+        }
+
+    @Test
+    fun legacyPendingFileIsIgnoredAndV2StoreRemainsUsable() =
+        runTest {
+            val legacyFile = fileStorage.dataStoreFile("platform_oauth_pending.pb")
+            fileStorage.write(legacyFile, byteArrayOf(0x01, 0x02, 0x03))
+
+            assertNull(repository.latest("Mastodon"))
+
+            repository.save(
+                PlatformOAuthPending(
+                    platformId = "Mastodon",
+                    host = "mastodon.social",
+                    createdAtEpochMillis = 100,
+                ),
+            )
+            assertEquals("mastodon.social", repository.latest("Mastodon")?.host)
+            assertEquals(true, fileStorage.exists(legacyFile))
+            assertEquals(true, fileStorage.exists(fileStorage.dataStoreFile("platform_oauth_pending_v2.pb")))
         }
 }

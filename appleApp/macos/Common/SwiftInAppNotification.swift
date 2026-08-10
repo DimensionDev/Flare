@@ -6,7 +6,7 @@ import UserNotifications
 struct LoginExpiredToast: Identifiable {
     let id = UUID()
     let accountKey: MicroBlogKey
-    let platformType: PlatformType
+    let platformId: String
 }
 
 final class SwiftInAppNotification: NSObject, ObservableObject, InAppNotification, UNUserNotificationCenterDelegate {
@@ -27,7 +27,7 @@ final class SwiftInAppNotification: NSObject, ObservableObject, InAppNotificatio
         case .loginExpired:
             progressNotifications.remove(messageKey(for: message))
             if let expired = throwable as? LoginExpiredException {
-                showLoginExpiredToast(accountKey: expired.accountKey, platformType: expired.platformType)
+                showLoginExpiredToast(accountKey: expired.accountKey, platformId: expired.platformId)
             }
             return
         default:
@@ -114,8 +114,8 @@ final class SwiftInAppNotification: NSObject, ObservableObject, InAppNotificatio
         publishLoginExpiredToast(nil)
     }
 
-    private func showLoginExpiredToast(accountKey: MicroBlogKey, platformType: PlatformType) {
-        publishLoginExpiredToast(LoginExpiredToast(accountKey: accountKey, platformType: platformType))
+    private func showLoginExpiredToast(accountKey: MicroBlogKey, platformId: String) {
+        publishLoginExpiredToast(LoginExpiredToast(accountKey: accountKey, platformId: platformId))
     }
 
     private func publishLoginExpiredToast(_ toast: LoginExpiredToast?) {

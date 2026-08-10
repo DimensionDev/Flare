@@ -32,7 +32,7 @@ internal class ListListsTool(
     )
 
     override suspend fun execute(args: Args): String {
-        val targets = session.listTargets.filterListTargetsByPlatformNames(args.platforms)
+        val targets = session.listTargets.filterListTargetsByPlatformNames(args.platforms, session.platformRegistry)
         if (targets.isEmpty()) return noListTargetsMessage(args.platforms)
         val query = args.query.trim()
         val maxItems = args.maxItems.listToolLimit()
@@ -51,7 +51,7 @@ internal class ListListsTool(
                                 list.description.orEmpty().contains(query, ignoreCase = true)
                         }
                 appendLine("Account: ${target.accountKey}")
-                appendLine("Platform: ${target.platformType.name}")
+                appendLine("Platform: ${target.platformId}")
                 append(lists.toListToolText(emptyMessage = "No cached lists matched.", maxItems = maxItems))
                 appendLine()
             }
@@ -85,7 +85,7 @@ internal class LoadListInfoTool(
     override suspend fun execute(args: Args): String {
         val listId = args.listId.trim()
         if (listId.isBlank()) return "List id is blank."
-        val targets = session.listTargets.resolveListTargets(args.accountId, args.accountHost, args.platforms)
+        val targets = session.listTargets.resolveListTargets(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
         if (targets.isEmpty()) return noListTargetsMessage(args.platforms, args.accountId, args.accountHost)
         return buildString {
             appendLine("List info")
@@ -93,7 +93,7 @@ internal class LoadListInfoTool(
             appendLine()
             targets.forEach { target ->
                 appendLine("Account: ${target.accountKey}")
-                appendLine("Platform: ${target.platformType.name}")
+                appendLine("Platform: ${target.platformId}")
                 val list = runCatching { target.loadListInfo(listId) }.getOrNull()
                 if (list == null) {
                     appendLine("No list info was returned.")
@@ -134,7 +134,7 @@ internal class LoadListTimelineTool(
     override suspend fun execute(args: Args): String {
         val listId = args.listId.trim()
         if (listId.isBlank()) return "List id is blank."
-        val targets = session.listTargets.resolveListTargets(args.accountId, args.accountHost, args.platforms)
+        val targets = session.listTargets.resolveListTargets(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
         if (targets.isEmpty()) return noListTargetsMessage(args.platforms, args.accountId, args.accountHost)
         val maxItems = args.maxItems.listToolLimit()
         val results =
@@ -149,7 +149,7 @@ internal class LoadListTimelineTool(
             appendLine()
             results.forEach { (target, items) ->
                 appendLine("Account: ${target.accountKey}")
-                appendLine("Platform: ${target.platformType.name}")
+                appendLine("Platform: ${target.platformId}")
                 append(items.toTimelineToolText(maxItems = maxItems))
                 appendLine()
             }
@@ -186,7 +186,7 @@ internal class LoadUserListsTool(
 
     override suspend fun execute(args: Args): String {
         val userKey = microBlogKeyOrNull(args.userId, args.userHost) ?: return "User id is blank."
-        val targets = session.listTargets.resolveListTargets(args.accountId, args.accountHost, args.platforms)
+        val targets = session.listTargets.resolveListTargets(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
         if (targets.isEmpty()) return noListTargetsMessage(args.platforms, args.accountId, args.accountHost)
         val maxItems = args.maxItems.listToolLimit()
         return buildString {
@@ -196,7 +196,7 @@ internal class LoadUserListsTool(
             targets.forEach { target ->
                 val lists = runCatching { target.loadUserLists(userKey) }.getOrElse { emptyList() }
                 appendLine("Account: ${target.accountKey}")
-                appendLine("Platform: ${target.platformType.name}")
+                appendLine("Platform: ${target.platformId}")
                 append(lists.toGenericListToolText(emptyMessage = "No lists were returned for this user.", maxItems = maxItems))
                 appendLine()
             }
@@ -229,7 +229,7 @@ internal class CreateListTool(
         val title = args.title.trim()
         if (title.isBlank()) return "List title is blank."
         val target =
-            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms)
+            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
                 ?: return ambiguousListAccountMessage(args.platforms)
         val metadata = ListMetaData(title = title, description = args.description.trim().takeIf { it.isNotBlank() })
         if (!args.confirmed) {
@@ -242,7 +242,7 @@ internal class CreateListTool(
             )
         }
         target.createList(metadata)
-        return "List created successfully.\nAccount: ${target.accountKey}\nPlatform: ${target.platformType.name}\nTitle: $title"
+        return "List created successfully.\nAccount: ${target.accountKey}\nPlatform: ${target.platformId}\nTitle: $title"
     }
 
     companion object {
@@ -274,7 +274,7 @@ internal class UpdateListTool(
         if (listId.isBlank()) return "List id is blank."
         if (title.isBlank()) return "List title is blank."
         val target =
-            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms)
+            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
                 ?: return ambiguousListAccountMessage(args.platforms)
         val metadata = ListMetaData(title = title, description = args.description.trim().takeIf { it.isNotBlank() })
         if (!args.confirmed) {
@@ -288,7 +288,7 @@ internal class UpdateListTool(
             )
         }
         target.updateList(listId, metadata)
-        return "List updated successfully.\nAccount: ${target.accountKey}\nPlatform: ${target.platformType.name}\nList id: $listId"
+        return "List updated successfully.\nAccount: ${target.accountKey}\nPlatform: ${target.platformId}\nList id: $listId"
     }
 
     companion object {
@@ -316,7 +316,7 @@ internal class DeleteListTool(
         val listId = args.listId.trim()
         if (listId.isBlank()) return "List id is blank."
         val target =
-            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms)
+            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
                 ?: return ambiguousListAccountMessage(args.platforms)
         if (!args.confirmed) {
             return target.simpleListConfirmation(
@@ -328,7 +328,7 @@ internal class DeleteListTool(
             )
         }
         target.deleteList(listId)
-        return "List deleted successfully.\nAccount: ${target.accountKey}\nPlatform: ${target.platformType.name}\nList id: $listId"
+        return "List deleted successfully.\nAccount: ${target.accountKey}\nPlatform: ${target.platformId}\nList id: $listId"
     }
 
     companion object {
@@ -359,7 +359,7 @@ internal class AddListMemberTool(
         if (listId.isBlank()) return "List id is blank."
         val userKey = microBlogKeyOrNull(args.userId, args.userHost) ?: return "User id is blank."
         val target =
-            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms)
+            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
                 ?: return ambiguousListAccountMessage(args.platforms)
         if (!args.confirmed) {
             return target.memberConfirmation(
@@ -374,7 +374,7 @@ internal class AddListMemberTool(
         target.addMember(listId, userKey)
         return "List member added successfully.\n" +
             "Account: ${target.accountKey}\n" +
-            "Platform: ${target.platformType.name}\n" +
+            "Platform: ${target.platformId}\n" +
             "List id: $listId\n" +
             "User: $userKey"
     }
@@ -407,7 +407,7 @@ internal class RemoveListMemberTool(
         if (listId.isBlank()) return "List id is blank."
         val userKey = microBlogKeyOrNull(args.userId, args.userHost) ?: return "User id is blank."
         val target =
-            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms)
+            session.listTargets.resolveSingleListTarget(args.accountId, args.accountHost, args.platforms, session.platformRegistry)
                 ?: return ambiguousListAccountMessage(args.platforms)
         if (!args.confirmed) {
             return target.memberConfirmation(
@@ -422,7 +422,7 @@ internal class RemoveListMemberTool(
         target.removeMember(listId, userKey)
         return "List member removed successfully.\n" +
             "Account: ${target.accountKey}\n" +
-            "Platform: ${target.platformType.name}\n" +
+            "Platform: ${target.platformId}\n" +
             "List id: $listId\n" +
             "User: $userKey"
     }
@@ -436,9 +436,10 @@ private fun List<AgentListTarget>.resolveListTargets(
     accountId: String,
     accountHost: String,
     platforms: List<String>,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
 ): List<AgentListTarget> {
     val requestedAccount = microBlogKeyOrNull(accountId, accountHost)
-    val targets = filterListTargetsByPlatformNames(platforms)
+    val targets = filterListTargetsByPlatformNames(platforms, platformRegistry)
     return requestedAccount?.let { account -> targets.filter { it.accountKey == account } } ?: targets
 }
 
@@ -446,7 +447,8 @@ private fun List<AgentListTarget>.resolveSingleListTarget(
     accountId: String,
     accountHost: String,
     platforms: List<String>,
-): AgentListTarget? = resolveListTargets(accountId, accountHost, platforms).singleOrNull()
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
+): AgentListTarget? = resolveListTargets(accountId, accountHost, platforms, platformRegistry).singleOrNull()
 
 private fun noListTargetsMessage(
     platforms: List<String>,
@@ -497,7 +499,7 @@ private suspend fun AgentListTarget.listConfirmation(
         appendLine("inputRequestId=$requestId")
         appendLine("action=$actionLabel")
         appendLine("account=$accountKey")
-        appendLine("platform=${platformType.name}")
+        appendLine("platform=$platformId")
         listId?.let { appendLine("listId=$it") }
         appendLine("title=${metadata.title}")
         metadata.description?.let { appendLine("description=$it") }
@@ -519,7 +521,7 @@ private suspend fun AgentListTarget.simpleListConfirmation(
         appendLine("inputRequestId=$requestId")
         appendLine("action=$actionLabel")
         appendLine("account=$accountKey")
-        appendLine("platform=${platformType.name}")
+        appendLine("platform=$platformId")
         appendLine("listId=$listId")
     }.trim()
 }
@@ -542,7 +544,7 @@ private suspend fun AgentListTarget.memberConfirmation(
         appendLine("inputRequestId=$requestId")
         appendLine("action=$actionLabel")
         appendLine("account=$accountKey")
-        appendLine("platform=${platformType.name}")
+        appendLine("platform=$platformId")
         appendLine("listId=$listId")
         appendLine("user=$userKey")
     }.trim()
@@ -663,7 +665,7 @@ private fun UiTimelineV2.Post.toListPostToolText(): String =
     buildString {
         appendLine("itemType: post")
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("statusKey: $statusKey")
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
@@ -681,7 +683,7 @@ private fun UiProfile.toListUserToolText(message: UiTimelineV2.Message?): String
         appendLine("itemType: user")
         message?.let { appendLine("messageStatusKey: ${it.statusKey}") }
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("userKey: $key")
         appendLine("displayName: ${name.raw}")
         appendLine("handle: ${handle.raw}")

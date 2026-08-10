@@ -10,9 +10,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.asType
@@ -25,18 +24,20 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
+internal const val FANBOX_PLATFORM_ID: String = "Fanbox"
 private const val FANBOX_SUPPORTED_TIMELINE_SPEC_ID: String = "fanbox.supported"
 
 @HiddenFromObjC
 public data object FanboxPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by FanboxLoginProvider {
-    override val type: PlatformType = PlatformType.Fanbox
-    override val metadata: PlatformTypeMetadata =
-        PlatformTypeMetadata(
+    override val platformId: String = FANBOX_PLATFORM_ID
+    override val metadata: PlatformMetadata =
+        PlatformMetadata(
             displayName = "FANBOX",
             icon = UiIcon.Fanbox,
         )
+    override val order: Int = 40
 
     internal val supportedTimelineSpec =
         TimelineSpec(

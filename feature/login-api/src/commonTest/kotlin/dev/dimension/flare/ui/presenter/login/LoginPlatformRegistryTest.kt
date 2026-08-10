@@ -2,15 +2,13 @@ package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
-import dev.dimension.flare.data.network.nodeinfo.NodeData
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
@@ -28,46 +26,42 @@ class LoginPlatformRegistryTest {
     @Test
     fun duplicatePlatformProvidersFailFast() {
         assertFailsWith<IllegalArgumentException> {
-            LoginPlatformRegistry(
-                testRuntimeData(
-                    testProvider(PlatformType.Mastodon),
-                    testProvider(PlatformType.Mastodon),
-                ),
+            testRegistry(
+                testProvider("Mastodon"),
+                testProvider("Mastodon"),
             )
         }
     }
 
     @Test
-    fun providerCanBeFoundByPlatformType() {
-        val mastodon = testLoginPlatformSpec(testProvider(PlatformType.Mastodon))
-        val bluesky = testLoginPlatformSpec(testProvider(PlatformType.Bluesky))
+    fun providerCanBeFoundByPlatformId() {
+        val mastodon = testLoginPlatformSpec(testProvider("Mastodon"))
+        val bluesky = testLoginPlatformSpec(testProvider("Bluesky"))
 
-        val registry = LoginPlatformRegistry(testRuntimeData(listOf(mastodon, bluesky)))
+        val registry = testRegistry(listOf(mastodon, bluesky))
 
-        assertSame(mastodon, registry.get(PlatformType.Mastodon))
-        assertSame(bluesky, registry.require(PlatformType.Bluesky))
+        assertSame(mastodon, registry.get("Mastodon"))
+        assertSame(bluesky, registry.require("Bluesky"))
     }
 
     @Test
     fun methodsAreSortedByPriorityDescending() {
         val registry =
-            LoginPlatformRegistry(
-                testRuntimeData(
-                    testProvider(
-                        platformType = PlatformType.Bluesky,
-                        methods =
-                            listOf(
-                                LoginMethodSpec(LoginMethodType.Password, UiStrings.PasswordLogin, priority = 0),
-                                LoginMethodSpec(LoginMethodType.OAuth, UiStrings.OAuthLogin, priority = 20),
-                                LoginMethodSpec(LoginMethodType.WebCookie, UiStrings.WebCookieLogin, priority = 10),
-                            ),
-                    ),
+            testRegistry(
+                testProvider(
+                    platformId = "Bluesky",
+                    methods =
+                        listOf(
+                            LoginMethodSpec(LoginMethodType.Password, UiStrings.PasswordLogin, priority = 0),
+                            LoginMethodSpec(LoginMethodType.OAuth, UiStrings.OAuthLogin, priority = 20),
+                            LoginMethodSpec(LoginMethodType.WebCookie, UiStrings.WebCookieLogin, priority = 10),
+                        ),
                 ),
             )
 
         assertEquals(
             listOf(LoginMethodType.OAuth, LoginMethodType.WebCookie, LoginMethodType.Password),
-            registry.methods(PlatformType.Bluesky).map { it.type },
+            registry.methods("Bluesky").map { it.type },
         )
     }
 
@@ -75,24 +69,22 @@ class LoginPlatformRegistryTest {
     fun detectionUsesLoginProviderDetectorsByPriority() =
         runTest {
             val registry =
-                LoginPlatformRegistry(
-                    testRuntimeData(
-                        testProvider(
-                            platformType = PlatformType.Mastodon,
-                            detectorPriority = 0,
-                            detectedSoftware = "mastodon",
-                        ),
-                        testProvider(
-                            platformType = PlatformType.Misskey,
-                            detectorPriority = 10,
-                            detectedSoftware = "misskey",
-                        ),
+                testRegistry(
+                    testProvider(
+                        platformId = "Mastodon",
+                        detectorPriority = 0,
+                        detectedSoftware = "mastodon",
+                    ),
+                    testProvider(
+                        platformId = "Misskey",
+                        detectorPriority = 10,
+                        detectedSoftware = "misskey",
                     ),
                 )
 
-            val detected = registry.detectPlatformType("https://example.social/")
+            val detected = registry.detectPlatformId("https://example.social/")
 
-            assertEquals(PlatformType.Misskey, detected.platformType)
+            assertEquals("Misskey", detected.platformId)
             assertEquals("example.social", detected.host)
             assertEquals("misskey", detected.software)
         }
@@ -101,24 +93,22 @@ class LoginPlatformRegistryTest {
     fun detectionContinuesWhenDetectorFails() =
         runTest {
             val registry =
-                LoginPlatformRegistry(
-                    testRuntimeData(
-                        testProvider(
-                            platformType = PlatformType.Bluesky,
-                            detectorPriority = 10,
-                            detectorFailure = IllegalStateException("probe failed"),
-                        ),
-                        testProvider(
-                            platformType = PlatformType.Mastodon,
-                            detectorPriority = 0,
-                            detectedSoftware = "mastodon",
-                        ),
+                testRegistry(
+                    testProvider(
+                        platformId = "Bluesky",
+                        detectorPriority = 10,
+                        detectorFailure = IllegalStateException("probe failed"),
+                    ),
+                    testProvider(
+                        platformId = "Mastodon",
+                        detectorPriority = 0,
+                        detectedSoftware = "mastodon",
                     ),
                 )
 
-            val detected = registry.detectPlatformType("mstdn.jp")
+            val detected = registry.detectPlatformId("mstdn.jp")
 
-            assertEquals(PlatformType.Mastodon, detected.platformType)
+            assertEquals("Mastodon", detected.platformId)
             assertEquals("mstdn.jp", detected.host)
         }
 
@@ -126,66 +116,58 @@ class LoginPlatformRegistryTest {
     fun detectionDoesNotSwallowCancellation() =
         runTest {
             val registry =
-                LoginPlatformRegistry(
-                    testRuntimeData(
-                        testProvider(
-                            platformType = PlatformType.Bluesky,
-                            detectorFailure = CancellationException("cancelled"),
-                        ),
-                        testProvider(
-                            platformType = PlatformType.Mastodon,
-                            detectedSoftware = "mastodon",
-                        ),
+                testRegistry(
+                    testProvider(
+                        platformId = "Bluesky",
+                        detectorFailure = CancellationException("cancelled"),
+                    ),
+                    testProvider(
+                        platformId = "Mastodon",
+                        detectedSoftware = "mastodon",
                     ),
                 )
 
             assertFailsWith<CancellationException> {
-                registry.detectPlatformType("mstdn.jp")
+                registry.detectPlatformId("mstdn.jp")
             }
         }
 
     @Test
     fun runtimeDataDerivesProvidersFromPlatformSpecs() {
-        val mastodon = testProvider(PlatformType.Mastodon)
+        val mastodon = testProvider("Mastodon")
         val mastodonSpec = testLoginPlatformSpec(mastodon)
-        val blueskySpec = testPlatformSpec(PlatformType.Bluesky)
+        val blueskySpec = testPlatformSpec("Bluesky")
 
         val registry =
-            LoginPlatformRegistry(
-                PlatformRuntimeData(
-                    platformSpecs = listOf(mastodonSpec, blueskySpec),
-                    extraTimelineSpecs = emptyList(),
-                ),
-            )
+            testRegistry(listOf(mastodonSpec, blueskySpec))
 
-        assertSame(mastodonSpec, registry.require(PlatformType.Mastodon))
-        assertEquals(null, registry.get(PlatformType.Bluesky))
+        assertSame(mastodonSpec, registry.require("Mastodon"))
+        assertEquals(null, registry.get("Bluesky"))
     }
 
     private fun testProvider(
-        platformType: PlatformType,
+        platformId: String,
         methods: List<LoginMethodSpec> = emptyList(),
         detectorPriority: Int = 0,
         detectedSoftware: String? = null,
         detectorFailure: Throwable? = null,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
-            override val platformType: PlatformType = platformType
-            override val metadata: PlatformTypeMetadata =
-                PlatformTypeMetadata(
-                    displayName = platformType.name,
+            override val platformId: String = platformId
+            override val metadata: PlatformMetadata =
+                PlatformMetadata(
+                    displayName = platformId,
                     icon = UiIcon.Mastodon,
                 )
             override val detector: PlatformDetector =
                 object : PlatformDetector {
                     override val priority: Int = detectorPriority
 
-                    override suspend fun detect(host: String): NodeData? {
+                    override suspend fun detect(host: String): NodeDetection? {
                         detectorFailure?.let { throw it }
                         return detectedSoftware?.let {
-                            NodeData(
+                            NodeDetection(
                                 host = host,
-                                platformType = platformType,
                                 software = it,
                                 compatibleMode = false,
                             )
@@ -206,9 +188,15 @@ class LoginPlatformRegistryTest {
     private fun testRuntimeData(vararg providers: LoginPlatformProvider): PlatformRuntimeData =
         testRuntimeData(providers.map(::testLoginPlatformSpec))
 
+    private fun testRegistry(vararg providers: LoginPlatformProvider): LoginPlatformRegistry =
+        LoginPlatformRegistry(PlatformRegistry(testRuntimeData(*providers)))
+
+    private fun testRegistry(platformSpecs: List<PlatformSpec>): LoginPlatformRegistry =
+        LoginPlatformRegistry(PlatformRegistry(testRuntimeData(platformSpecs)))
+
     private fun testRuntimeData(platformSpecs: List<PlatformSpec>): PlatformRuntimeData =
         PlatformRuntimeData(
-            platformSpecs = platformSpecs,
+            platformSpecs = listOf(testPlatformSpec("DefaultGuest", isDefaultGuest = true)) + platformSpecs,
             extraTimelineSpecs = emptyList(),
         )
 
@@ -220,8 +208,8 @@ class LoginPlatformRegistryTest {
         object :
             TestLoginPlatformSpec,
             LoginPlatformProvider by provider {
-            override val type: PlatformType = provider.platformType
-            override val metadata: PlatformTypeMetadata = provider.metadata
+            override val platformId: String = provider.platformId
+            override val metadata: PlatformMetadata = provider.metadata
             override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 
             override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
@@ -234,12 +222,16 @@ class LoginPlatformRegistryTest {
             ): MicroblogDataSource = error("Not used")
         }
 
-    private fun testPlatformSpec(platformType: PlatformType): PlatformSpec =
+    private fun testPlatformSpec(
+        platformId: String,
+        isDefaultGuest: Boolean = false,
+    ): PlatformSpec =
         object : PlatformSpec {
-            override val type: PlatformType = platformType
-            override val metadata: PlatformTypeMetadata =
-                PlatformTypeMetadata(
-                    displayName = platformType.name,
+            override val platformId: String = platformId
+            override val isDefaultGuest: Boolean = isDefaultGuest
+            override val metadata: PlatformMetadata =
+                PlatformMetadata(
+                    displayName = platformId,
                     icon = UiIcon.Mastodon,
                 )
             override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()

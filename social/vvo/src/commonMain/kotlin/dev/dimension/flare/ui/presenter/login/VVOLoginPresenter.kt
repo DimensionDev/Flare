@@ -8,12 +8,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -82,7 +82,7 @@ internal class VVOLoginPresenter(
                         id = uid,
                         host = vvoHost,
                     ),
-                platformType = PlatformType.VVo,
+                platformId = VVO_PLATFORM_ID,
             ),
             credential =
                 credentialState.value,

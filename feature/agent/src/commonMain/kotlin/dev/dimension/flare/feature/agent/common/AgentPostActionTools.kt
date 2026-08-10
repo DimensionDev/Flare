@@ -174,7 +174,7 @@ internal class ExecutePostActionTool(
             appendLine("Action: ${action.label}")
             appendLine("Account: ${action.payload.accountKey}")
             appendLine("Target status: ${post.statusKey}")
-            appendLine("Platform: ${target.platformType.name}")
+            appendLine("Platform: ${target.platformId}")
         }.trim()
     }
 
@@ -274,7 +274,7 @@ private suspend fun AgentToolSession.postActionTargetSelectionMessage(args: Post
         posts.forEach { post ->
             appendLine("- optionId=post:${post.agentAttachmentRef()}")
             appendLine("  optionKind=post")
-            appendLine("  platform=${post.platformType.name}")
+            appendLine("  platform=${post.platformId}")
             appendLine("  targetStatus=${post.statusKey}")
             appendLine("  author=${post.user?.let { user -> user.name.raw.takeIf { it.isNotBlank() } ?: user.handle.canonical }.orEmpty()}")
             appendLine("  summary=${post.content.original.raw.take(120)}")
@@ -329,7 +329,7 @@ private suspend fun AgentToolSession.availableActionPosts(): List<UiTimelineV2.P
             .filterIsInstance<AgentMessagePart.PostCard>()
             .map { it.post.agentDisplayPost() }
             .forEach(::add)
-    }.distinctBy { it.platformType to it.statusKey }
+    }.distinctBy { it.platformId to it.statusKey }
 
 private suspend fun AgentToolSession.findActionPostByRef(ref: String): UiTimelineV2.Post? {
     val normalizedRef = ref.normalizedActionPostRef()
@@ -458,9 +458,9 @@ private fun UiTimelineV2.Post.actionPostRefAliases(): Set<String> =
         add(statusKey.toString())
         add("${statusKey.host}:${statusKey.id}")
         add("${statusKey.id}:${statusKey.host}")
-        add("${platformType.name}:$statusKey")
-        add("${platformType.name}:${statusKey.host}:${statusKey.id}")
-        add("${platformType.name}:${statusKey.id}:${statusKey.host}")
+        add("$platformId:$statusKey")
+        add("$platformId:${statusKey.host}:${statusKey.id}")
+        add("$platformId:${statusKey.id}:${statusKey.host}")
     }
 
 private fun String.normalizedActionPostRef(): String =

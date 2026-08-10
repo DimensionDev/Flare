@@ -285,6 +285,7 @@ public data class ComposeConfig public constructor(
         val canSensitive: Boolean,
         val altTextMaxLength: Int,
         val allowMediaOnly: Boolean,
+        val compression: Compression = Compression(),
     ) {
         internal fun merge(other: Media): Media =
             Media(
@@ -292,7 +293,22 @@ public data class ComposeConfig public constructor(
                 canSensitive = canSensitive && other.canSensitive,
                 altTextMaxLength = minOf(altTextMaxLength, other.altTextMaxLength),
                 allowMediaOnly = allowMediaOnly && other.allowMediaOnly,
+                compression = compression.merge(other.compression),
             )
+
+        @Immutable
+        public data class Compression(
+            val maxSizeBytes: Long = 1L * 1024 * 1024,
+            val maxWidth: Int = 2000,
+            val maxHeight: Int = 2000,
+        ) {
+            internal fun merge(other: Compression): Compression =
+                Compression(
+                    maxSizeBytes = minOf(maxSizeBytes, other.maxSizeBytes),
+                    maxWidth = minOf(maxWidth, other.maxWidth),
+                    maxHeight = minOf(maxHeight, other.maxHeight),
+                )
+        }
     }
 
     @Immutable

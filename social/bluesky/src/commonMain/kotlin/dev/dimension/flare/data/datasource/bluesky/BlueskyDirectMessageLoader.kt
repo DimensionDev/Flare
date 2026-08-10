@@ -20,9 +20,9 @@ import dev.dimension.flare.data.datasource.microblog.loader.DirectMessageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
@@ -35,7 +35,7 @@ internal class BlueskyDirectMessageLoader(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : DirectMessageLoader {
-    override val platformType: PlatformType = PlatformType.Bluesky
+    override val platformId: String = BLUESKY_PLATFORM_ID
 
     override suspend fun loadRooms(
         pageSize: Int,

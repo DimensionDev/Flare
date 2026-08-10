@@ -563,7 +563,7 @@ internal sealed interface Route : NavKey {
                     ServiceSelect.Relogin(
                         ReloginTarget(
                             accountKey = deeplinkRoute.accountKey,
-                            platformType = deeplinkRoute.platformType,
+                            platformId = deeplinkRoute.platformId,
                         ),
                     )
                 }

@@ -11,9 +11,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
@@ -28,16 +27,20 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
+internal const val BLUESKY_PLATFORM_ID: String = "Bluesky"
+
 @HiddenFromObjC
 public data object BlueskyPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by BlueskyLoginProvider {
-    public override val type: PlatformType = PlatformType.Bluesky
-    public override val metadata: PlatformTypeMetadata =
-        PlatformTypeMetadata(
+    public override val platformId: String = BLUESKY_PLATFORM_ID
+    public override val metadata: PlatformMetadata =
+        PlatformMetadata(
             displayName = "Bluesky",
             icon = UiIcon.Bluesky,
+            agentAliases = listOf("bsky", "blue sky", "蓝天"),
         )
+    public override val order: Int = 30
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         buildList {
@@ -96,7 +99,7 @@ public data object BlueskyPlatformSpec :
     override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = throw UnsupportedOperationException("$platformId guest data source is not supported yet")
 
     private fun profileDeepLink(
         accountKey: MicroBlogKey,

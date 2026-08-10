@@ -16,10 +16,10 @@ import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserList
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
+import dev.dimension.flare.data.platform.MISSKEY_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
@@ -780,7 +780,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                         accountType = AccountType.Specific(accountKey),
                     ),
             ),
-        platformType = PlatformType.Misskey,
+        platformId = MISSKEY_PLATFORM_ID,
         accountType = accountKey.toAccountType(),
         replyToHandle =
             parent?.user?.let {
@@ -846,7 +846,8 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
             ),
         mark = persistentListOf(),
         bottomContent = null,
-        platformType = PlatformType.Misskey,
+        platformId = MISSKEY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Misskey,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -919,7 +920,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                 }.toImmutableMap(),
                     )
                 },
-        platformType = PlatformType.Misskey,
+        platformId = MISSKEY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Misskey,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1301,7 +1303,7 @@ internal fun Meta200Response.render(): UiInstanceMetadata {
                 description = this.description,
                 iconUrl = this.iconURL,
                 domain = this.uri ?: "Unknown",
-                type = PlatformType.Misskey,
+                platformId = MISSKEY_PLATFORM_ID,
                 bannerUrl = this.bannerURL,
                 usersCount = 0, // Default to 0 as users count isn't provided in Meta200Response
             ),

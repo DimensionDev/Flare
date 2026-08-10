@@ -98,6 +98,13 @@ import kotlin.time.Duration.Companion.seconds
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
 
+private val MEDIA_COMPRESSION =
+    ComposeConfig.Media.Compression(
+        maxSizeBytes = 5L * 1024 * 1024,
+        maxWidth = 4096,
+        maxHeight = 4096,
+    )
+
 @OptIn(ExperimentalPagingApi::class)
 internal class XQTDataSource(
     override val accountKey: MicroBlogKey,
@@ -544,8 +551,8 @@ internal class XQTDataSource(
                     if (isImage) {
                         imageCompressor.compress(
                             imageBytes = bytes,
-                            maxSize = 5 * 1024 * 1024,
-                            maxDimensions = 4096 to 4096,
+                            maxSize = MEDIA_COMPRESSION.maxSizeBytes,
+                            maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
                         )
                     } else {
                         bytes
@@ -726,6 +733,7 @@ internal class XQTDataSource(
                     canSensitive = true,
                     altTextMaxLength = 1000,
                     allowMediaOnly = true,
+                    compression = MEDIA_COMPRESSION,
                 ),
         )
 

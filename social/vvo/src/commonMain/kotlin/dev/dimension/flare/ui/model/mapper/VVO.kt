@@ -8,9 +8,9 @@ import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.User
+import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
@@ -190,7 +190,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
     val quote = retweetedStatus?.renderStatusV2(accountKey)?.contentPostOrNull()
     val post =
         UiTimelineV2.Post(
-            platformType = PlatformType.VVo,
+            platformId = VVO_PLATFORM_ID,
             images = actualMedia.toImmutableList(),
             sensitive = false,
             contentWarning = null,
@@ -384,7 +384,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2 {
 
     val post =
         UiTimelineV2.Post(
-            platformType = PlatformType.VVo,
+            platformId = VVO_PLATFORM_ID,
             images = media.toImmutableList(),
             sensitive = false,
             contentWarning = null,
@@ -546,7 +546,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                             ).toImmutableMap(),
                     )
                 },
-        platformType = PlatformType.VVo,
+        platformId = VVO_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Weibo,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(

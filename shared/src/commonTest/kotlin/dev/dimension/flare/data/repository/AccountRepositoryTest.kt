@@ -15,7 +15,7 @@ import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.toUi
@@ -26,6 +26,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -34,6 +35,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 class AccountRepositoryTest : RobolectricTest() {
@@ -87,7 +91,7 @@ class AccountRepositoryTest : RobolectricTest() {
                 val initial = emissions.receive()
                 assertEquals(listOf(accountKey), initial.map { it.accountKey })
 
-                repository.setActiveAccount(accountKey).join()
+                repository.setActiveAccount(accountKey)
 
                 val duplicate = withTimeoutOrNull(100) { emissions.receive() }
                 assertNull(
@@ -136,7 +140,7 @@ class AccountRepositoryTest : RobolectricTest() {
                 fetches.receive()
                 assertEquals(1, fetchCount)
 
-                repository.setActiveAccount(accountKey).join()
+                repository.setActiveAccount(accountKey)
 
                 val duplicateFetch = withTimeoutOrNull(100) { fetches.receive() }
                 assertNull(
@@ -186,7 +190,7 @@ class AccountRepositoryTest : RobolectricTest() {
                 fetches.receive()
                 assertEquals(1, fetchCount)
 
-                repository.setActiveAccount(accountKey).join()
+                repository.setActiveAccount(accountKey)
 
                 val restartedFetch = withTimeoutOrNull(100) { fetches.receive() }
                 assertNull(
@@ -197,6 +201,76 @@ class AccountRepositoryTest : RobolectricTest() {
             } finally {
                 job.cancel()
             }
+        }
+
+    @Test
+    fun unavailableAccountCanBeDisplayedExportedAndDeletedWithoutDatasource() =
+        runTest {
+            val repository = createRepository(this)
+            val unavailableKey = MicroBlogKey(id = "alice", host = "testnet.example")
+            appDatabase.accountDao().insert(
+                DbAccount(
+                    account_key = unavailableKey,
+                    credential_json = "{\"token\":\"kept\"}",
+                    platformId = "TestNet",
+                    last_active = 10L,
+                    sort_id = 3L,
+                ),
+            )
+
+            val account = repository.allAccounts.first().single()
+            assertEquals("TestNet", account.platformDisplayName)
+            assertEquals(dev.dimension.flare.ui.model.UiIcon.World, account.platformIcon)
+            assertFalse(account.platformAvailable)
+            assertFailsWith<UnsupportedPlatformException> {
+                repository.getOrCreateDataSource(account)
+            }
+            val activationError =
+                assertFailsWith<UnsupportedPlatformException> {
+                    repository.setActiveAccount(unavailableKey)
+                }
+            assertEquals("TestNet", activationError.platformId)
+            assertEquals("{\"token\":\"kept\"}", appDatabase.accountDao().getAccount(unavailableKey)?.credential_json)
+
+            repository.delete(unavailableKey).join()
+            assertNull(appDatabase.accountDao().getAccount(unavailableKey))
+        }
+
+    @Test
+    fun activeAccountSkipsNewerUnavailableAccounts() =
+        runTest {
+            val repository = createRepository(this)
+            insertAccount()
+            appDatabase.accountDao().insert(
+                DbAccount(
+                    account_key = MicroBlogKey("future", "testnet.example"),
+                    credential_json = "{}",
+                    platformId = "TestNet",
+                    last_active = 100L,
+                    sort_id = 1L,
+                ),
+            )
+
+            val state = repository.activeAccount.first()
+            assertEquals(accountKey, assertIs<dev.dimension.flare.ui.model.UiState.Success<UiAccount>>(state).data.accountKey)
+        }
+
+    @Test
+    fun allUnavailableAccountsHaveExplicitState() =
+        runTest {
+            val repository = createRepository(this)
+            appDatabase.accountDao().insert(
+                DbAccount(
+                    account_key = MicroBlogKey("future", "testnet.example"),
+                    credential_json = "{}",
+                    platformId = "TestNet",
+                    last_active = 100L,
+                ),
+            )
+
+            val state = repository.activeAccount.first()
+            val error = assertIs<dev.dimension.flare.ui.model.UiState.Error<UiAccount>>(state).throwable
+            assertEquals(listOf("TestNet"), assertIs<NoAvailableAccountException>(error).platformIds)
         }
 
     private fun createRepository(scope: CoroutineScope): AccountRepository =
@@ -213,7 +287,7 @@ class AccountRepositoryTest : RobolectricTest() {
             DbAccount(
                 account_key = accountKey,
                 credential_json = "{}",
-                platform_type = PlatformType.Mastodon,
+                platformId = "Mastodon",
                 last_active = 1L,
                 sort_id = 0L,
             ),

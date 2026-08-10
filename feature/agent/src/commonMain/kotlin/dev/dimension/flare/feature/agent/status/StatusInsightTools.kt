@@ -13,7 +13,7 @@ import dev.dimension.flare.feature.agent.common.AgentUserTarget
 import dev.dimension.flare.feature.agent.common.agentAttachmentMarker
 import dev.dimension.flare.feature.agent.common.agentAttachmentRef
 import dev.dimension.flare.feature.agent.common.filterByPlatformNames
-import dev.dimension.flare.feature.agent.common.filterPlatformTypesByPlatformNames
+import dev.dimension.flare.feature.agent.common.filterPlatformIdsByPlatformNames
 import dev.dimension.flare.feature.agent.common.filterUserTargetsByPlatformNames
 import dev.dimension.flare.feature.agent.common.setUserSelectionRequest
 import dev.dimension.flare.feature.agent.common.userSelectionRequestToolText
@@ -102,7 +102,8 @@ internal class LoadPostContextTool(
 
     override suspend fun execute(args: Args): String {
         val statusKey = microBlogKeyOrNull(id = args.statusId, host = args.statusHost) ?: return "Status id is blank."
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { context(statusKey) }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
@@ -145,7 +146,8 @@ internal class LoadHomeTimelineTool(
     )
 
     override suspend fun execute(args: Args): String {
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { homeTimeline() }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
@@ -199,7 +201,8 @@ internal class LoadUserTimelineTool(
                     platforms = args.platforms,
                     requestType = "user_timeline",
                 ) ?: "User id is blank."
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { userTimeline(userKey = userKey, mediaOnly = args.mediaOnly) }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
@@ -243,7 +246,8 @@ internal class LoadDiscoverStatusesTool(
     )
 
     override suspend fun execute(args: Args): String {
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val posts = targets.loadPosts { discoverStatuses() }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
@@ -296,8 +300,8 @@ internal class SearchPostsTool(
         }
         val targets =
             session.searchTargets
-                .distinctBy { it.platformType }
-                .filterByPlatformNames(args.platforms)
+                .distinctBy { it.platformId }
+                .filterByPlatformNames(args.platforms, session.platformRegistry)
         if (targets.isEmpty()) {
             return if (args.platforms.isEmpty()) {
                 "No signed-in accounts are available for search."
@@ -310,7 +314,7 @@ internal class SearchPostsTool(
         return buildString {
             appendLine("Search query: \"$query\"")
             appendLine("Search target: Posts")
-            appendLine("Platforms searched: ${targets.joinToString { it.platformType?.name ?: "Unknown" }}")
+            appendLine("Platforms searched: ${targets.joinToString { it.platformId ?: "Unknown" }}")
             appendLine(DIRECT_MICROBLOG_DATA_SOURCE_RESULT_NOTE)
             appendLine()
             append(
@@ -360,8 +364,8 @@ internal class SearchUsersTool(
         }
         val targets =
             session.searchTargets
-                .distinctBy { it.platformType }
-                .filterByPlatformNames(args.platforms)
+                .distinctBy { it.platformId }
+                .filterByPlatformNames(args.platforms, session.platformRegistry)
         if (targets.isEmpty()) {
             return if (args.platforms.isEmpty()) {
                 "No signed-in accounts are available for search."
@@ -383,7 +387,7 @@ internal class SearchUsersTool(
         return buildString {
             appendLine("Search query: \"$query\"")
             appendLine("Search target: Users")
-            appendLine("Platforms searched: ${targets.joinToString { it.platformType?.name ?: "Unknown" }}")
+            appendLine("Platforms searched: ${targets.joinToString { it.platformId ?: "Unknown" }}")
             appendLine(DIRECT_MICROBLOG_DATA_SOURCE_RESULT_NOTE)
             appendLine()
             if (selectionRequest != null) {
@@ -443,7 +447,9 @@ internal class LoadUserProfileTool(
                     platforms = args.platforms,
                     requestType = "user_profile",
                 ) ?: "User id is blank."
-        val targets = session.userTargets.resolveUserTargetsOrNull(args.platforms) ?: return noUserTargetsMessage(args.platforms)
+        val targets =
+            session.userTargets.resolveUserTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noUserTargetsMessage(args.platforms)
         val users = targets.loadUserProfiles(userKey)
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
@@ -485,7 +491,8 @@ internal class LoadDiscoverUsersTool(
     )
 
     override suspend fun execute(args: Args): String {
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { discoverUsers() }
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
@@ -526,7 +533,8 @@ internal class LoadDiscoverHashtagsTool(
     )
 
     override suspend fun execute(args: Args): String {
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val hashtags = targets.loadHashtags { discoverHashtags() }
         return buildString {
             appendLine("Discover hashtags")
@@ -577,7 +585,8 @@ internal class LoadFollowingTool(
                     platforms = args.platforms,
                     requestType = "following",
                 ) ?: "User id is blank."
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { following(userKey) }
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
@@ -629,7 +638,8 @@ internal class LoadFollowersTool(
                     platforms = args.platforms,
                     requestType = "followers",
                 ) ?: "User id is blank."
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val users = targets.loadUsers { fans(userKey) }
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
@@ -686,7 +696,8 @@ internal class LoadProfileTabsTool(
                     platforms = args.platforms,
                     requestType = "profile_tabs",
                 ) ?: "User id is blank."
-        val targets = session.searchTargets.resolveTargetsOrNull(args.platforms) ?: return noTargetsMessage(args.platforms)
+        val targets =
+            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
         val tabResults = targets.loadProfileTabs(userKey)
         val selectedTabs =
             tabResults.mapNotNull { result ->
@@ -701,7 +712,7 @@ internal class LoadProfileTabsTool(
                 appendLine(DIRECT_MICROBLOG_DATA_SOURCE_RESULT_NOTE)
                 tabResults.forEach { result ->
                     appendLine()
-                    appendLine("Platform: ${result.target.platformType?.name ?: "Unknown"}")
+                    appendLine("Platform: ${result.target.platformId ?: "Unknown"}")
                     if (result.tabs.isEmpty()) {
                         appendLine("No profile tabs were returned.")
                     } else {
@@ -752,14 +763,20 @@ private fun microBlogKeyOrNull(
     return MicroBlogKey(id = trimmedId, host = host.trim())
 }
 
-private fun List<AgentSearchTarget>.resolveTargetsOrNull(platforms: List<String>): List<AgentSearchTarget>? =
-    distinctBy { it.platformType }
-        .filterByPlatformNames(platforms)
+private fun List<AgentSearchTarget>.resolveTargetsOrNull(
+    platforms: List<String>,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
+): List<AgentSearchTarget>? =
+    distinctBy { it.platformId }
+        .filterByPlatformNames(platforms, platformRegistry)
         .takeIf { it.isNotEmpty() }
 
-private fun List<AgentUserTarget>.resolveUserTargetsOrNull(platforms: List<String>): List<AgentUserTarget>? =
-    distinctBy { it.platformType }
-        .filterUserTargetsByPlatformNames(platforms)
+private fun List<AgentUserTarget>.resolveUserTargetsOrNull(
+    platforms: List<String>,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
+): List<AgentUserTarget>? =
+    distinctBy { it.platformId }
+        .filterUserTargetsByPlatformNames(platforms, platformRegistry)
         .takeIf { it.isNotEmpty() }
 
 private fun noTargetsMessage(platforms: List<String>): String =
@@ -776,9 +793,9 @@ private fun noUserTargetsMessage(platforms: List<String>): String =
         "No signed-in accounts with UserLoader are available for the requested platforms: ${platforms.joinToString()}."
     }
 
-private fun List<AgentSearchTarget>.platformNames(): String = joinToString { it.platformType?.name ?: "Unknown" }
+private fun List<AgentSearchTarget>.platformNames(): String = joinToString { it.platformId ?: "Unknown" }
 
-private fun List<AgentUserTarget>.userPlatformNames(): String = joinToString { it.platformType.name }
+private fun List<AgentUserTarget>.userPlatformNames(): String = joinToString { it.platformId }
 
 private suspend fun AgentToolSession.requestUserSelectionFromAttachments(
     platforms: List<String>,
@@ -789,8 +806,8 @@ private suspend fun AgentToolSession.requestUserSelectionFromAttachments(
             .snapshot()
             .filterIsInstance<AgentMessagePart.UserCard>()
             .map { it.user }
-            .filterByPlatformNames(platforms)
-            .distinctBy { it.platformType to it.key }
+            .filterByPlatformNames(platforms, platformRegistry)
+            .distinctBy { it.platformId to it.key }
             .takeIf { it.isNotEmpty() }
             ?: return null
     val request =
@@ -806,12 +823,15 @@ private suspend fun AgentToolSession.requestUserSelectionFromAttachments(
     )
 }
 
-private fun List<UiProfile>.filterByPlatformNames(platforms: List<String>): List<UiProfile> {
-    val platformTypes = map { it.platformType }.filterPlatformTypesByPlatformNames(platforms)
+private fun List<UiProfile>.filterByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
+): List<UiProfile> {
+    val platformIds = map { it.platformId }.filterPlatformIdsByPlatformNames(platforms, platformRegistry)
     return when {
-        platformTypes.isEmpty() && platforms.isNotEmpty() -> emptyList()
+        platformIds.isEmpty() && platforms.isNotEmpty() -> emptyList()
         platforms.isEmpty() -> this
-        else -> filter { it.platformType in platformTypes }
+        else -> filter { it.platformId in platformIds }
     }
 }
 
@@ -833,7 +853,7 @@ private suspend fun List<AgentSearchTarget>.loadPosts(
             }
         }.awaitAll()
     }.flatten()
-        .distinctBy { it.platformType to it.statusKey }
+        .distinctBy { it.platformId to it.statusKey }
 
 private suspend fun List<AgentSearchTarget>.loadUsers(loaderFactory: MicroblogDataSource.() -> RemoteLoader<UiProfile>): List<UiProfile> =
     coroutineScope {
@@ -850,7 +870,7 @@ private suspend fun List<AgentSearchTarget>.loadUsers(loaderFactory: MicroblogDa
             }
         }.awaitAll()
     }.flatten()
-        .distinctBy { it.platformType to it.key }
+        .distinctBy { it.platformId to it.key }
 
 private suspend fun List<AgentUserTarget>.loadUserProfiles(userKey: MicroBlogKey): List<UiProfile> =
     coroutineScope {
@@ -862,7 +882,7 @@ private suspend fun List<AgentUserTarget>.loadUserProfiles(userKey: MicroBlogKey
             }
         }.awaitAll()
     }.filterNotNull()
-        .distinctBy { it.platformType to it.key }
+        .distinctBy { it.platformId to it.key }
 
 private suspend fun List<AgentSearchTarget>.loadHashtags(
     loaderFactory: MicroblogDataSource.() -> RemoteLoader<UiHashtag>,
@@ -931,7 +951,7 @@ private suspend fun List<Pair<AgentSearchTarget, ProfileTab>>.loadProfileTabPost
             }
         }.awaitAll()
     }.flatten()
-        .distinctBy { it.platformType to it.statusKey }
+        .distinctBy { it.platformId to it.statusKey }
 
 private fun buildPostToolResult(
     title: String,
@@ -989,7 +1009,7 @@ private suspend fun List<AgentSearchTarget>.searchPosts(query: String): List<UiT
             }
         }.awaitAll()
     }.flatten()
-        .distinctBy { it.platformType to it.statusKey }
+        .distinctBy { it.platformId to it.statusKey }
 
 private suspend fun List<AgentSearchTarget>.searchUsers(query: String): List<UiProfile> =
     coroutineScope {
@@ -1006,7 +1026,7 @@ private suspend fun List<AgentSearchTarget>.searchUsers(query: String): List<UiP
             }
         }.awaitAll()
     }.flatten()
-        .distinctBy { it.platformType to it.key }
+        .distinctBy { it.platformId to it.key }
 
 private fun List<UiTimelineV2.Post>.toInsightPostToolListText(
     title: String,
@@ -1071,7 +1091,7 @@ private fun List<UiHashtag>.toInsightHashtagToolListText(
 private fun UiProfile.toInsightUserToolText(): String =
     buildString {
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("userKey: $key")
         appendLine("displayName: ${name.raw}")
         appendLine("handle: ${handle.raw}")
@@ -1086,7 +1106,7 @@ private fun UiProfile.toInsightUserToolText(): String =
 private fun UiTimelineV2.Post.toInsightPostToolText(): String =
     buildString {
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("statusKey: $statusKey")
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")

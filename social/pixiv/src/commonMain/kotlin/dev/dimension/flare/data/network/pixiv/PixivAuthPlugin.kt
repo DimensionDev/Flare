@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.network.pixiv
 
+import dev.dimension.flare.data.platform.PIXIV_PLATFORM_ID
 import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
 import io.ktor.client.call.save
@@ -84,7 +84,7 @@ internal class PixivAuthPlugin(
                     plugin.refreshExpiredTokenLocked(authCredential)
                         ?: throw LoginExpiredException(
                             plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
-                            PlatformType.Pixiv,
+                            PIXIV_PLATFORM_ID,
                         )
                 context.headers.remove(HttpHeaders.Authorization)
                 context.auth(refreshed)

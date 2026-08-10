@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.model
 
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -90,7 +89,7 @@ class UiArticleTest {
                                     key = "gate:5",
                                     reason =
                                         UiArticleContentGateReason.SubscriptionRequired(
-                                            platformType = PlatformType.Fanbox,
+                                            platformId = "Fanbox",
                                             feeRequired = 500,
                                         ),
                                     actionUrl = "https://example.com/support",
@@ -125,7 +124,7 @@ class UiArticleTest {
 
         val gate = assertIs<UiArticleBlock.ContentGate>(decoded.content.blocks[5])
         val reason = assertIs<UiArticleContentGateReason.SubscriptionRequired>(gate.reason)
-        assertEquals(PlatformType.Fanbox, reason.platformType)
+        assertEquals("Fanbox", reason.platformId)
         assertEquals(500, reason.feeRequired)
         assertEquals("https://example.com/support", gate.actionUrl)
     }

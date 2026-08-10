@@ -10,10 +10,10 @@ import dev.dimension.flare.data.network.pixiv.model.PixivTrendTag
 import dev.dimension.flare.data.network.pixiv.model.PixivUser
 import dev.dimension.flare.data.network.pixiv.model.PixivUserDetailResponse
 import dev.dimension.flare.data.platform.PIXIV_HOST
+import dev.dimension.flare.data.platform.PIXIV_PLATFORM_ID
 import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiHashtag
@@ -40,7 +40,7 @@ import kotlin.time.Instant
 internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val statusKey = pixivIllustKey(id)
     return UiTimelineV2.Post(
-        platformType = PlatformType.Pixiv,
+        platformId = PIXIV_PLATFORM_ID,
         images = toUiMedia().toPersistentList(),
         sensitive = xRestrict > 0 || sanityLevel >= 6,
         contentWarning = UiTranslatableText(original = title.toUiPlainText()),
@@ -115,7 +115,7 @@ internal fun PixivComment.toUiTimeline(
     illustKey: MicroBlogKey,
 ): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        platformType = PlatformType.Pixiv,
+        platformId = PIXIV_PLATFORM_ID,
         images =
             stamp
                 ?.toUiMedia()
@@ -152,7 +152,8 @@ internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile 
             (profileImageUrls?.medium ?: profileImageUrls?.px170x170 ?: profileImageUrls?.px50x50)
                 .toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
         nameInternal = name.toUiPlainText(),
-        platformType = PlatformType.Pixiv,
+        platformId = PIXIV_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Pixiv,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -183,7 +184,8 @@ internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiPr
         handle = UiHandle(raw = userAccount ?: userId.toString(), host = PIXIV_HOST),
         avatar = profileImageUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
         nameInternal = (userName ?: userAccount ?: userId.toString()).toUiPlainText(),
-        platformType = PlatformType.Pixiv,
+        platformId = PIXIV_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Pixiv,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(

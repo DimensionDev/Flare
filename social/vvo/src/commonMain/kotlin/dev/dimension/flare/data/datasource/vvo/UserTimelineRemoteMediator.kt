@@ -5,9 +5,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -45,7 +45,7 @@ internal class UserTimelineRemoteMediator(
         if (config.data?.login != true) {
             throw LoginExpiredException(
                 accountKey = accountKey,
-                platformType = PlatformType.VVo,
+                platformId = VVO_PLATFORM_ID,
             )
         }
 

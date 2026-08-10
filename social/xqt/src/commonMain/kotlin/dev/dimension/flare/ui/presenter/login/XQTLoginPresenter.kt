@@ -11,11 +11,11 @@ import dev.dimension.flare.data.datasource.xqt.userById
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.platform.XQTCredential
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -80,7 +80,7 @@ internal class XQTLoginPresenter(
                         id = account.restId,
                         host = xqtHost,
                     ),
-                platformType = PlatformType.xQt,
+                platformId = XQT_PLATFORM_ID,
             ),
             credential =
                 XQTCredential(

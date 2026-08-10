@@ -92,7 +92,6 @@ public class DirectMessageUserListPresenter : PresenterBase<DirectMessageUserLis
             profile?.handle?.raw,
             profile?.handle?.canonical,
             profile?.handleWithoutAt,
-            profile?.handleWithoutAtAndHost,
         ).any { value ->
             value.lowercase().contains(query)
         }

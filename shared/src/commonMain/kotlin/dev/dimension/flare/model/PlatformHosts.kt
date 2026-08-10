@@ -1,0 +1,57 @@
+package dev.dimension.flare.model
+
+import kotlin.io.encoding.Base64
+import kotlin.native.HiddenFromObjC
+
+@HiddenFromObjC
+public val xqtOldHost: String =
+    buildString {
+        append(Base64.decode("dHc=").decodeToString())
+        append(Base64.decode("aXR0").decodeToString())
+        append(Base64.decode("ZXI=").decodeToString())
+        append(Base64.decode("LmNvbQ==").decodeToString())
+    }
+
+@HiddenFromObjC
+public val xqtHost: String =
+    buildString {
+        append("x")
+        append(".com")
+    }
+
+@HiddenFromObjC
+public val vvo: String =
+    buildString {
+        append(Base64.decode("d2Vp").decodeToString())
+        append(Base64.decode("Ym8=").decodeToString())
+    }
+
+@HiddenFromObjC
+public val vvoHost: String =
+    buildString {
+        append(Base64.decode("bS53").decodeToString())
+        append(Base64.decode("ZWli").decodeToString())
+        append(Base64.decode("by5jbg==").decodeToString())
+    }
+
+@HiddenFromObjC
+public val vvoHostShort: String =
+    buildString {
+        append(vvo)
+        append(Base64.decode("LmNu").decodeToString())
+    }
+
+@HiddenFromObjC
+public val vvoHostLong: String =
+    buildString {
+        append(Base64.decode("d2Vp").decodeToString())
+        append(Base64.decode("Ym8uY29t").decodeToString())
+    }
+
+@HiddenFromObjC
+public val ilink: String =
+    buildString {
+        append(Base64.decode("aHR0cHM6Ly90").decodeToString())
+        append(Base64.decode("Lm1lLytWWjYzZnFOUQ==").decodeToString())
+        append(Base64.decode("WElBME16Vmw=").decodeToString())
+    }

@@ -16,7 +16,7 @@ import kotlin.time.Clock
 @HiddenFromObjC
 public fun createSampleStatus(user: UiProfile): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        platformType = user.platformType,
+        platformId = user.platformId,
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,

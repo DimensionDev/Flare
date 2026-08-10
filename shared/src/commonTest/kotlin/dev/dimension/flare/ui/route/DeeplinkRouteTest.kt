@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.route
 
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import kotlinx.collections.immutable.persistentMapOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +26,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Relogin(
                 accountKey = MicroBlogKey("expired", "example.com"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)

@@ -11,32 +11,31 @@
     import {
         createLoginFlowPresenter,
         type LoginFieldType,
-        type PlatformType,
     } from "@flare/web-presenters/loginFlow.svelte";
 
     let {
-        platformType,
+        platformId,
         host,
         methodType,
     }: {
-        platformType: PlatformType;
+        platformId: string;
         host: string;
         methodType: LoginMethodType;
     } = $props();
 
-    const initialPlatformType = untrack(() => platformType);
+    const initialPlatformId = untrack(() => platformId);
     const initialHost = untrack(() => host);
     const initialMethodType = untrack(() => methodType);
-    const redirectUri = browser ? loginRedirectUri(initialPlatformType) : null;
+    const redirectUri = browser ? loginRedirectUri(initialPlatformId) : null;
     let qrContent = $state<string | null>(null);
     const loginFlow = createLoginFlowPresenter(
-        initialPlatformType,
+        initialPlatformId,
         initialHost,
         initialMethodType,
         redirectUri,
         (url) => {
             saveLoginOAuthContext({
-                platformType: initialPlatformType,
+                platformId: initialPlatformId,
                 host: initialHost,
                 methodType: initialMethodType,
             });

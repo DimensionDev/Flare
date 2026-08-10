@@ -8,7 +8,7 @@ import SwiftUI
 struct LoginExpiredToast: Identifiable {
     let id = UUID()
     let accountKey: MicroBlogKey
-    let platformType: PlatformType
+    let platformId: String
 }
 
 final class SwiftInAppNotification: ObservableObject, InAppNotification {
@@ -32,7 +32,7 @@ final class SwiftInAppNotification: ObservableObject, InAppNotification {
                 if let expiredError = throwable as? LoginExpiredException {
                     let toast = LoginExpiredToast(
                         accountKey: expiredError.accountKey,
-                        platformType: expiredError.platformType
+                        platformId: expiredError.platformId
                     )
                     Drops.show(
                         .init(

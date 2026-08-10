@@ -4,8 +4,8 @@ import chat.bsky.convo.ConvoView
 import chat.bsky.convo.ConvoViewLastMessageUnion
 import chat.bsky.convo.DeletedMessageView
 import chat.bsky.convo.MessageView
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
@@ -122,7 +122,8 @@ private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
         handle = UiHandle(raw = userKey.id, host = userKey.host),
         avatar = null,
         nameInternal = userKey.id.toUiPlainText(),
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
         clickEvent = ClickEvent.Noop,
         banner = null,
         description = null,

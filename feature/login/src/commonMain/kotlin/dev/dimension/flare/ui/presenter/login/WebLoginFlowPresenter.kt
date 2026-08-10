@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 
 @WebPresenter("loginFlow")
 public class WebLoginFlowPresenter(
-    private val platformType: PlatformType,
+    private val platformId: String,
     private val host: String,
     private val methodType: LoginMethodType,
     private val redirectUri: String?,
@@ -51,8 +50,8 @@ public class WebLoginFlowPresenter(
     override fun body(): State {
         val scope = rememberCoroutineScope()
         val handler =
-            remember(platformType, host, methodType, redirectUri) {
-                loginPlatformRegistry.require(platformType).createHandler(
+            remember(platformId, host, methodType, redirectUri) {
+                loginPlatformRegistry.require(platformId).createHandler(
                     LoginContext(
                         host = host,
                         methodType = methodType,

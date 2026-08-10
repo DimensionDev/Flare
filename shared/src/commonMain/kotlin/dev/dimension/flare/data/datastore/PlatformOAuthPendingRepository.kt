@@ -2,14 +2,13 @@ package dev.dimension.flare.data.datastore
 
 import androidx.datastore.core.DataStore
 import dev.dimension.flare.data.datastore.model.PlatformOAuthPendingData
-import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public data class PlatformOAuthPending(
-    val platformType: PlatformType,
+    val platformId: String,
     val host: String,
     val flowId: String = DEFAULT_FLOW_ID,
     val createdAtEpochMillis: Long,
@@ -33,7 +32,7 @@ public class PlatformOAuthPendingRepository internal constructor(
                 entries =
                     current.entries
                         .filterNot {
-                            it.platformType == pending.platformType &&
+                            it.platformId == pending.platformId &&
                                 it.host == pending.host &&
                                 it.flowId == pending.flowId
                         } + pending.toEntry(),
@@ -42,7 +41,7 @@ public class PlatformOAuthPendingRepository internal constructor(
     }
 
     public suspend fun get(
-        platformType: PlatformType,
+        platformId: String,
         host: String,
         flowId: String = PlatformOAuthPending.DEFAULT_FLOW_ID,
     ): PlatformOAuthPending? =
@@ -50,38 +49,38 @@ public class PlatformOAuthPendingRepository internal constructor(
             .first()
             .entries
             .firstOrNull {
-                it.platformType == platformType &&
+                it.platformId == platformId &&
                     it.host == host &&
                     it.flowId == flowId
             }?.toPending()
 
     public suspend fun latest(
-        platformType: PlatformType,
+        platformId: String,
         flowId: String = PlatformOAuthPending.DEFAULT_FLOW_ID,
     ): PlatformOAuthPending? =
         store.data
             .first()
             .entries
             .filter {
-                it.platformType == platformType &&
+                it.platformId == platformId &&
                     it.flowId == flowId
             }.maxByOrNull { it.createdAtEpochMillis }
             ?.toPending()
 
     public suspend fun all(
-        platformType: PlatformType,
+        platformId: String,
         flowId: String = PlatformOAuthPending.DEFAULT_FLOW_ID,
     ): List<PlatformOAuthPending> =
         store.data
             .first()
             .entries
             .filter {
-                it.platformType == platformType &&
+                it.platformId == platformId &&
                     it.flowId == flowId
             }.map { it.toPending() }
 
     public suspend fun clear(
-        platformType: PlatformType,
+        platformId: String,
         host: String,
         flowId: String = PlatformOAuthPending.DEFAULT_FLOW_ID,
     ) {
@@ -89,7 +88,7 @@ public class PlatformOAuthPendingRepository internal constructor(
             current.copy(
                 entries =
                     current.entries.filterNot {
-                        it.platformType == platformType &&
+                        it.platformId == platformId &&
                             it.host == host &&
                             it.flowId == flowId
                     },
@@ -99,7 +98,7 @@ public class PlatformOAuthPendingRepository internal constructor(
 
     public suspend fun clear(pending: PlatformOAuthPending) {
         clear(
-            platformType = pending.platformType,
+            platformId = pending.platformId,
             host = pending.host,
             flowId = pending.flowId,
         )
@@ -108,7 +107,7 @@ public class PlatformOAuthPendingRepository internal constructor(
 
 private fun PlatformOAuthPending.toEntry(): PlatformOAuthPendingData.Entry =
     PlatformOAuthPendingData.Entry(
-        platformType = platformType,
+        platformId = platformId,
         host = host,
         flowId = flowId,
         createdAtEpochMillis = createdAtEpochMillis,
@@ -120,7 +119,7 @@ private fun PlatformOAuthPending.toEntry(): PlatformOAuthPendingData.Entry =
 
 private fun PlatformOAuthPendingData.Entry.toPending(): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = platformType,
+        platformId = platformId,
         host = host,
         flowId = flowId,
         createdAtEpochMillis = createdAtEpochMillis,

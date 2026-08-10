@@ -30,8 +30,8 @@ import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
@@ -197,7 +197,8 @@ private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
         handle = UiHandle(raw = userKey.id, host = userKey.host),
         avatar = null,
         nameInternal = userKey.id.toUiPlainText(),
-        platformType = PlatformType.xQt,
+        platformId = XQT_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
         clickEvent = ClickEvent.Noop,
         banner = null,
         description = null,

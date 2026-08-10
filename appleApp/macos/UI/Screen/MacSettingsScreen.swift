@@ -408,12 +408,31 @@ private struct MacAccountManagementSettingsPane: View {
                 accountMenu(item: item, accountName: user.handle.canonical)
             }
         } errorContent: { error in
-            UserErrorView(error: error)
+            Group {
+                if item.account.platformAvailable {
+                    UserErrorView(error: error)
+                } else {
+                    unavailableAccountRow(item.account)
+                }
+            }
                 .contextMenu {
                     accountMenu(item: item, accountName: item.account.accountKey.id)
                 }
         } loadingContent: {
             UserLoadingView()
+        }
+    }
+
+    private func unavailableAccountRow(_ account: UiAccount) -> some View {
+        HStack(spacing: 8) {
+            Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
+                .frame(width: 24, height: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: account.platformDisplayName)
+                Text(verbatim: account.accountKey.description())
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

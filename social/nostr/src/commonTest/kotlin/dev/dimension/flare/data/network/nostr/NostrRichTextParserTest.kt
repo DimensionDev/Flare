@@ -2,7 +2,6 @@ package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
@@ -86,7 +85,7 @@ class NostrRichTextParserTest {
                                 handle = UiHandle(raw = "alice", host = NostrService.NOSTR_HOST),
                                 avatar = "",
                                 nameInternal = "Alice".toUiPlainText(),
-                                platformType = PlatformType.Nostr,
+                                platformId = "Nostr",
                                 clickEvent = ClickEvent.Noop,
                                 banner = null,
                                 description = null,

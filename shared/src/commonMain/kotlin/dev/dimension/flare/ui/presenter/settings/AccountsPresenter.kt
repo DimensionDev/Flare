@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
@@ -11,6 +12,7 @@ import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -26,6 +28,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @WebPresenter("accounts")
 public class AccountsPresenter : PresenterBase<AccountsState>() {
@@ -36,6 +39,17 @@ public class AccountsPresenter : PresenterBase<AccountsState>() {
         accountRepository.allAccounts
             .map { accounts ->
                 accounts.map { account ->
+                    if (!account.platformAvailable) {
+                        return@map flowOf(
+                            AccountsState.AccountItem(
+                                account = account,
+                                profile =
+                                    UiState.Error(
+                                        UnsupportedPlatformException(account.platformId, account.accountKey),
+                                    ),
+                            ),
+                        )
+                    }
                     accountServiceFlow(
                         AccountType.Specific(account.accountKey),
                         accountRepository,
@@ -67,12 +81,15 @@ public class AccountsPresenter : PresenterBase<AccountsState>() {
     override fun body(): AccountsState {
         val accounts by accountsFlow.collectAsUiState()
         val activeAccount by accountRepository.activeAccount.flattenUiState()
+        val scope = rememberCoroutineScope()
         return object : AccountsState {
             override val accounts = accounts
             override val activeAccount = activeAccount
 
             override fun setActiveAccount(accountKey: MicroBlogKey) {
-                accountRepository.setActiveAccount(accountKey)
+                scope.launch {
+                    runCatching { accountRepository.setActiveAccount(accountKey) }
+                }
             }
 
             override fun removeAccount(accountKey: MicroBlogKey) {

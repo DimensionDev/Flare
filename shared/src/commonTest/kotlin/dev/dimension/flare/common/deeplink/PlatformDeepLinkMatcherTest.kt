@@ -3,7 +3,6 @@ package dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDeepLink
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
@@ -21,7 +20,7 @@ class PlatformDeepLinkMatcherTest {
     fun mastodonDeepLinksAreGeneratedInOrder() {
         val accountKey = MicroBlogKey(id = "1", host = "mastodon.social")
 
-        val deepLinks = PlatformType.Mastodon.deepLinks(accountKey)
+        val deepLinks = "Mastodon".deepLinks(accountKey)
 
         assertEquals(2, deepLinks.size)
         assertEquals("https://mastodon.social/@{handle}", deepLinks[0].uriPattern)
@@ -32,7 +31,7 @@ class PlatformDeepLinkMatcherTest {
     fun misskeyDeepLinksUseNotesRoute() {
         val accountKey = MicroBlogKey(id = "1", host = "misskey.example")
 
-        val deepLinks = PlatformType.Misskey.deepLinks(accountKey)
+        val deepLinks = "Misskey".deepLinks(accountKey)
 
         assertEquals(2, deepLinks.size)
         assertEquals("https://misskey.example/@{handle}", deepLinks[0].uriPattern)
@@ -43,7 +42,7 @@ class PlatformDeepLinkMatcherTest {
     fun blueskyDeepLinksIncludeProfileAndPost() {
         val accountKey = MicroBlogKey(id = "1", host = "bsky.example")
 
-        val deepLinks = PlatformType.Bluesky.deepLinks(accountKey)
+        val deepLinks = "Bluesky".deepLinks(accountKey)
 
         assertEquals(4, deepLinks.size)
         assertEquals("https://bsky.example/profile/{handle}", deepLinks[0].uriPattern)
@@ -56,7 +55,7 @@ class PlatformDeepLinkMatcherTest {
     fun xqtDeepLinksUseStatusRoute() {
         val accountKey = MicroBlogKey(id = "1", host = xqtHost)
 
-        val deepLinks = PlatformType.xQt.deepLinks(accountKey)
+        val deepLinks = "xQt".deepLinks(accountKey)
 
         assertEquals(12, deepLinks.size)
         assertEquals("https://$xqtHost/{handle}", deepLinks[0].uriPattern)
@@ -66,7 +65,7 @@ class PlatformDeepLinkMatcherTest {
 
     @Test
     fun vvoHasNoDeepLinks() {
-        val deepLinks = PlatformType.VVo.deepLinks(MicroBlogKey(id = "1", host = "irrelevant"))
+        val deepLinks = "VVo".deepLinks(MicroBlogKey(id = "1", host = "irrelevant"))
 
         assertTrue(deepLinks.isEmpty())
     }
@@ -76,12 +75,12 @@ class PlatformDeepLinkMatcherTest {
         val mastodonAccount =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val misskeyAccount =
             UiAccount(
                 accountKey = MicroBlogKey(id = "2", host = "misskey.example"),
-                platformType = PlatformType.Misskey,
+                platformId = "Misskey",
             )
         val mapping = deepLinkMapping(mastodonAccount, misskeyAccount)
 
@@ -104,12 +103,12 @@ class PlatformDeepLinkMatcherTest {
         val account1 =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val account2 =
             UiAccount(
                 accountKey = MicroBlogKey(id = "2", host = "mastodon.social"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val mapping = deepLinkMapping(account1, account2)
 
@@ -141,7 +140,7 @@ class PlatformDeepLinkMatcherTest {
         val account =
             UiAccount(
                 accountKey = MicroBlogKey(id = "did:plc:alice", host = "example.com"),
-                platformType = PlatformType.Bluesky,
+                platformId = "Bluesky",
             )
         val mapping = deepLinkMapping(account)
 
@@ -176,7 +175,7 @@ class PlatformDeepLinkMatcherTest {
         val account =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val mapping = deepLinkMapping(account)
 
@@ -189,7 +188,7 @@ class PlatformDeepLinkMatcherTest {
         val account =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "fanbox.cc"),
-                platformType = PlatformType.Fanbox,
+                platformId = "Fanbox",
             )
         val mapping =
             mapOf(
@@ -225,7 +224,7 @@ class PlatformDeepLinkMatcherTest {
         val account =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "fanbox.cc"),
-                platformType = PlatformType.Fanbox,
+                platformId = "Fanbox",
             )
         val mapping =
             mapOf(
@@ -261,7 +260,7 @@ class PlatformDeepLinkMatcherTest {
         val account =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "fanbox.cc"),
-                platformType = PlatformType.Fanbox,
+                platformId = "Fanbox",
             )
         val mapping =
             mapOf(
@@ -289,22 +288,22 @@ class PlatformDeepLinkMatcherTest {
         val mastodonAccount =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.example"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val misskeyAccount =
             UiAccount(
                 accountKey = MicroBlogKey(id = "2", host = "misskey.example"),
-                platformType = PlatformType.Misskey,
+                platformId = "Misskey",
             )
         val bskyAccount =
             UiAccount(
                 accountKey = MicroBlogKey(id = "3", host = "bsky.example"),
-                platformType = PlatformType.Bluesky,
+                platformId = "Bluesky",
             )
         val xAccount =
             UiAccount(
                 accountKey = MicroBlogKey(id = "4", host = xqtHost),
-                platformType = PlatformType.xQt,
+                platformId = "xQt",
             )
 
         val mapping = deepLinkMapping(mastodonAccount, misskeyAccount, bskyAccount, xAccount)
@@ -409,7 +408,7 @@ class PlatformDeepLinkMatcherTest {
         val account =
             UiAccount(
                 accountKey = MicroBlogKey(id = "1", host = "mastodon.social"),
-                platformType = PlatformType.Mastodon,
+                platformId = "Mastodon",
             )
         val mapping = deepLinkMapping(account)
 
@@ -436,10 +435,10 @@ private fun assertMatch(
     assertEquals(expectedHost, actual?.host)
 }
 
-private fun PlatformType.deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
+private fun String.deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
     platformRegistry.require(this).deepLinks(accountKey)
 
-private fun UiAccount.deepLinks(): ImmutableList<PlatformDeepLink<*>> = platformRegistry.require(platformType).deepLinks(accountKey)
+private fun UiAccount.deepLinks(): ImmutableList<PlatformDeepLink<*>> = platformRegistry.require(platformId).deepLinks(accountKey)
 
 private fun deepLinkMapping(vararg accounts: UiAccount): Map<UiAccount, List<PlatformDeepLink<*>>> =
     persistentMapOf<UiAccount, List<PlatformDeepLink<*>>>()

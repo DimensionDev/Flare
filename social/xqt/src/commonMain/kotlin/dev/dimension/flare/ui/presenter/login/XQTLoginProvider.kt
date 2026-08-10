@@ -1,18 +1,17 @@
 package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.data.datasource.xqt.userById
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.xqt.XQTPlatformDetector
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.platform.XQTCredential
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
@@ -28,8 +27,8 @@ import kotlinx.coroutines.flow.flowOf
 private const val LOGIN_ACTION = "login"
 
 public data object XQTLoginProvider : LoginPlatformProvider {
-    override val platformType: PlatformType = PlatformType.xQt
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = XQT_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = XqtPlatformSpec.metadata
     override val detector: PlatformDetector = XQTPlatformDetector
     override val methods: List<LoginMethodSpec> =
@@ -53,7 +52,7 @@ public data object XQTLoginProvider : LoginPlatformProvider {
                                 " get the full story with all the live commentary.",
                         iconUrl = null,
                         domain = xqtHost,
-                        type = platformType,
+                        platformId = platformId,
                         bannerUrl = null,
                         usersCount = 0,
                     ),
@@ -62,7 +61,7 @@ public data object XQTLoginProvider : LoginPlatformProvider {
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${platformType.name} is not supported yet")
+        throw UnsupportedOperationException("$platformId is not supported yet")
 
     override fun createHandler(context: LoginContext): LoginMethodHandler {
         require(context.methodType == LoginMethodType.WebCookie) {
@@ -136,7 +135,7 @@ private class XQTWebCookieLoginHandler(
         accountService.addAccount(
             UiAccount(
                 accountKey = accountKey,
-                platformType = PlatformType.xQt,
+                platformId = XQT_PLATFORM_ID,
             ),
             credential =
                 XQTCredential(

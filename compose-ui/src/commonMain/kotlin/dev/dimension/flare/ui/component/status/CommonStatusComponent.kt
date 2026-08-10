@@ -138,7 +138,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
-import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -230,7 +229,7 @@ public fun CommonStatusComponent(
                         }
                         if (appearanceSettings.showPlatformLogo) {
                             FAIcon(
-                                imageVector = item.platformType.brandIcon,
+                                imageVector = item.platformIcon.toImageVector(),
                                 contentDescription = null,
                                 modifier =
                                     Modifier

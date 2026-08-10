@@ -216,7 +216,7 @@ private fun List<UiTimelineV2.Post>.toLocalCachePostToolText(
 private fun UiTimelineV2.Post.toLocalCachePostToolText(): String =
     buildString {
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("statusKey: $statusKey")
         appendLine("createdAt: ${createdAt.value}")
         appendLine("authorName: ${user?.name?.raw.orEmpty()}")
@@ -261,7 +261,7 @@ private fun List<UiProfile>.toLocalCacheUserToolText(
 private fun UiProfile.toLocalCacheUserToolText(): String =
     buildString {
         appendLine("attachmentRef: ${agentAttachmentMarker()}")
-        appendLine("platform: ${platformType.name}")
+        appendLine("platform: $platformId")
         appendLine("userKey: $key")
         appendLine("displayName: ${name.raw}")
         appendLine("handle: ${handle.raw}")

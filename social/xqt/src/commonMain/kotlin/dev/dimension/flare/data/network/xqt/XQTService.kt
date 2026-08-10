@@ -4,6 +4,7 @@ import dev.dimension.flare.common.JSON_WITH_ENCODE_DEFAULT
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.data.translation.canonicalTranslationLanguage
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.DmApi
@@ -38,7 +39,6 @@ import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.elonmusk114514.ElonMusk1145141919810
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.call.body
 import io.ktor.client.plugins.BrowserUserAgent
@@ -250,7 +250,7 @@ private val XQTHeaderPlugin =
             if ((error == 215L || response.status == HttpStatusCode.Forbidden) && accountKey != null) {
                 throw LoginExpiredException(
                     accountKey,
-                    PlatformType.xQt,
+                    XQT_PLATFORM_ID,
                 )
             }
         }

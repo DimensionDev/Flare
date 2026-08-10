@@ -23,7 +23,6 @@ import dev.dimension.flare.data.repository.SaveDraftTarget
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.Dispatchers
@@ -799,7 +798,7 @@ class SendDraftUseCaseTest : RobolectricTest() {
     ): UiAccount =
         UiAccount(
             accountKey = MicroBlogKey(id, host),
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
         )
 
     private fun media(

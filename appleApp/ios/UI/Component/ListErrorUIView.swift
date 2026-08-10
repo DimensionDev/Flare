@@ -91,7 +91,7 @@ final class ListErrorUIView: UIView {
             iconView.image = UIImage(systemName: "person.badge.shield.exclamationmark")
             titleLabel.text = String(format: String(localized: "error_login_expired %@"), "\(expired.accountKey)")
             button.setTitle(String(localized: "error_login_expired_action"), for: .normal)
-            actionURL = reloginURL(accountKey: expired.accountKey, platformType: expired.platformType)
+            actionURL = reloginURL(accountKey: expired.accountKey, platformId: expired.platformId)
             mode = .openLogin
         } else if let reloginError = error as? RequireReLoginException {
             iconView.image = UIImage(systemName: "person.badge.shield.exclamationmark")
@@ -99,7 +99,7 @@ final class ListErrorUIView: UIView {
             messageLabel.text = String(localized: "permission_denied_message")
             messageLabel.isHidden = false
             button.setTitle(String(localized: "error_login_expired_action"), for: .normal)
-            actionURL = reloginURL(accountKey: reloginError.accountKey, platformType: reloginError.platformType)
+            actionURL = reloginURL(accountKey: reloginError.accountKey, platformId: reloginError.platformId)
             mode = .openLogin
         } else {
             iconView.image = UIImage(systemName: "exclamationmark.triangle.text.page")
@@ -123,11 +123,11 @@ final class ListErrorUIView: UIView {
         }
     }
 
-    private func reloginURL(accountKey: MicroBlogKey, platformType: PlatformType) -> URL? {
+    private func reloginURL(accountKey: MicroBlogKey, platformId: String) -> URL? {
         URL(
             string: DeeplinkRoute.Relogin(
                 accountKey: accountKey,
-                platformType: platformType
+                platformId: platformId
             ).toUri()
         )
     }

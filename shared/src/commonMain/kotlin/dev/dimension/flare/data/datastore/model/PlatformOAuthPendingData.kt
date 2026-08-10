@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datastore.model
 
-import dev.dimension.flare.model.PlatformType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,7 +9,8 @@ internal data class PlatformOAuthPendingData(
 ) {
     @Serializable
     internal data class Entry(
-        val platformType: PlatformType,
+        @SerialName("platformType")
+        val platformId: String,
         val host: String,
         val flowId: String = "OAuth",
         val createdAtEpochMillis: Long = 0L,

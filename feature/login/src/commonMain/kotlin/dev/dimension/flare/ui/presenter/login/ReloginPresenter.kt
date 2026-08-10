@@ -16,17 +16,17 @@ public class ReloginPresenter(
     override fun body(): ReloginState =
         object : ReloginState {
             override val target: ReloginTarget = this@ReloginPresenter.target
-            override val methods: List<LoginMethodSpec> = loginPlatformRegistry.methods(target.platformType)
+            override val methods: List<LoginMethodSpec> = loginPlatformRegistry.methods(target.platformId)
 
-            override fun platformIcon(): UiIcon = loginPlatformRegistry.require(target.platformType).metadata.icon
+            override fun platformIcon(): UiIcon = loginPlatformRegistry.require(target.platformId).metadata.icon
 
             override fun agreementUrl(): String? =
                 loginPlatformRegistry
-                    .require(target.platformType)
+                    .require(target.platformId)
                     .agreementUrl(target.accountKey.host)
 
             override fun createLoginHandler(methodType: LoginMethodType): LoginMethodHandler =
-                loginPlatformRegistry.require(target.platformType).createHandler(
+                loginPlatformRegistry.require(target.platformId).createHandler(
                     LoginContext(
                         host = target.accountKey.host,
                         methodType = methodType,

@@ -2,7 +2,6 @@ package dev.dimension.flare.feature.agent.common
 
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
@@ -112,7 +111,7 @@ internal class AgentVisibleResultTest {
 
 private fun createTestPost(): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        platformType = PlatformType.Mastodon,
+        platformId = "Mastodon",
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,

@@ -12,11 +12,11 @@ import dev.dimension.flare.data.network.bluesky.FLARE_BLUESKY_OAUTH_SCOPES
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.bluesky.requireFlareOAuthScopes
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.client.plugins.DefaultRequest
@@ -104,7 +104,7 @@ internal class BlueskyOAuthLoginPresenter(
                         val state = Url(url).parameters["state"]
                         val pending =
                             pendingRepository
-                                .all(PlatformType.Bluesky)
+                                .all(BLUESKY_PLATFORM_ID)
                                 .firstOrNull { it.attributes["state"] == state }
                         if (pending == null) {
                             error = "No pending authorization request"
@@ -175,7 +175,7 @@ internal class BlueskyOAuthLoginPresenter(
                             id = token.subject.did,
                             host = host,
                         ),
-                    platformType = PlatformType.Bluesky,
+                    platformId = BLUESKY_PLATFORM_ID,
                 ),
             credential = credential,
             serializer = BlueskyCredential.serializer(),
@@ -198,7 +198,7 @@ private fun OAuthAuthorizationRequest.toPlatformOAuthPending(
     redirectUri: String,
 ): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Bluesky,
+        platformId = BLUESKY_PLATFORM_ID,
         host = host,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes =

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
@@ -29,7 +28,7 @@ class ComposeAccountSelectionFlowTest {
                     UiState.Success(
                         UiAccount(
                             accountKey = accountKey,
-                            platformType = PlatformType.Mastodon,
+                            platformId = "Mastodon",
                         ),
                     )
             val accountUpdates = MutableSharedFlow<Pair<MicroBlogKey, UiState<UiAccount>>>()
@@ -63,7 +62,7 @@ class ComposeAccountSelectionFlowTest {
                         UiState.Success(
                             UiAccount(
                                 accountKey = accountKey,
-                                platformType = PlatformType.Mastodon,
+                                platformId = "Mastodon",
                             ),
                         ),
                 )

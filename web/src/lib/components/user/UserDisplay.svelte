@@ -67,7 +67,7 @@
 		{#if user.avatar?.url}
 			<img src={user.avatar?.url} alt="" loading="lazy" />
 		{:else}
-			<span>{initials(user.name.innerText || user.handleWithoutAtAndHost || handleText)}</span>
+			<span>{initials(user.name.innerText || handleText)}</span>
 		{/if}
 	</div>
 

@@ -81,6 +81,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
+private val MEDIA_COMPRESSION =
+    ComposeConfig.Media.Compression(
+        maxSizeBytes = 200L * 1024 * 1024,
+        maxWidth = 8192,
+        maxHeight = 8192,
+    )
+
 @OptIn(ExperimentalPagingApi::class)
 internal class MisskeyDataSource(
     override val accountKey: MicroBlogKey,
@@ -456,8 +463,8 @@ internal class MisskeyDataSource(
                         if (isImage) {
                             imageCompressor.compress(
                                 imageBytes = bytes,
-                                maxSize = 200L * 1024 * 1024,
-                                maxDimensions = 8192 to 8192,
+                                maxSize = MEDIA_COMPRESSION.maxSizeBytes,
+                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
                             )
                         } else {
                             bytes
@@ -581,6 +588,7 @@ internal class MisskeyDataSource(
                     canSensitive = true,
                     altTextMaxLength = 512,
                     allowMediaOnly = true,
+                    compression = MEDIA_COMPRESSION,
                 ),
             poll = ComposeConfig.Poll(9),
             emoji =

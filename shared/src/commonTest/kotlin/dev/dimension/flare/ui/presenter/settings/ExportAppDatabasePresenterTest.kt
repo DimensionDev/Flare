@@ -15,7 +15,6 @@ import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.presenter.ExportState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,6 +28,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExportAppDatabasePresenterTest : RobolectricTest() {
@@ -68,7 +69,7 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
                 DbAccount(
                     account_key = MicroBlogKey("user", "example.com"),
                     credential_json = "{}",
-                    platform_type = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     last_active = 123456789L,
                 )
             db.accountDao().insert(account)
@@ -131,5 +132,48 @@ class ExportAppDatabasePresenterTest : RobolectricTest() {
 
             assertEquals(1, export.rssSources.size)
             assertEquals(rssSource.url, export.rssSources.first().url)
+        }
+
+    @Test
+    fun oldBackupKeepsUnknownPlatformIdAndLegacyFieldName() =
+        runTest {
+            val fixture =
+                """
+                {
+                  "accounts": [
+                    {
+                      "account_key": {"id": "future-user", "host": "testnet.example"},
+                      "credential_json": "{\"token\":\"kept\"}",
+                      "platform_type": "TestNet",
+                      "last_active": 123,
+                      "sort_id": 7
+                    }
+                  ]
+                }
+                """.trimIndent()
+
+            ImportAppDatabasePresenter(fixture).import()
+
+            val account = db.accountDao().getAccount(MicroBlogKey("future-user", "testnet.example"))
+            assertEquals("TestNet", account?.platformId)
+            assertEquals("{\"token\":\"kept\"}", account?.credential_json)
+            assertEquals(7L, account?.sort_id)
+
+            val reExported = ExportAppDatabasePresenter().export()
+            assertTrue(reExported.contains("\"platform_type\":\"TestNet\""))
+            assertTrue(!reExported.contains("\"platformId\""))
+        }
+
+    @Test
+    fun importRejectsOnlyInvalidPlatformIdSyntax() =
+        runTest {
+            val fixture =
+                """
+                {"accounts":[{"account_key":{"id":"bad","host":"example.com"},"credential_json":"{}","platform_type":"bad/id","last_active":1,"sort_id":0}]}
+                """.trimIndent()
+
+            assertFailsWith<IllegalArgumentException> {
+                ImportAppDatabasePresenter(fixture).import()
+            }
         }
 }

@@ -27,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.subscription.SubscriptionDataSource
 import dev.dimension.flare.data.datasource.subscription.SubscriptionSourceDetection
+import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.LocalCacheRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
@@ -34,9 +35,15 @@ import dev.dimension.flare.data.repository.toUiRssSource
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
+import dev.dimension.flare.model.PlatformRegistry
+import dev.dimension.flare.model.PlatformRuntimeData
+import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -58,6 +65,20 @@ import kotlin.test.assertTrue
 import kotlin.time.Clock
 
 internal class AgentToolsTest {
+    private val platformRegistry =
+        PlatformRegistry(
+            PlatformRuntimeData(
+                platformSpecs =
+                    listOf(
+                        AgentTestPlatformSpec("Mastodon", isDefaultGuest = true),
+                        AgentTestPlatformSpec("VVo", listOf("weibo", "微博")),
+                        AgentTestPlatformSpec("xQt", listOf("twitter", "推特")),
+                        AgentTestPlatformSpec("Bluesky", listOf("blue sky", "蓝天")),
+                    ),
+                extraTimelineSpecs = emptyList(),
+            ),
+        )
+
     @Test
     fun emptyPlatformListSearchesEveryTarget() {
         val targets = agentSearchTargets()
@@ -78,10 +99,33 @@ internal class AgentToolsTest {
     fun platformAliasesResolveToSpecificTargets() {
         val targets = agentSearchTargets()
 
-        assertEquals(listOf(targets[0]), targets.filterByPlatformNames(listOf("微博")))
-        assertEquals(listOf(targets[1]), targets.filterByPlatformNames(listOf("twitter")))
-        assertEquals(listOf(targets[1]), targets.filterByPlatformNames(listOf("推特")))
-        assertEquals(listOf(targets[2]), targets.filterByPlatformNames(listOf("蓝天")))
+        assertEquals(listOf(targets[0]), targets.filterByPlatformNames(listOf("微博"), platformRegistry))
+        assertEquals(listOf(targets[1]), targets.filterByPlatformNames(listOf("twitter"), platformRegistry))
+        assertEquals(listOf(targets[1]), targets.filterByPlatformNames(listOf("推特"), platformRegistry))
+        assertEquals(listOf(targets[2]), targets.filterByPlatformNames(listOf("蓝天"), platformRegistry))
+    }
+
+    @Test
+    fun platformIdsKeepCaseAndSeparatorsWhenFilteringTargets() {
+        val registry =
+            PlatformRegistry(
+                PlatformRuntimeData(
+                    platformSpecs =
+                        listOf(
+                            AgentTestPlatformSpec("Mastodon", isDefaultGuest = true),
+                            AgentTestPlatformSpec("Foo-Bar"),
+                            AgentTestPlatformSpec("FooBar"),
+                        ),
+                    extraTimelineSpecs = emptyList(),
+                ),
+            )
+        val hyphenated = AgentSearchTarget("Foo-Bar", StubMicroblogDataSource)
+        val compact = AgentSearchTarget("FooBar", StubMicroblogDataSource)
+        val targets = listOf(hyphenated, compact)
+
+        assertEquals(listOf(hyphenated), targets.filterByPlatformNames(listOf("Foo-Bar"), registry))
+        assertEquals(listOf(compact), targets.filterByPlatformNames(listOf("FooBar"), registry))
+        assertTrue(targets.filterByPlatformNames(listOf("foo-bar"), registry).isEmpty())
     }
 
     @Test
@@ -162,12 +206,12 @@ internal class AgentToolsTest {
                             listOf(
                                 AgentNotificationTarget(
                                     accountKey = alice.accountKey,
-                                    platformType = PlatformType.Mastodon,
+                                    platformId = "Mastodon",
                                     dataSource = alice,
                                 ),
                                 AgentNotificationTarget(
                                     accountKey = bob.accountKey,
-                                    platformType = PlatformType.Mastodon,
+                                    platformId = "Mastodon",
                                     dataSource = bob,
                                 ),
                             ),
@@ -309,7 +353,7 @@ internal class AgentToolsTest {
                     ),
                 )
 
-            val result = tool.execute(ListBuiltInTimelinesTool.Args(platforms = listOf("mastodon")))
+            val result = tool.execute(ListBuiltInTimelinesTool.Args(platforms = listOf("Mastodon")))
 
             assertTrue(result.contains("common.home:alice@example.social"))
             assertTrue(result.contains("specId: common.home"))
@@ -399,12 +443,12 @@ internal class AgentToolsTest {
                             listOf(
                                 AgentComposeTarget(
                                     accountKey = alice.accountKey,
-                                    platformType = PlatformType.Mastodon,
+                                    platformId = "Mastodon",
                                     dataSource = alice,
                                 ),
                                 AgentComposeTarget(
                                     accountKey = bob.accountKey,
-                                    platformType = PlatformType.Mastodon,
+                                    platformId = "Mastodon",
                                     dataSource = bob,
                                 ),
                             ),
@@ -419,7 +463,7 @@ internal class AgentToolsTest {
                 tool.execute(
                     ComposePostTool.Args(
                         content = "hello from agent",
-                        platforms = listOf("mastodon"),
+                        platforms = listOf("Mastodon"),
                     ),
                 )
 
@@ -459,17 +503,17 @@ internal class AgentToolsTest {
                             listOf(
                                 AgentComposeTarget(
                                     accountKey = mastodon.accountKey,
-                                    platformType = PlatformType.Mastodon,
+                                    platformId = "Mastodon",
                                     dataSource = mastodon,
                                 ),
                                 AgentComposeTarget(
                                     accountKey = twitter.accountKey,
-                                    platformType = PlatformType.xQt,
+                                    platformId = "xQt",
                                     dataSource = twitter,
                                 ),
                                 AgentComposeTarget(
                                     accountKey = weibo.accountKey,
-                                    platformType = PlatformType.VVo,
+                                    platformId = "VVo",
                                     dataSource = weibo,
                                 ),
                             ),
@@ -541,7 +585,7 @@ internal class AgentToolsTest {
                         AgentToolContext.StatusContext(
                             postDataSource = StubPostDataSource,
                             statusKey = targetPost.statusKey,
-                            currentPlatformType = PlatformType.Mastodon,
+                            currentPlatformId = "Mastodon",
                             currentPost = targetPost,
                         ),
                 )
@@ -575,7 +619,7 @@ internal class AgentToolsTest {
                         AgentToolContext.StatusContext(
                             postDataSource = StubPostDataSource,
                             statusKey = targetPost.statusKey,
-                            currentPlatformType = PlatformType.Mastodon,
+                            currentPlatformId = "Mastodon",
                             currentPost = targetPost,
                         ),
                 )
@@ -646,7 +690,7 @@ internal class AgentToolsTest {
             listOf(
                 AgentUserTarget(
                     accountKey = accountKey,
-                    platformType = PlatformType.xQt,
+                    platformId = "xQt",
                     dataSource = StubMicroblogDataSource,
                     loadUserById = {
                         error("unused")
@@ -654,7 +698,7 @@ internal class AgentToolsTest {
                 ),
             )
 
-        assertEquals(targets, targets.filterUserTargetsByPlatformNames(listOf("twitter")))
+        assertEquals(targets, targets.filterUserTargetsByPlatformNames(listOf("twitter"), platformRegistry))
     }
 
     @Test
@@ -1107,9 +1151,9 @@ internal class AgentToolsTest {
 
     private fun agentSearchTargets(): List<AgentSearchTarget> =
         listOf(
-            AgentSearchTarget(PlatformType.VVo, StubMicroblogDataSource),
-            AgentSearchTarget(PlatformType.xQt, StubMicroblogDataSource),
-            AgentSearchTarget(PlatformType.Bluesky, StubMicroblogDataSource),
+            AgentSearchTarget("VVo", StubMicroblogDataSource),
+            AgentSearchTarget("xQt", StubMicroblogDataSource),
+            AgentSearchTarget("Bluesky", StubMicroblogDataSource),
         )
 
     private fun composePostTool(
@@ -1126,7 +1170,7 @@ internal class AgentToolsTest {
                     listOf(
                         AgentComposeTarget(
                             accountKey = dataSource.accountKey,
-                            platformType = PlatformType.Mastodon,
+                            platformId = "Mastodon",
                             dataSource = dataSource,
                         ),
                     ),
@@ -1138,9 +1182,27 @@ internal class AgentToolsTest {
         )
 }
 
+private class AgentTestPlatformSpec(
+    override val platformId: String,
+    aliases: List<String> = emptyList(),
+    override val isDefaultGuest: Boolean = false,
+) : PlatformSpec {
+    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World, aliases)
+    override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
+
+    override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
+
+    override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource = StubMicroblogDataSource
+
+    override fun guestDataSource(
+        host: String,
+        locale: String,
+    ): MicroblogDataSource = StubMicroblogDataSource
+}
+
 private fun stubListTarget(
     accountKey: MicroBlogKey = MicroBlogKey("alice", "example.social"),
-    platformType: PlatformType = PlatformType.Mastodon,
+    platformId: String = "Mastodon",
     lists: List<UiList.List> =
         listOf(
             UiList.List(
@@ -1154,7 +1216,7 @@ private fun stubListTarget(
 ): AgentListTarget =
     AgentListTarget(
         accountKey = accountKey,
-        platformType = platformType,
+        platformId = platformId,
         supportedMetaData = setOf("TITLE", "DESCRIPTION"),
         listCached = { lists },
         loadListInfo = { listId -> lists.first { it.id == listId } },
@@ -1172,7 +1234,7 @@ private fun stubBuiltInTimelineTarget(
     specId: String,
     title: String,
     accountKey: MicroBlogKey = MicroBlogKey("alice", "example.social"),
-    platformType: PlatformType = PlatformType.Mastodon,
+    platformId: String = "Mastodon",
     items: List<UiTimelineV2> = emptyList(),
 ): AgentBuiltInTimelineTarget =
     AgentBuiltInTimelineTarget(
@@ -1180,7 +1242,7 @@ private fun stubBuiltInTimelineTarget(
         specId = specId,
         title = title,
         accountKey = accountKey,
-        platformType = platformType,
+        platformId = platformId,
         loadTimeline = { pageSize -> items.take(pageSize) },
     )
 
@@ -1191,7 +1253,7 @@ private fun createPost(
     actions: ImmutableList<ActionMenu> = persistentListOf(),
 ): UiTimelineV2.Post =
     UiTimelineV2.Post(
-        platformType = PlatformType.Mastodon,
+        platformId = "Mastodon",
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,
@@ -1277,7 +1339,7 @@ private fun postActionSession(
             AgentToolContext.StatusContext(
                 postDataSource = dataSource,
                 statusKey = post.statusKey,
-                currentPlatformType = post.platformType,
+                currentPlatformId = post.platformId,
                 currentPost = post,
             ),
         searchTargets = emptyList(),
@@ -1286,7 +1348,7 @@ private fun postActionSession(
             listOf(
                 AgentPostActionTarget(
                     accountKey = accountKey,
-                    platformType = post.platformType,
+                    platformId = post.platformId,
                     dataSource = dataSource,
                 ),
             ),
@@ -1309,7 +1371,7 @@ private fun relationSession(
             listOf(
                 AgentRelationTarget(
                     accountKey = dataSource.accountKey,
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                     dataSource = dataSource,
                 ),
             ),

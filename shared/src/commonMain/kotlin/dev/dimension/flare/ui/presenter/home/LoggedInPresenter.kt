@@ -14,7 +14,7 @@ public class LoggedInPresenter : PresenterBase<LoggedInState>() {
     private val accountRepository: AccountRepository by koinInject()
 
     private val loggedInFlow by lazy {
-        accountRepository.allAccounts.map { it.isNotEmpty() }
+        accountRepository.allAccounts.map { accounts -> accounts.any { it.platformAvailable } }
     }
 
     @Composable

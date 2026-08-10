@@ -1,15 +1,14 @@
 package dev.dimension.flare.data.network.mastodon
 
-import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.repository.tryRun
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.presenter.login.NodeDetection
+import dev.dimension.flare.ui.presenter.login.PlatformDetector
 
 internal data object MastodonPlatformDetector : PlatformDetector {
     override val priority: Int = 60
 
-    override suspend fun detect(host: String): NodeData? {
+    override suspend fun detect(host: String): NodeDetection? {
         val nodeInfo =
             tryRun {
                 NodeInfoService.fetchNodeInfo(host)
@@ -20,9 +19,8 @@ internal data object MastodonPlatformDetector : PlatformDetector {
         }
 
         if (nodeInfo?.equals("mastodon", ignoreCase = true) == true) {
-            return NodeData(
+            return NodeDetection(
                 host = host,
-                platformType = PlatformType.Mastodon,
                 software = nodeInfo,
                 compatibleMode = false,
             )
@@ -31,10 +29,9 @@ internal data object MastodonPlatformDetector : PlatformDetector {
         return tryRun {
             MastodonInstanceService("https://$host/").instance().let {
                 requireNotNull(it.title)
-                NodeData(
+                NodeDetection(
                     host = host,
-                    platformType = PlatformType.Mastodon,
-                    software = nodeInfo ?: PlatformType.Mastodon.name,
+                    software = nodeInfo ?: "Mastodon",
                     compatibleMode = nodeInfo != null,
                 )
             }
@@ -42,10 +39,9 @@ internal data object MastodonPlatformDetector : PlatformDetector {
             tryRun {
                 MastodonInstanceService("https://$host/").instanceV1().let {
                     requireNotNull(it.title)
-                    NodeData(
+                    NodeDetection(
                         host = host,
-                        platformType = PlatformType.Mastodon,
-                        software = nodeInfo ?: PlatformType.Mastodon.name,
+                        software = nodeInfo ?: "Mastodon",
                         compatibleMode = nodeInfo != null,
                     )
                 }

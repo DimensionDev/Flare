@@ -11,12 +11,12 @@ import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
+import dev.dimension.flare.data.platform.MASTODON_PLATFORM_ID
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -40,14 +40,14 @@ public class MastodonCallbackPresenter(
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(code) {
             val pendingOAuth =
-                pendingRepository.latest(PlatformType.Mastodon)?.toMastodonPending() ?: run {
+                pendingRepository.latest(MASTODON_PLATFORM_ID)?.toMastodonPending() ?: run {
                     error = Exception("No pending OAuth")
                     return@LaunchedEffect
                 }
             try {
                 tryPendingOAuth(pendingOAuth, code, accountService)
                 pendingRepository.clear(
-                    platformType = PlatformType.Mastodon,
+                    platformId = MASTODON_PLATFORM_ID,
                     host = pendingOAuth.host,
                 )
                 toHome.invoke()
@@ -93,7 +93,7 @@ public class MastodonCallbackPresenter(
                         id = id,
                         host = host,
                     ),
-                platformType = PlatformType.Mastodon,
+                platformId = MASTODON_PLATFORM_ID,
             ),
             credential =
                 MastodonCredential(
@@ -172,7 +172,7 @@ private object MastodonLoginSessionStore {
 
 private fun MastodonLoginSessionStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Mastodon,
+        platformId = MASTODON_PLATFORM_ID,
         host = host,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes =

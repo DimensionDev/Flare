@@ -9,11 +9,11 @@ import androidx.compose.runtime.setValue
 import com.atproto.server.CreateSessionRequest
 import com.atproto.server.CreateSessionResponse
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
@@ -147,7 +147,7 @@ internal class BlueskyLoginPresenter(
                             id = response.did.did,
                             host = Url(baseUrl).host,
                         ),
-                    platformType = PlatformType.Bluesky,
+                    platformId = BLUESKY_PLATFORM_ID,
                 ),
             credential = credential,
             serializer = BlueskyCredential.serializer(),

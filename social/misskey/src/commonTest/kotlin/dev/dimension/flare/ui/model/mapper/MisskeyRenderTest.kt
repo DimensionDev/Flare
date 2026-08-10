@@ -16,9 +16,11 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.postEventOrNull
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -33,11 +35,7 @@ class MisskeyRenderTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(MisskeyRenderTestModule::class)
         }
     }
 
@@ -371,4 +369,10 @@ class MisskeyRenderTest {
         }
 
     private fun timelinePostItemOf(item: UiTimelineV2): UiTimelineV2.TimelinePostItem = assertIs<UiTimelineV2.TimelinePostItem>(item)
+}
+
+@Module
+internal class MisskeyRenderTestModule {
+    @Single
+    fun platformFormatter(): PlatformFormatter = TestFormatter()
 }

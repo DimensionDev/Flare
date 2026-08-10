@@ -204,7 +204,7 @@ internal class ProfileInsightAgentUseCase(
             appendLine("Respond in this language: $targetLanguage.")
             appendLine()
             appendLine("Profile:")
-            appendLine("platform: ${platformType.name}")
+            appendLine("platform: $platformId")
             appendLine("userKey: $key")
             appendLine("userId: ${key.id}")
             appendLine("userHost: ${key.host}")

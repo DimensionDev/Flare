@@ -71,6 +71,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.Uuid
 
+private val MEDIA_COMPRESSION =
+    ComposeConfig.Media.Compression(
+        maxSizeBytes = 16L * 1024 * 1024,
+        maxWidth = 2880,
+        maxHeight = 2880,
+    )
+
 @OptIn(ExperimentalPagingApi::class)
 internal open class MastodonDataSource(
     override val accountKey: MicroBlogKey,
@@ -298,8 +305,8 @@ internal open class MastodonDataSource(
                         if (isImage) {
                             imageCompressor.compress(
                                 imageBytes = bytes,
-                                maxSize = 16 * 1024 * 1024,
-                                maxDimensions = 2880 to 2880,
+                                maxSize = MEDIA_COMPRESSION.maxSizeBytes,
+                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
                             )
                         } else {
                             bytes
@@ -456,6 +463,7 @@ internal open class MastodonDataSource(
                         canSensitive = true,
                         altTextMaxLength = 1500,
                         allowMediaOnly = true,
+                        compression = MEDIA_COMPRESSION,
                     )
                 },
             poll =

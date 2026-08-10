@@ -14,7 +14,6 @@ import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
@@ -281,7 +280,7 @@ class PostEventHandlerTest : RobolectricTest() {
         poll: UiPoll? = null,
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,
@@ -311,7 +310,7 @@ class PostEventHandlerTest : RobolectricTest() {
                 ),
             avatar = "https://test.social/author.png",
             nameInternal = "Author".toUiPlainText(),
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             clickEvent = ClickEvent.Noop,
             banner = null,
             description = null,

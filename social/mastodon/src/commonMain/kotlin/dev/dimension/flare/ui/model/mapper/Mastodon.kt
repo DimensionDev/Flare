@@ -18,9 +18,9 @@ import dev.dimension.flare.data.network.mastodon.api.model.QuoteApproval
 import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.platform.MASTODON_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
@@ -798,7 +798,7 @@ private fun Status.renderStatus(
                                 ?: AccountType.GuestHost(host),
                     ),
             ),
-        platformType = PlatformType.Mastodon,
+        platformId = MASTODON_PLATFORM_ID,
         emojiReactions = reactions,
         accountType = accountKey.toAccountType(guestHost = host),
     )
@@ -992,7 +992,8 @@ internal fun Account.render(
                                 .toImmutableMap(),
                     )
                 },
-        platformType = PlatformType.Mastodon,
+        platformId = MASTODON_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Mastodon,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1242,7 +1243,7 @@ internal fun InstanceData.render(): UiInstanceMetadata {
                 description = this.description,
                 iconUrl = this.icon?.lastOrNull()?.src,
                 domain = this.domain ?: "Unknown",
-                type = PlatformType.Mastodon,
+                platformId = MASTODON_PLATFORM_ID,
                 bannerUrl = this.thumbnail?.url,
                 usersCount = this.usage?.users?.activeMonth ?: 0,
             ),

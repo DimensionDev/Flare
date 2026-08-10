@@ -5,10 +5,6 @@ import co.touchlab.crashkios.crashlytics.setCrashlyticsUnhandledExceptionHook
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.SwiftOnDeviceAI
-import dev.dimension.flare.data.platform.AllRssTimelineLoaderFactory
-import dev.dimension.flare.data.platform.RssTimelineSpecs
-import dev.dimension.flare.model.PlatformRuntimeData
-import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
 import dev.dimension.flare.ui.render.SwiftPlatformTextRenderer
 import kotlinx.coroutines.CoroutineScope
@@ -53,15 +49,6 @@ internal class AppleKoinApplication
 @Configuration
 @ComponentScan("dev.dimension.flare.apple.shared")
 internal class AppleKoinModule
-
-@Single
-internal fun runtimeData(allRssTimelineLoaderFactory: AllRssTimelineLoaderFactory): PlatformRuntimeData =
-    PlatformRuntimeData(
-        platformSpecs = platformSpecs(),
-        extraTimelineSpecs = RssTimelineSpecs.timelineSpecs(allRssTimelineLoaderFactory),
-    )
-
-internal expect fun platformSpecs(): List<PlatformSpec>
 
 @Single
 internal fun inAppNotification(scope: CoroutineScope): InAppNotification =

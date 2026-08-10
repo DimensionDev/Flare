@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -14,7 +13,7 @@ class LoginContextTest {
             loginContext(
                 ReloginTarget(
                     accountKey = accountKey,
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                 ),
             )
 
@@ -29,7 +28,7 @@ class LoginContextTest {
             loginContext(
                 ReloginTarget(
                     accountKey = expected,
-                    platformType = PlatformType.Mastodon,
+                    platformId = "Mastodon",
                 ),
             )
 

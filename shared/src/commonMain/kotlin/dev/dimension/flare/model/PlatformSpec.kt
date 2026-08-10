@@ -17,8 +17,17 @@ import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public interface PlatformSpec {
-    public val type: PlatformType
-    public val metadata: PlatformTypeMetadata
+    public val platformId: String
+    public val metadata: PlatformMetadata
+    public val order: Int
+        get() = 0
+    public val isDefaultGuest: Boolean
+        get() = false
+    public val capabilities: Set<PlatformCapability>
+        get() = emptySet()
+
+    public fun resolveInitialText(context: ComposeInitialTextContext): InitialText? = null
+
     public val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>>
     public val subscriptionTimelineSpecs: ImmutableList<SubscriptionTimelineSpec>
         get() = persistentListOf()
@@ -84,6 +93,7 @@ public data class PlatformRuntimeData(
 ) {
     internal val timelineSpecs by lazy {
         platformSpecs
+            .sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
             .flatMap { it.timelineSpecs }
             .plus(extraTimelineSpecs)
     }
@@ -94,22 +104,29 @@ public data class PlatformRuntimeData(
 public class PlatformRegistry(
     data: PlatformRuntimeData,
 ) {
-    public val all: List<PlatformSpec> = data.platformSpecs
-    private val byType: Map<PlatformType, PlatformSpec> =
+    public val all: List<PlatformSpec> =
         data.platformSpecs
             .also { specs ->
-                val duplicateTypes =
+                specs.forEach { requireValidPlatformId(it.platformId) }
+                val duplicateIds =
                     specs
-                        .groupBy { it.type }
+                        .groupBy { it.platformId.lowercase() }
                         .filterValues { it.size > 1 }
                         .keys
-                require(duplicateTypes.isEmpty()) {
-                    "Duplicate platform specs: ${duplicateTypes.joinToString()}"
+                require(duplicateIds.isEmpty()) {
+                    "Duplicate platform specs: ${duplicateIds.joinToString()}"
                 }
-            }.associateBy { it.type }
+                val defaultGuests = specs.filter { it.isDefaultGuest }
+                require(defaultGuests.size == 1) {
+                    "Exactly one default guest platform is required: ${defaultGuests.joinToString { it.platformId }}"
+                }
+            }.sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
+    private val byId: Map<String, PlatformSpec> = all.associateBy { it.platformId }
+
+    public val defaultGuest: PlatformSpec = all.single { it.isDefaultGuest }
 
     public val subscriptionTimelineSpecs: List<SubscriptionTimelineSpec> by lazy {
-        data.platformSpecs
+        all
             .flatMap { it.subscriptionTimelineSpecs }
             .also { specs ->
                 val duplicateTypes =
@@ -127,9 +144,23 @@ public class PlatformRegistry(
         subscriptionTimelineSpecs.associateBy { it.type }
     }
 
-    public fun get(type: PlatformType): PlatformSpec? = byType[type]
+    public fun get(platformId: String): PlatformSpec? = byId[platformId]
 
-    public fun require(type: PlatformType): PlatformSpec = get(type) ?: throw UnsupportedPlatformException(type)
+    public fun require(platformId: String): PlatformSpec = get(platformId) ?: throw UnsupportedPlatformException(platformId)
+
+    public fun isRegistered(platformId: String): Boolean = platformId in byId
+
+    public fun metadataOrFallback(platformId: String): PlatformMetadata =
+        get(platformId)?.metadata
+            ?: PlatformMetadata(
+                displayName = platformId,
+                icon = dev.dimension.flare.ui.model.UiIcon.World,
+            )
+
+    public fun supports(
+        platformId: String,
+        capability: PlatformCapability,
+    ): Boolean = capability in get(platformId)?.capabilities.orEmpty()
 
     public fun getSubscriptionTimelineSpec(type: SubscriptionType): SubscriptionTimelineSpec? = subscriptionTimelineSpecsByType[type]
 
@@ -139,8 +170,9 @@ public class PlatformRegistry(
 
 @HiddenFromObjC
 public class UnsupportedPlatformException(
-    public val type: PlatformType,
-) : IllegalArgumentException("Platform is not registered: $type")
+    public val platformId: String,
+    public val accountKey: MicroBlogKey? = null,
+) : IllegalArgumentException("Platform is not registered: $platformId")
 
 @HiddenFromObjC
 public class UnsupportedSubscriptionTimelineException(

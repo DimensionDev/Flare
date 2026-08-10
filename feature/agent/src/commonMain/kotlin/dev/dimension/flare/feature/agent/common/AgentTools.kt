@@ -35,7 +35,7 @@ import dev.dimension.flare.feature.agent.status.LoadUserTimelineTool
 import dev.dimension.flare.feature.agent.status.SearchPostsTool
 import dev.dimension.flare.feature.agent.status.SearchUsersTool
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -54,6 +54,7 @@ import org.koin.core.annotation.Single
 @Single
 internal class AgentToolProvider(
     private val localCacheRepository: LocalCacheRepository,
+    private val platformRegistry: PlatformRegistry,
 ) {
     fun resolve(context: AgentToolContext): AgentToolSet {
         val statusContext = context.status
@@ -62,7 +63,7 @@ internal class AgentToolProvider(
             buildList {
                 addAll(context.searchDataSources.toAgentSearchTargets())
                 if (statusContext != null && microblogDataSource != null && none { it.dataSource === microblogDataSource }) {
-                    add(AgentSearchTarget(platformType = statusContext.currentPlatformType, dataSource = microblogDataSource))
+                    add(AgentSearchTarget(platformId = statusContext.currentPlatformId, dataSource = microblogDataSource))
                 }
             }
         val composeTargets = context.searchDataSources.toAgentComposeTargets()
@@ -75,7 +76,7 @@ internal class AgentToolProvider(
                         add(
                             AgentPostActionTarget(
                                 accountKey = authenticated.accountKey,
-                                platformType = statusContext.currentPlatformType,
+                                platformId = statusContext.currentPlatformId,
                                 dataSource = statusContext.postDataSource,
                             ),
                         )
@@ -92,7 +93,7 @@ internal class AgentToolProvider(
                         add(
                             AgentRelationTarget(
                                 accountKey = authenticated.accountKey,
-                                platformType = statusContext.currentPlatformType,
+                                platformId = statusContext.currentPlatformId,
                                 dataSource = relationDataSource,
                             ),
                         )
@@ -106,7 +107,7 @@ internal class AgentToolProvider(
                     microblogDataSource
                         .toAgentUserTarget(
                             accountKey = null,
-                            platformType = statusContext.currentPlatformType,
+                            platformId = statusContext.currentPlatformId,
                         )?.let(::add)
                 }
             }
@@ -126,6 +127,7 @@ internal class AgentToolProvider(
                 builtInTimelineTargets = builtInTimelineTargets,
                 subscriptionDataSource = KoinSubscriptionDataSource,
                 localCacheRepository = localCacheRepository,
+                platformRegistry = platformRegistry,
                 userTargets = userTargets,
                 messagePartStore = AgentToolMessagePartStore(),
                 inputRequestStore = AgentToolInputRequestStore(),
@@ -177,11 +179,11 @@ internal class AgentToolProvider(
                 },
             systemPromptGuidance =
                 listOf(
-                    searchTargets.searchPlatformGuidance(),
+                    searchTargets.searchPlatformGuidance(platformRegistry),
                     notificationTargets.notificationGuidance(),
                     listTargets.listGuidance(),
                     builtInTimelineTargets.builtInTimelineGuidance(),
-                    composeTargets.composePlatformGuidance(),
+                    composeTargets.composePlatformGuidance(platformRegistry),
                     postActionTargets.postActionGuidance(),
                     relationTargets.relationActionGuidance(),
                     AGENT_SUBSCRIPTION_TOOL_GUIDANCE,
@@ -492,7 +494,7 @@ internal data class AgentToolContext(
     data class StatusContext(
         val postDataSource: PostDataSource,
         val statusKey: MicroBlogKey,
-        val currentPlatformType: PlatformType,
+        val currentPlatformId: String,
         val currentPost: UiTimelineV2.Post? = null,
     )
 
@@ -516,6 +518,7 @@ internal data class AgentToolSession(
     val inputRequestStore: AgentToolInputRequestStore,
     val subscriptionItemStore: AgentSubscriptionItemStore = AgentSubscriptionItemStore(),
     val localCacheRepository: LocalCacheRepository? = null,
+    val platformRegistry: PlatformRegistry? = null,
 ) {
     fun statusMicroblogDataSource(): MicroblogDataSource? = status?.postDataSource as? MicroblogDataSource
 
@@ -606,37 +609,37 @@ private const val AGENT_CONFIRMATION_BEHAVIOR_GUIDANCE =
     """
 
 internal data class AgentSearchTarget(
-    val platformType: PlatformType?,
+    val platformId: String?,
     val dataSource: MicroblogDataSource,
 )
 
 internal data class AgentComposeTarget(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
     val dataSource: ComposeDataSource,
 )
 
 internal data class AgentPostActionTarget(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
     val dataSource: PostDataSource,
 )
 
 internal data class AgentRelationTarget(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
     val dataSource: RelationDataSource,
 )
 
 internal data class AgentNotificationTarget(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
     val dataSource: NotificationTimelineDataSource,
 )
 
 internal data class AgentListTarget(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
     val supportedMetaData: Set<String>,
     val listCached: suspend () -> List<UiList.List>,
     val loadListInfo: suspend (String) -> UiList.List,
@@ -654,13 +657,13 @@ internal data class AgentBuiltInTimelineTarget(
     val specId: String,
     val title: String,
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
     val loadTimeline: suspend (Int) -> List<UiTimelineV2>,
 )
 
 internal data class AgentUserTarget(
     val accountKey: MicroBlogKey?,
-    val platformType: PlatformType,
+    val platformId: String,
     val dataSource: MicroblogDataSource,
     val loadUserById: suspend (String) -> UiProfile,
 )
@@ -668,7 +671,7 @@ internal data class AgentUserTarget(
 internal fun List<AccountMicroblogDataSource>.toAgentSearchTargets(): List<AgentSearchTarget> =
     map { item ->
         AgentSearchTarget(
-            platformType = item.platformType,
+            platformId = item.platformId,
             dataSource = item.dataSource,
         )
     }
@@ -678,7 +681,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentComposeTargets(): List<Agen
         val dataSource = item.dataSource as? ComposeDataSource ?: return@mapNotNull null
         AgentComposeTarget(
             accountKey = item.accountKey,
-            platformType = item.platformType,
+            platformId = item.platformId,
             dataSource = dataSource,
         )
     }
@@ -688,7 +691,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentPostActionTargets(): List<A
         val dataSource = item.dataSource as? PostDataSource ?: return@mapNotNull null
         AgentPostActionTarget(
             accountKey = item.accountKey,
-            platformType = item.platformType,
+            platformId = item.platformId,
             dataSource = dataSource,
         )
     }
@@ -698,7 +701,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentRelationTargets(): List<Age
         val dataSource = item.dataSource as? RelationDataSource ?: return@mapNotNull null
         AgentRelationTarget(
             accountKey = item.accountKey,
-            platformType = item.platformType,
+            platformId = item.platformId,
             dataSource = dataSource,
         )
     }
@@ -708,7 +711,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentNotificationTargets(): List
         val dataSource = item.dataSource as? NotificationTimelineDataSource ?: return@mapNotNull null
         AgentNotificationTarget(
             accountKey = item.accountKey,
-            platformType = item.platformType,
+            platformId = item.platformId,
             dataSource = dataSource,
         )
     }
@@ -718,7 +721,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentListTargets(): List<AgentLi
         val dataSource = item.dataSource as? ListDataSource ?: return@mapNotNull null
         AgentListTarget(
             accountKey = item.accountKey,
-            platformType = item.platformType,
+            platformId = item.platformId,
             supportedMetaData =
                 dataSource.listHandler.supportedMetaData
                     .map { it.name }
@@ -779,7 +782,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentBuiltInTimelineTargets(): L
                 specId = candidate.target.spec.id,
                 title = candidate.title.agentTimelineTitle(),
                 accountKey = item.accountKey,
-                platformType = item.platformType,
+                platformId = item.platformId,
                 loadTimeline = { pageSize ->
                     candidate
                         .createLoader(context)
@@ -826,18 +829,18 @@ internal fun List<AccountMicroblogDataSource>.toAgentUserTargets(): List<AgentUs
     mapNotNull { item ->
         item.dataSource.toAgentUserTarget(
             accountKey = item.accountKey,
-            platformType = item.platformType,
+            platformId = item.platformId,
         )
     }
 
 private fun MicroblogDataSource.toAgentUserTarget(
     accountKey: MicroBlogKey?,
-    platformType: PlatformType,
+    platformId: String,
 ): AgentUserTarget? {
     val userDataSource = this as? UserDataSource ?: return null
     return AgentUserTarget(
         accountKey = accountKey,
-        platformType = platformType,
+        platformId = platformId,
         dataSource = this,
         loadUserById = { userId ->
             when (
@@ -863,87 +866,54 @@ private fun UiState<UiProfile>.isTerminalUserLoadState(): Boolean =
         is UiState.Loading -> false
     }
 
-internal fun List<AgentSearchTarget>.filterByPlatformNames(platforms: List<String>): List<AgentSearchTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
-}
+internal fun List<AgentSearchTarget>.filterByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentSearchTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
 
-internal fun List<AgentUserTarget>.filterUserTargetsByPlatformNames(platforms: List<String>): List<AgentUserTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
-}
+internal fun List<AgentUserTarget>.filterUserTargetsByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentUserTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
 
-internal fun List<AgentComposeTarget>.filterComposeTargetsByPlatformNames(platforms: List<String>): List<AgentComposeTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
-}
+internal fun List<AgentComposeTarget>.filterComposeTargetsByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentComposeTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
 
-internal fun List<AgentRelationTarget>.filterRelationTargetsByPlatformNames(platforms: List<String>): List<AgentRelationTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
-}
+internal fun List<AgentRelationTarget>.filterRelationTargetsByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentRelationTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
 
 internal fun List<AgentNotificationTarget>.filterNotificationTargetsByPlatformNames(
     platforms: List<String>,
-): List<AgentNotificationTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
-}
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentNotificationTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
 
-internal fun List<AgentListTarget>.filterListTargetsByPlatformNames(platforms: List<String>): List<AgentListTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
-}
+internal fun List<AgentListTarget>.filterListTargetsByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentListTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
 
 internal fun List<AgentBuiltInTimelineTarget>.filterBuiltInTimelineTargetsByPlatformNames(
     platforms: List<String>,
-): List<AgentBuiltInTimelineTarget> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> this
-        platformFilter.platformTypes.isEmpty() -> emptyList()
-        else -> filter { it.platformType in platformFilter.platformTypes }
-    }
+    platformRegistry: PlatformRegistry? = null,
+): List<AgentBuiltInTimelineTarget> = filterTargetsByPlatformNames(platforms, platformRegistry) { it.platformId }
+
+internal fun Iterable<String>.filterPlatformIdsByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry? = null,
+): Set<String> {
+    val platformIds = platforms.toPlatformIdsOrNull(platformRegistry) ?: return toSet()
+    return filter { it in platformIds }.toSet()
 }
 
-internal fun Iterable<PlatformType>.filterPlatformTypesByPlatformNames(platforms: List<String>): Set<PlatformType> {
-    val platformFilter = platforms.toPlatformFilter()
-    return when {
-        platformFilter.searchAll -> toSet()
-        platformFilter.platformTypes.isEmpty() -> emptySet()
-        else -> filter { it in platformFilter.platformTypes }.toSet()
-    }
-}
-
-internal fun List<AgentSearchTarget>.searchPlatformGuidance(): String {
-    val platformTypes =
-        mapNotNull { it.platformType }
+internal fun List<AgentSearchTarget>.searchPlatformGuidance(platformRegistry: PlatformRegistry? = null): String {
+    val platformIds =
+        mapNotNull { it.platformId }
             .distinct()
-    return if (platformTypes.isEmpty()) {
+    return if (platformIds.isEmpty()) {
         """
 
         Search platform guidance:
@@ -952,11 +922,11 @@ internal fun List<AgentSearchTarget>.searchPlatformGuidance(): String {
         """
     } else {
         val platformLines =
-            platformTypes.joinToString(separator = "\n") { platformType ->
+            platformIds.joinToString(separator = "\n") { platformId ->
                 buildString {
                     append("- ")
-                    append(platformType.name)
-                    val aliases = platformType.searchAliases()
+                    append(platformId)
+                    val aliases = platformId.searchAliases(platformRegistry)
                     if (aliases.isNotEmpty()) {
                         append(" (aliases: ")
                         append(aliases.joinToString())
@@ -992,7 +962,7 @@ internal fun List<AgentNotificationTarget>.notificationGuidance(): String =
                     append("- accountKey=")
                     append(target.accountKey)
                     append(", platform=")
-                    append(target.platformType.name)
+                    append(target.platformId)
                     append(", filters=")
                     append(target.dataSource.supportedNotificationFilter.joinToString())
                 }
@@ -1018,7 +988,7 @@ internal fun List<AgentListTarget>.listGuidance(): String =
     } else {
         val accountLines =
             joinToString(separator = "\n") { target ->
-                "- accountKey=${target.accountKey}, platform=${target.platformType.name}, metadata=${target.supportedMetaData.joinToString()}"
+                "- accountKey=${target.accountKey}, platform=${target.platformId}, metadata=${target.supportedMetaData.joinToString()}"
             }
         """
 
@@ -1042,7 +1012,7 @@ internal fun List<AgentBuiltInTimelineTarget>.builtInTimelineGuidance(): String 
     } else {
         val timelineLines =
             joinToString(separator = "\n") { target ->
-                "- timelineId=${target.id}, specId=${target.specId}, title=${target.title}, accountKey=${target.accountKey}, platform=${target.platformType.name}"
+                "- timelineId=${target.id}, specId=${target.specId}, title=${target.title}, accountKey=${target.accountKey}, platform=${target.platformId}"
             }
         """
 
@@ -1055,7 +1025,7 @@ internal fun List<AgentBuiltInTimelineTarget>.builtInTimelineGuidance(): String 
         """
     }.trimIndent()
 
-internal fun List<AgentComposeTarget>.composePlatformGuidance(): String =
+internal fun List<AgentComposeTarget>.composePlatformGuidance(platformRegistry: PlatformRegistry? = null): String =
     if (isEmpty()) {
         """
 
@@ -1070,8 +1040,8 @@ internal fun List<AgentComposeTarget>.composePlatformGuidance(): String =
                     append("- accountKey=")
                     append(target.accountKey)
                     append(", platform=")
-                    append(target.platformType.name)
-                    val aliases = target.platformType.searchAliases()
+                    append(target.platformId)
+                    val aliases = target.platformId.searchAliases(platformRegistry)
                     if (aliases.isNotEmpty()) {
                         append(" (aliases: ")
                         append(aliases.joinToString())
@@ -1103,7 +1073,7 @@ internal fun List<AgentPostActionTarget>.postActionGuidance(): String =
     } else {
         val accountLines =
             joinToString(separator = "\n") { target ->
-                "- accountKey=${target.accountKey}, platform=${target.platformType.name}"
+                "- accountKey=${target.accountKey}, platform=${target.platformId}"
             }
         """
 
@@ -1128,7 +1098,7 @@ internal fun List<AgentRelationTarget>.relationActionGuidance(): String =
     } else {
         val accountLines =
             joinToString(separator = "\n") { target ->
-                "- accountKey=${target.accountKey}, platform=${target.platformType.name}, supported=${target.dataSource.supportedRelationTypes.joinToString()}"
+                "- accountKey=${target.accountKey}, platform=${target.platformId}, supported=${target.dataSource.supportedRelationTypes.joinToString()}"
             }
         """
 
@@ -1171,48 +1141,41 @@ internal class AgentToolTraceRegistry(
 internal fun agentToolTraceRegistry(vararg entries: Pair<String, AgentToolTraceKeys>): AgentToolTraceRegistry =
     AgentToolTraceRegistry(entries.toMap())
 
-private data class AgentPlatformFilter(
-    val searchAll: Boolean,
-    val platformTypes: Set<PlatformType>,
-)
-
-private fun List<String>.toPlatformFilter(): AgentPlatformFilter {
-    val normalizedPlatforms =
-        map { it.searchPlatformKey() }
-            .filter { it.isNotBlank() }
-    if (normalizedPlatforms.isEmpty() || normalizedPlatforms.any { it in SEARCH_ALL_PLATFORM_KEYS }) {
-        return AgentPlatformFilter(
-            searchAll = true,
-            platformTypes = emptySet(),
-        )
-    }
-    return AgentPlatformFilter(
-        searchAll = false,
-        platformTypes = normalizedPlatforms.mapNotNull { it.toPlatformTypeOrNull() }.toSet(),
-    )
+private inline fun <T> List<T>.filterTargetsByPlatformNames(
+    platforms: List<String>,
+    platformRegistry: PlatformRegistry?,
+    platformId: (T) -> String?,
+): List<T> {
+    val platformIds = platforms.toPlatformIdsOrNull(platformRegistry) ?: return this
+    return filter { platformId(it) in platformIds }
 }
 
-private fun String.toPlatformTypeOrNull(): PlatformType? =
-    PlatformType.entries.firstOrNull { platformType ->
-        this == platformType.searchNameKey() ||
-            platformType.searchAliases().any { alias -> this == alias.searchPlatformKey() }
+private fun List<String>.toPlatformIdsOrNull(platformRegistry: PlatformRegistry?): Set<String>? {
+    val requestedPlatforms = map { it.trim() }.filter { it.isNotBlank() }
+    if (requestedPlatforms.isEmpty() || requestedPlatforms.any { it.searchPlatformAliasKey() in SEARCH_ALL_PLATFORM_KEYS }) {
+        return null
     }
+    return requestedPlatforms.map { it.toPlatformIdOrNull(platformRegistry) ?: it }.toSet()
+}
 
-private fun PlatformType.searchAliases(): List<String> =
-    when (name) {
-        PlatformType.Mastodon.name -> listOf("masto", "fediverse", "长毛象", "联邦宇宙")
-        PlatformType.Misskey.name -> listOf("mk")
-        PlatformType.Bluesky.name -> listOf("bsky", "blue sky", "蓝天")
-        PlatformType.Pixiv.name -> listOf("pxv", "p站")
-        PlatformType.xQt.name -> listOf("x", "x.com", "twitter", "twitter.com", "推特")
-        PlatformType.VVo.name -> listOf("weibo", "sina weibo", "微博", "新浪微博")
-        PlatformType.Nostr.name -> listOf("nostr")
-        else -> emptyList()
-    }
+private fun String.toPlatformIdOrNull(platformRegistry: PlatformRegistry?): String? {
+    platformRegistry ?: return null
+    platformRegistry.get(this)?.let { return it.platformId }
+    val aliasKey = searchPlatformAliasKey()
+    return platformRegistry.all
+        .filter { spec -> spec.metadata.agentAliases.any { it.searchPlatformAliasKey() == aliasKey } }
+        .singleOrNull()
+        ?.platformId
+}
 
-private fun PlatformType.searchNameKey(): String = name.searchPlatformKey()
+private fun String.searchAliases(platformRegistry: PlatformRegistry?): List<String> =
+    platformRegistry
+        ?.get(this)
+        ?.metadata
+        ?.agentAliases
+        .orEmpty()
 
-private fun String.searchPlatformKey(): String =
+private fun String.searchPlatformAliasKey(): String =
     trim()
         .lowercase()
         .replace("-", "")
@@ -1240,7 +1203,7 @@ private val SEARCH_ALL_PLATFORM_KEYS =
         "全平台",
         "跨平台",
         "各平台",
-    ).map { it.searchPlatformKey() }.toSet()
+    ).map { it.searchPlatformAliasKey() }.toSet()
 
 private const val AGENT_SUBSCRIPTION_TOOL_GUIDANCE =
     """

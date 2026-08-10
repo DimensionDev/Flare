@@ -12,7 +12,6 @@ import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
@@ -180,7 +179,7 @@ class MessageDaoTest : RobolectricTest() {
             handle = UiHandle(raw = key.id, host = key.host),
             avatar = "",
             nameInternal = key.id.toUiPlainText(),
-            platformType = PlatformType.Bluesky,
+            platformId = "Bluesky",
             clickEvent = ClickEvent.Noop,
             banner = null,
             description = null,

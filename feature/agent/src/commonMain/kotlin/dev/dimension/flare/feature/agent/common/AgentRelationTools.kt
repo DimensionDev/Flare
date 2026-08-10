@@ -7,7 +7,6 @@ import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSour
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import kotlinx.serialization.Serializable
@@ -70,7 +69,7 @@ internal class LoadUserRelationTool(
         return buildString {
             appendLine("User relation")
             appendLine("Target user key: ${user.userKey}")
-            appendLine("Target platform: ${user.platformType?.name.orEmpty()}")
+            appendLine("Target platform: ${user.platformId.orEmpty()}")
             user.profile?.let { profile ->
                 appendLine("Target displayName: ${profile.name.raw}")
                 appendLine("Target handle: ${profile.handle.raw}")
@@ -138,7 +137,7 @@ internal class ListRelationActionsTool(
                 appendLine(
                     "- optionId=relation:${candidate.target.accountKey}:${candidate.action.id}, " +
                         "optionKind=relation_action, accountKey=${candidate.target.accountKey}, " +
-                        "platform=${candidate.target.platformType.name}, " +
+                        "platform=${candidate.target.platformId}, " +
                         "actionId=${candidate.action.id}, actionName=${candidate.action.label}, " +
                         "supportedType=${candidate.action.requiredType.name}",
                 )
@@ -222,7 +221,7 @@ internal class ExecuteRelationActionTool(
             return "Relation action cannot target the same signed-in account: ${target.accountKey}."
         }
         if (!target.supports(action)) {
-            return "${target.platformType.name} account ${target.accountKey} does not support ${action.label}."
+            return "${target.platformId} account ${target.accountKey} does not support ${action.label}."
         }
         if (!args.confirmed) {
             val requestId = "relation-confirm:${target.accountKey}:${user.userKey}:${action.id}"
@@ -238,7 +237,7 @@ internal class ExecuteRelationActionTool(
                     appendLine("account=${target.accountKey}")
                     appendLine("accountId=${target.accountKey.id}")
                     appendLine("accountHost=${target.accountKey.host}")
-                    appendLine("platform=${target.platformType.name}")
+                    appendLine("platform=${target.platformId}")
                     user.profile?.let { profile ->
                         appendLine("targetUserRef=${profile.agentAttachmentMarker()}")
                         appendLine("displayName=${profile.name.raw}")
@@ -281,7 +280,7 @@ internal class ExecuteRelationActionTool(
             appendLine("Action: ${action.label}")
             appendLine("Account: ${target.accountKey}")
             appendLine("Target user: ${user.userKey}")
-            appendLine("Platform: ${target.platformType.name}")
+            appendLine("Platform: ${target.platformId}")
         }.trim()
     }
 
@@ -325,7 +324,7 @@ private data class RelationToolArgs(
 
 private data class RelationUserTarget(
     val userKey: MicroBlogKey,
-    val platformType: PlatformType?,
+    val platformId: String?,
     val profile: UiProfile?,
 )
 
@@ -418,7 +417,7 @@ private suspend fun AgentToolSession.resolveRelationUser(args: RelationUserArgs)
         findRelationUserByRef(ref)?.let {
             return it
         }
-        parseRelationUserRef(ref)?.let {
+        parseRelationUserRef(ref, platformRegistry)?.let {
             return it
         }
     }
@@ -428,7 +427,7 @@ private suspend fun AgentToolSession.resolveRelationUser(args: RelationUserArgs)
         }
         return RelationUserTarget(
             userKey = key,
-            platformType = null,
+            platformId = null,
             profile = null,
         )
     }
@@ -462,7 +461,7 @@ private suspend fun AgentToolSession.availableRelationUsers(): List<UiProfile> =
                     -> {}
                 }
             }
-    }.distinctBy { it.platformType to it.key }
+    }.distinctBy { it.platformId to it.key }
 
 private suspend fun AgentToolSession.findRelationUserByRef(ref: String): RelationUserTarget? {
     val normalizedRef = ref.normalizedUserRef()
@@ -477,7 +476,10 @@ private suspend fun AgentToolSession.findRelationUserByKey(key: MicroBlogKey): R
         .firstOrNull { user -> user.key == key }
         ?.toRelationUserTarget()
 
-private fun parseRelationUserRef(ref: String): RelationUserTarget? {
+private fun parseRelationUserRef(
+    ref: String,
+    platformRegistry: dev.dimension.flare.model.PlatformRegistry?,
+): RelationUserTarget? {
     val value =
         ref
             .trim()
@@ -487,7 +489,16 @@ private fun parseRelationUserRef(ref: String): RelationUserTarget? {
     if (parts.size < 3) {
         return null
     }
-    val platformType = PlatformType.entries.firstOrNull { it.name.equals(parts[0], ignoreCase = true) }
+    val rawPlatformId = parts[0]
+    val platformId =
+        platformRegistry
+            ?.all
+            ?.firstOrNull { it.platformId.equals(rawPlatformId, ignoreCase = true) }
+            ?.platformId
+            ?: runCatching {
+                dev.dimension.flare.model
+                    .requireValidPlatformId(rawPlatformId)
+            }.getOrNull()
     val host = parts[1]
     val id = parts.drop(2).joinToString(":")
     if (id.isBlank()) {
@@ -495,7 +506,7 @@ private fun parseRelationUserRef(ref: String): RelationUserTarget? {
     }
     return RelationUserTarget(
         userKey = MicroBlogKey(id = id, host = host),
-        platformType = platformType,
+        platformId = platformId,
         profile = null,
     )
 }
@@ -503,7 +514,7 @@ private fun parseRelationUserRef(ref: String): RelationUserTarget? {
 private fun UiProfile.toRelationUserTarget(): RelationUserTarget =
     RelationUserTarget(
         userKey = key,
-        platformType = platformType,
+        platformId = platformId,
         profile = this,
     )
 
@@ -518,10 +529,10 @@ private fun AgentToolSession.resolveRelationTargets(
             ?.let { MicroBlogKey(id = it, host = args.accountHost.trim()) }
     val platformTargets =
         relationTargets
-            .filterRelationTargetsByPlatformNames(args.platforms)
+            .filterRelationTargetsByPlatformNames(args.platforms, platformRegistry)
             .let { targets ->
-                user.platformType?.let { platformType ->
-                    targets.filter { it.platformType == platformType }
+                user.platformId?.let { platformId ->
+                    targets.filter { it.platformId == platformId }
                 } ?: targets
             }
     return if (requestedAccount != null) {
@@ -634,7 +645,7 @@ private suspend fun AgentToolSession.relationUserSelectionMessage(
         options.forEach { user ->
             appendLine("- optionId=user:${user.agentAttachmentRef()}")
             appendLine("  optionKind=user")
-            appendLine("  platform=${user.platformType.name}")
+            appendLine("  platform=${user.platformId}")
             appendLine("  userKey=${user.key}")
             appendLine("  displayName=${user.name.raw}")
             appendLine("  handle=${user.handle.raw}")
@@ -662,7 +673,7 @@ private suspend fun AgentToolSession.relationActionSelectionMessage(
             appendLine("  action=${candidate.action.id}")
             appendLine("  actionName=${candidate.action.label}")
             appendLine("  account=${candidate.target.accountKey}")
-            appendLine("  platform=${candidate.target.platformType.name}")
+            appendLine("  platform=${candidate.target.platformId}")
         }
     }.trim()
 }
@@ -742,7 +753,7 @@ private suspend fun AgentToolSession.relationAccountSelectionMessage(
             appendLine("- optionId=account:${target.accountKey}")
             appendLine("  optionKind=account")
             appendLine("  account=${target.accountKey}")
-            appendLine("  platform=${target.platformType.name}")
+            appendLine("  platform=${target.platformId}")
         }
     }.trim()
 }
@@ -760,8 +771,8 @@ private fun AgentToolSession.noRelationTargetsMessage(
             "No relation-capable account matches the requested platforms: ${platforms.joinToString()}."
         }
 
-        user.platformType != null -> {
-            "No relation-capable signed-in account is available for ${user.platformType.name}."
+        user.platformId != null -> {
+            "No relation-capable signed-in account is available for ${user.platformId}."
         }
 
         else -> {
@@ -782,7 +793,7 @@ private fun AgentToolSession.noRelationActionsMessage(
 private fun RelationStateResult.toToolText(): String =
     buildString {
         appendLine("Account: ${target.accountKey}")
-        appendLine("Platform: ${target.platformType.name}")
+        appendLine("Platform: ${target.platformId}")
         appendLine("Supported relation types: ${target.dataSource.supportedRelationTypes.joinToString()}")
         appendLine("following: ${relation.following}")
         appendLine("isFans: ${relation.isFans}")
@@ -820,9 +831,9 @@ private fun UiProfile.agentUserRefAliases(): Set<String> =
         add(key.toString())
         add("${key.host}:${key.id}")
         add("${key.id}:${key.host}")
-        add("${platformType.name}:$key")
-        add("${platformType.name}:${key.host}:${key.id}")
-        add("${platformType.name}:${key.id}:${key.host}")
+        add("$platformId:$key")
+        add("$platformId:${key.host}:${key.id}")
+        add("$platformId:${key.id}:${key.host}")
     }
 
 private fun String.normalizedUserRef(): String =
@@ -870,7 +881,7 @@ private fun StringBuilder.appendRelationActionArgs(
     appendLine("action=${action.id}")
     appendLine("accountId=${target.accountKey.id}")
     appendLine("accountHost=${target.accountKey.host}")
-    appendLine("platforms=${target.platformType.name}")
+    appendLine("platforms=${target.platformId}")
     user.profile?.let {
         appendLine("targetUserRef=${it.agentAttachmentMarker()}")
     }

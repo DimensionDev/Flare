@@ -577,17 +577,7 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
 
         if showPlatformLogo {
             platformLogo.isHidden = false
-            let icon: FontAwesomeIcon?
-            switch post.platformType {
-            case .mastodon: icon = .mastodon
-            case .misskey:  icon = .misskey
-            case .bluesky:  icon = .bluesky
-            case .xQt:      icon = .xTwitter
-            case .vvo:      icon = .weibo
-            case .nostr:    icon = .nostr
-            default:        icon = nil
-            }
-            platformLogo.image = icon.flatMap { UIImage(fontAwesome: $0) }
+            platformLogo.image = UIImage(fontAwesome: post.platformIcon.fontAwesomeIcon)
         } else {
             platformLogo.isHidden = true
         }

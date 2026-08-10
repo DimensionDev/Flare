@@ -1,11 +1,8 @@
 package dev.dimension.flare.ui.presenter.login
 
-import dev.dimension.flare.data.network.nodeinfo.NodeData
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformRuntimeData
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
+import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
@@ -63,7 +60,7 @@ public data class LoginFlowState(
 
 public data class ReloginTarget(
     val accountKey: MicroBlogKey,
-    val platformType: PlatformType,
+    val platformId: String,
 )
 
 public sealed interface LoginEffect {
@@ -81,8 +78,8 @@ public sealed interface LoginEffect {
 }
 
 public interface LoginPlatformProvider {
-    public val platformType: PlatformType
-    public val metadata: PlatformTypeMetadata
+    public val platformId: String
+    public val metadata: PlatformMetadata
     public val detector: PlatformDetector
     public val methods: List<LoginMethodSpec>
 
@@ -148,47 +145,42 @@ public interface LoginMethodHandler : AutoCloseable {
 @Single
 @HiddenFromObjC
 public class LoginPlatformRegistry(
-    @Provided data: PlatformRuntimeData,
+    @Provided platformRegistry: PlatformRegistry,
 ) {
-    public val all: List<LoginPlatformProvider> = data.platformSpecs.filterIsInstance<LoginPlatformProvider>()
-    private val byType: Map<PlatformType, LoginPlatformProvider> =
-        all
-            .also { providers ->
-                val duplicateTypes =
-                    providers
-                        .groupBy { it.platformType }
-                        .filterValues { it.size > 1 }
-                        .keys
-                require(duplicateTypes.isEmpty()) {
-                    "Duplicate login platform providers: ${duplicateTypes.joinToString()}"
-                }
-            }.associateBy { it.platformType }
+    public val all: List<LoginPlatformProvider> = platformRegistry.all.filterIsInstance<LoginPlatformProvider>()
+    private val byId: Map<String, LoginPlatformProvider> = all.associateBy { it.platformId }
 
-    public fun get(platformType: PlatformType): LoginPlatformProvider? = byType[platformType]
+    public fun get(platformId: String): LoginPlatformProvider? = byId[platformId]
 
-    public fun require(platformType: PlatformType): LoginPlatformProvider =
-        get(platformType) ?: throw UnsupportedLoginPlatformException(platformType)
+    public fun require(platformId: String): LoginPlatformProvider = get(platformId) ?: throw UnsupportedLoginPlatformException(platformId)
 
-    public fun methods(platformType: PlatformType): List<LoginMethodSpec> = require(platformType).methods.sortedByDescending { it.priority }
+    public fun methods(platformId: String): List<LoginMethodSpec> = require(platformId).methods.sortedByDescending { it.priority }
 
-    public suspend fun detectPlatformType(host: String): NodeData {
+    public suspend fun detectPlatformId(host: String): NodeData {
         val hostCleaned = normalizeHost(host)
         require(hostCleaned.isNotBlank()) { "Host is blank" }
         return all
-            .map { it.detector }
-            .distinct()
-            .sortedByDescending { it.priority }
-            .firstNotNullOfOrNull { detector ->
+            .sortedByDescending { it.detector.priority }
+            .firstNotNullOfOrNull { provider ->
                 runCatching {
-                    detector.detect(hostCleaned)
+                    provider.detector.detect(hostCleaned)
                 }.getOrElse {
                     if (it is CancellationException) {
                         throw it
                     }
                     null
+                }?.let { detected ->
+                    NodeData(
+                        host = detected.host,
+                        platformId = provider.platformId,
+                        software = detected.software,
+                        compatibleMode = detected.compatibleMode,
+                        platformDisplayName = provider.metadata.displayName,
+                        platformIcon = provider.metadata.icon,
+                        loginMethods = provider.methods.sortedByDescending { it.priority },
+                    )
                 }
-            }
-            ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
+            } ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
     }
 
     private fun normalizeHost(host: String): String =
@@ -204,5 +196,5 @@ public class LoginPlatformRegistry(
 
 @HiddenFromObjC
 public class UnsupportedLoginPlatformException(
-    public val platformType: PlatformType,
-) : IllegalArgumentException("Login platform is not registered: $platformType")
+    public val platformId: String,
+) : IllegalArgumentException("Login platform is not registered: $platformId")

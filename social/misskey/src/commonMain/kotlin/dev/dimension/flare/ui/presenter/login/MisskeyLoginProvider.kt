@@ -8,7 +8,7 @@ import dev.dimension.flare.data.network.misskey.MisskeyPlatformDetector
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
+import dev.dimension.flare.data.platform.MISSKEY_PLATFORM_ID
 import dev.dimension.flare.data.platform.MisskeyCredential
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
@@ -16,8 +16,7 @@ import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstance
@@ -35,8 +34,8 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 public data object MisskeyLoginProvider : LoginPlatformProvider {
-    override val platformType: PlatformType = PlatformType.Misskey
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = MISSKEY_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = MisskeyPlatformSpec.metadata
     override val detector: PlatformDetector = MisskeyPlatformDetector
     override val methods: List<LoginMethodSpec> =
@@ -61,7 +60,7 @@ public data object MisskeyLoginProvider : LoginPlatformProvider {
                             description = it.description,
                             iconUrl = it.meta?.iconURL,
                             domain = it.url,
-                            type = platformType,
+                            platformId = platformId,
                             bannerUrl = it.meta?.bannerURL,
                             usersCount =
                                 it.stats?.usersCount ?: it.nodeinfo
@@ -132,13 +131,13 @@ private class MisskeyOAuthLoginHandler(
             require(session.isNotBlank() && session != value) { "No session" }
             val pendingOAuth =
                 pendingRepository
-                    .all(PlatformType.Misskey)
+                    .all(MISSKEY_PLATFORM_ID)
                     .firstOrNull { it.attributes["session"] == session }
                     ?.toMisskeyPending()
                     ?: error("No pending OAuth")
             misskeyAuthCheckUseCase(pendingOAuth.host, session)
             pendingRepository.clear(
-                platformType = PlatformType.Misskey,
+                platformId = MISSKEY_PLATFORM_ID,
                 host = pendingOAuth.host,
             )
             // Preserve the existing iOS NavigationPath workaround.
@@ -181,7 +180,7 @@ private class MisskeyOAuthLoginHandler(
         accountService.addAccount(
             UiAccount(
                 accountKey = accountKey,
-                platformType = PlatformType.Misskey,
+                platformId = MISSKEY_PLATFORM_ID,
             ),
             credential =
                 MisskeyCredential(
@@ -221,7 +220,7 @@ private const val LOGIN_ACTION = "login"
 
 private fun MisskeyLoginStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Misskey,
+        platformId = MISSKEY_PLATFORM_ID,
         host = host,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes = mapOf("session" to session),

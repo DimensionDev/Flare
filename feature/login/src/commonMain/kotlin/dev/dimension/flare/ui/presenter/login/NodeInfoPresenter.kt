@@ -17,7 +17,6 @@ import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.RecommendedInstance
@@ -67,12 +66,12 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }.collectAsLazyPagingItems()
 
-        val detectedPlatformType by remember(filterFlow) {
+        val detectedPlatformId by remember(filterFlow) {
             filterFlow.flatMapLatest {
                 flow {
                     runCatching {
                         emit(UiState.Loading())
-                        loginPlatformRegistry.detectPlatformType(it)
+                        loginPlatformRegistry.detectPlatformId(it)
                     }.onSuccess {
                         emit(UiState.Success(it))
                     }.onFailure {
@@ -84,8 +83,8 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 
         return object : NodeInfoState {
             override val instances = instances.toPagingState()
-            override val detectedPlatformType = detectedPlatformType
-            override val canNext = detectedPlatformType.isSuccess
+            override val detectedPlatformId = detectedPlatformId
+            override val canNext = detectedPlatformId.isSuccess
 
             override fun setFilter(value: String) {
                 if (filter != value) {
@@ -99,7 +98,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 @Immutable
 public interface NodeInfoState {
     public val instances: PagingState<UiInstance>
-    public val detectedPlatformType: UiState<NodeData>
+    public val detectedPlatformId: UiState<NodeData>
     public val canNext: Boolean
 
     public fun setFilter(value: String)
@@ -117,7 +116,15 @@ private class LoginRecommendInstancePagingSource(
                     .map { provider ->
                         async {
                             tryRun {
-                                provider.recommendInstances()
+                                provider.recommendInstances().map { recommendation ->
+                                    recommendation.copy(
+                                        instance =
+                                            recommendation.instance.copy(
+                                                platformDisplayName = provider.metadata.displayName,
+                                                platformIcon = provider.metadata.icon,
+                                            ),
+                                    )
+                                }
                             }.getOrDefault(emptyList())
                         }
                     }.awaitAll()
@@ -128,7 +135,7 @@ private class LoginRecommendInstancePagingSource(
                 .sortedWith(
                     compareByDescending<RecommendedInstance> { it.priority }
                         .thenByDescending { it.instance.usersCount },
-                ).distinctBy { it.instance.type to it.instance.domain }
+                ).distinctBy { it.instance.platformId to it.instance.domain }
                 .map { it.instance }
         return LoadResult.Page(
             data = instances,

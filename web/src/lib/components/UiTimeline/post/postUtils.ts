@@ -4,7 +4,6 @@ import type {
 	ActionMenu,
 	ActionMenuItem,
 	ActionMenuItemTextLocalizedType,
-	PlatformType,
 	TranslationDisplayState,
 	UiMedia,
 	UiTimelineV2MessageType,
@@ -133,17 +132,6 @@ export function visibilityLabel(visibility: UiTimelineV2PostVisibility): string 
 			return m.visibilitySpecified();
 		case 'Channel':
 			return m.visibilityChannel();
-	}
-}
-
-export function platformIcon(platform: PlatformType): string {
-	switch (platform) {
-		case 'xQt':
-			return 'World';
-		case 'VVo':
-			return 'World';
-		default:
-			return platform;
 	}
 }
 

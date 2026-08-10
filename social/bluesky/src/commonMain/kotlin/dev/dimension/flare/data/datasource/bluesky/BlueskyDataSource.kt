@@ -113,6 +113,13 @@ import kotlin.time.Clock
 
 private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
 
+private val MEDIA_COMPRESSION =
+    ComposeConfig.Media.Compression(
+        maxSizeBytes = 1L * 1024 * 1024,
+        maxWidth = 2000,
+        maxHeight = 2000,
+    )
+
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
     override val accountKey: MicroBlogKey,
@@ -304,8 +311,8 @@ internal class BlueskyDataSource(
                         if (isImage) {
                             imageCompressor.compress(
                                 imageBytes = bytes,
-                                maxSize = 1 * 1024 * 1024,
-                                maxDimensions = 2000 to 2000,
+                                maxSize = MEDIA_COMPRESSION.maxSizeBytes,
+                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
                             )
                         } else {
                             bytes
@@ -622,6 +629,7 @@ internal class BlueskyDataSource(
                     canSensitive = true,
                     altTextMaxLength = 2000,
                     allowMediaOnly = true,
+                    compression = MEDIA_COMPRESSION,
                 ),
             language = ComposeConfig.Language(3),
         )

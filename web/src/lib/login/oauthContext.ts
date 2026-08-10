@@ -1,5 +1,3 @@
-import type { PlatformType } from "@flare/web-presenters/loginServiceSelect.svelte";
-
 const LOGIN_OAUTH_CONTEXT_KEY = "flare:login:oauth:context";
 
 export type LoginMethodType =
@@ -9,17 +7,17 @@ export type LoginMethodType =
     | "QrConnect";
 
 export type LoginOAuthContext = {
-    platformType: PlatformType;
+    platformId: string;
     host: string;
     methodType: LoginMethodType;
 };
 
-export function loginCallbackPath(platformType: PlatformType): string {
-    return `/login/callback/${platformType.toLowerCase()}`;
+export function loginCallbackPath(platformId: string): string {
+    return `/login/callback/${platformId.toLowerCase()}`;
 }
 
-export function loginRedirectUri(platformType: PlatformType): string {
-    return `${globalThis.location.origin}${loginCallbackPath(platformType)}`;
+export function loginRedirectUri(platformId: string): string {
+    return `${globalThis.location.origin}${loginCallbackPath(platformId)}`;
 }
 
 export function loadLoginOAuthContext(): LoginOAuthContext | null {

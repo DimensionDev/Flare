@@ -106,7 +106,7 @@ public class LinkOpenDefaultsPresenter : PresenterBase<LinkOpenDefaultsPresenter
             .allAccountServicesFlow()
             .map { services ->
                 services.mapNotNull { service ->
-                    val spec = platformRegistry.get(service.platformType) ?: return@mapNotNull null
+                    val spec = platformRegistry.get(service.platformId) ?: return@mapNotNull null
                     val hosts =
                         spec
                             .deepLinks(service.accountKey)

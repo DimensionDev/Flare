@@ -105,12 +105,12 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
+import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
@@ -988,7 +988,7 @@ private fun ComposeAccountAvatar(
             contentAlignment = Alignment.Center,
         ) {
             FAIcon(
-                imageVector = user.platformType.brandIcon,
+                imageVector = user.platformIcon.toImageVector(),
                 contentDescription = null,
                 modifier = Modifier.size(size * 0.24f),
             )

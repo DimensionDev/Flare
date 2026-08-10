@@ -1,18 +1,16 @@
 package dev.dimension.flare.data.network.nostr
 
-import dev.dimension.flare.data.network.nodeinfo.NodeData
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.presenter.login.NodeDetection
+import dev.dimension.flare.ui.presenter.login.PlatformDetector
 
 internal data object NostrPlatformDetector : PlatformDetector {
-    override suspend fun detect(host: String): NodeData? {
+    override suspend fun detect(host: String): NodeDetection? {
         if (!host.equals("nostr", ignoreCase = true)) {
             return null
         }
-        return NodeData(
+        return NodeDetection(
             host = host,
-            platformType = PlatformType.Nostr,
-            software = PlatformType.Nostr.name,
+            software = "Nostr",
             compatibleMode = false,
         )
     }

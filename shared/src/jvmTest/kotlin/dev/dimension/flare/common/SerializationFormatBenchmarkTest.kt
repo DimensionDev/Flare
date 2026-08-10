@@ -7,7 +7,6 @@ import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
@@ -283,7 +282,7 @@ class SerializationFormatBenchmarkTest {
                 ),
             avatar = "https://${key.host}/${key.id}.png",
             nameInternal = name.toUiPlainText(),
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             clickEvent = ClickEvent.Noop,
             banner = "https://${key.host}/${key.id}/banner.png",
             description =
@@ -323,7 +322,7 @@ class SerializationFormatBenchmarkTest {
         mediaCount: Int,
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             images =
                 List(mediaCount) { index ->
                     UiMedia.Image(

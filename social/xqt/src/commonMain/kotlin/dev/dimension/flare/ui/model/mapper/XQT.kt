@@ -45,9 +45,9 @@ import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.xTwitterClientLanguage
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticle
@@ -680,27 +680,27 @@ internal fun Tweet.renderStatus(
     val statusUrl =
         buildString {
             append("https://${accountKey.host}/")
-            append(user?.handleWithoutAtAndHost)
+            append(user?.handleWithoutAt)
             append("/status/")
             append(legacy?.idStr ?: restId)
         }
     val fxUrl =
         buildString {
             append("https://fixupx.com/")
-            append(user?.handleWithoutAtAndHost)
+            append(user?.handleWithoutAt)
             append("/status/")
             append(legacy?.idStr ?: restId)
         }
     val fixvxUrl =
         buildString {
             append("https://fixvx.com/")
-            append(user?.handleWithoutAtAndHost)
+            append(user?.handleWithoutAt)
             append("/status/")
             append(legacy?.idStr ?: restId)
         }
 
     return UiTimelineV2.Post(
-        platformType = PlatformType.xQt,
+        platformId = XQT_PLATFORM_ID,
         images = medias,
         sensitive = legacy?.possiblySensitive == true,
         contentWarning = null,
@@ -999,7 +999,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
             } else {
                 null
             },
-        platformType = PlatformType.xQt,
+        platformId = XQT_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1328,7 +1329,8 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
                 raw = twitterScreenName.orEmpty(),
                 host = accountKey.host,
             ),
-        platformType = PlatformType.xQt,
+        platformId = XQT_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1422,7 +1424,7 @@ internal fun Tweet.renderArticle(accountKey: MicroBlogKey): UiArticle? {
         cover = article.coverMedia.toUiCardImage(),
         publishDate = legacy?.createdAt?.let { parseXQTCustomDateTime(it)?.toUi() },
         author = UiArticleAuthor.Profile(profile),
-        sourceUrl = "https://${accountKey.host}/${profile.handleWithoutAtAndHost}/status/$tweetId",
+        sourceUrl = "https://${accountKey.host}/${profile.handleWithoutAt}/status/$tweetId",
     )
 }
 

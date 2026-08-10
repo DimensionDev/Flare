@@ -10,9 +10,9 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
+import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
@@ -174,7 +174,7 @@ internal class VVOLoader(
         if (config.data?.login != true) {
             throw LoginExpiredException(
                 accountKey = accountKey,
-                platformType = PlatformType.VVo,
+                platformId = VVO_PLATFORM_ID,
             )
         }
         return requireNotNull(config.data.st) { "st is null" }

@@ -26,9 +26,9 @@ import dev.dimension.flare.data.network.misskey.api.createReactionsApi
 import dev.dimension.flare.data.network.misskey.api.createUsersApi
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.MisskeyException
+import dev.dimension.flare.data.platform.MISSKEY_PLATFORM_ID
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -71,7 +71,7 @@ private fun config(
                         if (it.error?.code == "PERMISSION_DENIED" && accountKey != null) {
                             throw RequireReLoginException(
                                 accountKey = accountKey,
-                                platformType = PlatformType.Misskey,
+                                platformId = MISSKEY_PLATFORM_ID,
                             )
                         } else {
                             throw it

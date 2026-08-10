@@ -11,11 +11,11 @@ import dev.dimension.flare.data.network.fanbox.FanboxPostEntity
 import dev.dimension.flare.data.network.fanbox.FanboxService
 import dev.dimension.flare.data.network.fanbox.FanboxUserEntity
 import dev.dimension.flare.data.platform.FANBOX_HOST
+import dev.dimension.flare.data.platform.FANBOX_PLATFORM_ID
 import dev.dimension.flare.data.platform.FANBOX_WEB_HOST
 import dev.dimension.flare.data.platform.FanboxCredential
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiArticleAuthor
@@ -153,7 +153,7 @@ internal fun FanboxPostDetailBody.toUiArticle(
                         key = "$id:content-gate",
                         reason =
                             UiArticleContentGateReason.SubscriptionRequired(
-                                platformType = PlatformType.Fanbox,
+                                platformId = FANBOX_PLATFORM_ID,
                                 feeRequired = feeRequired.takeIf { it > 0 },
                             ),
                         actionUrl = sourceUrl,
@@ -179,7 +179,7 @@ internal fun FanboxCommentItem.toUiTimeline(
 ): UiTimelineV2.Post {
     val statusKey = fanboxCommentKey(postKey, id)
     return UiTimelineV2.Post(
-        platformType = PlatformType.Fanbox,
+        platformId = FANBOX_PLATFORM_ID,
         images = persistentListOf(),
         sensitive = false,
         contentWarning = null,
@@ -217,7 +217,8 @@ internal fun FanboxCreatorDetailBody.toUiProfile(
         handle = UiHandle(raw = creatorId, host = FANBOX_HOST),
         avatar = userEntity?.iconUrl.toUiImage(imageHeaders),
         nameInternal = (userEntity?.name ?: creatorId).toUiPlainText(),
-        platformType = PlatformType.Fanbox,
+        platformId = FANBOX_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -274,7 +275,8 @@ internal fun FanboxCredential.toUiProfile(
         handle = UiHandle(raw = profileId, host = FANBOX_HOST),
         avatar = iconUrl.toUiImage(imageHeaders),
         nameInternal = (name ?: profileId).toUiPlainText(),
-        platformType = PlatformType.Fanbox,
+        platformId = FANBOX_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -312,7 +314,8 @@ private fun FanboxUserEntity.toUiProfile(
         handle = UiHandle(raw = profileId, host = FANBOX_HOST),
         avatar = iconUrl.toUiImage(imageHeaders),
         nameInternal = (name.ifBlank { profileId }).toUiPlainText(),
-        platformType = PlatformType.Fanbox,
+        platformId = FANBOX_PLATFORM_ID,
+        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
         clickEvent = ClickEvent.Deeplink(profileRoute(accountKey, creatorId)),
         banner = null,
         description = null,

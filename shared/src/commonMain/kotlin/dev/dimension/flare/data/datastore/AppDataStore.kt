@@ -38,7 +38,7 @@ internal class AppDataStore(
 
     val platformOAuthPendingStore: DataStore<PlatformOAuthPendingData> by lazy {
         createDataStore(
-            name = "platform_oauth_pending.pb",
+            name = "platform_oauth_pending_v2.pb",
             serializer = protobufSerializer(PlatformOAuthPendingData()),
         )
     }

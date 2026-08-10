@@ -14,9 +14,11 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.json.jsonObject
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -32,11 +34,7 @@ class MastodonRenderTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(MastodonRenderTestModule::class)
         }
     }
 
@@ -436,4 +434,10 @@ class MastodonRenderTest {
                 else -> null
             }
         }
+}
+
+@Module
+internal class MastodonRenderTestModule {
+    @Single
+    fun platformFormatter(): PlatformFormatter = TestFormatter()
 }

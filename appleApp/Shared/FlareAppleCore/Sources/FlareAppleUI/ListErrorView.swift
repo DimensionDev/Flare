@@ -25,7 +25,7 @@ public struct ListErrorView: View {
                 Button {
                     if let url = reloginURL(
                         accountKey: expiredError.accountKey,
-                        platformType: expiredError.platformType
+                        platformId: expiredError.platformId
                     ) {
                         openURL(url)
                     }
@@ -46,7 +46,7 @@ public struct ListErrorView: View {
                 Button {
                     if let url = reloginURL(
                         accountKey: reloginError.accountKey,
-                        platformType: reloginError.platformType
+                        platformId: reloginError.platformId
                     ) {
                         openURL(url)
                     }
@@ -80,11 +80,11 @@ public struct ListErrorView: View {
         .padding()
     }
 
-    private func reloginURL(accountKey: MicroBlogKey, platformType: PlatformType) -> URL? {
+    private func reloginURL(accountKey: MicroBlogKey, platformId: String) -> URL? {
         URL(
             string: DeeplinkRoute.Relogin(
                 accountKey: accountKey,
-                platformType: platformType
+                platformId: platformId
             ).toUri()
         )
     }

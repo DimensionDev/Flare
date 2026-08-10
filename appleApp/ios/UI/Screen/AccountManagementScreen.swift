@@ -11,12 +11,12 @@ struct AccountManagementScreen: View {
 
     var body: some View {
         List {
-            StateView(state: presenter.state.activeAccount) { currentAcount in
-                ForEach(tabItems, id: \.account.accountKey) { account in
-                    StateView(state: account.profile) { user in
+            ForEach(tabItems, id: \.account.accountKey) { account in
+                StateView(state: account.profile) { user in
+                    accountActions(for: account.account, accountName: user.handle.canonical) {
                         UserCompatView(data: user) {
                             HStack {
-                                Image(systemName: currentAcount.accountKey == user.key ? "checkmark.circle.fill" : "circle")
+                                Image(systemName: activeAccountKey == user.key ? "checkmark.circle.fill" : "circle")
                                     .foregroundColor(.blue)
                                 Image(systemName: "line.3.horizontal")
                                     .foregroundColor(.secondary)
@@ -27,108 +27,22 @@ struct AccountManagementScreen: View {
                         .onTapGesture {
                             presenter.state.setActiveAccount(accountKey: user.key)
                         }
-                        .contextMenu {
-                            if account.account.platformType == .nostr {
-                                NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
-                                    Label {
-                                        Text("Manage relays")
-                                    } icon: {
-                                        Image(fontAwesome: .list)
-                                    }
-                                }
-                            }
-                            Button(role: .destructive) {
-                                requestLogoutConfirmation(
-                                    accountKey: user.key,
-                                    accountName: user.handle.canonical
-                                )
-                            } label: {
-                                Label {
-                                    Text("logout_title")
-                                } icon: {
-                                    Image(fontAwesome: .trash)
-                                }
-                            }
-                        }
-                        .swipeActions {
-                            if account.account.platformType == .nostr {
-                                NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
-                                    Label {
-                                        Text("Manage relays")
-                                    } icon: {
-                                        Image(fontAwesome: .list)
-                                    }
-                                }
-                                .tint(.accentColor)
-                            }
-                            Button(role: .destructive) {
-                                requestLogoutConfirmation(
-                                    accountKey: user.key,
-                                    accountName: user.handle.canonical
-                                )
-                            } label: {
-                                Label {
-                                    Text("logout_title")
-                                } icon: {
-                                    Image(fontAwesome: .trash)
-                                }
-                            }
-                        }
-                    } errorContent: { error in
-                        UserErrorView(error: error)
-                            .contextMenu {
-                                if account.account.platformType == .nostr {
-                                    NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
-                                        Label {
-                                            Text("Manage relays")
-                                        } icon: {
-                                            Image(fontAwesome: .squareRss)
-                                        }
-                                    }
-                                }
-                                Button(role: .destructive) {
-                                    requestLogoutConfirmation(
-                                        accountKey: account.account.accountKey,
-                                        accountName: account.account.accountKey.id
-                                    )
-                                } label: {
-                                    Label {
-                                        Text("logout_title")
-                                    } icon: {
-                                        Image(fontAwesome: .trash)
-                                    }
-                                }
-                            }
-                            .swipeActions {
-                                if account.account.platformType == .nostr {
-                                    NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
-                                        Label {
-                                            Text("Manage relays")
-                                        } icon: {
-                                            Image(fontAwesome: .squareRss)
-                                        }
-                                    }
-                                    .tint(.accentColor)
-                                }
-                                Button(role: .destructive) {
-                                    requestLogoutConfirmation(
-                                        accountKey: account.account.accountKey,
-                                        accountName: account.account.accountKey.id
-                                    )
-                                } label: {
-                                    Label {
-                                        Text("logout_title")
-                                    } icon: {
-                                        Image(fontAwesome: .trash)
-                                    }
-                                }
-                            }
-                    } loadingContent: {
-                        UserLoadingView()
                     }
+                } errorContent: { error in
+                    accountActions(for: account.account, accountName: account.account.accountKey.id) {
+                        Group {
+                            if account.account.platformAvailable {
+                                UserErrorView(error: error)
+                            } else {
+                                unavailableAccountRow(account.account)
+                            }
+                        }
+                    }
+                } loadingContent: {
+                    UserLoadingView()
                 }
-                .onMove(perform: move)
             }
+            .onMove(perform: move)
         }
         .onSuccessOf(of: presenter.state.accounts) { data in
             tabItems = data.cast(AccountsStateAccountItem.self)
@@ -168,8 +82,68 @@ struct AccountManagementScreen: View {
             }
         }
     }
-    
-    
+
+    private func accountActions<Content: View>(
+        for account: UiAccount,
+        accountName: String?,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        content()
+            .contextMenu {
+                accountActionButtons(for: account, accountName: accountName)
+            }
+            .swipeActions {
+                accountActionButtons(for: account, accountName: accountName)
+            }
+    }
+
+    @ViewBuilder
+    private func accountActionButtons(for account: UiAccount, accountName: String?) -> some View {
+        if account.supportsRelayManagement {
+            NavigationLink(value: Route.nostrRelays(account.accountKey)) {
+                Label {
+                    Text("Manage relays")
+                } icon: {
+                    Image(fontAwesome: .list)
+                }
+            }
+            .tint(.accentColor)
+        }
+        Button(role: .destructive) {
+            requestLogoutConfirmation(
+                accountKey: account.accountKey,
+                accountName: accountName
+            )
+        } label: {
+            Label {
+                Text("logout_title")
+            } icon: {
+                Image(fontAwesome: .trash)
+            }
+        }
+    }
+
+    private func unavailableAccountRow(_ account: UiAccount) -> some View {
+        HStack(spacing: 12) {
+            Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
+                .frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: account.platformDisplayName)
+                Text(verbatim: account.accountKey.description())
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var activeAccountKey: MicroBlogKey? {
+        if case .success(let active) = onEnum(of: presenter.state.activeAccount) {
+            active.data.accountKey
+        } else {
+            nil
+        }
+    }
+
     func move(from source: IndexSet, to destination: Int) {
         tabItems.move(fromOffsets: source, toOffset: destination)
     }

@@ -42,7 +42,7 @@ public class HomeTimelineWithTabsPresenter : PresenterBase<HomeTimelineWithTabsP
 
     private val isLoggedInFlow by lazy {
         accountRepository.allAccounts
-            .map { it.isNotEmpty() }
+            .map { accounts -> accounts.any { it.platformAvailable } }
             .distinctUntilChanged()
     }
 

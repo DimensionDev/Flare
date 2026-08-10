@@ -376,7 +376,7 @@ internal sealed interface Route : NavKey {
                     Relogin(
                         ReloginTarget(
                             accountKey = deeplinkRoute.accountKey,
-                            platformType = deeplinkRoute.platformType,
+                            platformId = deeplinkRoute.platformId,
                         ),
                     )
                 }

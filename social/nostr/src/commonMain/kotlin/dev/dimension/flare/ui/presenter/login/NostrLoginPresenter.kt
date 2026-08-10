@@ -11,12 +11,12 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
 import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.data.network.nostr.defaultNostrRelays
+import dev.dimension.flare.data.platform.NOSTR_PLATFORM_ID
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
@@ -84,7 +84,7 @@ internal class NostrLoginPresenter(
                                             id = connection.pubkeyHex,
                                             host = NostrService.NOSTR_HOST,
                                         ),
-                                    platformType = PlatformType.Nostr,
+                                    platformId = NOSTR_PLATFORM_ID,
                                 ),
                             credential =
                                 NostrCredential(
@@ -161,7 +161,7 @@ internal class NostrLoginPresenter(
                                     id = imported.pubkeyHex,
                                     host = NostrService.NOSTR_HOST,
                                 ),
-                            platformType = PlatformType.Nostr,
+                            platformId = NOSTR_PLATFORM_ID,
                         ),
                     credential =
                         NostrCredential(

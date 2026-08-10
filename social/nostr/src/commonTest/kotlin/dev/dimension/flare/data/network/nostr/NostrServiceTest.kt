@@ -6,9 +6,13 @@ import dev.dimension.flare.data.platform.NostrSignerCredential
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.toUiPlainText
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.stopKoin
 import kotlin.test.AfterTest
@@ -152,7 +156,15 @@ class NostrServiceTest {
             try {
                 service.run {
                     events.toUiTimeline(
-                        profiles = emptyMap<String, UiProfile>(),
+                        profiles =
+                            mapOf(
+                                ROOT_EVENT_PUBKEY to
+                                    profileOf(
+                                        pubKey = ROOT_EVENT_PUBKEY,
+                                        metadata = null,
+                                        cachedProfile = null,
+                                    ),
+                            ),
                         eventsById = eventGraph,
                     )
                 }
@@ -272,6 +284,66 @@ class NostrServiceTest {
         assertEquals("https://example.com/avatar.png", metadata.picture)
     }
 
+    @Test
+    fun profileResolutionKeepsCachedIdentityWhenMetadataIsMissing() {
+        val service = createService()
+        val cachedProfile = createProfile(handle = "alice", name = "Alice")
+
+        val profile =
+            try {
+                service.profileOf(
+                    pubKey = ROOT_EVENT_PUBKEY,
+                    metadata = null,
+                    cachedProfile = cachedProfile,
+                )
+            } finally {
+                service.close()
+            }
+
+        assertEquals("alice", profile.handle.raw)
+        assertEquals("Alice", profile.name.raw)
+    }
+
+    @Test
+    fun profileResolutionLetsMetadataReplaceCachedIdentity() {
+        val service = createService()
+        val cachedProfile = createProfile(handle = "old-handle", name = "Old Name")
+
+        val profile =
+            try {
+                service.profileOf(
+                    pubKey = ROOT_EVENT_PUBKEY,
+                    metadata = UserMetadata(name = "alice", displayName = "Alice"),
+                    cachedProfile = cachedProfile,
+                )
+            } finally {
+                service.close()
+            }
+
+        assertEquals("alice", profile.handle.raw)
+        assertEquals("Alice", profile.name.raw)
+    }
+
+    @Test
+    fun profileResolutionUsesNpubWhenMetadataAndCacheAreMissing() {
+        val service = createService()
+
+        val profile =
+            try {
+                service.profileOf(
+                    pubKey = ROOT_EVENT_PUBKEY,
+                    metadata = null,
+                    cachedProfile = null,
+                )
+            } finally {
+                service.close()
+            }
+
+        val expectedHandle = nostrBech32PublicKey(ROOT_EVENT_PUBKEY).take(16)
+        assertEquals(expectedHandle, profile.handle.raw)
+        assertEquals(expectedHandle, profile.name.raw)
+    }
+
     private companion object {
         fun createService(): NostrService {
             val generated = NostrService.generateAccount()
@@ -294,6 +366,24 @@ class NostrServiceTest {
                 amberSignerBridge = UnsupportedAmberSignerBridge("Amber signer is unavailable in tests."),
             )
         }
+
+        fun createProfile(
+            handle: String,
+            name: String,
+        ): UiProfile =
+            UiProfile(
+                key = MicroBlogKey(ROOT_EVENT_PUBKEY, NostrService.NOSTR_HOST),
+                handle = UiHandle(handle, NostrService.NOSTR_HOST),
+                avatar = "",
+                nameInternal = name.toUiPlainText(),
+                platformId = "Nostr",
+                clickEvent = ClickEvent.Noop,
+                banner = null,
+                description = null,
+                matrices = UiProfile.Matrices(0, 0, 0),
+                mark = persistentListOf(),
+                bottomContent = null,
+            )
 
         const val SECRET_KEY_HEX = "1111111111111111111111111111111111111111111111111111111111111111"
         const val ROOT_EVENT_ID = "1b14014e85b5a3f554dc92198ce118d83562147ca08a98e4bb07b00d003108f7"

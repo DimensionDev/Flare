@@ -38,10 +38,10 @@ struct ServiceSelectionScreen: View {
                 Text(ServiceSelectCopy.welcomeHint)
             }
 
-            if let node = detectedNode(from: presenter.state.detectedPlatformType), presenter.state.canNext {
+            if let node = detectedNode(from: presenter.state.detectedPlatformId), presenter.state.canNext {
                 Section {
                     loginContent(state: presenter.state, node: node)
-                        .id("login-\(node.platformType)-\(node.host)")
+                        .id("login-\(node.platformId)-\(node.host)")
                         .transition(MacOSServiceSelectionAnimation.inline)
                 }
             } else {
@@ -118,9 +118,9 @@ struct ServiceSelectionScreen: View {
     @ViewBuilder
     private func platformIndicator(state: ServiceSelectState) -> some View {
         ZStack {
-            switch onEnum(of: state.detectedPlatformType) {
+            switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                Image(fontAwesome: state.platformIcon(platformType: success.data.platformType).fontAwesomeIcon)
+                Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
                     .resizable()
                     .scaledToFit()
             case .loading:
@@ -136,9 +136,9 @@ struct ServiceSelectionScreen: View {
 
     @ViewBuilder
     private func loginContent(state: ServiceSelectState, node: NodeData) -> some View {
-        let methods = state.loginMethods(platformType: node.platformType)
+        let methods = node.loginMethods
         if let firstMethod = methods.first {
-            let key = "\(node.platformType)-\(node.host)"
+            let key = "\(node.platformId)-\(node.host)"
             let selectedMethod = Binding<LoginMethodType>(
                 get: { selectedMethods[key] ?? firstMethod.type },
                 set: { method in
@@ -169,7 +169,7 @@ struct ServiceSelectionScreen: View {
 
                 LoginFlowView {
                     state.createLoginHandler(
-                        platformType: node.platformType,
+                        platformId: node.platformId,
                         host: node.host,
                         methodType: selectedMethod.wrappedValue,
                         redirectUri: nil,
@@ -178,7 +178,7 @@ struct ServiceSelectionScreen: View {
                     .id("\(key)-\(selectedMethod.wrappedValue)")
 
                 LoginAgreementView(
-                    urlString: state.agreementUrl(platformType: node.platformType, host: node.host)
+                    urlString: state.agreementUrl(platformId: node.platformId, host: node.host)
                 )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -192,13 +192,13 @@ struct ServiceSelectionScreen: View {
         @ViewBuilder trailing: () -> Trailing
     ) -> some View {
         HStack(spacing: 8) {
-            Image(fontAwesome: state.platformIcon(platformType: node.platformType).fontAwesomeIcon)
+            Image(fontAwesome: node.platformIcon.fontAwesomeIcon)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 22, height: 22)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(platformTitle(node.platformType))
+                Text(node.platformDisplayName)
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
@@ -218,7 +218,7 @@ struct ServiceSelectionScreen: View {
             successContent: { instance in
                 ServiceInstanceRow(
                     instance: instance,
-                    icon: state.platformIcon(platformType: instance.type).fontAwesomeIcon
+                    icon: instance.platformIcon.fontAwesomeIcon
                 ) {
                     select(instance: instance, state: state)
                 }
@@ -255,41 +255,20 @@ struct ServiceSelectionScreen: View {
     }
 
     private func serviceContentKey(state: ServiceSelectState) -> String {
-        if let node = detectedNode(from: state.detectedPlatformType), state.canNext {
-            return "login-\(node.platformType)-\(node.host)-\(node.compatibleMode)"
+        if let node = detectedNode(from: state.detectedPlatformId), state.canNext {
+            return "login-\(node.platformId)-\(node.host)-\(node.compatibleMode)"
         }
         return "recommendations"
     }
 
     private func platformIndicatorKey(state: ServiceSelectState) -> String {
-        switch onEnum(of: state.detectedPlatformType) {
+        switch onEnum(of: state.detectedPlatformId) {
         case .success(let success):
-            return "success-\(success.data.platformType)-\(success.data.host)"
+            return "success-\(success.data.platformId)-\(success.data.host)"
         case .loading:
             return "loading"
         case .error:
             return "error"
-        }
-    }
-
-    private func platformTitle(_ type: PlatformType) -> String {
-        switch type {
-        case .mastodon:
-            return "Mastodon"
-        case .misskey:
-            return "Misskey"
-        case .bluesky:
-            return "Bluesky"
-        case .nostr:
-            return "Nostr"
-        case .xQt:
-            return "X"
-        case .vvo:
-            return "Weibo"
-        case .pixiv:
-            return "Pixiv"
-        case .fanbox:
-            return "Fanbox"
         }
     }
 

@@ -13,9 +13,11 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -29,11 +31,7 @@ class VVORenderTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(VvoRenderTestModule::class)
         }
     }
 
@@ -152,4 +150,10 @@ class VVORenderTest {
             avatarHD = "https://weibo.cn/$name-hd.jpg",
             followersCountStr = "0",
         )
+}
+
+@Module
+internal class VvoRenderTestModule {
+    @Single
+    fun platformFormatter(): PlatformFormatter = TestFormatter()
 }

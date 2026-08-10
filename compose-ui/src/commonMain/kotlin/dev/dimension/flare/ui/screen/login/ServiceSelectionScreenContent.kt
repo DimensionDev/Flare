@@ -69,7 +69,6 @@ import dev.dimension.flare.compose.ui.service_select_welcome_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
 import dev.dimension.flare.compose.ui.service_select_welcome_title
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder
@@ -85,7 +84,6 @@ import dev.dimension.flare.ui.component.res
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.toImageVector
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.isSuccess
@@ -175,10 +173,10 @@ public fun ServiceSelectionScreenContent(
                     },
                     modifier = Modifier.width(300.dp),
                     leadingIcon = {
-                        state.detectedPlatformType
+                        state.detectedPlatformId
                             .onSuccess {
                                 FAIcon(
-                                    imageVector = state.platformIcon(it.platformType).toImageVector(),
+                                    imageVector = it.platformIcon.toImageVector(),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                 )
@@ -201,13 +199,13 @@ public fun ServiceSelectionScreenContent(
                     textAlign = TextAlign.Center,
                     style = PlatformTheme.typography.caption,
                 )
-                AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess && state.instanceInputState.text.isNotEmpty()) {
+                AnimatedVisibility(state.canNext && state.detectedPlatformId.isSuccess && state.instanceInputState.text.isNotEmpty()) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.imePadding(),
                     ) {
-                        state.detectedPlatformType.takeSuccess()?.let {
+                        state.detectedPlatformId.takeSuccess()?.let {
                             if (it.compatibleMode) {
                                 PlatformText(
                                     stringResource(
@@ -218,17 +216,18 @@ public fun ServiceSelectionScreenContent(
                                 )
                             }
                         }
-                        state.detectedPlatformType.onSuccess { nodeData ->
+                        state.detectedPlatformId.onSuccess { nodeData ->
                             GenericLoginContent(
                                 state = state,
-                                platformType = nodeData.platformType,
+                                platformId = nodeData.platformId,
                                 host = nodeData.host,
+                                methods = nodeData.loginMethods,
                                 openUri = openUri,
                                 onWebViewLogin = onWebViewLogin,
                                 registerDeeplinkCallback = registerDeeplinkCallback,
                             )
                             LoginAgreement(
-                                platformType = nodeData.platformType,
+                                platformId = nodeData.platformId,
                                 host = nodeData.host,
                                 agreementUrl = state::agreementUrl,
                                 openUri = openUri,
@@ -239,7 +238,7 @@ public fun ServiceSelectionScreenContent(
             }
         }
 
-        if (!(state.canNext && state.detectedPlatformType.isSuccess && state.instanceInputState.text.isNotEmpty())) {
+        if (!(state.canNext && state.detectedPlatformId.isSuccess && state.instanceInputState.text.isNotEmpty())) {
             item(span = StaggeredGridItemSpan.FullLine) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -257,7 +256,6 @@ public fun ServiceSelectionScreenContent(
                         val instance = get(it)
                         ServiceSelectItem(
                             instance = instance,
-                            platformIcon = state::platformIcon,
                             index = it,
                             totalCount = itemCount,
                             onClick = {
@@ -273,7 +271,6 @@ public fun ServiceSelectionScreenContent(
                             index = it,
                             totalCount = 10,
                             instance = null,
-                            platformIcon = state::platformIcon,
                             onClick = {},
                         )
                     }
@@ -304,7 +301,7 @@ public fun ReloginScreenContent(
     contentPadding: PaddingValues,
     listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
-    val state by producePresenter("relogin_${target.accountKey}_${target.platformType.name}") {
+    val state by producePresenter("relogin_${target.accountKey}_${target.platformId}") {
         remember(target) { ReloginPresenter(target, onBack) }.body()
     }
     val methods = state.methods
@@ -315,7 +312,7 @@ public fun ReloginScreenContent(
         remember(target, selectedMethod) {
             state.createLoginHandler(selectedMethod)
         }
-    val loginState by producePresenter("relogin_flow_${target.accountKey}_${target.platformType.name}_$selectedMethod") {
+    val loginState by producePresenter("relogin_flow_${target.accountKey}_${target.platformId}_$selectedMethod") {
         remember(handler) { LoginFlowPresenter(handler) }.body()
     }
     var qrContent by remember(handler) { mutableStateOf<String?>(null) }
@@ -407,7 +404,7 @@ public fun ReloginScreenContent(
                     },
                 )
                 LoginAgreement(
-                    platformType = target.platformType,
+                    platformId = target.platformId,
                     host = target.accountKey.host,
                     agreementUrl = { _, _ -> state.agreementUrl() },
                     openUri = openUri,
@@ -420,25 +417,25 @@ public fun ReloginScreenContent(
 @Composable
 private fun GenericLoginContent(
     state: SelectionPresenter.State,
-    platformType: PlatformType,
+    platformId: String,
     host: String,
+    methods: List<LoginMethodSpec>,
     openUri: (String) -> Unit,
     onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
 ) {
-    val methods = state.loginMethods(platformType)
     if (methods.isEmpty()) return
-    var selectedMethod by remember(platformType, host) { mutableStateOf(methods.first().type) }
+    var selectedMethod by remember(platformId, host) { mutableStateOf(methods.first().type) }
     val selectedSpec = methods.firstOrNull { it.type == selectedMethod } ?: methods.first()
     val handler =
-        remember(platformType, host, selectedMethod) {
+        remember(platformId, host, selectedMethod) {
             state.createLoginHandler(
-                platformType = platformType,
+                platformId = platformId,
                 host = host,
                 methodType = selectedMethod,
             )
         }
-    val loginState by producePresenter("login_flow_${platformType.name}_${host}_$selectedMethod") {
+    val loginState by producePresenter("login_flow_${platformId}_${host}_$selectedMethod") {
         remember(handler) { LoginFlowPresenter(handler) }.body()
     }
     var qrContent by remember(handler) { mutableStateOf<String?>(null) }
@@ -725,7 +722,6 @@ private fun QrLoginContent(
 @Composable
 private fun ServiceSelectItem(
     instance: UiInstance?,
-    platformIcon: (PlatformType) -> UiIcon,
     onClick: () -> Unit,
     index: Int,
     totalCount: Int,
@@ -765,7 +761,7 @@ private fun ServiceSelectItem(
                     )
                 } else if (instance != null) {
                     FAIcon(
-                        imageVector = platformIcon(instance.type).toImageVector(),
+                        imageVector = instance.platformIcon.toImageVector(),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )
@@ -796,18 +792,18 @@ private fun ServiceSelectItem(
 
 @Composable
 private fun LoginAgreement(
-    platformType: PlatformType,
+    platformId: String,
     host: String,
-    agreementUrl: (PlatformType, String) -> String?,
+    agreementUrl: (String, String) -> String?,
     openUri: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val url = agreementUrl(platformType, host) ?: return
+    val url = agreementUrl(platformId, host) ?: return
     val linkText = stringResource(Res.string.eula_privacy_policy)
     val fullText = stringResource(Res.string.login_agreement, linkText)
     val color = PlatformTheme.colorScheme.primary
     val annotatedString =
-        remember(platformType, host, url, linkText, fullText, color) {
+        remember(platformId, host, url, linkText, fullText, color) {
             buildAnnotatedString {
                 append(fullText)
                 val startIndex = fullText.indexOf(linkText)

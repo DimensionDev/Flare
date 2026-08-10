@@ -10,9 +10,9 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
 import dev.dimension.flare.data.platform.XQTCredential
+import dev.dimension.flare.data.platform.XQT_PLATFORM_ID
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiMedia
@@ -28,7 +28,7 @@ internal class XQTDirectMessageLoader(
     private val accountKey: MicroBlogKey,
     private val credentialFlow: Flow<XQTCredential>,
 ) : DirectMessageLoader {
-    override val platformType: PlatformType = PlatformType.xQt
+    override val platformId: String = XQT_PLATFORM_ID
 
     override val runtimeTransformer: Flow<DirectMessageRuntimeTransformer> =
         credentialFlow.map { credential ->

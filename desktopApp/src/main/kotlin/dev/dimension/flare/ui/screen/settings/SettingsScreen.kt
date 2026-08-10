@@ -76,7 +76,6 @@ import dev.dimension.flare.import_confirmation_message
 import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ilink
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
@@ -274,6 +273,7 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.ExportDataPresenter
 import dev.dimension.flare.ui.presenter.ImportDataPresenter
@@ -404,163 +404,171 @@ internal fun SettingsScreen(
                     .padding(LocalWindowPadding.current)
                     .padding(horizontal = screenHorizontalPadding),
         ) {
+            val activeAccount = state.accountState.user.takeSuccess()
             state.accountState.accounts
                 .onSuccess { accounts ->
-                    state.accountState.user
-                        .onSuccess { activeAccount ->
-                            Header(stringResource(Res.string.settings_accounts_title))
-                            Expander(
-                                expanded = state.accountState.expanded,
-                                onExpandedChanged = {
-                                    state.accountState.setExpanded(it)
-                                },
-                                heading = {
-                                    RichText(activeAccount.name)
-                                },
-                                icon = {
-                                    AvatarComponent(data = activeAccount.avatar, size = 24.dp)
-                                },
-                                caption = {
-                                    Text(text = activeAccount.handle.canonical)
-                                },
-                            ) {
-                                ReorderableColumn(
-                                    list = accounts,
-                                    onSettle = { fromIndex, toIndex ->
-                                        state.accountState.moveItem(fromIndex, toIndex)
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                                ) { _, account, _ ->
-                                    key(account.account.accountKey.toString()) {
-                                        ReorderableItem {
-                                            AccountItem(
-                                                account.profile,
-                                                onClick = {
-                                                    state.accountState.setActiveAccount(it)
-                                                },
-                                                toLogin = toLogin,
-                                                toRelogin = toRelogin,
-                                                trailingContent = { user ->
-                                                    Row(
-                                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    Header(stringResource(Res.string.settings_accounts_title))
+                    Expander(
+                        expanded = state.accountState.expanded,
+                        onExpandedChanged = {
+                            state.accountState.setExpanded(it)
+                        },
+                        heading = {
+                            if (activeAccount == null) {
+                                Text(stringResource(Res.string.settings_accounts_title))
+                            } else {
+                                RichText(activeAccount.name)
+                            }
+                        },
+                        icon = {
+                            activeAccount?.let {
+                                AvatarComponent(data = it.avatar, size = 24.dp)
+                            }
+                        },
+                        caption = {
+                            Text(
+                                text =
+                                    activeAccount?.handle?.canonical
+                                        ?: stringResource(Res.string.add_account),
+                            )
+                        },
+                    ) {
+                        ReorderableColumn(
+                            list = accounts,
+                            onSettle = { fromIndex, toIndex ->
+                                state.accountState.moveItem(fromIndex, toIndex)
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) { _, account, _ ->
+                            key(account.account.accountKey.toString()) {
+                                ReorderableItem {
+                                    AccountItem(
+                                        account.profile,
+                                        onClick = {
+                                            state.accountState.setActiveAccount(it)
+                                        },
+                                        toLogin = toLogin,
+                                        toRelogin = toRelogin,
+                                        trailingContent = { user ->
+                                            Row(
+                                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            ) {
+                                                if (user == null) {
+                                                    SubtleButton(
+                                                        onClick = {
+                                                            pendingDeleteAccountKey = account.account.accountKey
+                                                            pendingDeleteAccountLabel = account.account.accountKey.toString()
+                                                        },
                                                     ) {
-                                                        if (user == null) {
-                                                            SubtleButton(
-                                                                onClick = {
-                                                                    pendingDeleteAccountKey = account.account.accountKey
-                                                                    pendingDeleteAccountLabel = account.account.accountKey.toString()
-                                                                },
-                                                            ) {
-                                                                FAIcon(
-                                                                    FontAwesomeIcons.Solid.Trash,
-                                                                    contentDescription = stringResource(Res.string.remove_account),
-                                                                    tint = FluentTheme.colors.system.critical,
+                                                        FAIcon(
+                                                            FontAwesomeIcons.Solid.Trash,
+                                                            contentDescription = stringResource(Res.string.remove_account),
+                                                            tint = FluentTheme.colors.system.critical,
+                                                        )
+                                                    }
+                                                } else {
+                                                    RadioButton(
+                                                        selected = activeAccount?.key == user.key,
+                                                        onClick = {
+                                                            state.accountState.setActiveAccount(user.key)
+                                                        },
+                                                    )
+                                                    SubtleButton(
+                                                        modifier = Modifier.draggableHandle(),
+                                                        onClick = {},
+                                                        iconOnly = true,
+                                                    ) {
+                                                        FAIcon(
+                                                            FontAwesomeIcons.Solid.Bars,
+                                                            contentDescription = stringResource(Res.string.tab_settings_drag),
+                                                        )
+                                                    }
+                                                    MenuFlyoutContainer(
+                                                        flyout = {
+                                                            if (account.account.supportsRelayManagement) {
+                                                                MenuFlyoutItem(
+                                                                    text = {
+                                                                        Text(
+                                                                            stringResource(Res.string.settings_nostr_relays_manage),
+                                                                        )
+                                                                    },
+                                                                    onClick = {
+                                                                        toNostrRelays(user.key)
+                                                                    },
+                                                                    icon = {
+                                                                        FAIcon(
+                                                                            FontAwesomeIcons.Solid.List,
+                                                                            contentDescription =
+                                                                                stringResource(
+                                                                                    Res.string.settings_nostr_relays_manage,
+                                                                                ),
+                                                                        )
+                                                                    },
                                                                 )
                                                             }
-                                                        } else {
-                                                            RadioButton(
-                                                                selected = activeAccount.key == user.key,
+                                                            MenuFlyoutItem(
+                                                                text = {
+                                                                    Text(
+                                                                        stringResource(Res.string.remove_account),
+                                                                        color = FluentTheme.colors.system.critical,
+                                                                    )
+                                                                },
                                                                 onClick = {
-                                                                    state.accountState.setActiveAccount(user.key)
+                                                                    pendingDeleteAccountKey = user.key
+                                                                    pendingDeleteAccountLabel = user.handle.canonical
+                                                                },
+                                                                icon = {
+                                                                    FAIcon(
+                                                                        FontAwesomeIcons.Solid.Trash,
+                                                                        contentDescription =
+                                                                            stringResource(
+                                                                                Res.string.remove_account,
+                                                                            ),
+                                                                        tint = FluentTheme.colors.system.critical,
+                                                                    )
                                                                 },
                                                             )
-                                                            SubtleButton(
-                                                                modifier = Modifier.draggableHandle(),
-                                                                onClick = {},
-                                                                iconOnly = true,
-                                                            ) {
-                                                                FAIcon(
-                                                                    FontAwesomeIcons.Solid.Bars,
-                                                                    contentDescription = stringResource(Res.string.tab_settings_drag),
-                                                                )
-                                                            }
-                                                            MenuFlyoutContainer(
-                                                                flyout = {
-                                                                    if (account.account.platformType == PlatformType.Nostr) {
-                                                                        MenuFlyoutItem(
-                                                                            text = {
-                                                                                Text(
-                                                                                    stringResource(Res.string.settings_nostr_relays_manage),
-                                                                                )
-                                                                            },
-                                                                            onClick = {
-                                                                                toNostrRelays(user.key)
-                                                                            },
-                                                                            icon = {
-                                                                                FAIcon(
-                                                                                    FontAwesomeIcons.Solid.List,
-                                                                                    contentDescription =
-                                                                                        stringResource(
-                                                                                            Res.string.settings_nostr_relays_manage,
-                                                                                        ),
-                                                                                )
-                                                                            },
-                                                                        )
-                                                                    }
-                                                                    MenuFlyoutItem(
-                                                                        text = {
-                                                                            Text(
-                                                                                stringResource(Res.string.remove_account),
-                                                                                color = FluentTheme.colors.system.critical,
-                                                                            )
-                                                                        },
-                                                                        onClick = {
-                                                                            pendingDeleteAccountKey = user.key
-                                                                            pendingDeleteAccountLabel = user.handle.canonical
-                                                                        },
-                                                                        icon = {
-                                                                            FAIcon(
-                                                                                FontAwesomeIcons.Solid.Trash,
-                                                                                contentDescription =
-                                                                                    stringResource(
-                                                                                        Res.string.remove_account,
-                                                                                    ),
-                                                                                tint = FluentTheme.colors.system.critical,
-                                                                            )
-                                                                        },
-                                                                    )
-                                                                },
-                                                            ) {
-                                                                SubtleButton(
-                                                                    onClick = {
-                                                                        isFlyoutVisible = !isFlyoutVisible
-                                                                    },
-                                                                    iconOnly = true,
-                                                                ) {
-                                                                    FAIcon(
-                                                                        FontAwesomeIcons.Solid.EllipsisVertical,
-                                                                        contentDescription = stringResource(Res.string.remove_account),
-                                                                    )
-                                                                }
-                                                            }
+                                                        },
+                                                    ) {
+                                                        SubtleButton(
+                                                            onClick = {
+                                                                isFlyoutVisible = !isFlyoutVisible
+                                                            },
+                                                            iconOnly = true,
+                                                        ) {
+                                                            FAIcon(
+                                                                FontAwesomeIcons.Solid.EllipsisVertical,
+                                                                contentDescription = stringResource(Res.string.remove_account),
+                                                            )
                                                         }
                                                     }
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
-                                ExpanderItem(
-                                    heading = {
-                                        Text(stringResource(Res.string.add_account))
-                                    },
-                                    modifier =
-                                        Modifier.clickable {
-                                            toLogin.invoke()
+                                                }
+                                            }
                                         },
-                                    icon = {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = stringResource(Res.string.add_account),
-                                        )
-                                    },
-                                )
+                                    )
+                                }
                             }
                         }
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.add_account))
+                            },
+                            modifier =
+                                Modifier.clickable {
+                                    toLogin.invoke()
+                                },
+                            icon = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Plus,
+                                    contentDescription = stringResource(Res.string.add_account),
+                                )
+                            },
+                        )
+                    }
                 }.onError {
                     CardExpanderItem(
                         heading = {

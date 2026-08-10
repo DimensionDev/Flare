@@ -25,7 +25,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 11,
+    version = 12,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -52,7 +52,6 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
 )
 @ColumnTypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
-    dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
     dev.dimension.flare.data.database.app.model.DraftConverters::class,
     dev.dimension.flare.data.database.adapter.SubscriptionTypeConverter::class,
     dev.dimension.flare.data.database.adapter.RssDisplayModeConverter::class,
@@ -96,6 +95,12 @@ internal abstract class AppDatabase : RoomDatabase() {
             object : Migration(10, 11) {
                 override suspend fun migrate(connection: SQLiteConnection) {
                     connection.executeSQL("DROP TABLE IF EXISTS DbApplication")
+                }
+            }
+        val MIGRATION_11_12 =
+            object : Migration(11, 12) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    // Kotlin now models platform_type as a String. The physical schema is unchanged.
                 }
             }
     }

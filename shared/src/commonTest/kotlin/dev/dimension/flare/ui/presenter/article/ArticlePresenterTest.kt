@@ -7,7 +7,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticle
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -120,7 +119,7 @@ class ArticlePresenterTest {
 
     private fun createPost(statusKey: MicroBlogKey): UiTimelineV2.Post =
         UiTimelineV2.Post(
-            platformType = PlatformType.xQt,
+            platformId = "xQt",
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,

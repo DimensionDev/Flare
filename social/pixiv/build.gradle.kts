@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.koin.compiler)
 }
 
 kotlin {
@@ -34,6 +35,7 @@ kotlin {
                 implementation(libs.ktor.client.resources)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
+                implementation(libs.koin.annotations)
                 implementation(libs.paging.common)
                 implementation(libs.cryptography.provider.optimal)
             }
@@ -57,6 +59,5 @@ kotlin {
         }
     }
 }
-
 
 

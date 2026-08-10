@@ -8,7 +8,7 @@ internal suspend fun AgentToolSession.setUserSelectionRequest(
 ): AgentPendingInputRequest {
     val candidates =
         users
-            .distinctBy { it.platformType to it.key }
+            .distinctBy { it.platformId to it.key }
             .take(AGENT_USER_SELECTION_OPTION_LIMIT)
     val request =
         AgentPendingInputRequest(
@@ -39,12 +39,12 @@ internal fun userSelectionRequestToolText(
         appendLine("inputRequestId=${request.requestId}")
         appendLine("inputRequestOptions:")
         candidates
-            .distinctBy { it.platformType to it.key }
+            .distinctBy { it.platformId to it.key }
             .take(AGENT_USER_SELECTION_OPTION_LIMIT)
             .forEach { user ->
                 appendLine("- optionId=user:${user.agentAttachmentRef()}")
                 appendLine("  optionKind=user")
-                appendLine("  platform=${user.platformType.name}")
+                appendLine("  platform=${user.platformId}")
                 appendLine("  userKey=${user.key}")
                 appendLine("  displayName=${user.name.raw}")
                 appendLine("  handle=${user.handle.raw}")
@@ -58,7 +58,7 @@ private fun UiProfile.userSelectionValue(requestType: String): String =
         appendLine("userRef=${agentAttachmentMarker()}")
         appendLine("userId=${key.id}")
         appendLine("userHost=${key.host}")
-        appendLine("platform=${platformType.name}")
+        appendLine("platform=$platformId")
         appendLine("displayName=${name.raw}")
         appendLine("handle=${handle.raw}")
     }

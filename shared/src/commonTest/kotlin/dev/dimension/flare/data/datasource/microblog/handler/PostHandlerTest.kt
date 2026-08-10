@@ -38,7 +38,6 @@ import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
@@ -771,7 +770,7 @@ class PostHandlerTest : RobolectricTest() {
                     )
                 } ?: persistentListOf()
         return UiTimelineV2.Post(
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             images = images,
             sensitive = false,
             contentWarning = null,

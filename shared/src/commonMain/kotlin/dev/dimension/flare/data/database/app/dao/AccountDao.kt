@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface AccountDao {
-    @Query("SELECT * FROM DbAccount ORDER BY last_active DESC LIMIT 1")
-    fun activeAccount(): Flow<DbAccount?>
+    @Query("SELECT * FROM DbAccount WHERE platform_type IN (:platformIds) ORDER BY last_active DESC LIMIT 1")
+    fun activeAccount(platformIds: List<String>): Flow<DbAccount?>
 
     @Query("SELECT * FROM DbAccount ORDER BY sort_id")
     fun sortedAccounts(): Flow<List<DbAccount>>

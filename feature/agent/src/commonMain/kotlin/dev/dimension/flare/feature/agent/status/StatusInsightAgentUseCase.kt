@@ -85,7 +85,7 @@ internal class StatusInsightAgentUseCase(
                     AgentToolContext.StatusContext(
                         postDataSource = postDataSource,
                         statusKey = statusKey,
-                        currentPlatformType = post.platformType,
+                        currentPlatformId = post.platformId,
                         currentPost = post,
                     ),
                 searchDataSources = searchDataSources,
@@ -258,7 +258,7 @@ internal class StatusInsightAgentUseCase(
             appendLine("Respond in this language: $targetLanguage.")
             appendLine()
             appendLine("Post:")
-            appendLine("platform: ${platformType.name}")
+            appendLine("platform: $platformId")
             appendLine("statusKey: $statusKey")
             appendLine("createdAt: ${createdAt.value}")
             appendLine("visibility: ${visibility?.name.orEmpty()}")

@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
@@ -131,7 +130,8 @@ public sealed interface UiArticleContentGateReason {
     @SerialName("subscription_required")
     @Immutable
     public data class SubscriptionRequired public constructor(
-        val platformType: PlatformType,
+        @SerialName("platformType")
+        val platformId: String,
         val feeRequired: Int? = null,
     ) : UiArticleContentGateReason
 }

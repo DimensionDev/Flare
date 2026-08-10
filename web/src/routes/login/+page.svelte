@@ -6,8 +6,8 @@
     import { m } from "$lib/paraglide/messages.js";
     import {
         createLoginServiceSelectPresenter,
+        type LoginMethodSpec,
         type NodeData,
-        type PlatformType,
         type UiInstance,
     } from "@flare/web-presenters/loginServiceSelect.svelte";
 
@@ -28,13 +28,13 @@
     let instanceInput = $state("");
     let selectedMethod = $state<LoginMethodType | null>(null);
 
-    const detectedPlatform = $derived(serviceSelect.detectedPlatformType);
+    const detectedPlatform = $derived(serviceSelect.detectedPlatformId);
     const detectedNode = $derived(
         detectedPlatform.type === "Success" ? detectedPlatform.data : null,
     );
     const instances = $derived(serviceSelect.instances);
     const filteredMethods = $derived<LoginMethodType[]>(
-        detectedNode ? loginMethods(detectedNode.platformType) : [],
+        detectedNode ? loginMethods(detectedNode.loginMethods) : [],
     );
     const activeMethod = $derived(
         filteredMethods.includes(selectedMethod as LoginMethodType)
@@ -56,21 +56,13 @@
         setInput("");
     }
 
-    function loginMethods(platformType: PlatformType): LoginMethodType[] {
-        const methods: LoginMethodType[] = (() => {
-            switch (platformType) {
-                case "Mastodon":
-                case "Misskey":
-                    return ["OAuth"];
-                case "Bluesky":
-                    return ["Password", "OAuth"];
-                case "xQt":
-                case "VVo":
-                default:
-                    return [];
-            }
-        })();
-        return methods.filter((method) => supportedMethods.includes(method));
+    function loginMethods(methods: readonly LoginMethodSpec[]): LoginMethodType[] {
+        return methods
+            .map((method) => method.type)
+            .filter(
+                (method): method is LoginMethodType =>
+                    supportedMethods.includes(method as LoginMethodType),
+            );
     }
 
     function methodLabel(method: LoginMethodType): string {
@@ -92,42 +84,6 @@
             .replace(/^https?:\/\//, "")
             .replace(/\/$/, "")
             .toLowerCase();
-    }
-
-    function platformIcon(
-        platformType: PlatformType | null | undefined,
-    ): string {
-        switch (platformType) {
-            case "Mastodon":
-                return "Mastodon";
-            case "Bluesky":
-                return "Bluesky";
-            case "Misskey":
-                return "Misskey";
-            case "xQt":
-                return "World";
-            case "VVo":
-                return "World";
-            default:
-                return "World";
-        }
-    }
-
-    function platformTitle(platformType: PlatformType): string {
-        switch (platformType) {
-            case "Mastodon":
-                return "Mastodon";
-            case "Bluesky":
-                return "Bluesky";
-            case "Misskey":
-                return "Misskey";
-            case "xQt":
-                return "Unsupported";
-            case "VVo":
-                return "Unsupported";
-            default:
-                return "Unsupported";
-        }
     }
 
     function usersCountText(value: number): string {
@@ -174,7 +130,7 @@
                 <span class="service-leading" aria-hidden="true">
                     {#if detectedNode}
                         <FaIcon
-                            name={platformIcon(detectedNode.platformType)}
+                            name={detectedNode.platformIcon}
                             size={18}
                         />
                     {:else}
@@ -223,11 +179,11 @@
     >
         <header class="selected-service">
             <span class="service-icon bg-base-200 text-base-content">
-                <FaIcon name={platformIcon(node.platformType)} size={18} />
+                <FaIcon name={node.platformIcon} size={18} />
             </span>
             <span class="selected-copy">
                 <span class="selected-title"
-                    >{platformTitle(node.platformType)}</span
+                    >{node.platformDisplayName}</span
                 >
                 <span class="selected-host">{node.host}</span>
             </span>
@@ -264,9 +220,9 @@
         {/if}
 
         {#if activeMethod}
-            {#key `${node.platformType}:${node.host}:${activeMethod}`}
+            {#key `${node.platformId}:${node.host}:${activeMethod}`}
                 <LoginFlowPanel
-                    platformType={node.platformType}
+                    platformId={node.platformId}
                     host={node.host}
                     methodType={activeMethod}
                 />
@@ -281,7 +237,7 @@
             {@render InstancePlaceholders(6)}
         {:else if visibleInstances().length > 0}
             <div class="instances-grid">
-                {#each visibleInstances() as instance, index (instance.type + ":" + instance.domain)}
+                {#each visibleInstances() as instance, index (instance.platformId + ":" + instance.domain)}
                     <button
                         class="instance-card rounded-box border border-base-300 bg-base-100"
                         style={`animation-delay: ${Math.min(index, 8) * 22}ms;`}
@@ -307,7 +263,7 @@
                                         />
                                     {:else}
                                         <FaIcon
-                                            name={platformIcon(instance.type)}
+                                            name={instance.platformIcon}
                                             size={28}
                                         />
                                     {/if}

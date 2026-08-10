@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.presenter.login
 
 import dev.dimension.flare.data.datastore.PlatformOAuthPending
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.pixiv.PIXIV_ANDROID_CLIENT_ID
 import dev.dimension.flare.data.network.pixiv.PIXIV_ANDROID_CLIENT_SECRET
 import dev.dimension.flare.data.network.pixiv.PIXIV_ANDROID_REDIRECT_URI
@@ -14,12 +13,12 @@ import dev.dimension.flare.data.network.pixiv.buildPixivAuthorizationRequest
 import dev.dimension.flare.data.network.pixiv.parsePixivCallbackCode
 import dev.dimension.flare.data.network.pixiv.toCredential
 import dev.dimension.flare.data.platform.PIXIV_HOST
+import dev.dimension.flare.data.platform.PIXIV_PLATFORM_ID
 import dev.dimension.flare.data.platform.PixivCredential
 import dev.dimension.flare.data.platform.PixivPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstance
@@ -37,8 +36,8 @@ import kotlin.time.Duration.Companion.minutes
 private const val LOGIN_ACTION = "login"
 
 public data object PixivLoginProvider : LoginPlatformProvider {
-    override val platformType: PlatformType = PlatformType.Pixiv
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = PIXIV_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = PixivPlatformSpec.metadata
     override val detector: PlatformDetector = PixivPlatformDetector
     override val methods: List<LoginMethodSpec> =
@@ -60,7 +59,7 @@ public data object PixivLoginProvider : LoginPlatformProvider {
                         description = "Illustrations, manga, and novels.",
                         iconUrl = null,
                         domain = PIXIV_HOST,
-                        type = platformType,
+                        platformId = platformId,
                         bannerUrl = null,
                         usersCount = 0,
                     ),
@@ -69,7 +68,7 @@ public data object PixivLoginProvider : LoginPlatformProvider {
         )
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${platformType.name} is not supported yet")
+        throw UnsupportedOperationException("$platformId is not supported yet")
 
     override fun createHandler(context: LoginContext): LoginMethodHandler {
         require(context.methodType == LoginMethodType.OAuth) {
@@ -121,7 +120,7 @@ private class PixivOAuthLoginHandler(
             _state.value = oauthState(loading = true)
             runCatching {
                 val pending =
-                    pendingRepository.latest(PlatformType.Pixiv)
+                    pendingRepository.latest(PIXIV_PLATFORM_ID)
                         ?: error("No pending Pixiv OAuth")
                 val request = pending.toPixivAuthorizationRequest()
                 val code =
@@ -144,7 +143,7 @@ private class PixivOAuthLoginHandler(
                     account =
                         UiAccount(
                             accountKey = accountKey,
-                            platformType = PlatformType.Pixiv,
+                            platformId = PIXIV_PLATFORM_ID,
                         ),
                     credential = credential,
                     serializer = PixivCredential.serializer(),
@@ -188,7 +187,7 @@ private class PixivOAuthLoginHandler(
 
 private fun PixivAuthorizationRequest.toPlatformOAuthPending(): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Pixiv,
+        platformId = PIXIV_PLATFORM_ID,
         host = PIXIV_HOST,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes =

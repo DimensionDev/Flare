@@ -15,7 +15,6 @@ import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
@@ -367,7 +366,7 @@ class ListMemberHandlerTest : RobolectricTest() {
                 ),
             avatar = "https://${userKey.host}/${userKey.id}.png",
             nameInternal = name.toUiPlainText(),
-            platformType = PlatformType.Mastodon,
+            platformId = "Mastodon",
             clickEvent = ClickEvent.Noop,
             banner = null,
             description = null,

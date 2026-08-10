@@ -796,7 +796,7 @@
 								<img class="picker-avatar" src={group.profile.avatar?.url} alt="" loading="lazy" />
 								<span class="setting-copy">
 									<span class="setting-title">{group.profile.handleWithoutAt}</span>
-									<span class="setting-description">{group.profile.host ?? group.profile.platformType}</span>
+									<span class="setting-description">{group.profile.host ?? group.profile.platformId}</span>
 								</span>
 							</summary>
 							<div class="ios-disclosure-content nested">

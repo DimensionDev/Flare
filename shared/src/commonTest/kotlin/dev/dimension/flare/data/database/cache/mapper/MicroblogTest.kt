@@ -29,7 +29,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datastore.model.AppSettings
-import dev.dimension.flare.data.network.nostr.bech32PublicKey
 import dev.dimension.flare.data.translation.PreTranslationStoreSupport
 import dev.dimension.flare.data.translation.cacheKey
 import dev.dimension.flare.di.startKoin
@@ -66,8 +65,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
-
-private const val NOSTR_TEST_HOST = "nostr"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MicroblogTest : RobolectricTest() {
@@ -1465,7 +1462,7 @@ class MicroblogTest : RobolectricTest() {
             val userKey = MicroBlogKey(id = "did:plc:test-user", host = "bsky.social")
             val detailedUser =
                 createUser(userKey, "Detailed").copy(
-                    platformType = dev.dimension.flare.model.PlatformType.Bluesky,
+                    platformId = "Bluesky",
                     banner = "https://bsky.social/banner.png".toUiImage(),
                     description = "full profile".toUiPlainText(),
                     matrices =
@@ -1477,7 +1474,7 @@ class MicroblogTest : RobolectricTest() {
                 )
             val partialUser =
                 createUser(userKey, "Partial").copy(
-                    platformType = dev.dimension.flare.model.PlatformType.Bluesky,
+                    platformId = "Bluesky",
                     banner = null,
                     description = null,
                     matrices =
@@ -2047,83 +2044,6 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
-    fun saveToDatabaseKeepsExistingNostrProfileWhenIncomingUsesFallbackNpub() =
-        runTest {
-            val accountKey = MicroBlogKey(id = "nostr-account", host = NOSTR_TEST_HOST)
-            val userKey =
-                MicroBlogKey(
-                    id = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-                    host = NOSTR_TEST_HOST,
-                )
-            val detailedUser =
-                UiProfile(
-                    key = userKey,
-                    handle = UiHandle(raw = "alice", host = NOSTR_TEST_HOST),
-                    avatar = "https://example.com/alice.png",
-                    nameInternal = "Alice".toUiPlainText(),
-                    platformType = dev.dimension.flare.model.PlatformType.Nostr,
-                    clickEvent = ClickEvent.Noop,
-                    banner = "https://example.com/banner.png",
-                    description = "hello".toUiPlainText(),
-                    matrices = UiProfile.Matrices(0, 0, 0),
-                    mark = persistentListOf(),
-                    bottomContent = null,
-                )
-            val fallback = bech32PublicKey(userKey.id).take(16)
-            val fallbackUser =
-                UiProfile(
-                    key = userKey,
-                    handle = UiHandle(raw = fallback, host = NOSTR_TEST_HOST),
-                    avatar = "",
-                    nameInternal = fallback.toUiPlainText(),
-                    platformType = dev.dimension.flare.model.PlatformType.Nostr,
-                    clickEvent = ClickEvent.Noop,
-                    banner = null,
-                    description = null,
-                    matrices = UiProfile.Matrices(0, 0, 0),
-                    mark = persistentListOf(),
-                    bottomContent = null,
-                )
-
-            saveToDatabase(
-                db,
-                listOf(
-                    TimelinePagingMapper.toDb(
-                        createPost(
-                            accountKey = accountKey,
-                            user = detailedUser,
-                            statusKey = MicroBlogKey(id = "status-detailed", host = NOSTR_TEST_HOST),
-                            text = "detailed",
-                        ),
-                        pagingKey = "home",
-                    ),
-                ),
-            )
-            saveToDatabase(
-                db,
-                listOf(
-                    TimelinePagingMapper.toDb(
-                        createPost(
-                            accountKey = accountKey,
-                            user = fallbackUser,
-                            statusKey = MicroBlogKey(id = "status-fallback", host = NOSTR_TEST_HOST),
-                            text = "fallback",
-                        ),
-                        pagingKey = "home",
-                    ),
-                ),
-            )
-
-            val savedUser = db.userDao().findByKey(userKey).first()
-            val savedProfile = assertNotNull(savedUser).content
-            assertEquals("alice", savedProfile.handle.raw)
-            assertEquals("Alice", savedProfile.name.raw)
-            assertEquals("https://example.com/alice.png", savedProfile.avatar?.url)
-            assertEquals("https://example.com/banner.png", savedProfile.banner?.url)
-            assertEquals("hello", savedProfile.description?.raw)
-        }
-
-    @Test
     fun cachedTimelineMapperDoesNotOverflowWhenReplyReferenceChainIsVeryLong() =
         runTest {
             val accountKey = MicroBlogKey(id = "account-long-cache", host = "test.com")
@@ -2376,7 +2296,7 @@ class MicroblogTest : RobolectricTest() {
                 ),
             avatar = "https://${key.host}/${key.id}.png",
             nameInternal = name.toUiPlainText(),
-            platformType = dev.dimension.flare.model.PlatformType.Mastodon,
+            platformId = "Mastodon",
             clickEvent = ClickEvent.Noop,
             banner = null,
             description = null,
@@ -2419,7 +2339,7 @@ class MicroblogTest : RobolectricTest() {
                     }
             ).distinctBy { it.type to it.statusKey }
         return UiTimelineV2.Post(
-            platformType = dev.dimension.flare.model.PlatformType.Mastodon,
+            platformId = "Mastodon",
             images = persistentListOf(),
             sensitive = false,
             contentWarning = null,

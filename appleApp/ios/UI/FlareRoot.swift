@@ -78,7 +78,7 @@ struct FlareRoot: View {
             }
             .onAppear {
                 inAppNotification.onRelogin = { toast in
-                    reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                    reloginRoute = .relogin(toast.accountKey, toast.platformId)
                 }
             }
         } loadingContent: {
@@ -164,7 +164,7 @@ struct BackportFlareRoot: View {
             }
             .onAppear {
                 inAppNotification.onRelogin = { toast in
-                    reloginRoute = .relogin(toast.accountKey, toast.platformType)
+                    reloginRoute = .relogin(toast.accountKey, toast.platformId)
                 }
             }
         } loadingContent: {

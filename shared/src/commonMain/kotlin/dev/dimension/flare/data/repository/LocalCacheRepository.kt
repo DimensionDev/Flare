@@ -45,7 +45,7 @@ internal class DatabaseLocalCacheRepository(
             ).mapNotNull {
                 it.status.data.content
                     .contentPostOrNull()
-            }.distinctBy { it.platformType to it.statusKey }
+            }.distinctBy { it.platformId to it.statusKey }
     }
 
     override suspend fun listViewedPosts(limit: Int): List<UiTimelineV2.Post> =
@@ -57,7 +57,7 @@ internal class DatabaseLocalCacheRepository(
             ).mapNotNull {
                 it.status.status.data.content
                     .contentPostOrNull()
-            }.distinctBy { it.platformType to it.statusKey }
+            }.distinctBy { it.platformId to it.statusKey }
 
     override suspend fun searchUsers(
         query: String,
@@ -73,7 +73,7 @@ internal class DatabaseLocalCacheRepository(
                 query = normalizedQuery.toLikePattern(),
                 limit = limit.normalizedLocalCacheLimit(),
             ).map { it.content }
-            .distinctBy { it.platformType to it.key }
+            .distinctBy { it.platformId to it.key }
     }
 
     override suspend fun listViewedUsers(limit: Int): List<UiProfile> =
@@ -83,7 +83,7 @@ internal class DatabaseLocalCacheRepository(
             .asSequence()
             .filter { it.data.accountType is AccountType.Specific }
             .map { it.user.content }
-            .distinctBy { it.platformType to it.key }
+            .distinctBy { it.platformId to it.key }
             .toList()
 }
 

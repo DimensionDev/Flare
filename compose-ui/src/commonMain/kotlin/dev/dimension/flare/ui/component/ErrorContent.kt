@@ -93,7 +93,7 @@ private fun RequireReLoginError(
                         DeeplinkRoute
                             .Relogin(
                                 accountKey = error.accountKey,
-                                platformType = error.platformType,
+                                platformId = error.platformId,
                             ).toUri(),
                     )
                 },
@@ -128,7 +128,7 @@ private fun LoginExpiredError(
                         DeeplinkRoute
                             .Relogin(
                                 accountKey = error.accountKey,
-                                platformType = error.platformType,
+                                platformId = error.platformId,
                             ).toUri(),
                     )
                 },

@@ -8,12 +8,14 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.TimelineSpecIds
 import dev.dimension.flare.data.model.tab.accountLoader
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.ComposeInitialTextContext
+import dev.dimension.flare.model.InitialText
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformDeepLink
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.PlatformSpec
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.resolveReplyParticipantInitialText
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiStrings
@@ -27,16 +29,22 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlin.native.HiddenFromObjC
 
+internal const val MISSKEY_PLATFORM_ID: String = "Misskey"
+
 @HiddenFromObjC
 public data object MisskeyPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by MisskeyLoginProvider {
-    public override val type: PlatformType = PlatformType.Misskey
-    public override val metadata: PlatformTypeMetadata =
-        PlatformTypeMetadata(
+    public override val platformId: String = MISSKEY_PLATFORM_ID
+    public override val metadata: PlatformMetadata =
+        PlatformMetadata(
             displayName = "Misskey",
             icon = UiIcon.Misskey,
+            agentAliases = listOf("mk"),
         )
+    public override val order: Int = 20
+
+    override fun resolveInitialText(context: ComposeInitialTextContext): InitialText? = context.resolveReplyParticipantInitialText()
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> =
         persistentListOf(
@@ -160,7 +168,7 @@ public data object MisskeyPlatformSpec :
     override fun guestDataSource(
         host: String,
         locale: String,
-    ): MicroblogDataSource = throw UnsupportedOperationException("${type.name} guest data source is not supported yet")
+    ): MicroblogDataSource = throw UnsupportedOperationException("$platformId guest data source is not supported yet")
 }
 
 @Serializable

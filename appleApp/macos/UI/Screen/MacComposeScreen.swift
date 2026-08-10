@@ -1388,27 +1388,6 @@ private extension UiProfile {
     var accountPickerKey: String {
         "\(key.id)-\(key.host)"
     }
-
-    var platformIcon: UiIcon {
-        switch platformType {
-        case .mastodon:
-            return .mastodon
-        case .misskey:
-            return .misskey
-        case .bluesky:
-            return .bluesky
-        case .nostr:
-            return .nostr
-        case .pixiv:
-            return .pixiv
-        case .fanbox:
-            return .fanbox
-        case .xQt:
-            return .x
-        case .vvo:
-            return .weibo
-        }
-    }
 }
 
 private extension Array where Element == UiProfile {

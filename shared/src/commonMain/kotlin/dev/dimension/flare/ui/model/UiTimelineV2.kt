@@ -5,7 +5,6 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.render.UiDateTime
@@ -242,11 +241,13 @@ public sealed class UiTimelineV2 {
     @Serializable
     @Immutable
     public data class Post public constructor(
-        val platformType: PlatformType,
+        @SerialName("platformType")
+        val platformId: String,
         val images: SerializableImmutableList<UiMedia>,
         val sensitive: Boolean,
         val contentWarning: UiTranslatableText?,
         val user: UiProfile?,
+        val platformIcon: UiIcon = user?.platformIcon ?: UiIcon.World,
         public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
@@ -290,7 +291,7 @@ public sealed class UiTimelineV2 {
         override val renderHash: Int by lazy {
             renderHashBuilder()
                 .add(itemKey)
-                .add(platformType)
+                .add(platformId)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
                 .add(contentWarning?.original?.renderSummaryHash())
@@ -479,7 +480,7 @@ private fun UiTimelineV2.Message.Type.renderSummaryHash(): Int =
 private fun UiTimelineV2.Post.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(itemKey)
-        .add(platformType)
+        .add(platformId)
         .add(user?.renderSummaryHash())
         .add(contentWarning?.original?.renderSummaryHash())
         .add(contentWarning?.translation?.renderSummaryHash())
@@ -514,7 +515,7 @@ private fun UiProfile.renderSummaryHash(): Int =
         .add(handle.host)
         .add(avatar?.renderSummaryHash())
         .add(name.raw)
-        .add(platformType)
+        .add(platformId)
         .add(banner?.renderSummaryHash())
         .add(description?.renderSummaryHash())
         .add(translationDisplayState)

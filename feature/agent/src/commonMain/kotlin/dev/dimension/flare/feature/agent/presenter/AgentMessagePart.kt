@@ -142,11 +142,11 @@ internal fun AgentMessagePart.agentMessagePartIdentity(): String =
     when (this) {
         is AgentMessagePart.PostCard -> {
             val post = post.agentDisplayPost()
-            "post:${post.platformType}:${post.statusKey}"
+            "post:${post.platformId}:${post.statusKey}"
         }
 
         is AgentMessagePart.UserCard -> {
-            "user:${user.platformType}:${user.key}"
+            "user:${user.platformId}:${user.key}"
         }
 
         is AgentMessagePart.Actions -> {
@@ -165,7 +165,7 @@ private fun UiTimelineV2.Post.agentAttachmentRefAliases(): Set<String> =
         addAll(
             attachmentRefAliases(
                 canonicalRef = agentAttachmentRef(),
-                platformName = platformType.name,
+                platformName = platformId,
                 key = statusKey,
             ),
         )
@@ -174,7 +174,7 @@ private fun UiTimelineV2.Post.agentAttachmentRefAliases(): Set<String> =
             addAll(
                 attachmentRefAliases(
                     canonicalRef = displayPost.agentAttachmentRef(),
-                    platformName = displayPost.platformType.name,
+                    platformName = displayPost.platformId,
                     key = displayPost.statusKey,
                 ),
             )
@@ -184,7 +184,7 @@ private fun UiTimelineV2.Post.agentAttachmentRefAliases(): Set<String> =
 private fun UiProfile.agentAttachmentRefAliases(): Set<String> =
     attachmentRefAliases(
         canonicalRef = agentAttachmentRef(),
-        platformName = platformType.name,
+        platformName = platformId,
         key = key,
     )
 

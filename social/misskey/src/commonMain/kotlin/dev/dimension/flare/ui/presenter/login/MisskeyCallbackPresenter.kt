@@ -10,12 +10,12 @@ import dev.dimension.flare.data.datastore.PlatformOAuthPending
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
+import dev.dimension.flare.data.platform.MISSKEY_PLATFORM_ID
 import dev.dimension.flare.data.platform.MisskeyCredential
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -42,7 +42,7 @@ public class MisskeyCallbackPresenter(
         LaunchedEffect(session) {
             val pendingOAuth =
                 pendingRepository
-                    .all(PlatformType.Misskey)
+                    .all(MISSKEY_PLATFORM_ID)
                     .firstOrNull { it.attributes["session"] == session }
                     ?.toMisskeyPending() ?: run {
                     error = Exception("No pending OAuth")
@@ -51,7 +51,7 @@ public class MisskeyCallbackPresenter(
             runCatching {
                 misskeyAuthCheckUseCase(pendingOAuth.host, session, accountService)
                 pendingRepository.clear(
-                    platformType = PlatformType.Misskey,
+                    platformId = MISSKEY_PLATFORM_ID,
                     host = pendingOAuth.host,
                 )
                 // TODO: delay to workaround iOS NavigationPath.append not working
@@ -90,7 +90,7 @@ public class MisskeyCallbackPresenter(
                         id = id,
                         host = host,
                     ),
-                platformType = PlatformType.Misskey,
+                platformId = MISSKEY_PLATFORM_ID,
             ),
             credential =
                 MisskeyCredential(
@@ -140,7 +140,7 @@ private object MisskeyLoginSessionStore {
 
 private fun MisskeyLoginSessionStore.Pending.toPlatformOAuthPending(): PlatformOAuthPending =
     PlatformOAuthPending(
-        platformType = PlatformType.Misskey,
+        platformId = MISSKEY_PLATFORM_ID,
         host = host,
         createdAtEpochMillis = Clock.System.now().toEpochMilliseconds(),
         attributes = mapOf("session" to session),

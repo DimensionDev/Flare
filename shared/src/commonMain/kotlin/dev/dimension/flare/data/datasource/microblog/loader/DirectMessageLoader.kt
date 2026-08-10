@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.microblog.loader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiState
@@ -13,7 +12,7 @@ import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public interface DirectMessageLoader {
-    public val platformType: PlatformType
+    public val platformId: String
 
     public val runtimeTransformer: Flow<DirectMessageRuntimeTransformer>
         get() = flowOf(DirectMessageRuntimeTransformer())

@@ -15,6 +15,8 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.login_expired
 import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.UnsupportedPlatformException
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
@@ -82,7 +84,9 @@ fun AccountItem(
         }.onError { throwable ->
             CardExpanderItem(
                 heading = {
-                    if (throwable is LoginExpiredException) {
+                    if (throwable is UnsupportedPlatformException) {
+                        Text(text = throwable.platformId)
+                    } else if (throwable is LoginExpiredException) {
                         Text(
                             text =
                                 stringResource(
@@ -97,12 +101,24 @@ fun AccountItem(
                 modifier = modifier,
                 icon = {
                     FAIcon(
-                        FontAwesomeIcons.Solid.FaceSadTear,
-                        contentDescription = stringResource(Res.string.account_item_error_title),
+                        imageVector =
+                            if (throwable is UnsupportedPlatformException) {
+                                UiIcon.World.toImageVector()
+                            } else {
+                                FontAwesomeIcons.Solid.FaceSadTear
+                            },
+                        contentDescription =
+                            if (throwable is UnsupportedPlatformException) {
+                                throwable.platformId
+                            } else {
+                                stringResource(Res.string.account_item_error_title)
+                            },
                     )
                 },
                 caption = {
-                    if (throwable is LoginExpiredException) {
+                    if (throwable is UnsupportedPlatformException) {
+                        Text(text = throwable.accountKey?.toString() ?: throwable.platformId)
+                    } else if (throwable is LoginExpiredException) {
                         Text(text = throwable.accountKey.toString())
                     } else {
                         Text(text = stringResource(Res.string.account_item_error_message))
@@ -115,7 +131,7 @@ fun AccountItem(
                                 toRelogin(
                                     ReloginTarget(
                                         accountKey = throwable.accountKey,
-                                        platformType = throwable.platformType,
+                                        platformId = throwable.platformId,
                                     ),
                                 )
                             },

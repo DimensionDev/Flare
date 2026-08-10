@@ -15,22 +15,24 @@
 
     const context = browser ? loadLoginOAuthContext() : null;
     const callbackUrl = browser ? globalThis.location.href : "";
-    const loginFlow = createLoginFlowPresenter(
-        context?.platformType ?? "Mastodon",
-        context?.host ?? "",
-        context?.methodType ?? "OAuth",
-        browser && context ? loginRedirectUri(context.platformType) : null,
-        () => {},
-        () => {},
-        () => {},
-        () => {
-            clearLoginOAuthContext();
-            void goto("/");
-        },
-    );
+    const loginFlow = context
+        ? createLoginFlowPresenter(
+              context.platformId,
+              context.host,
+              context.methodType,
+              browser ? loginRedirectUri(context.platformId) : null,
+              () => {},
+              () => {},
+              () => {},
+              () => {
+                  clearLoginOAuthContext();
+                  void goto("/");
+              },
+          )
+        : null;
 
     onMount(() => {
-        if (context) {
+        if (context && loginFlow) {
             loginFlow.resume(callbackUrl);
         }
     });
@@ -50,25 +52,25 @@
     <main class="callback-content">
         <section class="callback-panel rounded-box border border-base-300 bg-base-100">
             <span class="callback-icon bg-base-200 text-base-content">
-                {#if loginFlow.error || !context}
+                {#if loginFlow?.error || !context}
                     <FaIcon name="CircleExclamation" size={22} />
                 {:else}
                     <span class="loading loading-spinner loading-sm"></span>
                 {/if}
             </span>
             <div class="callback-copy">
-                <h1>{loginFlow.error || !context ? m.loginFailed() : m.loginSigningIn()}</h1>
+                <h1>{loginFlow?.error || !context ? m.loginFailed() : m.loginSigningIn()}</h1>
                 <p>
                     {#if !context}
                         {m.loginOauthContextMissing()}
-                    {:else if loginFlow.error}
+                    {:else if loginFlow?.error}
                         {loginFlow.error}
                     {:else}
                         {m.loginVerifyingAccount()}
                     {/if}
                 </p>
             </div>
-            {#if loginFlow.error || !context}
+            {#if loginFlow?.error || !context}
                 <a class="btn btn-primary btn-sm" href="/login">{m.loginBackToLogin()}</a>
             {/if}
         </section>

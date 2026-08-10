@@ -3,7 +3,6 @@ package dev.dimension.flare.data.repository
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -41,7 +40,7 @@ public interface AccountService {
 @HiddenFromObjC
 public data class AccountMicroblogDataSource(
     public val accountKey: MicroBlogKey,
-    public val platformType: PlatformType,
+    public val platformId: String,
     public val dataSource: MicroblogDataSource,
 )
 
@@ -87,10 +86,10 @@ internal class RepositoryAccountService(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
         repository.allAccounts.mapLatest { accounts ->
-            accounts.map { account ->
+            accounts.filter { it.platformAvailable }.map { account ->
                 AccountMicroblogDataSource(
                     accountKey = account.accountKey,
-                    platformType = account.platformType,
+                    platformId = account.platformId,
                     dataSource = repository.getOrCreateDataSource(account),
                 )
             }

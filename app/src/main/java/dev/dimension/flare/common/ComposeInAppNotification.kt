@@ -72,7 +72,7 @@ internal class ComposeInAppNotification : InAppNotification {
                         if (throwable is LoginExpiredException) {
                             ReloginTarget(
                                 accountKey = throwable.accountKey,
-                                platformType = throwable.platformType,
+                                platformId = throwable.platformId,
                             )
                         } else {
                             null

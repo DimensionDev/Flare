@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.database.cache.model
 
 import dev.dimension.flare.common.Locale
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.createSampleStatus
@@ -16,7 +15,7 @@ class TranslationDisplayTest {
     fun selectedTranslationPopulatesWrapperWithoutChangingOriginal() {
         val post =
             createSampleStatus(createSampleUser()).copy(
-                platformType = PlatformType.xQt,
+                platformId = "xQt",
                 content =
                     UiTranslatableText(
                         original = "original".toUiPlainText(),

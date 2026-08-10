@@ -1,16 +1,14 @@
 package dev.dimension.flare.ui.model.mapper
 
-import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.NotificationsTimelineResponse
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiTimelineV2
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
+import org.koin.plugin.module.dsl.modules
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,11 +22,7 @@ class XQTNotificationMapperTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(
-                module {
-                    single<PlatformFormatter> { TestFormatter() }
-                },
-            )
+            modules(XqtRenderTestModule::class)
         }
     }
 

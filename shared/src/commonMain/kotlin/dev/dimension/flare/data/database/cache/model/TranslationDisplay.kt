@@ -255,7 +255,7 @@ internal fun UiTimelineV2.effectiveTranslationCacheKey(
     val post = platformPostOrNull() ?: return providerCacheKey
     val platformPayload = post.platformTranslationPayloadOrNull() ?: return providerCacheKey
     val payloadHash = platformPayload.encodeJson(TranslationPayload.serializer()).stableTranslationHash()
-    return "platform:${post.platformType.name}:$payloadHash"
+    return "platform:${post.platformId}:$payloadHash"
 }
 
 private fun DbTranslation?.toDisplayState(): TranslationDisplayState =

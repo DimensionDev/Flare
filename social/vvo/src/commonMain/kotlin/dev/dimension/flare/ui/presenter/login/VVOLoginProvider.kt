@@ -1,16 +1,15 @@
 package dev.dimension.flare.ui.presenter.login
 
-import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
 import dev.dimension.flare.data.network.vvo.VVOPlatformDetector
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.platform.VVO_PLATFORM_ID
 import dev.dimension.flare.data.platform.VVoCredential
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.addAccount
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.PlatformTypeMetadata
+import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount
@@ -24,8 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 private const val LOGIN_ACTION = "login"
 
 public data object VVOLoginProvider : LoginPlatformProvider {
-    override val platformType: PlatformType = PlatformType.VVo
-    override val metadata: PlatformTypeMetadata
+    override val platformId: String = VVO_PLATFORM_ID
+    override val metadata: PlatformMetadata
         get() = VvoPlatformSpec.metadata
     override val detector: PlatformDetector = VVOPlatformDetector
     override val methods: List<LoginMethodSpec> =
@@ -41,7 +40,7 @@ public data object VVOLoginProvider : LoginPlatformProvider {
     override suspend fun recommendInstances(): List<RecommendedInstance> = emptyList()
 
     override suspend fun instanceMetadata(host: String): UiInstanceMetadata =
-        throw UnsupportedOperationException("${platformType.name} is not supported yet")
+        throw UnsupportedOperationException("$platformId is not supported yet")
 
     override fun createHandler(context: LoginContext): LoginMethodHandler {
         require(context.methodType == LoginMethodType.WebCookie) {
@@ -118,7 +117,7 @@ private class VVOWebCookieLoginHandler(
         accountService.addAccount(
             UiAccount(
                 accountKey = accountKey,
-                platformType = PlatformType.VVo,
+                platformId = VVO_PLATFORM_ID,
             ),
             credential =
                 credentialState.value,

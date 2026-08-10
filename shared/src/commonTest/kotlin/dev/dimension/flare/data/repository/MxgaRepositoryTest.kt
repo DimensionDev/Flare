@@ -3,7 +3,6 @@ package dev.dimension.flare.data.repository
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
@@ -19,6 +18,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MxgaRepositoryTest {
+    private val platformRegistry = dev.dimension.flare.testPlatformRegistry()
+
     @Test
     fun metadataAndWhitelistRejectUntrustedShapes() {
         val meta =
@@ -105,7 +106,7 @@ class MxgaRepositoryTest {
             createSampleUser().copy(
                 key = MicroBlogKey("100", "x.com"),
                 handle = UiHandle("safe", "x.com"),
-                platformType = PlatformType.xQt,
+                platformId = "xQt",
             )
         val base = createSampleStatus(user)
         val snapshot =
@@ -126,21 +127,21 @@ class MxgaRepositoryTest {
                 content = UiTranslatableText("blocked-word".toUiPlainText()),
             )
 
-        assertFalse(translatedOnly.isMxgaMatch(snapshot))
-        assertTrue(blocked.isMxgaMatch(snapshot))
+        assertFalse(translatedOnly.isMxgaMatch(snapshot, platformRegistry))
+        assertTrue(blocked.isMxgaMatch(snapshot, platformRegistry))
         assertTrue(
             UiTimelineV2
                 .TimelinePostItem(
                     post = translatedOnly,
                     presentation = UiTimelineV2.PostPresentation(repost = blocked),
-                ).isMxgaMatch(snapshot),
+                ).isMxgaMatch(snapshot, platformRegistry),
         )
         assertFalse(
             UiTimelineV2
                 .TimelinePostItem(
                     post = translatedOnly,
                     presentation = UiTimelineV2.PostPresentation(quotes = persistentListOf(blocked)),
-                ).isMxgaMatch(snapshot),
+                ).isMxgaMatch(snapshot, platformRegistry),
         )
     }
 }

@@ -13,7 +13,7 @@ import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationR
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.applyTranslation
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
@@ -235,7 +235,7 @@ internal object TimelinePagingMapper {
                 } else {
                     dbStatusReferenceWithStatus(
                         reference = reference,
-                        accountType = root.accountType as DbAccountType,
+                        accountType = root.accountType,
                         rootStatusId = rootStatusId,
                         referenceOrder = index,
                     )
@@ -276,7 +276,7 @@ internal object TimelinePagingMapper {
             DbStatusReference(
                 referenceType = referenceType,
                 statusId = rootStatusId,
-                referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
+                referenceStatusId = DbStatus.createId(post.accountType, post.statusKey),
                 referenceOrder = referenceOrder,
                 _id = Uuid.random().toString(),
             ),
@@ -285,7 +285,7 @@ internal object TimelinePagingMapper {
 
     private fun dbStatusReferenceWithStatus(
         reference: UiTimelineV2.Post.Reference,
-        accountType: DbAccountType,
+        accountType: AccountType,
         rootStatusId: String,
         referenceOrder: Int,
     ) = DbStatusReferenceWithStatus(
@@ -311,7 +311,7 @@ internal object TimelinePagingMapper {
             DbTimelineItemPresentationReference(
                 pagingKey = pagingKey,
                 statusId = rootStatusId,
-                referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
+                referenceStatusId = DbStatus.createId(post.accountType, post.statusKey),
                 presentationType = type,
                 referenceOrder = referenceOrder,
                 _id = Uuid.random().toString(),
@@ -326,7 +326,7 @@ internal object TimelinePagingMapper {
                     statusKey = data.statusKey,
                     content = data,
                     renderHash = data.renderHash,
-                    accountType = data.accountType as DbAccountType,
+                    accountType = data.accountType,
                     text = data.searchText,
                 ),
         )

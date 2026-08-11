@@ -4,7 +4,7 @@ import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 
@@ -13,7 +13,7 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 )
 internal data class DbStatus(
     val statusKey: MicroBlogKey,
-    val accountType: DbAccountType,
+    val accountType: AccountType,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val content: UiTimelineV2,
     val renderHash: Int,
@@ -23,7 +23,7 @@ internal data class DbStatus(
 ) {
     companion object {
         fun createId(
-            accountType: DbAccountType,
+            accountType: AccountType,
             statusKey: MicroBlogKey,
         ): String = "${accountType}_$statusKey"
     }

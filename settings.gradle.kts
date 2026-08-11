@@ -24,6 +24,7 @@ dependencyResolutionManagement {
 rootProject.name = "Flare"
 include(":app")
 include(":shared")
+include(":ui-model")
 include(":social:bluesky")
 include(":social:fanbox")
 include(":social:mastodon")

@@ -12,7 +12,7 @@ import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserHistoryWithUser
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
@@ -80,17 +80,17 @@ internal interface UserDao {
     ): List<DbUser>
 
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
-    suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
+    suspend fun deleteHistoryByAccountType(accountType: AccountType)
 
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType AND userKey = :userKey")
     suspend fun deleteHistory(
-        accountType: DbAccountType,
+        accountType: AccountType,
         userKey: MicroBlogKey,
     )
 
     @Query("SELECT * FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
     fun getUserRelation(
-        accountType: DbAccountType,
+        accountType: AccountType,
         userKey: MicroBlogKey,
     ): Flow<DbUserRelation?>
 
@@ -99,7 +99,7 @@ internal interface UserDao {
 
     @Query("DELETE FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
     suspend fun deleteUserRelation(
-        accountType: DbAccountType,
+        accountType: AccountType,
         userKey: MicroBlogKey,
     )
 

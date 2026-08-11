@@ -15,7 +15,6 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -82,7 +81,7 @@ public class StatusContextPresenter(
                             val loader = service.context(key)
                             if (loader is CacheableRemoteLoader<UiTimelineV2>) {
                                 val pagingKey = loader.pagingKey
-                                val exists = database.pagingTimelineDao().existsPaging(accountType as DbAccountType, pagingKey)
+                                val exists = database.pagingTimelineDao().existsPaging(accountType, pagingKey)
                                 if (!exists) {
                                     val status = database.statusDao().get(statusKey, accountType).firstOrNull()
                                     status?.let {
@@ -92,7 +91,7 @@ public class StatusContextPresenter(
                                                 .insertAll(
                                                     listOf(
                                                         DbPagingTimeline(
-                                                            statusId = DbStatus.createId(accountType as DbAccountType, statusKey),
+                                                            statusId = DbStatus.createId(accountType, statusKey),
                                                             pagingKey = pagingKey,
                                                             sortId = 0,
                                                         ),

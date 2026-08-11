@@ -7,7 +7,6 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlin.time.Clock
@@ -31,7 +30,7 @@ public class LogUserHistoryPresenter(
             cacheDatabase.userDao().insertHistory(
                 DbUserHistory(
                     userKey = userKey,
-                    accountType = accountType as DbAccountType,
+                    accountType = accountType,
                     lastVisit = Clock.System.now().toEpochMilliseconds(),
                 ),
             )

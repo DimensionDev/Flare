@@ -5,7 +5,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.encodeProtobuf
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiProfile
@@ -14,10 +14,10 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal class AccountTypeConverter {
     @ColumnTypeConverter
-    fun fromString(value: String): DbAccountType = value.decodeJson()
+    fun fromString(value: String): AccountType = value.decodeJson()
 
     @ColumnTypeConverter
-    fun fromEnum(value: DbAccountType): String = value.encodeJson()
+    fun fromEnum(value: AccountType): String = value.encodeJson()
 
     @ColumnTypeConverter
     fun fromUiProfile(value: UiProfile): ByteArray = value.encodeProtobuf()

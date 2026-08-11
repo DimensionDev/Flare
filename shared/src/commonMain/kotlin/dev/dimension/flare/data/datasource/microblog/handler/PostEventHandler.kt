@@ -10,7 +10,6 @@ import dev.dimension.flare.data.datasource.microblog.UpdatePostActionMenuEvent
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
@@ -27,7 +26,6 @@ public class PostEventHandler(
 ) : DatabaseUpdater {
     private val coroutineScope: CoroutineScope by koinInject()
     private val database: CacheDatabase by koinInject()
-    private val dbAccountType = accountType as DbAccountType
 
     public interface Handler {
         public suspend fun handle(
@@ -43,7 +41,7 @@ public class PostEventHandler(
                     .statusDao()
                     .get(
                         statusKey = event.postKey,
-                        accountType = dbAccountType,
+                        accountType = accountType,
                     ).firstOrNull()
                     ?.content
             if (event is UpdatePostActionMenuEvent && originalData is UiTimelineV2.Post) {
@@ -57,7 +55,7 @@ public class PostEventHandler(
                     )
                 database.statusDao().update(
                     statusKey = event.postKey,
-                    accountType = dbAccountType,
+                    accountType = accountType,
                     content = updatedData,
                     renderHash = updatedData.renderHash,
                     text = updatedData.searchText,
@@ -67,27 +65,29 @@ public class PostEventHandler(
                 val updatedData =
                     originalData.copy(
                         poll =
-                            originalData.poll?.copy(
-                                ownVotes = event.options,
-                                options =
-                                    originalData.poll.options
-                                        .mapIndexed { index, option ->
-                                            if (event.options.contains(index)) {
-                                                option.copy(
-                                                    votesCount =
-                                                        option.votesCount.plus(
-                                                            1,
-                                                        ),
-                                                )
-                                            } else {
-                                                option
-                                            }
-                                        }.toImmutableList(),
-                            ),
+                            originalData.poll?.let { poll ->
+                                poll.copy(
+                                    ownVotes = event.options,
+                                    options =
+                                        poll.options
+                                            .mapIndexed { index, option ->
+                                                if (event.options.contains(index)) {
+                                                    option.copy(
+                                                        votesCount =
+                                                            option.votesCount.plus(
+                                                                1,
+                                                            ),
+                                                    )
+                                                } else {
+                                                    option
+                                                }
+                                            }.toImmutableList(),
+                                )
+                            },
                     )
                 database.statusDao().update(
                     statusKey = event.postKey,
-                    accountType = dbAccountType,
+                    accountType = accountType,
                     content = updatedData,
                     renderHash = updatedData.renderHash,
                     text = updatedData.searchText,
@@ -103,7 +103,7 @@ public class PostEventHandler(
                 if (originalData != null) {
                     database.statusDao().update(
                         statusKey = event.postKey,
-                        accountType = dbAccountType,
+                        accountType = accountType,
                         content = originalData,
                         renderHash = originalData.renderHash,
                         text = originalData.searchText,
@@ -117,11 +117,11 @@ public class PostEventHandler(
         database.connect {
             database.statusDao().delete(
                 statusKey = postKey,
-                accountType = dbAccountType,
+                accountType = accountType,
             )
             database.pagingTimelineDao().deleteStatus(
-                accountType = dbAccountType,
-                statusId = DbStatus.createId(dbAccountType, postKey),
+                accountType = accountType,
+                statusId = DbStatus.createId(accountType, postKey),
             )
         }
     }
@@ -136,14 +136,14 @@ public class PostEventHandler(
                     .statusDao()
                     .get(
                         statusKey = postKey,
-                        accountType = dbAccountType,
+                        accountType = accountType,
                     ).firstOrNull()
                     ?.content
             if (currentData != null) {
                 val updatedData = update(currentData)
                 database.statusDao().update(
                     statusKey = postKey,
-                    accountType = dbAccountType,
+                    accountType = accountType,
                     content = updatedData,
                     renderHash = updatedData.renderHash,
                     text = updatedData.searchText,
@@ -162,7 +162,7 @@ public class PostEventHandler(
                     .statusDao()
                     .get(
                         statusKey = postKey,
-                        accountType = dbAccountType,
+                        accountType = accountType,
                     ).firstOrNull()
                     ?.content
             if (currentData != null && currentData is UiTimelineV2.Post) {
@@ -176,7 +176,7 @@ public class PostEventHandler(
                     )
                 database.statusDao().update(
                     statusKey = postKey,
-                    accountType = dbAccountType,
+                    accountType = accountType,
                     content = updatedData,
                     renderHash = updatedData.renderHash,
                     text = updatedData.searchText,

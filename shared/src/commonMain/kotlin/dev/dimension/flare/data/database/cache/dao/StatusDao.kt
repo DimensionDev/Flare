@@ -7,7 +7,7 @@ import androidx.room3.Query
 import androidx.room3.Transaction
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.Flow
@@ -23,27 +23,27 @@ internal interface StatusDao {
     @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
     fun get(
         statusKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): Flow<DbStatus?>
 
     @Transaction
     @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
     fun getWithReferences(
         statusKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): Flow<DbStatusWithReference?>
 
     @Transaction
     @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
     suspend fun getWithReferencesSync(
         statusKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): DbStatusWithReference?
 
     @Query("SELECT * FROM DbStatus WHERE accountType = :accountType AND statusKey IN (:statusKeys)")
     suspend fun getByKeys(
         statusKeys: List<MicroBlogKey>,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): List<DbStatus>
 
     @Query(
@@ -52,7 +52,7 @@ internal interface StatusDao {
     )
     suspend fun update(
         statusKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
         content: UiTimelineV2,
         renderHash: Int,
         text: String?,
@@ -61,11 +61,11 @@ internal interface StatusDao {
     @Query("DELETE FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
     suspend fun delete(
         statusKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     )
 
     @Query("DELETE FROM DbStatus WHERE accountType = :accountType")
-    suspend fun deleteByAccountType(accountType: DbAccountType)
+    suspend fun deleteByAccountType(accountType: AccountType)
 
     @Query("SELECT COUNT(*) FROM DbStatus")
     fun count(): Flow<Long>

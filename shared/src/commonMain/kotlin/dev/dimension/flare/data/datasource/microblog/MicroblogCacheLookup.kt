@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -45,7 +44,7 @@ internal class DatabaseMicroblogCacheLookup(
             .statusDao()
             .get(
                 statusKey = statusKey,
-                accountType = accountType as DbAccountType,
+                accountType = accountType,
             ).firstOrNull()
             ?.content
             ?.contentPostOrNull()

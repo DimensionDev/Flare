@@ -3,7 +3,7 @@ package dev.dimension.flare.data.repository
 import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
-import dev.dimension.flare.ui.model.UiSearchHistory
+import dev.dimension.flare.ui.model.createUiSearchHistory
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
@@ -24,7 +24,7 @@ internal class SearchHistoryRepository(
             .map {
                 it
                     .map {
-                        UiSearchHistory(
+                        createUiSearchHistory(
                             keyword = it.search,
                             createdAt = Instant.fromEpochMilliseconds(it.created_at),
                         )

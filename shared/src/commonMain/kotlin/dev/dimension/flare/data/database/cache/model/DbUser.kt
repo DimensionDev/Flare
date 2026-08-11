@@ -4,7 +4,7 @@ import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -31,7 +31,7 @@ internal data class DbUser(
     ],
 )
 internal data class DbUserRelation(
-    val accountType: DbAccountType,
+    val accountType: AccountType,
     val userKey: MicroBlogKey,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val relation: UiRelation,

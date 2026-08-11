@@ -6,7 +6,7 @@ import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 
 @Entity
 internal data class DbEmoji(
@@ -32,7 +32,7 @@ internal class EmojiContentConverter {
 
 @Entity
 internal data class DbEmojiHistory(
-    val accountType: DbAccountType,
+    val accountType: AccountType,
     val shortCode: String,
     val lastUse: Long,
     @PrimaryKey

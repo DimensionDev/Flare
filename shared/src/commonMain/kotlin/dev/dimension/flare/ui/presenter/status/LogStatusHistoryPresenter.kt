@@ -9,7 +9,6 @@ import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.repository.STATUS_HISTORY_PAGING_KEY
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlin.time.Clock
@@ -33,7 +32,7 @@ public class LogStatusHistoryPresenter(
             cacheDatabase.pagingTimelineDao().insertAll(
                 listOf(
                     DbPagingTimeline(
-                        statusId = DbStatus.createId(accountType as DbAccountType, statusKey),
+                        statusId = DbStatus.createId(accountType, statusKey),
                         pagingKey = PAGING_KEY,
                         sortId = Clock.System.now().toEpochMilliseconds(),
                     ),

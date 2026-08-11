@@ -19,7 +19,6 @@ import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -34,7 +33,7 @@ public class ListMemberHandler(
     private val accountKey: MicroBlogKey,
     private val loader: ListMemberLoader,
 ) {
-    private val accountType: DbAccountType = AccountType.Specific(accountKey)
+    private val accountType: AccountType = AccountType.Specific(accountKey)
     private val database: CacheDatabase by koinInject()
     private val memberPagingKey: String
         get() = "${pagingKey}_members"

@@ -1,0 +1,697 @@
+package dev.dimension.flare.ui.model
+
+import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.mapper.fromRss
+import dev.dimension.flare.ui.render.UiDateTime
+import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlin.native.HiddenFromObjC
+import kotlin.time.Instant
+
+@Serializable
+@Immutable
+public sealed class UiTimelineV2 {
+    public val id: String? by lazy {
+        itemKey
+    }
+
+    public abstract val searchText: String?
+    public abstract val statusKey: MicroBlogKey
+    public abstract val createdAt: UiDateTime
+    public abstract val accountType: AccountType
+
+    public abstract val itemKey: String?
+    public abstract val renderHash: Int
+
+    @Transient
+    public val itemType: String =
+        when (this) {
+            is Feed -> "feed"
+            is Post -> "post"
+            is TimelinePostItem -> "timeline_post_item"
+            is User -> "user"
+            is UserList -> "user_list"
+            is Message -> "message"
+        }
+
+    @Serializable
+    @Immutable
+    public data class Message public constructor(
+        val user: UiProfile? = null,
+        override val statusKey: MicroBlogKey,
+        val icon: UiIcon,
+        @SerialName("messageType")
+        val type: Type,
+        override val createdAt: UiDateTime,
+        public val clickEvent: ClickEvent,
+        override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
+    ) : UiTimelineV2() {
+        override val searchText: String? = null
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(user?.renderSummaryHash())
+                .add(statusKey)
+                .add(icon)
+                .add(type.renderSummaryHash())
+                .add(createdAt.value.toEpochMilliseconds())
+                .add(accountType)
+                .build()
+        }
+
+        @Serializable
+        @Immutable
+        public sealed class Type {
+            @Serializable
+            @Immutable
+            public data class Unknown public constructor(
+                val rawType: String,
+            ) : Type()
+
+            @Serializable
+            @Immutable
+            public data class Raw public constructor(
+                val content: String,
+            ) : Type()
+
+            @Serializable
+            @Immutable
+            public data class Localized public constructor(
+                val data: MessageId,
+                val args: SerializableImmutableList<String> = persistentListOf(),
+            ) : Type() {
+                @Serializable
+                @Immutable
+                public enum class MessageId {
+                    Mention,
+                    NewPost,
+                    Repost,
+                    Follow,
+                    FollowRequest,
+                    Favourite,
+                    PollEnded,
+                    PostUpdated,
+                    Reply,
+                    Quote,
+                    Reaction,
+                    FollowRequestAccepted,
+                    ScheduledNotePosted,
+                    ScheduledNotePostFailed,
+                    RoleAssigned,
+                    ChatRoomInvitationReceived,
+                    AchievementEarned,
+                    ExportCompleted,
+                    Test,
+                    Login,
+                    CreateToken,
+                    App,
+                    StarterpackJoined,
+                    Pinned,
+                    Like,
+                }
+            }
+        }
+    }
+
+    @Serializable
+    @Immutable
+    public data class Feed public constructor(
+        val title: String?,
+        val description: String?,
+        val descriptionHtml: String? = null,
+        val url: String,
+        public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        @Transient
+        public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
+        override val createdAt: UiDateTime,
+        val source: Source,
+        val media: UiMedia.Image? = null,
+        public val clickEvent: ClickEvent = ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url)),
+        override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
+    ) : UiTimelineV2() {
+        val actualCreatedAt: UiDateTime? by lazy {
+            if (createdAt.value == Instant.fromEpochMilliseconds(0L)) {
+                null
+            } else {
+                createdAt
+            }
+        }
+        override val statusKey: MicroBlogKey = MicroBlogKey.fromRss(url)
+        override val searchText: String =
+            buildString {
+                title?.let {
+                    append(it)
+                    append(" ")
+                }
+                description?.let {
+                    append(it)
+                }
+            }
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(title)
+                .add(description)
+                .add(url)
+                .add(sourceLanguages)
+                .add(translationDisplayState)
+                .add(createdAt.value.toEpochMilliseconds())
+                .add(source.name)
+                .add(source.icon)
+                .add(media?.renderSummaryHash())
+                .add(accountType)
+                .build()
+        }
+
+        @Serializable
+        @Immutable
+        public data class Source public constructor(
+            val name: String,
+            val icon: String?,
+        )
+    }
+
+    @Serializable
+    @Immutable
+    public data class TimelinePostItem public constructor(
+        val post: Post,
+        val presentation: PostPresentation = PostPresentation(),
+        @Transient
+        override val itemKey: String? = post.itemKey,
+    ) : UiTimelineV2() {
+        override val statusKey: MicroBlogKey = post.statusKey
+        override val createdAt: UiDateTime = post.createdAt
+        override val accountType: AccountType = post.accountType
+        override val searchText: String =
+            buildString {
+                append(post.searchText)
+                presentation.inlineParents.forEach { parent ->
+                    append(" ")
+                    append(parent.searchText)
+                }
+                presentation.quotes.forEach { quote ->
+                    append(" ")
+                    append(quote.searchText)
+                }
+                presentation.repost?.let { repost ->
+                    append(" ")
+                    append(repost.searchText)
+                }
+            }
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(post.renderSummaryHash())
+                .add(presentation.renderSummaryHash())
+                .build()
+        }
+
+        val displayPost: Post by lazy {
+            presentation.repost ?: post
+        }
+    }
+
+    @Serializable
+    @Immutable
+    public data class PostPresentation public constructor(
+        val message: Message? = null,
+        val inlineParents: SerializableImmutableList<Post> = persistentListOf(),
+        val quotes: SerializableImmutableList<Post> = persistentListOf(),
+        val repost: Post? = null,
+    )
+
+    @Serializable
+    @Immutable
+    public data class Post public constructor(
+        @SerialName("platformType")
+        val platformId: String,
+        val images: SerializableImmutableList<UiMedia>,
+        val sensitive: Boolean,
+        val contentWarning: UiTranslatableText?,
+        val user: UiProfile?,
+        val platformIcon: UiIcon = user?.platformIcon ?: UiIcon.World,
+        public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
+        @Transient
+        public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
+        val content: UiTranslatableText,
+        val actions: SerializableImmutableList<ActionMenu>,
+        val poll: UiPoll?,
+        public override val statusKey: MicroBlogKey,
+        val card: UiCard?,
+        override val createdAt: UiDateTime,
+        val emojiReactions: SerializableImmutableList<EmojiReaction> = persistentListOf(),
+        val sourceChannel: SourceChannel? = null,
+        val visibility: Visibility? = null,
+        val replyToHandle: String? = null,
+        public val references: SerializableImmutableList<Reference> = persistentListOf(),
+        public val clickEvent: ClickEvent,
+        public val mediaClickPolicy: MediaClickPolicy = MediaClickPolicy.OpenStatusMedia,
+        public override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
+    ) : UiTimelineV2() {
+        override val searchText: String =
+            buildString {
+                user?.name?.raw?.let {
+                    append(it)
+                    append(" ")
+                }
+                contentWarning?.original?.raw?.let {
+                    append(it)
+                    append(" ")
+                }
+                content.original.raw.let {
+                    append(it)
+                    append(" ")
+                }
+            }
+
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
+
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(platformId)
+                .add(images.renderSummaryHash { it.renderSummaryHash() })
+                .add(sensitive)
+                .add(contentWarning?.original?.renderSummaryHash())
+                .add(contentWarning?.translation?.renderSummaryHash())
+                .add(sourceLanguages)
+                .add(translationDisplayState)
+                .add(content.original.renderSummaryHash())
+                .add(content.translation?.renderSummaryHash())
+                .add(actions.renderSummaryHash { it.renderSummaryHash() })
+                .add(poll?.renderSummaryHash())
+                .add(statusKey)
+                .add(card?.renderSummaryHash())
+                .add(createdAt.value.toEpochMilliseconds())
+                .add(emojiReactions.renderSummaryHash { it.renderSummaryHash() })
+                .add(sourceChannel?.id)
+                .add(sourceChannel?.name)
+                .add(visibility)
+                .add(replyToHandle)
+                .add(references.renderSummaryHash { it.renderSummaryHash() })
+                .add(mediaClickPolicy)
+                .add(accountType)
+                .build()
+        }
+
+        @Serializable
+        @Immutable
+        public enum class MediaClickPolicy {
+            OpenStatusMedia,
+            OpenPostClickEvent,
+        }
+
+        @Serializable
+        @Immutable
+        public data class SourceChannel(
+            val id: String,
+            val name: String,
+        )
+
+        @Serializable
+        @Immutable
+        public data class EmojiReaction(
+            val name: String,
+            val url: String,
+            val count: UiNumber,
+            public val clickEvent: ClickEvent,
+            val isUnicode: Boolean,
+            val me: Boolean,
+        ) {
+            val onClicked: ClickContext.() -> Unit by lazy {
+                clickEvent.onClicked
+            }
+            val isImageReaction: Boolean by lazy {
+                name.startsWith(":") && name.endsWith(":")
+            }
+        }
+
+        @Serializable
+        @Immutable
+        public data class Reference public constructor(
+            val statusKey: MicroBlogKey,
+            val type: ReferenceType,
+        )
+
+        @Serializable
+        public enum class Visibility {
+            Public,
+            Home,
+            Followers,
+            Specified,
+            Channel,
+        }
+    }
+
+    @Serializable
+    @Immutable
+    public data class User public constructor(
+        val message: Message? = null,
+        val value: UiProfile,
+        override val createdAt: UiDateTime,
+        override val statusKey: MicroBlogKey,
+        val button: SerializableImmutableList<ActionMenu.Item> = persistentListOf(),
+        override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
+    ) : UiTimelineV2() {
+        override val searchText: String? = null
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(message?.renderHash)
+                .add(value.renderSummaryHash())
+                .add(createdAt.value.toEpochMilliseconds())
+                .add(statusKey)
+                .add(button.renderSummaryHash { it.renderSummaryHash() })
+                .add(accountType)
+                .build()
+        }
+    }
+
+    @Serializable
+    @Immutable
+    public data class UserList public constructor(
+        val message: Message?,
+        val users: SerializableImmutableList<UiProfile>,
+        override val createdAt: UiDateTime,
+        override val statusKey: MicroBlogKey,
+        val post: Post?,
+        override val accountType: AccountType,
+        @Transient
+        override val itemKey: String? = null,
+    ) : UiTimelineV2() {
+        override val searchText: String? = null
+        override val renderHash: Int by lazy {
+            renderHashBuilder()
+                .add(itemKey)
+                .add(message?.renderHash)
+                .add(users.renderSummaryHash { it.renderSummaryHash() })
+                .add(createdAt.value.toEpochMilliseconds())
+                .add(statusKey)
+                .add(post?.renderSummaryHash())
+                .add(accountType)
+                .build()
+        }
+    }
+}
+
+@HiddenFromObjC
+public fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 =
+    when (this) {
+        is UiTimelineV2.Feed -> copy(itemKey = itemKey)
+        is UiTimelineV2.Message -> copy(itemKey = itemKey)
+        is UiTimelineV2.Post -> copy(itemKey = itemKey)
+        is UiTimelineV2.TimelinePostItem -> copy(itemKey = itemKey)
+        is UiTimelineV2.User -> copy(itemKey = itemKey)
+        is UiTimelineV2.UserList -> copy(itemKey = itemKey)
+    }
+
+public fun UiTimelineV2.asTimelinePostItem(): UiTimelineV2.TimelinePostItem? =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> this
+        is UiTimelineV2.Post -> UiTimelineV2.TimelinePostItem(post = this, itemKey = itemKey)
+        else -> null
+    }
+
+public fun UiTimelineV2.contentPostOrNull(): UiTimelineV2.Post? =
+    when (this) {
+        is UiTimelineV2.TimelinePostItem -> displayPost
+        is UiTimelineV2.Post -> this
+        else -> null
+    }
+
+private fun renderHashBuilder(): RenderHashBuilder = RenderHashBuilder()
+
+private class RenderHashBuilder {
+    private var result: Int = 17
+
+    fun add(value: Any?): RenderHashBuilder {
+        result = 31 * result + (value?.hashCode() ?: 0)
+        return this
+    }
+
+    fun build(): Int = result
+}
+
+private fun UiTimelineV2.Message.Type.renderSummaryHash(): Int =
+    when (this) {
+        is UiTimelineV2.Message.Type.Localized -> {
+            renderHashBuilder()
+                .add(data)
+                .add(args)
+                .build()
+        }
+
+        is UiTimelineV2.Message.Type.Raw -> {
+            renderHashBuilder()
+                .add(content)
+                .build()
+        }
+
+        is UiTimelineV2.Message.Type.Unknown -> {
+            renderHashBuilder()
+                .add(rawType)
+                .build()
+        }
+    }
+
+private fun UiTimelineV2.Post.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(itemKey)
+        .add(platformId)
+        .add(user?.renderSummaryHash())
+        .add(contentWarning?.original?.renderSummaryHash())
+        .add(contentWarning?.translation?.renderSummaryHash())
+        .add(content.original.renderSummaryHash())
+        .add(content.translation?.renderSummaryHash())
+        .add(images.renderSummaryHash { it.renderSummaryHash() })
+        .add(sensitive)
+        .add(poll?.renderSummaryHash())
+        .add(card?.renderSummaryHash())
+        .add(emojiReactions.renderSummaryHash { it.renderSummaryHash() })
+        .add(replyToHandle)
+        .add(sourceChannel?.id)
+        .add(sourceChannel?.name)
+        .add(visibility)
+        .add(translationDisplayState)
+        .add(actions.renderSummaryHash { it.renderSummaryHash() })
+        .add(createdAt.value.toEpochMilliseconds())
+        .build()
+
+private fun UiTimelineV2.PostPresentation.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(message?.renderHash)
+        .add(inlineParents.renderSummaryHash { it.renderSummaryHash() })
+        .add(quotes.renderSummaryHash { it.renderSummaryHash() })
+        .add(repost?.renderSummaryHash())
+        .build()
+
+private fun UiProfile.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(key)
+        .add(handle.raw)
+        .add(handle.host)
+        .add(avatar?.renderSummaryHash())
+        .add(name.raw)
+        .add(platformId)
+        .add(banner?.renderSummaryHash())
+        .add(description?.renderSummaryHash())
+        .add(translationDisplayState)
+        .add(matrices.fansCount)
+        .add(matrices.followsCount)
+        .add(matrices.statusesCount)
+        .add(matrices.platformFansCount)
+        .add(mark)
+        .add(bottomContent?.renderSummaryHash())
+        .build()
+
+private fun UiProfile.BottomContent.renderSummaryHash(): Int =
+    when (this) {
+        is UiProfile.BottomContent.Fields -> {
+            fields.entries
+                .sortedBy { it.key }
+                .fold(renderHashBuilder()) { builder, entry ->
+                    builder
+                        .add(entry.key)
+                        .add(entry.value.renderSummaryHash())
+                }.build()
+        }
+
+        is UiProfile.BottomContent.Iconify -> {
+            items.entries
+                .sortedBy { it.key.name }
+                .fold(renderHashBuilder()) { builder, entry ->
+                    builder
+                        .add(entry.key)
+                        .add(entry.value.renderSummaryHash())
+                }.build()
+        }
+    }
+
+private fun UiPoll.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(id)
+        .add(options.renderSummaryHash { it.renderSummaryHash() })
+        .add(multiple)
+        .add(ownVotes)
+        .add(expired)
+        .add(voted)
+        .add(canVote)
+        .build()
+
+private fun UiPoll.Option.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(title)
+        .add(votesCount)
+        .add(percentage.toBits())
+        .build()
+
+private fun UiCard.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(title)
+        .add(description)
+        .add(media?.renderSummaryHash())
+        .add(url)
+        .build()
+
+private fun UiMedia.renderSummaryHash(): Int =
+    when (this) {
+        is UiMedia.Audio -> {
+            renderHashBuilder()
+                .add(url)
+                .add(description)
+                .add(previewUrl)
+                .build()
+        }
+
+        is UiMedia.Gif -> {
+            renderHashBuilder()
+                .add(url)
+                .add(previewUrl)
+                .add(description)
+                .add(height.toBits())
+                .add(width.toBits())
+                .build()
+        }
+
+        is UiMedia.Image -> {
+            renderHashBuilder()
+                .add(url)
+                .add(previewUrl)
+                .add(description)
+                .add(height.toBits())
+                .add(width.toBits())
+                .add(sensitive)
+                .build()
+        }
+
+        is UiMedia.Video -> {
+            renderHashBuilder()
+                .add(url)
+                .add(thumbnailUrl)
+                .add(description)
+                .add(height.toBits())
+                .add(width.toBits())
+                .build()
+        }
+    }
+
+private fun UiRichText.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(raw)
+        .add(innerText)
+        .add(imageUrls)
+        .build()
+
+private fun UiTimelineV2.Post.EmojiReaction.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(name)
+        .add(url)
+        .add(count)
+        .add(isUnicode)
+        .add(me)
+        .build()
+
+private fun UiTimelineV2.Post.Reference.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(statusKey)
+        .add(type)
+        .build()
+
+private fun ActionMenu.renderSummaryHash(): Int =
+    when (this) {
+        ActionMenu.Divider -> {
+            renderHashBuilder()
+                .add("divider")
+                .build()
+        }
+
+        is ActionMenu.Group -> {
+            renderHashBuilder()
+                .add(displayItem.renderSummaryHash())
+                .add(actions.renderSummaryHash { it.renderSummaryHash() })
+                .build()
+        }
+
+        is ActionMenu.Item -> {
+            renderSummaryHash()
+        }
+    }
+
+private fun ActionMenu.Item.renderSummaryHash(): Int =
+    renderHashBuilder()
+        .add(updateKey)
+        .add(icon)
+        .add(text.renderSummaryHash())
+        .add(count)
+        .add(color)
+        .build()
+
+private fun ActionMenu.Item.Text?.renderSummaryHash(): Int =
+    when (this) {
+        null -> {
+            0
+        }
+
+        is ActionMenu.Item.Text.Localized -> {
+            renderHashBuilder()
+                .add(type)
+                .add(parameters)
+                .build()
+        }
+
+        is ActionMenu.Item.Text.Raw -> {
+            renderHashBuilder()
+                .add(text)
+                .build()
+        }
+    }
+
+private inline fun <T> Iterable<T>.renderSummaryHash(hash: (T) -> Int): Int =
+    fold(renderHashBuilder()) { builder, item ->
+        builder.add(hash(item))
+    }.build()

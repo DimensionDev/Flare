@@ -4,7 +4,7 @@ import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 internal class DirectMessageTimelineDbPageLoader(
     private val database: CacheDatabase,
-    private val accountType: DbAccountType,
+    private val accountType: AccountType,
 ) : OffsetFromStartPageLoader<DbDirectMessageTimeline> {
     override suspend fun load(
         offset: Int,

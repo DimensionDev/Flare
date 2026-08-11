@@ -16,7 +16,6 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
@@ -55,7 +54,7 @@ internal interface PagingTimelineDao {
     )
     fun getPagingSource(
         pagingKey: String,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Transaction
@@ -239,7 +238,7 @@ internal interface PagingTimelineDao {
     )
     fun get(
         pagingKey: String,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): Flow<DbPagingTimelineWithStatus?>
 
     @Transaction
@@ -346,7 +345,7 @@ internal interface PagingTimelineDao {
             "LIMIT :limit",
     )
     suspend fun getByAccountTypeWithStatus(
-        accountType: DbAccountType,
+        accountType: AccountType,
         afterId: String?,
         limit: Int,
     ): List<DbPagingTimelineWithStatus>
@@ -364,7 +363,7 @@ internal interface PagingTimelineDao {
     )
     suspend fun delete(
         pagingKey: String,
-        accountType: DbAccountType,
+        accountType: AccountType,
     )
 
     suspend fun delete(
@@ -388,7 +387,7 @@ internal interface PagingTimelineDao {
             "AND DbStatus.accountType = :accountType" +
             ")",
     )
-    suspend fun deleteByAccountType(accountType: DbAccountType)
+    suspend fun deleteByAccountType(accountType: AccountType)
 
     @Query(
         "DELETE FROM DbPagingTimeline " +
@@ -400,7 +399,7 @@ internal interface PagingTimelineDao {
             ")",
     )
     suspend fun deleteStatus(
-        accountType: DbAccountType,
+        accountType: AccountType,
         statusId: String,
     )
 
@@ -416,7 +415,7 @@ internal interface PagingTimelineDao {
             ")",
     )
     suspend fun existsPaging(
-        accountType: DbAccountType,
+        accountType: AccountType,
         paging_key: String,
     ): Boolean
 

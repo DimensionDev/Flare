@@ -14,7 +14,7 @@ import dev.dimension.flare.data.database.cache.model.DbListMemberWithContent
 import dev.dimension.flare.data.database.cache.model.DbListPaging
 import dev.dimension.flare.data.database.cache.model.DbListWithContent
 import dev.dimension.flare.data.database.cache.model.DbUserWithListMembership
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
@@ -34,7 +34,7 @@ internal interface ListDao {
     @Query("SELECT * FROM DbList WHERE listKey = :listKey AND accountType = :accountType")
     fun getList(
         listKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): Flow<DbList?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -52,13 +52,13 @@ internal interface ListDao {
     @Query("DELETE FROM DbList WHERE listKey = :listKey AND accountType = :accountType")
     suspend fun deleteByListKey(
         listKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     )
 
     @Query("DELETE FROM DbListPaging WHERE listKey = :listKey AND accountType = :accountType")
     suspend fun deletePagingByListKey(
         listKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     )
 
     @Query("DELETE FROM DbList")
@@ -70,7 +70,7 @@ internal interface ListDao {
     @Query("UPDATE DbList SET content = :content WHERE listKey = :listKey AND accountType = :accountType")
     suspend fun updateListContent(
         listKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
         content: DbList.ListContent,
     )
 

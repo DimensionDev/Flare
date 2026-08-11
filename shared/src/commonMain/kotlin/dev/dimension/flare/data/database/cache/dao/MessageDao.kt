@@ -7,19 +7,19 @@ import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface MessageDao {
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
-    fun getRoomTimeline(accountType: DbAccountType): Flow<List<DbDirectMessageTimeline>>
+    fun getRoomTimeline(accountType: AccountType): Flow<List<DbDirectMessageTimeline>>
 
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountType = :accountType")
     fun getRoomInfo(
         roomKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     ): Flow<DbDirectMessageTimeline?>
 
     @Query(
@@ -31,7 +31,7 @@ internal interface MessageDao {
         """,
     )
     suspend fun getRoomTimelinePage(
-        accountType: DbAccountType,
+        accountType: AccountType,
         offset: Int,
         limit: Int,
     ): List<DbDirectMessageTimeline>
@@ -75,18 +75,18 @@ internal interface MessageDao {
     suspend fun getLatestMessage(roomKey: MicroBlogKey): DbMessageItem?
 
     @Query("DELETE FROM DbDirectMessageTimeline WHERE accountType = :accountType")
-    suspend fun clearMessageTimeline(accountType: DbAccountType)
+    suspend fun clearMessageTimeline(accountType: AccountType)
 
     @Query("UPDATE DbDirectMessageTimeline SET unreadCount = 0 WHERE roomKey = :roomKey AND accountType = :accountType")
     suspend fun clearUnreadCount(
         roomKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     )
 
     @Query("DELETE FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountType = :accountType")
     suspend fun deleteRoomTimeline(
         roomKey: MicroBlogKey,
-        accountType: DbAccountType,
+        accountType: AccountType,
     )
 
     @Query("DELETE FROM DbMessageRoom WHERE roomKey = :roomKey")

@@ -10,7 +10,7 @@ import androidx.room3.Relation
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.data.database.cache.model.DbList.ListContent
-import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import kotlinx.serialization.Serializable
@@ -21,7 +21,7 @@ import kotlin.uuid.Uuid
 )
 internal data class DbList(
     val listKey: MicroBlogKey,
-    val accountType: DbAccountType,
+    val accountType: AccountType,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val content: ListContent,
     @PrimaryKey
@@ -53,7 +53,7 @@ internal class ListContentConverters {
     ],
 )
 internal data class DbListPaging(
-    val accountType: DbAccountType,
+    val accountType: AccountType,
     val pagingKey: String,
     val listKey: MicroBlogKey,
     @PrimaryKey

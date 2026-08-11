@@ -345,7 +345,7 @@ private fun ActionMenu.prependTranslationAction(
                                                         error("TranslateNoop should use ClickEvent.Noop")
                                                     }
                                                 },
-                                        ),
+                                        ).toUri(),
                                     )
                                 }
                             },

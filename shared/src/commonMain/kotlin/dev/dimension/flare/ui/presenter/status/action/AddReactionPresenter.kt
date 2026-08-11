@@ -18,6 +18,7 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
+import dev.dimension.flare.ui.model.createEmojiData
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -53,7 +54,7 @@ public class AddReactionPresenter(
                     }
                 }.map {
                     remember(it) {
-                        EmojiData(it, accountType)
+                        createEmojiData(it, accountType)
                     }
                 }
 

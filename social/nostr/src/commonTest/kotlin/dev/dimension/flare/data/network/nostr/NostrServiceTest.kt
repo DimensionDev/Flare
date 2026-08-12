@@ -203,6 +203,9 @@ class NostrServiceTest {
         val reposted = assertNotNull(repost.presentation.repost)
         assertEquals(ROOT_EVENT_ID, reposted.statusKey.id)
         val message = assertNotNull(repost.presentation.message)
+        assertEquals(1754504040L, repost.createdAt.value.epochSeconds)
+        assertEquals(repost.createdAt, message.createdAt)
+        assertEquals(1754504013L, reposted.createdAt.value.epochSeconds)
         assertEquals(
             UiTimelineV2.Message.Type.Localized.MessageId.Repost,
             assertIs<UiTimelineV2.Message.Type.Localized>(message.type).data,

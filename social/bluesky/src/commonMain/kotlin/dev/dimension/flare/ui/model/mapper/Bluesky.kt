@@ -745,7 +745,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                             id = post.uri.atUri + "_reblog_${user.key}",
                             host = accountKey.host,
                         ),
-                    createdAt = renderedPost.createdAt,
+                    createdAt = reason.value.indexedAt.toUi(),
                     accountType = accountKey.toAccountType(),
                     clickEvent =
                         ClickEvent.Deeplink(
@@ -796,6 +796,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
             renderedPost.copy(
                 statusKey = message?.statusKey ?: renderedPost.statusKey,
                 user = repostUser,
+                createdAt = feedReason.value.indexedAt.toUi(),
                 images = persistentListOf(),
                 content = UiTranslatableText(original = uiRichTextOf(emptyList())),
                 contentWarning = null,

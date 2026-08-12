@@ -785,10 +785,11 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     }
 
     private func measuredTileHeight(_ tile: UIView, width: CGFloat) -> CGFloat {
-        tile.bounds = CGRect(x: 0, y: 0, width: width, height: UIView.layoutFittingExpandedSize.height)
+        let fittingHeight = UIView.layoutFittingCompressedSize.height
+        tile.bounds = CGRect(x: 0, y: 0, width: width, height: fittingHeight)
         tile.setNeedsLayout()
         let size = tile.systemLayoutSizeFitting(
-            CGSize(width: width, height: UIView.layoutFittingExpandedSize.height),
+            CGSize(width: width, height: fittingHeight),
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         )
@@ -1045,18 +1046,21 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         bodyTranslationText.setContentCompressionResistancePriority(.required, for: .vertical)
         textContainer.setContentHuggingPriority(.required, for: .vertical)
         textContainer.setContentCompressionResistancePriority(.required, for: .vertical)
+        let textStack = UIStackView()
+        textStack.axis = .vertical
+        textStack.alignment = .fill
+        textStack.spacing = 4
+        textStack.translatesAutoresizingMaskIntoConstraints = false
         bodyText.translatesAutoresizingMaskIntoConstraints = false
         bodyTranslationText.translatesAutoresizingMaskIntoConstraints = false
-        textContainer.addSubview(bodyText)
-        textContainer.addSubview(bodyTranslationText)
+        textStack.addArrangedSubview(bodyText)
+        textStack.addArrangedSubview(bodyTranslationText)
+        textContainer.addSubview(textStack)
         NSLayoutConstraint.activate([
-            bodyText.topAnchor.constraint(equalTo: textContainer.topAnchor, constant: 8),
-            bodyText.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 8),
-            bodyText.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -8),
-            bodyTranslationText.topAnchor.constraint(equalTo: bodyText.bottomAnchor, constant: 4),
-            bodyTranslationText.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 8),
-            bodyTranslationText.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -8),
-            bodyTranslationText.bottomAnchor.constraint(equalTo: textContainer.bottomAnchor),
+            textStack.topAnchor.constraint(equalTo: textContainer.topAnchor, constant: 8),
+            textStack.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 8),
+            textStack.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -8),
+            textStack.bottomAnchor.constraint(equalTo: textContainer.bottomAnchor),
         ])
         stack.addArrangedSubview(textContainer)
 

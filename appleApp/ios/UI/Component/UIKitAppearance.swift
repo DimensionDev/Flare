@@ -138,18 +138,23 @@ struct GalleryUIKitAppearance: Equatable {
     let showMedia: Bool
     let avatarShape: AvatarShape
     let avatarShapeID: String
+    let postActionLayout: PostActionLayoutConfig
+    let postActionLayoutID: String
     let showOriginalWithTranslation: Bool
 
     init(timeline: TimelineAppearance, showOriginalWithTranslation: Bool = false) {
         showMedia = timeline.showMedia
         avatarShape = timeline.avatarShape
         avatarShapeID = timeline.avatarShape.name
+        postActionLayout = timeline.postActionLayout
+        postActionLayoutID = PostActionLayoutHelpers.shared.signature(config: timeline.postActionLayout)
         self.showOriginalWithTranslation = showOriginalWithTranslation
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.showMedia == rhs.showMedia &&
             lhs.avatarShapeID == rhs.avatarShapeID &&
+            lhs.postActionLayoutID == rhs.postActionLayoutID &&
             lhs.showOriginalWithTranslation == rhs.showOriginalWithTranslation
     }
 }

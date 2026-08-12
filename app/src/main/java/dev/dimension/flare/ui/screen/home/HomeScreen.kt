@@ -30,7 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -97,6 +99,10 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun HomeScreen(afterInit: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter { presenter(uriHandler = uriHandler) }
+    // The presenter is retained by a ViewModel, so keep its UI-owned handler current.
+    SideEffect {
+        state.updateUriHandler(uriHandler)
+    }
     val hapticFeedback = LocalHapticFeedback.current
     state.tabs
         .onSuccess { tabs ->
@@ -557,6 +563,7 @@ private val HomeTabsPresenter.State.HomeTabs.icon: ImageVector
 @Composable
 private fun presenter(uriHandler: UriHandler) =
     run {
+        val currentUriHandler = remember { mutableStateOf(uriHandler) }
         val secondaryTabsPresenter = remember { SecondaryTabsPresenter() }.invoke()
         val loggedInState = remember { LoggedInPresenter() }.invoke()
         val canComposeState = remember { CanComposePresenter() }.invoke()
@@ -625,7 +632,7 @@ private fun presenter(uriHandler: UriHandler) =
                         }
                     },
                     onLink = {
-                        uriHandler.openUri(it)
+                        currentUriHandler.value.openUri(it)
                     },
                 )
             }.invoke()
@@ -640,6 +647,10 @@ private fun presenter(uriHandler: UriHandler) =
             val loggedInState = loggedInState.isLoggedIn
             val canComposeState = canComposeState.canCompose
             val aiAgentEnabled = aiAgentEnabledState.enabled
+
+            fun updateUriHandler(uriHandler: UriHandler) {
+                currentUriHandler.value = uriHandler
+            }
 
             fun navigate(route: Route) {
                 navigate(

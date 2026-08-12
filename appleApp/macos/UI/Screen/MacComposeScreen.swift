@@ -142,6 +142,7 @@ struct MacComposeScreen: View {
                     }
                 }
                 .disabled(!presenter.state.canSend)
+                .keyboardShortcut(.return, modifiers: .command)
             }
         }
         .fileImporter(

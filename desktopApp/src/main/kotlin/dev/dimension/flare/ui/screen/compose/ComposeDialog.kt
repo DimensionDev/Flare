@@ -44,9 +44,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Dp
@@ -460,8 +465,15 @@ fun ComposeDialog(
                                 .heightIn(min = 120.dp)
                                 .focusRequester(
                                     focusRequester = focusRequester,
-                                ).onKeyEvent {
-                                    if (it.isCtrlPressed && it.key == Key.Enter) {
+                                ).onPreviewKeyEvent {
+                                    if (
+                                        it.type == KeyEventType.KeyDown &&
+                                        it.isCtrlPressed &&
+                                        !it.isAltPressed &&
+                                        !it.isMetaPressed &&
+                                        !it.isShiftPressed &&
+                                        it.key == Key.Enter
+                                    ) {
                                         if (state.canSend) {
                                             state.send {
                                                 onBack?.invoke()

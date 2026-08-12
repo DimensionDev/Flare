@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.status.StatusActions
@@ -19,6 +20,7 @@ public fun ProfileMenu(
             LocalTimelineAppearance provides
                 LocalTimelineAppearance.current.copy(
                     postActionStyle = PostActionStyle.RightAligned,
+                    postActionLayout = PostActionLayoutConfig.Default,
                 ),
             PlatformTextStyle provides PlatformTheme.typography.title,
         ) {

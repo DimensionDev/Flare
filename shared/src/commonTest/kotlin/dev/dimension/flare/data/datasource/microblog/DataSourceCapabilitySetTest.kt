@@ -87,5 +87,5 @@ private abstract class EmptyDataSource : MicroblogDataSource {
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = error("Not used")
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
 }

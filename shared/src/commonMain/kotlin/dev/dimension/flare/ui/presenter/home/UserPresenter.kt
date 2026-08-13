@@ -2,8 +2,8 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -30,15 +30,12 @@ public open class UserPresenter(
             .flatMapLatest { service ->
                 val userId =
                     userKey?.id
-                        ?: if (service is AuthenticatedMicroblogDataSource) {
-                            service.accountKey.id
-                        } else {
-                            null
-                        }
-                if (userId == null || service !is UserDataSource) {
+                        ?: service.accountKeyOrNull?.id
+                val profile = service.capabilities.profile
+                if (userId == null || profile == null) {
                     flowOf(UiState.Error(NoActiveAccountException))
                 } else {
-                    service.userHandler.userById(userId).toUi()
+                    profile.userHandler.userById(userId).toUi()
                 }
             }
     }

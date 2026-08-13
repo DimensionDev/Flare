@@ -5,6 +5,7 @@ import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.serialization.typeToken
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.feature.agent.common.AgentSearchTarget
@@ -50,7 +51,7 @@ internal class LoadStatusContextTool(
         val dataSource = session.statusMicroblogDataSource() ?: return session.statusContextUnavailableMessage()
         val statusKey = session.statusKey() ?: return session.statusContextUnavailableMessage()
         val posts =
-            dataSource
+            requireNotNull(dataSource.capabilities.post)
                 .context(statusKey)
                 .load(
                     pageSize = STATUS_CONTEXT_PAGE_SIZE,
@@ -103,8 +104,11 @@ internal class LoadPostContextTool(
     override suspend fun execute(args: Args): String {
         val statusKey = microBlogKeyOrNull(id = args.statusId, host = args.statusHost) ?: return "Status id is blank."
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val posts = targets.loadPosts { context(statusKey) }
+            session.searchTargets
+                .withPostCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val posts = targets.loadPosts { requireNotNull(capabilities.post).context(statusKey) }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Post context",
@@ -147,8 +151,11 @@ internal class LoadHomeTimelineTool(
 
     override suspend fun execute(args: Args): String {
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val posts = targets.loadPosts { homeTimeline() }
+            session.searchTargets
+                .withTimelineCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val posts = targets.loadPosts { requireNotNull(capabilities.timeline).homeTimeline() }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Home timeline posts",
@@ -202,8 +209,14 @@ internal class LoadUserTimelineTool(
                     requestType = "user_timeline",
                 ) ?: "User id is blank."
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val posts = targets.loadPosts { userTimeline(userKey = userKey, mediaOnly = args.mediaOnly) }
+            session.searchTargets
+                .withProfileCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val posts =
+            targets.loadPosts {
+                requireNotNull(capabilities.profile).userTimeline(userKey = userKey, mediaOnly = args.mediaOnly)
+            }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "User timeline posts",
@@ -247,8 +260,11 @@ internal class LoadDiscoverStatusesTool(
 
     override suspend fun execute(args: Args): String {
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val posts = targets.loadPosts { discoverStatuses() }
+            session.searchTargets
+                .withSearchCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val posts = targets.loadPosts { requireNotNull(capabilities.search).discoverStatuses() }
         session.messagePartStore.addPosts(posts)
         return buildPostToolResult(
             title = "Discover posts",
@@ -300,6 +316,7 @@ internal class SearchPostsTool(
         }
         val targets =
             session.searchTargets
+                .withSearchCapability()
                 .distinctBy { it.platformId }
                 .filterByPlatformNames(args.platforms, session.platformRegistry)
         if (targets.isEmpty()) {
@@ -364,6 +381,7 @@ internal class SearchUsersTool(
         }
         val targets =
             session.searchTargets
+                .withSearchCapability()
                 .distinctBy { it.platformId }
                 .filterByPlatformNames(args.platforms, session.platformRegistry)
         if (targets.isEmpty()) {
@@ -492,8 +510,11 @@ internal class LoadDiscoverUsersTool(
 
     override suspend fun execute(args: Args): String {
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val users = targets.loadUsers { discoverUsers() }
+            session.searchTargets
+                .withSearchCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val users = targets.loadUsers { requireNotNull(capabilities.search).discoverUsers() }
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "Discover users",
@@ -534,8 +555,11 @@ internal class LoadDiscoverHashtagsTool(
 
     override suspend fun execute(args: Args): String {
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val hashtags = targets.loadHashtags { discoverHashtags() }
+            session.searchTargets
+                .withSearchCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val hashtags = targets.loadHashtags { requireNotNull(capabilities.search).discoverHashtags() }
         return buildString {
             appendLine("Discover hashtags")
             appendLine("Platforms loaded: ${targets.platformNames()}")
@@ -586,8 +610,11 @@ internal class LoadFollowingTool(
                     requestType = "following",
                 ) ?: "User id is blank."
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val users = targets.loadUsers { following(userKey) }
+            session.searchTargets
+                .withProfileCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val users = targets.loadUsers { requireNotNull(capabilities.profile).following(userKey) }
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "Following users",
@@ -639,8 +666,11 @@ internal class LoadFollowersTool(
                     requestType = "followers",
                 ) ?: "User id is blank."
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
-        val users = targets.loadUsers { fans(userKey) }
+            session.searchTargets
+                .withProfileCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
+        val users = targets.loadUsers { requireNotNull(capabilities.profile).fans(userKey) }
         session.messagePartStore.addUsers(users)
         return buildUserToolResult(
             title = "Followers",
@@ -697,7 +727,10 @@ internal class LoadProfileTabsTool(
                     requestType = "profile_tabs",
                 ) ?: "User id is blank."
         val targets =
-            session.searchTargets.resolveTargetsOrNull(args.platforms, session.platformRegistry) ?: return noTargetsMessage(args.platforms)
+            session.searchTargets
+                .withProfileCapability()
+                .resolveTargetsOrNull(args.platforms, session.platformRegistry)
+                ?: return noTargetsMessage(args.platforms)
         val tabResults = targets.loadProfileTabs(userKey)
         val selectedTabs =
             tabResults.mapNotNull { result ->
@@ -762,6 +795,15 @@ private fun microBlogKeyOrNull(
     }
     return MicroBlogKey(id = trimmedId, host = host.trim())
 }
+
+private fun List<AgentSearchTarget>.withTimelineCapability(): List<AgentSearchTarget> =
+    filter { it.dataSource.capabilities.timeline != null }
+
+private fun List<AgentSearchTarget>.withSearchCapability(): List<AgentSearchTarget> = filter { it.dataSource.capabilities.search != null }
+
+private fun List<AgentSearchTarget>.withProfileCapability(): List<AgentSearchTarget> = filter { it.dataSource.capabilities.profile != null }
+
+private fun List<AgentSearchTarget>.withPostCapability(): List<AgentSearchTarget> = filter { it.dataSource.capabilities.post != null }
 
 private fun List<AgentSearchTarget>.resolveTargetsOrNull(
     platforms: List<String>,
@@ -915,7 +957,7 @@ private suspend fun List<AgentSearchTarget>.loadProfileTabs(userKey: MicroBlogKe
                 runCatching {
                     ProfileTabResult(
                         target = target,
-                        tabs = target.dataSource.profileTabs(userKey),
+                        tabs = requireNotNull(target.dataSource.capabilities.profile).profileTabs(userKey),
                     )
                 }.getOrNull()
             }
@@ -998,7 +1040,7 @@ private suspend fun List<AgentSearchTarget>.searchPosts(query: String): List<UiT
         map { target ->
             async {
                 runCatching {
-                    target.dataSource
+                    requireNotNull(target.dataSource.capabilities.search)
                         .searchStatus(query)
                         .load(
                             pageSize = STATUS_SEARCH_PAGE_SIZE,
@@ -1016,7 +1058,7 @@ private suspend fun List<AgentSearchTarget>.searchUsers(query: String): List<UiP
         map { target ->
             async {
                 runCatching {
-                    target.dataSource
+                    requireNotNull(target.dataSource.capabilities.search)
                         .searchUser(query)
                         .load(
                             pageSize = USER_SEARCH_PAGE_SIZE,

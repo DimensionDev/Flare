@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.home
 
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -43,7 +44,7 @@ public class SearchStatusTimelinePresenter(
                         ): PagingResult<UiTimelineV2> = PagingResult(data = emptyList())
                     }
                 } else {
-                    service.searchStatus(query)
+                    requireNotNull(service.capabilities.search).searchStatus(query)
                 }
             }
         }

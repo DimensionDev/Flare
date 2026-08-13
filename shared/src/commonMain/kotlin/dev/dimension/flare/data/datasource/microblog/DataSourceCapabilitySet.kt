@@ -85,7 +85,7 @@ public class ProfileCapability(
 
     public fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = delegate.fans(userKey)
 
-    public fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = delegate.profileTabs(userKey)
+    public suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = delegate.profileTabs(userKey)
 }
 
 @HiddenFromObjC

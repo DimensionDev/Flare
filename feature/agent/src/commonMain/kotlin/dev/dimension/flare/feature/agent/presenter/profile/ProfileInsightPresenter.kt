@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -63,7 +64,7 @@ public class ProfileInsightPresenter(
                 accountService
                     .accountServiceFlow(accountType)
                     .combine(accountService.allAccountServicesFlow()) { service, availableSearchDataSources ->
-                        (service as? UserDataSource)?.let { userDataSource ->
+                        service.capabilities.profile?.let { userDataSource ->
                             ProfileInsightContext(
                                 userDataSource = userDataSource,
                                 searchDataSources = availableSearchDataSources,

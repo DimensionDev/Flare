@@ -10,9 +10,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
@@ -61,13 +60,16 @@ public class PinnableTimelineTabPresenter(
             accountType = accountType,
             repository = accountRepository,
         ).map { service ->
+            val tabCatalog = service.capabilities.tabCatalog
             Sections(
                 builtInTabs =
-                    (service as? TimelineTabConfigurationDataSource)
+                    tabCatalog
+                        ?.configuration
                         ?.builtInTimelineTabs
                         ?: persistentListOf(),
                 pinnableTabs =
-                    (service as? PinnableTimelineTabDataSource)
+                    tabCatalog
+                        ?.pinnable
                         ?.pinnableTimelineTabs
                         .orEmpty(),
             )

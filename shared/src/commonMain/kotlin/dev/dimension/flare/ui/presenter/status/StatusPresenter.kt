@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -28,7 +28,7 @@ public class StatusPresenter(
         val accountServiceState =
             serviceState.flatMap { service ->
                 remember(service, statusKey) {
-                    (service as PostDataSource).postHandler.post(statusKey)
+                    requireNotNull(service.capabilities.post).postHandler.post(statusKey)
                 }.collectAsState().toUi()
             }
         remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()

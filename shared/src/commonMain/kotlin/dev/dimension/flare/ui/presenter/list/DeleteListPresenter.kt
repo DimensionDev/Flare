@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -32,8 +32,7 @@ public class DeleteListPresenter(
                         accountType = accountType,
                         repository = accountRepository,
                     ).map {
-                        require(it is ListDataSource)
-                        it
+                        requireNotNull(it.capabilities.list)
                     }.first()
                         .listHandler
                         .delete(listId)

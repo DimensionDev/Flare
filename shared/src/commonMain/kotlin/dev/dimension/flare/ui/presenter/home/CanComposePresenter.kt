@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiState
@@ -18,7 +18,7 @@ public class CanComposePresenter : PresenterBase<CanComposeState>() {
         accountRepository.allAccounts.map { accounts ->
             accounts.any { account ->
                 runCatching {
-                    accountRepository.getOrCreateDataSource(account) is ComposeDataSource
+                    accountRepository.getOrCreateDataSource(account).capabilities.compose != null
                 }.getOrDefault(false)
             }
         }

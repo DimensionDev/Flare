@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.repository
 
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -61,7 +61,11 @@ internal class AccountTabSyncCoordinator(
 
     private suspend fun addDefaultTabs(account: UiAccount) {
         val defaultTabs =
-            (accountRepository.getOrCreateDataSource(account) as? TimelineTabConfigurationDataSource)
+            accountRepository
+                .getOrCreateDataSource(account)
+                .capabilities
+                .tabCatalog
+                ?.configuration
                 ?.defaultTabs
                 .orEmpty()
         if (defaultTabs.isEmpty()) {

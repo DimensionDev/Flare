@@ -9,11 +9,9 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -57,18 +55,18 @@ internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flo
     allAccountServicesFlow(accountRepository)
         .map {
             it
-                .filterIsInstance<UserDataSource>()
-                .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                .filterIsInstance<NotificationTimelineDataSource>()
+                .mapNotNull { dataSource ->
+                    val profile = dataSource.capabilities.profile ?: return@mapNotNull null
+                    val notification = dataSource.capabilities.notification ?: return@mapNotNull null
+                    if (notification.timeline == null) return@mapNotNull null
+                    val accountKey = dataSource.accountKeyOrNull ?: return@mapNotNull null
+                    Triple(profile, accountKey, notification.events)
+                }
         }.map { accounts ->
-            accounts.map { dataSource ->
-                when (dataSource) {
-                    !is UserDataSource -> {
-                        flowOf(null)
-                    }
-
-                    !is NotificationDataSource -> {
-                        dataSource.userHandler.userById(dataSource.accountKey.id).toUi().map {
+            accounts.map { (profile, accountKey, notificationEvents) ->
+                when (notificationEvents) {
+                    null -> {
+                        profile.userHandler.userById(accountKey.id).toUi().map {
                             it.map {
                                 it to 0
                             }
@@ -77,8 +75,8 @@ internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flo
 
                     else -> {
                         combine(
-                            dataSource.userHandler.userById(dataSource.accountKey.id).toUi(),
-                            dataSource.notificationHandler.notificationBadgeCount.toUi(),
+                            profile.userHandler.userById(accountKey.id).toUi(),
+                            notificationEvents.notificationHandler.notificationBadgeCount.toUi(),
                         ) { user, badge ->
                             user.flatMap { profile ->
                                 badge.map { count ->
@@ -92,7 +90,7 @@ internal fun notificationAccountsFlow(accountRepository: AccountRepository): Flo
         }.combineLatestFlowLists()
         .map {
             it
-                .mapNotNull { it?.takeSuccess() }
+                .mapNotNull { it.takeSuccess() }
                 .sortedWith(
                     compareByDescending { it.second },
                 ).map { (profile, badge) ->
@@ -146,9 +144,8 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
         allAccountServicesFlow(accountRepository)
             .map { sources ->
                 sources
-                    .filterIsInstance<NotificationTimelineDataSource>()
-                    .filter { it is UserDataSource }
-                    .map { it.accountKey }
+                    .filter { it.capabilities.notification?.timeline != null && it.capabilities.profile != null }
+                    .mapNotNull { it.accountKeyOrNull }
             }.distinctUntilChanged()
     }
 
@@ -160,8 +157,7 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
                     flowOf(emptyList<NotificationFilter>().toImmutableList())
                 } else {
                     accountServiceFlow(AccountType.Specific(accountKey), accountRepository).map {
-                        require(it is NotificationTimelineDataSource)
-                        it.supportedNotificationFilter.toImmutableList()
+                        requireNotNull(it.capabilities.notification?.timeline).supportedNotificationFilter.toImmutableList()
                     }
                 }
             }.distinctUntilChanged()
@@ -177,14 +173,14 @@ public class AllNotificationPresenter : PresenterBase<AllNotificationPresenter.S
                     } else {
                         accountServiceFlow(AccountType.Specific(accountKey), accountRepository)
                             .flatMapLatest { source ->
-                                require(source is NotificationTimelineDataSource)
+                                val timeline = requireNotNull(source.capabilities.notification?.timeline)
                                 selectedNotificationFilterFlow
                                     .map { filter ->
-                                        filter?.takeIf { it in source.supportedNotificationFilter }
-                                            ?: source.supportedNotificationFilter.firstOrNull()
+                                        filter?.takeIf { it in timeline.supportedNotificationFilter }
+                                            ?: timeline.supportedNotificationFilter.firstOrNull()
                                     }.distinctUntilChanged()
                                     .map { filter ->
-                                        filter?.let(source::notification) ?: notSupported()
+                                        filter?.let(timeline::notification) ?: notSupported()
                                     }
                             }.distinctUntilChanged()
                     }

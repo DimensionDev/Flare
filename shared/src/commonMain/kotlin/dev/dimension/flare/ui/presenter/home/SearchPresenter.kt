@@ -19,8 +19,8 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
@@ -80,14 +80,16 @@ public class SearchPresenter(
         allAccountServicesFlow(accountRepository)
             .map {
                 it
-                    .filterIsInstance<UserDataSource>()
-                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                    .toImmutableList()
+                    .mapNotNull { dataSource ->
+                        val capabilities = dataSource.capabilities
+                        val profile = capabilities.profile ?: return@mapNotNull null
+                        if (capabilities.search == null) return@mapNotNull null
+                        val accountKey = dataSource.accountKeyOrNull ?: return@mapNotNull null
+                        profile to accountKey
+                    }.toImmutableList()
             }.map {
-                it.map { dataSource ->
-                    val authenticated = dataSource as UserDataSource
-                    val accountKey = dataSource.accountKey
-                    authenticated.userHandler.userById(accountKey.id).toUi()
+                it.map { (profile, accountKey) ->
+                    profile.userHandler.userById(accountKey.id).toUi()
                 }
             }.combineLatestFlowLists()
             .map {
@@ -122,8 +124,9 @@ public class SearchPresenter(
                         if (query.isEmpty()) {
                             PagingData.emptyFlow(isError = true)
                         } else {
+                            val search = requireNotNull(dataSource.capabilities.search)
                             Pager(config = pagingConfig) {
-                                dataSource.searchUser(query).toPagingSource()
+                                search.searchUser(query).toPagingSource()
                             }.flow
                         }
                     }.getOrElse { PagingData.emptyFlow(isError = true) }

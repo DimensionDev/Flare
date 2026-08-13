@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -17,8 +17,8 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlin.time.Duration.Companion.minutes
 
 public class NotificationBadgePresenter(
@@ -31,10 +31,12 @@ public class NotificationBadgePresenter(
         accountServiceFlow(
             accountType = accountType,
             repository = accountRepository,
-        ).filterIsInstance<NotificationDataSource>()
-            .map {
-                it.notificationHandler.notificationBadgeCount
-            }
+        ).mapNotNull {
+            it.capabilities.notification
+                ?.events
+                ?.notificationHandler
+                ?.notificationBadgeCount
+        }
     }
 
     @Composable

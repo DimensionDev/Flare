@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.di.koinInject
@@ -30,9 +30,11 @@ public class AllNotificationBadgePresenter : PresenterBase<AllNotificationBadgeP
         allAccountServicesFlow(accountRepository)
             .map {
                 it
-                    .filterIsInstance<NotificationDataSource>()
-                    .map {
-                        it.notificationHandler.notificationBadgeCount
+                    .mapNotNull { dataSource ->
+                        dataSource.capabilities.notification
+                            ?.events
+                            ?.notificationHandler
+                            ?.notificationBadgeCount
                     }
             }
     }

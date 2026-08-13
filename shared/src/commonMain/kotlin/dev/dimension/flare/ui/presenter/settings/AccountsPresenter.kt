@@ -8,8 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -58,8 +57,9 @@ public class AccountsPresenter : PresenterBase<AccountsState>() {
                         AccountType.Specific(account.accountKey),
                         accountRepository,
                     ).flatMapLatest { service ->
-                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
-                            service.userHandler.userById(account.accountKey.id).toUi().map { user ->
+                        val profile = service.capabilities.profile
+                        if (profile != null) {
+                            profile.userHandler.userById(account.accountKey.id).toUi().map { user ->
                                 AccountsState.AccountItem(
                                     account = account,
                                     profile = user,

@@ -14,6 +14,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
@@ -56,7 +57,7 @@ public class ArticlePresenter(
     private val articleStateFlow by lazy {
         serviceFlow.map { service ->
             val articleDataSource =
-                service as? ArticleDataSource
+                service.capabilities.article
                     ?: error("Current service does not support article data source")
             articleDataSource.article(articleKey).withProxy(ProxyRef.forAccount((service as? dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource)?.accountKey))
         }
@@ -64,7 +65,11 @@ public class ArticlePresenter(
 
     private val commentsFlow by lazy {
         articleCommentsFlow(
-            dataSources = serviceFlow,
+            dataSources =
+                serviceFlow.map { service ->
+                    service.capabilities.article
+                        ?: error("Current service does not support article data source")
+                },
             articleKey = articleKey,
         )
     }
@@ -113,13 +118,10 @@ public class ArticlePresenter(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun articleCommentsFlow(
-    dataSources: Flow<Any>,
+    dataSources: Flow<ArticleDataSource>,
     articleKey: MicroBlogKey,
 ): Flow<PagingData<UiTimelineV2>> =
-    dataSources.flatMapLatest { dataSource ->
-        val articleDataSource =
-            dataSource as? ArticleDataSource
-                ?: error("Current service does not support article data source")
+    dataSources.flatMapLatest { articleDataSource ->
         Pager(config = pagingConfig) {
             articleDataSource.articleComments(articleKey).toTimelinePagingSource()
         }.flow

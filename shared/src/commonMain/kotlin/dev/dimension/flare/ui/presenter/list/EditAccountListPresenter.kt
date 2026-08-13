@@ -10,7 +10,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -45,8 +45,7 @@ public class EditAccountListPresenter(
     private val userListFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
             .flatMapLatest { service ->
-                require(service is ListDataSource)
-                service.listMemberHandler.userLists(userKey).toUi()
+                requireNotNull(service.capabilities.list).listMemberHandler.userLists(userKey).toUi()
             }.map {
                 it.map {
                     it.toImmutableList()
@@ -61,9 +60,9 @@ public class EditAccountListPresenter(
         val allList =
             serviceState
                 .map { service ->
-                    require(service is ListDataSource)
+                    val list = requireNotNull(service.capabilities.list)
                     remember(service) {
-                        service.listHandler.data.cachedIn(scope).map {
+                        list.listHandler.data.cachedIn(scope).map {
                             it.filter {
                                 !it.readonly
                             }
@@ -77,18 +76,16 @@ public class EditAccountListPresenter(
 
             override fun addList(list: UiList) {
                 serviceState.onSuccess {
-                    require(it is ListDataSource)
                     scope.launch {
-                        it.listMemberHandler.addMember(list.id, userKey = userKey)
+                        requireNotNull(it.capabilities.list).listMemberHandler.addMember(list.id, userKey = userKey)
                     }
                 }
             }
 
             override fun removeList(list: UiList) {
                 serviceState.onSuccess {
-                    require(it is ListDataSource)
                     scope.launch {
-                        it.listMemberHandler.removeMember(list.id, userKey = userKey)
+                        requireNotNull(it.capabilities.list).listMemberHandler.removeMember(list.id, userKey = userKey)
                     }
                 }
             }

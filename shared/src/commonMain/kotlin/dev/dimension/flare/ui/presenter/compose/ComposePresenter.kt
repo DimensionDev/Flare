@@ -330,9 +330,18 @@ public class ComposePresenter(
             selectedAccountKeys,
             composeConfig,
             ->
-            check?.isValid != false && selectedAccountKeys.isNotEmpty() && (
-                text.isNotBlank() || (composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
-            )
+            val media = composeConfig.media
+            val mediaCountAllowed =
+                media == null ||
+                    (mediaSize >= media.minCountForNew && mediaSize <= media.maxCount)
+            val contentPresent =
+                text.isNotBlank() ||
+                    (media?.allowMediaOnly == true && mediaSize > 0)
+            selectedAccountKeys.isNotEmpty() &&
+                contentPresent &&
+                mediaCountAllowed &&
+                check?.isValid != false &&
+                composeConfig.visibility?.allVisibilities?.isNotEmpty() != false
         }
     }
 
@@ -873,6 +882,7 @@ public class ComposePresenter(
             }
 
             override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
+                if (value !in config.allVisibilities) return
                 hasExplicitVisibility = true
                 visibility = value.takeIf { it in config.allVisibilities } ?: config.defaultVisibility
             }

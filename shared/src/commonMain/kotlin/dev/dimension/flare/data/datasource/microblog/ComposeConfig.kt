@@ -85,6 +85,8 @@ public data class ComposeConfig public constructor(
     public data class Language public constructor(
         val maxCount: Int,
     ) {
+        internal fun merge(other: Language): Language = Language(maxCount = minOf(maxCount, other.maxCount))
+
         private val popularCodes =
             listOf(
                 "en",
@@ -304,6 +306,8 @@ public data class ComposeConfig public constructor(
         val canSensitive: Boolean,
         val altTextMaxLength: Int,
         val allowMediaOnly: Boolean,
+        val minCountForNew: Int = 0,
+        val supportedMimeTypes: Set<String>? = null,
         val compression: Compression = Compression(),
     ) {
         internal fun merge(other: Media): Media =
@@ -312,6 +316,8 @@ public data class ComposeConfig public constructor(
                 canSensitive = canSensitive && other.canSensitive,
                 altTextMaxLength = minOf(altTextMaxLength, other.altTextMaxLength),
                 allowMediaOnly = allowMediaOnly && other.allowMediaOnly,
+                minCountForNew = maxOf(minCountForNew, other.minCountForNew),
+                supportedMimeTypes = supportedMimeTypes.intersectConstraint(other.supportedMimeTypes),
                 compression = compression.merge(other.compression),
             )
 
@@ -438,6 +444,12 @@ public data class ComposeConfig public constructor(
             } else {
                 null
             }
+        val language =
+            if (language != null && other.language != null) {
+                language.merge(other.language)
+            } else {
+                null
+            }
         return ComposeConfig(
             text = text,
             media = media,
@@ -445,6 +457,14 @@ public data class ComposeConfig public constructor(
             emoji = emoji,
             contentWarning = contentWarning,
             visibility = visibility,
+            language = language,
         )
     }
 }
+
+private fun Set<String>?.intersectConstraint(other: Set<String>?): Set<String>? =
+    when {
+        this == null -> other
+        other == null -> this
+        else -> this intersect other
+    }

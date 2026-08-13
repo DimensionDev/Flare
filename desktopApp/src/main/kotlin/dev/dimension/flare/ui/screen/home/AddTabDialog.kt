@@ -242,7 +242,7 @@ internal fun AddTabDialog(
                                                     selected = selectedIndex == index,
                                                     onSelectedChanged = { selectedIndex = index },
                                                 ) {
-                                                    UiText(section.title.asText())
+                                                    UiText(section.title)
                                                 }
                                             }
                                         }

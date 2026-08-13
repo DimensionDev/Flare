@@ -49,6 +49,8 @@ public extension UiText {
             localized.string.text
         case .raw(let raw):
             raw.string
+        case .externalRef(let external):
+            external.fallbackText()
         }
     }
 }

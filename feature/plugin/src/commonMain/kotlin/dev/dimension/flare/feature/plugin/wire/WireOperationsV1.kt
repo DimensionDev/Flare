@@ -4,6 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+public data object EmptyRequestV1
+
+@Serializable
 public data class TimelinePageRequestV1(
     val timelineId: String,
     val page: PageRequestV1,
@@ -19,6 +22,13 @@ public data class SearchRequestV1(
 @Serializable
 public data class EntityRequestV1(
     val key: EntityKeyV1,
+    val entityToken: String? = null,
+)
+
+@Serializable
+public data class EntityPageRequestV1(
+    val key: EntityKeyV1,
+    val page: PageRequestV1,
     val entityToken: String? = null,
 )
 
@@ -97,4 +107,32 @@ public data class ListMemberRequestV1(
 public data class DirectMessageSendRequestV1(
     val roomKey: EntityKeyV1,
     val text: String,
+)
+
+@Serializable
+public data class NotificationPageRequestV1(
+    val filterId: String? = null,
+    val page: PageRequestV1,
+)
+
+@Serializable
+public data class DirectMessagePageRequestV1(
+    val roomKey: EntityKeyV1,
+    val page: PageRequestV1,
+)
+
+@Serializable
+public data class DirectMessageDeleteRequestV1(
+    val roomKey: EntityKeyV1,
+    val messageKey: EntityKeyV1,
+)
+
+@Serializable
+public data class CountResultV1(
+    val value: Int,
+)
+
+@Serializable
+public data class BooleanResultV1(
+    val value: Boolean,
 )

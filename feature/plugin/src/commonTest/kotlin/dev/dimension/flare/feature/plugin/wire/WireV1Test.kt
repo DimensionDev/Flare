@@ -4,6 +4,7 @@ import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class WireV1Test {
@@ -39,5 +40,33 @@ class WireV1Test {
                     ),
             ).requireValid()
         }
+    }
+
+    @Test
+    fun accountCredentialEnvelopeRoundTrips() {
+        val value =
+            PluginAccountCredentialV1(
+                snapshot =
+                    AccountPluginSnapshotV1(
+                        pluginId = "dev.dimension.flare.test",
+                        platformId = "Test",
+                        packageHash = "a".repeat(64),
+                        origin = "https://example.social",
+                        accountId = "me",
+                        manifestCapabilities = mapOf("flare.datasource.timeline/v1" to setOf("page")),
+                        negotiatedCapabilities = mapOf("flare.datasource.timeline/v1" to setOf("page")),
+                        credentialSchemaVersion = 1,
+                        timelineSchemaVersion = 1,
+                    ),
+                credential = kotlinx.serialization.json.JsonObject(emptyMap()),
+            )
+
+        assertEquals(
+            value,
+            PluginJsonV1.decodeFromString(
+                PluginAccountCredentialV1.serializer(),
+                PluginJsonV1.encodeToString(PluginAccountCredentialV1.serializer(), value),
+            ),
+        )
     }
 }

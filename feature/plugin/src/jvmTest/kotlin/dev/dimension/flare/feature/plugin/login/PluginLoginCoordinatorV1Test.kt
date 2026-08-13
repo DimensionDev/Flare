@@ -287,6 +287,11 @@ private const val LOGIN_MANIFEST =
       "platform": {
         "id": "TestPlugin",
         "name": "Test platform",
+        "capabilities": {
+          "flare.datasource.timeline/v1": {
+            "operations": { "page": {} }
+          }
+        },
         "loginMethods": [
           { "id": "oauth", "interaction": "OAuth", "title": "OAuth" },
           {
@@ -329,7 +334,9 @@ private const val LOGIN_SCRIPT =
             handle: "test@plugin.example",
             displayName: "Test"
           },
-          capabilities: {}
+          capabilities: {
+            "flare.datasource.timeline/v1": ["page"]
+          }
         }
       };
     }
@@ -358,6 +365,11 @@ private const val LOGIN_SCRIPT =
             const session = request.cookies.cookies.find(it => it.name === "session");
             return session?.value === "valid" ? success(request, { cookies: request.cookies.cookies }) : { type: "pending" };
           }
+        }
+      },
+      capabilities: {
+        timeline: {
+          async page() { return { items: [] }; }
         }
       }
     });

@@ -116,6 +116,19 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     }
 
     validateUniqueIds(platform.loginMethods.map(LoginMethodManifestV1::id), "platform.loginMethods", errors)
+    platform.loginMethods
+        .groupBy(LoginMethodManifestV1::interaction)
+        .filterValues { it.size > 1 }
+        .forEach { (interaction, methods) ->
+            errors +=
+                ManifestIssueV1(
+                    code = "login.interaction.duplicate",
+                    path = "platform.loginMethods",
+                    message =
+                        "Only one $interaction login method is supported; found " +
+                            methods.joinToString { it.id },
+                )
+        }
     platform.loginMethods.forEachIndexed { index, method -> validateLogin(method, index, permissions, errors) }
     check(platform.deepLinks.size <= 64, "deepLink.count", "platform.deepLinks", "Too many Deep Link rules")
     platform.deepLinks.forEachIndexed { index, rule -> validateDeepLink(rule, index, permissions, errors) }

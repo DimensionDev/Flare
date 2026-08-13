@@ -22,6 +22,7 @@ public enum class LoginMethodType {
     OAuth,
     Password,
     CredentialImport,
+    Form,
     QrConnect,
     ExternalSigner,
     WebCookie,

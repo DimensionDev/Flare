@@ -24,7 +24,9 @@ import kotlinx.io.readByteArray
 import okio.Buffer
 import okio.buffer
 import okio.use
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class KtorPluginHttpTransport(
     engine: HttpClientEngine,
 ) : PluginHttpTransport,

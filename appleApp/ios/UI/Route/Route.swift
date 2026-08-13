@@ -91,6 +91,8 @@ enum Route: Hashable, Identifiable {
             )
         case .settings:
             SettingsScreen()
+        case .pluginManagement:
+            PluginManagementView()
         case .notification:
             NotificationScreen()
         case .discover:
@@ -344,6 +346,7 @@ enum Route: Hashable, Identifiable {
     case linkOpenDefaults
     case appIconSettings
     case settings
+    case pluginManagement
     case about
     case notification
     case discover

@@ -22,6 +22,8 @@ public class ReloginPresenter(
 
             override fun platformIcon(): UiIcon = loginPlatformRegistry.require(target.platformId).metadata.icon
 
+            override fun platformIconUrl(): String? = loginPlatformRegistry.require(target.platformId).metadata.iconUrl
+
             override fun agreementUrl(): String? =
                 loginPlatformRegistry
                     .require(target.platformId)
@@ -49,6 +51,8 @@ public interface ReloginState {
     public val methods: List<LoginMethodSpec>
 
     public fun platformIcon(): UiIcon
+
+    public fun platformIconUrl(): String?
 
     public fun agreementUrl(): String?
 

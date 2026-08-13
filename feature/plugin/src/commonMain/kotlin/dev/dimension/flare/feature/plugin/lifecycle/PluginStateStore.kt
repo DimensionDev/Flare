@@ -16,7 +16,9 @@ import okio.FileSystem
 import okio.Path
 import okio.buffer
 import okio.use
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class PluginStateStore private constructor(
     private val fileSystem: FileSystem,
     internal val paths: PluginStoragePaths,
@@ -38,6 +40,8 @@ public class PluginStateStore private constructor(
 
     public val requiresRestart: Boolean
         get() = startupPlugins != desired.value.plugins
+
+    public fun requiresRestart(pluginId: String): Boolean = startupPlugins[pluginId] != desired.value.plugins[pluginId]
 
     public suspend fun setEnabled(
         pluginId: String,
@@ -67,6 +71,20 @@ public class PluginStateStore private constructor(
         if (!current.indexHealthy) throw PluginIndexCorruptException("Plugin index is corrupt")
         val plugins = current.plugins.values.filterNot { it.pluginId == record.pluginId } + record
         validateEncodedIndex(PluginStateIndexV1(plugins = plugins.sortedBy(InstalledPluginV1::pluginId)))
+    }
+
+    internal suspend fun rebuild(records: List<InstalledPluginV1>) {
+        mutex.withLock {
+            require(!mutableDesired.value.indexHealthy) { "Plugin index is healthy" }
+            val index = PluginStateIndexV1(plugins = records.sortedBy(InstalledPluginV1::pluginId))
+            validateEncodedIndex(index)
+            writeIndex(index)
+            mutableDesired.value =
+                PluginDesiredSnapshotV1(
+                    plugins = index.plugins.associateBy(InstalledPluginV1::pluginId),
+                    indexHealthy = true,
+                )
+        }
     }
 
     public suspend fun cleanup(): PluginCleanupResultV1 = cleanup(emptySet())

@@ -133,6 +133,35 @@ class PluginInstallerTest {
             assertFails { installer.inspect(source) }
             assertFalse(fileSystem.exists(stateStore.paths.incoming))
         }
+
+    @Test
+    fun explicitlyRebuildsCorruptIndexFromValidatedPackages() =
+        runBlocking {
+            TestFppFactory.write(input)
+            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            fileSystem.write(stateStore.paths.index) { writeUtf8("not-json") }
+
+            val corruptStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
+            assertFalse(corruptStore.desired.value.indexHealthy)
+            val result = PluginInstaller(fileSystem, corruptStore).rebuildIndex()
+
+            assertEquals(1, result.restored)
+            assertEquals(0, result.skipped)
+            assertEquals(
+                installed.packageHash,
+                corruptStore.desired.value.plugins
+                    .getValue(installed.pluginId)
+                    .packageHash,
+            )
+            assertTrue(corruptStore.running.plugins.isEmpty())
+            assertTrue(corruptStore.requiresRestart)
+            assertNotNull(
+                PluginStateStore
+                    .open(fileSystem, root / "social-plugins-v2")
+                    .running.plugins[installed.pluginId],
+            )
+            Unit
+        }
 }
 
 private class RepeatingSource(

@@ -84,6 +84,7 @@ internal fun SettingsDetailPlaceholder(modifier: Modifier = Modifier) {
 internal fun SettingsScreen(
     toAccounts: () -> Unit,
     toProxy: () -> Unit,
+    toPlugins: () -> Unit,
     toAppearanceTheme: () -> Unit,
     toAppearanceLayout: () -> Unit,
     toAppearanceDisplay: () -> Unit,
@@ -141,6 +142,19 @@ internal fun SettingsScreen(
                 supportingContent = {
                     Text(text = stringResource(id = R.string.settings_accounts_subtitle))
                 },
+            )
+            SegmentedListItem(
+                onClick = toPlugins,
+                shapes = ListItemDefaults.single(),
+                content = { Text(text = stringResource(id = R.string.settings_plugins_title)) },
+                leadingContent = {
+                    ThemedIcon(
+                        imageVector = FontAwesomeIcons.Solid.Gear,
+                        contentDescription = null,
+                        color = ThemeIconData.Color.ForestGreen,
+                    )
+                },
+                supportingContent = { Text(text = stringResource(id = R.string.settings_plugins_subtitle)) },
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),

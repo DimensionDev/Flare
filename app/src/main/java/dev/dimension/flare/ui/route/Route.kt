@@ -101,6 +101,8 @@ internal sealed interface Route : NavKey {
 
         @Serializable
         data object Proxy : Settings
+        @Serializable
+        data object Plugins : Settings
 
         @Serializable
         data object AppearanceTheme : Settings

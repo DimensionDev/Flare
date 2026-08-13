@@ -11,11 +11,14 @@ import kotlinx.coroutines.sync.withLock
 import okio.Buffer
 import okio.FileSystem
 import okio.HashingSink
+import okio.HashingSource
 import okio.Path
 import okio.Source
 import okio.buffer
 import okio.use
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class PluginInstaller(
     private val fileSystem: FileSystem,
     private val stateStore: PluginStateStore,
@@ -105,6 +108,45 @@ public class PluginInstaller(
             stateStore.cleanup(setOfNotNull(activePreview?.let { stateStore.paths.incoming }))
         }
 
+    /** Explicit recovery for a corrupt index. It never runs during startup. */
+    public suspend fun rebuildIndex(): PluginIndexRebuildResultV1 =
+        mutex.withLock {
+            require(!stateStore.desired.value.indexHealthy) { "Plugin index is healthy" }
+            val packagePaths =
+                fileSystem
+                    .listOrNull(stateStore.paths.packages)
+                    .orEmpty()
+                    .filter { PACKAGE_FILE.matches(it.name) }
+                    .sortedBy(Path::name)
+            require(packagePaths.size <= MAX_RECOVERY_PACKAGES) { "Too many plugin packages to recover" }
+
+            var skipped = 0
+            val recovered = mutableMapOf<String, RecoveredPlugin>()
+            packagePaths.forEach { path ->
+                val candidate = recover(path)
+                if (candidate == null) {
+                    skipped++
+                } else {
+                    val current = recovered[candidate.record.pluginId]
+                    if (current == null || candidate.isNewerThan(current)) {
+                        if (current != null) skipped++
+                        recovered[candidate.record.pluginId] = candidate
+                    } else {
+                        skipped++
+                    }
+                }
+            }
+
+            recovered.values.forEach { candidate ->
+                persistIcon(
+                    stateStore.paths.iconPath(candidate.record.packageHash),
+                    candidate.icon,
+                )
+            }
+            stateStore.rebuild(recovered.values.map(RecoveredPlugin::record))
+            PluginIndexRebuildResultV1(restored = recovered.size, skipped = skipped)
+        }
+
     private fun stage(source: Source): String {
         val hashingSink = HashingSink.sha256(fileSystem.sink(stateStore.paths.incoming))
         try {
@@ -124,6 +166,41 @@ public class PluginInstaller(
             fileSystem.delete(stateStore.paths.incoming, mustExist = false)
             throw error
         }
+    }
+
+    private suspend fun recover(path: Path): RecoveredPlugin? =
+        runCatching {
+            val packageHash = path.name.removeSuffix(PACKAGE_SUFFIX)
+            require(hash(path) == packageHash) { "Plugin package hash does not match its filename" }
+            val packageSize = requireNotNull(fileSystem.metadata(path).size)
+            require(packageSize in 1..FppLimits.MAX_PACKAGE_BYTES) { "Plugin package size is invalid" }
+            val validated = validator.validate(path)
+            RecoveredPlugin(
+                record =
+                    InstalledPluginV1(
+                        pluginId = validated.manifest.id,
+                        version = validated.manifest.version,
+                        packageHash = packageHash,
+                        packageSize = packageSize,
+                        iconSize = validated.icon.size.toLong(),
+                        source = PluginInstallSourceV1.Local,
+                        enabled = true,
+                        manifest = validated.manifest,
+                        catalogs = validated.catalogs,
+                    ),
+                icon = validated.icon,
+            )
+        }.getOrNull()
+
+    private fun hash(path: Path): String {
+        val hashingSource = HashingSource.sha256(fileSystem.source(path))
+        hashingSource.buffer().use { source ->
+            val buffer = Buffer()
+            while (source.read(buffer, COPY_BUFFER_BYTES) != -1L) {
+                buffer.skip(buffer.size)
+            }
+        }
+        return hashingSource.hash.hex()
     }
 
     private fun persistPackage(
@@ -193,6 +270,11 @@ public enum class PluginSensitivePermissionTypeV1 {
 public data class PluginInstallWarningV1(
     val type: PluginInstallWarningTypeV1,
     val detail: String? = null,
+)
+
+public data class PluginIndexRebuildResultV1(
+    val restored: Int,
+    val skipped: Int,
 )
 
 public enum class PluginInstallWarningTypeV1 {
@@ -298,6 +380,16 @@ private data class SemVer(
     }
 }
 
+private data class RecoveredPlugin(
+    val record: InstalledPluginV1,
+    val icon: ByteArray,
+) {
+    fun isNewerThan(other: RecoveredPlugin): Boolean {
+        val version = compareSemVer(record.version, other.record.version)
+        return version > 0 || (version == 0 && record.packageHash > other.record.packageHash)
+    }
+}
+
 private val dev.dimension.flare.feature.plugin.manifest.PluginTextV1.fallback: String
     get() =
         when (this) {
@@ -306,3 +398,6 @@ private val dev.dimension.flare.feature.plugin.manifest.PluginTextV1.fallback: S
         }
 
 private const val COPY_BUFFER_BYTES = 8_192L
+private const val PACKAGE_SUFFIX = ".fpp"
+private const val MAX_RECOVERY_PACKAGES = 256
+private val PACKAGE_FILE = Regex("[0-9a-f]{64}\\.fpp")

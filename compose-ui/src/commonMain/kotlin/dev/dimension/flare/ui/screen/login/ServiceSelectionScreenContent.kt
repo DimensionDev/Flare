@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -185,14 +186,11 @@ public fun ServiceSelectionScreenContent(
                     leadingIcon = {
                         state.detectedPlatformId
                             .onSuccess {
-                                FAIcon(
-                                    imageVector = it.platformIcon.toImageVector(),
-                                    contentDescription =
-                                        stringResource(
-                                            Res.string.service_select_detected_platform,
-                                            it.platformId,
-                                        ),
-                                    modifier = Modifier.size(24.dp),
+                                PlatformIcon(
+                                    iconUrl = it.platformIconUrl,
+                                    fallback = it.platformIcon,
+                                    size = 24,
+                                    contentDescription = stringResource(Res.string.service_select_detected_platform, it.platformId),
                                 )
                             }.onError {
                                 FAIcon(
@@ -386,10 +384,10 @@ public fun ReloginScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                FAIcon(
-                    imageVector = state.platformIcon().toImageVector(),
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp),
+                PlatformIcon(
+                    iconUrl = state.platformIconUrl(),
+                    fallback = state.platformIcon(),
+                    size = 36,
                 )
                 PlatformText(
                     text = stringResource(Res.string.login_expired),
@@ -430,6 +428,32 @@ public fun ReloginScreenContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PlatformIcon(
+    iconUrl: String?,
+    fallback: dev.dimension.flare.ui.model.UiIcon,
+    size: Int,
+    contentDescription: String? = null,
+) {
+    if (iconUrl.isNullOrBlank()) {
+        FAIcon(
+            imageVector = fallback.toImageVector(),
+            contentDescription = contentDescription,
+            modifier = Modifier.size(size.dp),
+        )
+    } else {
+        NetworkImage(
+            model = iconUrl,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            modifier =
+                Modifier
+                    .size(size.dp)
+                    .clip(RoundedCornerShape((size / 5).dp)),
+        )
     }
 }
 

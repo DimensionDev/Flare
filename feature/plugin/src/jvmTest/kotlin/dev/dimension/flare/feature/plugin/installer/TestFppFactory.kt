@@ -99,6 +99,12 @@ internal object TestFppFactory {
         Files.write(Paths.get(path.toString()), bytes)
     }
 
+    fun flipLastByte(path: Path) {
+        val bytes = Files.readAllBytes(Paths.get(path.toString()))
+        bytes[bytes.lastIndex] = (bytes.last().toInt() xor 1).toByte()
+        Files.write(Paths.get(path.toString()), bytes)
+    }
+
     fun patchLittleEndian(
         path: Path,
         signature: Int,

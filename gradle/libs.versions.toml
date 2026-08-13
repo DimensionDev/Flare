@@ -182,6 +182,7 @@ ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", vers
 ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit" }
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-serialization-kotlinx-xml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }

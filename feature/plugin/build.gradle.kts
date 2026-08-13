@@ -35,11 +35,29 @@ kotlin {
                 implementation(libs.quickjs.kt)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.http)
+            }
+        }
+        val androidJvmMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
+        val appleMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.darwin)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.ktor.client.mock)
             }
         }
         val androidDeviceTest by getting {

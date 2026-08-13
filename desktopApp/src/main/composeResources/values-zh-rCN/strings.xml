@@ -638,4 +638,22 @@
     <string name="media_download_started">已开始下载。</string>
     <string name="fanbox_supported_title">支持中</string>
     <string name="fanbox_recommended_creators_title">推荐创作者</string>
+    <string name="settings_plugins_title">插件</string>
+    <string name="settings_plugins_subtitle">安装和管理社交平台插件</string>
+    <string name="plugin_install">安装 .fpp</string>
+    <string name="plugin_empty">尚未安装插件</string>
+    <string name="plugin_restart_required">重启 Flare 后插件变更才会生效。</string>
+    <string name="plugin_unverified_warning">此本地插件未经验证，请仅在信任作者时安装。</string>
+    <string name="plugin_permissions">权限</string>
+    <string name="plugin_capabilities">功能</string>
+    <string name="plugin_uninstall">卸载</string>
+    <string name="plugin_cleanup">清理未使用文件</string>
+    <string name="plugin_rebuild_index">重建插件索引</string>
+    <string name="plugin_retry">重试</string>
+    <string name="plugin_running">当前进程中已启用</string>
+    <string name="plugin_inactive">当前进程中未启用</string>
+    <string name="plugin_warning_added_permission">此更新申请了新增权限</string>
+    <string name="plugin_warning_downgrade">此插件包版本低于当前安装版本</string>
+    <string name="plugin_warning_changed_package">同一版本的插件包内容已变化</string>
+    <string name="plugin_warning_compatibility">兼容性警告</string>
 </resources>

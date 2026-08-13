@@ -11,12 +11,15 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface PluginHttpTransport {
     /** Executes exactly one request without redirects, cookies, or logging. */
     public suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1
 }
 
+@HiddenFromObjC
 public data class PluginTransportRequestV1(
     val method: String,
     val url: String,
@@ -25,6 +28,7 @@ public data class PluginTransportRequestV1(
     val timeoutMillis: Long,
 )
 
+@HiddenFromObjC
 public sealed interface PluginTransportBodyV1 {
     public data class Text(
         val value: String,
@@ -40,6 +44,7 @@ public sealed interface PluginTransportBodyV1 {
     ) : PluginTransportBodyV1
 }
 
+@HiddenFromObjC
 public sealed interface PluginTransportMultipartPartV1 {
     public val name: String
 
@@ -57,6 +62,7 @@ public sealed interface PluginTransportMultipartPartV1 {
     ) : PluginTransportMultipartPartV1
 }
 
+@HiddenFromObjC
 public data class PluginTransportResponseV1(
     val status: Int,
     val headers: Map<String, List<String>>,

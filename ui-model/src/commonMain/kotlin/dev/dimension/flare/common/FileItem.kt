@@ -7,6 +7,7 @@ public expect class FileItem {
     public suspend fun readBytes(): ByteArray
 
     /** Opens a fresh stream. Callers own and close the returned source. */
+    @HiddenFromObjC
     public fun openSource(): Source
 
     public suspend fun size(): Long

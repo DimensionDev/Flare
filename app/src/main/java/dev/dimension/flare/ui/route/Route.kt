@@ -99,6 +99,9 @@ internal sealed interface Route : NavKey {
         data object Accounts : Settings
 
         @Serializable
+        data object Plugins : Settings
+
+        @Serializable
         data object AppearanceTheme : Settings
 
         @Serializable

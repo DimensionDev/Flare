@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonElement
 import okio.FileSystem
+import kotlin.native.HiddenFromObjC
 
 public data class PluginRuntimeKeyV1 private constructor(
     val pluginId: String,
@@ -73,6 +74,7 @@ public data class PluginRuntimeIssueV1(
     val paused: Boolean,
 )
 
+@HiddenFromObjC
 public class PluginRuntimePool(
     fileSystem: FileSystem,
     transport: PluginHttpTransport,

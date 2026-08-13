@@ -3,6 +3,7 @@ package dev.dimension.flare.data.io
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import kotlin.native.HiddenFromObjC
 
 internal interface FileStorage {
     fun dataStoreFile(fileName: String): Path
@@ -28,10 +29,24 @@ internal interface FileStorage {
     fun list(path: Path): List<Path>
 }
 
+/** A narrow, plugin-agnostic way for feature modules to allocate app-owned files. */
+@HiddenFromObjC
+public interface AppFileStore {
+    public val fileSystem: FileSystem
+
+    public fun directory(name: String): Path
+}
+
 internal open class OkioFileStorage(
-    val fileSystem: FileSystem,
+    override val fileSystem: FileSystem,
     private val root: Path,
-) : FileStorage {
+) : FileStorage,
+    AppFileStore {
+    override fun directory(name: String): Path {
+        require(name.matches(Regex("[a-z0-9][a-z0-9._-]{0,63}"))) { "Invalid app data directory name" }
+        return root.resolve(name)
+    }
+
     override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
 
     override fun draftMediaFile(

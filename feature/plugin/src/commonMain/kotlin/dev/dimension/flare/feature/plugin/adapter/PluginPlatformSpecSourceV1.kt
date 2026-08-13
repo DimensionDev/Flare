@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.tab.TimelineLoaderFactory
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
@@ -103,7 +104,6 @@ public class PluginPlatformSpecSourceV1(
     private val oauth: PluginOAuthLoginCoordinatorV1,
     private val form: PluginFormLoginCoordinatorV1,
     private val webCookie: PluginWebCookieLoginCoordinatorV1,
-    private val accountService: AccountService,
     private val coroutineScope: CoroutineScope,
     private val onIssue: (PluginStateIssueV1) -> Unit = {},
 ) : PlatformSpecSource {
@@ -130,7 +130,6 @@ public class PluginPlatformSpecSourceV1(
                             oauth = oauth,
                             form = form,
                             webCookie = webCookie,
-                            accountService = accountService,
                             coroutineScope = coroutineScope,
                         )
                     }.getOrElse { error ->
@@ -154,10 +153,10 @@ private class PluginPlatformSpecV1(
     private val oauth: PluginOAuthLoginCoordinatorV1,
     private val form: PluginFormLoginCoordinatorV1,
     private val webCookie: PluginWebCookieLoginCoordinatorV1,
-    private val accountService: AccountService,
     private val coroutineScope: CoroutineScope,
 ) : PlatformSpec,
     LoginPlatformProvider {
+    private val accountService: AccountService by koinInject()
     private val manifest = plugin.installed.manifest
     private val platform = manifest.platform
 

@@ -34,7 +34,10 @@ struct AccountManagementScreen: View {
                             if account.account.platformAvailable {
                                 UserErrorView(error: error)
                             } else {
-                                unavailableAccountRow(account.account)
+                                NavigationLink(value: Route.pluginManagement) {
+                                    unavailableAccountRow(account.account)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -125,10 +128,9 @@ struct AccountManagementScreen: View {
 
     private func unavailableAccountRow(_ account: UiAccount) -> some View {
         HStack(spacing: 12) {
-            Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
-                .frame(width: 32, height: 32)
+            PluginPlatformIcon(iconURL: account.platformIconUrl, fallback: account.platformIcon, size: 32)
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: account.platformDisplayName)
+                Text(account.platformDisplayNameText.text)
                 Text(verbatim: account.accountKey.description())
                     .font(.caption)
                     .foregroundStyle(.secondary)

@@ -6,7 +6,7 @@ import okio.Path.Companion.toOkioPath
 import okio.SYSTEM
 import org.koin.core.annotation.Single
 
-@Single(binds = [FileStorage::class])
+@Single(binds = [FileStorage::class, AppFileStore::class])
 internal class JvmFileStorage :
     OkioFileStorage(
         fileSystem = FileSystem.SYSTEM,

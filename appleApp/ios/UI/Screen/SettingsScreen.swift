@@ -92,6 +92,14 @@ struct SettingsScreen: View {
             }
 
             Section {
+                NavigationLink(value: Route.pluginManagement) {
+                    Label {
+                        Text("settings_plugins_title")
+                        Text("settings_plugins_subtitle")
+                    } icon: {
+                        Image(systemName: "puzzlepiece.extension")
+                    }
+                }
                 NavigationLink(value: Route.localFilter) {
                     Label {
                         Text("local_filter_title")

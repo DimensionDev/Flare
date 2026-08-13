@@ -139,6 +139,7 @@ dependencies {
     implementation(projects.feature.subscription)
     implementation(projects.feature.tab)
     implementation(projects.feature.agent)
+    implementation(projects.feature.plugin)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
@@ -245,4 +246,3 @@ kotlin {
         }
     }
 }
-

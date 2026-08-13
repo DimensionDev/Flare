@@ -117,9 +117,11 @@ struct ServiceSelectionScreen: View {
         ZStack {
             switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
-                    .resizable()
-                    .scaledToFit()
+                PluginPlatformIcon(
+                    iconURL: success.data.platformIconUrl,
+                    fallback: success.data.platformIcon,
+                    size: 24
+                )
                     .transition(ServiceSelectionAnimation.inline)
             case .loading:
                 ProgressView()
@@ -190,12 +192,9 @@ struct ServiceSelectionScreen: View {
 
     private func platformHeader(state: ServiceSelectState, node: NodeData) -> some View {
         HStack(spacing: 8) {
-            Image(fontAwesome: node.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
+            PluginPlatformIcon(iconURL: node.platformIconUrl, fallback: node.platformIcon, size: 24)
             VStack(alignment: .leading, spacing: 2) {
-                Text(node.platformDisplayName)
+                Text(node.platformDisplayNameText.text)
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
@@ -312,10 +311,11 @@ struct ReloginScreen: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 36, height: 36)
+            PluginPlatformIcon(
+                iconURL: presenter.state.platformIconUrl(),
+                fallback: presenter.state.platformIcon(),
+                size: 36
+            )
             Text(ServiceSelectCopy.loginExpired)
                 .font(.title2.weight(.semibold))
                 .multilineTextAlignment(.center)

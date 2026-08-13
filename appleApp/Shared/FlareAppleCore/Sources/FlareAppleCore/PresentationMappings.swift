@@ -31,7 +31,7 @@ public extension UiText {
         case .raw(let raw):
             raw.string
         case .externalRef(let external):
-            external.fallbackText()
+            PluginTextResolverV1.shared.resolve(text: external)
         }
     }
 }

@@ -120,9 +120,11 @@ struct ServiceSelectionScreen: View {
         ZStack {
             switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
-                    .resizable()
-                    .scaledToFit()
+                PluginPlatformIcon(
+                    iconURL: success.data.platformIconUrl,
+                    fallback: success.data.platformIcon,
+                    size: 20
+                )
             case .loading:
                 ProgressView()
                     .controlSize(.small)
@@ -192,13 +194,10 @@ struct ServiceSelectionScreen: View {
         @ViewBuilder trailing: () -> Trailing
     ) -> some View {
         HStack(spacing: 8) {
-            Image(fontAwesome: node.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
+            PluginPlatformIcon(iconURL: node.platformIconUrl, fallback: node.platformIcon, size: 22)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(node.platformDisplayName)
+                Text(node.platformDisplayNameText.text)
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
@@ -318,10 +317,11 @@ struct ReloginScreen: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 28, height: 28)
+            PluginPlatformIcon(
+                iconURL: presenter.state.platformIconUrl(),
+                fallback: presenter.state.platformIcon(),
+                size: 28
+            )
             VStack(alignment: .leading, spacing: 2) {
                 Text(ServiceSelectCopy.loginExpired)
                     .font(.title3.weight(.semibold))

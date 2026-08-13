@@ -14,7 +14,7 @@ struct MacSettingsScreen: View {
         TabView(selection: $selectedPane) {
             ForEach(MacSettingsPane.allCases) { pane in
                 NavigationStack {
-                    pane.detail
+                    pane.detail(selectedPane: $selectedPane)
                 }
                 .tabItem {
                     Label {
@@ -34,6 +34,7 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     case accountManagement
     case appearance
     case behavior
+    case plugins
     case localFilter
     case storage
     case aiConfig
@@ -50,6 +51,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "appearance_title"
         case .behavior:
             "settings_behavior_title"
+        case .plugins:
+            "settings_plugins_title"
         case .localFilter:
             "local_filter_title"
         case .storage:
@@ -71,6 +74,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             "appearance_description"
         case .behavior:
             "settings_behavior_description"
+        case .plugins:
+            "settings_plugins_subtitle"
         case .localFilter:
             "local_filter_description"
         case .storage:
@@ -92,6 +97,8 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
             .palette
         case .behavior:
             .sliders
+        case .plugins:
+            .rectangleList
         case .localFilter:
             .filter
         case .storage:
@@ -106,14 +113,18 @@ private enum MacSettingsPane: String, CaseIterable, Identifiable, Hashable {
     }
 
     @ViewBuilder
-    var detail: some View {
+    func detail(selectedPane: Binding<MacSettingsPane>) -> some View {
         switch self {
         case .accountManagement:
-            MacAccountManagementSettingsPane()
+            MacAccountManagementSettingsPane {
+                selectedPane.wrappedValue = .plugins
+            }
         case .appearance:
             MacAppearanceSettingsPane()
         case .behavior:
             MacBehaviorSettingsPane()
+        case .plugins:
+            PluginManagementView()
         case .localFilter:
             MacLocalFilterSettingsPane()
         case .storage:
@@ -305,6 +316,7 @@ private struct MacSettingLabelContent: View {
 }
 
 private struct MacAccountManagementSettingsPane: View {
+    let onManagePlugins: () -> Void
     @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
     @State private var accounts: [AccountsStateAccountItem] = []
     @State private var isLoginSheetPresented = false
@@ -424,16 +436,21 @@ private struct MacAccountManagementSettingsPane: View {
     }
 
     private func unavailableAccountRow(_ account: UiAccount) -> some View {
-        HStack(spacing: 8) {
-            Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
-                .frame(width: 24, height: 24)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: account.platformDisplayName)
-                Text(verbatim: account.accountKey.description())
-                    .font(.caption)
+        Button(action: onManagePlugins) {
+            HStack(spacing: 8) {
+                PluginPlatformIcon(iconURL: account.platformIconUrl, fallback: account.platformIcon, size: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(account.platformDisplayNameText.text)
+                    Text(verbatim: account.accountKey.description())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
                     .foregroundStyle(.secondary)
             }
         }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder

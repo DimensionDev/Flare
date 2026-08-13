@@ -5,7 +5,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import okio.Source
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public interface PluginCredentialAccess {
     public suspend fun read(): JsonElement
 
@@ -13,6 +15,7 @@ public interface PluginCredentialAccess {
     public suspend fun replace(value: JsonElement)
 }
 
+@HiddenFromObjC
 public interface PluginAsset {
     public val size: Long
     public val fileName: String?

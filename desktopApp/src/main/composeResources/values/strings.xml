@@ -687,4 +687,22 @@
     <string name="agent_ui_status_insight_user_placeholder">You can also enter a user link, handle, or userKey…</string>
     <string name="fanbox_supported_title">Supporting</string>
     <string name="fanbox_recommended_creators_title">Recommended creators</string>
+    <string name="settings_plugins_title">Plugins</string>
+    <string name="settings_plugins_subtitle">Install and manage social platform plugins</string>
+    <string name="plugin_install">Install .fpp</string>
+    <string name="plugin_empty">No plugins installed</string>
+    <string name="plugin_restart_required">Restart Flare to apply plugin changes.</string>
+    <string name="plugin_unverified_warning">This local plugin is unverified. Install only if you trust its author.</string>
+    <string name="plugin_permissions">Permissions</string>
+    <string name="plugin_capabilities">Functions</string>
+    <string name="plugin_uninstall">Uninstall</string>
+    <string name="plugin_cleanup">Clean up unused files</string>
+    <string name="plugin_rebuild_index">Rebuild plugin index</string>
+    <string name="plugin_retry">Retry</string>
+    <string name="plugin_running">Active in this process</string>
+    <string name="plugin_inactive">Inactive in this process</string>
+    <string name="plugin_warning_added_permission">This update requests an additional permission</string>
+    <string name="plugin_warning_downgrade">This package is older than the installed version</string>
+    <string name="plugin_warning_changed_package">This version has different package contents</string>
+    <string name="plugin_warning_compatibility">Compatibility warning</string>
 </resources>

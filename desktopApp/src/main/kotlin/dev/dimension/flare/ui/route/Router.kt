@@ -93,6 +93,7 @@ import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.settings.AgentChatScreen
 import dev.dimension.flare.ui.screen.settings.AgentHistoryScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
+import dev.dimension.flare.ui.screen.settings.DesktopPluginManagementScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.LocalHistoryAgentScreen
 import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
@@ -710,6 +711,9 @@ internal fun Router(
 
                 entry<Route.Settings> {
                     SettingsScreen(
+                        toPlugins = {
+                            navigate(Route.PluginManagement)
+                        },
                         toLogin = {
                             navigate(Route.ServiceSelect)
                         },
@@ -738,6 +742,10 @@ internal fun Router(
                             navigate(Route.PostActionLayout)
                         },
                     )
+                }
+
+                entry<Route.PluginManagement> {
+                    DesktopPluginManagementScreen(onBack = onBack)
                 }
 
                 entry<Route.PostActionLayout> {

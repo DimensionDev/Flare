@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.koin.compiler)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
@@ -37,11 +39,19 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.http)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.annotations)
             }
         }
         val androidJvmMain by getting {
             dependencies {
+                implementation(projects.composeUi)
                 implementation(libs.ktor.client.okhttp)
+                implementation(dependencies.platform(libs.compose.bom))
+                implementation(libs.compose.runtime)
+                implementation(libs.ui)
+                implementation(libs.material3)
             }
         }
         val appleMain by getting {

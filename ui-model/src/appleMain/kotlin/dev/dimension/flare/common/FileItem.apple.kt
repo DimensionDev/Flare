@@ -44,6 +44,7 @@ public actual class FileItem internal constructor(
 
     public actual suspend fun readBytes(): ByteArray = loader()
 
+    @HiddenFromObjC
     public actual fun openSource(): Source = sourceFactory?.invoke() ?: error("This file cannot be streamed")
 
     public actual suspend fun size(): Long = knownSize ?: loader().size.toLong()

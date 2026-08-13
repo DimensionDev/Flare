@@ -25,6 +25,7 @@ import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.DesktopKoinApplication
+import dev.dimension.flare.feature.plugin.management.ProvidePluginTextResolverV1
 import dev.dimension.flare.ui.component.PlatformTitleBar
 import dev.dimension.flare.ui.component.PlatformWindow
 import dev.dimension.flare.ui.component.status.ProvideDesktopTimelineMediaActions
@@ -124,30 +125,32 @@ fun main(args: Array<String>) {
                     remember {
                         NavigationBackButtonState()
                     }
-                FlareTheme {
-                    ProvideComposeWindow {
-                        ProvideDesktopTimelineMediaActions {
-                            FlareApp(
-                                backButtonState = backButtonState,
-                            )
+                ProvidePluginTextResolverV1 {
+                    FlareTheme {
+                        ProvideComposeWindow {
+                            ProvideDesktopTimelineMediaActions {
+                                FlareApp(
+                                    backButtonState = backButtonState,
+                                )
+                            }
                         }
-                    }
-                    PlatformTitleBar {
-                        if (backButtonState.canGoBack) {
-                            NavigationDefaults.BackButton(
-                                onClick = {
-                                    backButtonState.onClick.invoke()
-                                },
-                                modifier =
-                                    Modifier
-                                        .let {
-                                            if (SystemUtils.IS_OS_WINDOWS) {
-                                                it.width(70.dp)
-                                            } else {
-                                                it
-                                            }
-                                        },
-                            )
+                        PlatformTitleBar {
+                            if (backButtonState.canGoBack) {
+                                NavigationDefaults.BackButton(
+                                    onClick = {
+                                        backButtonState.onClick.invoke()
+                                    },
+                                    modifier =
+                                        Modifier
+                                            .let {
+                                                if (SystemUtils.IS_OS_WINDOWS) {
+                                                    it.width(70.dp)
+                                                } else {
+                                                    it
+                                                }
+                                            },
+                                )
+                            }
                         }
                     }
                 }

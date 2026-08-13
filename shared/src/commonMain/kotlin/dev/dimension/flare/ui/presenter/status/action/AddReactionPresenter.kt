@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.PostEvent
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -41,12 +41,14 @@ public class AddReactionPresenter(
     override fun body(): AddReactionState {
         val service =
             accountServiceProvider(accountType = accountType, repository = accountRepository).map { service ->
-                service as ComposeDataSource
+                requireNotNull(service.capabilities.compose)
+                service
             }
         val data =
             service
                 .flatMap {
-                    val emoji = remember(it) { it.composeConfig(ComposeType.Reply).emoji?.emoji }
+                    val compose = requireNotNull(it.capabilities.compose)
+                    val emoji = remember(it) { compose.composeConfig(ComposeType.Reply).emoji?.emoji }
                     if (emoji != null) {
                         emoji.collectAsState().toUi()
                     } else {
@@ -67,7 +69,8 @@ public class AddReactionPresenter(
 
             override fun select(emoji: UiEmoji) {
                 service.onSuccess { dataSource ->
-                    val postDataSource = dataSource as? PostDataSource ?: return@onSuccess
+                    val postDataSource = dataSource.capabilities.post ?: return@onSuccess
+                    val accountKey = dataSource.accountKeyOrNull ?: return@onSuccess
                     status.onSuccess { status ->
                         scope.launch {
                             val post = status.contentPostOrNull()
@@ -81,7 +84,7 @@ public class AddReactionPresenter(
                                         hasReacted = hasReacted,
                                         reaction = emoji.shortcode,
                                         count = count,
-                                        accountKey = dataSource.accountKey,
+                                        accountKey = accountKey,
                                     ),
                                 )
                             }

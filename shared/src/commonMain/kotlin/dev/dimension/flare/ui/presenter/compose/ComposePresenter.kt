@@ -14,10 +14,9 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
@@ -108,10 +107,14 @@ public class ComposePresenter(
                 allAccountServicesFlow(accountRepository)
                     .map { accounts ->
                         accounts
-                            .filterIsInstance<ComposeDataSource>()
-                            .map { account ->
-                                accountRepository.getFlow(account.accountKey).map {
-                                    account.accountKey to it
+                            .mapNotNull { dataSource ->
+                                val accountKey = dataSource.accountKeyOrNull
+                                if (dataSource.capabilities.compose != null && accountKey != null) {
+                                    accountRepository.getFlow(accountKey).map {
+                                        accountKey to it
+                                    }
+                                } else {
+                                    null
                                 }
                             }
                     },
@@ -129,9 +132,11 @@ public class ComposePresenter(
         allAccountServicesFlow(accountRepository)
             .map { services ->
                 services.mapNotNull { service ->
-                    if (service is UserDataSource && service is ComposeDataSource) {
-                        service.userHandler.userById(service.accountKey.id).toUi().map {
-                            service.accountKey to it
+                    val profile = service.capabilities.profile
+                    val accountKey = service.accountKeyOrNull
+                    if (profile != null && service.capabilities.compose != null && accountKey != null) {
+                        profile.userHandler.userById(accountKey.id).toUi().map {
+                            accountKey to it
                         }
                     } else {
                         null
@@ -191,19 +196,15 @@ public class ComposePresenter(
     private val composeConfigFlow by lazy {
         combine(selectedAccountServicesFlow, activeStatusFlow) { services, composeStatus ->
             val configs =
-                services.mapNotNull {
-                    if (it is ComposeDataSource) {
-                        it.composeConfig(
-                            type =
-                                when (composeStatus) {
-                                    is ComposeStatus.Quote -> ComposeType.Quote
-                                    is ComposeStatus.Reply -> ComposeType.Reply
-                                    null -> ComposeType.New
-                                },
-                        )
-                    } else {
-                        null
-                    }
+                services.mapNotNull { service ->
+                    service.capabilities.compose?.composeConfig(
+                        type =
+                            when (composeStatus) {
+                                is ComposeStatus.Quote -> ComposeType.Quote
+                                is ComposeStatus.Reply -> ComposeType.Reply
+                                null -> ComposeType.New
+                            },
+                    )
                 }
 
             when (configs.size) {
@@ -354,8 +355,9 @@ public class ComposePresenter(
                     accountType = resolvedAccountType,
                     repository = accountRepository,
                 ).mapNotNull {
-                    if (it is PostDataSource) {
-                        it.postHandler.post(composeStatus.statusKey).toUi()
+                    val post = it.capabilities.post
+                    if (post != null) {
+                        post.postHandler.post(composeStatus.statusKey).toUi()
                     } else {
                         null
                     }
@@ -725,8 +727,10 @@ public class ComposePresenter(
                         }
                         selectedAccounts.forEach { account ->
                             val dataSource =
-                                accountRepository.getOrCreateDataSource(account)
-                                    as? ComposeDataSource
+                                accountRepository
+                                    .getOrCreateDataSource(account)
+                                    .capabilities
+                                    .compose
                                     ?: error("Account does not support compose: ${account.accountKey}")
                             dataSource.compose(data = data) {
                                 // Media upload progress is not surfaced by this web-only entry yet.

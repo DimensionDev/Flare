@@ -4,9 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
@@ -74,9 +73,11 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
             .map { services ->
                 services
                     .mapNotNull { service ->
-                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
-                            service.userHandler
-                                .userById(service.accountKey.id)
+                        val profile = service.capabilities.profile
+                        val accountKey = service.accountKeyOrNull
+                        if (profile != null && accountKey != null) {
+                            profile.userHandler
+                                .userById(accountKey.id)
                                 .toUi()
                                 .distinctUntilChangedBy {
                                     it.takeSuccess()?.let {
@@ -103,13 +104,14 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
                                                             target =
                                                                 ShortcutSpec.Target.Route(
                                                                     DeeplinkRoute.Profile.User(
-                                                                        accountType = AccountType.Specific(service.accountKey),
+                                                                        accountType = AccountType.Specific(accountKey),
                                                                         userKey = user.key,
                                                                     ),
                                                                 ),
                                                         ),
                                                     ) +
-                                                        (service as? TimelineTabConfigurationDataSource)
+                                                        service.capabilities.tabCatalog
+                                                            ?.configuration
                                                             ?.shortcuts
                                                             .orEmpty()
                                                 ).mapNotNull(::toTab)

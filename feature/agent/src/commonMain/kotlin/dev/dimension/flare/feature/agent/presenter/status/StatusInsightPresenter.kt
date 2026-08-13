@@ -6,6 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -63,8 +65,9 @@ public class StatusInsightPresenter(
                 accountService
                     .accountServiceFlow(accountType)
                     .combine(accountService.allAccountServicesFlow()) { service, availableSearchDataSources ->
-                        (service as? PostDataSource)?.let { postDataSource ->
+                        service.capabilities.post?.let { postDataSource ->
                             StatusInsightContext(
+                                dataSource = service,
                                 postDataSource = postDataSource,
                                 searchDataSources = availableSearchDataSources,
                             )
@@ -80,6 +83,7 @@ public class StatusInsightPresenter(
                 runAgent = { context, userInput, currentConversationId ->
                     statusInsightAgentUseCase(
                         postDataSource = context.postDataSource,
+                        microblogDataSource = context.dataSource,
                         statusKey = statusKey,
                         searchDataSources = context.searchDataSources,
                         userInput = userInput,
@@ -160,6 +164,7 @@ public class StatusInsightPresenter(
     }
 
     private data class StatusInsightContext(
+        val dataSource: MicroblogDataSource,
         val postDataSource: PostDataSource,
         val searchDataSources: List<AccountMicroblogDataSource>,
     )

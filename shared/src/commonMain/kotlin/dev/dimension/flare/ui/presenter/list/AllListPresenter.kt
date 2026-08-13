@@ -10,7 +10,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -37,8 +37,7 @@ public class AllListPresenter(
             serviceState
                 .map { service ->
                     remember(service) {
-                        require(service is ListDataSource)
-                        service.listHandler.data.cachedIn(scope)
+                        requireNotNull(service.capabilities.list).listHandler.data.cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : AllListState {

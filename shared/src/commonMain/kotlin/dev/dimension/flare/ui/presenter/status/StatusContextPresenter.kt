@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
@@ -55,8 +55,9 @@ public class StatusContextPresenter(
             accountType = accountType,
             repository = accountRepository,
         ).flatMapLatest { service ->
-            if (service is PostDataSource) {
-                service.postHandler.post(statusKey).toUi()
+            val post = service.capabilities.post
+            if (post != null) {
+                post.postHandler.post(statusKey).toUi()
             } else {
                 flowOf(null)
             }
@@ -78,7 +79,7 @@ public class StatusContextPresenter(
                             accountType = accountType,
                             repository = accountRepository,
                         ).map { service ->
-                            val loader = service.context(key)
+                            val loader = requireNotNull(service.capabilities.post).context(key)
                             if (loader is CacheableRemoteLoader<UiTimelineV2>) {
                                 val pagingKey = loader.pagingKey
                                 val exists = database.pagingTimelineDao().existsPaging(accountType, pagingKey)

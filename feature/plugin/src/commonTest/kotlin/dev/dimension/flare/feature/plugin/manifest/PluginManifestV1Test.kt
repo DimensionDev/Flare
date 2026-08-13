@@ -13,6 +13,48 @@ import kotlin.test.assertTrue
 
 class PluginManifestV1Test {
     @Test
+    fun duplicateLoginInteractionIsRejected() {
+        val base = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val manifest =
+            base.copy(
+                platform =
+                    base.platform.copy(
+                        loginMethods =
+                            listOf(
+                                LoginMethodManifestV1(
+                                    id = "token-a",
+                                    interaction = LoginInteractionV1.Form,
+                                    title = PluginTextV1.Literal("Token A"),
+                                    fields =
+                                        listOf(
+                                            LoginFieldManifestV1(
+                                                id = "token",
+                                                type = LoginFieldTypeV1.Secret,
+                                                label = PluginTextV1.Literal("Token"),
+                                            ),
+                                        ),
+                                ),
+                                LoginMethodManifestV1(
+                                    id = "token-b",
+                                    interaction = LoginInteractionV1.Form,
+                                    title = PluginTextV1.Literal("Token B"),
+                                    fields =
+                                        listOf(
+                                            LoginFieldManifestV1(
+                                                id = "token",
+                                                type = LoginFieldTypeV1.Secret,
+                                                label = PluginTextV1.Literal("Token"),
+                                            ),
+                                        ),
+                                ),
+                            ),
+                    ),
+            )
+
+        assertTrue(manifest.validate().errors.any { it.code == "login.interaction.duplicate" })
+    }
+
+    @Test
     fun parsesLiteralAndLocalizedManifestText() {
         val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
 

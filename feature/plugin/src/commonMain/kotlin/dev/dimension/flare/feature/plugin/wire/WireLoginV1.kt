@@ -132,3 +132,10 @@ public data class AccountPluginSnapshotV1(
     val credentialSchemaVersion: Int,
     val timelineSchemaVersion: Int,
 )
+
+/** Host-owned credential envelope persisted in Flare's account store. */
+@Serializable
+public data class PluginAccountCredentialV1(
+    val snapshot: AccountPluginSnapshotV1,
+    val credential: JsonElement,
+)

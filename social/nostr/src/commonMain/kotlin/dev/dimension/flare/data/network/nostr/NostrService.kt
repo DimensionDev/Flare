@@ -2206,7 +2206,7 @@ internal class NostrService(
         val boostedPost = boostedEvent?.let { resolveEvent(it, visited) } ?: return null
         val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
-        val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey)
+        val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey, createdAt)
         return UiTimelineV2.TimelinePostItem(
             post = wrapperPost,
             presentation =
@@ -2232,7 +2232,7 @@ internal class NostrService(
         val boostedPost = boostedEvent?.let { resolveEvent(it, visited) } ?: return null
         val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
-        val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey)
+        val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey, createdAt)
         return UiTimelineV2.TimelinePostItem(
             post = wrapperPost,
             presentation =
@@ -2251,10 +2251,12 @@ internal class NostrService(
     private fun UiTimelineV2.Post.toRepostWrapperPost(
         actor: UiProfile,
         wrapperStatusKey: MicroBlogKey,
+        createdAt: Long,
     ): UiTimelineV2.Post =
         copy(
             statusKey = wrapperStatusKey,
             user = actor,
+            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
             images = persistentListOf(),
             contentWarning = null,
             content = UiTranslatableText(original = uiRichTextOf(emptyList())),
@@ -2403,7 +2405,7 @@ internal class NostrService(
                 val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
                 UiTimelineV2.TimelinePostItem(
-                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey),
+                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
                     presentation =
                         UiTimelineV2.PostPresentation(
                             message =
@@ -2432,7 +2434,7 @@ internal class NostrService(
                 val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
                 UiTimelineV2.TimelinePostItem(
-                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey),
+                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
                     presentation =
                         UiTimelineV2.PostPresentation(
                             message =

@@ -216,6 +216,9 @@ class BlueskyRenderTest {
         )
         assertEquals("", rendered.post.content.original.innerText)
         assertEquals(message.statusKey.id, rendered.statusKey.id)
+        assertEquals(Instant.parse("2024-01-01T02:00:00Z"), rendered.createdAt.value)
+        assertEquals(rendered.createdAt, message.createdAt)
+        assertEquals(Instant.parse("2024-01-01T00:00:00Z"), repost.createdAt.value)
         assertEquals("original post content", repost.content.original.innerText)
         assertEquals("did:plc:original", repost.user?.key?.id)
     }

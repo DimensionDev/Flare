@@ -6,6 +6,8 @@ import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,25 +33,55 @@ public enum class LoginFieldType {
 
 public data class LoginMethodSpec(
     val type: LoginMethodType,
-    val title: UiStrings,
+    val title: UiText,
     val priority: Int = 0,
-)
+) {
+    public constructor(
+        type: LoginMethodType,
+        title: UiStrings,
+        priority: Int = 0,
+    ) : this(type = type, title = title.asText(), priority = priority)
+}
 
 public data class LoginField(
     val id: String,
     val type: LoginFieldType,
-    val label: UiStrings,
-    val placeholder: UiStrings? = null,
+    val label: UiText,
+    val placeholder: UiText? = null,
     val value: String = "",
     val readOnly: Boolean = false,
     val error: String? = null,
-)
+) {
+    public constructor(
+        id: String,
+        type: LoginFieldType,
+        label: UiStrings,
+        placeholder: UiStrings? = null,
+        value: String = "",
+        readOnly: Boolean = false,
+        error: String? = null,
+    ) : this(
+        id = id,
+        type = type,
+        label = label.asText(),
+        placeholder = placeholder?.asText(),
+        value = value,
+        readOnly = readOnly,
+        error = error,
+    )
+}
 
 public data class LoginAction(
     val id: String,
-    val label: UiStrings,
+    val label: UiText,
     val enabled: Boolean = true,
-)
+) {
+    public constructor(
+        id: String,
+        label: UiStrings,
+        enabled: Boolean = true,
+    ) : this(id = id, label = label.asText(), enabled = enabled)
+}
 
 public data class LoginFlowState(
     val fields: List<LoginField> = emptyList(),
@@ -178,6 +210,8 @@ public class LoginPlatformRegistry(
                         platformDisplayName = provider.metadata.displayName,
                         platformIcon = provider.metadata.icon,
                         loginMethods = provider.methods.sortedByDescending { it.priority },
+                        platformDisplayNameText = provider.metadata.displayNameText,
+                        platformIconUrl = provider.metadata.iconUrl,
                     )
                 }
             } ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")

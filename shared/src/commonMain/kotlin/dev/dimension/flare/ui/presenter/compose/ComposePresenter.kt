@@ -336,11 +336,18 @@ public class ComposePresenter(
             selectedAccountKeys,
             composeConfig,
             ->
-            (
-                text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() &&
-                    (remainingLength == null || remainingLength >= 0)
-            ) ||
-                ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
+            val media = composeConfig.media
+            val mediaCountAllowed =
+                media == null ||
+                    (mediaSize >= media.minCountForNew && mediaSize <= media.maxCount)
+            val contentPresent =
+                text.isNotBlank() ||
+                    (media?.allowMediaOnly == true && mediaSize > 0)
+            selectedAccountKeys.isNotEmpty() &&
+                contentPresent &&
+                mediaCountAllowed &&
+                (remainingLength == null || remainingLength >= 0) &&
+                composeConfig.visibility?.allowedValues?.isNotEmpty() != false
         }
     }
 
@@ -527,7 +534,7 @@ public class ComposePresenter(
                 .mapNotNull {
                     it.visibility
                 }.map {
-                    visibilityPresenter()
+                    visibilityPresenter(it)
                 }
         val pollMaxOptions =
             composeConfig
@@ -840,19 +847,19 @@ public class ComposePresenter(
     }
 
     @Composable
-    private fun visibilityPresenter(): VisibilityState {
+    private fun visibilityPresenter(config: ComposeConfig.Visibility): VisibilityState {
         var showVisibilityMenu by remember {
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiTimelineV2.Post.Visibility.Public)
+            mutableStateOf(config.defaultValue)
         }
         var hasExplicitVisibility by remember {
             mutableStateOf(false)
         }
         LaunchedEffect(Unit) {
             appDataStore.composeConfigData.data.firstOrNull()?.let { data ->
-                if (!hasExplicitVisibility) {
+                if (!hasExplicitVisibility && data.visibility in config.allowedValues) {
                     visibility = data.visibility
                 }
             }
@@ -861,12 +868,9 @@ public class ComposePresenter(
             override val visibility = visibility
 
             override val allVisibilities =
-                persistentListOf(
-                    UiTimelineV2.Post.Visibility.Public,
-                    UiTimelineV2.Post.Visibility.Home,
-                    UiTimelineV2.Post.Visibility.Followers,
-                    UiTimelineV2.Post.Visibility.Specified,
-                )
+                ComposeConfig.Visibility.DefaultValues
+                    .filter(config.allowedValues::contains)
+                    .toImmutableList()
 
             override val showVisibilityMenu: Boolean
                 get() = showVisibilityMenu
@@ -880,12 +884,13 @@ public class ComposePresenter(
             }
 
             override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
+                if (value !in config.allowedValues) return
                 hasExplicitVisibility = true
                 visibility = value
             }
 
             override fun clear() {
-                visibility = UiTimelineV2.Post.Visibility.Public
+                visibility = config.defaultValue
                 showVisibilityMenu = false
                 hasExplicitVisibility = true
             }

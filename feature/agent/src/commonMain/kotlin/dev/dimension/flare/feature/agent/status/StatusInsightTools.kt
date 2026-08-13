@@ -25,6 +25,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
+import dev.dimension.flare.ui.model.fallbackString
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -751,7 +752,7 @@ internal class LoadProfileTabsTool(
                     } else {
                         result.tabs.forEachIndexed { index, tab ->
                             appendLine(
-                                "Tab #${index + 1}: name=${tab.name.name}, displayType=${tab.displayType.name}, " +
+                                "Tab #${index + 1}: name=${tab.name.fallbackString}, displayType=${tab.displayType.name}, " +
                                     "showAllImagesInGallery=${tab.showAllImagesInGallery}",
                             )
                         }
@@ -975,7 +976,7 @@ private fun List<ProfileTab>.selectProfileTab(
     if (normalizedTabName.isBlank()) {
         return null
     }
-    return firstOrNull { it.name.name.equals(normalizedTabName, ignoreCase = true) }
+    return firstOrNull { it.name.fallbackString.equals(normalizedTabName, ignoreCase = true) }
 }
 
 private suspend fun List<Pair<AgentSearchTarget, ProfileTab>>.loadProfileTabPosts(): List<UiTimelineV2.Post> =

@@ -81,6 +81,7 @@ import dev.dimension.flare.ui.component.platform.PlatformSecureTextField
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextField
 import dev.dimension.flare.ui.component.res
+import dev.dimension.flare.ui.component.resolveText
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.toImageVector
@@ -499,7 +500,7 @@ private fun LoginMethodPicker(
 ) {
     val labels =
         methods
-            .map { stringResource(it.title.res) }
+            .map { it.title.resolveText() }
             .toImmutableList()
     PlatformPicker(
         modifier =
@@ -553,7 +554,7 @@ private fun LoginFlowContent(
                 modifier = Modifier.width(300.dp),
                 enabled = action.enabled && !flowState.loading,
             ) {
-                PlatformText(text = stringResource(action.label.res))
+                PlatformText(text = action.label.resolveText())
             }
         }
         flowState.error?.let {
@@ -598,12 +599,12 @@ private fun LoginFieldInput(
         }
     }
     val label: @Composable () -> Unit = {
-        PlatformText(text = stringResource(field.label.res))
+        PlatformText(text = field.label.resolveText())
     }
     val placeholder: (@Composable () -> Unit)? =
         field.placeholder?.let { placeholder ->
             {
-                PlatformText(text = stringResource(placeholder.res))
+                PlatformText(text = placeholder.resolveText())
             }
         }
     val keyboardOptions =

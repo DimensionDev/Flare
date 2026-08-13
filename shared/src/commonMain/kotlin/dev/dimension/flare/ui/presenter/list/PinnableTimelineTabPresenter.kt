@@ -21,6 +21,8 @@ import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -44,7 +46,7 @@ public class PinnableTimelineTabPresenter(
 
     @Immutable
     public data class PinnableTimelineTab(
-        val title: UiStrings,
+        val title: UiText,
         val data: PagingState<UiTimelineTabItem>,
     )
 
@@ -88,7 +90,7 @@ public class PinnableTimelineTabPresenter(
                         null
                     } else {
                         PinnableTimelineTab(
-                            title = UiStrings.Default,
+                            title = UiStrings.Default.asText(),
                             data =
                                 PagingState.Success.ImmutableSuccess(
                                     sections.builtInTabs

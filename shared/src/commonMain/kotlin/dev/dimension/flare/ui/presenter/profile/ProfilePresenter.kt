@@ -25,7 +25,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -443,19 +443,19 @@ public abstract class ProfileState(
     @Immutable
     public sealed class Tab {
         public abstract val id: String
-        public abstract val name: UiStrings
+        public abstract val name: UiText
 
         @Immutable
         public data class Timeline(
             override val id: String,
-            override val name: UiStrings,
+            override val name: UiText,
             val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
         public data class Media(
             override val id: String,
-            override val name: UiStrings,
+            override val name: UiText,
             val presenter: ProfileMediaPresenter,
         ) : Tab()
     }

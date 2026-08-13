@@ -111,4 +111,5 @@ private suspend fun UiText.displayText(localizedString: suspend (UiStrings) -> S
     when (this) {
         is UiText.Localized -> localizedString(string)
         is UiText.Raw -> string
+        is UiText.ExternalRef -> fallbackText()
     }

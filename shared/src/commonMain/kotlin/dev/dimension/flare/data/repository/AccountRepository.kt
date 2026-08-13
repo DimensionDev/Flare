@@ -326,6 +326,8 @@ private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount =
         platformId = platformId,
         platformDisplayName = platformRegistry.metadataOrFallback(platformId).displayName,
         platformIcon = platformRegistry.metadataOrFallback(platformId).icon,
+        platformDisplayNameText = platformRegistry.metadataOrFallback(platformId).displayNameText,
+        platformIconUrl = platformRegistry.metadataOrFallback(platformId).iconUrl,
         platformAvailable = platformRegistry.isRegistered(platformId),
         supportsRelayManagement = platformRegistry.supports(platformId, PlatformCapability.RelayManagement),
     )

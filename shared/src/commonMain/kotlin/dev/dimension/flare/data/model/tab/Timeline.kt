@@ -436,7 +436,7 @@ public data class TimelineTarget<T : TimelineSpec.Data>(
 @HiddenFromObjC
 public data class TimelineCandidate<T : TimelineSpec.Data>(
     val target: TimelineTarget<T>,
-    val title: UiText = target.spec.title.asText(),
+    val title: UiText = target.spec.title,
     val icon: IconType = target.spec.icon,
     val appearancePatch: AppearancePatch? = null,
     val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
@@ -471,19 +471,35 @@ private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(context: Time
 @HiddenFromObjC
 public data class TimelineSpec<T : TimelineSpec.Data>(
     val id: String,
-    val title: UiStrings,
+    val title: UiText,
     val icon: IconType,
     val serializer: KSerializer<T>,
     val targetId: (data: T) -> String,
     val loaderFactory: TimelineLoaderFactory<T>,
 ) {
+    public constructor(
+        id: String,
+        title: UiStrings,
+        icon: IconType,
+        serializer: KSerializer<T>,
+        targetId: (data: T) -> String,
+        loaderFactory: TimelineLoaderFactory<T>,
+    ) : this(
+        id = id,
+        title = title.asText(),
+        icon = icon,
+        serializer = serializer,
+        targetId = targetId,
+        loaderFactory = loaderFactory,
+    )
+
     public fun itemId(data: T): String = "$id:${targetId(data)}"
 
     public fun target(data: T): TimelineTarget<T> = TimelineTarget(this, data)
 
     public fun candidate(
         data: T,
-        title: UiText = this.title.asText(),
+        title: UiText = this.title,
         icon: IconType = this.icon,
         filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
     ): TimelineCandidate<T> =
@@ -496,7 +512,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
 
     public fun galleryCandidate(
         data: T,
-        title: UiText = this.title.asText(),
+        title: UiText = this.title,
         icon: IconType = this.icon,
         filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
     ): TimelineCandidate<T> =
@@ -511,7 +527,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
     @OptIn(ExperimentalSerializationApi::class)
     internal fun source(
         data: T,
-        title: UiText = this.title.asText(),
+        title: UiText = this.title,
         icon: IconType = this.icon,
     ): TimelineSourceRef =
         TimelineSourceRef(

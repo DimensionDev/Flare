@@ -1,0 +1,94 @@
+package dev.dimension.flare.feature.plugin.abi
+
+public object PluginAbiV1 {
+    public const val API_VERSION: Int = 1
+    public const val MANIFEST_SCHEMA_VERSION: Int = 1
+    public const val ICON_PATH: String = "assets/icon.png"
+    public const val ENTRY_PATH: String = "plugin.js"
+    public const val MANIFEST_PATH: String = "manifest.json"
+    public const val ACCOUNT_ORIGIN: String = "\$accountOrigin"
+
+    public object Capabilities {
+        public const val TIMELINE: String = "flare.datasource.timeline/v1"
+        public const val SEARCH: String = "flare.datasource.search/v1"
+        public const val PROFILE: String = "flare.datasource.profile/v1"
+        public const val POST: String = "flare.datasource.post/v1"
+        public const val RELATION: String = "flare.datasource.relation/v1"
+        public const val COMPOSE: String = "flare.datasource.compose/v1"
+        public const val NOTIFICATION: String = "flare.datasource.notification/v1"
+        public const val LIST: String = "flare.datasource.list/v1"
+        public const val DIRECT_MESSAGE: String = "flare.datasource.direct-message/v1"
+        public const val ARTICLE: String = "flare.datasource.article/v1"
+        public const val GALLERY: String = "flare.datasource.gallery/v1"
+        public const val TAB_CATALOG: String = "flare.datasource.tab-catalog/v1"
+    }
+
+    /** Exact operation names supported by API v1. */
+    public val knownCapabilityOperations: Map<String, Set<String>> =
+        mapOf(
+            Capabilities.TIMELINE to setOf("page"),
+            Capabilities.SEARCH to
+                setOf(
+                    "posts",
+                    "profiles",
+                    "hashtags",
+                    "discoverPosts",
+                    "discoverProfiles",
+                    "discoverHashtags",
+                ),
+            Capabilities.PROFILE to setOf("byId", "byHandle", "timeline", "following", "followers"),
+            Capabilities.POST to setOf("detail", "context", "delete", "mutate"),
+            Capabilities.RELATION to setOf("state", "mutate"),
+            Capabilities.COMPOSE to setOf("publish"),
+            Capabilities.NOTIFICATION to setOf("page", "filters", "badge"),
+            Capabilities.LIST to
+                setOf(
+                    "page",
+                    "create",
+                    "update",
+                    "delete",
+                    "timeline",
+                    "members",
+                    "memberships",
+                    "addMember",
+                    "removeMember",
+                ),
+            Capabilities.DIRECT_MESSAGE to
+                setOf(
+                    "rooms",
+                    "messages",
+                    "send",
+                    "delete",
+                    "leave",
+                    "create",
+                    "badge",
+                    "canSend",
+                ),
+            Capabilities.ARTICLE to setOf("detail", "comments"),
+            Capabilities.GALLERY to setOf("detail", "comments", "recommendations"),
+            Capabilities.TAB_CATALOG to setOf("page"),
+        )
+
+    public fun capabilityMethod(
+        capabilityId: String,
+        operation: String,
+    ): String? {
+        val service =
+            when (capabilityId) {
+                Capabilities.TIMELINE -> "timeline"
+                Capabilities.SEARCH -> "search"
+                Capabilities.PROFILE -> "profile"
+                Capabilities.POST -> "post"
+                Capabilities.RELATION -> "relation"
+                Capabilities.COMPOSE -> "compose"
+                Capabilities.NOTIFICATION -> "notification"
+                Capabilities.LIST -> "list"
+                Capabilities.DIRECT_MESSAGE -> "directMessage"
+                Capabilities.ARTICLE -> "article"
+                Capabilities.GALLERY -> "gallery"
+                Capabilities.TAB_CATALOG -> "tabCatalog"
+                else -> return null
+            }
+        return "capabilities.$service.$operation"
+    }
+}

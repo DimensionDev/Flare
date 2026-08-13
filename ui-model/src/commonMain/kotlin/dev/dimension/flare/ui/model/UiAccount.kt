@@ -15,4 +15,6 @@ public data class UiAccount(
     public val platformIcon: UiIcon = UiIcon.World,
     public val platformAvailable: Boolean = true,
     public val supportsRelayManagement: Boolean = false,
+    public val platformDisplayNameText: UiText = UiText.Raw(platformDisplayName),
+    public val platformIconUrl: String? = null,
 )

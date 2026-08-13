@@ -403,7 +403,7 @@ private struct LoginFlowView: View {
             ForEach(presenter.state.flowState.actions, id: \.id) { action in
                 Button {
                     presenter.state.perform(actionId: action.id)
-                    if action.label == .cancel {
+                    if action.id == "cancel" {
                         withAnimation(MacOSServiceSelectionAnimation.standard) {
                             qrContent = nil
                         }

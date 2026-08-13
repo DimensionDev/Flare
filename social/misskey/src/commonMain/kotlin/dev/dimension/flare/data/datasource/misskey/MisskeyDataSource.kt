@@ -598,7 +598,7 @@ internal class MisskeyDataSource(
                     accountKey = accountKey,
                 ),
             contentWarning = ComposeConfig.ContentWarning,
-            visibility = ComposeConfig.Visibility,
+            visibility = ComposeConfig.Visibility(),
         )
 
     fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =

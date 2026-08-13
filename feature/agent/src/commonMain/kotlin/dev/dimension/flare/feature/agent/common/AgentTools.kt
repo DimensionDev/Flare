@@ -1202,6 +1202,7 @@ private fun dev.dimension.flare.ui.model.UiText.agentTimelineTitle(): String =
     when (this) {
         is dev.dimension.flare.ui.model.UiText.Localized -> string.name
         is dev.dimension.flare.ui.model.UiText.Raw -> string
+        is dev.dimension.flare.ui.model.UiText.ExternalRef -> fallbackText()
     }
 
 private val SEARCH_ALL_PLATFORM_KEYS =

@@ -231,6 +231,14 @@ private fun validateCookie(
         "$parentPath.cookie.startUrl",
         "Cookie start URL must use HTTPS",
     )
+    val startOrigin = cookie.startUrl.approvedOriginOrNull()
+    addErrorUnless(
+        startOrigin == PluginAbiV1.ACCOUNT_ORIGIN || startOrigin in permissions.authOrigins,
+        errors,
+        "cookie.startUrl.origin",
+        "$parentPath.cookie.startUrl",
+        "Cookie start URL origin is not approved",
+    )
     addErrorUnless(
         cookie.probes.isNotEmpty() && cookie.probes.size <= 16,
         errors,

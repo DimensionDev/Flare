@@ -78,8 +78,19 @@ public fun WireTextV1.requireValid() {
     if (key != null) {
         require(key.isWireName()) { "Invalid Wire text key" }
         require(!fallback.isNullOrBlank()) { "Localized Wire text requires a fallback" }
+        require(fallback.length <= WireLimitsV1.MAX_ERROR_TEXT_LENGTH) { "Wire text fallback is too long" }
     }
     require(args.size <= 16) { "Too many Wire text arguments" }
+    require(
+        args.all { (name, value) ->
+            name.isWireName() &&
+                when (value) {
+                    is dev.dimension.flare.ui.model.UiTextArgument.StringValue -> value.value.length <= 1_024
+                    is dev.dimension.flare.ui.model.UiTextArgument.NumberValue -> value.value.isFinite()
+                    is dev.dimension.flare.ui.model.UiTextArgument.BooleanValue -> true
+                }
+        },
+    ) { "Invalid Wire text arguments" }
 }
 
 private fun EntityKeyV1.requireValid() {

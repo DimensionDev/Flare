@@ -9,8 +9,32 @@ public data class HttpRequestV1(
     val method: String = "GET",
     val url: String,
     val headers: Map<String, String> = emptyMap(),
+    val authorization: HttpAuthorizationV1? = null,
+    val cookies: List<HttpCookieV1> = emptyList(),
     val body: HttpBodyV1? = null,
     val timeoutMillis: Long? = null,
+)
+
+@Serializable
+public sealed interface HttpAuthorizationV1 {
+    @Serializable
+    @SerialName("bearer")
+    public data class Bearer(
+        val token: String,
+    ) : HttpAuthorizationV1
+
+    @Serializable
+    @SerialName("basic")
+    public data class Basic(
+        val username: String,
+        val password: String,
+    ) : HttpAuthorizationV1
+}
+
+@Serializable
+public data class HttpCookieV1(
+    val name: String,
+    val value: String,
 )
 
 @Serializable

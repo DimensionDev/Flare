@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.sdk
 
+import dev.dimension.flare.feature.plugin.host.KtorPluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginAsset
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
@@ -37,9 +38,11 @@ import dev.dimension.flare.feature.plugin.wire.SearchRequestV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
+import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okio.Buffer
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
@@ -279,6 +282,99 @@ class PixelfedSampleTest {
             }
         }
 
+    @Test
+    fun optionalRealInstanceSmoke() =
+        runBlocking {
+            val configuredHost = System.getenv("PIXELFED_TEST_HOST")?.trim()?.takeIf(String::isNotEmpty) ?: return@runBlocking
+            val origin =
+                if (configuredHost.startsWith("https://")) {
+                    configuredHost.trimEnd('/')
+                } else {
+                    "https://${configuredHost.trimEnd('/')}"
+                }
+            val packagePath = root.resolve("real-instance.fpp")
+            pack(packagePath)
+            val plugin = install(packagePath)
+            val transport = KtorPluginHttpTransport(OkHttp.create())
+            val pool = PluginRuntimePool(FileSystem.SYSTEM, transport)
+            try {
+                val detector =
+                    pool.invoke(
+                        plugin = plugin,
+                        key = PluginRuntimeKeyV1.detector(PLUGIN_ID, plugin.installed.packageHash, "real-detector"),
+                        context = detectorContext(plugin, origin),
+                        method = "detector.detect",
+                        request = DetectorRequestV1(origin),
+                        requestSerializer = DetectorRequestV1.serializer(),
+                        responseSerializer = DetectorResultV1.serializer(),
+                    )
+                assertEquals(DetectorMatchV1.Exact, detector.match)
+
+                val token = System.getenv("PIXELFED_TEST_TOKEN")?.trim()?.takeIf(String::isNotEmpty) ?: return@runBlocking
+                val credential = MemoryCredential(buildJsonObject { put("accessToken", token) })
+                val accountId = "real-smoke"
+                val key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, accountId)
+                val context = accountContext(plugin, credential, origin = origin, accountId = accountId)
+                val timeline =
+                    pool.invoke(
+                        plugin = plugin,
+                        key = key,
+                        context = context,
+                        method = "capabilities.timeline.page",
+                        request = TimelinePageRequestV1("home", PageRequestV1(PageDirectionV1.Refresh, 5), emptyMap()),
+                        requestSerializer = TimelinePageRequestV1.serializer(),
+                        responseSerializer = PageV1.serializer(PostV1.serializer()),
+                    )
+                assertTrue(timeline.items.size <= 5)
+
+                if (System.getenv("PIXELFED_TEST_ALLOW_WRITE") != "1") return@runBlocking
+                val icon = locateSdk().resolve("examples/pixelfed/assets/icon.png").readBytes()
+                val writeContext =
+                    accountContext(
+                        plugin = plugin,
+                        credential = credential,
+                        assets = mapOf("smoke-image" to MemoryAsset("flare-plugin-smoke.png", "image/png", icon)),
+                        origin = origin,
+                        accountId = accountId,
+                    )
+                var created: EntityKeyV1? = null
+                try {
+                    val result =
+                        pool.invoke(
+                            plugin = plugin,
+                            key = key,
+                            context = writeContext,
+                            method = "capabilities.compose.publish",
+                            request =
+                                ComposeRequestV1(
+                                    text = "Flare Social Plugin API automated smoke test",
+                                    visibility = VisibilityV1.Unlisted,
+                                    assets = listOf(ComposeAssetV1("smoke-image", "flare-plugin-smoke.png", "image/png")),
+                                ),
+                            requestSerializer = ComposeRequestV1.serializer(),
+                            responseSerializer = ComposeResultV1.serializer(),
+                            timeout = PluginCallTimeoutV1.Extended,
+                        )
+                    created = result.post.key
+                } finally {
+                    created?.let { postKey ->
+                        pool.invoke(
+                            plugin = plugin,
+                            key = key,
+                            context = context,
+                            method = "capabilities.post.delete",
+                            request = EntityRequestV1(postKey),
+                            requestSerializer = EntityRequestV1.serializer(),
+                            responseSerializer = MutationResultV1.serializer(),
+                        )
+                    }
+                }
+            } finally {
+                pool.close()
+                transport.close()
+            }
+        }
+
     private suspend fun install(packagePath: Path): RunningPluginV1 {
         val namespace = root.resolve("state").toOkioPath()
         val store = PluginStateStore.open(FileSystem.SYSTEM, namespace)
@@ -387,8 +483,10 @@ private class PixelfedFixtureTransport : PluginHttpTransport {
     ): PluginTransportResponseV1 = PluginTransportResponseV1(status, headers, body.encodeToByteArray())
 }
 
-private fun detectorContext(plugin: RunningPluginV1): PluginInvocationContextV1 =
-    PluginInvocationContextV1.detector(PLUGIN_ID, "Pixelfed", plugin.installed.packageHash, ORIGIN, "en")
+private fun detectorContext(
+    plugin: RunningPluginV1,
+    origin: String = ORIGIN,
+): PluginInvocationContextV1 = PluginInvocationContextV1.detector(PLUGIN_ID, "Pixelfed", plugin.installed.packageHash, origin, "en")
 
 private fun loginContext(plugin: RunningPluginV1): PluginInvocationContextV1 =
     PluginInvocationContextV1.login(PLUGIN_ID, "Pixelfed", plugin.installed.packageHash, ORIGIN, emptySet(), "en")
@@ -397,8 +495,19 @@ private fun accountContext(
     plugin: RunningPluginV1,
     credential: PluginCredentialAccess,
     assets: Map<String, PluginAsset> = emptyMap(),
+    origin: String = ORIGIN,
+    accountId: String = "42",
 ): PluginInvocationContextV1 =
-    PluginInvocationContextV1.account(PLUGIN_ID, "Pixelfed", plugin.installed.packageHash, ORIGIN, "42", "en", credential, assets)
+    PluginInvocationContextV1.account(
+        PLUGIN_ID,
+        "Pixelfed",
+        plugin.installed.packageHash,
+        origin,
+        accountId,
+        "en",
+        credential,
+        assets,
+    )
 
 private fun pageRequest(): PageRequestV1 = PageRequestV1(PageDirectionV1.Refresh, 1)
 

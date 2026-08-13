@@ -83,6 +83,39 @@ class PlatformRegistryTest {
         assertEquals(accountKey, exception.accountKey)
     }
 
+    @Test
+    fun mergesStaticSourcesOnceAndKeepsBuiltInIds() {
+        val builtIn = spec("Mastodon", isDefaultGuest = true)
+        var loads = 0
+        val source =
+            object : PlatformSpecSource {
+                override fun load(occupiedPlatformIds: Set<String>): List<PlatformSpec> {
+                    loads += 1
+                    assertEquals(setOf("Mastodon"), occupiedPlatformIds)
+                    return listOf(spec("mastodon"), spec("Pixelfed"))
+                }
+            }
+        val data = PlatformRuntimeData(listOf(builtIn), emptyList(), listOf(source))
+
+        assertEquals(listOf("Mastodon", "Pixelfed"), data.platformSpecs.map { it.platformId })
+        assertEquals(1, loads)
+        assertEquals(listOf("Mastodon", "Pixelfed"), PlatformRegistry(data).all.map { it.platformId })
+        assertEquals(1, loads)
+    }
+
+    @Test
+    fun sourcePlatformCannotReplaceDefaultGuest() {
+        val builtIn = spec("Mastodon", isDefaultGuest = true)
+        val source =
+            object : PlatformSpecSource {
+                override fun load(occupiedPlatformIds: Set<String>): List<PlatformSpec> = listOf(spec("Pixelfed", isDefaultGuest = true))
+            }
+        val registry = PlatformRegistry(PlatformRuntimeData(listOf(builtIn), emptyList(), listOf(source)))
+
+        assertSame(builtIn, registry.defaultGuest)
+        assertFalse(registry.require("Pixelfed").isDefaultGuest)
+    }
+
     private fun registry(specs: List<PlatformSpec>): PlatformRegistry =
         PlatformRegistry(
             PlatformRuntimeData(

@@ -87,16 +87,49 @@ public data class RecommendedInstance(
 
 @Provided
 @HiddenFromObjC
-public data class PlatformRuntimeData(
-    public val platformSpecs: List<PlatformSpec>,
+public class PlatformRuntimeData(
+    platformSpecs: List<PlatformSpec>,
     public val extraTimelineSpecs: List<TimelineSpec<out TimelineSpec.Data>>,
+    platformSpecSources: List<PlatformSpecSource> = emptyList(),
 ) {
+    public val platformSpecs: List<PlatformSpec> = mergePlatformSpecs(platformSpecs, platformSpecSources)
+
     internal val timelineSpecs by lazy {
-        platformSpecs
+        this.platformSpecs
             .sortedWith(compareBy<PlatformSpec> { it.order }.thenBy { it.platformId })
             .flatMap { it.timelineSpecs }
             .plus(extraTimelineSpecs)
     }
+}
+
+@HiddenFromObjC
+public interface PlatformSpecSource {
+    public fun load(occupiedPlatformIds: Set<String>): List<PlatformSpec>
+}
+
+private fun mergePlatformSpecs(
+    builtInSpecs: List<PlatformSpec>,
+    sources: List<PlatformSpecSource>,
+): List<PlatformSpec> {
+    val result = builtInSpecs.toMutableList()
+    val occupiedIds = builtInSpecs.associateByTo(linkedMapOf()) { it.platformId.lowercase() }
+
+    sources.forEach { source ->
+        source.load(occupiedIds.values.mapTo(linkedSetOf()) { it.platformId }).forEach { spec ->
+            val normalizedId = spec.platformId.lowercase()
+            if (normalizedId !in occupiedIds) {
+                occupiedIds[normalizedId] = spec
+                result += if (spec.isDefaultGuest) NonDefaultGuestPlatformSpec(spec) else spec
+            }
+        }
+    }
+    return result
+}
+
+private class NonDefaultGuestPlatformSpec(
+    delegate: PlatformSpec,
+) : PlatformSpec by delegate {
+    override val isDefaultGuest: Boolean = false
 }
 
 @Single

@@ -312,6 +312,9 @@ public struct TimelineGalleryItemView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contextMenu {
+            StatusActionsView(data: post.actions, useText: true, allowSpacer: false)
+        }
         .onTapGesture {
             post.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }

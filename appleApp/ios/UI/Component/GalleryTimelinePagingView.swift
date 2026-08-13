@@ -102,6 +102,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private let refreshControl = UIRefreshControl()
     private let sizingPostTile = GalleryPostTileUIView()
     private let sizingFeedTile = GalleryFeedTileUIView()
+    private let actionMenuBuilder = StatusActionsUIView()
     private var heightCache: [String: CGFloat] = [:]
     private var heightCacheKeysByItemID: [String: Set<String>] = [:]
     private var isUserRefreshing = false
@@ -797,6 +798,30 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     }
 
     // MARK: - Delegate
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let itemID = dataSource.itemIdentifier(for: indexPath),
+              let index = itemIndexMap[itemID],
+              let success = currentSuccess,
+              index >= 0,
+              index < Int(success.itemCount),
+              let post = success.peek(index: Int32(index))?.timelineContentPost,
+              !post.actions.isEmpty else {
+            return nil
+        }
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self else { return UIMenu() }
+            self.actionMenuBuilder.onOpenURL = self.openURL
+            return self.actionMenuBuilder.contextMenu(
+                data: Array(post.actions),
+                postActionLayout: self.appearance.postActionLayout
+            )
+        }
+    }
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let success = currentSuccess,

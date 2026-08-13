@@ -420,6 +420,11 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         return section
     }
 
+    func contextMenu(data: [ActionMenu], postActionLayout: PostActionLayoutConfig) -> UIMenu {
+        let actions = castActionMenus(PostActionLayoutHelpers.shared.apply(actions: data, config: postActionLayout))
+        return UIMenu(children: buildMenu(from: actions))
+    }
+
     private func makeLauncher() -> AppleUriLauncher {
         AppleUriLauncher(openUrl: SwiftUI.OpenURLAction { [weak self] url in
             self?.onOpenURL?(url)

@@ -121,6 +121,7 @@ import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuDivider
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
@@ -982,6 +983,95 @@ internal fun StatusActions(
             }
         }
     }
+}
+
+@Composable
+internal fun StatusActionsDropdownMenu(
+    items: ImmutableList<ActionMenu>,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+) {
+    val appearanceSettings = LocalTimelineAppearance.current
+    val postActionLayout = appearanceSettings.postActionLayout
+    val displayItems =
+        remember(items, postActionLayout) {
+            lazy(LazyThreadSafetyMode.NONE) {
+                items
+                    .applyPostActionLayout(postActionLayout)
+                    .flattenStatusActionMenuItems()
+            }
+        }
+    val launcher = LocalUriHandler.current
+    PlatformDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        CompositionLocalProvider(
+            PlatformContentColor provides PlatformTheme.colorScheme.text,
+            PlatformTextStyle provides PlatformTheme.typography.body,
+        ) {
+            StatusActionMenuItems(displayItems.value, onDismissRequest, launcher)
+        }
+    }
+}
+
+@Composable
+private fun PlatformDropdownMenuScope.StatusActionMenuItems(
+    items: List<ActionMenu>,
+    closeMenu: () -> Unit,
+    launcher: UriHandler,
+) {
+    items.fastForEach { action ->
+        when (action) {
+            is ActionMenu.Item -> {
+                StatusActionItemMenu(action, closeMenu, launcher)
+            }
+
+            is ActionMenu.Group -> {
+                StatusActionMenuItems(action.actions, closeMenu, launcher)
+            }
+
+            ActionMenu.Divider -> {
+                PlatformDropdownMenuDivider()
+            }
+        }
+    }
+}
+
+private fun List<ActionMenu>.flattenStatusActionMenuItems(): List<ActionMenu> {
+    val flattened =
+        buildList {
+            this@flattenStatusActionMenuItems.forEach { action ->
+                when (action) {
+                    is ActionMenu.Item -> {
+                        add(action)
+                    }
+
+                    is ActionMenu.Group -> {
+                        val children = action.actions.flattenStatusActionMenuItems()
+                        if (children.isNotEmpty()) {
+                            add(ActionMenu.Divider)
+                            addAll(children)
+                            add(ActionMenu.Divider)
+                        }
+                    }
+
+                    ActionMenu.Divider -> {
+                        add(action)
+                    }
+                }
+            }
+        }
+    val result = mutableListOf<ActionMenu>()
+    flattened.forEach { action ->
+        if (action != ActionMenu.Divider || (result.isNotEmpty() && result.last() != ActionMenu.Divider)) {
+            result += action
+        }
+    }
+    if (result.lastOrNull() == ActionMenu.Divider) {
+        result.removeLast()
+    }
+    return result
 }
 
 @Composable

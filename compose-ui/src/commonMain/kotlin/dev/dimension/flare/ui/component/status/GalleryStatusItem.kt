@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,6 +90,7 @@ private fun GalleryPostTile(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearance = LocalTimelineAppearance.current
+    var isMenuExpanded by remember(post.itemKey) { mutableStateOf(false) }
     val showOriginalWithTranslation = appearance.aiConfig.showOriginalWithTranslation
     val translation = post.content.translation
     val visibleContent =
@@ -98,70 +103,85 @@ private fun GalleryPostTile(
         } else {
             listOf(post.content.original)
         }
-    Column(
+    TimelineMediaMenuBox(
+        expanded = isMenuExpanded,
+        onExpandedChange = { isMenuExpanded = it },
+        onClick = {
+            post.onClicked.invoke(
+                ClickContext(launcher = { uriHandler.openUri(it) }),
+            )
+        },
         modifier =
             modifier
                 .fillMaxWidth()
                 .clip(GalleryTileShape)
-                .background(PlatformTheme.colorScheme.card)
-                .clickable {
-                    post.onClicked.invoke(
-                        ClickContext(launcher = { uriHandler.openUri(it) }),
-                    )
-                },
+                .background(PlatformTheme.colorScheme.card),
+        menu = {
+            StatusActionsDropdownMenu(
+                items = post.actions,
+                expanded = isMenuExpanded,
+                onDismissRequest = { isMenuExpanded = false },
+            )
+        },
     ) {
-        if (post.images.isNotEmpty() && appearance.showMedia) {
-            val firstMedia = post.images.first()
-            CompositionLocalProvider(
-                LocalTimelineAppearance provides
-                    appearance.copy(videoAutoplay = VideoAutoplay.NEVER),
-            ) {
-                MediaItem(
-                    media = firstMedia,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                post.openMedia(
-                                    media = firstMedia,
-                                    launcher = uriHandler::openUri,
-                                )
-                            },
-                    keepAspectRatio = true,
-                )
-            }
-        } else {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                visibleContent.forEach { content ->
-                    if (!content.isEmpty) {
-                        RichText(
-                            text = content,
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = GALLERY_TEXT_MAX_LINES,
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (post.images.isNotEmpty() && appearance.showMedia) {
+                val firstMedia = post.images.first()
+                CompositionLocalProvider(
+                    LocalTimelineAppearance provides
+                        appearance.copy(videoAutoplay = VideoAutoplay.NEVER),
+                ) {
+                    TimelineMediaMenuBox(
+                        expanded = isMenuExpanded,
+                        onExpandedChange = { isMenuExpanded = it },
+                        onClick = {
+                            post.openMedia(
+                                media = firstMedia,
+                                launcher = uriHandler::openUri,
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        menu = {},
+                    ) {
+                        MediaItem(
+                            media = firstMedia,
+                            keepAspectRatio = true,
                         )
                     }
                 }
+            } else {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    visibleContent.forEach { content ->
+                        if (!content.isEmpty) {
+                            RichText(
+                                text = content,
+                                modifier = Modifier.fillMaxWidth(),
+                                maxLines = GALLERY_TEXT_MAX_LINES,
+                            )
+                        }
+                    }
+                }
             }
+            GalleryBottomRow(
+                avatar = post.user?.avatar,
+                name =
+                    post.user
+                        ?.name
+                        ?.raw
+                        .orEmpty(),
+                isCircle = true,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
+            )
         }
-        GalleryBottomRow(
-            avatar = post.user?.avatar,
-            name =
-                post.user
-                    ?.name
-                    ?.raw
-                    .orEmpty(),
-            isCircle = true,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
-        )
     }
 }
 

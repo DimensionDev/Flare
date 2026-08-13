@@ -1,5 +1,8 @@
 package dev.dimension.flare.feature.plugin.wire
 
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
+import kotlinx.serialization.json.JsonElement
+
 public object WireLimitsV1 {
     public const val MAX_PAGE_SIZE: Int = 100
     public const val MAX_PAGE_ITEMS: Int = 200
@@ -93,6 +96,74 @@ public fun WireTextV1.requireValid() {
     ) { "Invalid Wire text arguments" }
 }
 
+public fun CookieSnapshotV1.requireValid() {
+    require(cookies.size <= 512) { "Too many Cookie values" }
+    require(
+        cookies.all { cookie ->
+            cookie.sourceUrl.length <= 8_192 &&
+                COOKIE_NAME.matches(cookie.name) &&
+                cookie.value.length <= MAX_COOKIE_VALUE_LENGTH
+        },
+    ) { "Invalid Cookie snapshot" }
+    require(encodedSize(this, CookieSnapshotV1.serializer()) <= WireLimitsV1.MAX_PENDING_PAYLOAD_BYTES) {
+        "Cookie snapshot is too large"
+    }
+}
+
+public fun LoginTransitionV1.requireValid() {
+    when (this) {
+        LoginTransitionV1.Pending -> {
+            return
+        }
+
+        is LoginTransitionV1.ExternalBrowser -> {
+            require(url.isNotBlank() && url.length <= 8_192) { "Invalid external login URL" }
+            require(encodedJsonSize(pendingPayload) <= WireLimitsV1.MAX_PENDING_PAYLOAD_BYTES) {
+                "Login pending payload is too large"
+            }
+        }
+
+        is LoginTransitionV1.WebCookie -> {
+            require(startUrl.isNotBlank() && startUrl.length <= 8_192) { "Invalid Cookie login URL" }
+        }
+
+        is LoginTransitionV1.Success -> {
+            value.requireValid()
+        }
+    }
+}
+
+public fun LoginSuccessV1.requireValid() {
+    require(accountId.isNotBlank() && accountId.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid login account ID" }
+    require(origin.isNotBlank() && origin.length <= 8_192) { "Invalid login origin" }
+    require(encodedJsonSize(credential) <= WireLimitsV1.MAX_CREDENTIAL_BYTES) { "Login credential is too large" }
+    profile.requireValid()
+    require(capabilities.size <= 32) { "Too many negotiated capabilities" }
+    require(
+        capabilities.all { (capability, operations) ->
+            CAPABILITY_ID.matches(capability) &&
+                operations.size <= 32 &&
+                operations.all(METHOD_NAME::matches)
+        },
+    ) { "Invalid negotiated capabilities" }
+    composeConfig?.requireValid()
+}
+
+private fun encodedJsonSize(value: JsonElement): Int =
+    PluginJsonV1
+        .encodeToString(JsonElement.serializer(), value)
+        .encodeToByteArray()
+        .size
+
+private fun <T> encodedSize(
+    value: T,
+    serializer: kotlinx.serialization.KSerializer<T>,
+): Int =
+    PluginJsonV1
+        .encodeToString(serializer, value)
+        .encodeToByteArray()
+        .size
+
 private fun EntityKeyV1.requireValid() {
     require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid entity id" }
     require(host.isNotBlank() && host.length <= 253) { "Invalid entity host" }
@@ -121,3 +192,7 @@ private fun String.isWireName(): Boolean = WIRE_NAME.matches(this)
 
 private val WIRE_NAME = Regex("[A-Za-z][A-Za-z0-9_.-]{0,127}")
 private val MIME_TYPE = Regex("[A-Za-z0-9!#$&^_.+-]+/(?:[A-Za-z0-9!#$&^_.+-]+|\\*)")
+private val COOKIE_NAME = Regex("[!#$%&'*+.^_`|~0-9A-Za-z-]{1,128}")
+private val CAPABILITY_ID = Regex("[a-z0-9.-]+/[a-z0-9.-]+")
+private val METHOD_NAME = Regex("[A-Za-z][A-Za-z0-9_.-]{0,127}")
+private const val MAX_COOKIE_VALUE_LENGTH = 16 * 1_024

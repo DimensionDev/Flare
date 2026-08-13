@@ -76,6 +76,39 @@ class PluginManifestV1Test {
     }
 
     @Test
+    fun cookieStartUrlMustUseAnApprovedOrigin() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val cookieMethod =
+            LoginMethodManifestV1(
+                id = "cookie",
+                interaction = LoginInteractionV1.WebCookie,
+                title = PluginTextV1.Literal("Cookie"),
+                cookie =
+                    WebCookieManifestV1(
+                        startUrl = "https://unapproved.example/login",
+                        probes =
+                            listOf(
+                                CookieProbeManifestV1(
+                                    url = "${PluginAbiV1.ACCOUNT_ORIGIN}/cookie",
+                                    cookies = listOf(CookieRequirementManifestV1("session")),
+                                ),
+                            ),
+                    ),
+            )
+        val result =
+            manifest
+                .copy(platform = manifest.platform.copy(loginMethods = manifest.platform.loginMethods + cookieMethod))
+                .validate(
+                    validMethodTable().copy(
+                        methods = validMethodTable().methods + setOf("login.cookie.begin", "login.cookie.check"),
+                    ),
+                )
+
+        assertFalse(result.isValid)
+        assertTrue(result.errors.any { it.code == "cookie.startUrl.origin" })
+    }
+
+    @Test
     fun catalogUsesBcp47FallbackAndNamedArguments() {
         val bundle =
             PluginCatalogBundleV1(

@@ -30,6 +30,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.shared)
+                api(libs.okio)
                 implementation(projects.feature.loginApi)
                 implementation(libs.quickjs.kt)
                 implementation(libs.kotlinx.coroutines.core)

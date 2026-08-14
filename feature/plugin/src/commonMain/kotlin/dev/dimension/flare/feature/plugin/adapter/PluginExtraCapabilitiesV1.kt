@@ -168,6 +168,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = EntityRequestV1(userKey.toWire()),
                             requestSerializer = EntityRequestV1.serializer(),
                             responseSerializer = RelationV1.serializer(),
+                            validate = RelationV1::requireValid,
                         ).also { tokens[userKey] = it.actionTokens }
                         .let(mapper::relation)
 
@@ -194,6 +195,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = MutationRequestV1(userKey.toWire(), action, tokens[userKey]?.get(action)),
                             requestSerializer = MutationRequestV1.serializer(),
                             responseSerializer = MutationResultV1.serializer(),
+                            validate = MutationResultV1::requireValid,
                         )
                     if (result is MutationResultV1.UpdatedRelation) {
                         tokens[userKey] = result.relation.actionTokens
@@ -222,6 +224,7 @@ internal class PluginExtraCapabilitiesV1(
                         request = NotificationPageRequestV1(type.toWire(), request.toWire(pageSize)),
                         requestSerializer = NotificationPageRequestV1.serializer(),
                         responseSerializer = PageV1.serializer(NotificationV1.serializer()),
+                        validate = { page -> page.requireValid(NotificationV1::requireValid) },
                     )
                 },
                 map = mapper::notification,
@@ -240,6 +243,7 @@ internal class PluginExtraCapabilitiesV1(
                                     request = EmptyRequestV1,
                                     requestSerializer = EmptyRequestV1.serializer(),
                                     responseSerializer = CountResultV1.serializer(),
+                                    validate = CountResultV1::requireValid,
                                 ).value
                     },
             )
@@ -260,6 +264,7 @@ internal class PluginExtraCapabilitiesV1(
                         operation = "page",
                         page = request.toWire(pageSize),
                         serializer = SocialListV1.serializer(),
+                        validate = SocialListV1::requireValid,
                         map = mapper::socialList,
                     ).also { result -> result.data.forEach { cached[it.id] = it } }
 
@@ -274,6 +279,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = ListMutationRequestV1(title = metaData.title),
                             requestSerializer = ListMutationRequestV1.serializer(),
                             responseSerializer = SocialListV1.serializer(),
+                            validate = SocialListV1::requireValid,
                         ).let(mapper::socialList)
                         .also { cached[it.id] = it }
 
@@ -288,6 +294,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = ListMutationRequestV1(id = listId, title = metaData.title),
                             requestSerializer = ListMutationRequestV1.serializer(),
                             responseSerializer = SocialListV1.serializer(),
+                            validate = SocialListV1::requireValid,
                         ).let(mapper::socialList)
                         .also { cached[it.id] = it }
 
@@ -298,6 +305,7 @@ internal class PluginExtraCapabilitiesV1(
                         request = ListMutationRequestV1(id = listId),
                         requestSerializer = ListMutationRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
+                        validate = MutationResultV1::requireValid,
                     )
                     cached.remove(listId)
                 }
@@ -336,6 +344,7 @@ internal class PluginExtraCapabilitiesV1(
                         request = ListMemberRequestV1(listId, userKey.toWire()),
                         requestSerializer = ListMemberRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
+                        validate = MutationResultV1::requireValid,
                     )
                 }
 
@@ -349,6 +358,7 @@ internal class PluginExtraCapabilitiesV1(
                         operation = "memberships",
                         page = request.toWire(pageSize),
                         serializer = SocialListV1.serializer(),
+                        validate = SocialListV1::requireValid,
                         map = { mapper.socialList(it) },
                         entity = userKey,
                     )
@@ -380,6 +390,7 @@ internal class PluginExtraCapabilitiesV1(
                         operation = "rooms",
                         page = request.toWire(pageSize),
                         serializer = DirectMessageRoomV1.serializer(),
+                        validate = DirectMessageRoomV1::requireValid,
                         map = mapper::directMessageRoom,
                     ).also { result -> result.data.forEach { rooms[it.key] = it } }
 
@@ -396,7 +407,8 @@ internal class PluginExtraCapabilitiesV1(
                                 request = DirectMessagePageRequestV1(roomKey.toWire(), request.toWire(pageSize)),
                                 requestSerializer = DirectMessagePageRequestV1.serializer(),
                                 responseSerializer = PageV1.serializer(DirectMessageV1.serializer()),
-                            ).also { it.requireValid() }
+                                validate = { value -> value.requireValid(DirectMessageV1::requireValid) },
+                            )
                     return page.toPagingResult(mapper::directMessage)
                 }
 
@@ -416,6 +428,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = DirectMessageSendRequestV1(roomKey.toWire(), message),
                             requestSerializer = DirectMessageSendRequestV1.serializer(),
                             responseSerializer = DirectMessageV1.serializer(),
+                            validate = DirectMessageV1::requireValid,
                         ).let(mapper::directMessage)
 
                 override suspend fun deleteMessage(
@@ -428,6 +441,7 @@ internal class PluginExtraCapabilitiesV1(
                         request = DirectMessageDeleteRequestV1(roomKey.toWire(), messageKey.toWire()),
                         requestSerializer = DirectMessageDeleteRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
+                        validate = MutationResultV1::requireValid,
                     )
                 }
 
@@ -448,6 +462,7 @@ internal class PluginExtraCapabilitiesV1(
                         request = EntityRequestV1(roomKey.toWire()),
                         requestSerializer = EntityRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
+                        validate = MutationResultV1::requireValid,
                     )
                     rooms.remove(roomKey)
                 }
@@ -464,6 +479,7 @@ internal class PluginExtraCapabilitiesV1(
                                         request = EntityRequestV1(userKey.toWire()),
                                         requestSerializer = EntityRequestV1.serializer(),
                                         responseSerializer = DirectMessageRoomV1.serializer(),
+                                        validate = DirectMessageRoomV1::requireValid,
                                     ).let(mapper::directMessageRoom)
                             rooms[room.key] = room
                             emit(UiState.Success(room))
@@ -490,6 +506,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = EmptyRequestV1,
                             requestSerializer = EmptyRequestV1.serializer(),
                             responseSerializer = CountResultV1.serializer(),
+                            validate = CountResultV1::requireValid,
                         ).value
             }
 
@@ -505,6 +522,7 @@ internal class PluginExtraCapabilitiesV1(
                     request = EntityRequestV1(articleKey.toWire()),
                     requestSerializer = EntityRequestV1.serializer(),
                     responseSerializer = ArticleV1.serializer(),
+                    validate = ArticleV1::requireValid,
                 ).let(mapper::article)
 
         override fun articleComments(articleKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
@@ -526,6 +544,7 @@ internal class PluginExtraCapabilitiesV1(
                                 request = EntityRequestV1(statusKey.toWire()),
                                 requestSerializer = EntityRequestV1.serializer(),
                                 responseSerializer = GalleryV1.serializer(),
+                                validate = GalleryV1::requireValid,
                             ).let(mapper::gallery)
                 },
                 cacheSource = { cache.filterNotNull() },
@@ -557,10 +576,11 @@ internal class PluginExtraCapabilitiesV1(
                                 request = request.toWire(pageSize),
                                 requestSerializer = PageRequestV1.serializer(),
                                 responseSerializer = PageV1.serializer(TimelineSectionV1.serializer()),
-                            ).also { it.requireValid() }
+                                validate = { value -> value.requireValid(TimelineSectionV1::requireValid) },
+                            )
                     val candidates =
                         page.items.flatMap { section ->
-                            section.timelines.also { it.requireValid() }.items.map { timeline ->
+                            section.timelines.items.map { timeline ->
                                 val data = PluginTimelineDataV1(account, timeline.id, timeline.parameters)
                                 val title = timeline.title.toUiText(plugin.installed.pluginId)
                                 val icon = timeline.icon.toUiIcon().asType()
@@ -607,6 +627,7 @@ internal class PluginExtraCapabilitiesV1(
                     request = EntityPageRequestV1(key.toWire(), request.toWire(pageSize)),
                     requestSerializer = EntityPageRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(PostV1.serializer()),
+                    validate = { page -> page.requireValid { it.requireValid() } },
                 )
             },
             map = mapper::post,
@@ -626,7 +647,8 @@ internal class PluginExtraCapabilitiesV1(
                     request = EntityPageRequestV1(key.toWire(), request.toWire(pageSize)),
                     requestSerializer = EntityPageRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(ProfileV1.serializer()),
-                ).also { it.requireValid() }
+                    validate = { value -> value.requireValid(ProfileV1::requireValid) },
+                )
         return page.toPagingResult(mapper::profile)
     }
 
@@ -635,6 +657,7 @@ internal class PluginExtraCapabilitiesV1(
         operation: String,
         page: PageRequestV1,
         serializer: kotlinx.serialization.KSerializer<Wire>,
+        validate: (Wire) -> Unit,
         map: (Wire) -> Ui,
         entity: MicroBlogKey? = null,
     ): PagingResult<Ui> {
@@ -646,6 +669,7 @@ internal class PluginExtraCapabilitiesV1(
                     request = page,
                     requestSerializer = PageRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(serializer),
+                    validate = { value -> value.requireValid(validate) },
                 )
             } else {
                 invoker.invoke(
@@ -654,9 +678,9 @@ internal class PluginExtraCapabilitiesV1(
                     request = EntityPageRequestV1(entity.toWire(), page),
                     requestSerializer = EntityPageRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(serializer),
+                    validate = { value -> value.requireValid(validate) },
                 )
             }
-        response.requireValid()
         return response.toPagingResult(map)
     }
 

@@ -43,6 +43,54 @@ class WireV1Test {
     }
 
     @Test
+    fun rejectsInvalidNestedPageItem() {
+        assertFailsWith<IllegalArgumentException> {
+            PageV1(
+                items = listOf(validPost().copy(createdAt = "not-a-timestamp")),
+            ).requireValid(PostV1::requireValid)
+        }
+    }
+
+    @Test
+    fun rejectsInsecureUrlsAndNegativeCounts() {
+        assertFailsWith<IllegalArgumentException> {
+            validProfile().copy(avatarUrl = "http://example.social/avatar.png").requireValid()
+        }
+        assertFailsWith<IllegalArgumentException> {
+            validPost().copy(favouritesCount = -1).requireValid()
+        }
+    }
+
+    @Test
+    fun rejectsInvalidNestedMutationEntity() {
+        assertFailsWith<IllegalArgumentException> {
+            MutationResultV1
+                .UpdatedPost(validPost().copy(url = "https://user:password@example.social/post/1"))
+                .requireValid()
+        }
+    }
+
+    @Test
+    fun rejectsInvalidNotificationAndDirectMessageTimestamps() {
+        assertFailsWith<IllegalArgumentException> {
+            NotificationV1(
+                id = "notification-1",
+                createdAt = "yesterday",
+                kind = NotificationKindV1.Mention,
+            ).requireValid()
+        }
+        assertFailsWith<IllegalArgumentException> {
+            DirectMessageV1(
+                key = EntityKeyV1("message-1", "example.social"),
+                roomKey = EntityKeyV1("room-1", "example.social"),
+                sender = validProfile(),
+                createdAt = "tomorrow",
+                content = RichTextV1(value = "Hello"),
+            ).requireValid()
+        }
+    }
+
+    @Test
     fun accountCredentialEnvelopeRoundTrips() {
         val value =
             PluginAccountCredentialV1(
@@ -69,4 +117,21 @@ class WireV1Test {
             ),
         )
     }
+
+    private fun validProfile(): ProfileV1 =
+        ProfileV1(
+            key = EntityKeyV1("profile-1", "example.social"),
+            handle = "user@example.social",
+            displayName = "User",
+            avatarUrl = "https://example.social/avatar.png",
+        )
+
+    private fun validPost(): PostV1 =
+        PostV1(
+            key = EntityKeyV1("post-1", "example.social"),
+            author = validProfile(),
+            createdAt = "2026-08-14T00:00:00Z",
+            content = RichTextV1(value = "Hello"),
+            url = "https://example.social/p/post-1",
+        )
 }

@@ -226,6 +226,7 @@ internal class PluginDataSourceV1 private constructor(
                                     request = EntityRequestV1(statusKey.toWire()),
                                     requestSerializer = EntityRequestV1.serializer(),
                                     responseSerializer = MutationResultV1.serializer(),
+                                    validate = MutationResultV1::requireValid,
                                 )
                             }
                         },
@@ -252,6 +253,7 @@ internal class PluginDataSourceV1 private constructor(
                                         ),
                                     requestSerializer = MutationRequestV1.serializer(),
                                     responseSerializer = MutationResultV1.serializer(),
+                                    validate = MutationResultV1::requireValid,
                                 )
                             when (result) {
                                 is MutationResultV1.UpdatedPost -> {
@@ -306,6 +308,7 @@ internal class PluginDataSourceV1 private constructor(
                 request = TimelinePageRequestV1(timelineId, request.toWire(pageSize), declared.parameters + parameters),
                 requestSerializer = TimelinePageRequestV1.serializer(),
                 responseSerializer = PageV1.serializer(PostV1.serializer()),
+                validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
     }
@@ -337,6 +340,7 @@ internal class PluginDataSourceV1 private constructor(
                     dev.dimension.flare.feature.plugin.wire.EntityPageRequestV1
                         .serializer(),
                 responseSerializer = PageV1.serializer(PostV1.serializer()),
+                validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
     }
@@ -361,6 +365,7 @@ internal class PluginDataSourceV1 private constructor(
                     request = SearchRequestV1("", request.toWire(pageSize)),
                     requestSerializer = SearchRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(HashtagV1.serializer()),
+                    validate = { page -> page.requireValid(HashtagV1::requireValid) },
                 )
             },
             map = mapper::hashtag,
@@ -403,6 +408,7 @@ internal class PluginDataSourceV1 private constructor(
                     ),
                 requestSerializer = ProfileTimelineRequestV1.serializer(),
                 responseSerializer = PageV1.serializer(PostV1.serializer()),
+                validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
 
@@ -426,6 +432,7 @@ internal class PluginDataSourceV1 private constructor(
                         dev.dimension.flare.feature.plugin.wire.EntityPageRequestV1
                             .serializer(),
                     responseSerializer = PageV1.serializer(ProfileV1.serializer()),
+                    validate = { page -> page.requireValid(ProfileV1::requireValid) },
                 )
             },
             map = mapper::profile,
@@ -444,6 +451,7 @@ internal class PluginDataSourceV1 private constructor(
                 request = SearchRequestV1(query, request.toWire(pageSize)),
                 requestSerializer = SearchRequestV1.serializer(),
                 responseSerializer = PageV1.serializer(PostV1.serializer()),
+                validate = { page -> page.requireValid { it.requireValid() } },
             )
         }
     }
@@ -462,6 +470,7 @@ internal class PluginDataSourceV1 private constructor(
                     request = SearchRequestV1(query, request.toWire(pageSize)),
                     requestSerializer = SearchRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(ProfileV1.serializer()),
+                    validate = { page -> page.requireValid(ProfileV1::requireValid) },
                 )
             },
             map = mapper::profile,
@@ -524,7 +533,7 @@ internal class PluginDataSourceV1 private constructor(
                     responseSerializer = ComposeResultV1.serializer(),
                     timeout = PluginCallTimeoutV1.Extended,
                     assets = assets,
-                    validate = { it.post.requireValid() },
+                    validate = ComposeResultV1::requireValid,
                 )
             mapper.post(result.post)
             progress()

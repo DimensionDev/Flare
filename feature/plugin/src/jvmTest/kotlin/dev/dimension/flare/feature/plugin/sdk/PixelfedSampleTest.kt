@@ -1,5 +1,11 @@
 package dev.dimension.flare.feature.plugin.sdk
 
+import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.capabilities
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
+import dev.dimension.flare.feature.plugin.adapter.PluginPlatformSpecSourceV1
+import dev.dimension.flare.feature.plugin.adapter.accountCredential
 import dev.dimension.flare.feature.plugin.host.KtorPluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginAsset
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
@@ -11,8 +17,14 @@ import dev.dimension.flare.feature.plugin.host.PluginTransportMultipartPartV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstaller
+import dev.dimension.flare.feature.plugin.lifecycle.PluginRunningSnapshotV1
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.login.PluginFormLoginCoordinatorV1
+import dev.dimension.flare.feature.plugin.login.PluginOAuthLoginCoordinatorV1
+import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
+import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
+import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.runtime.PluginCallException
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeKeyV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
@@ -32,14 +44,24 @@ import dev.dimension.flare.feature.plugin.wire.MutationResultV1
 import dev.dimension.flare.feature.plugin.wire.PageDirectionV1
 import dev.dimension.flare.feature.plugin.wire.PageRequestV1
 import dev.dimension.flare.feature.plugin.wire.PageV1
+import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.PluginErrorCodeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
 import dev.dimension.flare.feature.plugin.wire.SearchRequestV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
 import io.ktor.client.engine.okhttp.OkHttp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -60,6 +82,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PixelfedSampleTest {
@@ -95,6 +118,7 @@ class PixelfedSampleTest {
 
             val transport = PixelfedFixtureTransport()
             val pool = PluginRuntimePool(FileSystem.SYSTEM, transport)
+            val platformScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
             var stage = "detector"
             try {
                 val detector =
@@ -165,46 +189,89 @@ class PixelfedSampleTest {
                     success.composeConfig?.visibility?.allowed,
                 )
 
-                stage = "timeline"
                 val credential = MemoryCredential(success.credential)
                 val accountKey = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, ORIGIN, "42")
                 val accountContext = accountContext(plugin, credential)
-                val timeline =
-                    pool.invoke(
-                        plugin = plugin,
-                        key = accountKey,
-                        context = accountContext,
-                        method = "capabilities.timeline.page",
-                        request = TimelinePageRequestV1("home", pageRequest(), emptyMap()),
-                        requestSerializer = TimelinePageRequestV1.serializer(),
-                        responseSerializer = PageV1.serializer(PostV1.serializer()),
+                val spec = plugin.platformSpec(pool, platformScope)
+                assertEquals("Pixelfed", spec.platformId)
+                assertEquals("file://${plugin.iconPath}", spec.metadata.iconUrl)
+                val platformContext =
+                    MemoryPlatformDataSourceContext(
+                        accountKey = MicroBlogKey("42", "pixelfed.social"),
+                        credential = plugin.accountCredential(success),
                     )
+                val dataSource = spec.createDataSource(platformContext)
+                val capabilities = dataSource.capabilities
+                assertNotNull(capabilities.timeline)
+                assertNotNull(capabilities.search)
+                assertNotNull(capabilities.profile)
+                assertNotNull(capabilities.post)
+                assertNotNull(capabilities.compose)
+                assertNotNull(capabilities.tabCatalog?.configuration)
+                assertNull(capabilities.relation)
+                assertNull(capabilities.notification)
+                assertNull(capabilities.list)
+                assertNull(capabilities.directMessage)
                 assertEquals(
-                    "100",
-                    timeline.items
-                        .single()
-                        .key.id,
+                    1,
+                    capabilities.tabCatalog
+                        ?.configuration
+                        ?.defaultTabs
+                        ?.size,
                 )
-                assertEquals("$ORIGIN/api/v1/timelines/home?max_id=100", timeline.olderCursor)
-                assertTrue(!timeline.endReached)
+                assertEquals(
+                    6,
+                    capabilities.tabCatalog
+                        ?.configuration
+                        ?.builtInTimelineTabs
+                        ?.size,
+                )
+                assertEquals(
+                    1,
+                    capabilities.compose
+                        ?.composeConfig(ComposeType.New)
+                        ?.media
+                        ?.minCountForNew,
+                )
 
-                stage = "search"
-                val search =
-                    pool.invoke(
-                        plugin = plugin,
-                        key = accountKey,
-                        context = accountContext,
-                        method = "capabilities.search.posts",
-                        request = SearchRequestV1("photo", pageRequest()),
-                        requestSerializer = SearchRequestV1.serializer(),
-                        responseSerializer = PageV1.serializer(PostV1.serializer()),
-                    )
+                stage = "adapter timeline"
+                val timeline = capabilities.timeline!!.homeTimeline().load(1, PagingRequest.Refresh)
                 assertEquals(
                     "100",
-                    search.items
+                    timeline.data
                         .single()
-                        .key.id,
+                        .statusKey.id,
                 )
+                assertEquals("$ORIGIN/api/v1/timelines/home?max_id=100", timeline.nextKey)
+
+                stage = "adapter search"
+                val search = capabilities.search!!.searchStatus("photo").load(1, PagingRequest.Refresh)
+                assertEquals(
+                    "100",
+                    search.data
+                        .single()
+                        .statusKey.id,
+                )
+
+                stage = "adapter profile timeline"
+                val gallery =
+                    capabilities.profile!!
+                        .userTimeline(MicroBlogKey("42", "pixelfed.social"), mediaOnly = true)
+                        .load(1, PagingRequest.Refresh)
+                assertEquals(
+                    "100",
+                    gallery.data
+                        .single()
+                        .statusKey.id,
+                )
+                assertTrue(transport.requests.any { "only_media=true" in it.url })
+
+                stage = "adapter post detail"
+                val detail =
+                    capabilities.post!!
+                        .postHandler.loader
+                        .status(MicroBlogKey("100", "pixelfed.social"))
+                assertEquals("100", detail.statusKey.id)
 
                 stage = "post mutation"
                 val mutation =
@@ -278,6 +345,7 @@ class PixelfedSampleTest {
             } catch (error: Throwable) {
                 throw AssertionError("Pixelfed sample failed during $stage after ${transport.requests}", error)
             } finally {
+                platformScope.cancel()
                 pool.close()
             }
         }
@@ -413,6 +481,36 @@ private class MemoryCredential(
     }
 }
 
+private class MemoryPlatformDataSourceContext(
+    override val accountKey: MicroBlogKey,
+    credential: PluginAccountCredentialV1,
+) : PlatformDataSourceContext {
+    private var value = PluginJsonV1.encodeToJsonElement(PluginAccountCredentialV1.serializer(), credential)
+
+    override fun <T : Any> credential(serializer: KSerializer<T>): T = PluginJsonV1.decodeFromJsonElement(serializer, value)
+
+    override fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T> = flowOf(credential(serializer))
+
+    override suspend fun <T : Any> updateCredential(
+        serializer: KSerializer<T>,
+        credential: T,
+    ) {
+        value = PluginJsonV1.encodeToJsonElement(serializer, credential)
+    }
+}
+
+private class MemoryOAuthPendingStore : PluginOAuthPendingStoreV1 {
+    private val values = mutableMapOf<String, PluginOAuthPendingV1>()
+
+    override suspend fun save(pending: PluginOAuthPendingV1) {
+        values[pending.flowId] = pending
+    }
+
+    override suspend fun load(flowId: String): PluginOAuthPendingV1? = values[flowId]
+
+    override suspend fun consume(pending: PluginOAuthPendingV1): Boolean = values.remove(pending.flowId, pending)
+}
+
 private class MemoryAsset(
     override val fileName: String?,
     override val mimeType: String?,
@@ -450,6 +548,14 @@ private class PixelfedFixtureTransport : PluginHttpTransport {
                 response("[$STATUS]", mapOf("Link" to listOf("<$ORIGIN/api/v1/timelines/home?max_id=100>; rel=\"next\"")))
             }
 
+            path == "/api/v1/accounts/42/statuses" -> {
+                response("[$STATUS]")
+            }
+
+            path == "/api/v1/statuses/100" -> {
+                response(STATUS)
+            }
+
             path == "/api/v2/search" -> {
                 response("""{"statuses":[$STATUS],"accounts":[$ACCOUNT]}""")
             }
@@ -482,6 +588,24 @@ private class PixelfedFixtureTransport : PluginHttpTransport {
         status: Int = 200,
     ): PluginTransportResponseV1 = PluginTransportResponseV1(status, headers, body.encodeToByteArray())
 }
+
+private fun RunningPluginV1.platformSpec(
+    pool: PluginRuntimePool,
+    scope: CoroutineScope,
+) = PluginPlatformSpecSourceV1(
+    running =
+        PluginRunningSnapshotV1(
+            plugins = mapOf(installed.pluginId to this),
+            referencedPackageHashes = setOf(installed.packageHash),
+            issues = emptyList(),
+            indexHealthy = true,
+        ),
+    runtimePool = pool,
+    oauth = PluginOAuthLoginCoordinatorV1(pool, MemoryOAuthPendingStore(), { id -> takeIf { installed.pluginId == id } }),
+    form = PluginFormLoginCoordinatorV1(pool),
+    webCookie = PluginWebCookieLoginCoordinatorV1(pool),
+    coroutineScope = scope,
+).load(emptySet()).single()
 
 private fun detectorContext(
     plugin: RunningPluginV1,

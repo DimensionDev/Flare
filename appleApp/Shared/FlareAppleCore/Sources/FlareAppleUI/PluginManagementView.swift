@@ -1,12 +1,21 @@
 import FlareAppleCore
 @preconcurrency import KotlinSharedUI
+import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
+
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 public struct PluginManagementView: View {
     @StateObject private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
     @State private var fileError: String?
+    @State private var pendingUninstallId: String?
+    @State private var pendingUninstallName: String?
 
     private var facade: PluginAppleFacadeV1 {
         presenter.presenter as! PluginAppleFacadeV1
@@ -30,9 +39,9 @@ public struct PluginManagementView: View {
                 }
             }
 
-            if let error = presenter.state.error ?? fileError {
+            if presenter.state.error != nil || fileError != nil {
                 Section {
-                    Label(error, systemImage: "exclamationmark.triangle")
+                    Label("plugin_operation_failed", systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.red)
                 }
             }
@@ -40,14 +49,14 @@ public struct PluginManagementView: View {
             if !presenter.state.issues.isEmpty || !presenter.state.runtimeIssues.isEmpty {
                 Section("plugin_issues") {
                     ForEach(presenter.state.issues, id: \.code) { issue in
-                        Text(issue.message)
+                        Text(issueText(issue.code))
                             .foregroundStyle(.red)
                     }
                     ForEach(presenter.state.runtimeIssues, id: \.pluginId) { issue in
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(issue.pluginId)
-                                Text(issue.code)
+                                Text(runtimeIssueText(issue.code))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -134,12 +143,45 @@ public struct PluginManagementView: View {
                 Text(installReviewText(review))
             }
         }
+        .alert(
+            "plugin_uninstall_confirm_title",
+            isPresented: Binding(
+                get: { pendingUninstallId != nil },
+                set: { visible in
+                    if !visible {
+                        pendingUninstallId = nil
+                        pendingUninstallName = nil
+                    }
+                }
+            )
+        ) {
+            Button("Cancel", role: .cancel) {
+                pendingUninstallId = nil
+                pendingUninstallName = nil
+            }
+            Button("plugin_uninstall", role: .destructive) {
+                guard let pluginId = pendingUninstallId else { return }
+                pendingUninstallId = nil
+                pendingUninstallName = nil
+                Task { try? await facade.uninstall(pluginId: pluginId) }
+            }
+        } message: {
+            Text(
+                String(
+                    format: String(localized: "plugin_uninstall_confirm_message"),
+                    pendingUninstallName ?? ""
+                )
+            )
+        }
     }
 
     @ViewBuilder
     private func pluginRow(_ plugin: PluginManagementItemV1) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
+                pluginIcon(path: plugin.iconPath)
+                    .frame(width: 40, height: 40)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(plugin.nameText.text)
                         .font(.headline)
@@ -173,7 +215,8 @@ public struct PluginManagementView: View {
             }
 
             Button("plugin_uninstall", role: .destructive) {
-                Task { try? await facade.uninstall(pluginId: plugin.pluginId) }
+                pendingUninstallId = plugin.pluginId
+                pendingUninstallName = plugin.nameText.text
             }
             .disabled(presenter.state.busy)
         }
@@ -182,8 +225,8 @@ public struct PluginManagementView: View {
 
     private func importPlugin(_ result: Result<[URL], Error>) {
         switch result {
-        case .failure(let error):
-            fileError = error.localizedDescription
+        case .failure:
+            fileError = String(localized: "plugin_operation_failed")
         case .success(let urls):
             guard let url = urls.first else { return }
             fileError = nil
@@ -197,10 +240,56 @@ public struct PluginManagementView: View {
                 do {
                     _ = try await facade.inspect(path: url.path(percentEncoded: false))
                 } catch {
-                    fileError = error.localizedDescription
+                    fileError = String(localized: "plugin_operation_failed")
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func pluginIcon(path: String) -> some View {
+        #if os(iOS)
+        if let image = UIImage(contentsOfFile: path) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Image(systemName: "puzzlepiece.extension")
+        }
+        #elseif os(macOS)
+        if let image = NSImage(contentsOfFile: path) {
+            Image(nsImage: image)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Image(systemName: "puzzlepiece.extension")
+        }
+        #else
+        Image(systemName: "puzzlepiece.extension")
+        #endif
+    }
+
+    private func issueText(_ code: String) -> String {
+        let key: String
+        switch code {
+        case "index.corrupt":
+            key = "plugin_issue_index_corrupt"
+        case "package.missing-or-changed", "icon.missing-or-changed":
+            key = "plugin_issue_files_missing"
+        case "platform.conflict":
+            key = "plugin_issue_platform_conflict"
+        case "platform.invalid":
+            key = "plugin_issue_platform_invalid"
+        default:
+            key = "plugin_operation_failed"
+        }
+        return String(localized: String.LocalizationValue(key))
+    }
+
+    private func runtimeIssueText(_ code: String) -> String {
+        let key: String.LocalizationValue =
+            code == "runtime.paused" ? "plugin_runtime_paused" : "plugin_runtime_fatal"
+        return String(localized: key)
     }
 
     private func installReviewText(_ review: PluginInstallReviewV1) -> String {

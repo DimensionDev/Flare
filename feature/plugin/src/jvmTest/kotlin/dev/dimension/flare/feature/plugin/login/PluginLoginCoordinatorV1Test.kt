@@ -1,5 +1,8 @@
 package dev.dimension.flare.feature.plugin.login
 
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.repository.AccountMicroblogDataSource
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -10,9 +13,17 @@ import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.feature.plugin.wire.CookieSnapshotV1
 import dev.dimension.flare.feature.plugin.wire.CookieValueV1
+import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -78,6 +89,58 @@ class PluginLoginCoordinatorV1Test {
             )
             assertNull(pendingStore.load(start.flowId))
             assertEquals("oauth.missing", assertFailsWith<PluginLoginException> { recreated.resume(callback, "en") }.code)
+        }
+
+    @Test
+    fun oauthCallbackStoresAccountAfterProcessRecreationAndIsIdempotent() =
+        runBlocking {
+            val start =
+                assertIs<PluginOAuthStartV1.ExternalBrowser>(
+                    oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en"),
+                )
+            val accounts = RecordingAccountService()
+            val callbacks = PluginOAuthCallbackCoordinatorV1(oauthCoordinator(), accounts)
+            val callback = "${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE"
+
+            assertTrue(callbacks.handle(callback, "en"))
+            assertTrue(callbacks.handle(callback, "en"))
+            assertEquals(1, accounts.added.size)
+            assertEquals(
+                MicroBlogKey(ACCOUNT_ID, "plugin.example"),
+                accounts.added
+                    .single()
+                    .first.accountKey,
+            )
+            assertEquals(
+                "oauth",
+                (accounts.added.single().second as PluginAccountCredentialV1)
+                    .credential
+                    .jsonObject["token"]
+                    ?.jsonPrimitive
+                    ?.content,
+            )
+        }
+
+    @Test
+    fun liveOAuthFlowUsesItsLoginUiCompletionInsteadOfFallbackWriter() =
+        runBlocking {
+            val start =
+                assertIs<PluginOAuthStartV1.ExternalBrowser>(
+                    oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en"),
+                )
+            val accounts = RecordingAccountService()
+            val callbacks = PluginOAuthCallbackCoordinatorV1(oauthCoordinator(), accounts)
+            var completedAccountId: String? = null
+            callbacks.register(start.flowId) { completedAccountId = it.accountId }
+
+            assertTrue(
+                callbacks.handle(
+                    "${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=$STATE",
+                    "en",
+                ),
+            )
+            assertEquals(ACCOUNT_ID, completedAccountId)
+            assertTrue(accounts.added.isEmpty())
         }
 
     @Test
@@ -235,6 +298,34 @@ class PluginLoginCoordinatorV1Test {
             .running.plugins
             .getValue(PLUGIN_ID)
     }
+}
+
+private class RecordingAccountService : AccountService {
+    val added = mutableListOf<Pair<UiAccount, Any>>()
+
+    override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = emptyFlow()
+
+    override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> = emptyFlow()
+
+    override fun <T : Any> addAccount(
+        account: UiAccount,
+        credential: T,
+        serializer: KSerializer<T>,
+    ): Job {
+        added += account to credential
+        return Job().apply { complete() }
+    }
+
+    override fun <T : Any> credentialFlow(
+        accountKey: MicroBlogKey,
+        serializer: KSerializer<T>,
+    ): Flow<T> = emptyFlow()
+
+    override fun <T : Any> updateCredential(
+        accountKey: MicroBlogKey,
+        credential: T,
+        serializer: KSerializer<T>,
+    ): Job = Job().apply { complete() }
 }
 
 private class MemoryPendingStore : PluginOAuthPendingStoreV1 {

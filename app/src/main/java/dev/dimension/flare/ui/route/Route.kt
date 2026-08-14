@@ -3,9 +3,9 @@ package dev.dimension.flare.ui.route
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.model.tab.TimelineDeepLinkRouteResolver
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
-import dev.dimension.flare.data.model.tab.TimelineDeepLinkRouteResolver
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType

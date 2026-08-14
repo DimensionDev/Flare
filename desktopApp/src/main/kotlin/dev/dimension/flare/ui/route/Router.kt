@@ -16,6 +16,7 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -23,6 +24,7 @@ import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
@@ -35,6 +37,8 @@ import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
+import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.feature.plugin.login.PluginOAuthCallbackCoordinatorV1
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiIcon
@@ -114,6 +118,7 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -126,6 +131,8 @@ internal fun Router(
     enableDeepLinkHandler: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val pluginOAuthCallbacks: PluginOAuthCallbackCoordinatorV1 by koinInject()
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
     val isBigScreen = isBigScreen()
@@ -139,11 +146,18 @@ internal fun Router(
     }
     if (enableDeepLinkHandler) {
         OnDeepLink {
-            val route = Route.parse(it)
-            if (route != null) {
-                navigate(route)
+            if (pluginOAuthCallbacks.canHandle(it)) {
+                coroutineScope.launch {
+                    runCatching { pluginOAuthCallbacks.handle(it, Locale.language) }
+                }
+                true
+            } else {
+                val route = Route.parse(it)
+                if (route != null) {
+                    navigate(route)
+                }
+                route != null
             }
-            route != null
         }
     }
     NavDisplay(

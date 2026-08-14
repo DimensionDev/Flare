@@ -1,7 +1,7 @@
 import Combine
 import FlareAppleCore
 import FlareAppleUI
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
 
@@ -19,6 +19,7 @@ struct Router: View {
     @State private var handledExternalNavigationRequestId: UUID?
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @StateObject private var deepLinkHandler: MacDeepLinkHandler
+    private let pluginOAuthCallbacks = PluginOAuthCallbackFacadeV1()
 
     init(
         initialRoute: Route,
@@ -122,7 +123,11 @@ struct Router: View {
             }
         }
         .onOpenURL { url in
-            deepLinkPresenter.state.handle(url: url.absoluteString)
+            if pluginOAuthCallbacks.canHandle(url: url.absoluteString) {
+                Task { try? await pluginOAuthCallbacks.handle(url: url.absoluteString) }
+            } else {
+                deepLinkPresenter.state.handle(url: url.absoluteString)
+            }
         }
         .onAppear {
             deepLinkHandler.onRoute = { route in

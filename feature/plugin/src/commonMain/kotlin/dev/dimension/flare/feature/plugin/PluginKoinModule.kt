@@ -2,6 +2,8 @@ package dev.dimension.flare.feature.plugin
 
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.io.AppFileStore
+import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.feature.plugin.login.PluginOAuthCallbackCoordinatorV1
 import dev.dimension.flare.model.PlatformSpecSource
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Configuration
@@ -24,4 +26,10 @@ internal class PluginKoinModule {
         subsystem: PluginSubsystemV1,
         scope: CoroutineScope,
     ): PlatformSpecSource = subsystem.platformSource(scope)
+
+    @Single
+    fun oauthCallbackCoordinator(
+        subsystem: PluginSubsystemV1,
+        accountService: AccountService,
+    ): PluginOAuthCallbackCoordinatorV1 = PluginOAuthCallbackCoordinatorV1(subsystem.oauth, accountService)
 }

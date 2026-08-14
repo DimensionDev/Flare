@@ -606,7 +606,8 @@ internal class PluginDataSourceV1 private constructor(
                 PluginRuntimeKeyV1.account(
                     plugin.installed.pluginId,
                     plugin.installed.packageHash,
-                    context.accountKey.toString(),
+                    account.snapshot.origin,
+                    account.snapshot.accountId,
                 )
             val invoker =
                 PluginAccountInvokerV1(

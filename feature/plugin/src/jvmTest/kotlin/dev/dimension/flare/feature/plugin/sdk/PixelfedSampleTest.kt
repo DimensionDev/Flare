@@ -167,7 +167,7 @@ class PixelfedSampleTest {
 
                 stage = "timeline"
                 val credential = MemoryCredential(success.credential)
-                val accountKey = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, "42")
+                val accountKey = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, ORIGIN, "42")
                 val accountContext = accountContext(plugin, credential)
                 val timeline =
                     pool.invoke(
@@ -313,7 +313,7 @@ class PixelfedSampleTest {
                 val token = System.getenv("PIXELFED_TEST_TOKEN")?.trim()?.takeIf(String::isNotEmpty) ?: return@runBlocking
                 val credential = MemoryCredential(buildJsonObject { put("accessToken", token) })
                 val accountId = "real-smoke"
-                val key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, accountId)
+                val key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, origin, accountId)
                 val context = accountContext(plugin, credential, origin = origin, accountId = accountId)
                 val timeline =
                     pool.invoke(

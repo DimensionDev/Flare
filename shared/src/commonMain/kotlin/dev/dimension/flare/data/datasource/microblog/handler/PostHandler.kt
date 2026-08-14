@@ -14,6 +14,7 @@ import dev.dimension.flare.data.translation.PreTranslationService
 import dev.dimension.flare.data.translation.TranslationSettingsSupport
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
@@ -62,13 +63,14 @@ public class PostHandler(
                 }
             },
             cacheSource = {
+                val dbAccountType = accountType as DbAccountType
                 combine(
                     database
                         .statusDao()
-                        .getWithReferences(postKey, accountType),
+                        .getWithReferences(postKey, dbAccountType),
                     database
                         .pagingTimelineDao()
-                        .get(pagingKey, accountType = accountType),
+                        .get(pagingKey, accountType = dbAccountType),
                     translationDisplay.optionsFlow(translationDisplayFlow),
                 ) { status, timelineStatus, translationDisplayOptions ->
                     timelineStatus?.let {
@@ -96,15 +98,16 @@ public class PostHandler(
                 loader.deleteStatus(postKey)
             }.onSuccess {
                 database.connect {
+                    val dbAccountType = accountType as DbAccountType
                     database.pagingTimelineDao().deleteStatus(
-                        accountType = accountType,
-                        statusId = DbStatus.createId(accountType, postKey),
+                        accountType = dbAccountType,
+                        statusId = DbStatus.createId(dbAccountType, postKey),
                     )
                     database.statusDao().delete(
                         statusKey = postKey,
-                        accountType = accountType,
+                        accountType = dbAccountType,
                     )
-                    database.statusReferenceDao().delete(DbStatus.createId(accountType, postKey))
+                    database.statusReferenceDao().delete(DbStatus.createId(dbAccountType, postKey))
                 }
             }
         }

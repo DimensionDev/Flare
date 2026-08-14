@@ -42,7 +42,6 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.contentPostOrNull
-import dev.dimension.flare.ui.model.createEmojiData
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
@@ -293,7 +292,7 @@ public class ComposePresenter(
             }.flatMapLatest { emojiConfig ->
                 emojiConfig?.emoji?.toUi()?.map { emojiState ->
                     emojiState.map { emoji ->
-                        createEmojiData(
+                        EmojiData(
                             data = emoji,
                             accountType = AccountType.Specific(emojiConfig.accountKey),
                         )
@@ -969,6 +968,24 @@ public interface VisibilityState {
     public fun setVisibility(value: UiTimelineV2.Post.Visibility)
 
     public fun clear()
+}
+
+@Immutable
+public sealed class ComposeStatus {
+    public abstract val statusKey: MicroBlogKey
+
+    public data class Quote(
+        override val statusKey: MicroBlogKey,
+    ) : ComposeStatus()
+
+    public open class Reply(
+        override val statusKey: MicroBlogKey,
+    ) : ComposeStatus()
+
+    public data class VVOComment(
+        override val statusKey: MicroBlogKey,
+        val rootId: String,
+    ) : Reply(statusKey)
 }
 
 @Immutable

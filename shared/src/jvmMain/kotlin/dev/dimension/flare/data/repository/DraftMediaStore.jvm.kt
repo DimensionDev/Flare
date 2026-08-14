@@ -2,7 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.fileItemFromStorage
+import java.io.File
 
 internal actual fun draftFileItem(
     path: String,
@@ -11,10 +11,8 @@ internal actual fun draftFileItem(
     mimeType: String?,
     loader: suspend () -> ByteArray,
 ): FileItem =
-    fileItemFromStorage(
-        path = path,
+    FileItem(
         name = name,
         type = type,
-        mimeType = mimeType,
-        loader = loader,
+        file = File(path),
     )

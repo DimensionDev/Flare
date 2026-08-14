@@ -2,7 +2,7 @@ package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.fileItemFromStorage
+import okio.Path.Companion.toPath
 
 internal actual fun draftFileItem(
     path: String,
@@ -10,11 +10,12 @@ internal actual fun draftFileItem(
     type: FileType,
     mimeType: String?,
     loader: suspend () -> ByteArray,
-): FileItem =
-    fileItemFromStorage(
+): FileItem {
+    val filePath = path.toPath()
+    return FileItem(
+        name = name ?: filePath.name,
         path = path,
-        name = name,
         type = type,
         mimeType = mimeType,
-        loader = loader,
     )
+}

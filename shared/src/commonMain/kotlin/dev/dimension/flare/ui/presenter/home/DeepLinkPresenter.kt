@@ -62,22 +62,20 @@ public class DeepLinkPresenter(
                 if (DeeplinkEvent.isDeeplinkEvent(url)) {
                     val event = DeeplinkEvent.parse(url)
                     if (event != null) {
-                        val postEvent = event.postEvent
-                        val translationEvent = event.translationEvent
                         when {
-                            postEvent != null -> {
+                            event.postEvent != null -> {
                                 accountServiceFlow(
                                     accountType = AccountType.Specific(event.accountKey),
                                     repository = accountRepository,
                                 ).firstOrNull()?.let { service ->
                                     if (service is PostDataSource) {
-                                        service.postEventHandler.handleEvent(postEvent)
+                                        service.postEventHandler.handleEvent(event.postEvent)
                                     }
                                 }
                             }
 
-                            translationEvent is DeeplinkEvent.TranslationEvent.RetryTranslation -> {
-                                with(translationEvent) {
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.RetryTranslation -> {
+                                with(event.translationEvent) {
                                     preTranslationService.setStatusDisplayMode(
                                         accountType = AccountType.Specific(event.accountKey),
                                         statusKey = statusKey,
@@ -90,8 +88,8 @@ public class DeepLinkPresenter(
                                 }
                             }
 
-                            translationEvent is DeeplinkEvent.TranslationEvent.Translate -> {
-                                with(translationEvent) {
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.Translate -> {
+                                with(event.translationEvent) {
                                     preTranslationService.setStatusDisplayMode(
                                         accountType = AccountType.Specific(event.accountKey),
                                         statusKey = statusKey,
@@ -104,10 +102,10 @@ public class DeepLinkPresenter(
                                 }
                             }
 
-                            translationEvent is DeeplinkEvent.TranslationEvent.ShowOriginal -> {
+                            event.translationEvent is DeeplinkEvent.TranslationEvent.ShowOriginal -> {
                                 preTranslationService.setStatusDisplayMode(
                                     accountType = AccountType.Specific(event.accountKey),
-                                    statusKey = translationEvent.statusKey,
+                                    statusKey = event.translationEvent.statusKey,
                                     mode = TranslationDisplayMode.Original,
                                 )
                             }

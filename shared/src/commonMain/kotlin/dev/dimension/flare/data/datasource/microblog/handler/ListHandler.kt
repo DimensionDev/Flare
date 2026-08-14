@@ -19,6 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import kotlinx.collections.immutable.ImmutableList
@@ -34,7 +35,7 @@ public class ListHandler<T : UiList>(
     private val accountKey: MicroBlogKey,
     private val loader: ListLoader<T>,
 ) {
-    private val accountType: AccountType = AccountType.Specific(accountKey)
+    private val accountType: DbAccountType = AccountType.Specific(accountKey)
     private val database: CacheDatabase by koinInject()
 
     public val supportedMetaData: ImmutableList<ListMetaDataType> by lazy {

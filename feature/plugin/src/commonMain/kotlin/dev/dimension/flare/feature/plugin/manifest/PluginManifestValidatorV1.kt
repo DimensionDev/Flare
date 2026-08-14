@@ -76,9 +76,55 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
         if (knownOperations == null) {
             warnings += ManifestIssueV1("capability.unknown", path, "Unknown capability is ignored by this Host")
         } else {
+            check(
+                declaration.operations.keys.containsAll(PluginAbiV1.requiredCapabilityOperations.getValue(capabilityId)),
+                "capability.incomplete",
+                path,
+                "Capability is missing operations required by the Host interface",
+            )
             declaration.operations.forEach { (operation, config) ->
                 check(operation in knownOperations, "capability.operation", "$path.$operation", "Unknown operation")
                 check(config.directions.size <= 3, "capability.directions", "$path.$operation.directions", "Invalid paging directions")
+            }
+        }
+        when (capabilityId) {
+            PluginAbiV1.Capabilities.NOTIFICATION -> {
+                check(
+                    "page" !in declaration.operations || declaration.notificationFilters.isNotEmpty(),
+                    "notification.filters",
+                    "$path.notificationFilters",
+                    "Notification page requires at least one static filter",
+                )
+                check(
+                    declaration.relationActions.isEmpty(),
+                    "capability.config",
+                    "$path.relationActions",
+                    "Relation actions are only valid for the relation capability",
+                )
+            }
+
+            PluginAbiV1.Capabilities.RELATION -> {
+                check(
+                    declaration.relationActions.isNotEmpty(),
+                    "relation.actions",
+                    "$path.relationActions",
+                    "Relation capability requires at least one static action",
+                )
+                check(
+                    declaration.notificationFilters.isEmpty(),
+                    "capability.config",
+                    "$path.notificationFilters",
+                    "Notification filters are only valid for the notification capability",
+                )
+            }
+
+            else -> {
+                check(
+                    declaration.notificationFilters.isEmpty() && declaration.relationActions.isEmpty(),
+                    "capability.config",
+                    path,
+                    "Capability-specific configuration is not valid here",
+                )
             }
         }
     }
@@ -97,6 +143,14 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
             "platform.timelines",
             "Timeline page operation is required",
         )
+        check(
+            platform.timelines.any(TimelineManifestV1::defaultForNewAccount),
+            "timeline.default",
+            "platform.timelines",
+            "At least one timeline must be a default for new accounts",
+        )
+    } else if (platform.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) {
+        check(false, "timeline.missing", "platform.timelines", "Timeline capability requires a declared timeline")
     }
 
     validateUniqueIds(platform.profileTabs.map(ProfileTabManifestV1::id), "platform.profileTabs", errors)

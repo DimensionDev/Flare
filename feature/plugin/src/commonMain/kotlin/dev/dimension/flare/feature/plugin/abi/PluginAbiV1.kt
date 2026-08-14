@@ -31,7 +31,6 @@ public object PluginAbiV1 {
                 setOf(
                     "posts",
                     "profiles",
-                    "hashtags",
                     "discoverPosts",
                     "discoverProfiles",
                     "discoverHashtags",
@@ -40,7 +39,7 @@ public object PluginAbiV1 {
             Capabilities.POST to setOf("detail", "context", "delete", "mutate"),
             Capabilities.RELATION to setOf("state", "mutate"),
             Capabilities.COMPOSE to setOf("publish"),
-            Capabilities.NOTIFICATION to setOf("page", "filters", "badge"),
+            Capabilities.NOTIFICATION to setOf("page", "badge"),
             Capabilities.LIST to
                 setOf(
                     "page",
@@ -71,6 +70,30 @@ public object PluginAbiV1 {
             Capabilities.TAB_CATALOG to setOf("page"),
         )
 
+    /** Operations required before a capability can be exposed through its Host interface. */
+    public val requiredCapabilityOperations: Map<String, Set<String>> =
+        knownCapabilityOperations.mapValues { (capability, operations) ->
+            when (capability) {
+                Capabilities.PROFILE -> setOf("byId", "byHandle")
+                Capabilities.POST -> setOf("detail")
+                Capabilities.NOTIFICATION -> emptySet()
+                else -> operations
+            }
+        }
+
+    public fun hasRequiredOperations(
+        capabilityId: String,
+        operations: Set<String>,
+    ): Boolean = requiredCapabilityOperations[capabilityId]?.let(operations::containsAll) == true && operations.isNotEmpty()
+
+    public fun isDisplayableCapability(
+        capabilityId: String,
+        operations: Set<String>,
+    ): Boolean =
+        capabilityId in DISPLAY_CAPABILITIES &&
+            hasRequiredOperations(capabilityId, operations) &&
+            (capabilityId != Capabilities.NOTIFICATION || "page" in operations)
+
     public fun capabilityMethod(
         capabilityId: String,
         operation: String,
@@ -93,4 +116,18 @@ public object PluginAbiV1 {
             }
         return "capabilities.$service.$operation"
     }
+
+    private val DISPLAY_CAPABILITIES =
+        setOf(
+            Capabilities.TIMELINE,
+            Capabilities.SEARCH,
+            Capabilities.PROFILE,
+            Capabilities.POST,
+            Capabilities.NOTIFICATION,
+            Capabilities.LIST,
+            Capabilities.DIRECT_MESSAGE,
+            Capabilities.ARTICLE,
+            Capabilities.GALLERY,
+            Capabilities.TAB_CATALOG,
+        )
 }

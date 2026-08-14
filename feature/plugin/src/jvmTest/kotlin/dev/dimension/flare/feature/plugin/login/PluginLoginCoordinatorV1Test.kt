@@ -383,6 +383,9 @@ private const val LOGIN_MANIFEST =
             "operations": { "page": {} }
           }
         },
+        "timelines": [
+          { "id": "home", "title": "Home", "defaultForNewAccount": true }
+        ],
         "loginMethods": [
           { "id": "oauth", "interaction": "OAuth", "title": "OAuth" },
           {

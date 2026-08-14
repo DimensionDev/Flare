@@ -1,6 +1,8 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -87,6 +89,14 @@ class PluginDetailCapabilityTest {
 
             val roomKey = MicroBlogKey("room-1", accountKey.host)
             assertEquals(roomKey, requireNotNull(dataSource.extraCapabilities.directMessageAdapter).roomInfo(roomKey).key)
+            assertEquals(
+                setOf(RelationActionType.Follow),
+                requireNotNull(dataSource.capabilitySet.relation).supportedRelationTypes,
+            )
+            assertEquals(
+                listOf(NotificationFilter.All, NotificationFilter.Mention),
+                requireNotNull(dataSource.capabilitySet.notification?.timeline).supportedNotificationFilter,
+            )
         }
 
     @Test
@@ -157,7 +167,15 @@ private const val MANIFEST =
           "flare.datasource.direct-message/v1": { "operations": {
             "rooms": {}, "room": {}, "messages": {}, "send": {}, "delete": {}, "leave": {},
             "create": {}, "badge": {}, "canSend": {}
-          } }
+          } },
+          "flare.datasource.relation/v1": {
+            "operations": { "state": {}, "mutate": {} },
+            "relationActions": ["follow"]
+          },
+          "flare.datasource.notification/v1": {
+            "operations": { "page": {}, "badge": {} },
+            "notificationFilters": ["all", "mention"]
+          }
         }
       }
     }
@@ -195,6 +213,14 @@ private const val SCRIPT =
         create() { return { key: { id: "room-1", host: "plugin.example" }, title: "Room", participants: [profile] }; },
         badge() { return { value: 0 }; },
         canSend() { return { value: true }; },
+      },
+      relation: {
+        state(request) { return { profileKey: request.key }; },
+        mutate() { return { type: "noChange" }; },
+      },
+      notification: {
+        page() { return { items: [] }; },
+        badge() { return { value: 0 }; },
       },
     } });
     """

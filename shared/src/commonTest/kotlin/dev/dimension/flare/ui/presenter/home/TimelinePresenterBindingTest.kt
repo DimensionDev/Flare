@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.home
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.HomeTimelineTabItem
@@ -17,15 +18,22 @@ import dev.dimension.flare.data.model.tab.TimelinePresenterFactory
 import dev.dimension.flare.data.model.tab.TimelineResolver
 import dev.dimension.flare.data.model.tab.TimelineSlot
 import dev.dimension.flare.data.model.tab.TimelineSlotContent
+import dev.dimension.flare.data.model.tab.TimelineSourceRef
+import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.isSystemHomeMixedTimeline
+import dev.dimension.flare.data.model.tab.remoteLoaderFactory
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.testPlatformRuntimeData
 import dev.dimension.flare.unavailableAccountService
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -244,6 +252,72 @@ class TimelinePresenterBindingTest {
             assertEquals(unavailable.id, tab.id)
         }
 
+    @Test
+    fun malformedPersistedTimelineDataBecomesUnavailableInsteadOfCrashing() =
+        runTest {
+            val original = homeSlot(accountId = "corrupt")
+            val source = assertIs<TimelineSlotContent.Source>(original.content).source
+            val malformed =
+                original.copy(
+                    content =
+                        TimelineSlotContent.Source(
+                            source.copy(data = "not-protobuf", ownerAccountKey = null),
+                        ),
+                )
+            val tab = timelineResolver.toTabItem(malformed)
+
+            assertNull(timelineResolver.resolveAccountKey(malformed))
+            assertTrue(
+                timelineResolver
+                    .resolveLoader(tab)
+                    .first()
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
+        }
+
+    @Test
+    fun ambiguousTimelineSpecIdIsUnavailableButRepeatedSameSpecIsSupported() =
+        runTest {
+            val accountKey = MicroBlogKey("duplicate", "example.com")
+            val spec =
+                TimelineSpec(
+                    id = "duplicate.timeline",
+                    title = UiText.Raw("Duplicate"),
+                    icon = UiIcon.World.asType(),
+                    serializer = TimelineSpec.AccountBasedData.serializer(),
+                    targetId = { it.accountKey.toString() },
+                    loaderFactory = remoteLoaderFactory { notSupported() },
+                )
+            val singleResolver =
+                TimelineResolver(
+                    PlatformRuntimeData(emptyList(), listOf(spec)),
+                    unavailableAccountService(),
+                )
+            val source =
+                assertIs<TimelineSlotContent.Source>(
+                    singleResolver
+                        .toSlot(spec.candidate(TimelineSpec.AccountBasedData(accountKey)))
+                        .content,
+                ).source.copy(ownerAccountKey = null)
+            val slot = source.toTestSlot()
+
+            val ambiguousResolver =
+                TimelineResolver(
+                    PlatformRuntimeData(emptyList(), listOf(spec, spec.copy(title = UiText.Raw("Other")))),
+                    unavailableAccountService(),
+                )
+            assertNull(ambiguousResolver.resolveAccountKey(slot))
+
+            val repeatedResolver =
+                TimelineResolver(
+                    PlatformRuntimeData(emptyList(), listOf(spec, spec)),
+                    unavailableAccountService(),
+                )
+            assertEquals(accountKey, repeatedResolver.resolveAccountKey(slot))
+        }
+
     private suspend fun systemHomeMixedTab(): UiGroupTimelineTabItem {
         val tab =
             settingsRepository.homeTimelineTabs
@@ -279,4 +353,10 @@ class TimelinePresenterBindingTest {
         id = id,
         presentation = TimelinePresentation(filterConfig = filterConfig),
     )
+
+    private fun TimelineSourceRef.toTestSlot() =
+        TimelineSlot(
+            id = id,
+            content = TimelineSlotContent.Source(this),
+        )
 }

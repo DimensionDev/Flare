@@ -180,7 +180,7 @@ private class PluginPlatformSpecV1(
             ?.takeIf { "page" in it }
             ?.let {
                 TimelineSpec(
-                    id = "plugin_${manifest.id.replace('.', '_')}_${platformId}${timelineSchemaSuffix()}_catalog",
+                    id = canonicalTimelineSpecId("catalog"),
                     title = platform.name.toUiText(manifest.id),
                     icon =
                         dev.dimension.flare.ui.model.UiIcon.World
@@ -199,7 +199,26 @@ private class PluginPlatformSpecV1(
             }
 
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> =
-        (specs.values + listOfNotNull(dynamicTimelineSpec)).toImmutableList()
+        buildList {
+            addAll(specs.values)
+            addAll(listOfNotNull(dynamicTimelineSpec))
+
+            val legacyCandidates =
+                buildList<Pair<String, TimelineSpec<out TimelineSpec.Data>>> {
+                    platform.timelines.forEach { timeline ->
+                        add(legacyTimelineSpecId(timeline.id) to specs.getValue(timeline.id))
+                    }
+                    dynamicTimelineSpec?.let { add(legacyTimelineSpecId("catalog") to it) }
+                }
+            legacyCandidates
+                .groupBy { it.first }
+                .values
+                .filter { it.size == 1 }
+                .forEach { candidates ->
+                    val (legacyId, spec) = candidates.single()
+                    add(spec.withId(legacyId))
+                }
+        }.toImmutableList()
 
     override fun resolveInitialText(context: ComposeInitialTextContext): InitialText? = context.resolveReplyParticipantInitialText()
 
@@ -365,7 +384,7 @@ private class PluginPlatformSpecV1(
 
     private fun TimelineManifestV1.toTimelineSpec(): TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
-            id = "plugin_${manifest.id.replace('.', '_')}_${platformId}${timelineSchemaSuffix()}_$id",
+            id = canonicalTimelineSpecId("timeline:$id"),
             title = title.toUiText(manifest.id),
             icon = icon.toUiIcon().asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
@@ -377,6 +396,14 @@ private class PluginPlatformSpecV1(
                     }
                 },
         )
+
+    private fun canonicalTimelineSpecId(kind: String): String =
+        "plugin:${manifest.id}:$platformId:schema${platform.timelineSchemaVersion}:$kind"
+
+    private fun legacyTimelineSpecId(id: String): String =
+        "plugin_${manifest.id.replace('.', '_')}_${platformId}${timelineSchemaSuffix()}_$id"
+
+    private fun TimelineSpec<out TimelineSpec.Data>.withId(id: String): TimelineSpec<out TimelineSpec.Data> = copy(id = id)
 
     private fun timelineSchemaSuffix(): String =
         platform.timelineSchemaVersion

@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
@@ -277,16 +279,16 @@ class AccountRepositoryTest : RobolectricTest() {
     fun reloginDoesNotPublishANewAccountEvent() =
         runTest {
             val repository = createRepository(this)
-            val events = Channel<UiAccount>(Channel.UNLIMITED)
-            val collection = launch { repository.onAdded.collect(events::send) }
+            val events = Channel<AccountChange>(Channel.UNLIMITED)
+            val collection = launch { repository.accountChanges.collect(events::send) }
             val alice = UiAccount(accountKey, "Mastodon")
             val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
 
             try {
                 repository.addAccount(alice, "first").join()
-                assertEquals(alice.accountKey, events.receive().accountKey)
+                assertEquals(alice.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
                 repository.addAccount(bob, "second").join()
-                assertEquals(bob.accountKey, events.receive().accountKey)
+                assertEquals(bob.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
 
                 repository.addAccount(alice.copy(platformId = "Pixelfed"), "refreshed").join()
 
@@ -303,25 +305,51 @@ class AccountRepositoryTest : RobolectricTest() {
     fun deletingAndReaddingTheSameAccountPublishesBothEventsAgain() =
         runTest {
             val repository = createRepository(this)
-            val added = Channel<UiAccount>(Channel.UNLIMITED)
-            val removed = Channel<MicroBlogKey>(Channel.UNLIMITED)
-            val addedCollection = launch { repository.onAdded.collect(added::send) }
-            val removedCollection = launch { repository.onRemoved.collect(removed::send) }
+            val events = Channel<AccountChange>(Channel.UNLIMITED)
+            val collection = launch { repository.accountChanges.collect(events::send) }
             val account = UiAccount(accountKey, "Mastodon")
 
             try {
                 repository.addAccount(account, "first").join()
-                assertEquals(accountKey, added.receive().accountKey)
+                assertEquals(accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
 
                 repository.delete(accountKey).join()
-                assertEquals(accountKey, removed.receive())
+                assertEquals(accountKey, assertIs<AccountChange.Removed>(events.receive()).accountKey)
 
                 repository.addAccount(account, "second").join()
-                assertEquals(accountKey, added.receive().accountKey)
+                assertEquals(accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
             } finally {
-                addedCollection.cancel()
-                removedCollection.cancel()
+                collection.cancel()
             }
+        }
+
+    @Test
+    fun accountChangesAreBufferedAndKeepMutationOrder() =
+        runTest {
+            val repository = createRepository(this)
+            val alice = UiAccount(accountKey, "Mastodon")
+            val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
+
+            repository.addAccount(alice, "first").join()
+            repository.addAccount(bob, "second").join()
+            repository.delete(accountKey).join()
+            repository.addAccount(alice, "third").join()
+
+            val changes = repository.accountChanges.take(4).toList()
+            assertEquals(
+                listOf(
+                    "added:${alice.accountKey}",
+                    "added:${bob.accountKey}",
+                    "removed:${alice.accountKey}",
+                    "added:${alice.accountKey}",
+                ),
+                changes.map { change ->
+                    when (change) {
+                        is AccountChange.Added -> "added:${change.account.accountKey}"
+                        is AccountChange.Removed -> "removed:${change.accountKey}"
+                    }
+                },
+            )
         }
 
     private fun createRepository(scope: CoroutineScope): AccountRepository =

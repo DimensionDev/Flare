@@ -6,6 +6,7 @@ import dev.dimension.flare.feature.plugin.host.PluginHostGateway
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationScopeV1
+import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
 import dev.dimension.flare.feature.plugin.host.defaultPluginRuntimeHeapBudgetBytes
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,8 +45,9 @@ public data class PluginRuntimeKeyV1 private constructor(
         public fun account(
             pluginId: String,
             packageHash: String,
-            accountKey: String,
-        ): PluginRuntimeKeyV1 = create(pluginId, packageHash, PluginInvocationScopeV1.Account, accountKey)
+            origin: String,
+            accountId: String,
+        ): PluginRuntimeKeyV1 = create(pluginId, packageHash, PluginInvocationScopeV1.Account, accountIdentity(origin, accountId))
 
         public fun guest(
             pluginId: String,
@@ -291,13 +293,21 @@ public class PluginRuntimePool(
         }
         require(context.metadata.scope == key.scope) { "Invocation scope does not match Runtime key" }
         when (key.scope) {
-            PluginInvocationScopeV1.Account -> require(key.identity == context.metadata.accountId) { "Account Runtime key mismatch" }
+            PluginInvocationScopeV1.Account -> {
+                require(
+                    key.identity == accountIdentity(context.metadata.origin, requireNotNull(context.metadata.accountId)),
+                ) { "Account Runtime key mismatch" }
+            }
 
-            PluginInvocationScopeV1.Guest -> require(key.identity == context.metadata.origin) { "Guest Runtime key mismatch" }
+            PluginInvocationScopeV1.Guest -> {
+                require(key.identity == context.metadata.origin) { "Guest Runtime key mismatch" }
+            }
 
             PluginInvocationScopeV1.Detector,
             PluginInvocationScopeV1.Login,
-            -> Unit
+            -> {
+                return
+            }
         }
     }
 
@@ -344,3 +354,11 @@ private fun monotonicMillis(): () -> Long {
 private const val FAILURE_LIMIT = 3
 private const val FAILURE_WINDOW_MILLIS = 60_000L
 private val HASH = Regex("[0-9a-f]{64}")
+
+private fun accountIdentity(
+    origin: String,
+    accountId: String,
+): String {
+    require(accountId.isNotBlank() && accountId.length <= 512) { "Invalid account ID" }
+    return "${PluginUrlPolicy.requireOrigin(origin)}\u0000$accountId"
+}

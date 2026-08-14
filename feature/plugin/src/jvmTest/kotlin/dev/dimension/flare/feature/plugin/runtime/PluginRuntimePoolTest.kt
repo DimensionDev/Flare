@@ -84,7 +84,13 @@ class PluginRuntimePoolTest {
                 assertFailsWith<IllegalArgumentException> {
                     pool.invokeJson(
                         plugin = plugin,
-                        key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, "first"),
+                        key =
+                            PluginRuntimeKeyV1.account(
+                                PLUGIN_ID,
+                                plugin.installed.packageHash,
+                                first.metadata.origin,
+                                requireNotNull(first.metadata.accountId),
+                            ),
                         context = second,
                         method = PAGE_METHOD,
                         request = JsonObject(emptyMap()),
@@ -113,7 +119,7 @@ class PluginRuntimePoolTest {
                 assertEquals(1, transport.maxConcurrent.get())
 
                 transport.reset()
-                val second = accountContext(plugin, "second", "https://two.example", MemoryCredential())
+                val second = accountContext(plugin, "first", "https://two.example", MemoryCredential())
                 coroutineScope {
                     listOf(
                         async { invokePage(pool, plugin, first, JsonObject(emptyMap())) },
@@ -303,7 +309,13 @@ class PluginRuntimePoolTest {
         pool
             .invokeJson(
                 plugin = plugin,
-                key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, requireNotNull(context.metadata.accountId)),
+                key =
+                    PluginRuntimeKeyV1.account(
+                        PLUGIN_ID,
+                        plugin.installed.packageHash,
+                        context.metadata.origin,
+                        requireNotNull(context.metadata.accountId),
+                    ),
                 context = context,
                 method = PAGE_METHOD,
                 request = request,

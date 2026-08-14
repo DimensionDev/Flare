@@ -16,6 +16,9 @@ import androidx.compose.ui.draw.alpha
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginCookieValue
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -28,19 +31,35 @@ private val userAgent =
 
 @Composable
 internal fun WebCookieLoginScreen(
-    url: String,
-    callback: (String?) -> Boolean,
+    request: LoginEffect.OpenWebCookieLogin,
+    callback: suspend (LoginCookieSnapshot) -> Boolean,
     onBack: () -> Unit,
 ) {
-    val webViewState = rememberWebViewState(url)
-    LaunchedEffect(url) {
+    val webViewState = rememberWebViewState(request.url)
+    LaunchedEffect(request) {
         while (true) {
             webViewState.lastLoadedUrl?.let { loadedUrl ->
-                val cookies =
-                    CookieManager
-                        .getInstance()
-                        .getCookie(loadedUrl)
-                if (callback(cookies)) {
+                val manager = CookieManager.getInstance()
+                val rawHeader = manager.getCookie(loadedUrl)
+                val values =
+                    request.probes
+                        .flatMap { probe ->
+                            val expected = probe.names.toSet()
+                            manager
+                                .getCookie(probe.url)
+                                .orEmpty()
+                                .split(';')
+                                .mapNotNull { item ->
+                                    val name = item.substringBefore('=', missingDelimiterValue = "").trim()
+                                    if (name !in expected) return@mapNotNull null
+                                    LoginCookieValue(
+                                        sourceUrl = probe.url,
+                                        name = name,
+                                        value = item.substringAfter('=', missingDelimiterValue = "").trim(),
+                                    )
+                                }
+                        }.distinctBy { it.sourceUrl to it.name }
+                if (callback(LoginCookieSnapshot(values = values, rawHeader = rawHeader))) {
                     onBack()
                     break
                 }
@@ -66,7 +85,7 @@ internal fun WebCookieLoginScreen(
                 WebStorage.getInstance().deleteAllData()
                 CookieManager.getInstance().removeAllCookies(null)
                 with(it.settings) {
-                    userAgentString = userAgent.toString()
+                    userAgentString = userAgent.getValue("user-agent")
                     javaScriptEnabled = true
                     domStorageEnabled = true
                     javaScriptCanOpenWindowsAutomatically = false

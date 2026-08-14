@@ -369,6 +369,7 @@ private struct LoginFlowView: View {
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieProbes: [LoginCookieProbe] = []
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -426,16 +427,12 @@ private struct LoginFlowView: View {
         )) {
             if let webCookieUrl {
                 if #available(iOS 26.0, *) {
-                    WebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else { return }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    WebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                 } else {
-                    BackportWebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else { return }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    BackportWebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                 }
             }
@@ -452,7 +449,17 @@ private struct LoginFlowView: View {
                     qrContent = showQr.content
                 }
             case .openWebCookieLogin(let webCookie):
+                webCookieProbes = webCookie.probes
                 webCookieUrl = webCookie.url
+            }
+        }
+    }
+
+    private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
+        let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
+        Task {
+            if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
+                webCookieUrl = nil
             }
         }
     }

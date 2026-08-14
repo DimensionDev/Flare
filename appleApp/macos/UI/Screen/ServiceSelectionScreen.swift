@@ -377,6 +377,7 @@ private struct LoginFlowView: View {
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieProbes: [LoginCookieProbe] = []
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -433,12 +434,8 @@ private struct LoginFlowView: View {
         )) {
             if let webCookieUrl {
                 NavigationStack {
-                    MacOSWebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else {
-                            return
-                        }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    MacOSWebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
@@ -469,7 +466,17 @@ private struct LoginFlowView: View {
                     qrContent = showQr.content
                 }
             case .openWebCookieLogin(let webCookie):
+                webCookieProbes = webCookie.probes
                 webCookieUrl = webCookie.url
+            }
+        }
+    }
+
+    private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
+        let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
+        Task {
+            if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
+                webCookieUrl = nil
             }
         }
     }
@@ -715,7 +722,7 @@ private struct MacOSWebLoginScreen: View {
     private let url: String
 
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
@@ -772,13 +779,12 @@ private final class MacOSWebLoginViewModel: ObservableObject {
     let delegate: MacOSCookieNavigationDelegate
 
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self.delegate = MacOSCookieNavigationDelegate {
             WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
-                let cookieString = MacOSWebLoginViewModel.cookieHeaderString(from: cookies, for: URL(string: url))
-                onCookie(cookieString)
+                onCookie(cookies)
             }
         }
         clearCookie()
@@ -803,17 +809,6 @@ private final class MacOSWebLoginViewModel: ObservableObject {
         }
     }
 
-    private static func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
-        let host = url?.host?.lowercased()
-        let filtered = cookies.filter { cookie in
-            guard let host else {
-                return true
-            }
-            let domain = cookie.domain.lowercased()
-            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
-        }
-        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
 }
 
 private extension URL {

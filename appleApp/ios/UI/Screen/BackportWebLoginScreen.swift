@@ -7,7 +7,7 @@ struct BackportWebLoginScreen: View {
     @StateObject private var viewModel: BackportWebLoginViewModel
     let url: String
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
@@ -56,19 +56,18 @@ class BackportWebLoginViewModel: ObservableObject {
     @Published
     var canShowWebView = false
     let url: String
-    let onCookie: (String) -> Void
+    let onCookie: ([HTTPCookie]) -> Void
     let delegate: WKDelegate
     private var observers = [NSKeyValueObservation]()
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self.onCookie = onCookie
         self.url = url
         self.delegate = WKDelegate {
             WKWebsiteDataStore.default().httpCookieStore.getAllCookies { (cookies) in
-                let cookieString = BackportWebLoginViewModel.cookieHeaderString(from: cookies, for: .init(string: url))
-                onCookie(cookieString)
+                onCookie(cookies)
             }
         }
         clearCookie()
@@ -89,15 +88,6 @@ class BackportWebLoginViewModel: ObservableObject {
                 }
             )
         }
-    }
-    private static func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
-        let host = url?.host?.lowercased()
-        let filtered = cookies.filter { cookie in
-            guard let host = host else { return true }
-            let domain = cookie.domain.lowercased()
-            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
-        }
-        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
     deinit {
         observers.removeAll()

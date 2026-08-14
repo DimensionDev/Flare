@@ -35,6 +35,7 @@ import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeKeyV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.feature.plugin.wire.CookieSnapshotV1
+import dev.dimension.flare.feature.plugin.wire.CookieValueV1
 import dev.dimension.flare.feature.plugin.wire.DetectorMatchV1
 import dev.dimension.flare.feature.plugin.wire.DetectorRequestV1
 import dev.dimension.flare.feature.plugin.wire.DetectorResultV1
@@ -59,6 +60,8 @@ import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.login.LoginAction
 import dev.dimension.flare.ui.presenter.login.LoginContext
+import dev.dimension.flare.ui.presenter.login.LoginCookieProbe
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
 import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.LoginField
 import dev.dimension.flare.ui.presenter.login.LoginFieldType
@@ -423,13 +426,6 @@ private class PluginPlatformSpecV1(
     }
 }
 
-/** Extra contract consumed by the shared Android/Desktop/Apple Cookie page in phase 8. */
-public interface PluginWebCookieMethodHandlerV1 {
-    public val cookieRequest: PluginWebCookieRequestV1?
-
-    public suspend fun checkCookies(snapshot: CookieSnapshotV1): PluginCookieCheckResultV1
-}
-
 private class PluginLoginMethodHandlerV1(
     private val plugin: RunningPluginV1,
     private val method: LoginMethodManifestV1,
@@ -440,8 +436,7 @@ private class PluginLoginMethodHandlerV1(
     private val webCookie: PluginWebCookieLoginCoordinatorV1,
     private val accountService: AccountService,
     private val coroutineScope: CoroutineScope,
-) : LoginMethodHandler,
-    PluginWebCookieMethodHandlerV1 {
+) : LoginMethodHandler {
     private val values = method.fields.associate { it.id to "" }.toMutableMap()
     private val mutableState = MutableStateFlow(state())
     private val mutableEffects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
@@ -449,8 +444,6 @@ private class PluginLoginMethodHandlerV1(
 
     override val state: StateFlow<LoginFlowState> = mutableState
     override val effects: Flow<LoginEffect> = mutableEffects
-    override val cookieRequest: PluginWebCookieRequestV1?
-        get() = cookieSession?.request
 
     override fun updateField(
         id: String,
@@ -515,7 +508,18 @@ private class PluginLoginMethodHandlerV1(
                             expectedAccountId = context.reloginTarget?.accountKey?.id,
                         )
                     cookieSession = session
-                    mutableEffects.emit(LoginEffect.OpenWebCookieLogin(session.request.startUrl))
+                    mutableEffects.emit(
+                        LoginEffect.OpenWebCookieLogin(
+                            url = session.request.startUrl,
+                            probes =
+                                session.request.probes.map { probe ->
+                                    LoginCookieProbe(
+                                        url = probe.url,
+                                        names = probe.cookies.map { it.name },
+                                    )
+                                },
+                        ),
+                    )
                     mutableState.value = state()
                 }
             }
@@ -539,11 +543,23 @@ private class PluginLoginMethodHandlerV1(
     override fun canResume(value: String): Boolean =
         method.interaction == LoginInteractionV1.OAuth && runCatching { parsePluginOAuthCallback(value) }.isSuccess
 
-    override suspend fun checkCookies(snapshot: CookieSnapshotV1): PluginCookieCheckResultV1 {
+    override suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean {
         val session = cookieSession ?: error("Cookie login has not started")
-        val result = session.check(snapshot)
+        val result =
+            session.check(
+                CookieSnapshotV1(
+                    cookies =
+                        snapshot.values.map { cookie ->
+                            CookieValueV1(
+                                sourceUrl = cookie.sourceUrl,
+                                name = cookie.name,
+                                value = cookie.value,
+                            )
+                        },
+                ),
+            )
         if (result is PluginCookieCheckResultV1.Success) complete(result.value)
-        return result
+        return result is PluginCookieCheckResultV1.Success
     }
 
     override fun clear() {

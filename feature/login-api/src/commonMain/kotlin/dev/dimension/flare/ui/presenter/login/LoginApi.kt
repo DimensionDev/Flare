@@ -107,7 +107,33 @@ public sealed interface LoginEffect {
 
     public data class OpenWebCookieLogin(
         val url: String,
+        val probes: List<LoginCookieProbe> = emptyList(),
     ) : LoginEffect
+}
+
+/** Cookies the login WebView must read from one exact URL. */
+public data class LoginCookieProbe(
+    val url: String,
+    val names: List<String>,
+)
+
+/** A cookie value associated with the exact URL from which the Host read it. */
+public data class LoginCookieValue(
+    val sourceUrl: String,
+    val name: String,
+    val value: String,
+)
+
+public data class LoginCookieSnapshot(
+    val values: List<LoginCookieValue> = emptyList(),
+    val rawHeader: String? = null,
+) {
+    internal fun legacyHeader(): String? =
+        rawHeader?.takeIf(String::isNotBlank)
+            ?: values
+                .distinctBy(LoginCookieValue::name)
+                .joinToString("; ") { "${it.name}=${it.value}" }
+                .takeIf(String::isNotBlank)
 }
 
 public interface LoginPlatformProvider {
@@ -164,6 +190,17 @@ public interface LoginMethodHandler : AutoCloseable {
     public suspend fun resume(value: String)
 
     public fun canResume(value: String): Boolean = true
+
+    /**
+     * Lets a login method inspect cookies before the Host closes its isolated WebView.
+     * Existing built-in handlers keep receiving their legacy Cookie header.
+     */
+    public suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean {
+        val value = snapshot.legacyHeader() ?: return false
+        if (!canResume(value)) return false
+        resume(value)
+        return true
+    }
 
     public fun onExternalAuthenticationDismissed(error: String?) {
         clear()

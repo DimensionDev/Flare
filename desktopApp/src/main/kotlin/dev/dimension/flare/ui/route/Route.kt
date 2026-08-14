@@ -8,6 +8,8 @@ import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.route.Route.Compose.New
 import dev.dimension.flare.ui.route.Route.Compose.Quote
@@ -299,8 +301,8 @@ internal sealed interface Route : NavKey {
     ) : ScreenRoute
 
     data class WebViewLogin(
-        val url: String,
-        val callback: (cookies: String?) -> Boolean,
+        val request: LoginEffect.OpenWebCookieLogin,
+        val callback: suspend (LoginCookieSnapshot) -> Boolean,
     ) : ScreenRoute
 
     data class DeepLinkAccountPicker(

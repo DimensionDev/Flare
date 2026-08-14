@@ -271,6 +271,37 @@ class PluginRuntimePoolTest {
             Unit
         }
 
+    @Test
+    fun transportIsCreatedOnFirstInvocationAndClosedWithPool() =
+        runBlocking {
+            val plugin = install(pageScript(STATEFUL_PAGE))
+            var created = 0
+            var closed = 0
+            val pool =
+                PluginRuntimePool(
+                    fileSystem = fileSystem,
+                    transportFactory = {
+                        created++
+                        object : CapturingTransport() {
+                            override fun close() {
+                                closed++
+                            }
+                        }
+                    },
+                )
+            val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
+
+            assertEquals(0, created)
+            invokePage(pool, plugin, context, request("normal"))
+            assertEquals(1, created)
+            invokePage(pool, plugin, context, request("normal"))
+            assertEquals(1, created)
+
+            pool.close()
+            pool.close()
+            assertEquals(1, closed)
+        }
+
     private suspend fun install(script: String): RunningPluginV1 {
         TestFppFactory.write(input, TestFppFactory.validEntries(script = script))
         val namespace = root / "social-plugins-v2"

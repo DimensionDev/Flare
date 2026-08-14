@@ -4,11 +4,13 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import kotlinx.coroutines.runBlocking
 import okio.Buffer
 import okio.FileSystem
+import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import okio.SYSTEM
 import okio.Source
 import okio.Timeout
+import java.io.IOException
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -68,6 +70,125 @@ class PluginInstallerTest {
             val disabledAfterRestart = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
             assertTrue(disabledAfterRestart.running.plugins.isEmpty())
             assertTrue(fileSystem.exists(disabledAfterRestart.paths.packagePath(installed.packageHash)))
+        }
+
+    @Test
+    fun reinstallingIdenticalPackageIsIdempotent() =
+        runBlocking {
+            TestFppFactory.write(input)
+            val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+
+            val preview = installer.inspect(input)
+            assertFalse(preview.requiresConfirmation)
+            val second = installer.commit(preview, confirmed = false)
+
+            assertEquals(first, second)
+            assertTrue(fileSystem.exists(stateStore.paths.packagePath(first.packageHash)))
+            assertTrue(fileSystem.exists(stateStore.paths.iconPath(first.packageHash)))
+        }
+
+    @Test
+    fun updateAndUninstallTakeEffectOnlyAfterRestartAndCleanUpOldFilesLater() =
+        runBlocking {
+            TestFppFactory.write(input)
+            val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+
+            val runningStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
+            val runningInstaller = PluginInstaller(fileSystem, runningStore)
+            val updatedManifest = TestFppFactory.validManifest.replace("\"version\": \"1.0.0\"", "\"version\": \"2.0.0\"")
+            TestFppFactory.write(
+                input,
+                TestFppFactory.validEntries(
+                    manifest = updatedManifest,
+                    script = TestFppFactory.validScript + "\n// version 2",
+                ),
+            )
+            val second = runningInstaller.inspect(input).let { runningInstaller.commit(it, confirmed = true) }
+
+            assertEquals(
+                first,
+                runningStore.running.plugins
+                    .getValue(first.pluginId)
+                    .installed,
+            )
+            assertEquals(
+                second,
+                runningStore.desired.value.plugins
+                    .getValue(first.pluginId),
+            )
+            runningStore.cleanup()
+            assertTrue(fileSystem.exists(runningStore.paths.packagePath(first.packageHash)))
+            assertTrue(fileSystem.exists(runningStore.paths.packagePath(second.packageHash)))
+
+            val updatedStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
+            assertEquals(
+                second,
+                updatedStore.running.plugins
+                    .getValue(first.pluginId)
+                    .installed,
+            )
+            updatedStore.cleanup()
+            assertFalse(fileSystem.exists(updatedStore.paths.packagePath(first.packageHash)))
+
+            updatedStore.uninstall(first.pluginId)
+            assertNotNull(updatedStore.running.plugins[first.pluginId])
+            updatedStore.cleanup()
+            assertTrue(fileSystem.exists(updatedStore.paths.packagePath(second.packageHash)))
+
+            val uninstalledStore = PluginStateStore.open(fileSystem, root / "social-plugins-v2")
+            assertTrue(uninstalledStore.running.plugins.isEmpty())
+            uninstalledStore.cleanup()
+            assertFalse(fileSystem.exists(uninstalledStore.paths.packagePath(second.packageHash)))
+            assertFalse(fileSystem.exists(uninstalledStore.paths.iconPath(second.packageHash)))
+        }
+
+    @Test
+    fun failedIndexCommitKeepsPreviousPluginAndLeavesOnlyCollectableOrphans() =
+        runBlocking {
+            TestFppFactory.write(input)
+            val first = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val failingFileSystem =
+                object : ForwardingFileSystem(fileSystem) {
+                    override fun atomicMove(
+                        source: Path,
+                        target: Path,
+                    ) {
+                        if (target.name == "index.json") throw IOException("synthetic index failure")
+                        super.atomicMove(source, target)
+                    }
+                }
+            val failingStore = PluginStateStore.open(failingFileSystem, root / "social-plugins-v2")
+            val failingInstaller = PluginInstaller(failingFileSystem, failingStore)
+            val updatedManifest = TestFppFactory.validManifest.replace("\"version\": \"1.0.0\"", "\"version\": \"2.0.0\"")
+            TestFppFactory.write(
+                input,
+                TestFppFactory.validEntries(
+                    manifest = updatedManifest,
+                    script = TestFppFactory.validScript + "\n// failed version 2",
+                ),
+            )
+            val preview = failingInstaller.inspect(input)
+
+            assertFails { failingInstaller.commit(preview, confirmed = true) }
+            assertEquals(
+                first,
+                failingStore.desired.value.plugins
+                    .getValue(first.pluginId),
+            )
+            assertEquals(
+                first,
+                PluginStateStore
+                    .open(fileSystem, root / "social-plugins-v2")
+                    .desired.value.plugins
+                    .getValue(first.pluginId),
+            )
+            assertTrue(fileSystem.exists(failingStore.paths.packagePath(first.packageHash)))
+            assertTrue(fileSystem.exists(failingStore.paths.packagePath(preview.packageHash)))
+
+            val cleanup = PluginStateStore.open(fileSystem, root / "social-plugins-v2").cleanup()
+            assertEquals(1, cleanup.packages)
+            assertEquals(1, cleanup.icons)
+            assertFalse(fileSystem.exists(failingStore.paths.packagePath(preview.packageHash)))
         }
 
     @Test

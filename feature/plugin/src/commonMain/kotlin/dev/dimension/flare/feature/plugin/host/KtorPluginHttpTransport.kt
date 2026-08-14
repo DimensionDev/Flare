@@ -29,8 +29,7 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class KtorPluginHttpTransport(
     engine: HttpClientEngine,
-) : PluginHttpTransport,
-    AutoCloseable {
+) : PluginHttpTransport {
     private val client =
         HttpClient(engine) {
             followRedirects = false

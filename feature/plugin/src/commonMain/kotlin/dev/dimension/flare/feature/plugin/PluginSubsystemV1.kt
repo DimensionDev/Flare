@@ -33,7 +33,7 @@ public class PluginSubsystemV1(
     public val runtimePool: PluginRuntimePool =
         PluginRuntimePool(
             fileSystem = appFiles.fileSystem,
-            transport = createKtorPluginHttpTransport(),
+            transportFactory = ::createKtorPluginHttpTransport,
         )
     public val installer: PluginInstaller = PluginInstaller(appFiles.fileSystem, stateStore)
 

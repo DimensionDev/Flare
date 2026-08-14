@@ -17,6 +17,9 @@ import kotlin.native.HiddenFromObjC
 public interface PluginHttpTransport {
     /** Executes exactly one request without redirects, cookies, or logging. */
     public suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1
+
+    /** Releases transport resources. No-op transports do not need to override this. */
+    public fun close() {}
 }
 
 @HiddenFromObjC

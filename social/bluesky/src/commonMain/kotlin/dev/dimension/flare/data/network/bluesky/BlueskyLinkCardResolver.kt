@@ -3,8 +3,10 @@ package dev.dimension.flare.data.network.bluesky
 import app.bsky.embed.ExternalExternal
 import app.bsky.feed.PostEmbedUnion
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.network.nullableFallbackJson
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
@@ -25,6 +27,8 @@ import sh.christian.ozone.api.model.Blob
 import app.bsky.embed.External as ExternalEmbed
 
 private const val CARDYB_ENDPOINT = "https://cardyb.bsky.app/v1/extract"
+private const val CARDYB_HOST = "cardyb.bsky.app"
+private const val CARDYB_IMAGE_PATH = "/v1/image"
 private const val LINK_CARD_TIMEOUT_MILLIS = 10_000L
 private const val LINK_CARD_IMAGE_TIMEOUT_MILLIS = 15_000L
 private const val MAX_IMAGE_DOWNLOAD_BYTES = 10L * 1024L * 1024L
@@ -43,7 +47,13 @@ internal data class BlueskyLinkCard(
 )
 
 internal class BlueskyLinkCardResolver(
-    private val client: HttpClient = ktorClient(),
+    private val client: HttpClient =
+        ktorClient {
+            followRedirects = false
+            install(ContentNegotiation) {
+                nullableFallbackJson()
+            }
+        },
 ) {
     suspend fun resolve(value: String): BlueskyLinkCard? {
         val uri = normalizeHttpUrl(value) ?: return null
@@ -63,14 +73,14 @@ internal class BlueskyLinkCardResolver(
                     uri = uri,
                     title = body.title.cleaned(MAX_CARD_TITLE_LENGTH) ?: uri.take(MAX_CARD_TITLE_LENGTH),
                     description = body.description.cleaned(MAX_CARD_DESCRIPTION_LENGTH).orEmpty(),
-                    imageUrl = body.image?.let(::normalizeHttpUrl),
+                    imageUrl = body.image?.let(::normalizeCardybImageUrl),
                 )
             }
         }
     }
 
     suspend fun fetchImage(value: String): ByteArray? {
-        val uri = normalizeHttpUrl(value) ?: return null
+        val uri = normalizeCardybImageUrl(value) ?: return null
         return bestEffort {
             withTimeoutOrNull(LINK_CARD_IMAGE_TIMEOUT_MILLIS) {
                 val response = client.get(uri)
@@ -105,6 +115,20 @@ internal fun normalizeHttpUrl(value: String): String? {
     if (parsed.host.isBlank()) return null
     return parsed.toString()
 }
+
+internal fun normalizeCardybImageUrl(value: String): String? =
+    runCatching { Url(value.trim()) }
+        .getOrNull()
+        ?.takeIf {
+            it.protocol.name == "https" &&
+                it.host.equals(CARDYB_HOST, ignoreCase = true) &&
+                it.port == 443 &&
+                it.encodedPath == CARDYB_IMAGE_PATH &&
+                it.parameters["url"]?.isNotBlank() == true &&
+                it.user == null &&
+                it.password == null &&
+                it.fragment.isEmpty()
+        }?.toString()
 
 internal fun BlueskyLinkCard.toExternalEmbed(thumb: Blob?): PostEmbedUnion.External =
     PostEmbedUnion.External(

@@ -29,6 +29,22 @@ class BlueskyLinkCardResolverTest {
     }
 
     @Test
+    fun acceptsOnlyCardybImageProxyUrls() {
+        val proxyUrl = "https://cardyb.bsky.app/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png"
+
+        assertEquals(proxyUrl, normalizeCardybImageUrl(proxyUrl))
+        listOf(
+            "http://127.0.0.1/private.png",
+            "https://192.168.1.1/private.png",
+            "http://cardyb.bsky.app/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png",
+            "https://user:password@cardyb.bsky.app/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png",
+            "https://cardyb.bsky.app.evil.test/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png",
+            "https://cardyb.bsky.app:444/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png",
+            "https://cardyb.bsky.app/v1/other?url=https%3A%2F%2Fexample.com%2Fcard.png",
+        ).forEach { assertNull(normalizeCardybImageUrl(it)) }
+    }
+
+    @Test
     fun cardybResolverPassesTheOriginalUrlAsQueryParameter() =
         runTest {
             var requestedUrl: String? = null
@@ -68,7 +84,7 @@ class BlueskyLinkCardResolverTest {
             val client =
                 HttpClient(
                     MockEngine { request ->
-                        if (request.url.encodedPath.endsWith(".png")) {
+                        if (request.url.parameters["url"]?.endsWith(".png") == true) {
                             respond(
                                 content = ByteReadChannel(imageBytes),
                                 headers = headersOf(HttpHeaders.ContentType, ContentType.Image.PNG.toString()),
@@ -80,14 +96,59 @@ class BlueskyLinkCardResolverTest {
                             )
                         }
                     },
-                )
+                ) {
+                    followRedirects = false
+                }
             val resolver = BlueskyLinkCardResolver(client)
 
             try {
                 withContext(Dispatchers.Default) {
-                    assertContentEquals(imageBytes, resolver.fetchImage("https://example.com/card.png"))
-                    assertNull(resolver.fetchImage("https://example.com/card.txt"))
+                    assertContentEquals(
+                        imageBytes,
+                        resolver.fetchImage(
+                            "https://cardyb.bsky.app/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png",
+                        ),
+                    )
+                    assertNull(
+                        resolver.fetchImage(
+                            "https://cardyb.bsky.app/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.txt",
+                        ),
+                    )
+                    assertNull(resolver.fetchImage("http://127.0.0.1/private.png"))
                 }
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
+    fun imageFetchDoesNotFollowProxyRedirects() =
+        runTest {
+            var requestCount = 0
+            val client =
+                HttpClient(
+                    MockEngine {
+                        requestCount++
+                        respond(
+                            content = "",
+                            status = HttpStatusCode.Found,
+                            headers = headersOf(HttpHeaders.Location, "http://127.0.0.1/private.png"),
+                        )
+                    },
+                ) {
+                    followRedirects = false
+                }
+
+            try {
+                val image =
+                    withContext(Dispatchers.Default) {
+                        BlueskyLinkCardResolver(client).fetchImage(
+                            "https://cardyb.bsky.app/v1/image?url=https%3A%2F%2Fexample.com%2Fcard.png",
+                        )
+                    }
+
+                assertNull(image)
+                assertEquals(1, requestCount)
             } finally {
                 client.close()
             }

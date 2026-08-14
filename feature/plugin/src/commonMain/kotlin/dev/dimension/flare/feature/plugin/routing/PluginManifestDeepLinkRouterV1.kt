@@ -108,4 +108,4 @@ public class PluginManifestDeepLinkRouterV1(
 
 private const val MAX_URL_LENGTH = 8_192
 private const val MAX_CAPTURE_LENGTH = 4_096
-private val CAPTURE = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,127})}")
+private val CAPTURE = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,127})\\}")

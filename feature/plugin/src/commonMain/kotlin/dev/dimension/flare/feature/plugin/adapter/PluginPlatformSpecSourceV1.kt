@@ -700,5 +700,5 @@ private fun RunningPluginV1.iconFileUrl(): String = "file://$iconPath"
 private fun String.render(values: Map<String, String>): String =
     DEEP_LINK_CAPTURE.replace(this) { match -> values.getValue(match.groupValues[1]) }
 
-private val DEEP_LINK_CAPTURE = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,127})}")
+private val DEEP_LINK_CAPTURE = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,127})\\}")
 private const val LOGIN_ACTION = "login"

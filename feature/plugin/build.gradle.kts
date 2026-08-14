@@ -74,6 +74,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.test.runner)
                 implementation(libs.junit)
                 implementation(libs.kotlinx.coroutines.test)
             }

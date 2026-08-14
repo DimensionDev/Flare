@@ -131,7 +131,7 @@ public sealed interface UiTextArgument {
     }
 }
 
-private val namedArgumentPattern = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,63})}")
+private val namedArgumentPattern = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,63})\\}")
 
 private fun String.interpolate(args: Map<String, UiTextArgument>): String =
     namedArgumentPattern.replace(this) { match ->

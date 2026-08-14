@@ -153,4 +153,4 @@ private fun String.interpolate(args: Map<String, UiTextArgument>): String =
 
 private val LOCALE_TAG = Regex("[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*")
 private val LOCALIZATION_KEY = Regex("[A-Za-z][A-Za-z0-9_.-]{0,127}")
-private val ARGUMENT = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,63})}")
+private val ARGUMENT = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,63})\\}")

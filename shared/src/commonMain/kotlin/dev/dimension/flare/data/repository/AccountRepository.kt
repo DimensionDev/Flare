@@ -22,7 +22,9 @@ import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
@@ -133,12 +135,20 @@ internal class AccountRepository internal constructor(
                 platformId = account.platformId,
                 credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
+                platformDisplayName = account.platformDisplayName,
+                platformIconName = account.platformIcon.name,
+                platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
+                platformIconUrl = account.platformIconUrl,
             ) ?: DbAccount(
                 account_key = account.accountKey,
                 platformId = account.platformId,
                 credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
                 sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
+                platformDisplayName = account.platformDisplayName,
+                platformIconName = account.platformIcon.name,
+                platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
+                platformIconUrl = account.platformIconUrl,
             )
         appDatabase.accountDao().insert(dbAccount)
         if (existingAccount == null) {
@@ -326,17 +336,25 @@ internal class AccountRepository internal constructor(
     }
 }
 
-private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount =
-    UiAccount(
+private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount {
+    val registered = platformRegistry.get(platformId)?.metadata
+    val displayName = registered?.displayName ?: platformDisplayName ?: platformId
+    val icon = registered?.icon ?: platformIconName?.let { name -> UiIcon.entries.firstOrNull { it.name == name } } ?: UiIcon.World
+    val displayNameText =
+        registered?.displayNameText
+            ?: platformDisplayNameTextJson?.let { runCatching { it.decodeJson<UiText>() }.getOrNull() }
+            ?: UiText.Raw(displayName)
+    return UiAccount(
         accountKey = account_key,
         platformId = platformId,
-        platformDisplayName = platformRegistry.metadataOrFallback(platformId).displayName,
-        platformIcon = platformRegistry.metadataOrFallback(platformId).icon,
-        platformDisplayNameText = platformRegistry.metadataOrFallback(platformId).displayNameText,
-        platformIconUrl = platformRegistry.metadataOrFallback(platformId).iconUrl,
+        platformDisplayName = displayName,
+        platformIcon = icon,
+        platformDisplayNameText = displayNameText,
+        platformIconUrl = registered?.iconUrl ?: platformIconUrl,
         platformAvailable = platformRegistry.isRegistered(platformId),
         supportsRelayManagement = platformRegistry.supports(platformId, PlatformCapability.RelayManagement),
     )
+}
 
 @HiddenFromObjC
 public data object NoActiveAccountException : Exception("No active account.")

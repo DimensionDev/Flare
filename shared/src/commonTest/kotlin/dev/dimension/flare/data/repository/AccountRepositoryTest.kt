@@ -4,6 +4,7 @@ import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.combineLatestFlowLists
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -18,6 +19,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -236,6 +239,38 @@ class AccountRepositoryTest : RobolectricTest() {
 
             repository.delete(unavailableKey).join()
             assertNull(appDatabase.accountDao().getAccount(unavailableKey))
+        }
+
+    @Test
+    fun unavailableAccountUsesMetadataCapturedWhenItWasAdded() =
+        runTest {
+            val repository = createRepository(this)
+            val account =
+                UiAccount(
+                    accountKey = MicroBlogKey("alice", "future.example"),
+                    platformId = "FutureNet",
+                    platformDisplayName = "Future Network",
+                    platformIcon = UiIcon.Mastodon,
+                    platformDisplayNameText = UiText.Raw("Localized Future Network"),
+                    platformIconUrl = "file:///stable/future.png",
+                )
+
+            repository.addAccount(account, "credential").join()
+
+            val stored = requireNotNull(appDatabase.accountDao().getAccount(account.accountKey))
+            assertEquals("Future Network", stored.platformDisplayName)
+            assertEquals(UiIcon.Mastodon.name, stored.platformIconName)
+            assertEquals(
+                UiText.Raw("Localized Future Network"),
+                requireNotNull(stored.platformDisplayNameTextJson).decodeJson<UiText>(),
+            )
+            assertEquals("file:///stable/future.png", stored.platformIconUrl)
+            val restored = repository.allAccounts.first().single()
+            assertEquals("Future Network", restored.platformDisplayName)
+            assertEquals(UiIcon.Mastodon, restored.platformIcon)
+            assertEquals(UiText.Raw("Localized Future Network"), restored.platformDisplayNameText)
+            assertEquals("file:///stable/future.png", restored.platformIconUrl)
+            assertFalse(restored.platformAvailable)
         }
 
     @Test

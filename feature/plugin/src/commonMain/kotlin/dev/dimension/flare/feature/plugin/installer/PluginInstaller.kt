@@ -95,6 +95,7 @@ public class PluginInstaller(
             stateStore.validateInstall(record)
             persistPackage(packagePath, preview.packageSize)
             persistIcon(iconPath, preview.validated.icon)
+            persistIcon(stateStore.paths.stableIconPath(preview.pluginId, preview.packageHash), preview.validated.icon)
             stateStore.install(record)
             activePreview = null
             record
@@ -143,6 +144,10 @@ public class PluginInstaller(
             recovered.values.forEach { candidate ->
                 persistIcon(
                     stateStore.paths.iconPath(candidate.record.packageHash),
+                    candidate.icon,
+                )
+                persistIcon(
+                    stateStore.paths.stableIconPath(candidate.record.pluginId, candidate.record.packageHash),
                     candidate.icon,
                 )
             }

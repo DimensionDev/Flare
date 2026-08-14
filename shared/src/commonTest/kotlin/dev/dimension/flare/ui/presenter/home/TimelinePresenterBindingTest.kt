@@ -30,10 +30,10 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformRuntimeData
 import dev.dimension.flare.testPlatformRuntimeData
-import dev.dimension.flare.unavailableAccountService
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.unavailableAccountService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

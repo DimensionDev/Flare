@@ -33,6 +33,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import okio.SYSTEM
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -123,6 +124,15 @@ class PluginLoginCoordinatorV1Test {
                     ?.jsonPrimitive
                     ?.content,
             )
+            val iconUrl =
+                requireNotNull(
+                    accounts.added
+                        .single()
+                        .first
+                        .platformIconUrl,
+                )
+            assertTrue(iconUrl.contains("/platform-"))
+            assertTrue(FileSystem.SYSTEM.exists(iconUrl.removePrefix("file://").toPath()))
         }
 
     @Test

@@ -42,7 +42,6 @@ interface LoginServiceV1 {
 interface SearchServiceV1 {
   posts(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
   profiles(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
-  hashtags(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<HashtagV1>>;
   discoverPosts(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
   discoverProfiles(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
   discoverHashtags(request: SearchRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<HashtagV1>>;
@@ -69,7 +68,6 @@ interface RelationServiceV1 {
 }
 interface NotificationServiceV1 {
   page(request: NotificationPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<NotificationV1>>;
-  filters(request: EmptyRequestV1, context: PluginInvocationContextV1): MaybePromise<NotificationFilterV1[]>;
   badge(request: EmptyRequestV1, context: PluginInvocationContextV1): MaybePromise<CountResultV1>;
 }
 interface ListServiceV1 {
@@ -277,7 +275,6 @@ interface NotificationV1 {
   post?: PostV1;
   message?: RichTextV1;
 }
-interface NotificationFilterV1 { id: string; title: string; kinds?: NotificationKindV1[] }
 interface SocialListV1 { id: string; title: string; memberCount?: number; entityToken?: string }
 interface DirectMessageRoomV1 {
   key: EntityKeyV1;

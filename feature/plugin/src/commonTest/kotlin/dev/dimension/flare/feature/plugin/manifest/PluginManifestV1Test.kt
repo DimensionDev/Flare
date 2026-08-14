@@ -173,6 +173,77 @@ class PluginManifestV1Test {
     }
 
     @Test
+    fun partialHostInterfacesAndDynamicNotificationFiltersAreRejected() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val partialProfile =
+            manifest.copy(
+                platform =
+                    manifest.platform.copy(
+                        capabilities =
+                            manifest.platform.capabilities +
+                                (
+                                    PluginAbiV1.Capabilities.LIST to
+                                        CapabilityManifestV1(
+                                            operations = mapOf("page" to CapabilityOperationManifestV1()),
+                                        )
+                                ),
+                    ),
+            )
+        val notificationWithoutStaticFilters =
+            manifest.copy(
+                platform =
+                    manifest.platform.copy(
+                        capabilities =
+                            manifest.platform.capabilities +
+                                (
+                                    PluginAbiV1.Capabilities.NOTIFICATION to
+                                        CapabilityManifestV1(
+                                            operations = mapOf("page" to CapabilityOperationManifestV1()),
+                                        )
+                                ),
+                    ),
+            )
+
+        assertTrue(partialProfile.validate().errors.any { it.code == "capability.incomplete" })
+        assertTrue(notificationWithoutStaticFilters.validate().errors.any { it.code == "notification.filters" })
+    }
+
+    @Test
+    fun staticNotificationFiltersAndRelationActionsAreAccepted() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val configured =
+            manifest.copy(
+                platform =
+                    manifest.platform.copy(
+                        capabilities =
+                            manifest.platform.capabilities +
+                                mapOf(
+                                    PluginAbiV1.Capabilities.NOTIFICATION to
+                                        CapabilityManifestV1(
+                                            operations = mapOf("page" to CapabilityOperationManifestV1()),
+                                            notificationFilters =
+                                                setOf(
+                                                    NotificationFilterKindV1.All,
+                                                    NotificationFilterKindV1.Mention,
+                                                ),
+                                        ),
+                                    PluginAbiV1.Capabilities.RELATION to
+                                        CapabilityManifestV1(
+                                            operations =
+                                                mapOf(
+                                                    "state" to CapabilityOperationManifestV1(),
+                                                    "mutate" to CapabilityOperationManifestV1(),
+                                                ),
+                                            relationActions = setOf(RelationActionKindV1.Follow),
+                                        ),
+                                ),
+                    ),
+            )
+
+        assertTrue(configured.validate().isValid)
+    }
+
+    @Test
     fun catalogUsesBcp47FallbackAndNamedArguments() {
         val bundle =
             PluginCatalogBundleV1(
@@ -210,6 +281,8 @@ class PluginManifestV1Test {
                     "login.oauth.begin",
                     "login.oauth.resume",
                     "capabilities.timeline.page",
+                    "capabilities.profile.byId",
+                    "capabilities.profile.byHandle",
                     "capabilities.profile.timeline",
                     "capabilities.compose.publish",
                 ),
@@ -237,7 +310,11 @@ class PluginManifestV1Test {
                     "operations": { "page": { "directions": ["refresh", "older"] } }
                   },
                   "${PluginAbiV1.Capabilities.PROFILE}": {
-                    "operations": { "timeline": { "directions": ["refresh", "older"] } }
+                    "operations": {
+                      "byId": {},
+                      "byHandle": {},
+                      "timeline": { "directions": ["refresh", "older"] }
+                    }
                   },
                   "${PluginAbiV1.Capabilities.COMPOSE}": {
                     "operations": { "publish": {} }

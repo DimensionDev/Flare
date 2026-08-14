@@ -35,10 +35,11 @@ internal fun RunningPluginV1.requireLoginSuccess(
     require(
         value.capabilities.all { (capability, operations) ->
             capability in PluginAbiV1.knownCapabilityOperations &&
-                declared[capability]?.operations?.keys?.containsAll(operations) == true
+                declared[capability]?.operations?.keys?.containsAll(operations) == true &&
+                PluginAbiV1.hasRequiredOperations(capability, operations)
         },
-    ) { "Login returned undeclared capabilities" }
-    require(value.capabilities.any { (capability, operations) -> capability in DISPLAY_CAPABILITIES && operations.isNotEmpty() }) {
+    ) { "Login returned undeclared or incomplete capabilities" }
+    require(value.capabilities.any { (capability, operations) -> PluginAbiV1.isDisplayableCapability(capability, operations) }) {
         "Login did not negotiate a displayable capability"
     }
     return value.copy(origin = origin)
@@ -63,19 +64,5 @@ public class PluginLoginException(
     message: String,
     cause: Throwable? = null,
 ) : IllegalStateException(message, cause)
-
-private val DISPLAY_CAPABILITIES =
-    setOf(
-        PluginAbiV1.Capabilities.TIMELINE,
-        PluginAbiV1.Capabilities.SEARCH,
-        PluginAbiV1.Capabilities.PROFILE,
-        PluginAbiV1.Capabilities.POST,
-        PluginAbiV1.Capabilities.NOTIFICATION,
-        PluginAbiV1.Capabilities.LIST,
-        PluginAbiV1.Capabilities.DIRECT_MESSAGE,
-        PluginAbiV1.Capabilities.ARTICLE,
-        PluginAbiV1.Capabilities.GALLERY,
-        PluginAbiV1.Capabilities.TAB_CATALOG,
-    )
 
 internal fun Url.accountHost(): String = host + if (specifiedPort == 0) "" else ":$specifiedPort"

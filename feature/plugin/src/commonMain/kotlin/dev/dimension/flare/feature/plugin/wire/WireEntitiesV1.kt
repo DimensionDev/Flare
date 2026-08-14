@@ -34,13 +34,6 @@ public data class NotificationV1(
 )
 
 @Serializable
-public data class NotificationFilterV1(
-    val id: String,
-    val title: String,
-    val kinds: Set<NotificationKindV1> = emptySet(),
-)
-
-@Serializable
 public data class SocialListV1(
     val id: String,
     val title: String,

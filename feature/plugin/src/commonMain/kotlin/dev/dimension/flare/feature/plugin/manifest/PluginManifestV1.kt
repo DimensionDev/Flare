@@ -56,7 +56,36 @@ public data class GuestManifestV1(
 @Serializable
 public data class CapabilityManifestV1(
     val operations: Map<String, CapabilityOperationManifestV1>,
+    val notificationFilters: Set<NotificationFilterKindV1> = emptySet(),
+    val relationActions: Set<RelationActionKindV1> = emptySet(),
 )
+
+@Serializable
+public enum class NotificationFilterKindV1 {
+    @SerialName("all")
+    All,
+
+    @SerialName("mention")
+    Mention,
+
+    @SerialName("comment")
+    Comment,
+
+    @SerialName("like")
+    Like,
+}
+
+@Serializable
+public enum class RelationActionKindV1 {
+    @SerialName("follow")
+    Follow,
+
+    @SerialName("block")
+    Block,
+
+    @SerialName("mute")
+    Mute,
+}
 
 @Serializable
 public data class CapabilityOperationManifestV1(

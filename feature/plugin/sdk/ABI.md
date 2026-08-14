@@ -53,15 +53,24 @@ Current method paths are:
 | Capability | Service operations |
 | --- | --- |
 | `flare.datasource.timeline/v1` | `timeline.page` |
-| `flare.datasource.search/v1` | `search.posts`, `profiles`, `hashtags`, `discoverPosts`, `discoverProfiles`, `discoverHashtags` |
+| `flare.datasource.search/v1` | `search.posts`, `profiles`, `discoverPosts`, `discoverProfiles`, `discoverHashtags` |
 | `flare.datasource.profile/v1` | `profile.byId`, `byHandle`, `timeline`, `following`, `followers` |
 | `flare.datasource.post/v1` | `post.detail`, `context`, `delete`, `mutate` |
+| `flare.datasource.relation/v1` | `relation.state`, `mutate` |
 | `flare.datasource.compose/v1` | `compose.publish` |
+| `flare.datasource.notification/v1` | `notification.page`, `badge` |
 | `flare.datasource.list/v1` | `list.page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` |
 | `flare.datasource.direct-message/v1` | `directMessage.rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` |
 
 Additional Host-known capability IDs are defined in `PluginAbiV1.kt`. Use
 `flare-plugin.d.ts` for the complete v1 JavaScript types.
+
+Capabilities that map to a full Host interface must declare its required
+operation set; installation rejects partial interfaces. Notification filters
+(`all`, `mention`, `comment`, `like`) and relation actions (`follow`, `block`,
+`mute`) are static arrays on their capability manifest declarations. They are
+not asynchronous JavaScript methods because Flare needs them synchronously to
+decide which controls to show.
 
 ## Invocation and state
 

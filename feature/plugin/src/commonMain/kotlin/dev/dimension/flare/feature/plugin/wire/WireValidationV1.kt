@@ -121,11 +121,6 @@ public fun NotificationV1.requireValid() {
     message?.requireValid()
 }
 
-public fun NotificationFilterV1.requireValid() {
-    require(id.isWireName()) { "Invalid notification filter ID" }
-    require(title.isNotBlank() && title.length <= 1_024) { "Invalid notification filter title" }
-}
-
 public fun SocialListV1.requireValid() {
     require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid list ID" }
     require(title.isNotBlank() && title.length <= 4_096) { "Invalid list title" }

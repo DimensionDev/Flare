@@ -42,6 +42,8 @@ import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.manifest.NotificationFilterKindV1
+import dev.dimension.flare.feature.plugin.manifest.RelationActionKindV1
 import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.wire.ArticleV1
 import dev.dimension.flare.feature.plugin.wire.BooleanResultV1
@@ -162,7 +164,11 @@ internal class PluginExtraCapabilitiesV1(
         private val tokens = mutableMapOf<MicroBlogKey, Map<SemanticActionV1, String>>()
         private val loader =
             object : RelationLoader {
-                override val supportedTypes: Set<RelationActionType> = RelationActionType.entries.toSet()
+                override val supportedTypes: Set<RelationActionType> =
+                    plugin.installed.manifest.platform.capabilities
+                        .getValue(PluginAbiV1.Capabilities.RELATION)
+                        .relationActions
+                        .mapTo(linkedSetOf(), RelationActionKindV1::toHost)
 
                 override suspend fun relation(userKey: MicroBlogKey): UiRelation =
                     invoker
@@ -216,7 +222,11 @@ internal class PluginExtraCapabilitiesV1(
     ) : NotificationTimelineDataSource,
         NotificationDataSource,
         MicroblogDataSource by base {
-        override val supportedNotificationFilter: List<NotificationFilter> = NotificationFilter.entries
+        override val supportedNotificationFilter: List<NotificationFilter> =
+            plugin.installed.manifest.platform.capabilities
+                .getValue(PluginAbiV1.Capabilities.NOTIFICATION)
+                .notificationFilters
+                .map(NotificationFilterKindV1::toHost)
 
         override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
             pluginRemoteLoader(
@@ -791,6 +801,21 @@ private fun NotificationFilter.toWire(): String? =
         NotificationFilter.Mention -> "mention"
         NotificationFilter.Comment -> "comment"
         NotificationFilter.Like -> "like"
+    }
+
+private fun NotificationFilterKindV1.toHost(): NotificationFilter =
+    when (this) {
+        NotificationFilterKindV1.All -> NotificationFilter.All
+        NotificationFilterKindV1.Mention -> NotificationFilter.Mention
+        NotificationFilterKindV1.Comment -> NotificationFilter.Comment
+        NotificationFilterKindV1.Like -> NotificationFilter.Like
+    }
+
+private fun RelationActionKindV1.toHost(): RelationActionType =
+    when (this) {
+        RelationActionKindV1.Follow -> RelationActionType.Follow
+        RelationActionKindV1.Block -> RelationActionType.Block
+        RelationActionKindV1.Mute -> RelationActionType.Mute
     }
 
 private fun <Wire : Any, Ui : Any> PageV1<Wire>.toPagingResult(map: (Wire) -> Ui): PagingResult<Ui> =

@@ -119,7 +119,10 @@ internal class PluginDataSourceV1 private constructor(
     override val capabilitySet: DataSourceCapabilitySet by lazy {
         DataSourceCapabilitySet(
             timeline = capability(PluginAbiV1.Capabilities.TIMELINE)?.let { TimelineCapability(this) },
-            search = capability(PluginAbiV1.Capabilities.SEARCH)?.let { SearchCapability(this) },
+            search =
+                capability(PluginAbiV1.Capabilities.SEARCH)
+                    ?.takeIf { PluginAbiV1.hasRequiredOperations(PluginAbiV1.Capabilities.SEARCH, it) }
+                    ?.let { SearchCapability(this) },
             profile =
                 capability(PluginAbiV1.Capabilities.PROFILE)
                     ?.takeIf { it.containsAll(PROFILE_LOOKUP_OPERATIONS) }
@@ -142,16 +145,12 @@ internal class PluginDataSourceV1 private constructor(
             tabCatalog =
                 if (
                     accountKey != null &&
-                    (
-                        plugin.installed.manifest.platform.timelines
-                            .isNotEmpty() || extraCapabilities.pinnableTabs != null
-                    )
+                    (hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page") || extraCapabilities.pinnableTabs != null)
                 ) {
                     TabCatalogCapability(
                         configuration =
                             TabConfiguration().takeIf {
-                                plugin.installed.manifest.platform.timelines
-                                    .isNotEmpty()
+                                hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")
                             },
                         pinnable = extraCapabilities.pinnableTabs,
                     )

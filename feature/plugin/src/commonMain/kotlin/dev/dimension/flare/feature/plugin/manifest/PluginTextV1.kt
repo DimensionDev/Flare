@@ -14,7 +14,9 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.encodeToJsonElement
 
 @Serializable(with = PluginTextV1Serializer::class)
@@ -94,7 +96,14 @@ public fun WireTextV1.toUiText(pluginId: String): UiText =
             namespace = pluginId,
             key = requireNotNull(key),
             fallback = requireNotNull(fallback),
-            args = args,
+            args =
+                args.mapValues { (_, value) ->
+                    when {
+                        value.isString -> UiTextArgument.StringValue(value.content)
+                        value.booleanOrNull != null -> UiTextArgument.BooleanValue(requireNotNull(value.booleanOrNull))
+                        else -> UiTextArgument.NumberValue(requireNotNull(value.doubleOrNull))
+                    }
+                },
         )
 
 @Serializable

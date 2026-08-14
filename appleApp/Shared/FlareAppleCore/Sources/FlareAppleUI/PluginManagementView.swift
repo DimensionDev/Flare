@@ -11,18 +11,16 @@ import AppKit
 #endif
 
 public struct PluginManagementView: View {
+    @State private var facade: PluginAppleFacadeV1
     @StateObject private var presenter: KotlinPresenter<PluginManagementStateV1>
     @State private var importsPlugin = false
     @State private var fileError: String?
     @State private var pendingUninstallId: String?
     @State private var pendingUninstallName: String?
 
-    private var facade: PluginAppleFacadeV1 {
-        presenter.presenter as! PluginAppleFacadeV1
-    }
-
     public init() {
         let facade = PluginAppleFacadeV1()
+        _facade = State(initialValue: facade)
         _presenter = StateObject(wrappedValue: KotlinPresenter(presenter: facade))
     }
 
@@ -48,7 +46,7 @@ public struct PluginManagementView: View {
 
             if !presenter.state.issues.isEmpty || !presenter.state.runtimeIssues.isEmpty {
                 Section("plugin_issues") {
-                    ForEach(presenter.state.issues, id: \.code) { issue in
+                    ForEach(Array(presenter.state.issues.enumerated()), id: \.offset) { _, issue in
                         Text(issueText(issue.code))
                             .foregroundStyle(.red)
                     }
@@ -135,9 +133,11 @@ public struct PluginManagementView: View {
             Button("Cancel", role: .cancel) {
                 Task { try? await facade.cancelInstall() }
             }
+            .disabled(presenter.state.busy)
             Button("plugin_confirm_install") {
                 Task { try? await facade.confirmInstall() }
             }
+            .disabled(presenter.state.busy)
         } message: {
             if let review = presenter.state.pendingInstall {
                 Text(installReviewText(review))
@@ -159,12 +159,14 @@ public struct PluginManagementView: View {
                 pendingUninstallId = nil
                 pendingUninstallName = nil
             }
+            .disabled(presenter.state.busy)
             Button("plugin_uninstall", role: .destructive) {
                 guard let pluginId = pendingUninstallId else { return }
                 pendingUninstallId = nil
                 pendingUninstallName = nil
                 Task { try? await facade.uninstall(pluginId: pluginId) }
             }
+            .disabled(presenter.state.busy)
         } message: {
             Text(
                 String(
@@ -302,13 +304,31 @@ public struct PluginManagementView: View {
         if !review.permissions.isEmpty {
             lines.append("")
             lines.append(String(localized: "plugin_permissions"))
-            lines.append(contentsOf: review.permissions.map { permission in
-                let cookie = permission.cookieName.map { "/\($0)" } ?? ""
-                return "• \(permission.origin)\(cookie)"
-            })
+            lines.append(contentsOf: review.permissions.map { "• " + permissionText($0) })
         }
         lines.append(contentsOf: review.warnings.compactMap(warningText))
         return lines.joined(separator: "\n")
+    }
+
+    private func permissionText(_ permission: PluginSensitivePermissionV1) -> String {
+        let accountToken = "$accountOrigin"
+        let accountRelativePath =
+            permission.origin == accountToken || permission.origin.hasPrefix(accountToken + "/")
+                ? String(permission.origin.dropFirst(accountToken.count))
+                : nil
+        let origin = accountRelativePath.map {
+            String(localized: "plugin_permission_account_origin_label") + $0
+        } ?? permission.origin
+        guard let cookieName = permission.cookieName else {
+            return accountRelativePath == nil
+                ? origin
+                : String(localized: "plugin_permission_account_origin")
+        }
+        return String(
+            format: String(localized: "plugin_permission_cookie"),
+            origin,
+            cookieName
+        )
     }
 
     private func warningText(_ warning: PluginInstallWarningV1) -> String? {
@@ -326,6 +346,10 @@ public struct PluginManagementView: View {
             key = "plugin_warning_compatibility"
         }
         let message = String(localized: String.LocalizationValue(key))
-        return "• " + (warning.detail.map { "\(message): \($0)" } ?? message)
+        let detail = warning.detail?.replacingOccurrences(
+            of: "$accountOrigin",
+            with: String(localized: "plugin_permission_account_origin_label")
+        )
+        return "• " + (detail.map { "\(message): \($0)" } ?? message)
     }
 }

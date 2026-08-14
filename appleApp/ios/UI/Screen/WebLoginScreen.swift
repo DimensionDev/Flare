@@ -24,6 +24,12 @@ struct WebLoginScreen: View {
                         }
                     }
                     .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            WebLoginOriginLabel(
+                                current: webLoginHTTPSOrigin(viewModel.page.url) ?? webLoginHTTPSOrigin(URL(string: url)) ?? "",
+                                initial: webLoginHTTPSOrigin(URL(string: url))
+                            )
+                        }
                         ToolbarItem(placement: .cancellationAction) {
                             Button {
                                 dismiss()
@@ -36,7 +42,13 @@ struct WebLoginScreen: View {
                             }
                         }
                     }
+                    .task {
+                        await viewModel.pollCookies()
+                    }
             }
+        }
+        .onDisappear {
+            viewModel.clearCookie()
         }
     }
 }
@@ -46,15 +58,26 @@ struct NavigationDecider: WebPage.NavigationDeciding {
     let onCookie: ([HTTPCookie]) -> Void
     let config: WebPage.Configuration
     let url: URL?
+    func decidePolicy(
+        for action: WebPage.NavigationAction,
+        preferences: inout WebPage.NavigationPreferences
+    ) async -> WKNavigationActionPolicy {
+        guard action.target?.isMainFrame != false else {
+            return .allow
+        }
+        return webLoginHTTPSOrigin(action.request.url) == nil ? .cancel : .allow
+    }
+
     func decidePolicy(for response: WebPage.NavigationResponse) async -> WKNavigationResponsePolicy {
         getCookies()
-        return .allow
+        return webLoginHTTPSOrigin(response.response.url) == nil ? .cancel : .allow
     }
     func getCookies() {
         WKWebsiteDataStore.default().httpCookieStore.getAllCookies { (cookies) in
             self.onCookie(cookies)
         }
     }
+
 }
 
 @available(iOS 26.0, *)
@@ -85,17 +108,52 @@ class WebLoginViewModel: ObservableObject {
             self.onCookie(cookies)
         }
     }
+
+    func pollCookies() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            getCookies()
+        }
+    }
     
     func clearCookie() {
-        let dataStore = WKWebsiteDataStore.default()
-        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            dataStore.removeData(
-                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records,
-                completionHandler: {
-                    self.canShowWebView = true
-                }
-            )
+        clearWebLoginDataStore { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.canShowWebView = true
+            }
         }
+    }
+}
+
+struct WebLoginOriginLabel: View {
+    let current: String
+    let initial: String?
+
+    var body: some View {
+        Text(current)
+            .lineLimit(1)
+            .foregroundStyle(current.isEmpty || current == initial ? Color.secondary : Color.red)
+    }
+}
+
+func webLoginHTTPSOrigin(_ url: URL?) -> String? {
+    guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty, url.user == nil, url.password == nil else {
+        return nil
+    }
+    if let port = url.port, port != 443 {
+        return "https://\(host):\(port)"
+    }
+    return "https://\(host)"
+}
+
+func clearWebLoginDataStore(completion: @escaping @Sendable () -> Void = {}) {
+    let dataStore = WKWebsiteDataStore.default()
+    dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+        dataStore.removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            for: records,
+            completionHandler: completion
+        )
     }
 }

@@ -82,6 +82,16 @@ class FppArchiveReaderTest {
         TestFppFactory.patchLittleEndian(packagePath, CENTRAL_HEADER, 4, 0x0314, 2)
         TestFppFactory.patchLittleEndian(packagePath, CENTRAL_HEADER, 38, 0xa000_0000L, 4)
         assertFails { FppArchiveReader(fileSystem).read(packagePath) }
+
+        TestFppFactory.write(packagePath)
+        TestFppFactory.patchLittleEndian(packagePath, LOCAL_HEADER, 6, 0x20, 2)
+        TestFppFactory.patchLittleEndian(packagePath, CENTRAL_HEADER, 8, 0x20, 2)
+        assertFails { FppArchiveReader(fileSystem).read(packagePath) }
+
+        TestFppFactory.write(packagePath, stored = true)
+        TestFppFactory.patchLittleEndian(packagePath, LOCAL_HEADER, 6, 0x02, 2)
+        TestFppFactory.patchLittleEndian(packagePath, CENTRAL_HEADER, 8, 0x02, 2)
+        assertFails { FppArchiveReader(fileSystem).read(packagePath) }
     }
 
     @Test

@@ -22,6 +22,12 @@ struct BackportWebLoginScreen: View {
                     webView.navigationDelegate = viewModel.delegate
                 }
                 .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        WebLoginOriginLabel(
+                            current: viewModel.currentOrigin,
+                            initial: webLoginHTTPSOrigin(URL(string: url))
+                        )
+                    }
                     ToolbarItem(placement: .cancellationAction) {
                         Button {
                             dismiss()
@@ -34,21 +40,40 @@ struct BackportWebLoginScreen: View {
                         }
                     }
                 }
+                .task {
+                    await viewModel.pollCookies()
+                }
             }
+        }
+        .onDisappear {
+            viewModel.clearCookie()
         }
     }
 }
 
 class WKDelegate: NSObject, WKNavigationDelegate {
     let decidePolicy: () -> Void
+    var onOriginChange: (String) -> Void = { _ in }
+
     init(decidePolicy: @escaping () -> Void
     ) {
         self.decidePolicy = decidePolicy
     }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        guard navigationAction.targetFrame?.isMainFrame != false else {
+            return .allow
+        }
+        guard let origin = webLoginHTTPSOrigin(navigationAction.request.url) else {
+            return .cancel
+        }
+        onOriginChange(origin)
+        return .allow
+    }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         decidePolicy()
-        return .allow
+        return webLoginHTTPSOrigin(navigationResponse.response.url) == nil ? .cancel : .allow
     }
 }
 
@@ -57,7 +82,19 @@ class BackportWebLoginViewModel: ObservableObject {
     var canShowWebView = false
     let url: String
     let onCookie: ([HTTPCookie]) -> Void
-    let delegate: WKDelegate
+    @Published var currentOrigin: String
+    lazy var delegate: WKDelegate = {
+        let delegate = WKDelegate { [weak self] in
+            guard let self else { return }
+            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+                self.onCookie(cookies)
+            }
+        }
+        delegate.onOriginChange = { [weak self] origin in
+            self?.currentOrigin = origin
+        }
+        return delegate
+    }()
     private var observers = [NSKeyValueObservation]()
     init(
         onCookie: @escaping ([HTTPCookie]) -> Void,
@@ -65,11 +102,7 @@ class BackportWebLoginViewModel: ObservableObject {
     ) {
         self.onCookie = onCookie
         self.url = url
-        self.delegate = WKDelegate {
-            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { (cookies) in
-                onCookie(cookies)
-            }
-        }
+        self.currentOrigin = webLoginHTTPSOrigin(URL(string: url)) ?? ""
         clearCookie()
     }
     var configuration: WKWebViewConfiguration {
@@ -78,15 +111,24 @@ class BackportWebLoginViewModel: ObservableObject {
         return configuration
     }
     func clearCookie() {
-        let dataStore = WKWebsiteDataStore.default()
-        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            dataStore.removeData(
-                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records,
-                completionHandler: {
-                    self.canShowWebView = true
-                }
-            )
+        clearWebLoginDataStore { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.canShowWebView = true
+            }
+        }
+    }
+
+    func getCookies() {
+        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+            self.onCookie(cookies)
+        }
+    }
+
+    func pollCookies() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            getCookies()
         }
     }
     deinit {

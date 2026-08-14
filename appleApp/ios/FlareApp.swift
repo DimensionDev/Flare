@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import AVFAudio
+import UIKit
 
 @main
 struct FlareApp: App {
@@ -32,6 +33,11 @@ struct FlareApp: App {
             }
             .onChange(of: scenePhase) { _, phase in
                 MediaCacheMaintenance.handleScenePhase(phase)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
+                Task.detached {
+                    try? await PluginRuntimeLifecycleFacadeV1().onMemoryPressure()
+                }
             }
         }
     }

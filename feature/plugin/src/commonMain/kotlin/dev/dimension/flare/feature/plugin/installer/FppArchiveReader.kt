@@ -40,9 +40,18 @@ internal class FppArchiveReader(
                 .associate { entry ->
                     val bytes =
                         zip.source("/${entry.path}".toPath()).buffer().use { source ->
-                            source.readByteArray()
+                            val buffer = Buffer()
+                            while (true) {
+                                val remaining = entry.uncompressedSize + 1 - buffer.size
+                                require(remaining > 0) { "${entry.path} exceeds its declared uncompressed size" }
+                                val read = source.read(buffer, minOf(COPY_BUFFER_BYTES, remaining))
+                                if (read == -1L) break
+                            }
+                            require(buffer.size == entry.uncompressedSize) {
+                                "Invalid uncompressed size for ${entry.path}"
+                            }
+                            buffer.readByteArray()
                         }
-                    require(bytes.size.toLong() == entry.uncompressedSize) { "Invalid uncompressed size for ${entry.path}" }
                     entry.path to bytes
                 }
         return FppArchive(entries = entries, files = files)
@@ -113,7 +122,7 @@ internal class FppArchiveReader(
         require(compressedSize != UINT32_MAX && uncompressedSize != UINT32_MAX && localHeaderOffset != UINT32_MAX) {
             "ZIP64 is not supported"
         }
-        validateFlags(flags)
+        validateFlags(flags, compression)
         require(compression == COMPRESSION_STORED || compression == COMPRESSION_DEFLATE) {
             "Unsupported ZIP compression method"
         }
@@ -163,7 +172,7 @@ internal class FppArchiveReader(
             val rawName = source.readByteArray(nameSize.toLong())
             val extra = source.readByteArray(extraSize.toLong())
 
-            validateFlags(flags)
+            validateFlags(flags, compression)
             require(flags == central.flags && compression == central.compression) { "ZIP header mismatch" }
             require(rawName.contentEquals(central.rawName)) { "ZIP entry name mismatch" }
             validateExtra(extra)
@@ -245,8 +254,15 @@ internal class FppArchiveReader(
         require(segments.all { it.isNotEmpty() && it != "." && it != ".." }) { "ZIP path traversal" }
     }
 
-    private fun validateFlags(flags: Int) {
+    private fun validateFlags(
+        flags: Int,
+        compression: Int,
+    ) {
         require(flags and (FLAG_ENCRYPTED or FLAG_STRONG_ENCRYPTION) == 0) { "Encrypted ZIP entries are not supported" }
+        require(flags and ALLOWED_FLAGS.inv() == 0) { "Unsupported ZIP entry flags" }
+        require(compression == COMPRESSION_DEFLATE || flags and FLAG_DEFLATE_OPTIONS == 0) {
+            "Invalid ZIP compression flags"
+        }
     }
 
     private fun validateUnixType(
@@ -338,12 +354,16 @@ private const val UINT32_MAX = 0xffff_ffffL
 private const val COMPRESSION_STORED = 0
 private const val COMPRESSION_DEFLATE = 8
 private const val FLAG_ENCRYPTED = 1
+private const val FLAG_DEFLATE_OPTIONS = (1 shl 1) or (1 shl 2)
 private const val FLAG_DATA_DESCRIPTOR = 1 shl 3
 private const val FLAG_STRONG_ENCRYPTION = 1 shl 6
+private const val FLAG_UTF8 = 1 shl 11
+private const val ALLOWED_FLAGS = FLAG_DEFLATE_OPTIONS or FLAG_DATA_DESCRIPTOR or FLAG_UTF8
 private const val UNIX_HOST = 3
 private const val UNIX_TYPE_MASK = 0xf000
 private const val UNIX_REGULAR = 0x8000
 private const val UNIX_DIRECTORY = 0x4000
 private const val UNIX_SYMLINK = 0xa000
 private const val MAX_PATH_LENGTH = 512
+private const val COPY_BUFFER_BYTES = 8_192L
 private val DRIVE_PATH = Regex("^[A-Za-z]:")

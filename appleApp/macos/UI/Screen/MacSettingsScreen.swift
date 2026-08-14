@@ -320,6 +320,7 @@ private struct MacAccountManagementSettingsPane: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
     @State private var accounts: [AccountsStateAccountItem] = []
     @State private var isLoginSheetPresented = false
+    @State private var reloginTarget: ReloginTarget?
     @State private var pendingLogoutAccountKey: MicroBlogKey?
     @State private var pendingLogoutAccountName: String?
 
@@ -327,6 +328,7 @@ private struct MacAccountManagementSettingsPane: View {
         StateView(state: presenter.state.accounts) { data in
             VStack {
                 Button {
+                    reloginTarget = nil
                     isLoginSheetPresented = true
                 } label: {
                     Label {
@@ -346,6 +348,7 @@ private struct MacAccountManagementSettingsPane: View {
                         systemImage: "person.crop.circle.badge.exclamationmark",
                         description: "macos_account_add"
                     ).onTapGesture {
+                        reloginTarget = nil
                         isLoginSheetPresented = true
                     }
                 } else {
@@ -369,8 +372,15 @@ private struct MacAccountManagementSettingsPane: View {
         }
         .sheet(isPresented: $isLoginSheetPresented) {
             NavigationStack {
-                ServiceSelectionScreen {
-                    isLoginSheetPresented = false
+                if let reloginTarget {
+                    ReloginScreen(target: reloginTarget) {
+                        self.reloginTarget = nil
+                        isLoginSheetPresented = false
+                    }
+                } else {
+                    ServiceSelectionScreen {
+                        isLoginSheetPresented = false
+                    }
                 }
             }
             .frame(width: 420, height: 540)
@@ -422,7 +432,17 @@ private struct MacAccountManagementSettingsPane: View {
         } errorContent: { error in
             Group {
                 if item.account.platformAvailable {
-                    UserErrorView(error: error)
+                    if let target = loginTarget(for: error) {
+                        Button {
+                            reloginTarget = target
+                            isLoginSheetPresented = true
+                        } label: {
+                            UserErrorView(error: error)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        UserErrorView(error: error)
+                    }
                 } else {
                     unavailableAccountRow(item.account)
                 }
@@ -451,6 +471,16 @@ private struct MacAccountManagementSettingsPane: View {
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private func loginTarget(for error: KotlinThrowable) -> ReloginTarget? {
+        if let expired = error as? LoginExpiredException {
+            return ReloginTarget(accountKey: expired.accountKey, platformId: expired.platformId)
+        }
+        if let required = error as? RequireReLoginException {
+            return ReloginTarget(accountKey: required.accountKey, platformId: required.platformId)
+        }
+        return nil
     }
 
     @ViewBuilder

@@ -298,13 +298,15 @@ internal class PluginDataSourceV1 private constructor(
     ): RemoteLoader<UiTimelineV2> {
         val declared =
             plugin.installed.manifest.platform.timelines
-                .singleOrNull { it.id == timelineId } ?: return notSupported()
+                .singleOrNull { it.id == timelineId }
+        val acceptsDynamicTimeline = hasOperation(PluginAbiV1.Capabilities.TAB_CATALOG, "page")
+        if (declared == null && !acceptsDynamicTimeline) return notSupported()
         if (!hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) return notSupported()
         return postPageLoader(PluginAbiV1.Capabilities.TIMELINE, "page") { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.TIMELINE,
                 operation = "page",
-                request = TimelinePageRequestV1(timelineId, request.toWire(pageSize), declared.parameters + parameters),
+                request = TimelinePageRequestV1(timelineId, request.toWire(pageSize), declared?.parameters.orEmpty() + parameters),
                 requestSerializer = TimelinePageRequestV1.serializer(),
                 responseSerializer = PageV1.serializer(PostV1.serializer()),
                 validate = { page -> page.requireValid { it.requireValid() } },
@@ -611,7 +613,7 @@ internal class PluginDataSourceV1 private constructor(
             coroutineScope: CoroutineScope,
         ): PluginDataSourceV1 {
             val credentialAccess = PlatformDataSourceCredentialAccessV1(plugin, context)
-            val account = credentialAccess.current()
+            val account = credentialAccess.initial()
             val operations = account.effectiveCapabilities(plugin)
             val runtimeKey =
                 PluginRuntimeKeyV1.account(

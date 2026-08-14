@@ -244,11 +244,12 @@ public class PluginRuntimePool(
         pluginId: String,
         countsTowardPause: Boolean,
     ) {
+        if (!countsTowardPause) return
         mutex.withLock {
             val now = nowMillis()
             val recent = failures.getOrPut(pluginId, ::mutableListOf)
             recent.removeAll { now - it > FAILURE_WINDOW_MILLIS }
-            if (countsTowardPause) recent += now
+            recent += now
             val isPaused = recent.size >= FAILURE_LIMIT
             if (isPaused) paused += pluginId
             mutableIssues.value =

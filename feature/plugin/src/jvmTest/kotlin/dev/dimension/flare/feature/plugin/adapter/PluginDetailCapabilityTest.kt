@@ -1,8 +1,12 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import androidx.paging.LoadState
+import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -22,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonObject
@@ -34,6 +39,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class PluginDetailCapabilityTest {
@@ -86,16 +92,83 @@ class PluginDetailCapabilityTest {
             val listAdapter = requireNotNull(dataSource.extraCapabilities.listAdapter)
             assertEquals("Cold list", listAdapter.info("list-1").title)
             assertEquals("Updated", listAdapter.update("list-1", ListMetaData(title = "Updated")).title)
+            assertTrue(
+                listAdapter
+                    .listTimeline("list-1")
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
 
             val roomKey = MicroBlogKey("room-1", accountKey.host)
-            assertEquals(roomKey, requireNotNull(dataSource.extraCapabilities.directMessageAdapter).roomInfo(roomKey).key)
+            val directMessage = requireNotNull(dataSource.extraCapabilities.directMessageAdapter)
+            assertEquals(roomKey, directMessage.roomInfo(roomKey).key)
+            assertTrue(directMessage.canSendDirectMessage(MicroBlogKey("user-1", accountKey.host)))
+
+            val relation = requireNotNull(dataSource.capabilitySet.relation)
             assertEquals(
                 setOf(RelationActionType.Follow),
-                requireNotNull(dataSource.capabilitySet.relation).supportedRelationTypes,
+                relation.supportedRelationTypes,
             )
+            val relationLoader = relation.relationHandler.dataSource
+            assertEquals(false, relationLoader.relation(MicroBlogKey("user-1", accountKey.host)).following)
+            relationLoader.follow(MicroBlogKey("user-1", accountKey.host))
+
+            val notification = requireNotNull(dataSource.capabilitySet.notification)
+            val notificationTimeline = requireNotNull(notification.timeline)
             assertEquals(
                 listOf(NotificationFilter.All, NotificationFilter.Mention),
-                requireNotNull(dataSource.capabilitySet.notification?.timeline).supportedNotificationFilter,
+                notificationTimeline.supportedNotificationFilter,
+            )
+            assertTrue(
+                notificationTimeline
+                    .notification()
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
+            assertEquals(0, requireNotNull(notification.events).notificationHandler.loader.notificationBadgeCount())
+
+            val articleKey = MicroBlogKey("article-1", accountKey.host)
+            val article = requireNotNull(dataSource.capabilitySet.article)
+            assertEquals("Plugin article", article.article(articleKey).title)
+            assertTrue(
+                article
+                    .articleComments(articleKey)
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
+
+            val galleryKey = MicroBlogKey("gallery-1", accountKey.host)
+            val gallery = requireNotNull(dataSource.capabilitySet.gallery)
+            val galleryDetail = gallery.galleryDetail(galleryKey)
+            assertIs<LoadState.NotLoading>(galleryDetail.refreshState.first { it !is LoadState.Loading })
+            assertEquals(
+                "Plugin gallery",
+                assertIs<CacheState.Success<GalleryDetail>>(galleryDetail.data.first { it is CacheState.Success }).data.title,
+            )
+            assertTrue(
+                gallery
+                    .galleryComments(galleryKey)
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
+            assertTrue(
+                gallery
+                    .galleryRecommendations(galleryKey)
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
+
+            assertEquals(
+                1,
+                dataSource
+                    .timeline("dynamic-feed", mapOf("kind" to "photos"))
+                    .load(20, PagingRequest.Refresh)
+                    .data.size,
             )
         }
 
@@ -173,10 +246,26 @@ private const val MANIFEST =
             "relationActions": ["follow"]
           },
           "flare.datasource.notification/v1": {
-            "operations": { "page": {}, "badge": {} },
+            "operations": { "page": { "directions": ["refresh"] }, "badge": {} },
             "notificationFilters": ["all", "mention"]
+          },
+          "flare.datasource.article/v1": { "operations": {
+            "detail": {}, "comments": { "directions": ["refresh"] }
+          } },
+          "flare.datasource.gallery/v1": { "operations": {
+            "detail": {}, "comments": { "directions": ["refresh"] },
+            "recommendations": { "directions": ["refresh"] }
+          } },
+          "flare.datasource.timeline/v1": {
+            "operations": { "page": { "directions": ["refresh"] } }
+          },
+          "flare.datasource.tab-catalog/v1": {
+            "operations": { "page": { "directions": ["refresh"] } }
           }
-        }
+        },
+        "timelines": [
+          { "id": "home", "title": "Home", "defaultForNewAccount": true }
+        ]
       }
     }
     """
@@ -221,6 +310,24 @@ private const val SCRIPT =
       notification: {
         page() { return { items: [] }; },
         badge() { return { value: 0 }; },
+      },
+      article: {
+        detail(request) { return { key: request.key, title: "Plugin article", createdAt: "2026-01-01T00:00:00Z", content: { format: "plain", value: "Article body" }, url: "https://plugin.example/articles/article-1" }; },
+        comments() { return { items: [] }; },
+      },
+      gallery: {
+        detail(request) { return { key: request.key, title: "Plugin gallery", createdAt: "2026-01-01T00:00:00Z", content: { format: "plain", value: "Gallery body" }, url: "https://plugin.example/galleries/gallery-1", images: [{ id: "image-1", type: "image", url: "https://plugin.example/images/image-1.jpg" }] }; },
+        comments() { return { items: [] }; },
+        recommendations() { return { items: [] }; },
+      },
+      timeline: {
+        page(request) {
+          if (request.timelineId !== "dynamic-feed" || request.parameters.kind !== "photos") throw new Error("bad timeline");
+          return { items: [{ key: { id: "post-1", host: "plugin.example" }, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Dynamic" } }] };
+        },
+      },
+      tabCatalog: {
+        page() { return { items: [] }; },
       },
     } });
     """

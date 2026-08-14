@@ -3,6 +3,7 @@ package dev.dimension.flare.feature.plugin.runtime
 import com.dokar.quickjs.QuickJs
 import com.dokar.quickjs.QuickJsException
 import com.dokar.quickjs.QuickJsInterruptedException
+import dev.dimension.flare.feature.plugin.abi.DISABLE_DYNAMIC_CODE_PRELUDE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -20,6 +21,20 @@ class QuickJsSmokeTest {
     fun awaitsPromise() =
         withQuickJs { quickJs ->
             assertEquals("Flare", quickJs.evaluate<String>("await Promise.resolve('Flare')"))
+        }
+
+    @Test
+    fun pluginPolicyDisablesStringCompilation() =
+        withQuickJs { quickJs ->
+            quickJs.evaluate<Unit>(DISABLE_DYNAMIC_CODE_PRELUDE)
+
+            assertEquals(
+                "undefined,undefined,undefined,undefined",
+                quickJs.evaluate<String>(
+                    "[typeof eval, typeof Function, typeof (() => {}).constructor, " +
+                        "typeof (async () => {}).constructor].join(',')",
+                ),
+            )
         }
 
     @Test

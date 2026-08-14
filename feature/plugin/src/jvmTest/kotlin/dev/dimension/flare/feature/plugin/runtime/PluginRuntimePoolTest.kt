@@ -12,8 +12,10 @@ import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonElement
@@ -138,11 +140,22 @@ class PluginRuntimePoolTest {
         runBlocking {
             val plugin = install(pageScript(STATEFUL_PAGE))
             val pool = PluginRuntimePool(fileSystem, CapturingTransport())
-            val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
+            val context = accountContext(plugin, "first", "https://one.example", MemoryCredential(), locale = "zh-Hans-CN")
             try {
                 assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
-                assertFailsWith<PluginCallException> { invokePage(pool, plugin, context, request("pluginError")) }
-                assertEquals(3, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
+                assertEquals(
+                    "找不到内容",
+                    assertFailsWith<PluginCallException> {
+                        invokePage(pool, plugin, context, request("pluginError"))
+                    }.message,
+                )
+                assertEquals(
+                    "缺少 photo，数量 2，启用 true",
+                    assertFailsWith<PluginCallException> {
+                        invokePage(pool, plugin, context, request("pluginErrorArgs"))
+                    }.message,
+                )
+                assertEquals(4, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
                 assertFailsWith<PluginRuntimeUnavailableException> {
                     invokePage(pool, plugin, context, request("throw"))
                 }
@@ -153,11 +166,55 @@ class PluginRuntimePoolTest {
                 }
                 assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
 
+                assertFailsWith<PluginRuntimeUnavailableException> {
+                    invokePage(pool, plugin, context, request("oom"))
+                }
+                pool.retry(PLUGIN_ID)
+                assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
+
                 assertFailsWith<kotlinx.coroutines.TimeoutCancellationException> {
                     withTimeout(100) { invokePage(pool, plugin, context, request("loop")) }
                 }
                 pool.retry(PLUGIN_ID)
                 assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
+            } finally {
+                pool.close()
+            }
+        }
+
+    @Test
+    fun callerCancellationRebuildsWithoutPublishingRuntimeFailure() =
+        runBlocking {
+            val plugin = install(pageScript(STATEFUL_PAGE))
+            val pool = PluginRuntimePool(fileSystem, CapturingTransport())
+            val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
+            try {
+                val call = launch { invokePage(pool, plugin, context, request("loop")) }
+                delay(100)
+                call.cancelAndJoin()
+
+                assertTrue(pool.issues.value.isEmpty())
+                assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
+            } finally {
+                pool.close()
+            }
+        }
+
+    @Test
+    fun pluginCannotCompileDownloadedJavaScript() =
+        runBlocking {
+            val plugin = install(pageScript(STATEFUL_PAGE))
+            val pool = PluginRuntimePool(fileSystem, CapturingTransport())
+            val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
+            try {
+                assertFailsWith<PluginRuntimeUnavailableException> {
+                    invokePage(pool, plugin, context, request("eval"))
+                }
+                assertEquals(1, invokePage(pool, plugin, context, request("normal"))["count"]!!.jsonPrimitive.int)
+                assertFailsWith<PluginRuntimeUnavailableException> {
+                    invokePage(pool, plugin, context, request("function"))
+                }
+                Unit
             } finally {
                 pool.close()
             }
@@ -240,15 +297,19 @@ class PluginRuntimePoolTest {
     fun memoryPressureClosesOnlyIdleRuntime() =
         runBlocking {
             val plugin = install(pageScript(STATEFUL_PAGE))
-            val pool = PluginRuntimePool(fileSystem, CapturingTransport())
+            val transport = GateTransport()
+            val pool = PluginRuntimePool(fileSystem, transport)
             val first = accountContext(plugin, "first", "https://one.example", MemoryCredential())
-            val second = accountContext(plugin, "second", "https://two.example", MemoryCredential())
             try {
-                assertEquals(1, invokePage(pool, plugin, first, request("normal"))["count"]!!.jsonPrimitive.int)
-                assertEquals(1, invokePage(pool, plugin, second, request("normal"))["count"]!!.jsonPrimitive.int)
+                val active = async { invokePage(pool, plugin, first, request("wait")) }
+                transport.started.await()
+                pool.closeIdle()
+                transport.release.complete(Unit)
+                assertEquals(1, active.await()["count"]!!.jsonPrimitive.int)
+                assertEquals(2, invokePage(pool, plugin, first, request("normal"))["count"]!!.jsonPrimitive.int)
+
                 pool.closeIdle()
                 assertEquals(1, invokePage(pool, plugin, first, request("normal"))["count"]!!.jsonPrimitive.int)
-                assertEquals(1, invokePage(pool, plugin, second, request("normal"))["count"]!!.jsonPrimitive.int)
             } finally {
                 pool.close()
             }
@@ -303,7 +364,16 @@ class PluginRuntimePoolTest {
         }
 
     private suspend fun install(script: String): RunningPluginV1 {
-        TestFppFactory.write(input, TestFppFactory.validEntries(script = script))
+        TestFppFactory.write(
+            input,
+            TestFppFactory.validEntries(script = script) +
+                listOf(
+                    "locales/en.json" to "{\"error.missing\":\"Content was not found\"}".encodeToByteArray(),
+                    "locales/zh-Hans.json" to
+                        "{\"error.missing\":\"找不到内容\",\"error.detail\":\"缺少 {item}，数量 {count}，启用 {active}\"}"
+                            .encodeToByteArray(),
+                ),
+        )
         val namespace = root / "social-plugins-v2"
         val store = PluginStateStore.open(fileSystem, namespace)
         val installer = PluginInstaller(fileSystem, store)
@@ -319,6 +389,7 @@ class PluginRuntimePoolTest {
         accountId: String,
         origin: String,
         credential: PluginCredentialAccess,
+        locale: String = "en",
     ): PluginInvocationContextV1 =
         PluginInvocationContextV1.account(
             pluginId = PLUGIN_ID,
@@ -326,7 +397,7 @@ class PluginRuntimePoolTest {
             packageHash = plugin.installed.packageHash,
             origin = origin,
             accountId = accountId,
-            locale = "en",
+            locale = locale,
             credential = credential,
         )
 
@@ -440,14 +511,34 @@ private const val STATEFUL_PAGE =
     """async function(request) {
       globalThis.__testCount = (globalThis.__testCount || 0) + 1;
       if (request.mode === "pluginError") {
-        throw flare.error({ code: "NotFound", message: { value: "missing" } });
+        throw flare.error({ code: "NotFound", message: { key: "error.missing", fallback: "missing" } });
+      }
+      if (request.mode === "pluginErrorArgs") {
+        throw flare.error({
+          code: "Validation",
+          message: {
+            key: "error.detail",
+            fallback: "Missing {item}, count {count}, active {active}",
+            args: { item: "photo", count: 2, active: true },
+          },
+        });
       }
       if (request.mode === "throw") throw new Error("synthetic");
       if (request.mode === "waitThrow") {
         await flare.http.request({ url: "https://one.example/wait" });
         throw new Error("synthetic");
       }
+      if (request.mode === "wait") {
+        await flare.http.request({ url: "https://one.example/wait" });
+        return { count: globalThis.__testCount };
+      }
+      if (request.mode === "oom") {
+        const chunks = [];
+        while (true) chunks.push(new Uint8Array(1024 * 1024));
+      }
       if (request.mode === "loop") while (true) {}
+      if (request.mode === "eval") return (0, eval)("({ remote: true })");
+      if (request.mode === "function") return (() => {}).constructor("return { remote: true }")();
       if (request.mode === "host") {
         await flare.credential.replace({ token: "new" });
         return {

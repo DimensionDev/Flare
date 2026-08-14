@@ -3,7 +3,7 @@ package dev.dimension.flare.feature.plugin.host
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.request.request
+import io.ktor.client.request.prepareRequest
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
@@ -38,25 +38,29 @@ public class KtorPluginHttpTransport(
 
     override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 =
         withTimeout(request.timeoutMillis) {
-            val response =
-                client.request(request.url) {
+            client
+                .prepareRequest(request.url) {
                     method = HttpMethod.parse(request.method)
                     request.headers.forEach { (name, value) -> headers.append(name, value) }
                     request.body?.let { setBody(it.toOutgoingContent()) }
+                }.execute { response ->
+                    val length = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
+                    val channel = response.bodyAsChannel()
+                    require(length == null || length <= MAX_RESPONSE_BYTES) {
+                        channel.cancel()
+                        "HTTP response is too large"
+                    }
+                    val packet = channel.readRemaining(MAX_RESPONSE_BYTES.toLong() + 1)
+                    require(packet.remaining <= MAX_RESPONSE_BYTES) {
+                        channel.cancel()
+                        "HTTP response is too large"
+                    }
+                    PluginTransportResponseV1(
+                        status = response.status.value,
+                        headers = response.headers.entries().associate { it.key to it.value },
+                        body = packet.readByteArray(),
+                    )
                 }
-            val length = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
-            require(length == null || length <= MAX_RESPONSE_BYTES) { "HTTP response is too large" }
-            val channel = response.bodyAsChannel()
-            val packet = channel.readRemaining(MAX_RESPONSE_BYTES.toLong() + 1)
-            require(packet.remaining <= MAX_RESPONSE_BYTES) {
-                channel.cancel()
-                "HTTP response is too large"
-            }
-            PluginTransportResponseV1(
-                status = response.status.value,
-                headers = response.headers.entries().associate { it.key to it.value },
-                body = packet.readByteArray(),
-            )
         }
 
     override fun close() {

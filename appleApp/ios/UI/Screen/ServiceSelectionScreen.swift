@@ -370,6 +370,7 @@ private struct LoginFlowView: View {
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
     @State private var webCookieProbes: [LoginCookieProbe] = []
+    @State private var checkingCookies = false
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -456,8 +457,11 @@ private struct LoginFlowView: View {
     }
 
     private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
-        let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
-        Task {
+        Task { @MainActor in
+            guard !checkingCookies else { return }
+            checkingCookies = true
+            defer { checkingCookies = false }
+            let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
             if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
                 webCookieUrl = nil
             }

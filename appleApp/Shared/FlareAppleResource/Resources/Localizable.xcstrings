@@ -49,6 +49,24 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "权限" } }
       }
     },
+    "plugin_permission_account_origin" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Network access to the HTTPS instance you choose" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "访问你选择的 HTTPS 实例" } }
+      }
+    },
+    "plugin_permission_account_origin_label" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "the HTTPS instance you choose" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "你选择的 HTTPS 实例" } }
+      }
+    },
+    "plugin_permission_cookie" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Read cookie %2$@ from %1$@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "从 %1$@ 读取 Cookie %2$@" } }
+      }
+    },
     "plugin_rebuild_index" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Rebuild plugin index" } },
@@ -135,8 +153,8 @@
     },
     "plugin_unverified_warning" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "This local plugin is unverified. Install it only if you trust its author." } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此本地插件未经验证。请仅在信任其作者时安装。" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此本地插件未经验证，可以访问列出的账号和网络域名。请仅在信任作者时安装。" } }
       }
     },
     "plugin_warning_added_permission" : {

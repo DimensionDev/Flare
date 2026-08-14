@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.management
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.di.koinGet
@@ -18,7 +19,12 @@ public class PluginAppleFacadeV1 : PresenterBase<PluginManagementStateV1>() {
         )
 
     @Composable
-    override fun body(): PluginManagementStateV1 = presenter.state.collectAsState().value
+    override fun body(): PluginManagementStateV1 {
+        DisposableEffect(presenter) {
+            onDispose { presenter.close() }
+        }
+        return presenter.state.collectAsState().value
+    }
 
     @Throws(Exception::class)
     public suspend fun inspect(path: String): PluginInstallReviewV1 = presenter.inspect(path)
@@ -71,5 +77,13 @@ public class PluginOAuthCallbackFacadeV1 {
     @Throws(Exception::class)
     public suspend fun handle(url: String) {
         check(coordinator.handle(url, Locale.language)) { "Unsupported plugin OAuth callback" }
+    }
+}
+
+/** Swift-facing hook for native memory-pressure notifications. */
+public class PluginRuntimeLifecycleFacadeV1 {
+    @Throws(Exception::class)
+    public suspend fun onMemoryPressure() {
+        koinGet<PluginSubsystemV1>().onMemoryPressure()
     }
 }

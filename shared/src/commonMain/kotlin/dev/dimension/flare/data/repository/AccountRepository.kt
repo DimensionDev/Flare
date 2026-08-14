@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -47,6 +48,11 @@ import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
+
+private data class RepositoryEvent<T>(
+    val generation: Long,
+    val value: T,
+)
 
 @Stable
 @Single
@@ -99,20 +105,18 @@ internal class AccountRepository internal constructor(
     }
 
     private val addAccountFlow by lazy {
-        MutableStateFlow<UiAccount?>(null)
+        MutableStateFlow<RepositoryEvent<UiAccount>?>(null)
     }
     internal val onAdded: Flow<UiAccount> by lazy {
         addAccountFlow
-            .mapNotNull { it }
-            .distinctUntilChangedBy { it.accountKey }
+            .mapNotNull { it?.value }
     }
     private val removeAccountFlow by lazy {
-        MutableStateFlow<MicroBlogKey?>(null)
+        MutableStateFlow<RepositoryEvent<MicroBlogKey>?>(null)
     }
     internal val onRemoved: Flow<MicroBlogKey> by lazy {
         removeAccountFlow
-            .mapNotNull { it }
-            .distinctUntilChangedBy { it }
+            .mapNotNull { it?.value }
     }
 
     internal inline fun <reified T : Any> addAccount(
@@ -133,6 +137,7 @@ internal class AccountRepository internal constructor(
         val credentialJson = credential.encodeJson(serializer)
         val dbAccount =
             existingAccount?.copy(
+                platformId = account.platformId,
                 credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
             ) ?: DbAccount(
@@ -143,7 +148,16 @@ internal class AccountRepository internal constructor(
                 sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
             )
         appDatabase.accountDao().insert(dbAccount)
-        addAccountFlow.value = account
+        if (existingAccount == null) {
+            addAccountFlow.update { RepositoryEvent((it?.generation ?: 0) + 1, account) }
+        } else {
+            dataSourceCacheMutex.withLock {
+                val dataSource = dataSourceCache.remove(account.accountKey)
+                if (dataSource is AutoCloseable) {
+                    dataSource.close()
+                }
+            }
+        }
     }
 
     internal inline fun <reified T : Any> updateCredential(
@@ -198,30 +212,25 @@ internal class AccountRepository internal constructor(
                     lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
                 )
             }
-            removeAccountFlow.value = accountKey
+            removeAccountFlow.update { RepositoryEvent((it?.generation ?: 0) + 1, accountKey) }
             dataSourceCacheMutex.withLock {
                 val datasource = dataSourceCache.remove(accountKey)
                 if (datasource is AutoCloseable) {
                     datasource.close()
                 }
             }
-            cacheDatabase.pagingTimelineDao().deleteByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.statusDao().deleteByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.userDao().deleteHistoryByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.emojiDao().clearHistoryByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.messageDao().clearMessageTimeline(
-                AccountType.Specific(accountKey),
-            )
+            invalidateCachedContent(accountKey)
             appDatabase.accountDao().delete(accountKey)
         }
+
+    private suspend fun invalidateCachedContent(accountKey: MicroBlogKey) {
+        val accountType = AccountType.Specific(accountKey)
+        cacheDatabase.pagingTimelineDao().deleteByAccountType(accountType)
+        cacheDatabase.statusDao().deleteByAccountType(accountType)
+        cacheDatabase.userDao().deleteHistoryByAccountType(accountType)
+        cacheDatabase.emojiDao().clearHistoryByAccountType(accountType)
+        cacheDatabase.messageDao().clearMessageTimeline(accountType)
+    }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
         appDatabase.accountDao().get(accountKey).map {
@@ -316,6 +325,10 @@ internal class AccountRepository internal constructor(
                 accountKey,
                 credential.encodeJson(serializer),
             )
+        }
+
+        override suspend fun invalidateCachedContent() {
+            this@AccountRepository.invalidateCachedContent(accountKey)
         }
     }
 }

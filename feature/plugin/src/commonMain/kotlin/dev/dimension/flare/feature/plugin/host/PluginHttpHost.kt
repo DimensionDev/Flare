@@ -243,7 +243,7 @@ private fun HttpBodyV1.resolve(assets: Map<String, PluginAsset>): PluginTranspor
         }
 
         is HttpBodyV1.Multipart -> {
-            PluginTransportBodyV1.Multipart(
+            val resolved =
                 parts.map { part ->
                     when (part) {
                         is HttpMultipartPartV1.Text -> {
@@ -260,8 +260,12 @@ private fun HttpBodyV1.resolve(assets: Map<String, PluginAsset>): PluginTranspor
                             )
                         }
                     }
-                },
-            )
+                }
+            require(
+                resolved.filterIsInstance<PluginTransportMultipartPartV1.Asset>().sumOf { it.value.size } <=
+                    MAX_MULTIPART_ASSET_BYTES,
+            ) { "Multipart assets are too large" }
+            PluginTransportBodyV1.Multipart(resolved)
         }
     }
 
@@ -378,5 +382,6 @@ private const val MAX_FORM_KEY = 256
 private const val MAX_FORM_VALUE = 64 * 1_024
 private const val MAX_MULTIPART_PARTS = 64
 private const val MAX_MULTIPART_TEXT = 256 * 1_024
+private const val MAX_MULTIPART_ASSET_BYTES = 1024L * 1024 * 1024
 private const val MAX_FILE_NAME = 512
 internal const val MAX_RESPONSE_BYTES: Int = 4 * 1_024 * 1_024

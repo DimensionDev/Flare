@@ -378,6 +378,7 @@ private struct LoginFlowView: View {
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
     @State private var webCookieProbes: [LoginCookieProbe] = []
+    @State private var checkingCookies = false
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -473,8 +474,11 @@ private struct LoginFlowView: View {
     }
 
     private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
-        let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
-        Task {
+        Task { @MainActor in
+            guard !checkingCookies else { return }
+            checkingCookies = true
+            defer { checkingCookies = false }
+            let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
             if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
                 webCookieUrl = nil
             }
@@ -731,6 +735,17 @@ private struct MacOSWebLoginScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Text(viewModel.currentOrigin)
+                .font(.callout)
+                .foregroundStyle(
+                    viewModel.currentOrigin.isEmpty || viewModel.currentOrigin == macWebLoginHTTPSOrigin(URL(string: url))
+                        ? Color.secondary
+                        : Color.red
+                )
+                .lineLimit(1)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+            Divider()
             if viewModel.canShowWebView {
                 MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
                     webView.navigationDelegate = viewModel.delegate
@@ -739,6 +754,12 @@ private struct MacOSWebLoginScreen: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+        .task {
+            await viewModel.pollCookies()
+        }
+        .onDisappear {
+            viewModel.clearCookie()
         }
     }
 }
@@ -762,31 +783,53 @@ private struct MacOSWebView: NSViewRepresentable {
 
 private final class MacOSCookieNavigationDelegate: NSObject, WKNavigationDelegate {
     private let onNavigationResponse: () -> Void
+    var onOriginChange: (String) -> Void = { _ in }
 
     init(onNavigationResponse: @escaping () -> Void) {
         self.onNavigationResponse = onNavigationResponse
     }
 
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        guard navigationAction.targetFrame?.isMainFrame != false else {
+            return .allow
+        }
+        guard let origin = macWebLoginHTTPSOrigin(navigationAction.request.url) else {
+            return .cancel
+        }
+        onOriginChange(origin)
+        return .allow
+    }
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         onNavigationResponse()
-        return .allow
+        return macWebLoginHTTPSOrigin(navigationResponse.response.url) == nil ? .cancel : .allow
     }
 }
 
 private final class MacOSWebLoginViewModel: ObservableObject {
     @Published var canShowWebView = false
+    @Published var currentOrigin: String
 
-    let delegate: MacOSCookieNavigationDelegate
+    private let onCookie: ([HTTPCookie]) -> Void
+    lazy var delegate: MacOSCookieNavigationDelegate = {
+        let delegate = MacOSCookieNavigationDelegate { [weak self] in
+            guard let self else { return }
+            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+                self.onCookie(cookies)
+            }
+        }
+        delegate.onOriginChange = { [weak self] origin in
+            self?.currentOrigin = origin
+        }
+        return delegate
+    }()
 
     init(
         onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
-        self.delegate = MacOSCookieNavigationDelegate {
-            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
-                onCookie(cookies)
-            }
-        }
+        self.onCookie = onCookie
+        self.currentOrigin = macWebLoginHTTPSOrigin(URL(string: url)) ?? ""
         clearCookie()
     }
 
@@ -796,19 +839,48 @@ private final class MacOSWebLoginViewModel: ObservableObject {
         return configuration
     }
 
-    private func clearCookie() {
-        let dataStore = WKWebsiteDataStore.default()
-        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            dataStore.removeData(
-                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records,
-                completionHandler: {
-                    self.canShowWebView = true
-                }
-            )
+    func clearCookie() {
+        clearMacWebLoginDataStore { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.canShowWebView = true
+            }
         }
     }
 
+    private func getCookies() {
+        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+            self.onCookie(cookies)
+        }
+    }
+
+    func pollCookies() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            getCookies()
+        }
+    }
+}
+
+private func macWebLoginHTTPSOrigin(_ url: URL?) -> String? {
+    guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty, url.user == nil, url.password == nil else {
+        return nil
+    }
+    if let port = url.port, port != 443 {
+        return "https://\(host):\(port)"
+    }
+    return "https://\(host)"
+}
+
+private func clearMacWebLoginDataStore(completion: @escaping @Sendable () -> Void = {}) {
+    let dataStore = WKWebsiteDataStore.default()
+    dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+        dataStore.removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            for: records,
+            completionHandler: completion
+        )
+    }
 }
 
 private extension URL {

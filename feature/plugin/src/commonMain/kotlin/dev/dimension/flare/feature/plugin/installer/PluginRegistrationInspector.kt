@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.installer
 
 import com.dokar.quickjs.QuickJs
+import dev.dimension.flare.feature.plugin.abi.DISABLE_DYNAMIC_CODE_PRELUDE
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.manifest.PluginMethodTableV1
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,7 +21,7 @@ internal class PluginRegistrationInspector(
             quickJs.evaluationTimeoutMillis = VALIDATION_TIMEOUT_MILLIS
             val result =
                 withTimeout(VALIDATION_TIMEOUT_MILLIS) {
-                    quickJs.evaluate<String>(registrationPrelude + source + registrationResult)
+                    quickJs.evaluate<String>(registrationPrelude + DISABLE_DYNAMIC_CODE_PRELUDE + source + registrationResult)
                 }
             return PluginJsonV1.decodeFromString(result)
         } finally {

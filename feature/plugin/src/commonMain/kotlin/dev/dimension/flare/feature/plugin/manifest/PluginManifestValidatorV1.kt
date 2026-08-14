@@ -152,6 +152,14 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     } else if (platform.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page")) {
         check(false, "timeline.missing", "platform.timelines", "Timeline capability requires a declared timeline")
     }
+    if (platform.hasOperation(PluginAbiV1.Capabilities.TAB_CATALOG, "page")) {
+        check(
+            platform.hasOperation(PluginAbiV1.Capabilities.TIMELINE, "page"),
+            "tabCatalog.timeline",
+            "platform.capabilities.${PluginAbiV1.Capabilities.TAB_CATALOG}",
+            "Tab catalog requires the timeline page operation",
+        )
+    }
 
     validateUniqueIds(platform.profileTabs.map(ProfileTabManifestV1::id), "platform.profileTabs", errors)
     platform.profileTabs.forEachIndexed { index, tab ->
@@ -196,6 +204,14 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
             "compose.capability",
             "platform.composeDefaults",
             "Compose publish operation is required",
+        )
+    }
+    if (platform.hasOperation(PluginAbiV1.Capabilities.COMPOSE, "publish")) {
+        check(
+            platform.composeDefaults != null,
+            "compose.defaults",
+            "platform.composeDefaults",
+            "Compose publish requires conservative manifest defaults",
         )
     }
 
@@ -487,7 +503,7 @@ private fun String.referencesOnly(captures: Set<String>): Boolean {
     return matches.isNotEmpty() && matches.all(captures::contains) && TARGET_CAPTURE.replace(this, "").isEmpty()
 }
 
-private fun String.isExactHttpsOrigin(): Boolean = httpsOriginOrNull() == this.removeSuffix("/")
+private fun String.isExactHttpsOrigin(): Boolean = httpsOriginOrNull() == this
 
 private fun String.isHttpsUrl(): Boolean = approvedOriginOrNull() != null
 
@@ -503,11 +519,9 @@ private fun String.httpsOriginOrNull(): String? {
     val host = match.groupValues[1]
     if (!host.isValidDnsHost()) return null
     val port = match.groupValues[2]
-    if (port.isNotEmpty()) {
-        val parsedPort = port.toIntOrNull()
-        if (parsedPort == null || parsedPort !in 1..65_535) return null
-    }
-    val origin = "https://${host.lowercase()}${if (port.isEmpty()) "" else ":$port"}"
+    val parsedPort = port.takeIf(String::isNotEmpty)?.toIntOrNull()
+    if (port.isNotEmpty() && (parsedPort == null || parsedPort !in 1..65_535)) return null
+    val origin = "https://${host.lowercase()}${parsedPort?.takeIf { it != 443 }?.let { ":$it" }.orEmpty()}"
     return origin
 }
 

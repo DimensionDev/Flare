@@ -5,6 +5,8 @@ import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.doubleOrNull
 import kotlin.time.Instant
 
 public object WireLimitsV1 {
@@ -231,6 +233,7 @@ public fun CountResultV1.requireValid() {
 
 public fun WireTextV1.requireValid() {
     require((value != null) xor (key != null)) { "Wire text must contain exactly one of value or key" }
+    require(value == null || value.isNotBlank()) { "Wire text value is blank" }
     require(value == null || value.length <= WireLimitsV1.MAX_ERROR_TEXT_LENGTH) { "Wire text is too long" }
     if (key != null) {
         require(key.isWireName()) { "Invalid Wire text key" }
@@ -241,10 +244,10 @@ public fun WireTextV1.requireValid() {
     require(
         args.all { (name, value) ->
             name.isWireName() &&
-                when (value) {
-                    is dev.dimension.flare.ui.model.UiTextArgument.StringValue -> value.value.length <= 1_024
-                    is dev.dimension.flare.ui.model.UiTextArgument.NumberValue -> value.value.isFinite()
-                    is dev.dimension.flare.ui.model.UiTextArgument.BooleanValue -> true
+                if (value.isString) {
+                    value.content.length <= 1_024
+                } else {
+                    value.booleanOrNull != null || value.doubleOrNull?.isFinite() == true
                 }
         },
     ) { "Invalid Wire text arguments" }

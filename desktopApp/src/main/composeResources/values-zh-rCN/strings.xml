@@ -643,8 +643,11 @@
     <string name="plugin_install">安装 .fpp</string>
     <string name="plugin_empty">尚未安装插件</string>
     <string name="plugin_restart_required">重启 Flare 后插件变更才会生效。</string>
-    <string name="plugin_unverified_warning">此本地插件未经验证，请仅在信任作者时安装。</string>
+    <string name="plugin_unverified_warning">此本地插件未经验证，可以访问列出的账号和网络域名。请仅在信任作者时安装。</string>
     <string name="plugin_permissions">权限</string>
+    <string name="plugin_permission_account_origin">访问你选择的 HTTPS 实例</string>
+    <string name="plugin_permission_account_origin_label">你选择的 HTTPS 实例</string>
+    <string name="plugin_permission_cookie">从 %1$s 读取 Cookie %2$s</string>
     <string name="plugin_capabilities">功能</string>
     <string name="plugin_uninstall">卸载</string>
     <string name="plugin_uninstall_confirm_title">卸载插件？</string>

@@ -180,13 +180,15 @@ private class PluginPlatformSpecV1(
             ?.takeIf { "page" in it }
             ?.let {
                 TimelineSpec(
-                    id = "plugin_${manifest.id.replace('.', '_')}_${platformId}_catalog",
+                    id = "plugin_${manifest.id.replace('.', '_')}_${platformId}${timelineSchemaSuffix()}_catalog",
                     title = platform.name.toUiText(manifest.id),
                     icon =
                         dev.dimension.flare.ui.model.UiIcon.World
                             .asType(),
                     serializer = PluginTimelineDataV1.serializer(),
-                    targetId = { data -> "${data.accountKey}:${data.timelineId}:${data.parameters}" },
+                    targetId = { data ->
+                        "${data.accountKey}:${data.timelineId}:${data.parameters.entries.sortedBy { it.key }}"
+                    },
                     loaderFactory =
                         TimelineLoaderFactory { data, context ->
                             context.accountServiceFlow(AccountType.Specific(data.accountKey)).map { service ->
@@ -275,24 +277,29 @@ private class PluginPlatformSpecV1(
             if (platform.detector == null) {
                 null
             } else {
-                runtimePool
-                    .invoke(
-                        plugin = plugin,
-                        key = PluginRuntimeKeyV1.detector(manifest.id, plugin.installed.packageHash, platformUuid()),
-                        context =
-                            PluginInvocationContextV1.detector(
-                                pluginId = manifest.id,
-                                platformId = platformId,
-                                packageHash = plugin.installed.packageHash,
-                                candidateOrigin = origin,
-                                locale = Locale.language,
-                            ),
-                        method = "detector.detect",
-                        request = DetectorRequestV1(origin),
-                        requestSerializer = DetectorRequestV1.serializer(),
-                        responseSerializer = DetectorResultV1.serializer(),
-                        validate = DetectorResultV1::requireValid,
-                    ).instance
+                val result =
+                    runtimePool
+                        .invoke(
+                            plugin = plugin,
+                            key = PluginRuntimeKeyV1.detector(manifest.id, plugin.installed.packageHash, platformUuid()),
+                            context =
+                                PluginInvocationContextV1.detector(
+                                    pluginId = manifest.id,
+                                    platformId = platformId,
+                                    packageHash = plugin.installed.packageHash,
+                                    candidateOrigin = origin,
+                                    locale = Locale.language,
+                                ),
+                            method = "detector.detect",
+                            request = DetectorRequestV1(origin),
+                            requestSerializer = DetectorRequestV1.serializer(),
+                            responseSerializer = DetectorResultV1.serializer(),
+                            validate = DetectorResultV1::requireValid,
+                        )
+                require(PluginUrlPolicy.requireOrigin(result.canonicalOrigin) == origin) {
+                    "Detector changed the selected instance origin"
+                }
+                result.instance.takeUnless { result.match == DetectorMatchV1.None }
             }
         val domain = detected?.domain ?: Url(origin).accountHost()
         val compose = platform.composeDefaults
@@ -358,7 +365,7 @@ private class PluginPlatformSpecV1(
 
     private fun TimelineManifestV1.toTimelineSpec(): TimelineSpec<TimelineSpec.AccountResourceData> =
         TimelineSpec(
-            id = "plugin_${manifest.id.replace('.', '_')}_${platformId}_$id",
+            id = "plugin_${manifest.id.replace('.', '_')}_${platformId}${timelineSchemaSuffix()}_$id",
             title = title.toUiText(manifest.id),
             icon = icon.toUiIcon().asType(),
             serializer = TimelineSpec.AccountResourceData.serializer(),
@@ -370,6 +377,12 @@ private class PluginPlatformSpecV1(
                     }
                 },
         )
+
+    private fun timelineSchemaSuffix(): String =
+        platform.timelineSchemaVersion
+            .takeIf { it != 1 }
+            ?.let { "_schema$it" }
+            .orEmpty()
 
     private fun DeepLinkManifestV1.toPlatformDeepLink(accountKey: MicroBlogKey): PlatformDeepLink<PluginDeepLinkArgumentsV1> {
         val origin =
@@ -392,6 +405,7 @@ private class PluginPlatformSpecV1(
         return PlatformDeepLink(
             uriPattern = pattern,
             serializer = PluginDeepLinkArgumentsSerializerV1(captureNames),
+            matcher = { arguments -> arguments.values.values.all { it.length in 1..MAX_DEEP_LINK_CAPTURE_LENGTH } },
             callback = { arguments ->
                 val value = target.value?.render(arguments.values)
                 when (target.type) {
@@ -434,7 +448,7 @@ private class PluginPlatformSpecV1(
     }
 }
 
-private class PluginLoginMethodHandlerV1(
+internal class PluginLoginMethodHandlerV1(
     private val plugin: RunningPluginV1,
     private val method: LoginMethodManifestV1,
     private val context: LoginContext,
@@ -549,8 +563,12 @@ private class PluginLoginMethodHandlerV1(
 
     override suspend fun resume(value: String) {
         if (method.interaction != LoginInteractionV1.OAuth || mutableState.value.loading) return
+        val expectedFlowId = oauthFlowId ?: return
         mutableState.value = state(loading = true)
         try {
+            require(parsePluginOAuthCallback(value).flowId == expectedFlowId) {
+                "OAuth callback belongs to another login flow"
+            }
             if (!oauthCallbacks.handle(value, Locale.language)) {
                 throw IllegalArgumentException("Unsupported OAuth callback")
             }
@@ -562,7 +580,10 @@ private class PluginLoginMethodHandlerV1(
     }
 
     override fun canResume(value: String): Boolean =
-        method.interaction == LoginInteractionV1.OAuth && runCatching { parsePluginOAuthCallback(value) }.isSuccess
+        method.interaction == LoginInteractionV1.OAuth &&
+            oauthFlowId?.let { expected ->
+                runCatching { parsePluginOAuthCallback(value).flowId == expected }.getOrDefault(false)
+            } == true
 
     override suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean {
         val session = cookieSession ?: error("Cookie login has not started")
@@ -731,3 +752,4 @@ private fun String.render(values: Map<String, String>): String =
 
 private val DEEP_LINK_CAPTURE = Regex("\\{([A-Za-z][A-Za-z0-9_.-]{0,127})\\}")
 private const val LOGIN_ACTION = "login"
+private const val MAX_DEEP_LINK_CAPTURE_LENGTH = 4_096

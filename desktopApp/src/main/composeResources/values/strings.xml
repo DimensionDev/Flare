@@ -692,8 +692,11 @@
     <string name="plugin_install">Install .fpp</string>
     <string name="plugin_empty">No plugins installed</string>
     <string name="plugin_restart_required">Restart Flare to apply plugin changes.</string>
-    <string name="plugin_unverified_warning">This local plugin is unverified. Install only if you trust its author.</string>
+    <string name="plugin_unverified_warning">This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author.</string>
     <string name="plugin_permissions">Permissions</string>
+    <string name="plugin_permission_account_origin">Network access to the HTTPS instance you choose</string>
+    <string name="plugin_permission_account_origin_label">the HTTPS instance you choose</string>
+    <string name="plugin_permission_cookie">Read cookie %2$s from %1$s</string>
     <string name="plugin_capabilities">Functions</string>
     <string name="plugin_uninstall">Uninstall</string>
     <string name="plugin_uninstall_confirm_title">Uninstall plugin?</string>

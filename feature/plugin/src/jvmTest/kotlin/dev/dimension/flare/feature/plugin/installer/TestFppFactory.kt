@@ -4,6 +4,7 @@ import okio.Path
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Base64
+import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -60,10 +61,20 @@ internal object TestFppFactory {
     fun write(
         path: Path,
         entries: List<Pair<String, ByteArray>> = validEntries(),
+        stored: Boolean = false,
     ) {
         ZipOutputStream(Files.newOutputStream(Paths.get(path.toString()))).use { zip ->
             entries.forEach { (name, bytes) ->
-                val entry = ZipEntry(name).apply { time = 0L }
+                val entry =
+                    ZipEntry(name).apply {
+                        time = 0L
+                        if (stored) {
+                            method = ZipEntry.STORED
+                            size = bytes.size.toLong()
+                            compressedSize = size
+                            crc = CRC32().apply { update(bytes) }.value
+                        }
+                    }
                 zip.putNextEntry(entry)
                 zip.write(bytes)
                 zip.closeEntry()

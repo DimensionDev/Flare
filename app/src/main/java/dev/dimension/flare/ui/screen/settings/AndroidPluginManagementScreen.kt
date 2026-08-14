@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +54,10 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningV1
+import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
@@ -80,6 +83,9 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val subsystem = koinGet<PluginSubsystemV1>()
     val presenter = remember(subsystem, scope) { PluginManagementPresenterV1(subsystem, scope) }
+    DisposableEffect(presenter) {
+        onDispose { presenter.close() }
+    }
     val state by presenter.state.collectAsState()
     var showsMaintenanceMenu by remember { mutableStateOf(false) }
     var pendingUninstallId by remember { mutableStateOf<String?>(null) }
@@ -89,12 +95,16 @@ internal fun AndroidPluginManagementScreen(onBack: () -> Unit) {
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri ?: return@rememberLauncherForActivityResult
             scope.launchPresenterAction {
-                context.contentResolver
-                    .openInputStream(uri)
-                    ?.source()
-                    ?.buffer()
-                    ?.use { presenter.inspect(it) }
-                    ?: error("Unable to open plugin package")
+                val source =
+                    context.contentResolver
+                        .openInputStream(uri)
+                        ?.source()
+                        ?.buffer()
+                if (source == null) {
+                    presenter.reportOperationFailure()
+                } else {
+                    source.use { presenter.inspect(it) }
+                }
             }
         }
 
@@ -244,7 +254,7 @@ private fun PluginInstallReviewDialog(
                 if (review.permissions.isNotEmpty()) {
                     Text(stringResource(R.string.plugin_permissions), style = MaterialTheme.typography.titleSmall)
                     review.permissions.forEach { permission ->
-                        Text("• ${permission.origin}${permission.cookieName?.let { "/$it" }.orEmpty()}")
+                        Text("• ${permission.localizedDescription()}")
                     }
                 }
                 review.warnings
@@ -263,6 +273,27 @@ private fun PluginInstallReviewDialog(
             }
         },
     )
+}
+
+@Composable
+private fun PluginSensitivePermissionV1.localizedDescription(): String {
+    val accountRelativePath =
+        origin
+            .takeIf { it == PluginAbiV1.ACCOUNT_ORIGIN || it.startsWith("${PluginAbiV1.ACCOUNT_ORIGIN}/") }
+            ?.removePrefix(PluginAbiV1.ACCOUNT_ORIGIN)
+    val displayOrigin =
+        if (accountRelativePath != null) {
+            stringResource(R.string.plugin_permission_account_origin_label) + accountRelativePath
+        } else {
+            origin
+        }
+    return cookieName?.let {
+        stringResource(R.string.plugin_permission_cookie, displayOrigin, it)
+    } ?: if (accountRelativePath != null) {
+        stringResource(R.string.plugin_permission_account_origin)
+    } else {
+        displayOrigin
+    }
 }
 
 @Composable
@@ -461,7 +492,12 @@ private fun PluginInstallWarningV1.localizedMessage(): String {
                 PluginInstallWarningTypeV1.Compatibility -> R.string.plugin_warning_compatibility
             },
         )
-    return detail?.let { "$prefix: $it" } ?: prefix
+    val localizedDetail =
+        detail?.replace(
+            PluginAbiV1.ACCOUNT_ORIGIN,
+            stringResource(R.string.plugin_permission_account_origin_label),
+        )
+    return localizedDetail?.let { "$prefix: $it" } ?: prefix
 }
 
 private fun CoroutineScope.launchPresenterAction(action: suspend () -> Unit) {

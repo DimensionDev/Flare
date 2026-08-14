@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.plugin.wire
 
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonNull
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -116,6 +117,23 @@ class WireV1Test {
                 PluginJsonV1.encodeToString(PluginAccountCredentialV1.serializer(), value),
             ),
         )
+    }
+
+    @Test
+    fun errorTextArgumentsUseJsonPrimitives() {
+        val value =
+            PluginJsonV1.decodeFromString<PluginErrorV1>(
+                """{"code":"Validation","message":{"key":"error.detail","fallback":"Missing {item}","args":{"item":"photo","count":2,"active":true}}}""",
+            )
+
+        value.message.requireValid()
+        assertContains(PluginJsonV1.encodeToString(value), "\"count\":2")
+        assertFailsWith<IllegalArgumentException> {
+            value.message.copy(args = mapOf("item" to JsonNull)).requireValid()
+        }
+        assertFailsWith<IllegalArgumentException> {
+            WireTextV1(value = "   ").requireValid()
+        }
     }
 
     private fun validProfile(): ProfileV1 =

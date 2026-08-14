@@ -59,6 +59,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -443,6 +444,12 @@ fun AccountItem(
                     colors = colors,
                 )
             }.onError { throwable ->
+                val reloginTarget =
+                    when (throwable) {
+                        is LoginExpiredException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                        is RequireReLoginException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                        else -> null
+                    }
                 SegmentedListItem(
                     selected = selected,
                     onClick = {},
@@ -453,12 +460,12 @@ fun AccountItem(
                     content = {
                         if (throwable is UnsupportedPlatformException) {
                             Text(text = unavailableAccount?.platformDisplayNameText?.resolveText() ?: throwable.platformId)
-                        } else if (throwable is LoginExpiredException) {
+                        } else if (reloginTarget != null) {
                             Text(
                                 text =
                                     stringResource(
                                         id = R.string.login_expired,
-                                        throwable.accountKey.toString(),
+                                        reloginTarget.accountKey.toString(),
                                     ),
                             )
                         } else {
@@ -493,8 +500,8 @@ fun AccountItem(
                     supportingContent = {
                         if (throwable is UnsupportedPlatformException) {
                             Text(text = throwable.accountKey?.toString() ?: throwable.platformId)
-                        } else if (throwable is LoginExpiredException) {
-                            Text(text = throwable.accountKey.toString())
+                        } else if (reloginTarget != null) {
+                            Text(text = reloginTarget.accountKey.toString())
                         } else {
                             Text(text = stringResource(id = R.string.account_item_error_message))
                         }
@@ -506,17 +513,10 @@ fun AccountItem(
                                     Text(text = stringResource(id = R.string.settings_plugins_title))
                                 }
                             }
-                        } else if (throwable is LoginExpiredException) {
+                        } else if (reloginTarget != null) {
                             {
                                 TextButton(
-                                    onClick = {
-                                        toRelogin(
-                                            ReloginTarget(
-                                                accountKey = throwable.accountKey,
-                                                platformId = throwable.platformId,
-                                            ),
-                                        )
-                                    },
+                                    onClick = { toRelogin(reloginTarget) },
                                 ) {
                                     Text(text = stringResource(id = R.string.login_expired_relogin))
                                 }

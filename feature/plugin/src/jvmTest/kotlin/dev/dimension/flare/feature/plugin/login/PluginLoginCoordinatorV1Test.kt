@@ -3,6 +3,7 @@ package dev.dimension.flare.feature.plugin.login
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.feature.plugin.adapter.PluginLoginMethodHandlerV1
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -17,6 +18,8 @@ import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.presenter.login.LoginContext
+import dev.dimension.flare.ui.presenter.login.LoginMethodType
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -37,6 +40,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -141,6 +145,51 @@ class PluginLoginCoordinatorV1Test {
             )
             assertEquals(ACCOUNT_ID, completedAccountId)
             assertTrue(accounts.added.isEmpty())
+        }
+
+    @Test
+    fun loginHandlerAcceptsOnlyTheOAuthFlowItStarted() =
+        runBlocking {
+            val accounts = RecordingAccountService()
+            val oauth = oauthCoordinator()
+            val callbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts)
+            var completed = false
+            val handler =
+                PluginLoginMethodHandlerV1(
+                    plugin = plugin,
+                    method =
+                        plugin.installed.manifest.platform.loginMethods
+                            .single { it.id == "oauth" },
+                    context =
+                        LoginContext(
+                            host = "plugin.example",
+                            methodType = LoginMethodType.OAuth,
+                            onSuccess = { completed = true },
+                        ),
+                    oauth = oauth,
+                    oauthCallbacks = callbacks,
+                    form = PluginFormLoginCoordinatorV1(pool, FixedEntropy),
+                    webCookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy),
+                    accountService = accounts,
+                    coroutineScope = this,
+                )
+            try {
+                handler.perform("login")
+                val callback = "${pluginOAuthRedirectUri(FLOW_ID)}?code=ok&state=$STATE"
+                assertTrue(handler.canResume(callback))
+                assertFalse(
+                    handler.canResume(
+                        "${pluginOAuthRedirectUri(OTHER_FLOW_ID)}?code=ok&state=$STATE",
+                    ),
+                )
+
+                handler.resume(callback)
+
+                assertTrue(completed)
+                assertEquals(1, accounts.added.size)
+            } finally {
+                handler.close()
+            }
         }
 
     @Test
@@ -273,6 +322,7 @@ class PluginLoginCoordinatorV1Test {
         assertTrue(PluginWebCookieNavigationPolicyV1.isAllowed("https://other.example/path"))
         assertEquals("https://other.example", PluginWebCookieNavigationPolicyV1.visibleOrigin("https://other.example/path"))
         assertTrue(!PluginWebCookieNavigationPolicyV1.isAllowed("http://other.example/path"))
+        assertTrue(!PluginWebCookieNavigationPolicyV1.isAllowed("https://user:password@other.example/path"))
         assertTrue(!PluginWebCookieNavigationPolicyV1.isAllowed("file:///tmp/test"))
     }
 
@@ -473,4 +523,5 @@ private const val PLUGIN_ID = "dev.dimension.flare.test.plugin"
 private const val ORIGIN = "https://plugin.example"
 private const val ACCOUNT_ID = "account-1"
 private const val FLOW_ID = "123e4567-e89b-42d3-a456-426614174000"
+private const val OTHER_FLOW_ID = "123e4567-e89b-42d3-a456-426614174001"
 private val STATE = "a".repeat(64)

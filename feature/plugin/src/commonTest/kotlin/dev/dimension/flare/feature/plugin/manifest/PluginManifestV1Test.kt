@@ -79,6 +79,63 @@ class PluginManifestV1Test {
     }
 
     @Test
+    fun composeCapabilityRequiresManifestDefaults() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+
+        val result =
+            manifest
+                .copy(platform = manifest.platform.copy(composeDefaults = null))
+                .validate(validMethodTable())
+
+        assertFalse(result.isValid)
+        assertTrue(result.errors.any { it.code == "compose.defaults" })
+    }
+
+    @Test
+    fun dynamicOnlyTimelineCatalogIsRejectedWithoutADefaultTab() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val dynamicOnly =
+            manifest.copy(
+                platform =
+                    manifest.platform.copy(
+                        timelines = emptyList(),
+                        capabilities =
+                            manifest.platform.capabilities +
+                                (
+                                    PluginAbiV1.Capabilities.TAB_CATALOG to
+                                        CapabilityManifestV1(
+                                            operations = mapOf("page" to CapabilityOperationManifestV1()),
+                                        )
+                                ),
+                    ),
+            )
+
+        assertTrue(dynamicOnly.validate().errors.any { it.code == "timeline.missing" })
+    }
+
+    @Test
+    fun tabCatalogWithoutTimelinePageIsRejected() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val invalid =
+            manifest.copy(
+                platform =
+                    manifest.platform.copy(
+                        timelines = emptyList(),
+                        capabilities =
+                            manifest.platform.capabilities - PluginAbiV1.Capabilities.TIMELINE +
+                                (
+                                    PluginAbiV1.Capabilities.TAB_CATALOG to
+                                        CapabilityManifestV1(
+                                            operations = mapOf("page" to CapabilityOperationManifestV1()),
+                                        )
+                                ),
+                    ),
+            )
+
+        assertTrue(invalid.validate().errors.any { it.code == "tabCatalog.timeline" })
+    }
+
+    @Test
     fun unknownCapabilityIsPreservedAsWarning() {
         val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
         val unknown =
@@ -106,7 +163,14 @@ class PluginManifestV1Test {
     fun authOriginRejectsInvalidHostAndPort() {
         val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
 
-        listOf("https://bad..host", "https://example.com:99999").forEach { origin ->
+        listOf(
+            "https://bad..host",
+            "https://example.com:99999",
+            "https://example.com/",
+            "https://example.com:443",
+            "https://example.com:0443",
+            "https://EXAMPLE.com",
+        ).forEach { origin ->
             val result =
                 manifest
                     .copy(permissions = PluginPermissionsV1(authOrigins = setOf(origin)))

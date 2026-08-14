@@ -355,12 +355,13 @@ internal class OnlinePreTranslationService(
         providerCacheKey: String,
         preferPlatformTranslation: Boolean,
     ): List<PreparedTranslationCandidate> {
+        val dbAccountType = accountType as? dev.dimension.flare.model.DbAccountType ?: return emptyList()
         val status =
             database
                 .statusDao()
                 .getWithReferencesSync(
                     statusKey = statusKey,
-                    accountType = accountType,
+                    accountType = dbAccountType,
                 ) ?: return emptyList()
         return prepareStatusCandidates(
             statuses = listOfNotNull(status.status.data) + status.references.mapNotNull { it.status?.data },

@@ -1,18 +1,15 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.toUiImage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
 class MediaFileNamePolicyTest {
-    private fun image(url: String): UiMedia.Image = checkNotNull(url.toUiImage())
-
     @Test
     fun statusMediaFileNameUsesStatusContextAndUrlExtension() {
-        val media = image("https://example.com/image.png")
+        val media = UiMedia.Image(url = "https://example.com/image.png")
 
         val fileName =
             MediaFileNamePolicy.statusMediaFileName(
@@ -30,7 +27,7 @@ class MediaFileNamePolicyTest {
 
     @Test
     fun statusMediaFileNameHandlesBlueskyAtExtension() {
-        val media = image("https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:x/bafkrei...@jpeg")
+        val media = UiMedia.Image(url = "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:x/bafkrei...@jpeg")
 
         val fileName =
             MediaFileNamePolicy.statusMediaFileName(
@@ -47,8 +44,8 @@ class MediaFileNamePolicyTest {
     fun statusMediaFileNameDistinguishesImagesFromTheSameStatus() {
         val medias =
             listOf(
-                image("https://pbs.twimg.com/media/first.jpg"),
-                image("https://pbs.twimg.com/media/second.jpg"),
+                UiMedia.Image(url = "https://pbs.twimg.com/media/first.jpg"),
+                UiMedia.Image(url = "https://pbs.twimg.com/media/second.jpg"),
             )
 
         val fileNames =
@@ -74,7 +71,7 @@ class MediaFileNamePolicyTest {
     fun statusMediaFileNamesAddsIndexSuffixes() {
         val medias =
             listOf(
-                image("https://example.com/image.png"),
+                UiMedia.Image(url = "https://example.com/image.png"),
                 UiMedia.Gif(
                     url = "https://example.com/animation",
                     previewUrl = "https://example.com/animation.jpg",
@@ -111,7 +108,7 @@ class MediaFileNamePolicyTest {
 
     @Test
     fun rawMediaFileNameUsesUrlFileName() {
-        val media = image("https://example.com/path/original@png?size=large")
+        val media = UiMedia.Image(url = "https://example.com/path/original@png?size=large")
 
         val fileName =
             MediaFileNamePolicy.rawMediaFileName(
@@ -158,7 +155,7 @@ class MediaFileNamePolicyTest {
     fun rawMediaFileNamesAddsIndexSuffixes() {
         val medias =
             listOf(
-                image("https://example.com/path/original@png?size=large"),
+                UiMedia.Image(url = "https://example.com/path/original@png?size=large"),
                 UiMedia.Audio(
                     url = "https://example.com/media/original",
                     description = null,

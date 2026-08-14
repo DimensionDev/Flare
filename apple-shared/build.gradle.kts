@@ -22,7 +22,6 @@ kotlin {
 
     val commonExportedProjects =
         listOf(
-            projects.uiModel,
             projects.shared,
             projects.social.bluesky,
             projects.social.fanbox,
@@ -62,7 +61,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.uiModel)
                 api(projects.shared)
                 api(projects.social.bluesky)
                 api(projects.social.fanbox)

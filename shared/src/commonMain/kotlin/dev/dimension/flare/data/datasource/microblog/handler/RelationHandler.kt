@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -43,7 +44,7 @@ public class RelationHandler(
                 val result = dataSource.relation(userKey)
                 database.userDao().insertUserRelation(
                     DbUserRelation(
-                        accountType = accountType,
+                        accountType = accountType as DbAccountType,
                         userKey = userKey,
                         relation = result,
                     ),
@@ -53,7 +54,7 @@ public class RelationHandler(
                 database
                     .userDao()
                     .getUserRelation(
-                        accountType = accountType,
+                        accountType = accountType as DbAccountType,
                         userKey = userKey,
                     ).mapNotNull { it?.relation }
             },
@@ -254,7 +255,7 @@ public class RelationHandler(
             database
                 .userDao()
                 .getUserRelation(
-                    accountType = accountType,
+                    accountType = accountType as DbAccountType,
                     userKey = userKey,
                 )
         val currentRelation = relationFlow.firstOrNull()?.relation ?: defaultRelation ?: return null
@@ -282,7 +283,7 @@ public class RelationHandler(
     ) {
         database.userDao().insertUserRelation(
             DbUserRelation(
-                accountType = accountType,
+                accountType = accountType as DbAccountType,
                 userKey = userKey,
                 relation = relation,
             ),
@@ -322,6 +323,7 @@ public class RelationHandler(
         userKey: MicroBlogKey,
         deleteUserHistory: Boolean,
     ) {
+        val dbAccountType = accountType as DbAccountType
         val timelines = mutableListOf<DbPagingTimeline>()
         var afterId: String? = null
         do {
@@ -329,7 +331,7 @@ public class RelationHandler(
                 database
                     .pagingTimelineDao()
                     .getByAccountTypeWithStatus(
-                        accountType = accountType,
+                        accountType = dbAccountType,
                         afterId = afterId,
                         limit = CACHE_CLEANUP_PAGE_SIZE,
                     )
@@ -345,7 +347,7 @@ public class RelationHandler(
             }
             if (deleteUserHistory) {
                 database.userDao().deleteHistory(
-                    accountType = accountType,
+                    accountType = dbAccountType,
                     userKey = userKey,
                 )
             }

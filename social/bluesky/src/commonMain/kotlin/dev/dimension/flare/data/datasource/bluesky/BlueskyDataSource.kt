@@ -68,7 +68,6 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.bluesky.BlueskyLinkCardResolver
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
-import dev.dimension.flare.data.network.bluesky.normalizeHttpUrl
 import dev.dimension.flare.data.network.bluesky.toExternalEmbed
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
@@ -378,7 +377,10 @@ internal class BlueskyDataSource(
                     .asSequence()
                     .flatMap { it.features.asSequence() }
                     .filterIsInstance<FacetFeatureUnion.Link>()
-                    .firstNotNullOfOrNull { normalizeHttpUrl(it.value.uri.uri) }
+                    .firstOrNull()
+                    ?.value
+                    ?.uri
+                    ?.uri
                     ?.let { createExternalEmbed(service = service, uri = it) }
             } else {
                 null

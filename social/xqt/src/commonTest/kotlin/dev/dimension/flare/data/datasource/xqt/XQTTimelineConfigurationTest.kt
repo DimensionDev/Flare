@@ -47,4 +47,12 @@ class XQTTimelineConfigurationTest {
         assertEquals(List(3) { expected }, dataSource.defaultTabs.map { it.icon })
         assertEquals(List(3) { expected }, dataSource.builtInTimelineTabs.take(3).map { it.icon })
     }
+
+    @Test
+    fun tagTimelineSpecIsRegistered() {
+        assertContains(
+            XqtPlatformSpec.timelineSpecs.map { it.id },
+            XqtPlatformSpec.tagTimelineSpec.id,
+        )
+    }
 }

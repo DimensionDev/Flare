@@ -57,6 +57,8 @@ Current method paths are:
 | `flare.datasource.profile/v1` | `profile.byId`, `byHandle`, `timeline`, `following`, `followers` |
 | `flare.datasource.post/v1` | `post.detail`, `context`, `delete`, `mutate` |
 | `flare.datasource.compose/v1` | `compose.publish` |
+| `flare.datasource.list/v1` | `list.page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` |
+| `flare.datasource.direct-message/v1` | `directMessage.rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` |
 
 Additional Host-known capability IDs are defined in `PluginAbiV1.kt`. Use
 `flare-plugin.d.ts` for the complete v1 JavaScript types.

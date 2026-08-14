@@ -44,6 +44,7 @@ public object PluginAbiV1 {
             Capabilities.LIST to
                 setOf(
                     "page",
+                    "detail",
                     "create",
                     "update",
                     "delete",
@@ -56,6 +57,7 @@ public object PluginAbiV1 {
             Capabilities.DIRECT_MESSAGE to
                 setOf(
                     "rooms",
+                    "room",
                     "messages",
                     "send",
                     "delete",

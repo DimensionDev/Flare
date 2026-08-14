@@ -64,6 +64,7 @@ internal class PluginWireMapperV1(
     private val profileAvailable: Boolean,
     private val postDetailAvailable: Boolean,
     private val postMutationAvailable: Boolean,
+    private val postDeleteAvailable: Boolean,
     private val composeAvailable: Boolean,
 ) {
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
@@ -260,7 +261,7 @@ internal class PluginWireMapperV1(
                         clickEvent = ClickEvent.Deeplink(DeeplinkRoute.Compose.Reply(accountKey, key)),
                         actionFamily = PostActionFamily.Reply,
                     )
-            } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null) {
+            } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null && postDeleteAvailable) {
                 overflow +=
                     ActionMenu.Item(
                         icon = UiIcon.Delete,

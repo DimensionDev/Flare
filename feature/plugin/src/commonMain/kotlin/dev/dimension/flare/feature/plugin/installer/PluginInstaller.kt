@@ -39,6 +39,9 @@ public class PluginInstaller(
                 val validated = validator.validate(stateStore.paths.incoming)
                 val packageSize = requireNotNull(fileSystem.metadata(stateStore.paths.incoming).size)
                 val existing = stateStore.desired.value.plugins[validated.manifest.id]
+                require(existing == null || existing.manifest.platform.id == validated.manifest.platform.id) {
+                    "Plugin platform ID cannot change during an update"
+                }
                 val preview =
                     PreparedPluginInstallV1(
                         pluginId = validated.manifest.id,

@@ -1,5 +1,7 @@
 package dev.dimension.flare.feature.plugin
 
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.io.AppFileStore
 import dev.dimension.flare.data.repository.AccountService
@@ -31,5 +33,11 @@ internal class PluginKoinModule {
     fun oauthCallbackCoordinator(
         subsystem: PluginSubsystemV1,
         accountService: AccountService,
-    ): PluginOAuthCallbackCoordinatorV1 = PluginOAuthCallbackCoordinatorV1(subsystem.oauth, accountService)
+        notification: InAppNotification,
+    ): PluginOAuthCallbackCoordinatorV1 =
+        PluginOAuthCallbackCoordinatorV1(
+            oauth = subsystem.oauth,
+            accountService = accountService,
+            onUnattendedFailure = { notification.onError(Message.Plugin, it) },
+        )
 }

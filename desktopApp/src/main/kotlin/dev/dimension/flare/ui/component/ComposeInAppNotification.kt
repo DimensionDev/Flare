@@ -26,6 +26,7 @@ import dev.dimension.flare.compose_notification_success
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.notification_login_expired
+import dev.dimension.flare.plugin_operation_failed
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.InfoBar
@@ -119,6 +120,7 @@ private val Message.successTitle
         when (this) {
             Message.Compose -> Res.string.compose_notification_success
             Message.LoginExpired -> Res.string.notification_login_expired
+            Message.Plugin -> Res.string.plugin_operation_failed
         }
 
 private val Message.errorTitle
@@ -126,6 +128,7 @@ private val Message.errorTitle
         when (this) {
             Message.Compose -> Res.string.compose_notification_error
             Message.LoginExpired -> Res.string.notification_login_expired
+            Message.Plugin -> Res.string.plugin_operation_failed
         }
 
 @Composable

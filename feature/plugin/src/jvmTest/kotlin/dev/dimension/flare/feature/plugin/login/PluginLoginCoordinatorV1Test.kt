@@ -148,6 +148,32 @@ class PluginLoginCoordinatorV1Test {
         }
 
     @Test
+    fun failedColdStartCallbackIsReportedOnlyWithoutALiveLoginUi() =
+        runBlocking {
+            val start =
+                assertIs<PluginOAuthStartV1.ExternalBrowser>(
+                    oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en"),
+                )
+            val failures = mutableListOf<Throwable>()
+            val callbacks =
+                PluginOAuthCallbackCoordinatorV1(
+                    oauth = oauthCoordinator(),
+                    accountService = RecordingAccountService(),
+                    onUnattendedFailure = failures::add,
+                )
+            val invalidCallback =
+                "${pluginOAuthRedirectUri(start.flowId)}?code=ok&state=${"0".repeat(64)}"
+
+            assertFailsWith<PluginLoginException> { callbacks.handle(invalidCallback, "en") }
+            assertEquals(1, failures.size)
+
+            failures.clear()
+            callbacks.register(start.flowId) {}
+            assertFailsWith<PluginLoginException> { callbacks.handle(invalidCallback, "en") }
+            assertTrue(failures.isEmpty())
+        }
+
+    @Test
     fun loginHandlerAcceptsOnlyTheOAuthFlowItStarted() =
         runBlocking {
             val accounts = RecordingAccountService()

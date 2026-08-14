@@ -131,7 +131,8 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
         }
     platform.loginMethods.forEachIndexed { index, method -> validateLogin(method, index, permissions, errors) }
     check(platform.deepLinks.size <= 64, "deepLink.count", "platform.deepLinks", "Too many Deep Link rules")
-    platform.deepLinks.forEachIndexed { index, rule -> validateDeepLink(rule, index, permissions, errors) }
+    val timelineIds = platform.timelines.mapTo(hashSetOf(), TimelineManifestV1::id)
+    platform.deepLinks.forEachIndexed { index, rule -> validateDeepLink(rule, index, permissions, timelineIds, errors) }
     platform.composeDefaults?.let {
         runCatching(it::requireValid).onFailure { error ->
             errors += ManifestIssueV1("compose.config", "platform.composeDefaults", error.message ?: "Invalid Compose config")
@@ -304,6 +305,7 @@ private fun validateDeepLink(
     rule: DeepLinkManifestV1,
     index: Int,
     permissions: PluginPermissionsV1,
+    timelineIds: Set<String>,
     errors: MutableList<ManifestIssueV1>,
 ) {
     val path = "platform.deepLinks[$index]"
@@ -356,11 +358,11 @@ private fun validateDeepLink(
 
         DeepLinkTargetTypeV1.Timeline -> {
             addErrorUnless(
-                value != null && ID.matches(value),
+                value != null && value in timelineIds,
                 errors,
                 "deepLink.timeline",
                 "$path.target.value",
-                "Timeline target requires an ID",
+                "Timeline target must reference a declared timeline",
             )
         }
 

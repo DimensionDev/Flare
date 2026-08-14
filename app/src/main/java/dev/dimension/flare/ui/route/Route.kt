@@ -6,6 +6,7 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
+import dev.dimension.flare.data.model.tab.TimelineDeepLinkRouteResolver
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
@@ -540,6 +541,10 @@ internal sealed interface Route : NavKey {
 
         public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
+                is DeeplinkRoute.Timeline.Source -> {
+                    TimelineDeepLinkRouteResolver.resolve(deeplinkRoute)?.let(Route::Timeline)
+                }
+
                 is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
                     val accountKey =
                         (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey

@@ -151,6 +151,28 @@ class PluginManifestV1Test {
     }
 
     @Test
+    fun timelineDeepLinkMustReferenceDeclaredTimeline() {
+        val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val result =
+            manifest
+                .copy(
+                    platform =
+                        manifest.platform.copy(
+                            deepLinks =
+                                listOf(
+                                    DeepLinkManifestV1(
+                                        path = listOf(DeepLinkPathSegmentV1.Literal("local")),
+                                        target = DeepLinkTargetV1(DeepLinkTargetTypeV1.Timeline, "missing"),
+                                    ),
+                                ),
+                        ),
+                ).validate(validMethodTable())
+
+        assertFalse(result.isValid)
+        assertTrue(result.errors.any { it.code == "deepLink.timeline" })
+    }
+
+    @Test
     fun catalogUsesBcp47FallbackAndNamedArguments() {
         val bundle =
             PluginCatalogBundleV1(

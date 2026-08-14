@@ -10,7 +10,9 @@ import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginPlatformManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1
+import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
+import dev.dimension.flare.feature.plugin.wire.VisibilityV1
 import kotlinx.serialization.json.JsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,6 +48,53 @@ class PluginAccountV1Test {
         val changed = plugin(setOf("detail"), credentialSchemaVersion = 2)
 
         assertFailsWith<RequireReLoginException> { account.effectiveCapabilities(changed) }
+    }
+
+    @Test
+    fun composeConstraintsUseStrictIntersection() {
+        val merged =
+            mergePluginComposeConfigV1(
+                composeConfig(
+                    minMedia = 1,
+                    maxMedia = 4,
+                    mimeTypes = setOf("IMAGE/*"),
+                    visibility = setOf(VisibilityV1.Public, VisibilityV1.Unlisted),
+                ),
+                composeConfig(
+                    minMedia = 2,
+                    maxMedia = 3,
+                    mimeTypes = setOf("image/jpeg", "video/mp4"),
+                    visibility = setOf(VisibilityV1.Unlisted, VisibilityV1.Followers),
+                ),
+            )
+
+        assertEquals(2, merged?.media?.minCountForNew)
+        assertEquals(3, merged?.media?.maxCount)
+        assertEquals(setOf("image/jpeg"), merged?.media?.supportedMimeTypes)
+        assertEquals(setOf(VisibilityV1.Unlisted), merged?.visibility?.allowed)
+        assertEquals(VisibilityV1.Unlisted, merged?.visibility?.default)
+    }
+
+    @Test
+    fun composeConstraintConflictsAreRejectedBeforeDatasourceCreation() {
+        assertFailsWith<IllegalArgumentException> {
+            mergePluginComposeConfigV1(
+                composeConfig(mimeTypes = setOf("image/jpeg")),
+                composeConfig(mimeTypes = setOf("video/mp4")),
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            mergePluginComposeConfigV1(
+                composeConfig(visibility = setOf(VisibilityV1.Public)),
+                composeConfig(visibility = setOf(VisibilityV1.Followers)),
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            mergePluginComposeConfigV1(
+                composeConfig(minMedia = 3, maxMedia = 4),
+                composeConfig(minMedia = 0, maxMedia = 2),
+            )
+        }
     }
 
     private fun credential(
@@ -107,4 +156,21 @@ class PluginAccountV1Test {
             iconPath = "/icon.png",
         )
     }
+
+    private fun composeConfig(
+        minMedia: Int = 0,
+        maxMedia: Int = 4,
+        mimeTypes: Set<String> = emptySet(),
+        visibility: Set<VisibilityV1> = setOf(VisibilityV1.Public),
+    ): ComposeConfigV1 =
+        ComposeConfigV1(
+            media =
+                ComposeConfigV1.MediaConfigV1(
+                    minCountForNew = minMedia,
+                    maxCount = maxMedia,
+                    maxBytes = 10_000_000,
+                    supportedMimeTypes = mimeTypes,
+                ),
+            visibility = ComposeConfigV1.VisibilityConfigV1(visibility, visibility.first()),
+        )
 }

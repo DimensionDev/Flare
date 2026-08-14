@@ -322,30 +322,31 @@ public class ComposePresenter(
         }.distinctUntilChanged()
     }
 
-    private val canSendFlow by lazy {
+    private val composeContentValidFlow by lazy {
         combine(
             textFlow,
             mediaSizeFlow,
-            remainingLengthFlow,
-            selectedComposeAccountKeysFlow,
             composeConfigFlow,
+            activeStatusFlow,
         ) {
             text,
             mediaSize,
-            remainingLength,
-            selectedAccountKeys,
             composeConfig,
+            composeStatus,
             ->
-            val media = composeConfig.media
-            val mediaCountAllowed =
-                media == null ||
-                    (mediaSize >= media.minCountForNew && mediaSize <= media.maxCount)
-            val contentPresent =
-                text.isNotBlank() ||
-                    (media?.allowMediaOnly == true && mediaSize > 0)
+            isComposeContentValid(text, mediaSize, composeConfig, composeStatus)
+        }
+    }
+
+    private val canSendFlow by lazy {
+        combine(
+            composeContentValidFlow,
+            remainingLengthFlow,
+            selectedComposeAccountKeysFlow,
+            composeConfigFlow,
+        ) { contentValid, remainingLength, selectedAccountKeys, composeConfig ->
             selectedAccountKeys.isNotEmpty() &&
-                contentPresent &&
-                mediaCountAllowed &&
+                contentValid &&
                 (remainingLength == null || remainingLength >= 0) &&
                 composeConfig.visibility?.allowedValues?.isNotEmpty() != false
         }
@@ -935,6 +936,19 @@ internal fun observeSelectedComposeAccountKeys(
             .filter { key -> allAccounts.containsKey(key) }
             .toImmutableList()
     }.distinctUntilChanged()
+
+internal fun isComposeContentValid(
+    text: String,
+    mediaSize: Int,
+    composeConfig: ComposeConfig,
+    composeStatus: ComposeStatus?,
+): Boolean {
+    val media = composeConfig.media
+    val minimumMediaCount = if (composeStatus == null) media?.minCountForNew ?: 0 else 0
+    val mediaCountAllowed = media == null || mediaSize in minimumMediaCount..media.maxCount
+    val contentPresent = text.isNotBlank() || ((media?.allowMediaOnly == true) && (mediaSize > 0))
+    return contentPresent && mediaCountAllowed
+}
 
 internal fun observeComposeStatusTarget(
     activeStatusFlow: Flow<ComposeStatus?>,

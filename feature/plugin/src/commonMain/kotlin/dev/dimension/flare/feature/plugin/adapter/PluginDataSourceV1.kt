@@ -502,6 +502,7 @@ internal class PluginDataSourceV1 private constructor(
                         description = media.altText,
                     )
                 }
+            validateComposeData(data, assets, cachedComposeConfig)
             progress()
             val result =
                 invoker.invoke(
@@ -638,7 +639,11 @@ internal class PluginDataSourceV1 private constructor(
                 timelineSpecs = timelineSpecs,
                 dynamicTimelineSpec = dynamicTimelineSpec,
                 coroutineScope = coroutineScope,
-                composeConfig = mergeComposeConfig(plugin.installed.manifest.platform.composeDefaults, account.snapshot.composeConfig),
+                composeConfig =
+                    mergePluginComposeConfigV1(
+                        plugin.installed.manifest.platform.composeDefaults,
+                        account.snapshot.composeConfig,
+                    ),
             )
         }
 
@@ -810,7 +815,7 @@ private fun ComposeConfigV1?.toHostComposeConfig(): ComposeConfig {
     )
 }
 
-private fun mergeComposeConfig(
+internal fun mergePluginComposeConfigV1(
     manifest: ComposeConfigV1?,
     instance: ComposeConfigV1?,
 ): ComposeConfigV1? {
@@ -827,11 +832,14 @@ private fun mergeComposeConfig(
             }
 
             else -> {
+                val minCountForNew = maxOf(manifest.media.minCountForNew, instance.media.minCountForNew)
+                val maxCount = minOf(manifest.media.maxCount, instance.media.maxCount)
+                require(minCountForNew <= maxCount) { "Plugin compose media constraints do not overlap" }
                 ComposeConfigV1.MediaConfigV1(
-                    minCountForNew = maxOf(manifest.media.minCountForNew, instance.media.minCountForNew),
-                    maxCount = minOf(manifest.media.maxCount, instance.media.maxCount),
+                    minCountForNew = minCountForNew,
+                    maxCount = maxCount,
                     maxBytes = minOf(manifest.media.maxBytes, instance.media.maxBytes),
-                    supportedMimeTypes = intersectConstraint(manifest.media.supportedMimeTypes, instance.media.supportedMimeTypes),
+                    supportedMimeTypes = intersectMimeConstraints(manifest.media.supportedMimeTypes, instance.media.supportedMimeTypes),
                     altTextMaxLength = minOf(manifest.media.altTextMaxLength, instance.media.altTextMaxLength),
                     canSensitive = manifest.media.canSensitive && instance.media.canSensitive,
                 )
@@ -849,6 +857,7 @@ private fun mergeComposeConfig(
 
             else -> {
                 val allowed = manifest.visibility.allowed intersect instance.visibility.allowed
+                require(allowed.isNotEmpty()) { "Plugin compose visibility constraints do not overlap" }
                 ComposeConfigV1.VisibilityConfigV1(
                     allowed = allowed,
                     default =
@@ -883,15 +892,78 @@ private fun mergeComposeConfig(
     ).also(ComposeConfigV1::requireValid)
 }
 
-private fun intersectConstraint(
+private fun intersectMimeConstraints(
     first: Set<String>,
     second: Set<String>,
-): Set<String> =
+): Set<String> {
+    val normalizedFirst = first.mapTo(linkedSetOf(), String::lowercase)
+    val normalizedSecond = second.mapTo(linkedSetOf(), String::lowercase)
+    if (normalizedFirst.isEmpty()) return normalizedSecond
+    if (normalizedSecond.isEmpty()) return normalizedFirst
+    return normalizedFirst
+        .flatMapTo(linkedSetOf()) { firstType ->
+            normalizedSecond.mapNotNull { secondType -> intersectMimeType(firstType, secondType) }
+        }.also {
+            require(it.isNotEmpty()) { "Plugin compose MIME constraints do not overlap" }
+        }
+}
+
+private fun intersectMimeType(
+    first: String,
+    second: String,
+): String? =
     when {
-        first.isEmpty() -> second
-        second.isEmpty() -> first
-        else -> first intersect second
+        first == second -> first
+        first.endsWith("/*") && second.startsWith(first.removeSuffix("*")) -> second
+        second.endsWith("/*") && first.startsWith(second.removeSuffix("*")) -> first
+        else -> null
     }
+
+private fun validateComposeData(
+    data: ComposeData,
+    assets: Map<String, PluginAsset>,
+    config: ComposeConfigV1?,
+) {
+    data.referenceStatus
+        ?.composeStatus
+        ?.statusKey
+        ?.let { EntityKeyV1(it.id, it.host).requireValid() }
+    require(data.localOnly.not()) { "Plugin compose does not support local-only posts" }
+    require(data.language.size <= 32 && data.language.all { it.length in 1..64 }) { "Invalid compose languages" }
+    val poll = data.poll
+    require((poll == null) || (poll.options.size in 2..100)) { "Invalid compose poll" }
+    if (config == null) return
+
+    config.text?.let { require(data.content.length <= it.maxLength) { "Compose text is too long" } }
+    config.visibility?.let { require(data.visibility.toWire() in it.allowed) { "Compose visibility is not allowed" } }
+    require(config.contentWarning || (data.spoilerText.isNullOrEmpty())) { "Content warnings are not supported" }
+    config.poll?.let { require((poll == null) || (poll.options.size <= it.maxOptions)) { "Too many poll options" } }
+    require((config.poll != null) || (poll == null)) { "Polls are not supported" }
+    config.language?.let { require(data.language.size <= it.maxCount) { "Too many compose languages" } }
+
+    val media = config.media
+    require((media != null) || assets.isEmpty()) { "Media is not supported" }
+    media ?: return
+    val minimum = if (data.referenceStatus == null) media.minCountForNew else 0
+    require(assets.size in minimum..media.maxCount) { "Invalid compose media count" }
+    require(media.canSensitive || (!data.sensitive)) { "Sensitive media is not supported" }
+    val supported = media.supportedMimeTypes.mapTo(linkedSetOf(), String::lowercase)
+    data.medias.zip(assets.values).forEach { (item, asset) ->
+        require(asset.size <= media.maxBytes) { "Compose media is too large" }
+        val altText = item.altText
+        require((altText == null) || (altText.length <= media.altTextMaxLength)) { "Media description is too long" }
+        val mimeType =
+            asset.mimeType
+                ?.substringBefore(';')
+                ?.trim()
+                ?.lowercase()
+        require(supported.isEmpty() || ((mimeType != null) && supported.any { it.matchesMimeType(mimeType) })) {
+            "Compose media type is not supported"
+        }
+    }
+}
+
+private fun String.matchesMimeType(actual: String): Boolean = (this == actual) || (endsWith("/*") && actual.startsWith(removeSuffix("*")))
 
 internal fun dev.dimension.flare.feature.plugin.wire.HostIconV1.toUiIcon(): dev.dimension.flare.ui.model.UiIcon =
     when (this) {

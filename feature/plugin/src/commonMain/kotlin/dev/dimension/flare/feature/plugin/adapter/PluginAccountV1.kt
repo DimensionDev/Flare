@@ -17,6 +17,7 @@ import kotlinx.serialization.json.JsonElement
 
 public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAccountCredentialV1 {
     success.requireValid()
+    mergePluginComposeConfigV1(installed.manifest.platform.composeDefaults, success.composeConfig)
     val manifestCapabilities =
         installed.manifest.platform.capabilities
             .mapValues { it.value.operations.keys }
@@ -52,6 +53,7 @@ internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
         "Invalid plugin account capabilities"
     }
     snapshot.composeConfig?.requireValid()
+    mergePluginComposeConfigV1(manifest.platform.composeDefaults, snapshot.composeConfig)
     require(
         dev.dimension.flare.feature.plugin.abi.PluginJsonV1
             .encodeToString(JsonElement.serializer(), credential)

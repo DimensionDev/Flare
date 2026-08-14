@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
+import okio.ByteString.Companion.encodeUtf8
+import okio.FileSystem
+import okio.Path.Companion.toPath
 
 public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAccountCredentialV1 {
     success.requireValid()
@@ -70,21 +73,42 @@ internal suspend fun AccountService.addPluginAccount(
             success.accountId,
             Url(success.origin).accountHost(),
         )
+    val accountMetadata = metadata.copy(iconUrl = plugin.stableAccountIconUrl() ?: metadata.iconUrl)
     addAccount(
         account =
             UiAccount(
                 accountKey = accountKey,
                 platformId = plugin.installed.manifest.platform.id,
-                platformDisplayName = metadata.displayName,
-                platformIcon = metadata.icon,
-                platformDisplayNameText = metadata.displayNameText,
-                platformIconUrl = metadata.iconUrl,
+                platformDisplayName = accountMetadata.displayName,
+                platformIcon = accountMetadata.icon,
+                platformDisplayNameText = accountMetadata.displayNameText,
+                platformIconUrl = accountMetadata.iconUrl,
             ),
         credential = plugin.accountCredential(success),
         serializer = PluginAccountCredentialV1.serializer(),
     ).join()
     return accountKey
 }
+
+private fun RunningPluginV1.stableAccountIconUrl(): String? =
+    runCatching {
+        val source = iconPath.toPath()
+        val directory = requireNotNull(source.parent)
+        val target =
+            directory / "platform-${installed.pluginId.encodeUtf8().sha256().hex()}-${installed.packageHash}.png"
+        if (source != target && !FileSystem.SYSTEM.exists(target)) {
+            val bytes = FileSystem.SYSTEM.read(source) { readByteArray() }
+            val temp = directory / "${target.name}.next"
+            FileSystem.SYSTEM.write(temp) { write(bytes) }
+            try {
+                FileSystem.SYSTEM.atomicMove(temp, target)
+            } catch (error: Throwable) {
+                FileSystem.SYSTEM.delete(temp, mustExist = false)
+                throw error
+            }
+        }
+        "file://$target"
+    }.getOrNull()
 
 private val PluginTextV1.fallbackText: String
     get() =

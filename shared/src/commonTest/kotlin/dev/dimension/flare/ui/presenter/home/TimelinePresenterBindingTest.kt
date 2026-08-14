@@ -6,6 +6,7 @@ import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.OkioFileStorage
 import dev.dimension.flare.data.model.HomeTimelineTabItem
@@ -47,6 +48,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class TimelinePresenterBindingTest : RobolectricTest() {
@@ -306,6 +308,33 @@ class TimelinePresenterBindingTest : RobolectricTest() {
             settingsRepository.replaceHomeTimelineTabs(tabs)
 
             assertEquals(listOf(group), settingsRepository.tabSettingsV2.first().homeSlots)
+        }
+
+    @Test
+    fun unavailableTimelineSpecKeepsPersistedTabWithoutCrashing() =
+        runTest {
+            val original = homeSlot(accountId = "plugin-account")
+            val source = assertIs<TimelineSlotContent.Source>(original.content).source
+            val unavailable =
+                original.copy(
+                    content = TimelineSlotContent.Source(source.copy(specId = "plugin.uninstalled.home")),
+                )
+            settingsRepository.updateTabSettingsV2 {
+                TabSettingsV2(homeSlots = listOf(unavailable))
+            }
+
+            val tab = settingsRepository.homeTimelineTabs.first().single()
+
+            assertNull(timelineResolver.resolveAccountKey(unavailable))
+            assertTrue(
+                timelineResolver
+                    .resolveLoader(tab)
+                    .first()
+                    .load(20, PagingRequest.Refresh)
+                    .data
+                    .isEmpty(),
+            )
+            assertEquals(unavailable.id, tab.id)
         }
 
     private suspend fun systemHomeMixedTab(): UiGroupTimelineTabItem {

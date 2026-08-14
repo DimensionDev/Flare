@@ -1,7 +1,11 @@
 package dev.dimension.flare.feature.plugin.wire
 
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
+import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
+import io.ktor.http.URLProtocol
+import io.ktor.http.Url
 import kotlinx.serialization.json.JsonElement
+import kotlin.time.Instant
 
 public object WireLimitsV1 {
     public const val MAX_PAGE_SIZE: Int = 100
@@ -31,6 +35,11 @@ public fun <T> PageV1<T>.requireValid() {
     require(newerCursor == null || newerCursor.length <= WireLimitsV1.MAX_CURSOR_LENGTH) { "Newer cursor is too large" }
 }
 
+public fun <T> PageV1<T>.requireValid(validateItem: (T) -> Unit) {
+    requireValid()
+    items.forEach(validateItem)
+}
+
 public fun ComposeConfigV1.requireValid() {
     text?.let { require(it.maxLength in 1..1_000_000) { "Invalid compose text limit" } }
     media?.let {
@@ -51,10 +60,21 @@ public fun ComposeConfigV1.requireValid() {
 
 public fun ProfileV1.requireValid() {
     key.requireValid()
-    require(handle.isNotBlank() && handle.length <= 512) { "Invalid profile handle" }
+    require(handle.isNotBlank() && handle.length <= 512 && handle.none(Char::isISOControl)) { "Invalid profile handle" }
     require(displayName.length <= 1_024) { "Profile display name is too long" }
+    avatarUrl.requireHttpsUrl()
+    bannerUrl.requireHttpsUrl()
+    url.requireHttpsUrl()
     description?.requireValid()
     require(fields.size <= 128) { "Too many profile fields" }
+    require(fields.map(ProfileFieldV1::name).distinct().size == fields.size) { "Duplicate profile field" }
+    fields.forEach { field ->
+        require(field.name.length <= 1_024 && field.name.none(Char::isISOControl)) { "Invalid profile field name" }
+        field.value.requireValid()
+    }
+    listOf(followersCount, followingCount, postsCount).filterNotNull().forEach {
+        require(it >= 0) { "Invalid profile count" }
+    }
     require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) {
         "Profile entity token is too large"
     }
@@ -65,14 +85,153 @@ public fun PostV1.requireValid(depth: Int = 0) {
     require(depth <= 4) { "Post nesting is too deep" }
     key.requireValid()
     author.requireValid()
+    createdAt.requireTimestamp()
     content.requireValid()
+    url.requireHttpsUrl()
     require(media.size <= 100) { "Too many media items" }
     media.forEach(MediaV1::requireValid)
     repost?.requireValid(depth + 1)
+    replyTo?.requireValid()
+    require(spoilerText == null || spoilerText.length <= WireLimitsV1.MAX_RICH_TEXT_LENGTH) { "Post spoiler is too long" }
+    listOf(favouritesCount, repostsCount, repliesCount).filterNotNull().forEach {
+        require(it >= 0) { "Invalid post count" }
+    }
     require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) {
         "Post entity token is too large"
     }
     actions.requireValid()
+}
+
+public fun HashtagV1.requireValid() {
+    require(name.isNotBlank() && name.length <= 1_024 && name.none(Char::isISOControl)) { "Invalid hashtag" }
+    url.requireHttpsUrl()
+}
+
+public fun RelationV1.requireValid() {
+    profileKey.requireValid()
+    require(actionTokens.size <= SemanticActionV1.entries.size) { "Too many relation action tokens" }
+    require(actionTokens.values.all { it.length <= WireLimitsV1.MAX_ACTION_TOKEN_LENGTH }) { "Relation action token is too large" }
+}
+
+public fun NotificationV1.requireValid() {
+    require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid notification ID" }
+    createdAt.requireTimestamp()
+    actor?.requireValid()
+    post?.requireValid()
+    message?.requireValid()
+}
+
+public fun NotificationFilterV1.requireValid() {
+    require(id.isWireName()) { "Invalid notification filter ID" }
+    require(title.isNotBlank() && title.length <= 1_024) { "Invalid notification filter title" }
+}
+
+public fun SocialListV1.requireValid() {
+    require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid list ID" }
+    require(title.isNotBlank() && title.length <= 4_096) { "Invalid list title" }
+    require(memberCount == null || memberCount >= 0) { "Invalid list member count" }
+    require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) { "List entity token is too large" }
+}
+
+public fun DirectMessageRoomV1.requireValid() {
+    key.requireValid()
+    require(title.length <= 4_096) { "Direct-message room title is too long" }
+    require(participants.size <= 256) { "Too many direct-message participants" }
+    participants.forEach(ProfileV1::requireValid)
+    lastMessage?.let { message ->
+        message.requireValid()
+        require(message.roomKey == key) { "Direct-message room contains a message from another room" }
+    }
+    require(unreadCount >= 0) { "Invalid direct-message unread count" }
+    require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) {
+        "Direct-message room entity token is too large"
+    }
+}
+
+public fun DirectMessageV1.requireValid() {
+    key.requireValid()
+    roomKey.requireValid()
+    sender.requireValid()
+    createdAt.requireTimestamp()
+    content.requireValid()
+    require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) {
+        "Direct-message entity token is too large"
+    }
+}
+
+public fun ArticleV1.requireValid() {
+    key.requireValid()
+    require(title.isNotBlank() && title.length <= 16_384) { "Invalid article title" }
+    author?.requireValid()
+    createdAt?.requireTimestamp()
+    content.requireValid()
+    url.requireHttpsUrl()
+    coverUrl.requireHttpsUrl()
+}
+
+public fun GalleryV1.requireValid() {
+    key.requireValid()
+    require(title.length <= 16_384) { "Gallery title is too long" }
+    author?.requireValid()
+    createdAt.requireTimestamp()
+    content?.requireValid()
+    url.requireHttpsUrl(required = true)
+    require(images.isNotEmpty() && images.size <= 100) { "Invalid gallery image count" }
+    images.forEach { media ->
+        require(media.type == MediaTypeV1.Image) { "Gallery media must be an image" }
+        media.requireValid()
+    }
+    require(entityToken == null || entityToken.length <= WireLimitsV1.MAX_ENTITY_TOKEN_LENGTH) {
+        "Gallery entity token is too large"
+    }
+    actions.requireValid()
+}
+
+public fun TimelineDescriptorV1.requireValid() {
+    require(id.isWireName()) { "Invalid timeline ID" }
+    title.requireValid()
+    require(parameters.size <= 32) { "Too many timeline parameters" }
+    require(parameters.all { (key, value) -> key.isWireName() && value.length <= 4_096 }) { "Invalid timeline parameter" }
+}
+
+public fun TimelineSectionV1.requireValid() {
+    require(id.isWireName()) { "Invalid timeline section ID" }
+    title.requireValid()
+    timelines.requireValid(TimelineDescriptorV1::requireValid)
+}
+
+public fun MutationResultV1.requireValid() {
+    when (this) {
+        is MutationResultV1.UpdatedPost -> {
+            post.requireValid()
+        }
+
+        is MutationResultV1.UpdatedProfile -> {
+            profile.requireValid()
+        }
+
+        is MutationResultV1.UpdatedRelation -> {
+            relation.requireValid()
+        }
+
+        MutationResultV1.Deleted,
+        MutationResultV1.NoChange,
+        -> {}
+
+        is MutationResultV1.Invalidate -> {
+            require(keys.size <= WireLimitsV1.MAX_PAGE_ITEMS) { "Too many invalidated entities" }
+            require(keys.distinct().size == keys.size) { "Duplicate invalidated entity" }
+            keys.forEach(EntityKeyV1::requireValid)
+        }
+    }
+}
+
+public fun ComposeResultV1.requireValid() {
+    post.requireValid()
+}
+
+public fun CountResultV1.requireValid() {
+    require(value >= 0) { "Invalid count" }
 }
 
 public fun WireTextV1.requireValid() {
@@ -164,9 +323,10 @@ private fun <T> encodedSize(
         .encodeToByteArray()
         .size
 
-private fun EntityKeyV1.requireValid() {
+public fun EntityKeyV1.requireValid() {
     require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid entity id" }
     require(host.isNotBlank() && host.length <= 253) { "Invalid entity host" }
+    PluginUrlPolicy.requireOrigin("https://$host")
 }
 
 private fun RichTextV1.requireValid() {
@@ -174,10 +334,13 @@ private fun RichTextV1.requireValid() {
 }
 
 private fun MediaV1.requireValid() {
-    require(id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Media id is too large" }
-    require(url.length <= 8_192) { "Media URL is too large" }
+    require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid media ID" }
+    url.requireHttpsUrl(required = true)
+    previewUrl.requireHttpsUrl()
+    require(description == null || description.length <= 100_000) { "Media description is too long" }
     require(width == null || width in 1..100_000) { "Invalid media width" }
     require(height == null || height in 1..100_000) { "Invalid media height" }
+    require(durationMillis == null || durationMillis in 0..604_800_000) { "Invalid media duration" }
 }
 
 private fun List<ActionDescriptorV1>.requireValid() {
@@ -185,6 +348,24 @@ private fun List<ActionDescriptorV1>.requireValid() {
     require(map(ActionDescriptorV1::action).distinct().size == size) { "Duplicate action" }
     require(all { it.actionToken == null || it.actionToken.length <= WireLimitsV1.MAX_ACTION_TOKEN_LENGTH }) {
         "Action token is too large"
+    }
+    require(all { it.count == null || it.count >= 0 }) { "Invalid action count" }
+}
+
+private fun String.requireTimestamp() {
+    require(length <= 128) { "Timestamp is too long" }
+    Instant.parse(this)
+}
+
+private fun String?.requireHttpsUrl(required: Boolean = false) {
+    if (isNullOrBlank()) {
+        require(!required) { "Required HTTPS URL is missing" }
+        return
+    }
+    require(length <= 8_192) { "URL is too long" }
+    val parsed = Url(this)
+    require(parsed.protocol == URLProtocol.HTTPS && parsed.host.isNotBlank() && parsed.user == null && parsed.password == null) {
+        "URL must use HTTPS without credentials"
     }
 }
 

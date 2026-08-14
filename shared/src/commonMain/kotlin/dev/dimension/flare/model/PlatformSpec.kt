@@ -69,6 +69,9 @@ public interface PlatformDataSourceContext {
         serializer: KSerializer<T>,
         credential: T,
     )
+
+    /** Clears content derived from an older datasource implementation without removing the account. */
+    public suspend fun invalidateCachedContent() {}
 }
 
 @HiddenFromObjC

@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,8 +40,10 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.feature.plugin.PluginSubsystemV1
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningV1
+import dev.dimension.flare.feature.plugin.installer.PluginSensitivePermissionV1
 import dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementItemV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementPresenterV1
@@ -57,6 +60,9 @@ import dev.dimension.flare.plugin_issue_platform_conflict
 import dev.dimension.flare.plugin_issue_platform_invalid
 import dev.dimension.flare.plugin_issues
 import dev.dimension.flare.plugin_operation_failed
+import dev.dimension.flare.plugin_permission_account_origin
+import dev.dimension.flare.plugin_permission_account_origin_label
+import dev.dimension.flare.plugin_permission_cookie
 import dev.dimension.flare.plugin_permissions
 import dev.dimension.flare.plugin_rebuild_index
 import dev.dimension.flare.plugin_restart_required
@@ -107,6 +113,9 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
     val subsystem = koinInject<PluginSubsystemV1>()
     val scope = rememberCoroutineScope()
     val presenter = remember(subsystem, scope) { PluginManagementPresenterV1(subsystem, scope) }
+    DisposableEffect(presenter) {
+        onDispose { presenter.close() }
+    }
     val state by presenter.state.collectAsState()
     val installLabel = stringResource(Res.string.plugin_install)
     var showsMaintenanceMenu by remember { mutableStateOf(false) }
@@ -116,6 +125,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
     state.pendingInstall?.let { review ->
         PluginInstallReviewDialog(
             review = review,
+            busy = state.busy,
             onConfirm = { scope.launchPresenterAction { presenter.confirmInstall() } },
             onCancel = { scope.launchPresenterAction { presenter.cancelInstall() } },
         )
@@ -245,6 +255,7 @@ internal fun DesktopPluginManagementScreen(onBack: () -> Unit) {
 @Composable
 private fun PluginInstallReviewDialog(
     review: PluginInstallReviewV1,
+    busy: Boolean,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -267,7 +278,7 @@ private fun PluginInstallReviewDialog(
                 if (review.permissions.isNotEmpty()) {
                     Text(stringResource(Res.string.plugin_permissions), style = FluentTheme.typography.bodyStrong)
                     review.permissions.forEach { permission ->
-                        Text("• ${permission.origin}${permission.cookieName?.let { "/$it" }.orEmpty()}")
+                        Text("• ${permission.localizedDescription()}")
                     }
                 }
                 review.warnings
@@ -278,9 +289,31 @@ private fun PluginInstallReviewDialog(
         primaryButtonText = stringResource(Res.string.plugin_confirm_install),
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = { button ->
+            if (busy) return@ContentDialog
             if (button == ContentDialogButton.Primary) onConfirm() else onCancel()
         },
     )
+}
+
+@Composable
+private fun PluginSensitivePermissionV1.localizedDescription(): String {
+    val accountRelativePath =
+        origin
+            .takeIf { it == PluginAbiV1.ACCOUNT_ORIGIN || it.startsWith("${PluginAbiV1.ACCOUNT_ORIGIN}/") }
+            ?.removePrefix(PluginAbiV1.ACCOUNT_ORIGIN)
+    val displayOrigin =
+        if (accountRelativePath != null) {
+            stringResource(Res.string.plugin_permission_account_origin_label) + accountRelativePath
+        } else {
+            origin
+        }
+    return cookieName?.let {
+        stringResource(Res.string.plugin_permission_cookie, displayOrigin, it)
+    } ?: if (accountRelativePath != null) {
+        stringResource(Res.string.plugin_permission_account_origin)
+    } else {
+        displayOrigin
+    }
 }
 
 @Composable
@@ -466,7 +499,12 @@ private fun PluginInstallWarningV1.localizedMessage(): String {
                 PluginInstallWarningTypeV1.Compatibility -> Res.string.plugin_warning_compatibility
             },
         )
-    return detail?.let { "$prefix: $it" } ?: prefix
+    val localizedDetail =
+        detail?.replace(
+            PluginAbiV1.ACCOUNT_ORIGIN,
+            stringResource(Res.string.plugin_permission_account_origin_label),
+        )
+    return localizedDetail?.let { "$prefix: $it" } ?: prefix
 }
 
 private fun CoroutineScope.launchPresenterAction(action: suspend () -> Unit) {

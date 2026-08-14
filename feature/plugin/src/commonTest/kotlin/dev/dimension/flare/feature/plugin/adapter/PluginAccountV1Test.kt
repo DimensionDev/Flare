@@ -13,7 +13,14 @@ import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1
 import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformDataSourceContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -49,6 +56,110 @@ class PluginAccountV1Test {
 
         assertFailsWith<RequireReLoginException> { account.effectiveCapabilities(changed) }
     }
+
+    @Test
+    fun hostCredentialAccessReadsTheLatestPersistedEnvelope() =
+        runTest {
+            val plugin = plugin(setOf("detail"))
+            val initial =
+                credential(plugin, previous = setOf("detail"), negotiated = setOf("detail"))
+                    .copy(credential = JsonObject(mapOf("token" to JsonPrimitive("old"))))
+            val persisted = MutableStateFlow(initial)
+            val context =
+                object : PlatformDataSourceContext {
+                    override val accountKey: MicroBlogKey = MicroBlogKey("me", "example.social")
+
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : Any> credential(serializer: KSerializer<T>): T = initial as T
+
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T> = persisted as Flow<T>
+
+                    @Suppress("UNCHECKED_CAST")
+                    override suspend fun <T : Any> updateCredential(
+                        serializer: KSerializer<T>,
+                        credential: T,
+                    ) {
+                        persisted.value = credential as PluginAccountCredentialV1
+                    }
+                }
+            val access = PlatformDataSourceCredentialAccessV1(plugin, context)
+            val refreshed = JsonObject(mapOf("token" to JsonPrimitive("new")))
+
+            persisted.value = initial.copy(credential = refreshed)
+
+            assertEquals(initial.credential, access.initial().credential)
+            assertEquals(refreshed, access.read())
+
+            val rotated = JsonObject(mapOf("token" to JsonPrimitive("rotated")))
+            access.replace(rotated)
+            assertEquals(rotated, persisted.value.credential)
+        }
+
+    @Test
+    fun mismatchedPersistedAccountRequiresReloginBeforeRuntimeCreation() {
+        val plugin = plugin(setOf("detail"))
+        val initial = credential(plugin, previous = setOf("detail"), negotiated = setOf("detail"))
+        val context =
+            object : PlatformDataSourceContext {
+                override val accountKey: MicroBlogKey = MicroBlogKey("another-account", "example.social")
+
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : Any> credential(serializer: KSerializer<T>): T = initial as T
+
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T> = MutableStateFlow(initial) as Flow<T>
+
+                override suspend fun <T : Any> updateCredential(
+                    serializer: KSerializer<T>,
+                    credential: T,
+                ) = Unit
+            }
+
+        assertFailsWith<RequireReLoginException> {
+            PlatformDataSourceCredentialAccessV1(plugin, context).initial()
+        }
+    }
+
+    @Test
+    fun packageChangeInvalidatesContentAndAdvancesThePersistedSnapshotOnce() =
+        runTest {
+            val plugin = plugin(setOf("detail"))
+            val previous =
+                credential(plugin, previous = setOf("detail"), negotiated = setOf("detail"))
+                    .let { it.copy(snapshot = it.snapshot.copy(packageHash = "b".repeat(64))) }
+            val persisted = MutableStateFlow(previous)
+            var invalidations = 0
+            val context =
+                object : PlatformDataSourceContext {
+                    override val accountKey: MicroBlogKey = MicroBlogKey("me", "example.social")
+
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : Any> credential(serializer: KSerializer<T>): T = previous as T
+
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : Any> credentialFlow(serializer: KSerializer<T>): Flow<T> = persisted as Flow<T>
+
+                    @Suppress("UNCHECKED_CAST")
+                    override suspend fun <T : Any> updateCredential(
+                        serializer: KSerializer<T>,
+                        credential: T,
+                    ) {
+                        persisted.value = credential as PluginAccountCredentialV1
+                    }
+
+                    override suspend fun invalidateCachedContent() {
+                        invalidations += 1
+                    }
+                }
+            val access = PlatformDataSourceCredentialAccessV1(plugin, context)
+
+            access.read()
+            access.read()
+
+            assertEquals(1, invalidations)
+            assertEquals(plugin.installed.packageHash, persisted.value.snapshot.packageHash)
+        }
 
     @Test
     fun composeConstraintsUseStrictIntersection() {

@@ -35,7 +35,10 @@ import dev.dimension.flare.feature.plugin.wire.DetectorMatchV1
 import dev.dimension.flare.feature.plugin.wire.DetectorRequestV1
 import dev.dimension.flare.feature.plugin.wire.DetectorResultV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
+import dev.dimension.flare.feature.plugin.wire.EntityPageRequestV1
 import dev.dimension.flare.feature.plugin.wire.EntityRequestV1
+import dev.dimension.flare.feature.plugin.wire.HandleRequestV1
+import dev.dimension.flare.feature.plugin.wire.HashtagV1
 import dev.dimension.flare.feature.plugin.wire.LoginBeginRequestV1
 import dev.dimension.flare.feature.plugin.wire.LoginResumeRequestV1
 import dev.dimension.flare.feature.plugin.wire.LoginTransitionV1
@@ -47,6 +50,8 @@ import dev.dimension.flare.feature.plugin.wire.PageV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.PluginErrorCodeV1
 import dev.dimension.flare.feature.plugin.wire.PostV1
+import dev.dimension.flare.feature.plugin.wire.ProfileTimelineRequestV1
+import dev.dimension.flare.feature.plugin.wire.ProfileV1
 import dev.dimension.flare.feature.plugin.wire.SearchRequestV1
 import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
@@ -351,6 +356,354 @@ class PixelfedSampleTest {
         }
 
     @Test
+    fun everyDeclaredCapabilityPaginationAndRemoteErrorIsExecutable() =
+        runBlocking {
+            val packagePath = root.resolve("capabilities.fpp")
+            pack(packagePath)
+            val plugin = install(packagePath)
+            val transport = PixelfedFixtureTransport()
+            val pool = PluginRuntimePool(FileSystem.SYSTEM, transport)
+            val credential = MemoryCredential(buildJsonObject { put("accessToken", "token") })
+            val key = PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, ORIGIN, "42")
+            val context = accountContext(plugin, credential)
+            try {
+                val postPageSerializer = PageV1.serializer(PostV1.serializer())
+                val profilePageSerializer = PageV1.serializer(ProfileV1.serializer())
+
+                listOf("home", "discover", "local", "federated", "bookmarks", "favourites").forEach { timelineId ->
+                    val page =
+                        pool.invokeAccount(
+                            plugin,
+                            key,
+                            context,
+                            "capabilities.timeline.page",
+                            TimelinePageRequestV1(timelineId, pageRequest(), emptyMap()),
+                            TimelinePageRequestV1.serializer(),
+                            postPageSerializer,
+                        )
+                    assertEquals(
+                        "100",
+                        page.items
+                            .single()
+                            .key.id,
+                        timelineId,
+                    )
+                }
+                assertTrue(transport.requests.any { it.url.contains("/timelines/public?") && "local=true" in it.url })
+                assertTrue(transport.requests.any { it.url.contains("/timelines/public?") && "local=false" in it.url })
+
+                val bookmarkPage =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.timeline.page",
+                        TimelinePageRequestV1("bookmarks", pageRequest(), emptyMap()),
+                        TimelinePageRequestV1.serializer(),
+                        postPageSerializer,
+                    )
+                assertEquals("max_id:100", bookmarkPage.olderCursor)
+                pool.invokeAccount(
+                    plugin,
+                    key,
+                    context,
+                    "capabilities.timeline.page",
+                    TimelinePageRequestV1("bookmarks", pageRequest().copy(cursor = bookmarkPage.olderCursor), emptyMap()),
+                    TimelinePageRequestV1.serializer(),
+                    postPageSerializer,
+                )
+                assertTrue(transport.requests.any { "/api/v1/bookmarks?" in it.url && "max_id=100" in it.url })
+                val completedPage =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.timeline.page",
+                        TimelinePageRequestV1("favourites", pageRequest().copy(limit = 2), emptyMap()),
+                        TimelinePageRequestV1.serializer(),
+                        postPageSerializer,
+                    )
+                assertTrue(completedPage.endReached)
+                assertNull(completedPage.olderCursor)
+
+                listOf("posts", "discoverPosts").forEach { operation ->
+                    val page =
+                        pool.invokeAccount(
+                            plugin,
+                            key,
+                            context,
+                            "capabilities.search.$operation",
+                            SearchRequestV1("photo", pageRequest()),
+                            SearchRequestV1.serializer(),
+                            postPageSerializer,
+                        )
+                    assertEquals(
+                        "100",
+                        page.items
+                            .single()
+                            .key.id,
+                        operation,
+                    )
+                }
+                val completedSearch =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.search.posts",
+                        SearchRequestV1("photo", pageRequest().copy(limit = 2)),
+                        SearchRequestV1.serializer(),
+                        postPageSerializer,
+                    )
+                assertTrue(completedSearch.endReached)
+                assertNull(completedSearch.olderCursor)
+                listOf("profiles", "discoverProfiles").forEach { operation ->
+                    val page =
+                        pool.invokeAccount(
+                            plugin,
+                            key,
+                            context,
+                            "capabilities.search.$operation",
+                            SearchRequestV1("alice", pageRequest()),
+                            SearchRequestV1.serializer(),
+                            profilePageSerializer,
+                        )
+                    assertEquals(
+                        "42",
+                        page.items
+                            .single()
+                            .key.id,
+                        operation,
+                    )
+                }
+                val hashtags =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.search.discoverHashtags",
+                        SearchRequestV1("", pageRequest()),
+                        SearchRequestV1.serializer(),
+                        PageV1.serializer(HashtagV1.serializer()),
+                    )
+                assertEquals("photography", hashtags.items.single().name)
+
+                val byId =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.profile.byId",
+                        EntityRequestV1(EntityKeyV1("42", "pixelfed.social")),
+                        EntityRequestV1.serializer(),
+                        ProfileV1.serializer(),
+                    )
+                assertEquals("@alice@pixelfed.social", byId.handle)
+                val byHandle =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.profile.byHandle",
+                        HandleRequestV1("@alice", "pixelfed.social"),
+                        HandleRequestV1.serializer(),
+                        ProfileV1.serializer(),
+                    )
+                assertEquals("42", byHandle.key.id)
+                val profileTimeline =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.profile.timeline",
+                        ProfileTimelineRequestV1(EntityKeyV1("42", "pixelfed.social"), "gallery", pageRequest()),
+                        ProfileTimelineRequestV1.serializer(),
+                        postPageSerializer,
+                    )
+                assertEquals(
+                    "100",
+                    profileTimeline.items
+                        .single()
+                        .key.id,
+                )
+                listOf("following", "followers").forEach { operation ->
+                    val page =
+                        pool.invokeAccount(
+                            plugin,
+                            key,
+                            context,
+                            "capabilities.profile.$operation",
+                            EntityPageRequestV1(EntityKeyV1("42", "pixelfed.social"), pageRequest()),
+                            EntityPageRequestV1.serializer(),
+                            profilePageSerializer,
+                        )
+                    assertEquals(
+                        "42",
+                        page.items
+                            .single()
+                            .key.id,
+                        operation,
+                    )
+                }
+
+                val postRequest = EntityRequestV1(EntityKeyV1("100", "pixelfed.social"))
+                val detail =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.post.detail",
+                        postRequest,
+                        EntityRequestV1.serializer(),
+                        PostV1.serializer(),
+                    )
+                assertEquals("100", detail.key.id)
+                val thread =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.post.context",
+                        EntityPageRequestV1(postRequest.key, pageRequest()),
+                        EntityPageRequestV1.serializer(),
+                        postPageSerializer,
+                    )
+                assertEquals(listOf("99", "100", "101"), thread.items.map { it.key.id })
+                val deleted =
+                    pool.invokeAccount(
+                        plugin,
+                        key,
+                        context,
+                        "capabilities.post.delete",
+                        postRequest,
+                        EntityRequestV1.serializer(),
+                        MutationResultV1.serializer(),
+                    )
+                assertIs<MutationResultV1.Deleted>(deleted)
+                SemanticActionV1.entries
+                    .filter {
+                        it in
+                            setOf(
+                                SemanticActionV1.Favourite,
+                                SemanticActionV1.Unfavourite,
+                                SemanticActionV1.Repost,
+                                SemanticActionV1.Unrepost,
+                                SemanticActionV1.Bookmark,
+                                SemanticActionV1.Unbookmark,
+                            )
+                    }.forEach { action ->
+                        val result =
+                            pool.invokeAccount(
+                                plugin,
+                                key,
+                                context,
+                                "capabilities.post.mutate",
+                                MutationRequestV1(postRequest.key, action),
+                                MutationRequestV1.serializer(),
+                                MutationResultV1.serializer(),
+                            )
+                        assertIs<MutationResultV1.UpdatedPost>(result)
+                    }
+
+                val composeError =
+                    assertFailsWith<PluginCallException> {
+                        pool.invokeAccount(
+                            plugin,
+                            key,
+                            context,
+                            "capabilities.compose.publish",
+                            ComposeRequestV1(text = "media required", visibility = VisibilityV1.Public),
+                            ComposeRequestV1.serializer(),
+                            ComposeResultV1.serializer(),
+                        )
+                    }
+                assertEquals(PluginErrorCodeV1.Validation, composeError.error.code)
+
+                mapOf(
+                    "unauthorized" to PluginErrorCodeV1.AuthenticationRequired,
+                    "invalid" to PluginErrorCodeV1.Validation,
+                    "limited" to PluginErrorCodeV1.RateLimited,
+                    "broken" to PluginErrorCodeV1.InvalidResponse,
+                    "remote" to PluginErrorCodeV1.Remote,
+                ).forEach { (id, expected) ->
+                    val error =
+                        assertFailsWith<PluginCallException>(id) {
+                            pool.invokeAccount(
+                                plugin,
+                                key,
+                                context,
+                                "capabilities.post.detail",
+                                EntityRequestV1(EntityKeyV1(id, "pixelfed.social")),
+                                EntityRequestV1.serializer(),
+                                PostV1.serializer(),
+                            )
+                        }
+                    assertEquals(expected, error.error.code, id)
+                    if (id == "limited") assertEquals(17, error.error.retryAfterSeconds)
+                }
+
+                transport.instanceBody = MASTODON_INSTANCE
+                val detector =
+                    pool.invoke(
+                        plugin = plugin,
+                        key = PluginRuntimeKeyV1.detector(PLUGIN_ID, plugin.installed.packageHash, "mastodon-detector"),
+                        context = detectorContext(plugin),
+                        method = "detector.detect",
+                        request = DetectorRequestV1(ORIGIN),
+                        requestSerializer = DetectorRequestV1.serializer(),
+                        responseSerializer = DetectorResultV1.serializer(),
+                    )
+                assertEquals(DetectorMatchV1.None, detector.match)
+            } finally {
+                pool.close()
+            }
+        }
+
+    @Test
+    fun timelineSchemaChangeRetiresExistingPluginTimelineSpecs() =
+        runBlocking {
+            val packagePath = root.resolve("timeline-schema.fpp")
+            pack(packagePath)
+            val plugin = install(packagePath)
+            val changed =
+                plugin.copy(
+                    installed =
+                        plugin.installed.copy(
+                            manifest =
+                                plugin.installed.manifest.copy(
+                                    platform =
+                                        plugin.installed.manifest.platform.copy(
+                                            timelineSchemaVersion = 2,
+                                        ),
+                                ),
+                        ),
+                )
+            val pool = PluginRuntimePool(FileSystem.SYSTEM, PixelfedFixtureTransport())
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            try {
+                val originalIds =
+                    plugin
+                        .platformSpec(pool, scope)
+                        .timelineSpecs
+                        .map { it.id }
+                        .toSet()
+                val changedIds =
+                    changed
+                        .platformSpec(pool, scope)
+                        .timelineSpecs
+                        .map { it.id }
+                        .toSet()
+
+                assertTrue(originalIds.none { "_schema" in it })
+                assertTrue(changedIds.all { "_schema2_" in it })
+                assertTrue(originalIds.intersect(changedIds).isEmpty())
+            } finally {
+                scope.cancel()
+                pool.close()
+            }
+        }
+
+    @Test
     fun optionalRealInstanceSmoke() =
         runBlocking {
             val configuredHost = System.getenv("PIXELFED_TEST_HOST")?.trim()?.takeIf(String::isNotEmpty) ?: return@runBlocking
@@ -523,13 +876,14 @@ private class MemoryAsset(
 
 private class PixelfedFixtureTransport : PluginHttpTransport {
     val requests = mutableListOf<PluginTransportRequestV1>()
+    var instanceBody: String = INSTANCE
 
     override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 {
         requests += request
         val path = URI(request.url).path
         return when {
             path == "/api/v1/instance" -> {
-                response(INSTANCE)
+                response(instanceBody)
             }
 
             path == "/api/v1/apps" -> {
@@ -548,24 +902,83 @@ private class PixelfedFixtureTransport : PluginHttpTransport {
                 response("[$STATUS]", mapOf("Link" to listOf("<$ORIGIN/api/v1/timelines/home?max_id=100>; rel=\"next\"")))
             }
 
+            path == "/api/v1/timelines/public" || path == "/api/v1/bookmarks" || path == "/api/v1/favourites" -> {
+                response("[$STATUS]")
+            }
+
+            path == "/api/v1/discover/posts" -> {
+                response("""{"data":[{"post":$STATUS}]}""")
+            }
+
+            path == "/api/v1.1/discover/accounts/popular" -> {
+                response("""{"accounts":[{"account":$ACCOUNT}]}""")
+            }
+
+            path == "/api/v1.1/discover/posts/hashtags" -> {
+                response("""{"hashtags":[{"name":"photography","url":"$ORIGIN/tags/photography"}]}""")
+            }
+
+            path == "/api/v1/accounts/42" || path == "/api/v1/accounts/lookup" -> {
+                response(ACCOUNT)
+            }
+
             path == "/api/v1/accounts/42/statuses" -> {
                 response("[$STATUS]")
             }
 
-            path == "/api/v1/statuses/100" -> {
-                response(STATUS)
+            path == "/api/v1/accounts/42/following" || path == "/api/v1/accounts/42/followers" -> {
+                response("[$ACCOUNT]")
             }
 
             path == "/api/v2/search" -> {
                 response("""{"statuses":[$STATUS],"accounts":[$ACCOUNT]}""")
             }
 
-            path == "/api/v1/statuses/100/favourite" -> {
-                response(STATUS.replace("\"favourited\":false", "\"favourited\":true"))
+            path == "/api/v1/statuses/100/context" -> {
+                response("""{"ancestors":[${statusWithId("99")}],"descendants":[${statusWithId("101")}]}""")
+            }
+
+            path.startsWith("/api/v1/statuses/100/") &&
+                path.substringAfterLast('/') in
+                setOf("favourite", "unfavourite", "reblog", "unreblog", "bookmark", "unbookmark") -> {
+                response(
+                    STATUS
+                        .replace("\"favourited\":false", "\"favourited\":${path.endsWith("/favourite")}")
+                        .replace("\"reblogged\":false", "\"reblogged\":${path.endsWith("/reblog")}")
+                        .replace("\"bookmarked\":false", "\"bookmarked\":${path.endsWith("/bookmark")}"),
+                )
+            }
+
+            path == "/api/v1/statuses/100" && request.method == "DELETE" -> {
+                response("", status = 204)
+            }
+
+            path == "/api/v1/statuses/100" -> {
+                response(STATUS)
             }
 
             path == "/api/v1/statuses/missing" -> {
                 response("""{"error":"missing"}""", status = 404)
+            }
+
+            path == "/api/v1/statuses/unauthorized" -> {
+                response("""{"error":"invalid_token"}""", status = 401)
+            }
+
+            path == "/api/v1/statuses/invalid" -> {
+                response("""{"error":"caption is too long"}""", status = 422)
+            }
+
+            path == "/api/v1/statuses/limited" -> {
+                response("""{"error":"slow_down"}""", mapOf("Retry-After" to listOf("17")), status = 429)
+            }
+
+            path == "/api/v1/statuses/broken" -> {
+                response("not-json")
+            }
+
+            path == "/api/v1/statuses/remote" -> {
+                response("""{"error":"upstream_failed"}""", status = 503)
             }
 
             path == "/api/v1/media" -> {
@@ -588,6 +1001,8 @@ private class PixelfedFixtureTransport : PluginHttpTransport {
         status: Int = 200,
     ): PluginTransportResponseV1 = PluginTransportResponseV1(status, headers, body.encodeToByteArray())
 }
+
+private fun statusWithId(id: String): String = STATUS.replace("\"id\":\"100\"", "\"id\":\"$id\"")
 
 private fun RunningPluginV1.platformSpec(
     pool: PluginRuntimePool,
@@ -633,6 +1048,25 @@ private fun accountContext(
         assets,
     )
 
+private suspend fun <Request, Response> PluginRuntimePool.invokeAccount(
+    plugin: RunningPluginV1,
+    key: PluginRuntimeKeyV1,
+    context: PluginInvocationContextV1,
+    method: String,
+    request: Request,
+    requestSerializer: KSerializer<Request>,
+    responseSerializer: KSerializer<Response>,
+): Response =
+    invoke(
+        plugin = plugin,
+        key = key,
+        context = context,
+        method = method,
+        request = request,
+        requestSerializer = requestSerializer,
+        responseSerializer = responseSerializer,
+    )
+
 private fun pageRequest(): PageRequestV1 = PageRequestV1(PageDirectionV1.Refresh, 1)
 
 private const val PLUGIN_ID = "dev.dimension.flare.sample.pixelfed"
@@ -640,6 +1074,8 @@ private const val ORIGIN = "https://pixelfed.social"
 private const val REDIRECT_URI = "flare://Callback/SignIn/Plugin/flow"
 private const val INSTANCE =
     """{"uri":"pixelfed.social","title":"Pixelfed Social","version":"3.5.3 (compatible; Pixelfed 0.12.7)","description":"Photos","stats":{"user_count":10},"registrations":true,"configuration":{"statuses":{"max_characters":500,"max_media_attachments":4},"media_attachments":{"image_size_limit":10485760,"video_size_limit":20971520,"description_limit":1500,"supported_mime_types":["image/jpeg","image/png","video/mp4"]}}}"""
+private const val MASTODON_INSTANCE =
+    """{"uri":"pixelfed.social","title":"Mastodon","version":"4.5.0","description":"Not Pixelfed"}"""
 private const val ACCOUNT =
     """{"id":"42","username":"alice","acct":"alice","display_name":"Alice","note":"<p>Photos</p>","avatar":"https://pixelfed.social/avatar.jpg","header":"https://pixelfed.social/header.jpg","url":"https://pixelfed.social/alice","followers_count":3,"following_count":4,"statuses_count":5,"locked":false,"bot":false,"fields":[]}"""
 private const val STATUS =

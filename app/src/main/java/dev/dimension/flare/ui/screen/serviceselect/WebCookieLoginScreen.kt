@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
+import android.net.Uri
 import android.view.ViewGroup.LayoutParams
 import android.webkit.CookieManager
 import android.webkit.WebResourceError
@@ -11,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,6 +33,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.WebViewProxy
 import dev.dimension.flare.data.network.ProxyNetwork
 import dev.dimension.flare.data.network.ProxySnapshot
+import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FlareScaffold
 import kotlinx.coroutines.CancellationException
@@ -52,11 +56,14 @@ private val userAgent =
     )
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun WebCookieLoginScreen(
     request: LoginEffect.OpenWebCookieLogin,
     callback: suspend (LoginCookieSnapshot) -> Boolean,
     onBack: () -> Unit,
 ) {
+    val initialOrigin = remember(request.url) { request.url.httpsOriginOrNull() }
+    var currentOrigin by remember(request) { mutableStateOf(initialOrigin.orEmpty()) }
     var route by remember { mutableStateOf<ProxySnapshot?>(null) }
     var errorMessage by remember { mutableStateOf<Int?>(null) }
     var retry by remember { mutableStateOf(0) }
@@ -87,7 +94,19 @@ internal fun WebCookieLoginScreen(
             }
         }
     }
-    FlareScaffold { padding ->
+    FlareScaffold(
+        topBar = {
+            FlareTopAppBar(
+                title = {
+                    androidx.compose.material3.Text(
+                        text = currentOrigin,
+                        color = if (currentOrigin.isNotEmpty() && currentOrigin != initialOrigin) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                    )
+                },
+                navigationIcon = { BackButton(onBack = onBack) },
+            )
+        },
+    ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
             val prepared = route
             val error = errorMessage
@@ -95,7 +114,11 @@ internal fun WebCookieLoginScreen(
                 ErrorContent(IllegalStateException(stringResource(error)), onRetry = { retry++ })
             } else if (prepared != null && prepared.isValid) {
                 key(prepared.key, retry) {
-                    ProxyLoginWebView(request, prepared, callback, onBack, onError = { errorMessage = R.string.proxy_webview_error })
+                    ProxyLoginWebView(
+                        request, prepared, callback, onBack,
+                        onOriginChange = { currentOrigin = it },
+                        onError = { errorMessage = R.string.proxy_webview_error },
+                    )
                 }
             } else {
                 CircularProgressIndicator()
@@ -110,9 +133,13 @@ private fun ProxyLoginWebView(
     route: ProxySnapshot,
     callback: suspend (LoginCookieSnapshot) -> Boolean,
     onBack: () -> Unit,
+    onOriginChange: (String) -> Unit,
     onError: () -> Unit,
 ) {
-    val webViewState = rememberWebViewState(request.url)
+    val webViewState = rememberWebViewState("about:blank")
+    LaunchedEffect(webViewState.lastLoadedUrl) {
+        webViewState.lastLoadedUrl?.httpsOriginOrNull()?.let(onOriginChange)
+    }
     var unsubscribe by remember { mutableStateOf<(() -> Unit)?>(null) }
     var disposed by remember { mutableStateOf(false) }
     LaunchedEffect(request) {
@@ -153,6 +180,13 @@ private fun ProxyLoginWebView(
         client =
             remember {
                 object : AccompanistWebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: AndroidWebView?, request: WebResourceRequest?): Boolean =
+                        !route.isValid || (request?.isForMainFrame == true && !request.url.isHttps())
+
+                    @Deprecated("Deprecated in Android")
+                    override fun shouldOverrideUrlLoading(view: AndroidWebView?, url: String?): Boolean =
+                        !route.isValid || url?.httpsOriginOrNull() == null
+
                     override fun onReceivedError(
                         view: AndroidWebView,
                         request: WebResourceRequest?,
@@ -164,12 +198,16 @@ private fun ProxyLoginWebView(
                 }
             },
         onCreated = { view ->
+            view.clearCache(true)
             with(view.settings) {
                 userAgentString = userAgent.getValue("user-agent")
                 javaScriptEnabled = true
                 domStorageEnabled = true
                 javaScriptCanOpenWindowsAutomatically = false
-                cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+                allowContentAccess = false
+                allowFileAccess = false
+                mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                cacheMode = WebSettings.LOAD_NO_CACHE
                 blockNetworkLoads = !route.isValid
             }
             unsubscribe =
@@ -181,13 +219,39 @@ private fun ProxyLoginWebView(
                         view.loadUrl("about:blank")
                     }
                 }
+            if (route.isValid && request.url.httpsOriginOrNull() != null) view.loadUrl(request.url)
         },
         onDispose = { view ->
             disposed = true
             unsubscribe?.invoke()
             unsubscribe = null
-            view.stopLoading()
-            view.destroy()
+            clearLoginWebView(view)
         },
     )
 }
+
+private fun clearLoginWebView(webView: android.webkit.WebView) {
+    webView.stopLoading()
+    webView.clearHistory()
+    webView.clearCache(true)
+    WebStorage.getInstance().deleteAllData()
+    CookieManager.getInstance().removeAllCookies(null)
+    CookieManager.getInstance().flush()
+    webView.destroy()
+}
+
+private fun String.httpsOriginOrNull(): String? =
+    runCatching {
+        val uri = Uri.parse(this)
+        require(
+            uri.scheme.equals("https", ignoreCase = true) &&
+                !uri.host.isNullOrBlank() &&
+                uri.userInfo == null,
+        )
+        "https://${uri.host}${if (uri.port == -1 || uri.port == 443) "" else ":${uri.port}"}"
+    }.getOrNull()
+
+private fun Uri.isHttps(): Boolean =
+    scheme.equals("https", ignoreCase = true) &&
+        !host.isNullOrBlank() &&
+        userInfo == null

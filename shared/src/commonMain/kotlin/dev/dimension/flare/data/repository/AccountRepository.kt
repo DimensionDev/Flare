@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -53,6 +54,11 @@ import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
+
+private data class RepositoryEvent<T>(
+    val generation: Long,
+    val value: T,
+)
 
 @Stable
 @Single
@@ -106,20 +112,18 @@ internal class AccountRepository internal constructor(
     }
 
     private val addAccountFlow by lazy {
-        MutableStateFlow<UiAccount?>(null)
+        MutableStateFlow<RepositoryEvent<UiAccount>?>(null)
     }
     internal val onAdded: Flow<UiAccount> by lazy {
         addAccountFlow
-            .mapNotNull { it }
-            .distinctUntilChangedBy { it.accountKey }
+            .mapNotNull { it?.value }
     }
     private val removeAccountFlow by lazy {
-        MutableStateFlow<MicroBlogKey?>(null)
+        MutableStateFlow<RepositoryEvent<MicroBlogKey>?>(null)
     }
     internal val onRemoved: Flow<MicroBlogKey> by lazy {
         removeAccountFlow
-            .mapNotNull { it }
-            .distinctUntilChangedBy { it }
+            .mapNotNull { it?.value }
     }
 
     internal val accountMutationMutex = Mutex()
@@ -188,11 +192,12 @@ internal class AccountRepository internal constructor(
         serializer: KSerializer<T>,
     ) {
         withAccountChanges {
+            val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
             restoreAccountsLocked(listOf(account.accountKey)) {
-                val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
                 val credentialJson = credential.encodeJson(serializer)
                 val dbAccount =
                     existingAccount?.copy(
+                        platformId = account.platformId,
                         credential_json = credentialJson,
                         last_active = Clock.System.now().toEpochMilliseconds(),
                     ) ?: DbAccount(
@@ -204,7 +209,14 @@ internal class AccountRepository internal constructor(
                     )
                 appDatabase.accountDao().insert(dbAccount)
             }
-            addAccountFlow.value = account
+            if (existingAccount == null) {
+                addAccountFlow.update { RepositoryEvent((it?.generation ?: 0) + 1, account) }
+            } else {
+                dataSourceCacheMutex.withLock {
+                    val dataSource = dataSourceCache.remove(account.accountKey)
+                    if (dataSource is AutoCloseable) dataSource.close()
+                }
+            }
         }
     }
 
@@ -270,13 +282,30 @@ internal class AccountRepository internal constructor(
                 lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
             )
         }
-        removeAccountFlow.value = accountKey
+        removeAccountFlow.update { RepositoryEvent((it?.generation ?: 0) + 1, accountKey) }
         dataSourceCacheMutex.withLock {
             val datasource = dataSourceCache.remove(accountKey)
             if (datasource is AutoCloseable) {
                 datasource.close()
             }
         }
+        invalidateCachedContent(accountKey)
+        appDatabase.accountDao().delete(accountKey)
+        // Finish selection cleanup before a replacement account can be added.
+        listOf(appDataStore.notificationPreferences, appDataStore.discoverPreferences).forEach { preferences ->
+            try {
+                preferences.updateData {
+                    if (it.selectedAccountKey == accountKey) it.copy(selectedAccountKey = null) else it
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                error.printStackTrace()
+            }
+        }
+    }
+
+    private suspend fun invalidateCachedContent(accountKey: MicroBlogKey) {
         cacheDatabase.clearHomeTimelinesForAccount(accountKey)
         cacheDatabase.pagingTimelineDao().deleteByAccountType(
             AccountType.Specific(accountKey),
@@ -293,19 +322,6 @@ internal class AccountRepository internal constructor(
         cacheDatabase.messageDao().clearMessageTimeline(
             AccountType.Specific(accountKey),
         )
-        appDatabase.accountDao().delete(accountKey)
-        // Finish selection cleanup before a replacement account can be added.
-        listOf(appDataStore.notificationPreferences, appDataStore.discoverPreferences).forEach { preferences ->
-            try {
-                preferences.updateData {
-                    if (it.selectedAccountKey == accountKey) it.copy(selectedAccountKey = null) else it
-                }
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                error.printStackTrace()
-            }
-        }
     }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
@@ -401,6 +417,10 @@ internal class AccountRepository internal constructor(
                 accountKey,
                 credential.encodeJson(serializer),
             )
+        }
+
+        override suspend fun invalidateCachedContent() {
+            this@AccountRepository.invalidateCachedContent(accountKey)
         }
     }
 }

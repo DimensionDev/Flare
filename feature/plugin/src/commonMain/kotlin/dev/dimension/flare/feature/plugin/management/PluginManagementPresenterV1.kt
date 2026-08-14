@@ -12,7 +12,10 @@ import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeIssueV1
 import dev.dimension.flare.ui.model.UiText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import okio.Source
 import kotlin.native.HiddenFromObjC
@@ -65,6 +69,7 @@ public data class PluginInstallReviewV1(
 public class PluginManagementPresenterV1(
     private val subsystem: PluginSubsystemV1,
     private val scope: CoroutineScope,
+    private val operationDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
     private val mutableState = MutableStateFlow(snapshot())
     public val state: StateFlow<PluginManagementStateV1> = mutableState.asStateFlow()
@@ -72,7 +77,7 @@ public class PluginManagementPresenterV1(
     private var preview: PreparedPluginInstallV1? = null
     private val actionMutex = Mutex()
 
-    init {
+    private val observation: Job =
         combine(
             subsystem.stateStore.desired,
             subsystem.sourceIssues,
@@ -87,6 +92,9 @@ public class PluginManagementPresenterV1(
                         error = current.error,
                     )
             }.launchIn(scope)
+
+    public fun close() {
+        observation.cancel()
     }
 
     @HiddenFromObjC
@@ -169,6 +177,10 @@ public class PluginManagementPresenterV1(
         mutableState.value = mutableState.value.copy(error = null)
     }
 
+    public fun reportOperationFailure() {
+        mutableState.value = mutableState.value.copy(error = "Plugin operation failed")
+    }
+
     private fun snapshot(): PluginManagementStateV1 {
         val desired = subsystem.stateStore.desired.value
         val running = subsystem.stateStore.running.plugins
@@ -202,7 +214,7 @@ public class PluginManagementPresenterV1(
         actionMutex.withLock {
             mutableState.value = mutableState.value.copy(busy = true, error = null)
             try {
-                block()
+                withContext(operationDispatcher) { block() }
             } catch (error: Throwable) {
                 if (error is CancellationException) throw error
                 mutableState.value = snapshot().copy(error = error.message ?: "Plugin operation failed")

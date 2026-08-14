@@ -13,4 +13,8 @@ internal actual fun platformSecureRandom(size: Int): ByteArray = ByteArray(size)
 
 internal actual fun platformPluginHttpEngine(): HttpClientEngine = OkHttp.create()
 
-internal actual fun defaultPluginRuntimeHeapBudgetBytes(): Long = 256L * 1024 * 1024
+internal actual fun defaultPluginRuntimeHeapBudgetBytes(): Long =
+    (Runtime.getRuntime().maxMemory() / 4).coerceIn(MIN_RUNTIME_POOL_BYTES, MAX_RUNTIME_POOL_BYTES)
+
+private const val MIN_RUNTIME_POOL_BYTES = 64L * 1024 * 1024
+private const val MAX_RUNTIME_POOL_BYTES = 256L * 1024 * 1024

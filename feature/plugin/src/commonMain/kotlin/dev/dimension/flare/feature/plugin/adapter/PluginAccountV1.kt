@@ -21,6 +21,9 @@ import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 
 public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAccountCredentialV1 {
@@ -95,6 +98,7 @@ internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
     require(snapshot.pluginId == plugin.installed.pluginId && snapshot.platformId == manifest.platform.id) {
         "Plugin account identity mismatch"
     }
+    require(PACKAGE_HASH.matches(snapshot.packageHash)) { "Invalid plugin account package hash" }
     require(snapshot.accountId.isNotBlank() && snapshot.accountId.length <= WireLimitsV1.MAX_ID_LENGTH) {
         "Invalid plugin account ID"
     }
@@ -142,6 +146,8 @@ internal class PlatformDataSourceCredentialAccessV1(
     private val plugin: RunningPluginV1,
     private val context: PlatformDataSourceContext,
 ) : PluginCredentialAccess {
+    private val packageRefreshMutex = Mutex()
+
     override suspend fun read(): JsonElement = current().credential
 
     override suspend fun replace(value: JsonElement) {
@@ -150,10 +156,46 @@ internal class PlatformDataSourceCredentialAccessV1(
         context.updateCredential(PluginAccountCredentialV1.serializer(), replacement)
     }
 
-    fun current(): PluginAccountCredentialV1 =
+    fun initial(): PluginAccountCredentialV1 =
         context
             .credential(PluginAccountCredentialV1.serializer())
-            .also { it.requireValid(plugin) }
+            .also(::requireCurrentAccount)
+
+    suspend fun current(): PluginAccountCredentialV1 =
+        persisted().let { current ->
+            if (current.snapshot.packageHash == plugin.installed.packageHash) {
+                current
+            } else {
+                packageRefreshMutex.withLock {
+                    val latest = persisted()
+                    if (latest.snapshot.packageHash == plugin.installed.packageHash) {
+                        latest
+                    } else {
+                        context.invalidateCachedContent()
+                        latest
+                            .copy(snapshot = latest.snapshot.copy(packageHash = plugin.installed.packageHash))
+                            .also { replacement ->
+                                replacement.requireValid(plugin)
+                                context.updateCredential(PluginAccountCredentialV1.serializer(), replacement)
+                            }
+                    }
+                }
+            }
+        }
+
+    private suspend fun persisted(): PluginAccountCredentialV1 =
+        context
+            .credentialFlow(PluginAccountCredentialV1.serializer())
+            .first()
+            .also(::requireCurrentAccount)
+
+    private fun requireCurrentAccount(account: PluginAccountCredentialV1) {
+        account.requireValid(plugin)
+        val expectedKey = MicroBlogKey(account.snapshot.accountId, Url(account.snapshot.origin).accountHost())
+        if (expectedKey != context.accountKey) {
+            throw RequireReLoginException(context.accountKey, plugin.installed.manifest.platform.id)
+        }
+    }
 }
 
 internal fun RunningPluginV1.accountInvocationContext(
@@ -181,3 +223,5 @@ private fun Map<String, Set<String>>.isCapabilitySnapshot(): Boolean =
                 operations.size <= 32 &&
                 PluginAbiV1.knownCapabilityOperations.getValue(capability).containsAll(operations)
         }
+
+private val PACKAGE_HASH = Regex("[0-9a-f]{64}")

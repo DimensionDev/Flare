@@ -176,6 +176,6 @@ private const val MAX_CATALOG_VALUE_LENGTH = 4_096
 private const val PNG_MIN_BYTES = 45
 private const val PNG_CHUNK_OVERHEAD = 12
 private const val PNG_IHDR_LENGTH = 13L
-private const val MAX_ICON_DIMENSION = 4_096L
+private const val MAX_ICON_DIMENSION = 1_024L
 private val CATALOG_KEY = Regex("[A-Za-z][A-Za-z0-9_.-]{0,127}")
 private val PNG_SIGNATURE = byteArrayOf(0x89.toByte(), 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)

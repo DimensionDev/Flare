@@ -106,6 +106,44 @@ class PluginHttpHostTest {
         }
 
     @Test
+    fun resolvesQueryAndParentRelativeRedirectsAgainstTheCurrentUrl() =
+        runBlocking {
+            val transport =
+                RecordingTransport { request ->
+                    when (request.url) {
+                        "https://instance.example/api/v1/start?old=1" -> {
+                            PluginTransportResponseV1(302, mapOf("Location" to listOf("?page=2")), byteArrayOf())
+                        }
+
+                        "https://instance.example/api/v1/start?page=2" -> {
+                            PluginTransportResponseV1(302, mapOf("Location" to listOf("../done")), byteArrayOf())
+                        }
+
+                        else -> {
+                            PluginTransportResponseV1(200, emptyMap(), "done".encodeToByteArray())
+                        }
+                    }
+                }
+
+            val response =
+                PluginHttpHost(transport).execute(
+                    HttpRequestV1(url = "https://instance.example/api/v1/start?old=1"),
+                    context(),
+                    30_000,
+                )
+
+            assertEquals("done", response.body)
+            assertEquals(
+                listOf(
+                    "https://instance.example/api/v1/start?old=1",
+                    "https://instance.example/api/v1/start?page=2",
+                    "https://instance.example/api/done",
+                ),
+                transport.requests.map(PluginTransportRequestV1::url),
+            )
+        }
+
+    @Test
     fun resolvesOnlyInvocationAssetsWithoutReadingThem() =
         runBlocking {
             val asset = BufferAsset("image".encodeToByteArray())
@@ -130,6 +168,33 @@ class PluginHttpHostTest {
             assertEquals(0, asset.openCount)
             assertFails { PluginHttpHost(transport).execute(request, context(), 120_000) }
             Unit
+        }
+
+    @Test
+    fun rejectsMultipartRequestsWhoseDeclaredAssetsExceedTheAggregateLimit() =
+        runBlocking {
+            val asset = SizedAsset(600L * 1024 * 1024)
+            val request =
+                HttpRequestV1(
+                    method = "POST",
+                    url = "https://instance.example/upload",
+                    body =
+                        HttpBodyV1.Multipart(
+                            listOf(
+                                HttpMultipartPartV1.Asset("first", "asset-1"),
+                                HttpMultipartPartV1.Asset("second", "asset-1"),
+                            ),
+                        ),
+                )
+
+            assertFails {
+                PluginHttpHost(RecordingTransport()).execute(
+                    request,
+                    context(assets = mapOf("asset-1" to asset)),
+                    120_000,
+                )
+            }
+            assertEquals(0, asset.openCount)
         }
 
     @Test
@@ -197,6 +262,19 @@ internal class BufferAsset(
     override fun openSource(): Source {
         openCount++
         return Buffer().write(bytes)
+    }
+}
+
+private class SizedAsset(
+    override val size: Long,
+) : PluginAsset {
+    var openCount = 0
+    override val fileName: String = "large.bin"
+    override val mimeType: String = "application/octet-stream"
+
+    override fun openSource(): Source {
+        openCount++
+        return Buffer()
     }
 }
 

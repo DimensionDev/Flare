@@ -16,6 +16,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.account_item_error_message
 import dev.dimension.flare.account_item_error_title
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.login_expired
 import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.model.MicroBlogKey
@@ -90,16 +91,22 @@ fun AccountItem(
                 },
             )
         }.onError { throwable ->
+            val reloginTarget =
+                when (throwable) {
+                    is LoginExpiredException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                    is RequireReLoginException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                    else -> null
+                }
             CardExpanderItem(
                 heading = {
                     if (throwable is UnsupportedPlatformException) {
                         Text(text = unavailableAccount?.platformDisplayNameText?.resolveText() ?: throwable.platformId)
-                    } else if (throwable is LoginExpiredException) {
+                    } else if (reloginTarget != null) {
                         Text(
                             text =
                                 stringResource(
                                     Res.string.login_expired,
-                                    throwable.accountKey.toString(),
+                                    reloginTarget.accountKey.toString(),
                                 ),
                         )
                     } else {
@@ -134,8 +141,8 @@ fun AccountItem(
                 caption = {
                     if (throwable is UnsupportedPlatformException) {
                         Text(text = throwable.accountKey?.toString() ?: throwable.platformId)
-                    } else if (throwable is LoginExpiredException) {
-                        Text(text = throwable.accountKey.toString())
+                    } else if (reloginTarget != null) {
+                        Text(text = reloginTarget.accountKey.toString())
                     } else {
                         Text(text = stringResource(Res.string.account_item_error_message))
                     }
@@ -150,16 +157,9 @@ fun AccountItem(
                             }
                             trailingContent.invoke(null)
                         }
-                    } else if (throwable is LoginExpiredException) {
+                    } else if (reloginTarget != null) {
                         SubtleButton(
-                            onClick = {
-                                toRelogin(
-                                    ReloginTarget(
-                                        accountKey = throwable.accountKey,
-                                        platformId = throwable.platformId,
-                                    ),
-                                )
-                            },
+                            onClick = { toRelogin(reloginTarget) },
                         ) {
                             Text(text = stringResource(Res.string.login_expired_relogin))
                         }

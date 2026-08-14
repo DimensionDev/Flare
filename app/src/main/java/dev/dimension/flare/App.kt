@@ -16,7 +16,11 @@ import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
 import dev.dimension.flare.common.CorruptImageRetryInterceptor
 import dev.dimension.flare.di.AndroidKoinApplication
+import dev.dimension.flare.di.koinGet
+import dev.dimension.flare.feature.plugin.PluginSubsystemV1
 import dev.dimension.flare.ui.component.proxyImageFetcherFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.plugin.module.dsl.startKoin
 
@@ -27,6 +31,15 @@ class App :
         super.onCreate()
         startKoin<AndroidKoinApplication> {
             androidContext(this@App)
+        }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            koinGet<CoroutineScope>().launch {
+                koinGet<PluginSubsystemV1>().onMemoryPressure()
+            }
         }
     }
 

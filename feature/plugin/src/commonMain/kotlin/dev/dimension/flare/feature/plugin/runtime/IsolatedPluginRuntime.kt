@@ -1,22 +1,32 @@
 package dev.dimension.flare.feature.plugin.runtime
 
+import com.dokar.quickjs.ExperimentalQuickJsApi
 import com.dokar.quickjs.QuickJs
 import com.dokar.quickjs.binding.asyncFunction
+import dev.dimension.flare.feature.plugin.abi.DISABLE_DYNAMIC_CODE_PRELUDE
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginHostGateway
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationMetadataV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.manifest.PluginCatalogBundleV1
 import dev.dimension.flare.feature.plugin.manifest.requiredMethods
+import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.wire.PluginErrorV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
+import dev.dimension.flare.ui.model.UiText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -40,6 +50,7 @@ internal class IsolatedPluginRuntime(
     var heapBytes: Long = 0
         private set
 
+    @OptIn(ExperimentalQuickJsApi::class, InternalCoroutinesApi::class)
     suspend fun invoke(
         method: String,
         request: JsonElement,
@@ -47,52 +58,65 @@ internal class IsolatedPluginRuntime(
         timeout: PluginCallTimeoutV1,
         validate: (JsonElement) -> Unit,
     ): JsonElement =
-        mutex.withLock {
-            require(context.metadata.pluginId == plugin.installed.pluginId) { "Invocation plugin mismatch" }
-            require(context.metadata.platformId == plugin.installed.manifest.platform.id) { "Invocation platform mismatch" }
-            require(context.metadata.packageHash == plugin.installed.packageHash) { "Invocation package mismatch" }
-            require(METHOD_PATH.matches(method)) { "Invalid plugin method" }
-            require(method in plugin.installed.manifest.requiredMethods()) { "Plugin method is not declared" }
-            val requestJson = request.toString()
-            require(requestJson.encodeToByteArray().size <= MAX_INVOCATION_REQUEST_BYTES) { "Plugin request is too large" }
-            if (poisoned) throw PluginRuntimeFatalException(IllegalStateException("Runtime generation is retired"), false)
-            try {
-                val runtime = quickJs ?: createRuntime().also { quickJs = it }
-                val contextJson = PluginJsonV1.encodeToString(PluginInvocationMetadataV1.serializer(), context.metadata)
-                activeContext = context
-                activeTimeoutMillis = timeout.millis
-                runtime.evaluationTimeoutMillis = timeout.millis
-                val result =
-                    withTimeout(timeout.millis) {
-                        runtime.evaluate<String>(
-                            "await globalThis.__flareInvokeV1(${JsonPrimitive(method)},$requestJson,$contextJson)",
-                            "flare-invocation.js",
-                        )
-                    }
-                require(result.encodeToByteArray().size <= MAX_INVOCATION_RESPONSE_BYTES) { "Plugin response is too large" }
-                val value = decodeResult(result)
-                validate(value)
-                heapBytes = runtime.memoryUsage.memoryUsedSize
-                value
-            } catch (error: PluginCallException) {
-                throw error
-            } catch (error: PluginRuntimeFatalException) {
-                throw error
-            } catch (error: Throwable) {
-                poisoned = true
-                closeLocked()
-                throw PluginRuntimeFatalException(
-                    cause = error,
-                    countsTowardPause = error !is CancellationException || error is TimeoutCancellationException,
-                )
-            } finally {
-                activeContext = null
-                activeTimeoutMillis = PluginCallTimeoutV1.Normal.millis
+        withContext(dispatcher) {
+            mutex.withLock {
+                require(context.metadata.pluginId == plugin.installed.pluginId) { "Invocation plugin mismatch" }
+                require(context.metadata.platformId == plugin.installed.manifest.platform.id) { "Invocation platform mismatch" }
+                require(context.metadata.packageHash == plugin.installed.packageHash) { "Invocation package mismatch" }
+                require(METHOD_PATH.matches(method)) { "Invalid plugin method" }
+                require(method in plugin.installed.manifest.requiredMethods()) { "Plugin method is not declared" }
+                val requestJson = request.toString()
+                require(requestJson.encodeToByteArray().size <= MAX_INVOCATION_REQUEST_BYTES) { "Plugin request is too large" }
+                if (poisoned) throw PluginRuntimeFatalException(IllegalStateException("Runtime generation is retired"), false)
+                val invocationJob = currentCoroutineContext()[Job]
+                var interruptHandle: DisposableHandle? = null
+                try {
+                    val runtime = quickJs ?: createRuntime().also { quickJs = it }
+                    interruptHandle =
+                        invocationJob?.invokeOnCompletion(onCancelling = true, invokeImmediately = true) { cause ->
+                            if (cause != null) runtime.interruptEvaluation()
+                        }
+                    val contextJson = PluginJsonV1.encodeToString(PluginInvocationMetadataV1.serializer(), context.metadata)
+                    activeContext = context
+                    activeTimeoutMillis = timeout.millis
+                    runtime.evaluationTimeoutMillis = timeout.millis
+                    val result =
+                        withTimeout(timeout.millis) {
+                            runtime.evaluate<String>(
+                                "await globalThis.__flareInvokeV1(${JsonPrimitive(method)},$requestJson,$contextJson)",
+                                "flare-invocation.js",
+                            )
+                        }
+                    require(result.encodeToByteArray().size <= MAX_INVOCATION_RESPONSE_BYTES) { "Plugin response is too large" }
+                    val value = decodeResult(result, plugin, context.metadata.locale)
+                    validate(value)
+                    heapBytes = runtime.memoryUsage.memoryUsedSize
+                    value
+                } catch (error: PluginCallException) {
+                    heapBytes = quickJs?.memoryUsage?.memoryUsedSize ?: 0
+                    throw error
+                } catch (error: PluginRuntimeFatalException) {
+                    throw error
+                } catch (error: Throwable) {
+                    poisoned = true
+                    closeLocked()
+                    val cancellation = invocationJob?.takeIf { it.isCancelled }?.getCancellationException()
+                    throw PluginRuntimeFatalException(
+                        cause = cancellation ?: error,
+                        countsTowardPause =
+                            cancellation == null &&
+                                (error !is CancellationException || error is TimeoutCancellationException),
+                    )
+                } finally {
+                    interruptHandle?.dispose()
+                    activeContext = null
+                    activeTimeoutMillis = PluginCallTimeoutV1.Normal.millis
+                }
             }
         }
 
     suspend fun close() {
-        mutex.withLock { closeLocked() }
+        withContext(dispatcher) { mutex.withLock { closeLocked() } }
     }
 
     private suspend fun createRuntime(): QuickJs {
@@ -113,7 +137,7 @@ internal class IsolatedPluginRuntime(
             }
             val source = loader.load(plugin)
             withTimeout(INITIALIZATION_TIMEOUT_MILLIS) {
-                runtime.evaluate<Unit>(RUNTIME_PRELUDE + source, "plugin.js")
+                runtime.evaluate<Unit>(RUNTIME_PRELUDE + DISABLE_DYNAMIC_CODE_PRELUDE + source, "plugin.js")
                 runtime.evaluate<Boolean>("globalThis.__flareValidateRegistrationV1()", "flare-registration.js")
             }
             heapBytes = runtime.memoryUsage.memoryUsedSize
@@ -133,14 +157,19 @@ internal class IsolatedPluginRuntime(
 
 public class PluginCallException(
     public val error: PluginErrorV1,
-) : IllegalStateException(error.message.value ?: error.message.fallback ?: error.code.name)
+    resolvedMessage: String? = null,
+) : IllegalStateException(resolvedMessage ?: error.message.value ?: error.message.fallback ?: error.code.name)
 
 internal class PluginRuntimeFatalException(
     cause: Throwable,
     val countsTowardPause: Boolean,
 ) : IllegalStateException("Plugin Runtime failed", cause)
 
-private fun decodeResult(value: String): JsonElement {
+private fun decodeResult(
+    value: String,
+    plugin: RunningPluginV1,
+    locale: String,
+): JsonElement {
     val objectValue = PluginJsonV1.parseToJsonElement(value).jsonObject
     return when (objectValue["ok"]?.jsonPrimitive?.booleanOrNull) {
         true -> {
@@ -152,7 +181,17 @@ private fun decodeResult(value: String): JsonElement {
             error.message.requireValid()
             require(error.retryAfterSeconds == null || error.retryAfterSeconds in 0..604_800) { "Invalid retry delay" }
             require(error.remoteCode == null || error.remoteCode.length <= 512) { "Remote error code is too long" }
-            throw PluginCallException(error)
+            val message =
+                error.message.value
+                    ?: PluginCatalogBundleV1(
+                        pluginId = plugin.installed.pluginId,
+                        defaultLocale = plugin.installed.manifest.defaultLocale,
+                        catalogs = plugin.installed.catalogs,
+                    ).resolve(
+                        error.message.toUiText(plugin.installed.pluginId) as UiText.ExternalRef,
+                        locale,
+                    )
+            throw PluginCallException(error, message)
         }
 
         null -> {

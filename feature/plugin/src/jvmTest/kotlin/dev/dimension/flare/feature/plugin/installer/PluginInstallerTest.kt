@@ -211,6 +211,10 @@ class PluginInstallerTest {
             TestFppFactory.write(input, TestFppFactory.validEntries(icon = byteArrayOf(1, 2, 3)))
             assertFails { installer.inspect(input) }
 
+            val oversizedIcon = TestFppFactory.validPng.copyOf().also { it.writeUInt32BigEndian(offset = 16, value = 1_025) }
+            TestFppFactory.write(input, TestFppFactory.validEntries(icon = oversizedIcon))
+            assertFails { installer.inspect(input) }
+
             TestFppFactory.write(
                 input,
                 TestFppFactory.validEntries(script = TestFppFactory.validScript + "\nasync function later() { return import('x'); }"),
@@ -283,6 +287,15 @@ class PluginInstallerTest {
             )
             Unit
         }
+}
+
+private fun ByteArray.writeUInt32BigEndian(
+    offset: Int,
+    value: Int,
+) {
+    repeat(4) { byteIndex ->
+        this[offset + byteIndex] = (value ushr ((3 - byteIndex) * 8)).toByte()
+    }
 }
 
 private class RepeatingSource(

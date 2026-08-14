@@ -35,7 +35,14 @@ struct AccountManagementScreen: View {
                     accountActions(for: account.account, accountName: account.account.accountKey.id) {
                         Group {
                             if account.account.platformAvailable {
-                                UserErrorView(error: error)
+                                if let target = loginTarget(for: error) {
+                                    NavigationLink(value: Route.relogin(target.accountKey, target.platformId)) {
+                                        UserErrorView(error: error)
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    UserErrorView(error: error)
+                                }
                             } else {
                                 NavigationLink(value: Route.pluginManagement) {
                                     unavailableAccountRow(account.account)
@@ -168,5 +175,15 @@ struct AccountManagementScreen: View {
     private func clearPendingLogout() {
         pendingLogoutAccountKey = nil
         pendingLogoutAccountName = nil
+    }
+
+    private func loginTarget(for error: KotlinThrowable) -> ReloginTarget? {
+        if let expired = error as? LoginExpiredException {
+            return ReloginTarget(accountKey: expired.accountKey, platformId: expired.platformId)
+        }
+        if let required = error as? RequireReLoginException {
+            return ReloginTarget(accountKey: required.accountKey, platformId: required.platformId)
+        }
+        return nil
     }
 }

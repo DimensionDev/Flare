@@ -26,7 +26,7 @@ internal class PluginAccountInvokerV1(
     private val runtimePool: PluginRuntimePool,
     private val runtimeKey: PluginRuntimeKeyV1,
     private val accountKey: MicroBlogKey?,
-    private val context: (locale: String, assets: Map<String, PluginAsset>) -> PluginInvocationContextV1,
+    private val context: suspend (locale: String, assets: Map<String, PluginAsset>) -> PluginInvocationContextV1,
 ) {
     suspend fun <Request, Response> invoke(
         capabilityId: String,
@@ -79,6 +79,8 @@ internal fun PagingRequest.toWire(
         parameters = parameters,
     ).also { it.requireValid() }
 
+internal fun PageDirectionV1.isSupportedBy(directions: Set<PageDirectionV1>): Boolean = directions.isEmpty() || this in directions
+
 internal fun <Wire : Any, Ui : Any> pluginRemoteLoader(
     directions: Set<PageDirectionV1>,
     load: suspend (pageSize: Int, request: PagingRequest) -> PageV1<Wire>,
@@ -95,7 +97,7 @@ internal fun <Wire : Any, Ui : Any> pluginRemoteLoader(
                     is PagingRequest.Append -> PageDirectionV1.Older
                     is PagingRequest.Prepend -> PageDirectionV1.Newer
                 }
-            if (directions.isNotEmpty() && direction !in directions) return PagingResult(endOfPaginationReached = true)
+            if (!direction.isSupportedBy(directions)) return PagingResult(endOfPaginationReached = true)
             val page = load(pageSize, request).also { it.requireValid() }
             return PagingResult(
                 data = page.items.map(map),

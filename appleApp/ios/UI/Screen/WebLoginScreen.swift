@@ -28,6 +28,7 @@ struct WebLoginScreen: View {
                                     viewModel.page.load(requestURL)
                                 }
                             }
+                            .task { await viewModel.pollCookies() }
                             .task {
                                 do { for try await _ in viewModel.page.navigations {} }
                                 catch { route.report(error) }
@@ -42,11 +43,15 @@ struct WebLoginScreen: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    WebLoginOriginLabel(current: webLoginHTTPSOrigin(viewModel?.page.url) ?? webLoginHTTPSOrigin(URL(string: url)) ?? "", initial: webLoginHTTPSOrigin(URL(string: url)))
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: { Label("Cancel", systemImage: "xmark") }
                 }
             }
         }
+        .onDisappear { viewModel?.clearCookie() }
     }
 }
 
@@ -56,12 +61,14 @@ struct NavigationDecider: WebPage.NavigationDeciding {
     let route: WebViewProxyRoute
     let url: URL?
     func decidePolicy(for action: WebPage.NavigationAction, preferences: inout WebPage.NavigationPreferences) async -> WKNavigationActionPolicy {
-        route.isValid ? .allow : .cancel
+        guard route.isValid else { return .cancel }
+        guard action.target?.isMainFrame != false else { return .allow }
+        return webLoginHTTPSOrigin(action.request.url) == nil ? .cancel : .allow
     }
     func decidePolicy(for response: WebPage.NavigationResponse) async -> WKNavigationResponsePolicy {
         guard route.isValid else { return .cancel }
         getCookies()
-        return .allow
+        return webLoginHTTPSOrigin(response.response.url) == nil ? .cancel : .allow
     }
     func getCookies() {
         route.dataStore.httpCookieStore.getAllCookies { (cookies) in
@@ -95,5 +102,47 @@ final class WebLoginViewModel {
             page?.stopLoading()
             page?.load(html: "")
         }
+    }
+    func pollCookies() async {
+        while !Task.isCancelled && route.isValid {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled && route.isValid else { return }
+            decider.getCookies()
+        }
+    }
+
+    func clearCookie() {
+        clearWebLoginDataStore(dataStore: route.dataStore)
+    }
+}
+
+struct WebLoginOriginLabel: View {
+    let current: String
+    let initial: String?
+
+    var body: some View {
+        Text(current)
+            .lineLimit(1)
+            .foregroundStyle(current.isEmpty || current == initial ? Color.secondary : Color.red)
+    }
+}
+
+func webLoginHTTPSOrigin(_ url: URL?) -> String? {
+    guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty, url.user == nil, url.password == nil else {
+        return nil
+    }
+    if let port = url.port, port != 443 {
+        return "https://\(host):\(port)"
+    }
+    return "https://\(host)"
+}
+
+func clearWebLoginDataStore(dataStore: WKWebsiteDataStore, completion: @escaping @Sendable () -> Void = {}) {
+    dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+        dataStore.removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            for: records,
+            completionHandler: completion
+        )
     }
 }

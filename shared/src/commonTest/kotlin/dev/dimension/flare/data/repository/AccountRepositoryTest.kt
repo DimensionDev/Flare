@@ -719,6 +719,57 @@ class AccountRepositoryTest : RobolectricTest() {
             assertEquals(accountKey, reopened.selectedAccountKey.first())
         }
 
+    @Test
+    fun reloginDoesNotPublishANewAccountEvent() =
+        runTest {
+            val repository = createRepository(this)
+            val events = Channel<UiAccount>(Channel.UNLIMITED)
+            val collection = launch { repository.onAdded.collect(events::send) }
+            val alice = UiAccount(accountKey, "Mastodon")
+            val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
+
+            try {
+                repository.addAccount(alice, "first")
+                assertEquals(alice.accountKey, events.receive().accountKey)
+                repository.addAccount(bob, "second")
+                assertEquals(bob.accountKey, events.receive().accountKey)
+
+                repository.addAccount(alice.copy(platformId = "Pixelfed"), "refreshed")
+
+                assertNull(withTimeoutOrNull(100) { events.receive() })
+                val stored = appDatabase.accountDao().getAccount(accountKey)
+                assertEquals("Pixelfed", stored?.platformId)
+                assertEquals("\"refreshed\"", stored?.credential_json)
+            } finally {
+                collection.cancel()
+            }
+        }
+
+    @Test
+    fun deletingAndReaddingTheSameAccountPublishesBothEventsAgain() =
+        runTest {
+            val repository = createRepository(this)
+            val added = Channel<UiAccount>(Channel.UNLIMITED)
+            val removed = Channel<MicroBlogKey>(Channel.UNLIMITED)
+            val addedCollection = launch { repository.onAdded.collect(added::send) }
+            val removedCollection = launch { repository.onRemoved.collect(removed::send) }
+            val account = UiAccount(accountKey, "Mastodon")
+
+            try {
+                repository.addAccount(account, "first")
+                assertEquals(accountKey, added.receive().accountKey)
+
+                repository.delete(accountKey)
+                assertEquals(accountKey, removed.receive())
+
+                repository.addAccount(account, "second")
+                assertEquals(accountKey, added.receive().accountKey)
+            } finally {
+                addedCollection.cancel()
+                removedCollection.cancel()
+            }
+        }
+
     private class ControlledProxyStore(
         initial: ProxySettings,
     ) : DataStore<ProxySettings> {

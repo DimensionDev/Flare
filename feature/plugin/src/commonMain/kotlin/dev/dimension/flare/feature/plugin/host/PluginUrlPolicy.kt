@@ -35,6 +35,10 @@ internal object PluginUrlPolicy {
         require(location.isNotBlank() && location.length <= MAX_URL_LENGTH) { "Invalid redirect URL" }
         val absolute =
             when {
+                URI_SCHEME.containsMatchIn(location) -> {
+                    location
+                }
+
                 location.startsWith("https://", ignoreCase = true) -> {
                     location
                 }
@@ -48,8 +52,7 @@ internal object PluginUrlPolicy {
                 }
 
                 else -> {
-                    val directory = current.encodedPath.substringBeforeLast('/', "")
-                    current.origin() + directory + "/" + location
+                    current.origin() + resolveRelativeReference(current, location)
                 }
             }
         return requireRequestUrl(absolute, approvedOrigins)
@@ -63,4 +66,34 @@ internal object PluginUrlPolicy {
     private fun Url.origin(): String = "https://$host${if (port == URLProtocol.HTTPS.defaultPort) "" else ":$port"}"
 }
 
+private fun resolveRelativeReference(
+    current: Url,
+    reference: String,
+): String {
+    val suffixIndex = reference.indexOfFirst { it == '?' || it == '#' }.takeIf { it >= 0 } ?: reference.length
+    val relativePath = reference.substring(0, suffixIndex)
+    val suffix = reference.substring(suffixIndex)
+    if (relativePath.isEmpty()) return current.encodedPath + suffix
+    val directory = current.encodedPath.substringBeforeLast('/', "")
+    return normalizePath("$directory/$relativePath") + suffix
+}
+
+private fun normalizePath(value: String): String {
+    val segments = mutableListOf<String>()
+    value.split('/').forEach { segment ->
+        when (segment) {
+            "", "." -> Unit
+            ".." -> if (segments.isNotEmpty()) segments.removeAt(segments.lastIndex)
+            else -> segments += segment
+        }
+    }
+    val trailingSlash = value.endsWith('/') || value.endsWith("/.") || value.endsWith("/..")
+    return buildString {
+        append('/')
+        append(segments.joinToString("/"))
+        if (trailingSlash && segments.isNotEmpty()) append('/')
+    }
+}
+
 private const val MAX_URL_LENGTH = 8_192
+private val URI_SCHEME = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")

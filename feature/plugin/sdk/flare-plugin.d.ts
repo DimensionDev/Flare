@@ -357,6 +357,7 @@ interface ComposeConfigV1 {
   language?: { maxCount: number };
 }
 interface ComposeAssetV1 { handle: string; fileName?: string; mimeType?: string; description?: string }
+interface ComposePollV1 { options: string[]; expiresInSeconds: number; multiple?: boolean }
 interface ComposeRequestV1 {
   text: string;
   visibility: VisibilityV1;
@@ -365,6 +366,7 @@ interface ComposeRequestV1 {
   sensitive: boolean;
   spoilerText?: string;
   replyTo?: EntityKeyV1;
+  poll?: ComposePollV1;
 }
 interface ComposeResultV1 { post: PostV1 }
 

@@ -122,18 +122,22 @@ internal class PluginExtraCapabilitiesV1(
         )
     }
 
-    val list: ListCapability? by lazy {
+    internal val listAdapter: ListAdapter? by lazy {
         val account = accountKey ?: return@lazy null
         if (!hasAll(PluginAbiV1.Capabilities.LIST, *LIST_OPERATIONS)) return@lazy null
-        ListCapability(ListAdapter(account))
+        ListAdapter(account)
     }
 
-    val directMessage: DirectMessageCapability? by lazy {
+    val list: ListCapability? by lazy { listAdapter?.let(::ListCapability) }
+
+    internal val directMessageAdapter: DirectMessageAdapter? by lazy {
         val account = accountKey ?: return@lazy null
         val scope = coroutineScope ?: return@lazy null
         if (!hasAll(PluginAbiV1.Capabilities.DIRECT_MESSAGE, *DIRECT_MESSAGE_OPERATIONS)) return@lazy null
-        DirectMessageCapability(DirectMessageAdapter(account, scope))
+        DirectMessageAdapter(account, scope)
     }
+
+    val directMessage: DirectMessageCapability? by lazy { directMessageAdapter?.let(::DirectMessageCapability) }
 
     val article: ArticleCapability? by lazy {
         if (!hasAll(PluginAbiV1.Capabilities.ARTICLE, "detail", "comments")) return@lazy null
@@ -249,10 +253,10 @@ internal class PluginExtraCapabilitiesV1(
             )
     }
 
-    private inner class ListAdapter(
+    internal inner class ListAdapter(
         private val account: MicroBlogKey,
     ) : ListDataSource {
-        private val cached = mutableMapOf<String, UiList.List>()
+        private val cached = mutableMapOf<String, SocialListV1>()
         private val listLoader =
             object : ListLoader<UiList.List> {
                 override suspend fun load(
@@ -266,52 +270,76 @@ internal class PluginExtraCapabilitiesV1(
                         serializer = SocialListV1.serializer(),
                         validate = SocialListV1::requireValid,
                         map = mapper::socialList,
-                    ).also { result -> result.data.forEach { cached[it.id] = it } }
+                        onItem = { cached[it.id] = it },
+                    )
 
-                override suspend fun info(listId: String): UiList.List =
-                    cached[listId] ?: error("List information has not been loaded: $listId")
+                override suspend fun info(listId: String): UiList.List = this@ListAdapter.info(listId)
 
-                override suspend fun create(metaData: ListMetaData): UiList.List =
-                    invoker
-                        .invoke(
-                            capabilityId = PluginAbiV1.Capabilities.LIST,
-                            operation = "create",
-                            request = ListMutationRequestV1(title = metaData.title),
-                            requestSerializer = ListMutationRequestV1.serializer(),
-                            responseSerializer = SocialListV1.serializer(),
-                            validate = SocialListV1::requireValid,
-                        ).let(mapper::socialList)
-                        .also { cached[it.id] = it }
+                override suspend fun create(metaData: ListMetaData): UiList.List = this@ListAdapter.create(metaData)
 
                 override suspend fun update(
                     listId: String,
                     metaData: ListMetaData,
-                ): UiList.List =
-                    invoker
-                        .invoke(
-                            capabilityId = PluginAbiV1.Capabilities.LIST,
-                            operation = "update",
-                            request = ListMutationRequestV1(id = listId, title = metaData.title),
-                            requestSerializer = ListMutationRequestV1.serializer(),
-                            responseSerializer = SocialListV1.serializer(),
-                            validate = SocialListV1::requireValid,
-                        ).let(mapper::socialList)
-                        .also { cached[it.id] = it }
+                ): UiList.List = this@ListAdapter.update(listId, metaData)
 
                 override suspend fun delete(listId: String) {
-                    invoker.invoke(
-                        capabilityId = PluginAbiV1.Capabilities.LIST,
-                        operation = "delete",
-                        request = ListMutationRequestV1(id = listId),
-                        requestSerializer = ListMutationRequestV1.serializer(),
-                        responseSerializer = MutationResultV1.serializer(),
-                        validate = MutationResultV1::requireValid,
-                    )
-                    cached.remove(listId)
+                    this@ListAdapter.delete(listId)
                 }
 
                 override val supportedMetaData = persistentListOf(ListMetaDataType.TITLE)
             }
+
+        internal suspend fun info(listId: String): UiList.List =
+            invoker
+                .invoke(
+                    capabilityId = PluginAbiV1.Capabilities.LIST,
+                    operation = "detail",
+                    request = EntityRequestV1(EntityKeyV1(listId, account.host), cached[listId]?.entityToken),
+                    requestSerializer = EntityRequestV1.serializer(),
+                    responseSerializer = SocialListV1.serializer(),
+                    validate = SocialListV1::requireValid,
+                ).also { cached[it.id] = it }
+                .let(mapper::socialList)
+
+        private suspend fun create(metaData: ListMetaData): UiList.List =
+            invoker
+                .invoke(
+                    capabilityId = PluginAbiV1.Capabilities.LIST,
+                    operation = "create",
+                    request = ListMutationRequestV1(title = metaData.title),
+                    requestSerializer = ListMutationRequestV1.serializer(),
+                    responseSerializer = SocialListV1.serializer(),
+                    validate = SocialListV1::requireValid,
+                ).also { cached[it.id] = it }
+                .let(mapper::socialList)
+
+        internal suspend fun update(
+            listId: String,
+            metaData: ListMetaData,
+        ): UiList.List =
+            invoker
+                .invoke(
+                    capabilityId = PluginAbiV1.Capabilities.LIST,
+                    operation = "update",
+                    request = ListMutationRequestV1(id = listId, title = metaData.title, entityToken = cached[listId]?.entityToken),
+                    requestSerializer = ListMutationRequestV1.serializer(),
+                    responseSerializer = SocialListV1.serializer(),
+                    validate = SocialListV1::requireValid,
+                ).also { cached[it.id] = it }
+                .let(mapper::socialList)
+
+        private suspend fun delete(listId: String) {
+            invoker.invoke(
+                capabilityId = PluginAbiV1.Capabilities.LIST,
+                operation = "delete",
+                request = ListMutationRequestV1(id = listId, entityToken = cached[listId]?.entityToken),
+                requestSerializer = ListMutationRequestV1.serializer(),
+                responseSerializer = MutationResultV1.serializer(),
+                validate = MutationResultV1::requireValid,
+            )
+            cached.remove(listId)
+        }
+
         private val memberLoader =
             object : ListMemberLoader {
                 override suspend fun loadMembers(
@@ -328,7 +356,7 @@ internal class PluginExtraCapabilitiesV1(
                         .invoke(
                             capabilityId = PluginAbiV1.Capabilities.LIST,
                             operation = "addMember",
-                            request = ListMemberRequestV1(listId, userKey.toWire()),
+                            request = ListMemberRequestV1(listId, userKey.toWire(), cached[listId]?.entityToken),
                             requestSerializer = ListMemberRequestV1.serializer(),
                             responseSerializer = ProfileV1.serializer(),
                             validate = ProfileV1::requireValid,
@@ -341,7 +369,7 @@ internal class PluginExtraCapabilitiesV1(
                     invoker.invoke(
                         capabilityId = PluginAbiV1.Capabilities.LIST,
                         operation = "removeMember",
-                        request = ListMemberRequestV1(listId, userKey.toWire()),
+                        request = ListMemberRequestV1(listId, userKey.toWire(), cached[listId]?.entityToken),
                         requestSerializer = ListMemberRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
                         validate = MutationResultV1::requireValid,
@@ -365,18 +393,24 @@ internal class PluginExtraCapabilitiesV1(
             }
 
         override fun listTimeline(listId: String): RemoteLoader<UiTimelineV2> =
-            entityPostLoader(PluginAbiV1.Capabilities.LIST, "timeline", MicroBlogKey(listId, account.host))
+            entityPostLoader(
+                PluginAbiV1.Capabilities.LIST,
+                "timeline",
+                MicroBlogKey(listId, account.host),
+                cached[listId]?.entityToken,
+            )
 
         override val listHandler: ListHandler<UiList.List> = ListHandler("plugin_lists_$account", account, listLoader)
         override val listMemberHandler: ListMemberHandler = ListMemberHandler("plugin_lists_$account", account, memberLoader)
     }
 
-    private inner class DirectMessageAdapter(
+    internal inner class DirectMessageAdapter(
         override val accountKey: MicroBlogKey,
         scope: CoroutineScope,
     ) : DirectMessageDataSource,
         MicroblogDataSource by base {
-        private val rooms = mutableMapOf<MicroBlogKey, UiDMRoom>()
+        private val rooms = mutableMapOf<MicroBlogKey, DirectMessageRoomV1>()
+        private val messages = mutableMapOf<MicroBlogKey, DirectMessageV1>()
         private val loader =
             object : DirectMessageLoader {
                 override val platformId: String = plugin.installed.manifest.platform.id
@@ -392,7 +426,8 @@ internal class PluginExtraCapabilitiesV1(
                         serializer = DirectMessageRoomV1.serializer(),
                         validate = DirectMessageRoomV1::requireValid,
                         map = mapper::directMessageRoom,
-                    ).also { result -> result.data.forEach { rooms[it.key] = it } }
+                        onItem = { rooms[it.key.toKey()] = it },
+                    )
 
                 override suspend fun loadMessages(
                     roomKey: MicroBlogKey,
@@ -404,45 +439,32 @@ internal class PluginExtraCapabilitiesV1(
                             .invoke(
                                 capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
                                 operation = "messages",
-                                request = DirectMessagePageRequestV1(roomKey.toWire(), request.toWire(pageSize)),
+                                request =
+                                    DirectMessagePageRequestV1(
+                                        roomKey.toWire(),
+                                        request.toWire(pageSize),
+                                        rooms[roomKey]?.entityToken,
+                                    ),
                                 requestSerializer = DirectMessagePageRequestV1.serializer(),
                                 responseSerializer = PageV1.serializer(DirectMessageV1.serializer()),
                                 validate = { value -> value.requireValid(DirectMessageV1::requireValid) },
                             )
+                    page.items.forEach { messages[it.key.toKey()] = it }
                     return page.toPagingResult(mapper::directMessage)
                 }
 
-                override suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom =
-                    rooms[roomKey]
-                        ?: loadRooms(100, PagingRequest.Refresh).data.firstOrNull { it.key == roomKey }
-                        ?: error("Direct-message room was not found: $roomKey")
+                override suspend fun fetchRoomInfo(roomKey: MicroBlogKey): UiDMRoom = this@DirectMessageAdapter.roomInfo(roomKey)
 
                 override suspend fun sendMessage(
                     roomKey: MicroBlogKey,
                     message: String,
-                ): UiDMItem =
-                    invoker
-                        .invoke(
-                            capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
-                            operation = "send",
-                            request = DirectMessageSendRequestV1(roomKey.toWire(), message),
-                            requestSerializer = DirectMessageSendRequestV1.serializer(),
-                            responseSerializer = DirectMessageV1.serializer(),
-                            validate = DirectMessageV1::requireValid,
-                        ).let(mapper::directMessage)
+                ): UiDMItem = this@DirectMessageAdapter.sendMessage(roomKey, message)
 
                 override suspend fun deleteMessage(
                     roomKey: MicroBlogKey,
                     messageKey: MicroBlogKey,
                 ) {
-                    invoker.invoke(
-                        capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
-                        operation = "delete",
-                        request = DirectMessageDeleteRequestV1(roomKey.toWire(), messageKey.toWire()),
-                        requestSerializer = DirectMessageDeleteRequestV1.serializer(),
-                        responseSerializer = MutationResultV1.serializer(),
-                        validate = MutationResultV1::requireValid,
-                    )
+                    this@DirectMessageAdapter.deleteMessage(roomKey, messageKey)
                 }
 
                 override suspend fun fetchNewMessages(
@@ -456,37 +478,10 @@ internal class PluginExtraCapabilitiesV1(
                     ).data.let(::DirectMessageDelta)
 
                 override suspend fun leaveRoom(roomKey: MicroBlogKey) {
-                    invoker.invoke(
-                        capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
-                        operation = "leave",
-                        request = EntityRequestV1(roomKey.toWire()),
-                        requestSerializer = EntityRequestV1.serializer(),
-                        responseSerializer = MutationResultV1.serializer(),
-                        validate = MutationResultV1::requireValid,
-                    )
-                    rooms.remove(roomKey)
+                    this@DirectMessageAdapter.leaveRoom(roomKey)
                 }
 
-                override fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>> =
-                    flow {
-                        emit(UiState.Loading())
-                        try {
-                            val room =
-                                invoker
-                                    .invoke(
-                                        capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
-                                        operation = "create",
-                                        request = EntityRequestV1(userKey.toWire()),
-                                        requestSerializer = EntityRequestV1.serializer(),
-                                        responseSerializer = DirectMessageRoomV1.serializer(),
-                                        validate = DirectMessageRoomV1::requireValid,
-                                    ).let(mapper::directMessageRoom)
-                            rooms[room.key] = room
-                            emit(UiState.Success(room))
-                        } catch (error: Throwable) {
-                            emit(UiState.Error(error))
-                        }
-                    }
+                override fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>> = this@DirectMessageAdapter.createRoom(userKey)
 
                 override suspend fun canSend(userKey: MicroBlogKey): Boolean =
                     invoker
@@ -508,6 +503,87 @@ internal class PluginExtraCapabilitiesV1(
                             responseSerializer = CountResultV1.serializer(),
                             validate = CountResultV1::requireValid,
                         ).value
+            }
+
+        internal suspend fun roomInfo(roomKey: MicroBlogKey): UiDMRoom =
+            invoker
+                .invoke(
+                    capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
+                    operation = "room",
+                    request = EntityRequestV1(roomKey.toWire(), rooms[roomKey]?.entityToken),
+                    requestSerializer = EntityRequestV1.serializer(),
+                    responseSerializer = DirectMessageRoomV1.serializer(),
+                    validate = DirectMessageRoomV1::requireValid,
+                ).also { rooms[it.key.toKey()] = it }
+                .let(mapper::directMessageRoom)
+
+        private suspend fun sendMessage(
+            roomKey: MicroBlogKey,
+            message: String,
+        ): UiDMItem =
+            invoker
+                .invoke(
+                    capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
+                    operation = "send",
+                    request = DirectMessageSendRequestV1(roomKey.toWire(), message, rooms[roomKey]?.entityToken),
+                    requestSerializer = DirectMessageSendRequestV1.serializer(),
+                    responseSerializer = DirectMessageV1.serializer(),
+                    validate = DirectMessageV1::requireValid,
+                ).also { messages[it.key.toKey()] = it }
+                .let(mapper::directMessage)
+
+        private suspend fun deleteMessage(
+            roomKey: MicroBlogKey,
+            messageKey: MicroBlogKey,
+        ) {
+            invoker.invoke(
+                capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
+                operation = "delete",
+                request =
+                    DirectMessageDeleteRequestV1(
+                        roomKey.toWire(),
+                        messageKey.toWire(),
+                        rooms[roomKey]?.entityToken,
+                        messages[messageKey]?.entityToken,
+                    ),
+                requestSerializer = DirectMessageDeleteRequestV1.serializer(),
+                responseSerializer = MutationResultV1.serializer(),
+                validate = MutationResultV1::requireValid,
+            )
+            messages.remove(messageKey)
+        }
+
+        private suspend fun leaveRoom(roomKey: MicroBlogKey) {
+            invoker.invoke(
+                capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
+                operation = "leave",
+                request = EntityRequestV1(roomKey.toWire(), rooms[roomKey]?.entityToken),
+                requestSerializer = EntityRequestV1.serializer(),
+                responseSerializer = MutationResultV1.serializer(),
+                validate = MutationResultV1::requireValid,
+            )
+            rooms.remove(roomKey)
+        }
+
+        private fun createRoom(userKey: MicroBlogKey): Flow<UiState<UiDMRoom>> =
+            flow {
+                emit(UiState.Loading())
+                try {
+                    val room =
+                        invoker
+                            .invoke(
+                                capabilityId = PluginAbiV1.Capabilities.DIRECT_MESSAGE,
+                                operation = "create",
+                                request = EntityRequestV1(userKey.toWire()),
+                                requestSerializer = EntityRequestV1.serializer(),
+                                responseSerializer = DirectMessageRoomV1.serializer(),
+                                validate = DirectMessageRoomV1::requireValid,
+                            ).also { rooms[it.key.toKey()] = it }
+                            .let(mapper::directMessageRoom)
+                    emit(UiState.Success(room))
+                } catch (error: Throwable) {
+                    emit(UiState.Error(error))
+                }
             }
 
         override val directMessageHandler: DirectMessageHandler = DirectMessageHandler(accountKey, loader, scope)
@@ -617,6 +693,7 @@ internal class PluginExtraCapabilitiesV1(
         capability: String,
         operation: String,
         key: MicroBlogKey,
+        entityToken: String? = null,
     ): RemoteLoader<UiTimelineV2> =
         pluginRemoteLoader(
             directions = directions(capability, operation),
@@ -624,7 +701,7 @@ internal class PluginExtraCapabilitiesV1(
                 invoker.invoke(
                     capabilityId = capability,
                     operation = operation,
-                    request = EntityPageRequestV1(key.toWire(), request.toWire(pageSize)),
+                    request = EntityPageRequestV1(key.toWire(), request.toWire(pageSize), entityToken),
                     requestSerializer = EntityPageRequestV1.serializer(),
                     responseSerializer = PageV1.serializer(PostV1.serializer()),
                     validate = { page -> page.requireValid { it.requireValid() } },
@@ -660,6 +737,7 @@ internal class PluginExtraCapabilitiesV1(
         validate: (Wire) -> Unit,
         map: (Wire) -> Ui,
         entity: MicroBlogKey? = null,
+        onItem: (Wire) -> Unit = {},
     ): PagingResult<Ui> {
         val response =
             if (entity == null) {
@@ -681,6 +759,7 @@ internal class PluginExtraCapabilitiesV1(
                     validate = { value -> value.requireValid(validate) },
                 )
             }
+        response.items.forEach(onItem)
         return response.toPagingResult(map)
     }
 
@@ -704,6 +783,8 @@ internal data class PluginTimelineDataV1(
 
 private fun MicroBlogKey.toWire(): EntityKeyV1 = EntityKeyV1(id, host)
 
+private fun EntityKeyV1.toKey(): MicroBlogKey = MicroBlogKey(id, host)
+
 private fun NotificationFilter.toWire(): String? =
     when (this) {
         NotificationFilter.All -> null
@@ -720,5 +801,5 @@ private fun <Wire : Any, Ui : Any> PageV1<Wire>.toPagingResult(map: (Wire) -> Ui
     )
 
 private val LIST_OPERATIONS =
-    arrayOf("page", "create", "update", "delete", "timeline", "members", "memberships", "addMember", "removeMember")
-private val DIRECT_MESSAGE_OPERATIONS = arrayOf("rooms", "messages", "send", "delete", "leave", "create", "badge", "canSend")
+    arrayOf("page", "detail", "create", "update", "delete", "timeline", "members", "memberships", "addMember", "removeMember")
+private val DIRECT_MESSAGE_OPERATIONS = arrayOf("rooms", "room", "messages", "send", "delete", "leave", "create", "badge", "canSend")

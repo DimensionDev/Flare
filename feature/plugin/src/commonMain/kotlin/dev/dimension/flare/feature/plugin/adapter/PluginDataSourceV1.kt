@@ -102,7 +102,7 @@ internal class PluginDataSourceV1 private constructor(
 
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
 
-    private val extraCapabilities: PluginExtraCapabilitiesV1 by lazy {
+    internal val extraCapabilities: PluginExtraCapabilitiesV1 by lazy {
         PluginExtraCapabilitiesV1(
             plugin = plugin,
             base = this,
@@ -122,7 +122,7 @@ internal class PluginDataSourceV1 private constructor(
             search = capability(PluginAbiV1.Capabilities.SEARCH)?.let { SearchCapability(this) },
             profile =
                 capability(PluginAbiV1.Capabilities.PROFILE)
-                    ?.takeIf { "byId" in it || "byHandle" in it }
+                    ?.takeIf { it.containsAll(PROFILE_LOOKUP_OPERATIONS) }
                     ?.let { ProfileCapability(this, userDataSource) },
             post =
                 capability(PluginAbiV1.Capabilities.POST)
@@ -378,6 +378,8 @@ internal class PluginDataSourceV1 private constructor(
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         plugin.installed.manifest.platform.profileTabs
+            .takeIf { hasOperation(PluginAbiV1.Capabilities.PROFILE, "timeline") }
+            .orEmpty()
             .map { tab ->
                 ProfileTab(
                     id = "plugin:${plugin.installed.pluginId}:${tab.id}",
@@ -723,9 +725,10 @@ internal class PluginDataSourceV1 private constructor(
                         platformId = plugin.installed.manifest.platform.id,
                         accountKey = accountKey,
                         originHost = Url(origin).accountHost(),
-                        profileAvailable = operations[PluginAbiV1.Capabilities.PROFILE].orEmpty().any { it == "byId" || it == "byHandle" },
+                        profileAvailable = operations[PluginAbiV1.Capabilities.PROFILE].orEmpty().containsAll(PROFILE_LOOKUP_OPERATIONS),
                         postDetailAvailable = "detail" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
                         postMutationAvailable = "mutate" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
+                        postDeleteAvailable = "delete" in operations[PluginAbiV1.Capabilities.POST].orEmpty(),
                         composeAvailable = accountKey != null && "publish" in operations[PluginAbiV1.Capabilities.COMPOSE].orEmpty(),
                     ),
                 timelineSpecs = timelineSpecs,
@@ -735,6 +738,8 @@ internal class PluginDataSourceV1 private constructor(
             )
     }
 }
+
+private val PROFILE_LOOKUP_OPERATIONS = setOf("byId", "byHandle")
 
 internal interface PluginNamedTimelineDataSourceV1 {
     fun timeline(

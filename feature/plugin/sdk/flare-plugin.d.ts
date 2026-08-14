@@ -74,6 +74,7 @@ interface NotificationServiceV1 {
 }
 interface ListServiceV1 {
   page(request: PageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<SocialListV1>>;
+  detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   create(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   update(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   delete(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
@@ -85,6 +86,7 @@ interface ListServiceV1 {
 }
 interface DirectMessageServiceV1 {
   rooms(request: PageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<DirectMessageRoomV1>>;
+  room(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<DirectMessageRoomV1>;
   messages(request: DirectMessagePageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<DirectMessageV1>>;
   send(request: DirectMessageSendRequestV1, context: PluginInvocationContextV1): MaybePromise<DirectMessageV1>;
   delete(request: DirectMessageDeleteRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
@@ -331,9 +333,14 @@ type EmptyRequestV1 = Record<string, never>;
 interface NotificationPageRequestV1 { filterId?: string; page: PageRequestV1 }
 interface ListMutationRequestV1 { id?: string; title?: string; entityToken?: string }
 interface ListMemberRequestV1 { listId: string; profileKey: EntityKeyV1; entityToken?: string }
-interface DirectMessageSendRequestV1 { roomKey: EntityKeyV1; text: string }
-interface DirectMessagePageRequestV1 { roomKey: EntityKeyV1; page: PageRequestV1 }
-interface DirectMessageDeleteRequestV1 { roomKey: EntityKeyV1; messageKey: EntityKeyV1 }
+interface DirectMessageSendRequestV1 { roomKey: EntityKeyV1; text: string; roomEntityToken?: string }
+interface DirectMessagePageRequestV1 { roomKey: EntityKeyV1; page: PageRequestV1; roomEntityToken?: string }
+interface DirectMessageDeleteRequestV1 {
+  roomKey: EntityKeyV1;
+  messageKey: EntityKeyV1;
+  roomEntityToken?: string;
+  messageEntityToken?: string;
+}
 interface CountResultV1 { value: number }
 interface BooleanResultV1 { value: boolean }
 

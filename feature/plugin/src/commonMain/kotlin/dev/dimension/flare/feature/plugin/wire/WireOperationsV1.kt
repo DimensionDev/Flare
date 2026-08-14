@@ -107,6 +107,7 @@ public data class ListMemberRequestV1(
 public data class DirectMessageSendRequestV1(
     val roomKey: EntityKeyV1,
     val text: String,
+    val roomEntityToken: String? = null,
 )
 
 @Serializable
@@ -119,12 +120,15 @@ public data class NotificationPageRequestV1(
 public data class DirectMessagePageRequestV1(
     val roomKey: EntityKeyV1,
     val page: PageRequestV1,
+    val roomEntityToken: String? = null,
 )
 
 @Serializable
 public data class DirectMessageDeleteRequestV1(
     val roomKey: EntityKeyV1,
     val messageKey: EntityKeyV1,
+    val roomEntityToken: String? = null,
+    val messageEntityToken: String? = null,
 )
 
 @Serializable

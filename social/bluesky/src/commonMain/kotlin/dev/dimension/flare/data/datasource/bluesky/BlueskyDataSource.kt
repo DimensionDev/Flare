@@ -16,6 +16,7 @@ import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
+import app.bsky.richtext.FacetFeatureUnion
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
@@ -64,8 +65,10 @@ import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.network.bluesky.BlueskyLinkCardResolver
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
+import dev.dimension.flare.data.network.bluesky.toExternalEmbed
 import dev.dimension.flare.data.platform.BlueskyCredential
 import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
@@ -94,6 +97,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -112,6 +116,7 @@ import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
 import kotlin.time.Clock
 
 private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
+private const val LINK_CARD_THUMB_MAX_BYTES = 1_000_000L
 
 private val MEDIA_COMPRESSION =
     ComposeConfig.Media.Compression(
@@ -139,6 +144,7 @@ internal class BlueskyDataSource(
     PostEventHandler.Handler {
     private val coroutineScope: CoroutineScope by koinInject()
     private val imageCompressor: ImageCompressor by koinInject()
+    private val linkCardResolver = BlueskyLinkCardResolver()
     private var cachedPdsService: BlueskyService? = null
 
     private val mutex = Mutex(locked = false)
@@ -336,38 +342,55 @@ internal class BlueskyDataSource(
                         .did.did
                 },
             )
+        val quoteEmbed =
+            quoteId
+                ?.let {
+                    service
+                        .getPosts(GetPostsQueryParams(persistentListOf(AtUri(it))))
+                        .maybeResponse()
+                        ?.posts
+                        ?.firstOrNull()
+                }?.let { item ->
+                    PostEmbedUnion.Record(
+                        Record(
+                            StrongRef(
+                                uri = item.uri,
+                                cid = item.cid,
+                            ),
+                        ),
+                    )
+                }
+        val imageEmbed =
+            mediaBlob.takeIf { it.any() }?.let { blobs ->
+                PostEmbedUnion.Images(
+                    Images(
+                        blobs
+                            .map { blob ->
+                                ImagesImage(image = blob.first, alt = blob.second.orEmpty())
+                            }.toImmutableList(),
+                    ),
+                )
+            }
+        val externalEmbed =
+            if (quoteId == null && data.medias.isEmpty()) {
+                facets
+                    .asSequence()
+                    .flatMap { it.features.asSequence() }
+                    .filterIsInstance<FacetFeatureUnion.Link>()
+                    .firstOrNull()
+                    ?.value
+                    ?.uri
+                    ?.uri
+                    ?.let { createExternalEmbed(service = service, uri = it) }
+            } else {
+                null
+            }
         val post =
             Post(
                 text = data.content,
                 facets = facets,
                 createdAt = Clock.System.now(),
-                embed =
-                    quoteId
-                        ?.let {
-                            service
-                                .getPosts(GetPostsQueryParams(persistentListOf(AtUri(it))))
-                                .maybeResponse()
-                                ?.posts
-                                ?.firstOrNull()
-                        }?.let { item ->
-                            PostEmbedUnion.Record(
-                                Record(
-                                    StrongRef(
-                                        uri = item.uri,
-                                        cid = item.cid,
-                                    ),
-                                ),
-                            )
-                        } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
-                        PostEmbedUnion.Images(
-                            Images(
-                                blobs
-                                    .map { blob ->
-                                        ImagesImage(image = blob.first, alt = blob.second.orEmpty())
-                                    }.toImmutableList(),
-                            ),
-                        )
-                    },
+                embed = quoteEmbed ?: imageEmbed ?: externalEmbed,
                 reply =
                     inReplyToID
                         ?.let {
@@ -410,6 +433,39 @@ internal class BlueskyDataSource(
                     record = post.bskyJson(),
                 ),
             ).requireResponse()
+    }
+
+    private suspend fun createExternalEmbed(
+        service: BlueskyService,
+        uri: String,
+    ): PostEmbedUnion.External? {
+        val card = linkCardResolver.resolve(uri) ?: return null
+        val thumb =
+            card.imageUrl
+                ?.let { linkCardResolver.fetchImage(it) }
+                ?.let { imageBytes ->
+                    try {
+                        imageCompressor
+                            .compress(
+                                imageBytes = imageBytes,
+                                maxSize = LINK_CARD_THUMB_MAX_BYTES,
+                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
+                            ).takeIf { it.isNotEmpty() && it.size.toLong() <= LINK_CARD_THUMB_MAX_BYTES }
+                    } catch (cause: CancellationException) {
+                        throw cause
+                    } catch (_: Exception) {
+                        null
+                    }
+                }?.let { imageBytes ->
+                    try {
+                        service.uploadBlob(imageBytes).maybeResponse()?.blob
+                    } catch (cause: CancellationException) {
+                        throw cause
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+        return card.toExternalEmbed(thumb)
     }
 
     suspend fun report(

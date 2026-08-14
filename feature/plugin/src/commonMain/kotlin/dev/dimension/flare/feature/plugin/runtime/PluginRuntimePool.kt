@@ -79,14 +79,15 @@ public data class PluginRuntimeIssueV1(
 @HiddenFromObjC
 public class PluginRuntimePool(
     fileSystem: FileSystem,
-    transport: PluginHttpTransport,
+    private val transportFactory: () -> PluginHttpTransport,
     private val softHeapBudgetBytes: Long = defaultPluginRuntimeHeapBudgetBytes(),
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val nowMillis: () -> Long = monotonicMillis(),
 ) {
     private val mutex = Mutex()
     private val loader = PluginPackageScriptLoader(fileSystem, dispatcher)
-    private val gateway = PluginHostGateway(transport)
+    private val transport = lazy(transportFactory)
+    private val gateway = lazy { PluginHostGateway(transport.value) }
     private val holders = mutableMapOf<PluginRuntimeKeyV1, Holder>()
     private val failures = mutableMapOf<String, MutableList<Long>>()
     private val paused = mutableSetOf<String>()
@@ -98,6 +99,14 @@ public class PluginRuntimePool(
     init {
         require(softHeapBudgetBytes > 0) { "Invalid Runtime heap budget" }
     }
+
+    public constructor(
+        fileSystem: FileSystem,
+        transport: PluginHttpTransport,
+        softHeapBudgetBytes: Long = defaultPluginRuntimeHeapBudgetBytes(),
+        dispatcher: CoroutineDispatcher = Dispatchers.Default,
+        nowMillis: () -> Long = monotonicMillis(),
+    ) : this(fileSystem, { transport }, softHeapBudgetBytes, dispatcher, nowMillis)
 
     public suspend fun <Request, Response> invoke(
         plugin: RunningPluginV1,
@@ -183,10 +192,12 @@ public class PluginRuntimePool(
     public suspend fun close() {
         val snapshot =
             mutex.withLock {
+                if (closed) return
                 closed = true
                 holders.values.toList().also { holders.clear() }
             }
         snapshot.forEach { holder -> holder.runtime.close() }
+        if (transport.isInitialized()) transport.value.close()
     }
 
     private suspend fun invokeTemporary(
@@ -215,7 +226,7 @@ public class PluginRuntimePool(
     }
 
     private fun createRuntime(plugin: RunningPluginV1): RuntimeHandle =
-        RuntimeHandle(IsolatedPluginRuntime(plugin, loader, gateway, dispatcher))
+        RuntimeHandle(IsolatedPluginRuntime(plugin, loader, gateway.value, dispatcher))
 
     private suspend fun handleFatal(
         pluginId: String,

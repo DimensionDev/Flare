@@ -5,6 +5,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.tab.TimelineLoaderFactory
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
@@ -415,9 +416,22 @@ private class PluginPlatformSpecV1(
                         )
                     }
 
-                    DeepLinkTargetTypeV1.Timeline,
-                    DeepLinkTargetTypeV1.Browser,
-                    -> {
+                    DeepLinkTargetTypeV1.Timeline -> {
+                        val timelineId = requireNotNull(value)
+                        val timeline = requireNotNull(platform.timelines.firstOrNull { it.id == timelineId })
+                        val spec = requireNotNull(specs[timelineId])
+                        val data = TimelineSpec.AccountResourceData(accountKey, timelineId)
+                        val title = timeline.title.toUiText(manifest.id)
+                        val icon = timeline.icon.toUiIcon().asType()
+                        val candidate =
+                            when (timeline.display) {
+                                dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1.List -> spec.candidate(data, title, icon)
+                                dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1.Grid -> spec.galleryCandidate(data, title, icon)
+                            }
+                        DeeplinkRoute.Timeline.Source(candidate.toUiTimelineTabItem().loaderKey)
+                    }
+
+                    DeepLinkTargetTypeV1.Browser -> {
                         DeeplinkRoute.OpenLinkDirectly(pattern.render(arguments.values))
                     }
                 }

@@ -15,6 +15,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -721,6 +722,15 @@ internal class TimelineResolver(
     private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(): Flow<RemoteLoader<UiTimelineV2>> =
         spec.loaderFactory.create(data, loaderContext)
 }
+
+public object TimelineDeepLinkRouteResolver {
+    public fun resolve(route: DeeplinkRoute.Timeline.Source): UiTimelineTabItem? {
+        if (route.loaderKey.length > MAX_DEEP_LINK_LOADER_KEY_LENGTH) return null
+        return runCatching { koinGet<TimelineResolver>().toTabItem(route.loaderKey) }.getOrNull()
+    }
+}
+
+private const val MAX_DEEP_LINK_LOADER_KEY_LENGTH = 64 * 1_024
 
 private fun <T : TimelineSpec.Data> TimelineTarget<T>.toSource(
     title: UiText,

@@ -538,6 +538,12 @@ extension Route {
 
     private static func fromTimeline(_ timeline: DeeplinkRoute.Timeline) -> Route? {
         switch onEnum(of: timeline) {
+        case .source(let data):
+            if let tabItem = TimelineDeepLinkRouteResolver.shared.resolve(route: data) {
+                .timeline(tabItem)
+            } else {
+                nil
+            }
         case .xQTDeviceFollow(let data):
             if let tabItem = XQTUiTimelineTabItemHelpers.shared.xqtDeviceFollow(accountType: data.accountType) {
                 .timeline(tabItem)

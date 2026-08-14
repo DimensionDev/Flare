@@ -251,6 +251,25 @@ class PluginInstallerTest {
         }
 
     @Test
+    fun updateCannotChangePersistedPlatformIdentity() =
+        runBlocking {
+            TestFppFactory.write(input)
+            val installed = installer.inspect(input).let { installer.commit(it, confirmed = true) }
+            val renamedPlatform =
+                TestFppFactory.validManifest
+                    .replace("\"id\": \"TestPlugin\"", "\"id\": \"RenamedPlugin\"")
+                    .replace("\"version\": \"1.0.0\"", "\"version\": \"2.0.0\"")
+            TestFppFactory.write(input, TestFppFactory.validEntries(manifest = renamedPlatform))
+
+            assertFails { installer.inspect(input) }
+            assertEquals(
+                installed,
+                stateStore.desired.value.plugins
+                    .getValue(installed.pluginId),
+            )
+        }
+
+    @Test
     fun rejectsCompressedInputOverLimitWhileStreaming() =
         runBlocking {
             val source = RepeatingSource(FppLimits.MAX_PACKAGE_BYTES + 1)

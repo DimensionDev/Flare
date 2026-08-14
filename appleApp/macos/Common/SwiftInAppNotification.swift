@@ -183,7 +183,7 @@ final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificat
 
     private func shouldDeliverSystemNotification(for message: Message) -> Bool {
         switch message {
-        case .compose:
+        case .compose, .plugin:
             true
         case .loginExpired:
             false
@@ -209,6 +209,12 @@ final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificat
             }
         case .loginExpired:
             ""
+        case .plugin:
+            String(
+                localized: "plugin_operation_failed",
+                defaultValue: "The plugin operation failed. Try again or restart Flare.",
+                bundle: .main
+            )
         }
     }
 
@@ -226,6 +232,8 @@ final class SwiftInAppNotification: NSObject, InAppNotification, UNUserNotificat
             "compose"
         case .loginExpired:
             "login-expired"
+        case .plugin:
+            "plugin"
         }
     }
 }

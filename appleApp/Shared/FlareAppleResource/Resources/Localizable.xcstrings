@@ -79,6 +79,60 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "卸载" } }
       }
     },
+    "plugin_uninstall_confirm_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Uninstall plugin?" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "卸载插件？" } }
+      }
+    },
+    "plugin_uninstall_confirm_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ will stop being available after Flare restarts. Accounts and credentials are kept." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%@ 将在 Flare 重启后停止提供。账号和凭据会被保留。" } }
+      }
+    },
+    "plugin_operation_failed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin operation failed. Try again or restart Flare." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件操作失败。请重试或重新启动 Flare。" } }
+      }
+    },
+    "plugin_issue_index_corrupt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin index is damaged. Rebuild it to recover valid packages." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件索引已损坏。请重建索引以恢复有效的插件包。" } }
+      }
+    },
+    "plugin_issue_files_missing" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plugin files are missing or have changed." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件文件缺失或已被修改。" } }
+      }
+    },
+    "plugin_issue_platform_conflict" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This plugin uses a platform ID that is already registered." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此插件使用了已注册的平台 ID。" } }
+      }
+    },
+    "plugin_issue_platform_invalid" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This plugin platform could not be loaded." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法加载此插件平台。" } }
+      }
+    },
+    "plugin_runtime_fatal" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin runtime stopped after a fatal error." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件运行时因严重错误而停止。" } }
+      }
+    },
+    "plugin_runtime_paused" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin was paused after repeated fatal errors." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件因连续发生严重错误而暂停。" } }
+      }
+    },
     "plugin_unverified_warning" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "This local plugin is unverified. Install it only if you trust its author." } },

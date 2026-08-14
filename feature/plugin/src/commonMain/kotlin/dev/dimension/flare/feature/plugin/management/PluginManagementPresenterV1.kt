@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.Path.Companion.toPath
 import okio.Source
 import kotlin.native.HiddenFromObjC
@@ -45,6 +47,7 @@ public data class PluginManagementItemV1(
     val pendingRestart: Boolean,
     val source: PluginInstallSourceV1,
     val capabilities: Set<String>,
+    val iconPath: String,
 )
 
 public data class PluginInstallReviewV1(
@@ -67,6 +70,7 @@ public class PluginManagementPresenterV1(
     public val state: StateFlow<PluginManagementStateV1> = mutableState.asStateFlow()
 
     private var preview: PreparedPluginInstallV1? = null
+    private val actionMutex = Mutex()
 
     init {
         combine(
@@ -74,13 +78,21 @@ public class PluginManagementPresenterV1(
             subsystem.sourceIssues,
             subsystem.runtimePool.issues,
         ) { _, _, _ -> snapshot() }
-            .onEach { mutableState.value = it.copy(pendingInstall = mutableState.value.pendingInstall, error = mutableState.value.error) }
-            .launchIn(scope)
+            .onEach { snapshot ->
+                val current = mutableState.value
+                mutableState.value =
+                    snapshot.copy(
+                        pendingInstall = current.pendingInstall,
+                        busy = current.busy,
+                        error = current.error,
+                    )
+            }.launchIn(scope)
     }
 
     @HiddenFromObjC
     public suspend fun inspect(source: Source): PluginInstallReviewV1 =
         runAction {
+            clearPreview()
             subsystem.installer
                 .inspect(source)
                 .also { prepared ->
@@ -91,6 +103,7 @@ public class PluginManagementPresenterV1(
 
     public suspend fun inspect(path: String): PluginInstallReviewV1 =
         runAction {
+            clearPreview()
             subsystem.installer
                 .inspect(path.toPath())
                 .also { prepared ->
@@ -121,15 +134,24 @@ public class PluginManagementPresenterV1(
         pluginId: String,
         enabled: Boolean,
     ) {
-        runAction { subsystem.stateStore.setEnabled(pluginId, enabled) }
+        runAction {
+            subsystem.stateStore.setEnabled(pluginId, enabled)
+            mutableState.value = snapshot()
+        }
     }
 
     public suspend fun uninstall(pluginId: String) {
-        runAction { subsystem.stateStore.uninstall(pluginId) }
+        runAction {
+            subsystem.stateStore.uninstall(pluginId)
+            mutableState.value = snapshot()
+        }
     }
 
     public suspend fun retryRuntime(pluginId: String) {
-        runAction { subsystem.runtimePool.retry(pluginId) }
+        runAction {
+            subsystem.runtimePool.retry(pluginId)
+            mutableState.value = snapshot()
+        }
     }
 
     public suspend fun cleanup() {
@@ -137,7 +159,10 @@ public class PluginManagementPresenterV1(
     }
 
     public suspend fun rebuildIndex() {
-        runAction { subsystem.installer.rebuildIndex() }
+        runAction {
+            subsystem.installer.rebuildIndex()
+            mutableState.value = snapshot()
+        }
     }
 
     public fun clearError() {
@@ -153,6 +178,10 @@ public class PluginManagementPresenterV1(
                     installed.toItem(
                         running = running[installed.pluginId]?.installed,
                         pendingRestart = subsystem.stateStore.requiresRestart(installed.pluginId),
+                        iconPath =
+                            subsystem.stateStore.paths
+                                .iconPath(installed.packageHash)
+                                .toString(),
                     )
                 },
             issues = subsystem.sourceIssues.value,
@@ -164,23 +193,30 @@ public class PluginManagementPresenterV1(
         )
     }
 
-    private suspend fun <T> runAction(block: suspend () -> T): T {
-        mutableState.value = mutableState.value.copy(busy = true, error = null)
-        return try {
-            block()
-        } catch (error: Throwable) {
-            if (error is CancellationException) throw error
-            mutableState.value = snapshot().copy(error = error.message ?: "Plugin operation failed")
-            throw error
-        } finally {
-            mutableState.value = mutableState.value.copy(busy = false)
-        }
+    private fun clearPreview() {
+        preview = null
+        mutableState.value = mutableState.value.copy(pendingInstall = null)
     }
+
+    private suspend fun <T> runAction(block: suspend () -> T): T =
+        actionMutex.withLock {
+            mutableState.value = mutableState.value.copy(busy = true, error = null)
+            try {
+                block()
+            } catch (error: Throwable) {
+                if (error is CancellationException) throw error
+                mutableState.value = snapshot().copy(error = error.message ?: "Plugin operation failed")
+                throw error
+            } finally {
+                mutableState.value = mutableState.value.copy(busy = false)
+            }
+        }
 }
 
 private fun InstalledPluginV1.toItem(
     running: InstalledPluginV1?,
     pendingRestart: Boolean,
+    iconPath: String,
 ): PluginManagementItemV1 =
     PluginManagementItemV1(
         pluginId = pluginId,
@@ -193,6 +229,7 @@ private fun InstalledPluginV1.toItem(
         pendingRestart = pendingRestart,
         source = source,
         capabilities = manifest.platform.capabilities.keys,
+        iconPath = iconPath,
     )
 
 private fun PluginTextV1.fallbackValue(): String =

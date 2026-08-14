@@ -696,6 +696,17 @@
     <string name="plugin_permissions">Permissions</string>
     <string name="plugin_capabilities">Functions</string>
     <string name="plugin_uninstall">Uninstall</string>
+    <string name="plugin_uninstall_confirm_title">Uninstall plugin?</string>
+    <string name="plugin_uninstall_confirm_message">%1$s will stop being available after Flare restarts. Accounts and credentials are kept.</string>
+    <string name="plugin_confirm_install">Install</string>
+    <string name="plugin_issues">Plugin issues</string>
+    <string name="plugin_operation_failed">The plugin operation failed. Try again or restart Flare.</string>
+    <string name="plugin_issue_index_corrupt">The plugin index is damaged. Rebuild it to recover valid packages.</string>
+    <string name="plugin_issue_files_missing">Plugin files are missing or have changed.</string>
+    <string name="plugin_issue_platform_conflict">This plugin uses a platform ID that is already registered.</string>
+    <string name="plugin_issue_platform_invalid">This plugin platform could not be loaded.</string>
+    <string name="plugin_runtime_fatal">The plugin runtime stopped after a fatal error.</string>
+    <string name="plugin_runtime_paused">The plugin was paused after repeated fatal errors.</string>
     <string name="plugin_cleanup">Clean up unused files</string>
     <string name="plugin_rebuild_index">Rebuild plugin index</string>
     <string name="plugin_retry">Retry</string>

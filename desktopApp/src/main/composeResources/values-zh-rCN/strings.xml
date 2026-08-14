@@ -647,6 +647,17 @@
     <string name="plugin_permissions">权限</string>
     <string name="plugin_capabilities">功能</string>
     <string name="plugin_uninstall">卸载</string>
+    <string name="plugin_uninstall_confirm_title">卸载插件？</string>
+    <string name="plugin_uninstall_confirm_message">%1$s 将在 Flare 重启后停止提供。账号和凭据会被保留。</string>
+    <string name="plugin_confirm_install">安装</string>
+    <string name="plugin_issues">插件问题</string>
+    <string name="plugin_operation_failed">插件操作失败。请重试或重新启动 Flare。</string>
+    <string name="plugin_issue_index_corrupt">插件索引已损坏。请重建索引以恢复有效的插件包。</string>
+    <string name="plugin_issue_files_missing">插件文件缺失或已被修改。</string>
+    <string name="plugin_issue_platform_conflict">此插件使用了已注册的平台 ID。</string>
+    <string name="plugin_issue_platform_invalid">无法加载此插件平台。</string>
+    <string name="plugin_runtime_fatal">插件运行时因严重错误而停止。</string>
+    <string name="plugin_runtime_paused">插件因连续发生严重错误而暂停。</string>
     <string name="plugin_cleanup">清理未使用文件</string>
     <string name="plugin_rebuild_index">重建插件索引</string>
     <string name="plugin_retry">重试</string>

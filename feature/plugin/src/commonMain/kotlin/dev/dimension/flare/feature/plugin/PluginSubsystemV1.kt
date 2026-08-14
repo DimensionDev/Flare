@@ -10,6 +10,7 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.login.PlatformOAuthPluginPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginFormLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthLoginCoordinatorV1
+import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingStoreV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.model.PlatformSpecSource
@@ -21,10 +22,15 @@ import kotlin.native.HiddenFromObjC
 
 /** Process-scoped plugin services. Opening this object reads only the bounded state index. */
 @HiddenFromObjC
-public class PluginSubsystemV1(
+public class PluginSubsystemV1 internal constructor(
     appFiles: AppFileStore,
-    pendingRepository: PlatformOAuthPendingRepository,
+    pendingStore: PluginOAuthPendingStoreV1,
 ) {
+    public constructor(
+        appFiles: AppFileStore,
+        pendingRepository: PlatformOAuthPendingRepository,
+    ) : this(appFiles, PlatformOAuthPluginPendingStoreV1(pendingRepository))
+
     public val stateStore: PluginStateStore =
         PluginStateStore.open(
             fileSystem = appFiles.fileSystem,
@@ -40,7 +46,6 @@ public class PluginSubsystemV1(
     private val mutableSourceIssues = MutableStateFlow(stateStore.running.issues)
     public val sourceIssues: StateFlow<List<PluginStateIssueV1>> = mutableSourceIssues.asStateFlow()
 
-    private val pendingStore = PlatformOAuthPluginPendingStoreV1(pendingRepository)
     public val oauth: PluginOAuthLoginCoordinatorV1 =
         PluginOAuthLoginCoordinatorV1(
             runtimePool = runtimePool,

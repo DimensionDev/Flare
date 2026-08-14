@@ -686,7 +686,10 @@ internal class TimelineResolver(
             is TimelineSlotContent.Group -> null
         }
 
-    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> = resolveSpec(source).createLoader(source.data)
+    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> {
+        val spec = specs[source.specId] ?: return flowOf(notSupported())
+        return spec.createLoader(source.data)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun resolveGroupLoader(item: UiGroupTimelineTabItem): Flow<RemoteLoader<UiTimelineV2>> =
@@ -705,13 +708,9 @@ internal class TimelineResolver(
                 }
             }
 
-    private fun resolveSpec(source: TimelineSourceRef): TimelineSpec<out TimelineSpec.Data> =
-        specs[source.specId]
-            ?: throw IllegalArgumentException("No timeline spec found for source ID: ${source.specId}")
-
     @OptIn(ExperimentalSerializationApi::class)
     private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
-        val spec = resolveSpec(source)
+        val spec = specs[source.specId] ?: return null
         val data = spec.decode(source.data)
         return (data as? TimelineSpec.AccountData)?.accountKey
     }

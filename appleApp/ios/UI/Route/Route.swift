@@ -90,6 +90,8 @@ enum Route: Hashable, Identifiable {
             )
         case .settings:
             SettingsScreen()
+        case .pluginManagement:
+            PluginManagementView()
         case .notification:
             NotificationScreen()
         case .discover:
@@ -330,6 +332,7 @@ enum Route: Hashable, Identifiable {
     case linkOpenDefaults
     case appIconSettings
     case settings
+    case pluginManagement
     case about
     case notification
     case discover
@@ -515,6 +518,12 @@ enum Route: Hashable, Identifiable {
             return .allChannels(.Specific(accountKey: data.accountKey))
         case .timeline(let data):
             switch onEnum(of: data) {
+            case .source(let data):
+                if let tabItem = TimelineDeepLinkRouteResolver.shared.resolve(route: data) {
+                    return .timeline(tabItem)
+                } else {
+                    return nil
+                }
             case .xQTDeviceFollow(let data):
                 if let tabItem = XQTUiTimelineTabItemHelpers.shared.xqtDeviceFollow(accountType: data.accountType) {
                     return .timeline(tabItem)

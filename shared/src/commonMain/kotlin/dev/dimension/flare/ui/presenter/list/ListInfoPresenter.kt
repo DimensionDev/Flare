@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -30,8 +30,7 @@ public class ListInfoPresenter(
         val listInfo =
             serviceState.flatMap {
                 remember(it) {
-                    require(it is ListDataSource)
-                    it.listHandler.listInfo(listId)
+                    requireNotNull(it.capabilities.list).listHandler.listInfo(listId)
                 }.collectAsState().toUi()
             }
 

@@ -12,7 +12,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
@@ -58,8 +58,9 @@ public class EditListMemberPresenter(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val membersFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            if (service is ListDataSource) {
-                service.listMemberHandler.listMembersListFlow(listId)
+            val list = service.capabilities.list
+            if (list != null) {
+                list.listMemberHandler.listMembersListFlow(listId)
             } else {
                 flowOf(emptyList<UiProfile>())
             }
@@ -75,11 +76,12 @@ public class EditListMemberPresenter(
         ) { service, filter, members ->
             Triple(service, filter, members)
         }.flatMapLatest { (service, filter, members) ->
-            if (service !is ListDataSource || filter.isEmpty()) {
+            val search = service.capabilities.search
+            if (service.capabilities.list == null || search == null || filter.isEmpty()) {
                 PagingData.emptyFlow<Pair<UiProfile, Boolean>>()
             } else {
                 Pager(config = pagingConfig) {
-                    service.searchUser(filter).toPagingSource()
+                    search.searchUser(filter).toPagingSource()
                 }.flow.map { pagingData ->
                     pagingData.map { user ->
                         user to members.any { member -> member.key == user.key }
@@ -113,9 +115,9 @@ public class EditListMemberPresenter(
             override fun addMember(userKey: MicroBlogKey) {
                 serviceState.onSuccess { service ->
                     scope.launch {
-                        if (service is ListDataSource) {
-                            service.listMemberHandler.addMember(listId, userKey)
-                        }
+                        service.capabilities.list
+                            ?.listMemberHandler
+                            ?.addMember(listId, userKey)
                     }
                 }
             }
@@ -123,9 +125,9 @@ public class EditListMemberPresenter(
             override fun removeMember(userKey: MicroBlogKey) {
                 serviceState.onSuccess { service ->
                     scope.launch {
-                        if (service is ListDataSource) {
-                            service.listMemberHandler.removeMember(listId, userKey)
-                        }
+                        service.capabilities.list
+                            ?.listMemberHandler
+                            ?.removeMember(listId, userKey)
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.route
 
 import androidx.navigation3.runtime.NavKey
+import dev.dimension.flare.data.model.tab.TimelineDeepLinkRouteResolver
 import dev.dimension.flare.data.model.tab.UiSourceTimelineTabItem
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.xqtDeviceFollow
@@ -8,6 +9,8 @@ import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.route.Route.Compose.New
 import dev.dimension.flare.ui.route.Route.Compose.Quote
@@ -46,6 +49,8 @@ internal sealed interface Route : NavKey {
     data object Notification : ScreenRoute
 
     data object Settings : ScreenRoute
+
+    data object PluginManagement : ScreenRoute
 
     data object PostActionLayout : ScreenRoute
 
@@ -297,8 +302,8 @@ internal sealed interface Route : NavKey {
     ) : ScreenRoute
 
     data class WebViewLogin(
-        val url: String,
-        val callback: (cookies: String?) -> Boolean,
+        val request: LoginEffect.OpenWebCookieLogin,
+        val callback: suspend (LoginCookieSnapshot) -> Boolean,
     ) : ScreenRoute
 
     data class DeepLinkAccountPicker(
@@ -344,6 +349,10 @@ internal sealed interface Route : NavKey {
 
         public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
+                is DeeplinkRoute.Timeline.Source -> {
+                    TimelineDeepLinkRouteResolver.resolve(deeplinkRoute)?.let(Route::Timeline)
+                }
+
                 is DeeplinkRoute.Timeline.XQTDeviceFollow -> {
                     val accountKey = (deeplinkRoute.accountType as? AccountType.Specific)?.accountKey ?: return null
                     Route.Timeline(

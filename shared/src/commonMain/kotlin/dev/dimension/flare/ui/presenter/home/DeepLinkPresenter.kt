@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.PlatformDeepLinkMatcher
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayMode
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datastore.model.LinkOpenDefaultMethod
 import dev.dimension.flare.data.datastore.model.methodFor
 import dev.dimension.flare.data.repository.AccountRepository
@@ -70,9 +70,9 @@ public class DeepLinkPresenter(
                                     accountType = AccountType.Specific(event.accountKey),
                                     repository = accountRepository,
                                 ).firstOrNull()?.let { service ->
-                                    if (service is PostDataSource) {
-                                        service.postEventHandler.handleEvent(postEvent)
-                                    }
+                                    service.capabilities.post
+                                        ?.postEventHandler
+                                        ?.handleEvent(postEvent)
                                 }
                             }
 

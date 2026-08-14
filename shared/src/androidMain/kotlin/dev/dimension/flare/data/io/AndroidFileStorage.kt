@@ -7,7 +7,7 @@ import okio.SYSTEM
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 
-@Single(binds = [FileStorage::class])
+@Single(binds = [FileStorage::class, AppFileStore::class])
 internal class AndroidFileStorage(
     @Provided private val context: Context,
 ) : OkioFileStorage(

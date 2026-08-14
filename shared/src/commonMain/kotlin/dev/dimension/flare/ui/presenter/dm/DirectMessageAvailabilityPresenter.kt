@@ -4,9 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.di.koinInject
@@ -42,4 +41,5 @@ public class DirectMessageAvailabilityPresenter : PresenterBase<DirectMessageAva
     ) : State
 }
 
-internal fun MicroblogDataSource.isDirectMessageCapableAccountService(): Boolean = this is DirectMessageDataSource && this is UserDataSource
+internal fun MicroblogDataSource.isDirectMessageCapableAccountService(): Boolean =
+    capabilities.directMessage != null && capabilities.profile != null

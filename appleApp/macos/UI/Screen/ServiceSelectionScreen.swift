@@ -120,9 +120,11 @@ struct ServiceSelectionScreen: View {
         ZStack {
             switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
-                    .resizable()
-                    .scaledToFit()
+                PluginPlatformIcon(
+                    iconURL: success.data.platformIconUrl,
+                    fallback: success.data.platformIcon,
+                    size: 20
+                )
             case .loading:
                 ProgressView()
                     .controlSize(.small)
@@ -192,13 +194,10 @@ struct ServiceSelectionScreen: View {
         @ViewBuilder trailing: () -> Trailing
     ) -> some View {
         HStack(spacing: 8) {
-            Image(fontAwesome: node.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
+            PluginPlatformIcon(iconURL: node.platformIconUrl, fallback: node.platformIcon, size: 22)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(node.platformDisplayName)
+                Text(node.platformDisplayNameText.text)
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
@@ -318,10 +317,11 @@ struct ReloginScreen: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 28, height: 28)
+            PluginPlatformIcon(
+                iconURL: presenter.state.platformIconUrl(),
+                fallback: presenter.state.platformIcon(),
+                size: 28
+            )
             VStack(alignment: .leading, spacing: 2) {
                 Text(ServiceSelectCopy.loginExpired)
                     .font(.title3.weight(.semibold))
@@ -377,6 +377,8 @@ private struct LoginFlowView: View {
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieProbes: [LoginCookieProbe] = []
+    @State private var checkingCookies = false
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -403,7 +405,7 @@ private struct LoginFlowView: View {
             ForEach(presenter.state.flowState.actions, id: \.id) { action in
                 Button {
                     presenter.state.perform(actionId: action.id)
-                    if action.label == .cancel {
+                    if action.id == "cancel" {
                         withAnimation(MacOSServiceSelectionAnimation.standard) {
                             qrContent = nil
                         }
@@ -433,12 +435,8 @@ private struct LoginFlowView: View {
         )) {
             if let webCookieUrl {
                 NavigationStack {
-                    MacOSWebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else {
-                            return
-                        }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    MacOSWebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
@@ -469,7 +467,20 @@ private struct LoginFlowView: View {
                     qrContent = showQr.content
                 }
             case .openWebCookieLogin(let webCookie):
+                webCookieProbes = webCookie.probes
                 webCookieUrl = webCookie.url
+            }
+        }
+    }
+
+    private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
+        Task { @MainActor in
+            guard !checkingCookies else { return }
+            checkingCookies = true
+            defer { checkingCookies = false }
+            let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
+            if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
+                webCookieUrl = nil
             }
         }
     }
@@ -715,7 +726,7 @@ private struct MacOSWebLoginScreen: View {
     private let url: String
 
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
@@ -724,6 +735,17 @@ private struct MacOSWebLoginScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Text(viewModel.currentOrigin)
+                .font(.callout)
+                .foregroundStyle(
+                    viewModel.currentOrigin.isEmpty || viewModel.currentOrigin == macWebLoginHTTPSOrigin(URL(string: url))
+                        ? Color.secondary
+                        : Color.red
+                )
+                .lineLimit(1)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+            Divider()
             if viewModel.canShowWebView {
                 MacOSWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
                     webView.navigationDelegate = viewModel.delegate
@@ -732,6 +754,12 @@ private struct MacOSWebLoginScreen: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+        .task {
+            await viewModel.pollCookies()
+        }
+        .onDisappear {
+            viewModel.clearCookie()
         }
     }
 }
@@ -755,32 +783,53 @@ private struct MacOSWebView: NSViewRepresentable {
 
 private final class MacOSCookieNavigationDelegate: NSObject, WKNavigationDelegate {
     private let onNavigationResponse: () -> Void
+    var onOriginChange: (String) -> Void = { _ in }
 
     init(onNavigationResponse: @escaping () -> Void) {
         self.onNavigationResponse = onNavigationResponse
     }
 
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        guard navigationAction.targetFrame?.isMainFrame != false else {
+            return .allow
+        }
+        guard let origin = macWebLoginHTTPSOrigin(navigationAction.request.url) else {
+            return .cancel
+        }
+        onOriginChange(origin)
+        return .allow
+    }
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         onNavigationResponse()
-        return .allow
+        return macWebLoginHTTPSOrigin(navigationResponse.response.url) == nil ? .cancel : .allow
     }
 }
 
 private final class MacOSWebLoginViewModel: ObservableObject {
     @Published var canShowWebView = false
+    @Published var currentOrigin: String
 
-    let delegate: MacOSCookieNavigationDelegate
-
-    init(
-        onCookie: @escaping (String) -> Void,
-        url: String
-    ) {
-        self.delegate = MacOSCookieNavigationDelegate {
+    private let onCookie: ([HTTPCookie]) -> Void
+    lazy var delegate: MacOSCookieNavigationDelegate = {
+        let delegate = MacOSCookieNavigationDelegate { [weak self] in
+            guard let self else { return }
             WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
-                let cookieString = MacOSWebLoginViewModel.cookieHeaderString(from: cookies, for: URL(string: url))
-                onCookie(cookieString)
+                self.onCookie(cookies)
             }
         }
+        delegate.onOriginChange = { [weak self] origin in
+            self?.currentOrigin = origin
+        }
+        return delegate
+    }()
+
+    init(
+        onCookie: @escaping ([HTTPCookie]) -> Void,
+        url: String
+    ) {
+        self.onCookie = onCookie
+        self.currentOrigin = macWebLoginHTTPSOrigin(URL(string: url)) ?? ""
         clearCookie()
     }
 
@@ -790,29 +839,47 @@ private final class MacOSWebLoginViewModel: ObservableObject {
         return configuration
     }
 
-    private func clearCookie() {
-        let dataStore = WKWebsiteDataStore.default()
-        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            dataStore.removeData(
-                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records,
-                completionHandler: {
-                    self.canShowWebView = true
-                }
-            )
+    func clearCookie() {
+        clearMacWebLoginDataStore { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.canShowWebView = true
+            }
         }
     }
 
-    private static func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
-        let host = url?.host?.lowercased()
-        let filtered = cookies.filter { cookie in
-            guard let host else {
-                return true
-            }
-            let domain = cookie.domain.lowercased()
-            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
+    private func getCookies() {
+        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+            self.onCookie(cookies)
         }
-        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+    }
+
+    func pollCookies() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            getCookies()
+        }
+    }
+}
+
+private func macWebLoginHTTPSOrigin(_ url: URL?) -> String? {
+    guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty, url.user == nil, url.password == nil else {
+        return nil
+    }
+    if let port = url.port, port != 443 {
+        return "https://\(host):\(port)"
+    }
+    return "https://\(host)"
+}
+
+private func clearMacWebLoginDataStore(completion: @escaping @Sendable () -> Void = {}) {
+    let dataStore = WKWebsiteDataStore.default()
+    dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+        dataStore.removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            for: records,
+            completionHandler: completion
+        )
     }
 }
 

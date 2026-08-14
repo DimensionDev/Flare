@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "dev.dimension.flare.sample.pixelfed",
+  "version": "0.1.0",
+  "defaultLocale": "en",
+  "name": {
+    "key": "plugin.name",
+    "fallback": "Pixelfed Sample"
+  },
+  "description": {
+    "key": "plugin.description",
+    "fallback": "Pixelfed support implemented as a Flare social plugin"
+  },
+  "permissions": {
+    "authOrigins": []
+  },
+  "platform": {
+    "id": "Pixelfed",
+    "name": {
+      "key": "platform.name",
+      "fallback": "Pixelfed"
+    },
+    "description": {
+      "key": "platform.description",
+      "fallback": "A federated image sharing platform"
+    },
+    "detector": {
+      "priority": 1000
+    },
+    "loginMethods": [
+      {
+        "id": "oauth",
+        "interaction": "OAuth",
+        "title": {
+          "key": "login.oauth",
+          "fallback": "Continue with Pixelfed"
+        },
+        "description": {
+          "key": "login.oauth.description",
+          "fallback": "Authorize Flare in your browser"
+        }
+      }
+    ],
+    "capabilities": {
+      "flare.datasource.timeline/v1": {
+        "operations": {
+          "page": {
+            "directions": ["refresh", "older"]
+          }
+        }
+      },
+      "flare.datasource.search/v1": {
+        "operations": {
+          "posts": {
+            "directions": ["refresh", "older"]
+          },
+          "profiles": {
+            "directions": ["refresh", "older"]
+          },
+          "discoverPosts": {
+            "directions": ["refresh", "older"]
+          },
+          "discoverProfiles": {
+            "directions": ["refresh", "older"]
+          },
+          "discoverHashtags": {
+            "directions": ["refresh", "older"]
+          }
+        }
+      },
+      "flare.datasource.profile/v1": {
+        "operations": {
+          "byId": {},
+          "byHandle": {},
+          "timeline": {
+            "directions": ["refresh", "older"]
+          },
+          "following": {
+            "directions": ["refresh", "older"]
+          },
+          "followers": {
+            "directions": ["refresh", "older"]
+          }
+        }
+      },
+      "flare.datasource.post/v1": {
+        "operations": {
+          "detail": {},
+          "context": {
+            "directions": ["refresh"]
+          },
+          "delete": {},
+          "mutate": {}
+        }
+      },
+      "flare.datasource.compose/v1": {
+        "operations": {
+          "publish": {}
+        }
+      }
+    },
+    "timelines": [
+      {
+        "id": "home",
+        "title": {
+          "key": "timeline.home",
+          "fallback": "Home"
+        },
+        "icon": "Home",
+        "defaultForNewAccount": true
+      },
+      {
+        "id": "discover",
+        "title": {
+          "key": "timeline.discover",
+          "fallback": "Discover"
+        },
+        "icon": "Featured"
+      },
+      {
+        "id": "local",
+        "title": {
+          "key": "timeline.local",
+          "fallback": "Local"
+        },
+        "icon": "Local",
+        "parameters": {
+          "local": "true"
+        }
+      },
+      {
+        "id": "federated",
+        "title": {
+          "key": "timeline.federated",
+          "fallback": "Federated"
+        },
+        "icon": "World",
+        "parameters": {
+          "local": "false"
+        }
+      },
+      {
+        "id": "bookmarks",
+        "title": {
+          "key": "timeline.bookmarks",
+          "fallback": "Bookmarks"
+        },
+        "icon": "Bookmark"
+      },
+      {
+        "id": "favourites",
+        "title": {
+          "key": "timeline.favourites",
+          "fallback": "Favourites"
+        },
+        "icon": "Heart"
+      }
+    ],
+    "profileTabs": [
+      {
+        "id": "posts",
+        "title": {
+          "key": "profile.posts",
+          "fallback": "Posts"
+        },
+        "icon": "Profile",
+        "display": "List"
+      },
+      {
+        "id": "gallery",
+        "title": {
+          "key": "profile.gallery",
+          "fallback": "Gallery"
+        },
+        "icon": "Featured",
+        "display": "Grid",
+        "parameters": {
+          "onlyMedia": "true"
+        }
+      }
+    ],
+    "composeDefaults": {
+      "text": {
+        "maxLength": 500
+      },
+      "media": {
+        "minCountForNew": 1,
+        "maxCount": 4,
+        "maxBytes": 10485760,
+        "supportedMimeTypes": [
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "image/webp",
+          "video/mp4"
+        ],
+        "altTextMaxLength": 1500,
+        "canSensitive": true
+      },
+      "visibility": {
+        "allowed": ["public", "unlisted", "followers"],
+        "default": "public"
+      },
+      "contentWarning": true
+    },
+    "credentialSchemaVersion": 1,
+    "timelineSchemaVersion": 1
+  }
+}

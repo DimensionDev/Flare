@@ -8,7 +8,7 @@ import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -53,8 +53,7 @@ public class AccountNotificationPresenter(
             accountType = AccountType.Specific(accountKey),
             repository = accountRepository,
         ).map {
-            require(it is NotificationTimelineDataSource)
-            it.supportedNotificationFilter.toImmutableList()
+            requireNotNull(it.capabilities.notification?.timeline).supportedNotificationFilter.toImmutableList()
         }.distinctUntilChanged()
     }
 
@@ -68,8 +67,7 @@ public class AccountNotificationPresenter(
                             accountType = AccountType.Specific(accountKey),
                             repository = accountRepository,
                         ).map {
-                            require(it is NotificationTimelineDataSource)
-                            it.notification(filter)
+                            requireNotNull(it.capabilities.notification?.timeline).notification(filter)
                         }.distinctUntilChanged()
                     }
             }

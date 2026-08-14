@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.Flow
@@ -66,6 +67,8 @@ public data class ComposeConfig public constructor(
     public data class Language public constructor(
         val maxCount: Int,
     ) {
+        internal fun merge(other: Language): Language = Language(maxCount = minOf(maxCount, other.maxCount))
+
         private val popularCodes =
             listOf(
                 "en",
@@ -285,6 +288,8 @@ public data class ComposeConfig public constructor(
         val canSensitive: Boolean,
         val altTextMaxLength: Int,
         val allowMediaOnly: Boolean,
+        val minCountForNew: Int = 0,
+        val supportedMimeTypes: Set<String>? = null,
         val compression: Compression = Compression(),
     ) {
         internal fun merge(other: Media): Media =
@@ -293,6 +298,8 @@ public data class ComposeConfig public constructor(
                 canSensitive = canSensitive && other.canSensitive,
                 altTextMaxLength = minOf(altTextMaxLength, other.altTextMaxLength),
                 allowMediaOnly = allowMediaOnly && other.allowMediaOnly,
+                minCountForNew = maxOf(minCountForNew, other.minCountForNew),
+                supportedMimeTypes = supportedMimeTypes.intersectConstraint(other.supportedMimeTypes),
                 compression = compression.merge(other.compression),
             )
 
@@ -344,7 +351,33 @@ public data class ComposeConfig public constructor(
     public data object ContentWarning
 
     @Immutable
-    public data object Visibility
+    public data class Visibility(
+        val allowedValues: Set<UiTimelineV2.Post.Visibility> = DefaultValues,
+        val defaultValue: UiTimelineV2.Post.Visibility = UiTimelineV2.Post.Visibility.Public,
+    ) {
+        internal fun merge(other: Visibility): Visibility {
+            val allowed = allowedValues intersect other.allowedValues
+            return Visibility(
+                allowedValues = allowed,
+                defaultValue =
+                    when {
+                        defaultValue in allowed -> defaultValue
+                        other.defaultValue in allowed -> other.defaultValue
+                        else -> allowed.firstOrNull() ?: defaultValue
+                    },
+            )
+        }
+
+        public companion object {
+            public val DefaultValues: Set<UiTimelineV2.Post.Visibility> =
+                setOf(
+                    UiTimelineV2.Post.Visibility.Public,
+                    UiTimelineV2.Post.Visibility.Home,
+                    UiTimelineV2.Post.Visibility.Followers,
+                    UiTimelineV2.Post.Visibility.Specified,
+                )
+        }
+    }
 
     internal fun merge(other: ComposeConfig): ComposeConfig {
         val text =
@@ -379,7 +412,13 @@ public data class ComposeConfig public constructor(
             }
         val visibility =
             if (visibility != null && other.visibility != null) {
-                visibility
+                visibility.merge(other.visibility)
+            } else {
+                null
+            }
+        val language =
+            if (language != null && other.language != null) {
+                language.merge(other.language)
             } else {
                 null
             }
@@ -390,6 +429,14 @@ public data class ComposeConfig public constructor(
             emoji = emoji,
             contentWarning = contentWarning,
             visibility = visibility,
+            language = language,
         )
     }
 }
+
+private fun Set<String>?.intersectConstraint(other: Set<String>?): Set<String>? =
+    when {
+        this == null -> other
+        other == null -> this
+        else -> this intersect other
+    }

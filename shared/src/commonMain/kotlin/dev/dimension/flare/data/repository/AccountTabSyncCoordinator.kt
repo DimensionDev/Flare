@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.repository
 
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -29,15 +29,11 @@ internal class AccountTabSyncCoordinator(
     init {
         coroutineScope.launch {
             removeTabsForDeletedAccounts()
-        }
-        coroutineScope.launch {
-            accountRepository.onAdded.collect { account ->
-                addDefaultTabs(account)
-            }
-        }
-        coroutineScope.launch {
-            accountRepository.onRemoved.collect { accountKey ->
-                removeTabsForAccount(accountKey)
+            accountRepository.accountChanges.collect { change ->
+                when (change) {
+                    is AccountChange.Added -> addDefaultTabs(change.account)
+                    is AccountChange.Removed -> removeTabsForAccount(change.accountKey)
+                }
             }
         }
     }
@@ -61,7 +57,11 @@ internal class AccountTabSyncCoordinator(
 
     private suspend fun addDefaultTabs(account: UiAccount) {
         val defaultTabs =
-            (accountRepository.getOrCreateDataSource(account) as? TimelineTabConfigurationDataSource)
+            accountRepository
+                .getOrCreateDataSource(account)
+                .capabilities
+                .tabCatalog
+                ?.configuration
                 ?.defaultTabs
                 .orEmpty()
         if (defaultTabs.isEmpty()) {
@@ -112,8 +112,20 @@ internal class AccountTabSyncCoordinator(
     private fun TimelineSlot.cleanupAccountSlots(shouldKeep: (MicroBlogKey?) -> Boolean): TimelineSlot? =
         when (val slotContent = content) {
             is TimelineSlotContent.Source -> {
-                if (shouldKeep(timelineResolver.resolveAccountKey(this))) {
-                    this
+                val accountKey = timelineResolver.resolveAccountKey(this)
+                val normalized =
+                    if (accountKey != null && slotContent.source.ownerAccountKey == null) {
+                        copy(
+                            content =
+                                TimelineSlotContent.Source(
+                                    slotContent.source.copy(ownerAccountKey = accountKey),
+                                ),
+                        )
+                    } else {
+                        this
+                    }
+                if (shouldKeep(accountKey)) {
+                    normalized
                 } else {
                     null
                 }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.coroutines.launch
@@ -145,6 +146,13 @@ private fun LoginAction.toWeb(): WebLoginAction =
         label = label.webLabel(),
         enabled = enabled,
     )
+
+private fun UiText.webLabel(): String =
+    when (this) {
+        is UiText.Localized -> string.webLabel()
+        is UiText.Raw -> string
+        is UiText.ExternalRef -> fallbackText()
+    }
 
 private fun UiStrings.webLabel(): String =
     when (this) {

@@ -425,4 +425,5 @@ private val UiText.editableText: String
         when (this) {
             is UiText.Raw -> string
             is UiText.Localized -> ""
+            is UiText.ExternalRef -> fallbackText()
         }

@@ -36,6 +36,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -81,6 +82,7 @@ import dev.dimension.flare.ui.component.platform.PlatformSecureTextField
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextField
 import dev.dimension.flare.ui.component.res
+import dev.dimension.flare.ui.component.resolveText
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.toImageVector
@@ -91,6 +93,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
 import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.LoginField
 import dev.dimension.flare.ui.presenter.login.LoginFieldType
@@ -108,7 +111,10 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun ServiceSelectionScreenContent(
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (
+        request: LoginEffect.OpenWebCookieLogin,
+        cookieCallback: suspend (LoginCookieSnapshot) -> Boolean,
+    ) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
@@ -175,10 +181,10 @@ public fun ServiceSelectionScreenContent(
                     leadingIcon = {
                         state.detectedPlatformId
                             .onSuccess {
-                                FAIcon(
-                                    imageVector = it.platformIcon.toImageVector(),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
+                                PlatformIcon(
+                                    iconUrl = it.platformIconUrl,
+                                    fallback = it.platformIcon,
+                                    size = 24,
                                 )
                             }.onError {
                                 FAIcon(
@@ -294,7 +300,10 @@ public fun ServiceSelectionScreenContent(
 @Composable
 public fun ReloginScreenContent(
     target: ReloginTarget,
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (
+        request: LoginEffect.OpenWebCookieLogin,
+        cookieCallback: suspend (LoginCookieSnapshot) -> Boolean,
+    ) -> Unit,
     onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
@@ -337,16 +346,7 @@ public fun ReloginScreenContent(
                 }
 
                 is LoginEffect.OpenWebCookieLogin -> {
-                    onWebViewLogin(effect.url) { cookies ->
-                        if (cookies.isNullOrBlank()) {
-                            false
-                        } else if (!loginState.canResume(cookies)) {
-                            false
-                        } else {
-                            loginState.resume(cookies)
-                            true
-                        }
-                    }
+                    onWebViewLogin(effect, loginState::checkCookies)
                 }
             }
         }
@@ -367,10 +367,10 @@ public fun ReloginScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                FAIcon(
-                    imageVector = state.platformIcon().toImageVector(),
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp),
+                PlatformIcon(
+                    iconUrl = state.platformIconUrl(),
+                    fallback = state.platformIcon(),
+                    size = 36,
                 )
                 PlatformText(
                     text = stringResource(Res.string.login_expired),
@@ -415,13 +415,41 @@ public fun ReloginScreenContent(
 }
 
 @Composable
+private fun PlatformIcon(
+    iconUrl: String?,
+    fallback: dev.dimension.flare.ui.model.UiIcon,
+    size: Int,
+) {
+    if (iconUrl.isNullOrBlank()) {
+        FAIcon(
+            imageVector = fallback.toImageVector(),
+            contentDescription = null,
+            modifier = Modifier.size(size.dp),
+        )
+    } else {
+        NetworkImage(
+            model = iconUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier =
+                Modifier
+                    .size(size.dp)
+                    .clip(RoundedCornerShape((size / 5).dp)),
+        )
+    }
+}
+
+@Composable
 private fun GenericLoginContent(
     state: SelectionPresenter.State,
     platformId: String,
     host: String,
     methods: List<LoginMethodSpec>,
     openUri: (String) -> Unit,
-    onWebViewLogin: (url: String, cookieCallback: (cookies: String?) -> Boolean) -> Unit,
+    onWebViewLogin: (
+        request: LoginEffect.OpenWebCookieLogin,
+        cookieCallback: suspend (LoginCookieSnapshot) -> Boolean,
+    ) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Boolean) -> Unit,
 ) {
     if (methods.isEmpty()) return
@@ -459,16 +487,7 @@ private fun GenericLoginContent(
                 }
 
                 is LoginEffect.OpenWebCookieLogin -> {
-                    onWebViewLogin(effect.url) { cookies ->
-                        if (cookies.isNullOrBlank()) {
-                            false
-                        } else if (!loginState.canResume(cookies)) {
-                            false
-                        } else {
-                            loginState.resume(cookies)
-                            true
-                        }
-                    }
+                    onWebViewLogin(effect, loginState::checkCookies)
                 }
             }
         }
@@ -499,7 +518,7 @@ private fun LoginMethodPicker(
 ) {
     val labels =
         methods
-            .map { stringResource(it.title.res) }
+            .map { it.title.resolveText() }
             .toImmutableList()
     PlatformPicker(
         modifier =
@@ -553,7 +572,7 @@ private fun LoginFlowContent(
                 modifier = Modifier.width(300.dp),
                 enabled = action.enabled && !flowState.loading,
             ) {
-                PlatformText(text = stringResource(action.label.res))
+                PlatformText(text = action.label.resolveText())
             }
         }
         flowState.error?.let {
@@ -598,12 +617,12 @@ private fun LoginFieldInput(
         }
     }
     val label: @Composable () -> Unit = {
-        PlatformText(text = stringResource(field.label.res))
+        PlatformText(text = field.label.resolveText())
     }
     val placeholder: (@Composable () -> Unit)? =
         field.placeholder?.let { placeholder ->
             {
-                PlatformText(text = stringResource(placeholder.res))
+                PlatformText(text = placeholder.resolveText())
             }
         }
     val keyboardOptions =

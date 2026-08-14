@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.home
 
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -19,7 +20,7 @@ public class HomeTimelinePresenter(
             accountType = accountType,
             repository = accountRepository,
         ).map {
-            it.homeTimeline()
+            requireNotNull(it.capabilities.timeline).homeTimeline()
         }
     }
 }

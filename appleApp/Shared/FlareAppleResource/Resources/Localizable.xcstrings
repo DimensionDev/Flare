@@ -1,6 +1,198 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "plugin_capabilities" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Functions" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "功能" } }
+      }
+    },
+    "plugin_cleanup" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clean up unused files" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "清理未使用文件" } }
+      }
+    },
+    "plugin_confirm_install" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Install" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "安装" } }
+      }
+    },
+    "plugin_empty" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No plugins installed" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "尚未安装插件" } }
+      }
+    },
+    "plugin_inactive" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inactive in this process" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前进程未启用" } }
+      }
+    },
+    "plugin_install" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Install .fpp" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "安装 .fpp" } }
+      }
+    },
+    "plugin_issues" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Issues" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "问题" } }
+      }
+    },
+    "plugin_permissions" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Permissions" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "权限" } }
+      }
+    },
+    "plugin_permission_account_origin" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Network access to the HTTPS instance you choose" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "访问你选择的 HTTPS 实例" } }
+      }
+    },
+    "plugin_permission_account_origin_label" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "the HTTPS instance you choose" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "你选择的 HTTPS 实例" } }
+      }
+    },
+    "plugin_permission_cookie" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Read cookie %2$@ from %1$@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "从 %1$@ 读取 Cookie %2$@" } }
+      }
+    },
+    "plugin_rebuild_index" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rebuild plugin index" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重建插件索引" } }
+      }
+    },
+    "plugin_restart_required" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart Flare to apply plugin changes." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重新启动 Flare 后应用插件更改。" } }
+      }
+    },
+    "plugin_retry" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Retry" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重试" } }
+      }
+    },
+    "plugin_running" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Active in this process" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "当前进程已启用" } }
+      }
+    },
+    "plugin_uninstall" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Uninstall" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "卸载" } }
+      }
+    },
+    "plugin_uninstall_confirm_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Uninstall plugin?" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "卸载插件？" } }
+      }
+    },
+    "plugin_uninstall_confirm_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ will stop being available after Flare restarts. Accounts and credentials are kept." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%@ 将在 Flare 重启后停止提供。账号和凭据会被保留。" } }
+      }
+    },
+    "plugin_operation_failed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin operation failed. Try again or restart Flare." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件操作失败。请重试或重新启动 Flare。" } }
+      }
+    },
+    "plugin_issue_index_corrupt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin index is damaged. Rebuild it to recover valid packages." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件索引已损坏。请重建索引以恢复有效的插件包。" } }
+      }
+    },
+    "plugin_issue_files_missing" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plugin files are missing or have changed." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件文件缺失或已被修改。" } }
+      }
+    },
+    "plugin_issue_platform_conflict" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This plugin uses a platform ID that is already registered." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此插件使用了已注册的平台 ID。" } }
+      }
+    },
+    "plugin_issue_platform_invalid" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This plugin platform could not be loaded." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法加载此插件平台。" } }
+      }
+    },
+    "plugin_runtime_fatal" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin runtime stopped after a fatal error." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件运行时因严重错误而停止。" } }
+      }
+    },
+    "plugin_runtime_paused" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The plugin was paused after repeated fatal errors." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件因连续发生严重错误而暂停。" } }
+      }
+    },
+    "plugin_unverified_warning" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此本地插件未经验证，可以访问列出的账号和网络域名。请仅在信任作者时安装。" } }
+      }
+    },
+    "plugin_warning_added_permission" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This update requests an additional permission" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此更新申请了新增权限" } }
+      }
+    },
+    "plugin_warning_changed_package" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This version has different package contents" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "同一版本的插件包内容已变化" } }
+      }
+    },
+    "plugin_warning_compatibility" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Compatibility warning" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "兼容性警告" } }
+      }
+    },
+    "plugin_warning_downgrade" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This package is older than the installed version" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "此插件包版本低于当前安装版本" } }
+      }
+    },
+    "settings_plugins_subtitle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Install and manage social platform plugins" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "安装和管理社交平台插件" } }
+      }
+    },
+    "settings_plugins_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plugins" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "插件" } }
+      }
+    },
     "" : {
       "localizations" : {
         "af" : {

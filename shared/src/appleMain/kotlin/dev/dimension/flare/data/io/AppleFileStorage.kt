@@ -5,7 +5,7 @@ import okio.Path.Companion.toPath
 import okio.SYSTEM
 import org.koin.core.annotation.Single
 
-@Single(binds = [FileStorage::class])
+@Single(binds = [FileStorage::class, AppFileStore::class])
 internal class AppleFileStorage :
     OkioFileStorage(
         fileSystem = FileSystem.SYSTEM,

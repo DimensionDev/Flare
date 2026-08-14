@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -57,6 +59,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -65,11 +68,14 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.resolveText
 import dev.dimension.flare.ui.component.toImageVector
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -95,6 +101,7 @@ internal fun AccountsScreen(
     toLogin: () -> Unit,
     toRelogin: (ReloginTarget) -> Unit,
     toNostrRelays: (MicroBlogKey) -> Unit,
+    toPlugins: () -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter {
@@ -201,6 +208,8 @@ internal fun AccountsScreen(
                             },
                             toLogin = toLogin,
                             toRelogin = toRelogin,
+                            unavailableAccount = account.takeUnless { it.platformAvailable },
+                            toPlugins = toPlugins,
                             trailingContent = { user ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -363,6 +372,8 @@ fun AccountItem(
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,
     toRelogin: (ReloginTarget) -> Unit = { toLogin() },
+    unavailableAccount: UiAccount? = null,
+    toPlugins: (() -> Unit)? = null,
     trailingContent: @Composable (UiProfile) -> Unit = { },
     headlineContent: @Composable (UiProfile) -> Unit = {
         RichText(text = it.name, maxLines = 1)
@@ -433,6 +444,12 @@ fun AccountItem(
                     colors = colors,
                 )
             }.onError { throwable ->
+                val reloginTarget =
+                    when (throwable) {
+                        is LoginExpiredException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                        is RequireReLoginException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                        else -> null
+                    }
                 SegmentedListItem(
                     selected = selected,
                     onClick = {},
@@ -442,13 +459,13 @@ fun AccountItem(
                     shapes = shapes,
                     content = {
                         if (throwable is UnsupportedPlatformException) {
-                            Text(text = throwable.platformId)
-                        } else if (throwable is LoginExpiredException) {
+                            Text(text = unavailableAccount?.platformDisplayNameText?.resolveText() ?: throwable.platformId)
+                        } else if (reloginTarget != null) {
                             Text(
                                 text =
                                     stringResource(
                                         id = R.string.login_expired,
-                                        throwable.accountKey.toString(),
+                                        reloginTarget.accountKey.toString(),
                                     ),
                             )
                         } else {
@@ -457,12 +474,20 @@ fun AccountItem(
                     },
                     leadingContent = {
                         if (throwable is UnsupportedPlatformException) {
-                            ThemedIcon(
-                                UiIcon.World.toImageVector(),
-                                contentDescription = throwable.platformId,
-                                color = ThemeIconData.Color.ImperialMagenta,
-                                size = avatarSize,
-                            )
+                            if (unavailableAccount?.platformIconUrl != null) {
+                                NetworkImage(
+                                    model = unavailableAccount.platformIconUrl,
+                                    contentDescription = unavailableAccount.platformDisplayName,
+                                    modifier = Modifier.size(avatarSize).clip(CircleShape),
+                                )
+                            } else {
+                                ThemedIcon(
+                                    (unavailableAccount?.platformIcon ?: UiIcon.World).toImageVector(),
+                                    contentDescription = unavailableAccount?.platformDisplayName ?: throwable.platformId,
+                                    color = ThemeIconData.Color.ImperialMagenta,
+                                    size = avatarSize,
+                                )
+                            }
                         } else {
                             ThemedIcon(
                                 FontAwesomeIcons.Solid.FaceSadTear,
@@ -475,24 +500,23 @@ fun AccountItem(
                     supportingContent = {
                         if (throwable is UnsupportedPlatformException) {
                             Text(text = throwable.accountKey?.toString() ?: throwable.platformId)
-                        } else if (throwable is LoginExpiredException) {
-                            Text(text = throwable.accountKey.toString())
+                        } else if (reloginTarget != null) {
+                            Text(text = reloginTarget.accountKey.toString())
                         } else {
                             Text(text = stringResource(id = R.string.account_item_error_message))
                         }
                     },
                     trailingContent =
-                        if (throwable is LoginExpiredException) {
+                        if (throwable is UnsupportedPlatformException && toPlugins != null) {
+                            {
+                                TextButton(onClick = toPlugins) {
+                                    Text(text = stringResource(id = R.string.settings_plugins_title))
+                                }
+                            }
+                        } else if (reloginTarget != null) {
                             {
                                 TextButton(
-                                    onClick = {
-                                        toRelogin(
-                                            ReloginTarget(
-                                                accountKey = throwable.accountKey,
-                                                platformId = throwable.platformId,
-                                            ),
-                                        )
-                                    },
+                                    onClick = { toRelogin(reloginTarget) },
                                 ) {
                                     Text(text = stringResource(id = R.string.login_expired_relogin))
                                 }

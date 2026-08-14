@@ -1,15 +1,13 @@
 package dev.dimension.flare.feature.agent.common
 
 import ai.koog.agents.core.tools.ToolRegistry
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.subscription.KoinSubscriptionDataSource
@@ -58,7 +56,7 @@ internal class AgentToolProvider(
 ) {
     fun resolve(context: AgentToolContext): AgentToolSet {
         val statusContext = context.status
-        val microblogDataSource = statusContext?.postDataSource as? MicroblogDataSource
+        val microblogDataSource = statusContext?.microblogDataSource
         val searchTargets =
             buildList {
                 addAll(context.searchDataSources.toAgentSearchTargets())
@@ -70,12 +68,12 @@ internal class AgentToolProvider(
         val postActionTargets =
             buildList {
                 addAll(context.searchDataSources.toAgentPostActionTargets())
-                if (statusContext != null && none { it.dataSource === statusContext.postDataSource }) {
-                    val authenticated = statusContext.postDataSource as? AuthenticatedMicroblogDataSource
-                    if (authenticated != null) {
+                if (statusContext != null) {
+                    val accountKey = statusContext.microblogDataSource?.accountKeyOrNull
+                    if (accountKey != null && none { it.accountKey == accountKey }) {
                         add(
                             AgentPostActionTarget(
-                                accountKey = authenticated.accountKey,
+                                accountKey = accountKey,
                                 platformId = statusContext.currentPlatformId,
                                 dataSource = statusContext.postDataSource,
                             ),
@@ -87,12 +85,13 @@ internal class AgentToolProvider(
             buildList {
                 addAll(context.searchDataSources.toAgentRelationTargets())
                 if (statusContext != null) {
-                    val authenticated = statusContext.postDataSource as? AuthenticatedMicroblogDataSource
-                    val relationDataSource = statusContext.postDataSource as? RelationDataSource
-                    if (authenticated != null && relationDataSource != null && none { it.dataSource === relationDataSource }) {
+                    val dataSource = statusContext.microblogDataSource
+                    val accountKey = dataSource?.accountKeyOrNull
+                    val relationDataSource = dataSource?.capabilities?.relation
+                    if (accountKey != null && relationDataSource != null && none { it.accountKey == accountKey }) {
                         add(
                             AgentRelationTarget(
-                                accountKey = authenticated.accountKey,
+                                accountKey = accountKey,
                                 platformId = statusContext.currentPlatformId,
                                 dataSource = relationDataSource,
                             ),
@@ -496,6 +495,7 @@ internal data class AgentToolContext(
         val statusKey: MicroBlogKey,
         val currentPlatformId: String,
         val currentPost: UiTimelineV2.Post? = null,
+        val microblogDataSource: MicroblogDataSource? = postDataSource as? MicroblogDataSource,
     )
 
     companion object {
@@ -520,7 +520,7 @@ internal data class AgentToolSession(
     val localCacheRepository: LocalCacheRepository? = null,
     val platformRegistry: PlatformRegistry? = null,
 ) {
-    fun statusMicroblogDataSource(): MicroblogDataSource? = status?.postDataSource as? MicroblogDataSource
+    fun statusMicroblogDataSource(): MicroblogDataSource? = status?.microblogDataSource
 
     fun statusKey(): MicroBlogKey? = status?.statusKey
 
@@ -669,7 +669,16 @@ internal data class AgentUserTarget(
 )
 
 internal fun List<AccountMicroblogDataSource>.toAgentSearchTargets(): List<AgentSearchTarget> =
-    map { item ->
+    mapNotNull { item ->
+        val capabilities = item.dataSource.capabilities
+        if (
+            capabilities.timeline == null &&
+            capabilities.search == null &&
+            capabilities.profile == null &&
+            capabilities.post == null
+        ) {
+            return@mapNotNull null
+        }
         AgentSearchTarget(
             platformId = item.platformId,
             dataSource = item.dataSource,
@@ -678,7 +687,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentSearchTargets(): List<Agent
 
 internal fun List<AccountMicroblogDataSource>.toAgentComposeTargets(): List<AgentComposeTarget> =
     mapNotNull { item ->
-        val dataSource = item.dataSource as? ComposeDataSource ?: return@mapNotNull null
+        val dataSource = item.dataSource.capabilities.compose ?: return@mapNotNull null
         AgentComposeTarget(
             accountKey = item.accountKey,
             platformId = item.platformId,
@@ -688,7 +697,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentComposeTargets(): List<Agen
 
 internal fun List<AccountMicroblogDataSource>.toAgentPostActionTargets(): List<AgentPostActionTarget> =
     mapNotNull { item ->
-        val dataSource = item.dataSource as? PostDataSource ?: return@mapNotNull null
+        val dataSource = item.dataSource.capabilities.post ?: return@mapNotNull null
         AgentPostActionTarget(
             accountKey = item.accountKey,
             platformId = item.platformId,
@@ -698,7 +707,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentPostActionTargets(): List<A
 
 internal fun List<AccountMicroblogDataSource>.toAgentRelationTargets(): List<AgentRelationTarget> =
     mapNotNull { item ->
-        val dataSource = item.dataSource as? RelationDataSource ?: return@mapNotNull null
+        val dataSource = item.dataSource.capabilities.relation ?: return@mapNotNull null
         AgentRelationTarget(
             accountKey = item.accountKey,
             platformId = item.platformId,
@@ -708,7 +717,10 @@ internal fun List<AccountMicroblogDataSource>.toAgentRelationTargets(): List<Age
 
 internal fun List<AccountMicroblogDataSource>.toAgentNotificationTargets(): List<AgentNotificationTarget> =
     mapNotNull { item ->
-        val dataSource = item.dataSource as? NotificationTimelineDataSource ?: return@mapNotNull null
+        val dataSource =
+            item.dataSource.capabilities.notification
+                ?.timeline
+                ?: return@mapNotNull null
         AgentNotificationTarget(
             accountKey = item.accountKey,
             platformId = item.platformId,
@@ -718,7 +730,7 @@ internal fun List<AccountMicroblogDataSource>.toAgentNotificationTargets(): List
 
 internal fun List<AccountMicroblogDataSource>.toAgentListTargets(): List<AgentListTarget> =
     mapNotNull { item ->
-        val dataSource = item.dataSource as? ListDataSource ?: return@mapNotNull null
+        val dataSource = item.dataSource.capabilities.list ?: return@mapNotNull null
         AgentListTarget(
             accountKey = item.accountKey,
             platformId = item.platformId,
@@ -775,7 +787,10 @@ internal fun List<AccountMicroblogDataSource>.toAgentBuiltInTimelineTargets(): L
     val accountService = agentTimelineAccountService()
     val context = TimelineLoaderContext(accountService)
     return flatMap { item ->
-        val dataSource = item.dataSource as? TimelineTabConfigurationDataSource ?: return@flatMap emptyList()
+        val dataSource =
+            item.dataSource.capabilities.tabCatalog
+                ?.configuration
+                ?: return@flatMap emptyList()
         dataSource.builtInTimelineTabs.map { candidate ->
             AgentBuiltInTimelineTarget(
                 id = candidate.id,
@@ -837,7 +852,7 @@ private fun MicroblogDataSource.toAgentUserTarget(
     accountKey: MicroBlogKey?,
     platformId: String,
 ): AgentUserTarget? {
-    val userDataSource = this as? UserDataSource ?: return null
+    val userDataSource = capabilities.profile ?: return null
     return AgentUserTarget(
         accountKey = accountKey,
         platformId = platformId,
@@ -1187,6 +1202,7 @@ private fun dev.dimension.flare.ui.model.UiText.agentTimelineTitle(): String =
     when (this) {
         is dev.dimension.flare.ui.model.UiText.Localized -> string.name
         is dev.dimension.flare.ui.model.UiText.Raw -> string
+        is dev.dimension.flare.ui.model.UiText.ExternalRef -> fallbackText()
     }
 
 private val SEARCH_ALL_PLATFORM_KEYS =

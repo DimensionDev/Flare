@@ -6,6 +6,8 @@ import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
+import dev.dimension.flare.ui.model.asText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +19,7 @@ public enum class LoginMethodType {
     OAuth,
     Password,
     CredentialImport,
+    Form,
     QrConnect,
     ExternalSigner,
     WebCookie,
@@ -31,25 +34,55 @@ public enum class LoginFieldType {
 
 public data class LoginMethodSpec(
     val type: LoginMethodType,
-    val title: UiStrings,
+    val title: UiText,
     val priority: Int = 0,
-)
+) {
+    public constructor(
+        type: LoginMethodType,
+        title: UiStrings,
+        priority: Int = 0,
+    ) : this(type = type, title = title.asText(), priority = priority)
+}
 
 public data class LoginField(
     val id: String,
     val type: LoginFieldType,
-    val label: UiStrings,
-    val placeholder: UiStrings? = null,
+    val label: UiText,
+    val placeholder: UiText? = null,
     val value: String = "",
     val readOnly: Boolean = false,
     val error: String? = null,
-)
+) {
+    public constructor(
+        id: String,
+        type: LoginFieldType,
+        label: UiStrings,
+        placeholder: UiStrings? = null,
+        value: String = "",
+        readOnly: Boolean = false,
+        error: String? = null,
+    ) : this(
+        id = id,
+        type = type,
+        label = label.asText(),
+        placeholder = placeholder?.asText(),
+        value = value,
+        readOnly = readOnly,
+        error = error,
+    )
+}
 
 public data class LoginAction(
     val id: String,
-    val label: UiStrings,
+    val label: UiText,
     val enabled: Boolean = true,
-)
+) {
+    public constructor(
+        id: String,
+        label: UiStrings,
+        enabled: Boolean = true,
+    ) : this(id = id, label = label.asText(), enabled = enabled)
+}
 
 public data class LoginFlowState(
     val fields: List<LoginField> = emptyList(),
@@ -74,7 +107,33 @@ public sealed interface LoginEffect {
 
     public data class OpenWebCookieLogin(
         val url: String,
+        val probes: List<LoginCookieProbe> = emptyList(),
     ) : LoginEffect
+}
+
+/** Cookies the login WebView must read from one exact URL. */
+public data class LoginCookieProbe(
+    val url: String,
+    val names: List<String>,
+)
+
+/** A cookie value associated with the exact URL from which the Host read it. */
+public data class LoginCookieValue(
+    val sourceUrl: String,
+    val name: String,
+    val value: String,
+)
+
+public data class LoginCookieSnapshot(
+    val values: List<LoginCookieValue> = emptyList(),
+    val rawHeader: String? = null,
+) {
+    internal fun legacyHeader(): String? =
+        rawHeader?.takeIf(String::isNotBlank)
+            ?: values
+                .distinctBy(LoginCookieValue::name)
+                .joinToString("; ") { "${it.name}=${it.value}" }
+                .takeIf(String::isNotBlank)
 }
 
 public interface LoginPlatformProvider {
@@ -132,6 +191,17 @@ public interface LoginMethodHandler : AutoCloseable {
 
     public fun canResume(value: String): Boolean = true
 
+    /**
+     * Lets a login method inspect cookies before the Host closes its isolated WebView.
+     * Existing built-in handlers keep receiving their legacy Cookie header.
+     */
+    public suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean {
+        val value = snapshot.legacyHeader() ?: return false
+        if (!canResume(value)) return false
+        resume(value)
+        return true
+    }
+
     public fun onExternalAuthenticationDismissed(error: String?) {
         clear()
     }
@@ -178,6 +248,8 @@ public class LoginPlatformRegistry(
                         platformDisplayName = provider.metadata.displayName,
                         platformIcon = provider.metadata.icon,
                         loginMethods = provider.methods.sortedByDescending { it.priority },
+                        platformDisplayNameText = provider.metadata.displayNameText,
+                        platformIconUrl = provider.metadata.iconUrl,
                     )
                 }
             } ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")

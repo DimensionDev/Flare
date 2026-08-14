@@ -102,6 +102,19 @@ public struct UserErrorView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+        } else if let reloginError = error as? RequireReLoginException {
+            HStack {
+                Image(systemName: "person.badge.shield.exclamationmark")
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                VStack(alignment: .leading) {
+                    Text("notification_login_expired", bundle: FlareAppleUILocalization.bundle)
+                    Text("error_login_expired \(reloginError.accountKey)", bundle: FlareAppleUILocalization.bundle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
         } else {
             HStack {
                 Image(systemName: "exclamationmark.triangle")

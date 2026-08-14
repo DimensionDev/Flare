@@ -9,7 +9,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -40,28 +40,28 @@ public class DMConversationPresenter(
         val items =
             serviceState
                 .map { service ->
-                    require(service is DirectMessageDataSource)
+                    val directMessage = requireNotNull(service.capabilities.directMessage)
                     remember(service, roomKey) {
-                        service.directMessageConversation(roomKey, scope = scope)
+                        directMessage.directMessageConversation(roomKey, scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         val users =
             serviceState
                 .flatMap { service ->
-                    require(service is DirectMessageDataSource)
+                    val directMessage = requireNotNull(service.capabilities.directMessage)
                     remember(service, roomKey) {
-                        service.getDirectMessageConversationInfo(roomKey)
+                        directMessage.getDirectMessageConversationInfo(roomKey)
                     }.collectAsState().toUi()
                 }.map {
                     it.users
                 }
         serviceState.onSuccess {
-            require(it is DirectMessageDataSource)
+            val directMessage = requireNotNull(it.capabilities.directMessage)
             LaunchedEffect(Unit) {
                 while (true) {
                     delay(10.seconds)
                     runCatching {
-                        it.fetchNewDirectMessageForConversation(roomKey)
+                        directMessage.fetchNewDirectMessageForConversation(roomKey)
                     }
                 }
             }
@@ -73,22 +73,19 @@ public class DMConversationPresenter(
 
             override fun send(message: String) {
                 serviceState.onSuccess {
-                    require(it is DirectMessageDataSource)
-                    it.sendDirectMessage(roomKey, message)
+                    requireNotNull(it.capabilities.directMessage).sendDirectMessage(roomKey, message)
                 }
             }
 
             override fun retry(key: MicroBlogKey) {
                 serviceState.onSuccess {
-                    require(it is DirectMessageDataSource)
-                    it.retrySendDirectMessage(key)
+                    requireNotNull(it.capabilities.directMessage).retrySendDirectMessage(key)
                 }
             }
 
             override fun leave() {
                 serviceState.onSuccess {
-                    require(it is DirectMessageDataSource)
-                    it.leaveDirectMessage(roomKey)
+                    requireNotNull(it.capabilities.directMessage).leaveDirectMessage(roomKey)
                 }
             }
         }

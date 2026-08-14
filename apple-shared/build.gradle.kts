@@ -36,6 +36,7 @@ kotlin {
             projects.feature.subscription,
             projects.feature.tab,
             projects.feature.agent,
+            projects.feature.plugin,
         )
 
     listOf("iosArm64", "iosSimulatorArm64", "macosArm64")
@@ -76,6 +77,7 @@ kotlin {
                 api(projects.feature.subscription)
                 api(projects.feature.tab)
                 api(projects.feature.agent)
+                api(projects.feature.plugin)
                 implementation(libs.compose.runtime)
 // START Non-FOSS component
                 implementation(libs.crashkios.crashlytics)

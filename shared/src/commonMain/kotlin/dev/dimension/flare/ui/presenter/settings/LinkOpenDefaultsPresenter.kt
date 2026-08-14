@@ -5,8 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.LinkOpenDefaultMethod
 import dev.dimension.flare.data.datastore.model.methodFor
@@ -119,10 +118,11 @@ public class LinkOpenDefaultsPresenter : PresenterBase<LinkOpenDefaultsPresenter
                         return@mapNotNull null
                     }
                     val dataSource = service.dataSource
+                    val profile = dataSource.capabilities.profile
                     val profileFlow =
-                        if (dataSource is UserDataSource && dataSource is AuthenticatedMicroblogDataSource) {
-                            dataSource.userHandler
-                                .userById(dataSource.accountKey.id)
+                        if (profile != null) {
+                            profile.userHandler
+                                .userById(service.accountKey.id)
                                 .toUi()
                                 .distinctUntilChangedBy { state ->
                                     state.takeSuccess()?.let { user ->

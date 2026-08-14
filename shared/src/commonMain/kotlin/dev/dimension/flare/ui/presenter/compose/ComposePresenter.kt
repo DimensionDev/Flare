@@ -14,10 +14,9 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeType
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.DraftRepository
@@ -108,10 +107,14 @@ public class ComposePresenter(
                 allAccountServicesFlow(accountRepository)
                     .map { accounts ->
                         accounts
-                            .filterIsInstance<ComposeDataSource>()
-                            .map { account ->
-                                accountRepository.getFlow(account.accountKey).map {
-                                    account.accountKey to it
+                            .mapNotNull { dataSource ->
+                                val accountKey = dataSource.accountKeyOrNull
+                                if (dataSource.capabilities.compose != null && accountKey != null) {
+                                    accountRepository.getFlow(accountKey).map {
+                                        accountKey to it
+                                    }
+                                } else {
+                                    null
                                 }
                             }
                     },
@@ -129,9 +132,11 @@ public class ComposePresenter(
         allAccountServicesFlow(accountRepository)
             .map { services ->
                 services.mapNotNull { service ->
-                    if (service is UserDataSource && service is ComposeDataSource) {
-                        service.userHandler.userById(service.accountKey.id).toUi().map {
-                            service.accountKey to it
+                    val profile = service.capabilities.profile
+                    val accountKey = service.accountKeyOrNull
+                    if (profile != null && service.capabilities.compose != null && accountKey != null) {
+                        profile.userHandler.userById(accountKey.id).toUi().map {
+                            accountKey to it
                         }
                     } else {
                         null
@@ -191,19 +196,15 @@ public class ComposePresenter(
     private val composeConfigFlow by lazy {
         combine(selectedAccountServicesFlow, activeStatusFlow) { services, composeStatus ->
             val configs =
-                services.mapNotNull {
-                    if (it is ComposeDataSource) {
-                        it.composeConfig(
-                            type =
-                                when (composeStatus) {
-                                    is ComposeStatus.Quote -> ComposeType.Quote
-                                    is ComposeStatus.Reply -> ComposeType.Reply
-                                    null -> ComposeType.New
-                                },
-                        )
-                    } else {
-                        null
-                    }
+                services.mapNotNull { service ->
+                    service.capabilities.compose?.composeConfig(
+                        type =
+                            when (composeStatus) {
+                                is ComposeStatus.Quote -> ComposeType.Quote
+                                is ComposeStatus.Reply -> ComposeType.Reply
+                                null -> ComposeType.New
+                            },
+                    )
                 }
 
             when (configs.size) {
@@ -321,25 +322,33 @@ public class ComposePresenter(
         }.distinctUntilChanged()
     }
 
-    private val canSendFlow by lazy {
+    private val composeContentValidFlow by lazy {
         combine(
             textFlow,
             mediaSizeFlow,
-            remainingLengthFlow,
-            selectedComposeAccountKeysFlow,
             composeConfigFlow,
+            activeStatusFlow,
         ) {
             text,
             mediaSize,
-            remainingLength,
-            selectedAccountKeys,
             composeConfig,
+            composeStatus,
             ->
-            (
-                text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() &&
-                    (remainingLength == null || remainingLength >= 0)
-            ) ||
-                ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
+            isComposeContentValid(text, mediaSize, composeConfig, composeStatus)
+        }
+    }
+
+    private val canSendFlow by lazy {
+        combine(
+            composeContentValidFlow,
+            remainingLengthFlow,
+            selectedComposeAccountKeysFlow,
+            composeConfigFlow,
+        ) { contentValid, remainingLength, selectedAccountKeys, composeConfig ->
+            selectedAccountKeys.isNotEmpty() &&
+                contentValid &&
+                (remainingLength == null || remainingLength >= 0) &&
+                composeConfig.visibility?.allowedValues?.isNotEmpty() != false
         }
     }
 
@@ -354,8 +363,9 @@ public class ComposePresenter(
                     accountType = resolvedAccountType,
                     repository = accountRepository,
                 ).mapNotNull {
-                    if (it is PostDataSource) {
-                        it.postHandler.post(composeStatus.statusKey).toUi()
+                    val post = it.capabilities.post
+                    if (post != null) {
+                        post.postHandler.post(composeStatus.statusKey).toUi()
                     } else {
                         null
                     }
@@ -525,7 +535,7 @@ public class ComposePresenter(
                 .mapNotNull {
                     it.visibility
                 }.map {
-                    visibilityPresenter()
+                    visibilityPresenter(it)
                 }
         val pollMaxOptions =
             composeConfig
@@ -725,8 +735,10 @@ public class ComposePresenter(
                         }
                         selectedAccounts.forEach { account ->
                             val dataSource =
-                                accountRepository.getOrCreateDataSource(account)
-                                    as? ComposeDataSource
+                                accountRepository
+                                    .getOrCreateDataSource(account)
+                                    .capabilities
+                                    .compose
                                     ?: error("Account does not support compose: ${account.accountKey}")
                             dataSource.compose(data = data) {
                                 // Media upload progress is not surfaced by this web-only entry yet.
@@ -836,19 +848,19 @@ public class ComposePresenter(
     }
 
     @Composable
-    private fun visibilityPresenter(): VisibilityState {
+    private fun visibilityPresenter(config: ComposeConfig.Visibility): VisibilityState {
         var showVisibilityMenu by remember {
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiTimelineV2.Post.Visibility.Public)
+            mutableStateOf(config.defaultValue)
         }
         var hasExplicitVisibility by remember {
             mutableStateOf(false)
         }
         LaunchedEffect(Unit) {
             appDataStore.composeConfigData.data.firstOrNull()?.let { data ->
-                if (!hasExplicitVisibility) {
+                if (!hasExplicitVisibility && data.visibility in config.allowedValues) {
                     visibility = data.visibility
                 }
             }
@@ -857,12 +869,9 @@ public class ComposePresenter(
             override val visibility = visibility
 
             override val allVisibilities =
-                persistentListOf(
-                    UiTimelineV2.Post.Visibility.Public,
-                    UiTimelineV2.Post.Visibility.Home,
-                    UiTimelineV2.Post.Visibility.Followers,
-                    UiTimelineV2.Post.Visibility.Specified,
-                )
+                ComposeConfig.Visibility.DefaultValues
+                    .filter(config.allowedValues::contains)
+                    .toImmutableList()
 
             override val showVisibilityMenu: Boolean
                 get() = showVisibilityMenu
@@ -876,12 +885,13 @@ public class ComposePresenter(
             }
 
             override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
+                if (value !in config.allowedValues) return
                 hasExplicitVisibility = true
                 visibility = value
             }
 
             override fun clear() {
-                visibility = UiTimelineV2.Post.Visibility.Public
+                visibility = config.defaultValue
                 showVisibilityMenu = false
                 hasExplicitVisibility = true
             }
@@ -926,6 +936,19 @@ internal fun observeSelectedComposeAccountKeys(
             .filter { key -> allAccounts.containsKey(key) }
             .toImmutableList()
     }.distinctUntilChanged()
+
+internal fun isComposeContentValid(
+    text: String,
+    mediaSize: Int,
+    composeConfig: ComposeConfig,
+    composeStatus: ComposeStatus?,
+): Boolean {
+    val media = composeConfig.media
+    val minimumMediaCount = if (composeStatus == null) media?.minCountForNew ?: 0 else 0
+    val mediaCountAllowed = media == null || mediaSize in minimumMediaCount..media.maxCount
+    val contentPresent = text.isNotBlank() || ((media?.allowMediaOnly == true) && (mediaSize > 0))
+    return contentPresent && mediaCountAllowed
+}
 
 internal fun observeComposeStatusTarget(
     activeStatusFlow: Flow<ComposeStatus?>,

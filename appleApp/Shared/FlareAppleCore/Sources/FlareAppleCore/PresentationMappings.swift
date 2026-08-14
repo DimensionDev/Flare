@@ -2,6 +2,38 @@ import Foundation
 import KotlinSharedUI
 import SwiftUI
 
+public func loginCookieSnapshot(
+    cookies: [HTTPCookie],
+    probes: [LoginCookieProbe],
+    fallbackUrl: String
+) -> LoginCookieSnapshot {
+    let fallbackURL = URL(string: fallbackUrl)
+    let rawHeader =
+        cookies
+            .filter { $0.matchesLogin(url: fallbackURL) }
+            .map { "\($0.name)=\($0.value)" }
+            .joined(separator: "; ")
+    let values = probes.flatMap { probe -> [LoginCookieValue] in
+        let url = URL(string: probe.url)
+        let names = Set(probe.names)
+        return cookies.compactMap { cookie in
+            guard names.contains(cookie.name), cookie.matchesLogin(url: url) else { return nil }
+            return LoginCookieValue(sourceUrl: probe.url, name: cookie.name, value: cookie.value)
+        }
+    }
+    return LoginCookieSnapshot(values: values, rawHeader: rawHeader.isEmpty ? nil : rawHeader)
+}
+
+private extension HTTPCookie {
+    func matchesLogin(url: URL?) -> Bool {
+        guard let url, let host = url.host?.lowercased() else { return false }
+        let cookieDomain = domain.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "."))
+        let domainMatches = host == cookieDomain || host.hasSuffix(".\(cookieDomain)")
+        let requestPath = url.path.isEmpty ? "/" : url.path
+        return domainMatches && requestPath.hasPrefix(path)
+    }
+}
+
 public func localizedPresentationString(
     _ key: String,
     fallback: String,
@@ -30,6 +62,8 @@ public extension UiText {
             localized.string.text
         case .raw(let raw):
             raw.string
+        case .externalRef(let external):
+            PluginTextResolverV1.shared.resolve(text: external)
         }
     }
 }

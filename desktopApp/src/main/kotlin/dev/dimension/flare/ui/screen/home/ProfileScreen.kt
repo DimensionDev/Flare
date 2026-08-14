@@ -67,9 +67,8 @@ import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -347,7 +346,7 @@ internal fun ProfileScreen(
                                                     },
                                                 ) {
                                                     dev.dimension.flare.ui.component.Text(
-                                                        text = tab.name.asText(),
+                                                        text = tab.name,
                                                     )
                                                 }
                                             }
@@ -391,7 +390,7 @@ internal fun ProfileScreen(
                                                 },
                                             ) {
                                                 dev.dimension.flare.ui.component.Text(
-                                                    text = tab.name.asText(),
+                                                    text = tab.name,
                                                 )
                                             }
                                         }
@@ -607,15 +606,15 @@ private fun presenter(
 }
 
 private sealed interface ProfileTabItem {
-    val name: UiStrings
+    val name: UiText
 
     data class Timeline(
-        override val name: UiStrings,
+        override val name: UiText,
         val data: PagingState<UiTimelineV2>,
     ) : ProfileTabItem
 
     data class Media(
-        override val name: UiStrings,
+        override val name: UiText,
         val data: PagingState<ProfileMedia>,
     ) : ProfileTabItem
 }

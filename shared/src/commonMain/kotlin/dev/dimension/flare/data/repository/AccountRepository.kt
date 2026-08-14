@@ -22,15 +22,17 @@ import dev.dimension.flare.model.PlatformDataSourceContext
 import dev.dimension.flare.model.PlatformRegistry
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -47,6 +50,16 @@ import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
+
+internal sealed interface AccountChange {
+    data class Added(
+        val account: UiAccount,
+    ) : AccountChange
+
+    data class Removed(
+        val accountKey: MicroBlogKey,
+    ) : AccountChange
+}
 
 @Stable
 @Single
@@ -98,22 +111,8 @@ internal class AccountRepository internal constructor(
         mutableMapOf<MicroBlogKey, MicroblogDataSource>()
     }
 
-    private val addAccountFlow by lazy {
-        MutableStateFlow<UiAccount?>(null)
-    }
-    internal val onAdded: Flow<UiAccount> by lazy {
-        addAccountFlow
-            .mapNotNull { it }
-            .distinctUntilChangedBy { it.accountKey }
-    }
-    private val removeAccountFlow by lazy {
-        MutableStateFlow<MicroBlogKey?>(null)
-    }
-    internal val onRemoved: Flow<MicroBlogKey> by lazy {
-        removeAccountFlow
-            .mapNotNull { it }
-            .distinctUntilChangedBy { it }
-    }
+    private val accountChangeChannel = Channel<AccountChange>(Channel.UNLIMITED)
+    internal val accountChanges: Flow<AccountChange> = accountChangeChannel.receiveAsFlow()
 
     internal inline fun <reified T : Any> addAccount(
         account: UiAccount,
@@ -133,17 +132,35 @@ internal class AccountRepository internal constructor(
         val credentialJson = credential.encodeJson(serializer)
         val dbAccount =
             existingAccount?.copy(
+                platformId = account.platformId,
                 credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
+                platformDisplayName = account.platformDisplayName,
+                platformIconName = account.platformIcon.name,
+                platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
+                platformIconUrl = account.platformIconUrl,
             ) ?: DbAccount(
                 account_key = account.accountKey,
                 platformId = account.platformId,
                 credential_json = credentialJson,
                 last_active = Clock.System.now().toEpochMilliseconds(),
                 sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
+                platformDisplayName = account.platformDisplayName,
+                platformIconName = account.platformIcon.name,
+                platformDisplayNameTextJson = account.platformDisplayNameText.encodeJson(),
+                platformIconUrl = account.platformIconUrl,
             )
         appDatabase.accountDao().insert(dbAccount)
-        addAccountFlow.value = account
+        if (existingAccount == null) {
+            check(accountChangeChannel.trySend(AccountChange.Added(account)).isSuccess)
+        } else {
+            dataSourceCacheMutex.withLock {
+                val dataSource = dataSourceCache.remove(account.accountKey)
+                if (dataSource is AutoCloseable) {
+                    dataSource.close()
+                }
+            }
+        }
     }
 
     internal inline fun <reified T : Any> updateCredential(
@@ -198,30 +215,25 @@ internal class AccountRepository internal constructor(
                     lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
                 )
             }
-            removeAccountFlow.value = accountKey
+            check(accountChangeChannel.trySend(AccountChange.Removed(accountKey)).isSuccess)
             dataSourceCacheMutex.withLock {
                 val datasource = dataSourceCache.remove(accountKey)
                 if (datasource is AutoCloseable) {
                     datasource.close()
                 }
             }
-            cacheDatabase.pagingTimelineDao().deleteByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.statusDao().deleteByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.userDao().deleteHistoryByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.emojiDao().clearHistoryByAccountType(
-                AccountType.Specific(accountKey),
-            )
-            cacheDatabase.messageDao().clearMessageTimeline(
-                AccountType.Specific(accountKey),
-            )
+            invalidateCachedContent(accountKey)
             appDatabase.accountDao().delete(accountKey)
         }
+
+    private suspend fun invalidateCachedContent(accountKey: MicroBlogKey) {
+        val accountType = AccountType.Specific(accountKey)
+        cacheDatabase.pagingTimelineDao().deleteByAccountType(accountType)
+        cacheDatabase.statusDao().deleteByAccountType(accountType)
+        cacheDatabase.userDao().deleteHistoryByAccountType(accountType)
+        cacheDatabase.emojiDao().clearHistoryByAccountType(accountType)
+        cacheDatabase.messageDao().clearMessageTimeline(accountType)
+    }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
         appDatabase.accountDao().get(accountKey).map {
@@ -317,18 +329,32 @@ internal class AccountRepository internal constructor(
                 credential.encodeJson(serializer),
             )
         }
+
+        override suspend fun invalidateCachedContent() {
+            this@AccountRepository.invalidateCachedContent(accountKey)
+        }
     }
 }
 
-private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount =
-    UiAccount(
+private fun DbAccount.toUi(platformRegistry: PlatformRegistry): UiAccount {
+    val registered = platformRegistry.get(platformId)?.metadata
+    val displayName = registered?.displayName ?: platformDisplayName ?: platformId
+    val icon = registered?.icon ?: platformIconName?.let { name -> UiIcon.entries.firstOrNull { it.name == name } } ?: UiIcon.World
+    val displayNameText =
+        registered?.displayNameText
+            ?: platformDisplayNameTextJson?.let { runCatching { it.decodeJson<UiText>() }.getOrNull() }
+            ?: UiText.Raw(displayName)
+    return UiAccount(
         accountKey = account_key,
         platformId = platformId,
-        platformDisplayName = platformRegistry.metadataOrFallback(platformId).displayName,
-        platformIcon = platformRegistry.metadataOrFallback(platformId).icon,
+        platformDisplayName = displayName,
+        platformIcon = icon,
+        platformDisplayNameText = displayNameText,
+        platformIconUrl = registered?.iconUrl ?: platformIconUrl,
         platformAvailable = platformRegistry.isRegistered(platformId),
         supportsRelayManagement = platformRegistry.supports(platformId, PlatformCapability.RelayManagement),
     )
+}
 
 @HiddenFromObjC
 public data object NoActiveAccountException : Exception("No active account.")

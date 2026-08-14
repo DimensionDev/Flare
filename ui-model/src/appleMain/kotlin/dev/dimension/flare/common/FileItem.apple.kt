@@ -1,12 +1,16 @@
 package dev.dimension.flare.common
 
 import okio.FileSystem
+import okio.Buffer
 import okio.Path.Companion.toPath
+import okio.Source
 import kotlin.native.HiddenFromObjC
 
 public actual class FileItem internal constructor(
     public actual val name: String?,
     private val loader: suspend () -> ByteArray,
+    private val sourceFactory: (() -> Source)? = null,
+    private val knownSize: Long? = null,
     public actual val type: FileType,
     public actual val mimeType: String? = null,
 ) {
@@ -18,6 +22,8 @@ public actual class FileItem internal constructor(
     ) : this(
         name = name,
         loader = { data },
+        sourceFactory = { Buffer().write(data) },
+        knownSize = data.size.toLong(),
         type = type,
         mimeType = mimeType,
     )
@@ -30,11 +36,18 @@ public actual class FileItem internal constructor(
     ) : this(
         name = name,
         loader = { FileSystem.SYSTEM.read(path.toPath()) { readByteArray() } },
+        sourceFactory = { FileSystem.SYSTEM.source(path.toPath()) },
+        knownSize = FileSystem.SYSTEM.metadataOrNull(path.toPath())?.size,
         type = type,
         mimeType = mimeType,
     )
 
     public actual suspend fun readBytes(): ByteArray = loader()
+
+    @HiddenFromObjC
+    public actual fun openSource(): Source = sourceFactory?.invoke() ?: error("This file cannot be streamed")
+
+    public actual suspend fun size(): Long = knownSize ?: loader().size.toLong()
 }
 
 @HiddenFromObjC

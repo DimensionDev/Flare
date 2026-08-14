@@ -117,9 +117,11 @@ struct ServiceSelectionScreen: View {
         ZStack {
             switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
-                    .resizable()
-                    .scaledToFit()
+                PluginPlatformIcon(
+                    iconURL: success.data.platformIconUrl,
+                    fallback: success.data.platformIcon,
+                    size: 24
+                )
                     .transition(ServiceSelectionAnimation.inline)
             case .loading:
                 ProgressView()
@@ -190,12 +192,9 @@ struct ServiceSelectionScreen: View {
 
     private func platformHeader(state: ServiceSelectState, node: NodeData) -> some View {
         HStack(spacing: 8) {
-            Image(fontAwesome: node.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
+            PluginPlatformIcon(iconURL: node.platformIconUrl, fallback: node.platformIcon, size: 24)
             VStack(alignment: .leading, spacing: 2) {
-                Text(node.platformDisplayName)
+                Text(node.platformDisplayNameText.text)
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
@@ -312,10 +311,11 @@ struct ReloginScreen: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 36, height: 36)
+            PluginPlatformIcon(
+                iconURL: presenter.state.platformIconUrl(),
+                fallback: presenter.state.platformIcon(),
+                size: 36
+            )
             Text(ServiceSelectCopy.loginExpired)
                 .font(.title2.weight(.semibold))
                 .multilineTextAlignment(.center)
@@ -369,6 +369,8 @@ private struct LoginFlowView: View {
     @StateObject private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieProbes: [LoginCookieProbe] = []
+    @State private var checkingCookies = false
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -395,7 +397,7 @@ private struct LoginFlowView: View {
             ForEach(presenter.state.flowState.actions, id: \.id) { action in
                 Button {
                     presenter.state.perform(actionId: action.id)
-                    if action.label == .cancel {
+                    if action.id == "cancel" {
                         withAnimation(ServiceSelectionAnimation.standard) {
                             qrContent = nil
                         }
@@ -426,16 +428,12 @@ private struct LoginFlowView: View {
         )) {
             if let webCookieUrl {
                 if #available(iOS 26.0, *) {
-                    WebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else { return }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    WebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                 } else {
-                    BackportWebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else { return }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    BackportWebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                 }
             }
@@ -452,7 +450,20 @@ private struct LoginFlowView: View {
                     qrContent = showQr.content
                 }
             case .openWebCookieLogin(let webCookie):
+                webCookieProbes = webCookie.probes
                 webCookieUrl = webCookie.url
+            }
+        }
+    }
+
+    private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
+        Task { @MainActor in
+            guard !checkingCookies else { return }
+            checkingCookies = true
+            defer { checkingCookies = false }
+            let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
+            if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
+                webCookieUrl = nil
             }
         }
     }

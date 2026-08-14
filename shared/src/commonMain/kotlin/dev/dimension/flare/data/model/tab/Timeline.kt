@@ -15,6 +15,7 @@ import dev.dimension.flare.data.model.appearance.toBag
 import dev.dimension.flare.data.model.appearance.toPatch
 import dev.dimension.flare.data.model.appearance.withPatch
 import dev.dimension.flare.data.repository.AccountService
+import dev.dimension.flare.di.koinGet
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -347,6 +348,7 @@ internal data class TimelineSourceRef(
     val title: UiText,
     val icon: IconType,
     val data: String,
+    val ownerAccountKey: MicroBlogKey? = null,
 )
 
 internal fun TimelineSourceRef.toSlot(
@@ -436,7 +438,7 @@ public data class TimelineTarget<T : TimelineSpec.Data>(
 @HiddenFromObjC
 public data class TimelineCandidate<T : TimelineSpec.Data>(
     val target: TimelineTarget<T>,
-    val title: UiText = target.spec.title.asText(),
+    val title: UiText = target.spec.title,
     val icon: IconType = target.spec.icon,
     val appearancePatch: AppearancePatch? = null,
     val filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
@@ -471,19 +473,35 @@ private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(context: Time
 @HiddenFromObjC
 public data class TimelineSpec<T : TimelineSpec.Data>(
     val id: String,
-    val title: UiStrings,
+    val title: UiText,
     val icon: IconType,
     val serializer: KSerializer<T>,
     val targetId: (data: T) -> String,
     val loaderFactory: TimelineLoaderFactory<T>,
 ) {
+    public constructor(
+        id: String,
+        title: UiStrings,
+        icon: IconType,
+        serializer: KSerializer<T>,
+        targetId: (data: T) -> String,
+        loaderFactory: TimelineLoaderFactory<T>,
+    ) : this(
+        id = id,
+        title = title.asText(),
+        icon = icon,
+        serializer = serializer,
+        targetId = targetId,
+        loaderFactory = loaderFactory,
+    )
+
     public fun itemId(data: T): String = "$id:${targetId(data)}"
 
     public fun target(data: T): TimelineTarget<T> = TimelineTarget(this, data)
 
     public fun candidate(
         data: T,
-        title: UiText = this.title.asText(),
+        title: UiText = this.title,
         icon: IconType = this.icon,
         filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
     ): TimelineCandidate<T> =
@@ -496,7 +514,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
 
     public fun galleryCandidate(
         data: T,
-        title: UiText = this.title.asText(),
+        title: UiText = this.title,
         icon: IconType = this.icon,
         filterConfig: TimelineFilterConfig = TimelineFilterConfig(),
     ): TimelineCandidate<T> =
@@ -511,7 +529,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
     @OptIn(ExperimentalSerializationApi::class)
     internal fun source(
         data: T,
-        title: UiText = this.title.asText(),
+        title: UiText = this.title,
         icon: IconType = this.icon,
     ): TimelineSourceRef =
         TimelineSourceRef(
@@ -520,6 +538,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
             title = title,
             icon = icon,
             data = ProtoBuf.encodeToHexString(serializer, data),
+            ownerAccountKey = (data as? AccountData)?.accountKey,
         )
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -569,8 +588,11 @@ internal class TimelineResolver(
 
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         data.timelineSpecs
-            .distinctBy { it.id }
-            .associateBy { it.id }
+            .groupBy { it.id }
+            .mapNotNull { (id, candidates) ->
+                val first = candidates.first()
+                (id to first).takeIf { candidates.all { candidate -> candidate === first } }
+            }.toMap()
     }
 
     fun toTabItem(slot: TimelineSlot): UiTimelineTabItem =
@@ -669,7 +691,10 @@ internal class TimelineResolver(
             is TimelineSlotContent.Group -> null
         }
 
-    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> = resolveSpec(source).createLoader(source.data)
+    private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> {
+        val spec = specs[source.specId] ?: return flowOf(notSupported())
+        return runCatching { spec.createLoader(source.data) }.getOrElse { flowOf(notSupported()) }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun resolveGroupLoader(item: UiGroupTimelineTabItem): Flow<RemoteLoader<UiTimelineV2>> =
@@ -688,14 +713,11 @@ internal class TimelineResolver(
                 }
             }
 
-    private fun resolveSpec(source: TimelineSourceRef): TimelineSpec<out TimelineSpec.Data> =
-        specs[source.specId]
-            ?: throw IllegalArgumentException("No timeline spec found for source ID: ${source.specId}")
-
     @OptIn(ExperimentalSerializationApi::class)
     private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
-        val spec = resolveSpec(source)
-        val data = spec.decode(source.data)
+        source.ownerAccountKey?.let { return it }
+        val spec = specs[source.specId] ?: return null
+        val data = runCatching { spec.decode(source.data) }.getOrNull() ?: return null
         return (data as? TimelineSpec.AccountData)?.accountKey
     }
 
@@ -705,6 +727,15 @@ internal class TimelineResolver(
     private fun <T : TimelineSpec.Data> TimelineTarget<T>.createLoader(): Flow<RemoteLoader<UiTimelineV2>> =
         spec.loaderFactory.create(data, loaderContext)
 }
+
+public object TimelineDeepLinkRouteResolver {
+    public fun resolve(route: DeeplinkRoute.Timeline.Source): UiTimelineTabItem? {
+        if (route.loaderKey.length > MAX_DEEP_LINK_LOADER_KEY_LENGTH) return null
+        return runCatching { koinGet<TimelineResolver>().toTabItem(route.loaderKey) }.getOrNull()
+    }
+}
+
+private const val MAX_DEEP_LINK_LOADER_KEY_LENGTH = 64 * 1_024
 
 private fun <T : TimelineSpec.Data> TimelineTarget<T>.toSource(
     title: UiText,

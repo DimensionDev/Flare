@@ -7,6 +7,7 @@ import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.PostTranslationDisplay
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
@@ -47,17 +48,19 @@ internal class StatusInsightAgentUseCase(
         postDataSource: PostDataSource,
         statusKey: MicroBlogKey,
         searchDataSources: List<AccountMicroblogDataSource>,
+        microblogDataSource: MicroblogDataSource? = postDataSource as? MicroblogDataSource,
         userInput: String? = null,
         conversationId: String = statusKey.statusInsightConversationId(),
     ): Flow<AgentConversationEvent<UiTimelineV2.Post, AgentTrace>> =
         channelFlow {
-            run(postDataSource, statusKey, searchDataSources, userInput, conversationId)
+            run(postDataSource, statusKey, searchDataSources, microblogDataSource, userInput, conversationId)
         }
 
     private suspend fun SendChannel<AgentConversationEvent<UiTimelineV2.Post, AgentTrace>>.run(
         postDataSource: PostDataSource,
         statusKey: MicroBlogKey,
         searchDataSources: List<AccountMicroblogDataSource>,
+        microblogDataSource: MicroblogDataSource?,
         userInput: String?,
         conversationId: String,
     ) {
@@ -87,6 +90,7 @@ internal class StatusInsightAgentUseCase(
                         statusKey = statusKey,
                         currentPlatformId = post.platformId,
                         currentPost = post,
+                        microblogDataSource = microblogDataSource,
                     ),
                 searchDataSources = searchDataSources,
             )

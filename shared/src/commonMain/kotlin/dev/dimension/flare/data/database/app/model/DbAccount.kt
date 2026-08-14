@@ -20,4 +20,12 @@ internal data class DbAccount(
         defaultValue = "0",
     )
     val sort_id: Long = 0L,
+    @ColumnInfo(name = "platform_display_name")
+    val platformDisplayName: String? = null,
+    @ColumnInfo(name = "platform_icon_name")
+    val platformIconName: String? = null,
+    @ColumnInfo(name = "platform_display_name_text_json")
+    val platformDisplayNameTextJson: String? = null,
+    @ColumnInfo(name = "platform_icon_url")
+    val platformIconUrl: String? = null,
 )

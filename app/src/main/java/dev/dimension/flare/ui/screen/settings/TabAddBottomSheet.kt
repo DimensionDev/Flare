@@ -249,7 +249,7 @@ internal fun TabAddBottomSheet(
                                             selected = selectedIndex == index,
                                             onClick = { selectedIndex = index },
                                             label = {
-                                                UiText(section.title.asText())
+                                                UiText(section.title)
                                             },
                                         )
                                     }

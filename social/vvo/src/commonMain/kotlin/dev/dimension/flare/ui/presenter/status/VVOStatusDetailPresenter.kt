@@ -12,7 +12,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
@@ -46,8 +46,10 @@ public class VVOStatusDetailPresenter(
     }
     private val rawStatusFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            require(service is PostDataSource)
-            service.postHandler.post(statusKey).toUi()
+            requireNotNull(service.capabilities.post)
+                .postHandler
+                .post(statusKey)
+                .toUi()
         }
     }
     private val extendedTextFlow by lazy {

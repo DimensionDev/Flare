@@ -7,12 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
@@ -28,7 +25,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -71,46 +68,40 @@ public class ProfilePresenter(
         serviceFlow.flatMapLatest { service ->
             val userId =
                 userKey?.id
-                    ?: if (service is AuthenticatedMicroblogDataSource) {
-                        service.accountKey.id
-                    } else {
-                        throw NoActiveAccountException
-                    }
-            (service as UserDataSource).userHandler.userById(userId).toUi()
+                    ?: service.accountKeyOrNull?.id
+                    ?: throw NoActiveAccountException
+            requireNotNull(service.capabilities.profile).userHandler.userById(userId).toUi()
         }
     }
 
     private val relationStateFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            require(service is RelationDataSource)
             val actualUserKey =
-                userKey ?: if (service is AuthenticatedMicroblogDataSource) {
-                    service.accountKey
-                } else {
-                    null
-                } ?: run {
+                userKey ?: service.accountKeyOrNull ?: run {
                     throw NoActiveAccountException
                 }
-            (service as RelationDataSource).relationHandler.relation(actualUserKey).toUi()
+            val relation =
+                service.capabilities.relation
+                    ?: return@flatMapLatest flowOf(
+                        UiState.Error(UnsupportedOperationException("Current service does not support relations")),
+                    )
+            relation.relationHandler.relation(actualUserKey).toUi()
         }
     }
 
     private val isMeFlow by lazy {
         serviceFlow.map { service ->
-            if (service is AuthenticatedMicroblogDataSource) {
-                service.accountKey == userKey || userKey == null
-            } else {
-                false
-            }
+            service.accountKeyOrNull?.let { it == userKey || userKey == null } ?: false
         }
     }
 
     private val canSendMessageFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            if (service is DirectMessageDataSource && userKey != null) {
+            val directMessage = service.capabilities.directMessage
+            if (directMessage != null && userKey != null) {
                 flow<Boolean> {
                     runCatching {
-                        service.canSendDirectMessage(userKey)
+                        directMessage.canSendDirectMessage(userKey)
                     }.getOrElse {
                         false
                     }.let {
@@ -125,11 +116,7 @@ public class ProfilePresenter(
 
     private val myAccountKeyFlow by lazy {
         serviceFlow.map { service ->
-            if (service is AuthenticatedMicroblogDataSource) {
-                service.accountKey
-            } else {
-                throw NoActiveAccountException
-            }
+            service.accountKeyOrNull ?: throw NoActiveAccountException
         }
     }
 
@@ -137,15 +124,11 @@ public class ProfilePresenter(
         serviceFlow.map { service ->
             val actualUserKey =
                 userKey
-                    ?: if (service is AuthenticatedMicroblogDataSource) {
-                        service.accountKey
-                    } else {
-                        null
-                    } ?: run {
+                    ?: service.accountKeyOrNull ?: run {
                     throw NoActiveAccountException
                 }
 
-            service
+            requireNotNull(service.capabilities.profile)
                 .profileTabs(actualUserKey)
                 .map { tab ->
                     val tabId = "${accountType}_${actualUserKey}_${tab.id}"
@@ -181,13 +164,15 @@ public class ProfilePresenter(
 
     private val isListDataSourceFlow by lazy {
         serviceFlow.map { service ->
-            service is ListDataSource
+            service.capabilities.list != null
         }
     }
 
     private val supportedRelationTypesFlow by lazy {
         serviceFlow.map { service ->
-            (service as? RelationDataSource)?.supportedRelationTypes.orEmpty()
+            service.capabilities.relation
+                ?.supportedRelationTypes
+                .orEmpty()
         }
     }
 
@@ -234,8 +219,7 @@ public class ProfilePresenter(
         val service by serviceFlow.collectAsUiState()
         val userState by userStateFlow.flattenUiState()
         service.onSuccess {
-            val userKey =
-                userKey ?: if (it is AuthenticatedMicroblogDataSource) it.accountKey else null
+            val userKey = userKey ?: it.accountKeyOrNull
             if (userKey != null) {
                 remember { LogUserHistoryPresenter(accountType, userKey) }.body()
             }
@@ -264,7 +248,7 @@ public class ProfilePresenter(
         ) {
             override fun follow(userKey: MicroBlogKey) {
                 service.onSuccess { service ->
-                    (service as RelationDataSource).relationHandler.follow(
+                    requireNotNull(service.capabilities.relation).relationHandler.follow(
                         userKey = userKey,
                         requestFollow = followButtonState.takeSuccess() == FollowButtonState.RequestFollow,
                     )
@@ -273,13 +257,13 @@ public class ProfilePresenter(
 
             override fun unfollow(userKey: MicroBlogKey) {
                 service.onSuccess { service ->
-                    (service as RelationDataSource).relationHandler.unfollow(userKey)
+                    requireNotNull(service.capabilities.relation).relationHandler.unfollow(userKey)
                 }
             }
 
             override fun unblock(userKey: MicroBlogKey) {
                 service.onSuccess { service ->
-                    (service as RelationDataSource).relationHandler.unblock(userKey)
+                    requireNotNull(service.capabilities.relation).relationHandler.unblock(userKey)
                 }
             }
 
@@ -459,19 +443,19 @@ public abstract class ProfileState(
     @Immutable
     public sealed class Tab {
         public abstract val id: String
-        public abstract val name: UiStrings
+        public abstract val name: UiText
 
         @Immutable
         public data class Timeline(
             override val id: String,
-            override val name: UiStrings,
+            override val name: UiText,
             val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
         public data class Media(
             override val id: String,
-            override val name: UiStrings,
+            override val name: UiText,
             val presenter: ProfileMediaPresenter,
         ) : Tab()
     }
@@ -537,7 +521,7 @@ public class ProfileWithUserNameAndHostPresenter(
                 repository = accountRepository,
             ).flatMap { service ->
                 remember(service) {
-                    (service as UserDataSource)
+                    requireNotNull(service.capabilities.profile)
                         .userHandler
                         .userByHandleAndHost(
                             UiHandle(

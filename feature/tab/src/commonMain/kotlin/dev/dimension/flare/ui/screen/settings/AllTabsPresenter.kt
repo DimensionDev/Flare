@@ -58,7 +58,7 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
                                 group.tabs
                                     .map { section ->
                                         State.FlattenedTabSection(
-                                            title = section.title.asText(),
+                                            title = section.title,
                                             data =
                                                 when (val data = section.data) {
                                                     is dev.dimension.flare.common.PagingState.Success -> {

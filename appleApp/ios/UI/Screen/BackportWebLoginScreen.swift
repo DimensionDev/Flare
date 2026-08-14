@@ -7,7 +7,7 @@ struct BackportWebLoginScreen: View {
     @StateObject private var viewModel: BackportWebLoginViewModel
     let url: String
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
@@ -22,6 +22,12 @@ struct BackportWebLoginScreen: View {
                     webView.navigationDelegate = viewModel.delegate
                 }
                 .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        WebLoginOriginLabel(
+                            current: viewModel.currentOrigin,
+                            initial: webLoginHTTPSOrigin(URL(string: url))
+                        )
+                    }
                     ToolbarItem(placement: .cancellationAction) {
                         Button {
                             dismiss()
@@ -34,21 +40,40 @@ struct BackportWebLoginScreen: View {
                         }
                     }
                 }
+                .task {
+                    await viewModel.pollCookies()
+                }
             }
+        }
+        .onDisappear {
+            viewModel.clearCookie()
         }
     }
 }
 
 class WKDelegate: NSObject, WKNavigationDelegate {
     let decidePolicy: () -> Void
+    var onOriginChange: (String) -> Void = { _ in }
+
     init(decidePolicy: @escaping () -> Void
     ) {
         self.decidePolicy = decidePolicy
     }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        guard navigationAction.targetFrame?.isMainFrame != false else {
+            return .allow
+        }
+        guard let origin = webLoginHTTPSOrigin(navigationAction.request.url) else {
+            return .cancel
+        }
+        onOriginChange(origin)
+        return .allow
+    }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         decidePolicy()
-        return .allow
+        return webLoginHTTPSOrigin(navigationResponse.response.url) == nil ? .cancel : .allow
     }
 }
 
@@ -56,21 +81,28 @@ class BackportWebLoginViewModel: ObservableObject {
     @Published
     var canShowWebView = false
     let url: String
-    let onCookie: (String) -> Void
-    let delegate: WKDelegate
+    let onCookie: ([HTTPCookie]) -> Void
+    @Published var currentOrigin: String
+    lazy var delegate: WKDelegate = {
+        let delegate = WKDelegate { [weak self] in
+            guard let self else { return }
+            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+                self.onCookie(cookies)
+            }
+        }
+        delegate.onOriginChange = { [weak self] origin in
+            self?.currentOrigin = origin
+        }
+        return delegate
+    }()
     private var observers = [NSKeyValueObservation]()
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self.onCookie = onCookie
         self.url = url
-        self.delegate = WKDelegate {
-            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { (cookies) in
-                let cookieString = BackportWebLoginViewModel.cookieHeaderString(from: cookies, for: .init(string: url))
-                onCookie(cookieString)
-            }
-        }
+        self.currentOrigin = webLoginHTTPSOrigin(URL(string: url)) ?? ""
         clearCookie()
     }
     var configuration: WKWebViewConfiguration {
@@ -79,25 +111,25 @@ class BackportWebLoginViewModel: ObservableObject {
         return configuration
     }
     func clearCookie() {
-        let dataStore = WKWebsiteDataStore.default()
-        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            dataStore.removeData(
-                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records,
-                completionHandler: {
-                    self.canShowWebView = true
-                }
-            )
+        clearWebLoginDataStore { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.canShowWebView = true
+            }
         }
     }
-    private static func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
-        let host = url?.host?.lowercased()
-        let filtered = cookies.filter { cookie in
-            guard let host = host else { return true }
-            let domain = cookie.domain.lowercased()
-            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
+
+    func getCookies() {
+        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+            self.onCookie(cookies)
         }
-        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+    }
+
+    func pollCookies() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            getCookies()
+        }
     }
     deinit {
         observers.removeAll()

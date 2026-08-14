@@ -8,7 +8,9 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PlatformOAuthPendingRepositoryTest {
     private val root = createTestRootPath()
@@ -117,6 +119,27 @@ class PlatformOAuthPendingRepositoryTest {
                 ),
             )
             assertEquals("misskey.io", repository.latest("Misskey")?.host)
+        }
+
+    @Test
+    fun consumeIsAtomicAndRequiresExactPendingValue() =
+        runTest {
+            val pending =
+                PlatformOAuthPending(
+                    platformId = "Plugin",
+                    host = "plugin.example",
+                    flowId = "flow-1",
+                    createdAtEpochMillis = 100,
+                    attributes = mapOf("payload" to "value"),
+                )
+            repository.save(pending)
+
+            assertEquals(listOf(pending), repository.allByFlowId("flow-1"))
+            assertEquals(listOf(pending), repository.allForPlatform("Plugin"))
+            assertFalse(repository.consume(pending.copy(attributes = mapOf("payload" to "changed"))))
+            assertTrue(repository.consume(pending))
+            assertFalse(repository.consume(pending))
+            assertEquals(emptyList(), repository.allByFlowId("flow-1"))
         }
 
     @Test

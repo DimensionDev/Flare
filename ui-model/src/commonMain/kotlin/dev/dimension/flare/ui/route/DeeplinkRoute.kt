@@ -26,6 +26,11 @@ public sealed class DeeplinkRoute {
     @Serializable
     public sealed class Timeline : DeeplinkRoute() {
         @Serializable
+        public data class Source(
+            val loaderKey: String,
+        ) : Timeline()
+
+        @Serializable
         public data class XQTDeviceFollow(
             val accountType: AccountType,
         ) : Timeline()

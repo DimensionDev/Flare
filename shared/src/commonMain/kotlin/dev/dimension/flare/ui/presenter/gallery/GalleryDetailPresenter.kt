@@ -12,7 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -47,7 +47,7 @@ public class GalleryDetailPresenter(
     private val detailCacheFlow by lazy {
         serviceFlow.flatMapLatest { service ->
             val galleryDataSource =
-                service as? GalleryDataSource
+                service.capabilities.gallery
                     ?: error("Current service does not support gallery data source")
             galleryDataSource.galleryDetail(statusKey).toUi()
         }
@@ -57,7 +57,7 @@ public class GalleryDetailPresenter(
         serviceFlow.flatMapLatest { service ->
             runCatching {
                 val galleryDataSource =
-                    service as? GalleryDataSource
+                    service.capabilities.gallery
                         ?: error("Current service does not support gallery data source")
                 Pager(config = pagingConfig) {
                     galleryDataSource.galleryComments(statusKey).toPagingSource()
@@ -72,7 +72,7 @@ public class GalleryDetailPresenter(
         serviceFlow.flatMapLatest { service ->
             runCatching {
                 val galleryDataSource =
-                    service as? GalleryDataSource
+                    service.capabilities.gallery
                         ?: error("Current service does not support gallery data source")
                 Pager(config = pagingConfig) {
                     galleryDataSource.galleryRecommendations(statusKey).toPagingSource()

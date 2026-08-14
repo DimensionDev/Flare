@@ -4,6 +4,7 @@ import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.combineLatestFlowLists
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -18,6 +19,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +31,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
@@ -237,6 +242,38 @@ class AccountRepositoryTest : RobolectricTest() {
         }
 
     @Test
+    fun unavailableAccountUsesMetadataCapturedWhenItWasAdded() =
+        runTest {
+            val repository = createRepository(this)
+            val account =
+                UiAccount(
+                    accountKey = MicroBlogKey("alice", "future.example"),
+                    platformId = "FutureNet",
+                    platformDisplayName = "Future Network",
+                    platformIcon = UiIcon.Mastodon,
+                    platformDisplayNameText = UiText.Raw("Localized Future Network"),
+                    platformIconUrl = "file:///stable/future.png",
+                )
+
+            repository.addAccount(account, "credential").join()
+
+            val stored = requireNotNull(appDatabase.accountDao().getAccount(account.accountKey))
+            assertEquals("Future Network", stored.platformDisplayName)
+            assertEquals(UiIcon.Mastodon.name, stored.platformIconName)
+            assertEquals(
+                UiText.Raw("Localized Future Network"),
+                requireNotNull(stored.platformDisplayNameTextJson).decodeJson<UiText>(),
+            )
+            assertEquals("file:///stable/future.png", stored.platformIconUrl)
+            val restored = repository.allAccounts.first().single()
+            assertEquals("Future Network", restored.platformDisplayName)
+            assertEquals(UiIcon.Mastodon, restored.platformIcon)
+            assertEquals(UiText.Raw("Localized Future Network"), restored.platformDisplayNameText)
+            assertEquals("file:///stable/future.png", restored.platformIconUrl)
+            assertFalse(restored.platformAvailable)
+        }
+
+    @Test
     fun activeAccountSkipsNewerUnavailableAccounts() =
         runTest {
             val repository = createRepository(this)
@@ -271,6 +308,83 @@ class AccountRepositoryTest : RobolectricTest() {
             val state = repository.activeAccount.first()
             val error = assertIs<dev.dimension.flare.ui.model.UiState.Error<UiAccount>>(state).throwable
             assertEquals(listOf("TestNet"), assertIs<NoAvailableAccountException>(error).platformIds)
+        }
+
+    @Test
+    fun reloginDoesNotPublishANewAccountEvent() =
+        runTest {
+            val repository = createRepository(this)
+            val events = Channel<AccountChange>(Channel.UNLIMITED)
+            val collection = launch { repository.accountChanges.collect(events::send) }
+            val alice = UiAccount(accountKey, "Mastodon")
+            val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
+
+            try {
+                repository.addAccount(alice, "first").join()
+                assertEquals(alice.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
+                repository.addAccount(bob, "second").join()
+                assertEquals(bob.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
+
+                repository.addAccount(alice.copy(platformId = "Pixelfed"), "refreshed").join()
+
+                assertNull(withTimeoutOrNull(100) { events.receive() })
+                val stored = appDatabase.accountDao().getAccount(accountKey)
+                assertEquals("Pixelfed", stored?.platformId)
+                assertEquals("\"refreshed\"", stored?.credential_json)
+            } finally {
+                collection.cancel()
+            }
+        }
+
+    @Test
+    fun deletingAndReaddingTheSameAccountPublishesBothEventsAgain() =
+        runTest {
+            val repository = createRepository(this)
+            val events = Channel<AccountChange>(Channel.UNLIMITED)
+            val collection = launch { repository.accountChanges.collect(events::send) }
+            val account = UiAccount(accountKey, "Mastodon")
+
+            try {
+                repository.addAccount(account, "first").join()
+                assertEquals(accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
+
+                repository.delete(accountKey).join()
+                assertEquals(accountKey, assertIs<AccountChange.Removed>(events.receive()).accountKey)
+
+                repository.addAccount(account, "second").join()
+                assertEquals(accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
+            } finally {
+                collection.cancel()
+            }
+        }
+
+    @Test
+    fun accountChangesAreBufferedAndKeepMutationOrder() =
+        runTest {
+            val repository = createRepository(this)
+            val alice = UiAccount(accountKey, "Mastodon")
+            val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
+
+            repository.addAccount(alice, "first").join()
+            repository.addAccount(bob, "second").join()
+            repository.delete(accountKey).join()
+            repository.addAccount(alice, "third").join()
+
+            val changes = repository.accountChanges.take(4).toList()
+            assertEquals(
+                listOf(
+                    "added:${alice.accountKey}",
+                    "added:${bob.accountKey}",
+                    "removed:${alice.accountKey}",
+                    "added:${alice.accountKey}",
+                ),
+                changes.map { change ->
+                    when (change) {
+                        is AccountChange.Added -> "added:${change.account.accountKey}"
+                        is AccountChange.Removed -> "removed:${change.accountKey}"
+                    }
+                },
+            )
         }
 
     private fun createRepository(scope: CoroutineScope): AccountRepository =

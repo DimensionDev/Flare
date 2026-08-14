@@ -32,9 +32,19 @@ struct AccountManagementScreen: View {
                     accountActions(for: account.account, accountName: account.account.accountKey.id) {
                         Group {
                             if account.account.platformAvailable {
-                                UserErrorView(error: error)
+                                if let target = loginTarget(for: error) {
+                                    NavigationLink(value: Route.relogin(target.accountKey, target.platformId)) {
+                                        UserErrorView(error: error)
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    UserErrorView(error: error)
+                                }
                             } else {
-                                unavailableAccountRow(account.account)
+                                NavigationLink(value: Route.pluginManagement) {
+                                    unavailableAccountRow(account.account)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -125,10 +135,9 @@ struct AccountManagementScreen: View {
 
     private func unavailableAccountRow(_ account: UiAccount) -> some View {
         HStack(spacing: 12) {
-            Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
-                .frame(width: 32, height: 32)
+            PluginPlatformIcon(iconURL: account.platformIconUrl, fallback: account.platformIcon, size: 32)
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: account.platformDisplayName)
+                Text(account.platformDisplayNameText.text)
                 Text(verbatim: account.accountKey.description())
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -163,5 +172,15 @@ struct AccountManagementScreen: View {
     private func clearPendingLogout() {
         pendingLogoutAccountKey = nil
         pendingLogoutAccountName = nil
+    }
+
+    private func loginTarget(for error: KotlinThrowable) -> ReloginTarget? {
+        if let expired = error as? LoginExpiredException {
+            return ReloginTarget(accountKey: expired.accountKey, platformId: expired.platformId)
+        }
+        if let required = error as? RequireReLoginException {
+            return ReloginTarget(accountKey: required.accountKey, platformId: required.platformId)
+        }
+        return nil
     }
 }

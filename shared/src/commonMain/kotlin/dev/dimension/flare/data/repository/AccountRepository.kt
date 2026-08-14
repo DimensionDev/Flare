@@ -33,8 +33,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -55,10 +55,15 @@ import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
 import kotlin.time.Clock
 
-private data class RepositoryEvent<T>(
-    val generation: Long,
-    val value: T,
-)
+internal sealed interface AccountChange {
+    data class Added(
+        val account: UiAccount,
+    ) : AccountChange
+
+    data class Removed(
+        val accountKey: MicroBlogKey,
+    ) : AccountChange
+}
 
 @Stable
 @Single
@@ -111,20 +116,8 @@ internal class AccountRepository internal constructor(
         mutableMapOf<MicroBlogKey, MicroblogDataSource>()
     }
 
-    private val addAccountFlow by lazy {
-        MutableStateFlow<RepositoryEvent<UiAccount>?>(null)
-    }
-    internal val onAdded: Flow<UiAccount> by lazy {
-        addAccountFlow
-            .mapNotNull { it?.value }
-    }
-    private val removeAccountFlow by lazy {
-        MutableStateFlow<RepositoryEvent<MicroBlogKey>?>(null)
-    }
-    internal val onRemoved: Flow<MicroBlogKey> by lazy {
-        removeAccountFlow
-            .mapNotNull { it?.value }
-    }
+    private val accountChangeChannel = Channel<AccountChange>(Channel.UNLIMITED)
+    internal val accountChanges: Flow<AccountChange> = accountChangeChannel.receiveAsFlow()
 
     internal val accountMutationMutex = Mutex()
     private val pendingDeletions =
@@ -210,7 +203,7 @@ internal class AccountRepository internal constructor(
                 appDatabase.accountDao().insert(dbAccount)
             }
             if (existingAccount == null) {
-                addAccountFlow.update { RepositoryEvent((it?.generation ?: 0) + 1, account) }
+                check(accountChangeChannel.trySend(AccountChange.Added(account)).isSuccess)
             } else {
                 dataSourceCacheMutex.withLock {
                     val dataSource = dataSourceCache.remove(account.accountKey)
@@ -282,7 +275,7 @@ internal class AccountRepository internal constructor(
                 lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
             )
         }
-        removeAccountFlow.update { RepositoryEvent((it?.generation ?: 0) + 1, accountKey) }
+        check(accountChangeChannel.trySend(AccountChange.Removed(accountKey)).isSuccess)
         dataSourceCacheMutex.withLock {
             val datasource = dataSourceCache.remove(accountKey)
             if (datasource is AutoCloseable) {

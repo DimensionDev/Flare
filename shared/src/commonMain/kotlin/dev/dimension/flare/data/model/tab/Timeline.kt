@@ -369,6 +369,7 @@ internal data class TimelineSourceRef(
     val title: UiText,
     val icon: IconType,
     val data: String,
+    val ownerAccountKey: MicroBlogKey? = null,
 )
 
 internal fun TimelineSourceRef.toSlot(
@@ -558,6 +559,7 @@ public data class TimelineSpec<T : TimelineSpec.Data>(
             title = title,
             icon = icon,
             data = ProtoBuf.encodeToHexString(serializer, data),
+            ownerAccountKey = (data as? AccountData)?.accountKey,
         )
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -607,8 +609,11 @@ internal class TimelineResolver(
 
     private val specs: Map<String, TimelineSpec<out TimelineSpec.Data>> by lazy {
         data.timelineSpecs
-            .distinctBy { it.id }
-            .associateBy { it.id }
+            .groupBy { it.id }
+            .mapNotNull { (id, candidates) ->
+                val first = candidates.first()
+                (id to first).takeIf { candidates.all { candidate -> candidate === first } }
+            }.toMap()
     }
 
     fun toTabItem(slot: TimelineSlot): UiTimelineTabItem =
@@ -710,7 +715,7 @@ internal class TimelineResolver(
 
     private fun resolveLoader(source: TimelineSourceRef): Flow<RemoteLoader<UiTimelineV2>> {
         val spec = specs[source.specId] ?: return flowOf(notSupported())
-        return spec.createLoader(source.data)
+        return runCatching { spec.createLoader(source.data) }.getOrElse { flowOf(notSupported()) }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -746,8 +751,9 @@ internal class TimelineResolver(
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun resolveAccountKey(source: TimelineSourceRef): MicroBlogKey? {
+        source.ownerAccountKey?.let { return it }
         val spec = specs[source.specId] ?: return null
-        val data = spec.decode(source.data)
+        val data = runCatching { spec.decode(source.data) }.getOrNull() ?: return null
         return (data as? TimelineSpec.AccountData)?.accountKey
     }
 

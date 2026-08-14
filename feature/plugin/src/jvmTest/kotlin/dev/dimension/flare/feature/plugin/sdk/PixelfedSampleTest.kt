@@ -694,8 +694,10 @@ class PixelfedSampleTest {
                         .map { it.id }
                         .toSet()
 
-                assertTrue(originalIds.none { "_schema" in it })
-                assertTrue(changedIds.all { "_schema2_" in it })
+                assertTrue(originalIds.any { ":schema1:" in it })
+                assertTrue(changedIds.any { ":schema2:" in it })
+                assertTrue(originalIds.any { it.startsWith("plugin_") && "_schema" !in it })
+                assertTrue(changedIds.any { "_schema2_" in it })
                 assertTrue(originalIds.intersect(changedIds).isEmpty())
             } finally {
                 scope.cancel()

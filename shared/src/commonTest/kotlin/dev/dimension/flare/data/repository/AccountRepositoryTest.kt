@@ -37,6 +37,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -139,7 +142,7 @@ class AccountRepositoryTest : RobolectricTest() {
             val events = Channel<String>(Channel.UNLIMITED)
             val observer =
                 launch(Dispatchers.Unconfined) {
-                    repository.onAdded.collect { events.send("added") }
+                    repository.accountChanges.filterIsInstance<AccountChange.Added>().map { it.account }.collect { events.send("added") }
                 }
             val addition = launch { repository.addAccount(UiAccount(accountKey, "Mastodon"), "restored") }
             val nextMutation =
@@ -180,7 +183,7 @@ class AccountRepositoryTest : RobolectricTest() {
             val events = Channel<UiAccount>(Channel.UNLIMITED)
             val observer =
                 launch(Dispatchers.Unconfined) {
-                    repository.onAdded.collect { events.send(it) }
+                    repository.accountChanges.filterIsInstance<AccountChange.Added>().map { it.account }.collect { events.send(it) }
                 }
             try {
                 val thrown =
@@ -518,7 +521,7 @@ class AccountRepositoryTest : RobolectricTest() {
 
         val concurrentSelection =
             launch(Dispatchers.Unconfined) {
-                assertEquals(accountKey, repository.onRemoved.first())
+                assertEquals(accountKey, repository.accountChanges.filterIsInstance<AccountChange.Removed>().map { it.accountKey }.first())
                 openPage.selectAccount(selectedDuringDeletion)
                 // The page closes after this click; only the app-scoped save remains.
             }
@@ -723,16 +726,16 @@ class AccountRepositoryTest : RobolectricTest() {
     fun reloginDoesNotPublishANewAccountEvent() =
         runTest {
             val repository = createRepository(this)
-            val events = Channel<UiAccount>(Channel.UNLIMITED)
-            val collection = launch { repository.onAdded.collect(events::send) }
+            val events = Channel<AccountChange>(Channel.UNLIMITED)
+            val collection = launch { repository.accountChanges.collect(events::send) }
             val alice = UiAccount(accountKey, "Mastodon")
             val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
 
             try {
                 repository.addAccount(alice, "first")
-                assertEquals(alice.accountKey, events.receive().accountKey)
+                assertEquals(alice.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
                 repository.addAccount(bob, "second")
-                assertEquals(bob.accountKey, events.receive().accountKey)
+                assertEquals(bob.accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
 
                 repository.addAccount(alice.copy(platformId = "Pixelfed"), "refreshed")
 
@@ -749,25 +752,51 @@ class AccountRepositoryTest : RobolectricTest() {
     fun deletingAndReaddingTheSameAccountPublishesBothEventsAgain() =
         runTest {
             val repository = createRepository(this)
-            val added = Channel<UiAccount>(Channel.UNLIMITED)
-            val removed = Channel<MicroBlogKey>(Channel.UNLIMITED)
-            val addedCollection = launch { repository.onAdded.collect(added::send) }
-            val removedCollection = launch { repository.onRemoved.collect(removed::send) }
+            val events = Channel<AccountChange>(Channel.UNLIMITED)
+            val collection = launch { repository.accountChanges.collect(events::send) }
             val account = UiAccount(accountKey, "Mastodon")
 
             try {
                 repository.addAccount(account, "first")
-                assertEquals(accountKey, added.receive().accountKey)
+                assertEquals(accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
 
                 repository.delete(accountKey)
-                assertEquals(accountKey, removed.receive())
+                assertEquals(accountKey, assertIs<AccountChange.Removed>(events.receive()).accountKey)
 
                 repository.addAccount(account, "second")
-                assertEquals(accountKey, added.receive().accountKey)
+                assertEquals(accountKey, assertIs<AccountChange.Added>(events.receive()).account.accountKey)
             } finally {
-                addedCollection.cancel()
-                removedCollection.cancel()
+                collection.cancel()
             }
+        }
+
+    @Test
+    fun accountChangesAreBufferedAndKeepMutationOrder() =
+        runTest {
+            val repository = createRepository(this)
+            val alice = UiAccount(accountKey, "Mastodon")
+            val bob = UiAccount(MicroBlogKey("bob", "example.social"), "Mastodon")
+
+            repository.addAccount(alice, "first")
+            repository.addAccount(bob, "second")
+            repository.delete(accountKey)
+            repository.addAccount(alice, "third")
+
+            val changes = repository.accountChanges.take(4).toList()
+            assertEquals(
+                listOf(
+                    "added:${alice.accountKey}",
+                    "added:${bob.accountKey}",
+                    "removed:${alice.accountKey}",
+                    "added:${alice.accountKey}",
+                ),
+                changes.map { change ->
+                    when (change) {
+                        is AccountChange.Added -> "added:${change.account.accountKey}"
+                        is AccountChange.Removed -> "removed:${change.accountKey}"
+                    }
+                },
+            )
         }
 
     private class ControlledProxyStore(

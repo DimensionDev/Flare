@@ -8,10 +8,10 @@ import FlareAppleCore
 struct WebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
     @State private var viewModel: WebLoginViewModel?
-    private let onCookie: (String) -> Void
+    private let onCookie: ([HTTPCookie]) -> Void
     let url: String
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self.url = url
@@ -52,7 +52,7 @@ struct WebLoginScreen: View {
 
 @available(iOS 26.0, *)
 struct NavigationDecider: WebPage.NavigationDeciding {
-    let onCookie: (String) -> Void
+    let onCookie: ([HTTPCookie]) -> Void
     let route: WebViewProxyRoute
     let url: URL?
     func decidePolicy(for action: WebPage.NavigationAction, preferences: inout WebPage.NavigationPreferences) async -> WKNavigationActionPolicy {
@@ -66,18 +66,8 @@ struct NavigationDecider: WebPage.NavigationDeciding {
     func getCookies() {
         route.dataStore.httpCookieStore.getAllCookies { (cookies) in
             guard route.isValid else { return }
-            let cookieString = cookieHeaderString(from: cookies, for: url)
-            self.onCookie(cookieString)
+            self.onCookie(cookies)
         }
-    }
-    private func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
-        let host = url?.host?.lowercased()
-        let filtered = cookies.filter { cookie in
-            guard let host = host else { return true }
-            let domain = cookie.domain.lowercased()
-            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
-        }
-        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
 }
 
@@ -87,9 +77,9 @@ final class WebLoginViewModel {
     let route: WebViewProxyRoute
     var page: WebPage
     let decider: NavigationDecider
-    let onCookie: (String) -> Void
+    let onCookie: ([HTTPCookie]) -> Void
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String,
         route: WebViewProxyRoute
     ) {

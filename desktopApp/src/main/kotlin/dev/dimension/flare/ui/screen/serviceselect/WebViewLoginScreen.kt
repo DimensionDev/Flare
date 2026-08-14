@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginCookieValue
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import io.github.kdroidfilter.webview.web.WebContent
 import io.github.kdroidfilter.webview.web.WebView
 import io.github.kdroidfilter.webview.web.WebViewState
@@ -13,37 +16,52 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun WebViewLoginScreen(
-    url: String,
-    callback: (String?) -> Boolean,
+    request: LoginEffect.OpenWebCookieLogin,
+    callback: suspend (LoginCookieSnapshot) -> Boolean,
     onBack: () -> Unit,
 ) {
     val state =
-        remember(url) {
+        remember(request.url) {
             WebViewState(WebContent.Url("about:blank")).apply {
                 webSettings.desktopWebSettings.incognito = true
             }
         }
-    LaunchedEffect(state.webView, url) {
+    LaunchedEffect(state.webView, request.url) {
         val nativeWebView = state.webView?.nativeWebView ?: return@LaunchedEffect
         while (!nativeWebView.isReady()) {
             delay(50)
         }
         nativeWebView.clearAllCookies()
-        nativeWebView.loadUrl(url)
+        nativeWebView.loadUrl(request.url)
     }
     LaunchedEffect(Unit) {
         while (true) {
             delay(2.seconds)
             val webView = state.webView?.nativeWebView ?: continue
-            val cookies =
-                listOfNotNull(state.lastLoadedUrl, url)
+            val rawHeader =
+                listOfNotNull(state.lastLoadedUrl, request.url)
                     .distinct()
                     .flatMap { webView.getCookiesForUrl(it) }
                     .plus(webView.getCookies())
                     .distinctBy { listOf(it.domain, it.path, it.name) }
                     .joinToString("; ") { "${it.name}=${it.value}" }
                     .takeIf { it.isNotBlank() }
-            if (callback.invoke(cookies)) {
+            val values =
+                request.probes
+                    .flatMap { probe ->
+                        val expected = probe.names.toSet()
+                        webView
+                            .getCookiesForUrl(probe.url)
+                            .filter { it.name in expected }
+                            .map { cookie ->
+                                LoginCookieValue(
+                                    sourceUrl = probe.url,
+                                    name = cookie.name,
+                                    value = cookie.value,
+                                )
+                            }
+                    }.distinctBy { it.sourceUrl to it.name }
+            if (callback(LoginCookieSnapshot(values = values, rawHeader = rawHeader))) {
                 onBack.invoke()
                 break
             }

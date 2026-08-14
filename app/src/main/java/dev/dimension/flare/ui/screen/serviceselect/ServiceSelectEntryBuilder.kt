@@ -10,10 +10,10 @@ internal fun EntryProviderScope<NavKey>.serviceSelectEntryBuilder(
 ) {
     entry<Route.ServiceSelect.Selection> {
         ServiceSelectScreen(
-            onWebViewLogin = { url, callback ->
+            onWebViewLogin = { request, callback ->
                 navigate(
                     Route.ServiceSelect.WebCookieLogin(
-                        url = url,
+                        request = request,
                         callback = callback,
                     ),
                 )
@@ -25,10 +25,10 @@ internal fun EntryProviderScope<NavKey>.serviceSelectEntryBuilder(
     entry<Route.ServiceSelect.Relogin> { args ->
         ReloginScreen(
             target = args.target,
-            onWebViewLogin = { url, callback ->
+            onWebViewLogin = { request, callback ->
                 navigate(
                     Route.ServiceSelect.WebCookieLogin(
-                        url = url,
+                        request = request,
                         callback = callback,
                     ),
                 )
@@ -39,7 +39,7 @@ internal fun EntryProviderScope<NavKey>.serviceSelectEntryBuilder(
 
     entry<Route.ServiceSelect.WebCookieLogin> { args ->
         WebCookieLoginScreen(
-            url = args.url,
+            request = args.request,
             callback = args.callback,
             onBack = onBack,
         )

@@ -34,6 +34,9 @@ import dev.dimension.flare.data.network.ProxySnapshot
 import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FlareScaffold
 import kotlinx.coroutines.CancellationException
+import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
+import dev.dimension.flare.ui.presenter.login.LoginCookieValue
+import dev.dimension.flare.ui.presenter.login.LoginEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -50,8 +53,8 @@ private val userAgent =
 
 @Composable
 internal fun WebCookieLoginScreen(
-    url: String,
-    callback: (String?) -> Boolean,
+    request: LoginEffect.OpenWebCookieLogin,
+    callback: suspend (LoginCookieSnapshot) -> Boolean,
     onBack: () -> Unit,
 ) {
     var route by remember { mutableStateOf<ProxySnapshot?>(null) }
@@ -92,7 +95,7 @@ internal fun WebCookieLoginScreen(
                 ErrorContent(IllegalStateException(stringResource(error)), onRetry = { retry++ })
             } else if (prepared != null && prepared.isValid) {
                 key(prepared.key, retry) {
-                    ProxyLoginWebView(url, prepared, callback, onBack, onError = { errorMessage = R.string.proxy_webview_error })
+                    ProxyLoginWebView(request, prepared, callback, onBack, onError = { errorMessage = R.string.proxy_webview_error })
                 }
             } else {
                 CircularProgressIndicator()
@@ -103,20 +106,39 @@ internal fun WebCookieLoginScreen(
 
 @Composable
 private fun ProxyLoginWebView(
-    url: String,
+    request: LoginEffect.OpenWebCookieLogin,
     route: ProxySnapshot,
-    callback: (String?) -> Boolean,
+    callback: suspend (LoginCookieSnapshot) -> Boolean,
     onBack: () -> Unit,
     onError: () -> Unit,
 ) {
-    val webViewState = rememberWebViewState(url)
+    val webViewState = rememberWebViewState(request.url)
     var unsubscribe by remember { mutableStateOf<(() -> Unit)?>(null) }
     var disposed by remember { mutableStateOf(false) }
-    LaunchedEffect(url) {
+    LaunchedEffect(request) {
         while (route.isValid) {
             webViewState.lastLoadedUrl?.let { loadedUrl ->
-                val cookies = CookieManager.getInstance().getCookie(loadedUrl)
-                if (route.isValid && callback(cookies)) {
+                val manager = CookieManager.getInstance()
+                val rawHeader = manager.getCookie(loadedUrl)
+                val values =
+                    request.probes
+                        .flatMap { probe ->
+                            val expected = probe.names.toSet()
+                            manager
+                                .getCookie(probe.url)
+                                .orEmpty()
+                                .split(';')
+                                .mapNotNull { item ->
+                                    val name = item.substringBefore('=', missingDelimiterValue = "").trim()
+                                    if (name !in expected) return@mapNotNull null
+                                    LoginCookieValue(
+                                        sourceUrl = probe.url,
+                                        name = name,
+                                        value = item.substringAfter('=', missingDelimiterValue = "").trim(),
+                                    )
+                                }
+                        }.distinctBy { it.sourceUrl to it.name }
+                if (route.isValid && callback(LoginCookieSnapshot(values = values, rawHeader = rawHeader))) {
                     onBack()
                     return@LaunchedEffect
                 }
@@ -143,7 +165,7 @@ private fun ProxyLoginWebView(
             },
         onCreated = { view ->
             with(view.settings) {
-                userAgentString = userAgent.toString()
+                userAgentString = userAgent.getValue("user-agent")
                 javaScriptEnabled = true
                 domStorageEnabled = true
                 javaScriptCanOpenWindowsAutomatically = false

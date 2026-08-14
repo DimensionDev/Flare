@@ -7,10 +7,10 @@ import FlareAppleCore
 struct BackportWebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
     @State private var viewModel: BackportWebLoginViewModel?
-    private let onCookie: (String) -> Void
+    private let onCookie: ([HTTPCookie]) -> Void
     let url: String
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String
     ) {
         self.url = url
@@ -76,10 +76,10 @@ class WKDelegate: NSObject, WKNavigationDelegate {
 final class BackportWebLoginViewModel {
     let route: WebViewProxyRoute
     let url: String
-    let onCookie: (String) -> Void
+    let onCookie: ([HTTPCookie]) -> Void
     let delegate: WKDelegate
     init(
-        onCookie: @escaping (String) -> Void,
+        onCookie: @escaping ([HTTPCookie]) -> Void,
         url: String,
         route: WebViewProxyRoute
     ) {
@@ -89,8 +89,7 @@ final class BackportWebLoginViewModel {
         self.delegate = WKDelegate(route: route) {
             route.dataStore.httpCookieStore.getAllCookies { (cookies) in
                 guard route.isValid else { return }
-                let cookieString = BackportWebLoginViewModel.cookieHeaderString(from: cookies, for: .init(string: url))
-                onCookie(cookieString)
+                onCookie(cookies)
             }
         }
     }

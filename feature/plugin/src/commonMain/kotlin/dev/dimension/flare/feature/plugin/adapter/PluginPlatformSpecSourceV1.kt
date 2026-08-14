@@ -17,6 +17,7 @@ import dev.dimension.flare.feature.plugin.lifecycle.PluginStateIssueV1
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.login.PluginCookieCheckResultV1
 import dev.dimension.flare.feature.plugin.login.PluginFormLoginCoordinatorV1
+import dev.dimension.flare.feature.plugin.login.PluginOAuthCallbackCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.login.PluginOAuthStartV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
@@ -41,7 +42,6 @@ import dev.dimension.flare.feature.plugin.wire.DetectorMatchV1
 import dev.dimension.flare.feature.plugin.wire.DetectorRequestV1
 import dev.dimension.flare.feature.plugin.wire.DetectorResultV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
-import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.ComposeInitialTextContext
 import dev.dimension.flare.model.InitialText
@@ -53,7 +53,6 @@ import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.model.PlatformSpecSource
 import dev.dimension.flare.model.RecommendedInstance
 import dev.dimension.flare.model.resolveReplyParticipantInitialText
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiStrings
@@ -161,17 +160,12 @@ private class PluginPlatformSpecV1(
 ) : PlatformSpec,
     LoginPlatformProvider {
     private val accountService: AccountService by koinInject()
+    private val oauthCallbacks: PluginOAuthCallbackCoordinatorV1 by koinInject()
     private val manifest = plugin.installed.manifest
     private val platform = manifest.platform
 
     override val platformId: String = platform.id
-    override val metadata: PlatformMetadata =
-        PlatformMetadata(
-            displayName = platform.name.fallback,
-            icon = dev.dimension.flare.ui.model.UiIcon.World,
-            displayNameText = platform.name.toUiText(manifest.id),
-            iconUrl = plugin.iconFileUrl(),
-        )
+    override val metadata: PlatformMetadata = plugin.platformMetadata()
     override val order: Int = 1_000 + (platform.detector?.priority ?: 0)
     override val isDefaultGuest: Boolean = false
 
@@ -353,8 +347,8 @@ private class PluginPlatformSpecV1(
             plugin = plugin,
             method = method,
             context = context,
-            metadata = metadata,
             oauth = oauth,
+            oauthCallbacks = oauthCallbacks,
             form = form,
             webCookie = webCookie,
             accountService = accountService,
@@ -444,8 +438,8 @@ private class PluginLoginMethodHandlerV1(
     private val plugin: RunningPluginV1,
     private val method: LoginMethodManifestV1,
     private val context: LoginContext,
-    private val metadata: PlatformMetadata,
     private val oauth: PluginOAuthLoginCoordinatorV1,
+    private val oauthCallbacks: PluginOAuthCallbackCoordinatorV1,
     private val form: PluginFormLoginCoordinatorV1,
     private val webCookie: PluginWebCookieLoginCoordinatorV1,
     private val accountService: AccountService,
@@ -455,6 +449,7 @@ private class PluginLoginMethodHandlerV1(
     private val mutableState = MutableStateFlow(state())
     private val mutableEffects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
     private var cookieSession: PluginWebCookieSessionV1? = null
+    private var oauthFlowId: String? = null
 
     override val state: StateFlow<LoginFlowState> = mutableState
     override val effects: Flow<LoginEffect> = mutableEffects
@@ -474,6 +469,8 @@ private class PluginLoginMethodHandlerV1(
         try {
             when (method.interaction) {
                 LoginInteractionV1.OAuth -> {
+                    oauthFlowId?.let { oauthCallbacks.unregister(it) }
+                    oauthFlowId = null
                     when (
                         val result =
                             oauth.begin(
@@ -485,6 +482,13 @@ private class PluginLoginMethodHandlerV1(
                             )
                     ) {
                         is PluginOAuthStartV1.ExternalBrowser -> {
+                            oauthFlowId = result.flowId
+                            oauthCallbacks.register(result.flowId) { success ->
+                                if (oauthFlowId == result.flowId) {
+                                    oauthFlowId = null
+                                    complete(success)
+                                }
+                            }
                             mutableEffects.emit(LoginEffect.OpenUrl(result.url))
                             mutableState.value = state()
                         }
@@ -547,7 +551,10 @@ private class PluginLoginMethodHandlerV1(
         if (method.interaction != LoginInteractionV1.OAuth || mutableState.value.loading) return
         mutableState.value = state(loading = true)
         try {
-            complete(oauth.resume(value, Locale.language))
+            if (!oauthCallbacks.handle(value, Locale.language)) {
+                throw IllegalArgumentException("Unsupported OAuth callback")
+            }
+            if (oauthFlowId != null) mutableState.value = state()
         } catch (error: Throwable) {
             if (error is CancellationException) throw error
             mutableState.value = state(error = error.message ?: "Plugin login failed")
@@ -579,31 +586,19 @@ private class PluginLoginMethodHandlerV1(
     override fun clear() {
         values.keys.forEach { values[it] = "" }
         closeCookieSession()
+        closeOAuthFlow()
         mutableState.value = state()
     }
 
     override fun close() {
         closeCookieSession()
+        closeOAuthFlow()
     }
 
     private suspend fun complete(success: LoginSuccessV1) {
         val accountKey = MicroBlogKey(success.accountId, Url(success.origin).accountHost())
         context.requireReloginAccount(accountKey)
-        val credential = plugin.accountCredential(success)
-        accountService
-            .addAccount(
-                account =
-                    UiAccount(
-                        accountKey = accountKey,
-                        platformId = plugin.installed.manifest.platform.id,
-                        platformDisplayName = metadata.displayName,
-                        platformIcon = metadata.icon,
-                        platformDisplayNameText = metadata.displayNameText,
-                        platformIconUrl = metadata.iconUrl,
-                    ),
-                credential = credential,
-                serializer = PluginAccountCredentialV1.serializer(),
-            ).join()
+        accountService.addPluginAccount(plugin, success)
         mutableState.value = state()
         context.onSuccess()
     }
@@ -612,6 +607,12 @@ private class PluginLoginMethodHandlerV1(
         val session = cookieSession ?: return null
         cookieSession = null
         return coroutineScope.launch { session.close() }
+    }
+
+    private fun closeOAuthFlow(): Job? {
+        val flowId = oauthFlowId ?: return null
+        oauthFlowId = null
+        return coroutineScope.launch { oauthCallbacks.unregister(flowId) }
     }
 
     private fun state(
@@ -724,8 +725,6 @@ private fun String.toHttpsOrigin(): String =
         trim()
             .let { if (it.startsWith("https://", ignoreCase = true)) it else "https://$it" },
     )
-
-private fun RunningPluginV1.iconFileUrl(): String = "file://$iconPath"
 
 private fun String.render(values: Map<String, String>): String =
     DEEP_LINK_CAPTURE.replace(this) { match -> values.getValue(match.groupValues[1]) }

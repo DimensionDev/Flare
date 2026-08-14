@@ -136,7 +136,12 @@ public class PluginOAuthLoginCoordinatorV1(
     public suspend fun resume(
         callbackUrl: String,
         locale: String,
-    ): LoginSuccessV1 {
+    ): LoginSuccessV1 = resumeResult(callbackUrl, locale).success
+
+    internal suspend fun resumeResult(
+        callbackUrl: String,
+        locale: String,
+    ): PluginOAuthResumeResultV1 {
         val callback = parsePluginOAuthCallback(callbackUrl)
         val pending = pendingStore.load(callback.flowId) ?: throw PluginLoginException("oauth.missing", "OAuth flow was not found")
         val callbackState = callback.parameters["state"]
@@ -191,9 +196,17 @@ public class PluginOAuthLoginCoordinatorV1(
         val success =
             transition as? LoginTransitionV1.Success
                 ?: throw PluginLoginException("login.transition", "OAuth resume did not complete login")
-        return plugin.requireLoginSuccess(success.value, pending.origin, pending.expectedAccountId)
+        return PluginOAuthResumeResultV1(
+            plugin = plugin,
+            success = plugin.requireLoginSuccess(success.value, pending.origin, pending.expectedAccountId),
+        )
     }
 }
+
+internal data class PluginOAuthResumeResultV1(
+    val plugin: RunningPluginV1,
+    val success: LoginSuccessV1,
+)
 
 public fun parsePluginOAuthCallback(value: String): PluginOAuthCallbackV1 {
     require(value.length <= MAX_CALLBACK_URL_LENGTH) { "OAuth callback URL is too long" }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
@@ -7,12 +8,19 @@ import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.login.accountHost
+import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
+import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.WireLimitsV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformDataSourceContext
+import dev.dimension.flare.model.PlatformMetadata
+import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiIcon
+import io.ktor.http.Url
 import kotlinx.serialization.json.JsonElement
 
 public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAccountCredentialV1 {
@@ -38,6 +46,49 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
         credential = success.credential,
     ).also { it.requireValid(this) }
 }
+
+internal fun RunningPluginV1.platformMetadata(): PlatformMetadata {
+    val platform = installed.manifest.platform
+    return PlatformMetadata(
+        displayName = platform.name.fallbackText,
+        icon = UiIcon.World,
+        displayNameText = platform.name.toUiText(installed.pluginId),
+        iconUrl = "file://$iconPath",
+    )
+}
+
+internal suspend fun AccountService.addPluginAccount(
+    plugin: RunningPluginV1,
+    success: LoginSuccessV1,
+): MicroBlogKey {
+    val metadata = plugin.platformMetadata()
+    val accountKey =
+        MicroBlogKey(
+            success.accountId,
+            Url(success.origin).accountHost(),
+        )
+    addAccount(
+        account =
+            UiAccount(
+                accountKey = accountKey,
+                platformId = plugin.installed.manifest.platform.id,
+                platformDisplayName = metadata.displayName,
+                platformIcon = metadata.icon,
+                platformDisplayNameText = metadata.displayNameText,
+                platformIconUrl = metadata.iconUrl,
+            ),
+        credential = plugin.accountCredential(success),
+        serializer = PluginAccountCredentialV1.serializer(),
+    ).join()
+    return accountKey
+}
+
+private val PluginTextV1.fallbackText: String
+    get() =
+        when (this) {
+            is PluginTextV1.Literal -> value
+            is PluginTextV1.Localized -> fallback
+        }
 
 internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
     val manifest = plugin.installed.manifest

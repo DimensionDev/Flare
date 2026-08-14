@@ -328,6 +328,10 @@ internal class XQTDataSource(
     override val pinnableTimelineTabs: List<PinnableTimelineTabSection> by lazy {
         listOf(
             PinnableTimelineTabSection(
+                title = UiStrings.Discover,
+                data = service.pinnableTagTimelines(accountKey),
+            ),
+            PinnableTimelineTabSection(
                 title = UiStrings.List,
                 data =
                     listHandler.data.map { paging ->
@@ -453,6 +457,13 @@ internal class XQTDataSource(
             service,
             accountKey,
             enableRanking = true,
+        )
+
+    fun tagTimelineLoader(tag: String) =
+        TagTimelineRemoteMediator(
+            tag = tag,
+            service = service,
+            accountKey = accountKey,
         )
 
     fun bookmarkTimelineLoader() =

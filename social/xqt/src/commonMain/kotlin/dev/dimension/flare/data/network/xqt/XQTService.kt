@@ -12,6 +12,7 @@ import dev.dimension.flare.data.network.xqt.api.GuestApi
 import dev.dimension.flare.data.network.xqt.api.ListsApi
 import dev.dimension.flare.data.network.xqt.api.MediaApi
 import dev.dimension.flare.data.network.xqt.api.OtherApi
+import dev.dimension.flare.data.network.xqt.api.PinnableTimelineApi
 import dev.dimension.flare.data.network.xqt.api.PostApi
 import dev.dimension.flare.data.network.xqt.api.TweetApi
 import dev.dimension.flare.data.network.xqt.api.UserApi
@@ -27,6 +28,7 @@ import dev.dimension.flare.data.network.xqt.api.createGuestApi
 import dev.dimension.flare.data.network.xqt.api.createListsApi
 import dev.dimension.flare.data.network.xqt.api.createMediaApi
 import dev.dimension.flare.data.network.xqt.api.createOtherApi
+import dev.dimension.flare.data.network.xqt.api.createPinnableTimelineApi
 import dev.dimension.flare.data.network.xqt.api.createPostApi
 import dev.dimension.flare.data.network.xqt.api.createTweetApi
 import dev.dimension.flare.data.network.xqt.api.createUserApi
@@ -88,6 +90,10 @@ internal class XQTService(
         accountKey = accountKey,
         chocolateFlow = chocolateFlow,
     ).createOtherApi(),
+    PinnableTimelineApi by config(
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
+    ).createPinnableTimelineApi(),
     PostApi by config(
         accountKey = accountKey,
         chocolateFlow = chocolateFlow,

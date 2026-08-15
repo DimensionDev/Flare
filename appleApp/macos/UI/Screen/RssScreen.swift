@@ -728,6 +728,11 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
                 return
             }
 
+            if navigationAction.targetFrame?.isMainFrame == false {
+                decisionHandler(.allow)
+                return
+            }
+
             if targetURL.scheme == "flare-media-image",
                let components = URLComponents(url: targetURL, resolvingAgainstBaseURL: false),
                let imageUrl = components.queryItems?.first(where: { $0.name == "url" })?.value,

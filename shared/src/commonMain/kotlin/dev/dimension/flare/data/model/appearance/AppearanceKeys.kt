@@ -10,6 +10,7 @@ import dev.dimension.flare.data.model.BottomBarStyle as AppearanceBottomBarStyle
 import dev.dimension.flare.data.model.PostActionStyle as AppearancePostActionStyle
 import dev.dimension.flare.data.model.Theme as AppearanceTheme
 import dev.dimension.flare.data.model.TimelineDisplayMode as AppearanceTimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout as AppearanceTimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay as AppearanceVideoAutoplay
 
 @HiddenFromObjC
@@ -59,6 +60,12 @@ public object AppearanceKeys {
     public object ExpandContentWarning : PerTimeline<Boolean>("timeline.expand_content_warning", false, Boolean.serializer())
 
     public object ExpandMediaSize : PerTimeline<Boolean>("timeline.expand_media_size", true, Boolean.serializer())
+
+    public object MediaLayout : PerTimeline<AppearanceTimelineMediaLayout>(
+        "timeline.media_layout",
+        AppearanceTimelineMediaLayout.Grid,
+        AppearanceTimelineMediaLayout.serializer(),
+    )
 
     public object LimitMediaGridToNine : PerTimeline<Boolean>(
         "timeline.limit_media_grid_to_nine",
@@ -127,6 +134,7 @@ public object AppearanceKeys {
             ShowSensitiveContent,
             ExpandContentWarning,
             ExpandMediaSize,
+            MediaLayout,
             LimitMediaGridToNine,
             VideoAutoplay,
             ShowLinkPreview,

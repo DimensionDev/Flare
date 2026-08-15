@@ -91,3 +91,9 @@ public enum class TimelineDisplayMode {
     Plain,
     Gallery,
 }
+
+@Serializable
+public enum class TimelineMediaLayout {
+    Grid,
+    Carousel,
+}

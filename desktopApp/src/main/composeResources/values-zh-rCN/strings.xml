@@ -297,6 +297,10 @@
     <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保持媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中按原比例显示媒体</string>
+    <string name="settings_appearance_media_layout">媒体布局</string>
+    <string name="settings_appearance_media_layout_description">选择时间轴动态中多个媒体项目的排列方式</string>
+    <string name="settings_appearance_media_layout_grid">网格</string>
+    <string name="settings_appearance_media_layout_carousel">轮播</string>
     <string name="settings_appearance_limit_media_grid_to_nine">媒体网格最多显示 9 项</string>
     <string name="settings_appearance_limit_media_grid_to_nine_description">每条时间轴动态最多显示 9 项媒体</string>
     <string name="settings_appearance_video_autoplay">视频自动播放</string>

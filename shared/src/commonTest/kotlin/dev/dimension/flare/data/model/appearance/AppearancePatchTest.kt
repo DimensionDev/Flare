@@ -10,6 +10,7 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.resolveTimelineAppearance
@@ -28,6 +29,7 @@ class AppearancePatchTest {
     fun emptyPatchSynthesizesDefaultAppearanceSettings() {
         assertEquals(AppearanceSettings.Default, AppearancePatch.EMPTY.toAppearanceSettings())
         assertFalse(TimelineAppearance.Default.expandContentWarning)
+        assertEquals(TimelineMediaLayout.Grid, TimelineAppearance.Default.mediaLayout)
         assertEquals(true, TimelineAppearance.Default.limitMediaGridToNine)
     }
 
@@ -55,6 +57,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.AvatarShape, AvatarShape.SQUARE)
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
+                .set(AppearanceKeys.MediaLayout, TimelineMediaLayout.Carousel)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
                 .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
@@ -72,6 +75,7 @@ class AppearancePatchTest {
                 avatarShape = AvatarShape.SQUARE,
                 showMedia = false,
                 expandContentWarning = true,
+                mediaLayout = TimelineMediaLayout.Carousel,
                 limitMediaGridToNine = false,
                 postActionFixedWidth = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
@@ -118,6 +122,7 @@ class AppearancePatchTest {
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, true)
                 .set(AppearanceKeys.ExpandContentWarning, true)
+                .set(AppearanceKeys.MediaLayout, TimelineMediaLayout.Carousel)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
                 .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
@@ -126,6 +131,7 @@ class AppearancePatchTest {
             TimelineAppearance(
                 showMedia = true,
                 expandContentWarning = true,
+                mediaLayout = TimelineMediaLayout.Carousel,
                 limitMediaGridToNine = false,
                 showNumbers = false,
                 postActionFixedWidth = false,
@@ -182,6 +188,7 @@ class AppearancePatchTest {
                 AppearanceKeys.ShowBottomBarLabels,
                 AppearanceKeys.DeckMode,
                 AppearanceKeys.ExpandContentWarning,
+                AppearanceKeys.MediaLayout,
                 AppearanceKeys.LimitMediaGridToNine,
                 AppearanceKeys.PostActionLayout,
                 AppearanceKeys.PostActionFixedWidth,

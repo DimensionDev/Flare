@@ -10,6 +10,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
@@ -84,6 +85,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
             override fun updateShowMedia(value: Boolean) = update(AppearanceKeys.ShowMedia, value)
 
             override fun updateExpandMediaSize(value: Boolean) = update(AppearanceKeys.ExpandMediaSize, value)
+
+            override fun updateMediaLayout(value: TimelineMediaLayout) = update(AppearanceKeys.MediaLayout, value)
 
             override fun updateLimitMediaGridToNine(value: Boolean) = update(AppearanceKeys.LimitMediaGridToNine, value)
 
@@ -166,6 +169,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updateShowMedia(value: Boolean)
 
         public fun updateExpandMediaSize(value: Boolean)
+
+        public fun updateMediaLayout(value: TimelineMediaLayout)
 
         public fun updateLimitMediaGridToNine(value: Boolean)
 

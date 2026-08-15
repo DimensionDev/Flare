@@ -32,6 +32,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
@@ -65,6 +66,10 @@ import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
+import dev.dimension.flare.settings_appearance_media_layout
+import dev.dimension.flare.settings_appearance_media_layout_carousel
+import dev.dimension.flare.settings_appearance_media_layout_description
+import dev.dimension.flare.settings_appearance_media_layout_grid
 import dev.dimension.flare.settings_appearance_post_action_style
 import dev.dimension.flare.settings_appearance_post_action_style_description
 import dev.dimension.flare.settings_appearance_post_action_style_hidden
@@ -168,6 +173,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
             appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
+            appearancePatch.contains(AppearanceKeys.MediaLayout) ||
             appearancePatch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
@@ -451,6 +457,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(
+                                        AppearanceKeys.MediaLayout,
+                                        timelineAppearance.mediaLayout,
+                                    ).set(
                                         AppearanceKeys.LimitMediaGridToNine,
                                         timelineAppearance.limitMediaGridToNine,
                                     ).set(
@@ -463,6 +472,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowSensitiveContent,
                                     AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.MediaLayout,
                                     AppearanceKeys.LimitMediaGridToNine,
                                     AppearanceKeys.VideoAutoplay,
                                 )
@@ -514,19 +524,42 @@ internal fun TimelinePresentationEditor(
                                 },
                             )
                             ExpanderItemSeparator()
-                            SwitchItem(
-                                title = stringResource(Res.string.settings_appearance_limit_media_grid_to_nine),
-                                caption = stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description),
-                                checked = timelineAppearance.limitMediaGridToNine,
-                                onCheckedChange = {
+                            ChoiceItem(
+                                title = stringResource(Res.string.settings_appearance_media_layout),
+                                caption = stringResource(Res.string.settings_appearance_media_layout_description),
+                                items =
+                                    persistentMapOf(
+                                        TimelineMediaLayout.Grid to Res.string.settings_appearance_media_layout_grid,
+                                        TimelineMediaLayout.Carousel to Res.string.settings_appearance_media_layout_carousel,
+                                    ),
+                                selected = timelineAppearance.mediaLayout,
+                                onSelected = {
                                     onAppearancePatchChange(
                                         appearancePatch.set(
-                                            AppearanceKeys.LimitMediaGridToNine,
+                                            AppearanceKeys.MediaLayout,
                                             it,
                                         ),
                                     )
                                 },
                             )
+                            AnimatedVisibility(timelineAppearance.mediaLayout == TimelineMediaLayout.Grid) {
+                                Column {
+                                    ExpanderItemSeparator()
+                                    SwitchItem(
+                                        title = stringResource(Res.string.settings_appearance_limit_media_grid_to_nine),
+                                        caption = stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description),
+                                        checked = timelineAppearance.limitMediaGridToNine,
+                                        onCheckedChange = {
+                                            onAppearancePatchChange(
+                                                appearancePatch.set(
+                                                    AppearanceKeys.LimitMediaGridToNine,
+                                                    it,
+                                                ),
+                                            )
+                                        },
+                                    )
+                                }
+                            }
                             ExpanderItemSeparator()
                             SwitchItem(
                                 title = stringResource(Res.string.settings_appearance_expand_media),

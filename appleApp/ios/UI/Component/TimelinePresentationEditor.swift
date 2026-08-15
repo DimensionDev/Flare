@@ -524,16 +524,32 @@ private struct MediaAppearanceOverrideGroup: View {
                     Text("appearance_expand_media_size")
                     Text("appearance_expand_media_size_description")
                 }
-                Toggle(isOn: Binding(get: {
-                    timelineAppearance.limitMediaGridToNine
+                Picker(selection: Binding(get: {
+                    timelineAppearance.mediaLayout
                 }, set: { value in
-                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setLimitMediaGridToNine(
+                    appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setMediaLayout(
                         patch: appearancePatch,
                         value: value
                     )
                 })) {
-                    Text("appearance_limit_media_grid_to_nine")
-                    Text("appearance_limit_media_grid_to_nine_description")
+                    Text("appearance_media_layout_grid").tag(TimelineMediaLayout.grid)
+                    Text("appearance_media_layout_carousel").tag(TimelineMediaLayout.carousel)
+                } label: {
+                    Text("appearance_media_layout")
+                    Text("appearance_media_layout_description")
+                }
+                if timelineAppearance.mediaLayout == .grid {
+                    Toggle(isOn: Binding(get: {
+                        timelineAppearance.limitMediaGridToNine
+                    }, set: { value in
+                        appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setLimitMediaGridToNine(
+                            patch: appearancePatch,
+                            value: value
+                        )
+                    })) {
+                        Text("appearance_limit_media_grid_to_nine")
+                        Text("appearance_limit_media_grid_to_nine_description")
+                    }
                 }
                 Toggle(isOn: Binding(get: {
                     timelineAppearance.showSensitiveContent

@@ -211,6 +211,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
                 isDetail: detailStatusKey == post.statusKey,
                 showTranslate: showTranslate,
                 aiTldrEnabled: aiTldrEnabled,
+                allowsMediaCarousel: true,
+                carouselOuterHorizontalPadding: 16
             )
             desired.append(statusView)
 
@@ -233,6 +235,8 @@ final class TimelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProvid
                 aiTldrEnabled: aiTldrEnabled,
                 inlineParents: Array(item.presentation.inlineParents),
                 quotes: Array(item.presentation.quotes),
+                allowsMediaCarousel: true,
+                carouselOuterHorizontalPadding: 16
             )
             desired.append(statusView)
 

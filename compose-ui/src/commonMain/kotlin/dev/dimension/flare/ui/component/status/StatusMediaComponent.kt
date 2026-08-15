@@ -3,12 +3,17 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -22,10 +27,13 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
@@ -42,6 +50,7 @@ import dev.dimension.flare.compose.ui.media_menu_download
 import dev.dimension.flare.compose.ui.media_menu_download_all
 import dev.dimension.flare.compose.ui.media_menu_share_image
 import dev.dimension.flare.compose.ui.status_sensitive_media
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
@@ -73,156 +82,92 @@ internal fun StatusMediaComponent(
     data: ImmutableList<UiMedia>,
     onMediaClick: (UiMedia) -> Unit,
     sensitive: Boolean,
+    shape: Shape,
+    allowCarousel: Boolean = false,
+    carouselLeadingPadding: Dp = 0.dp,
+    carouselTrailingPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
 ) {
-    val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalTimelineAppearance.current
-    val mediaActionConfig = LocalTimelineMediaActionConfig.current
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
     val showSensitiveButton = sensitive && !appearanceSettings.showSensitiveContent
+    val usesCarousel =
+        allowCarousel &&
+            appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
+            data.size > 1
+    val mediaContentModifier =
+        Modifier.let {
+            if (hideSensitive && SystemUtils.isBlurSupported) {
+                it.blur(32.dp)
+            } else {
+                it
+            }
+        }
     Box(
-        modifier = modifier,
-    ) {
-        AdaptiveGrid(
-            content = {
-                data.fastForEach { media ->
-                    var isMenuExpanded by remember(media.url) {
-                        mutableStateOf(false)
-                    }
-                    Box {
-                        CompositionLocalProvider(
-                            LocalTimelineAppearance provides
-                                appearanceSettings.copy(
-                                    videoAutoplay =
-                                        if (hideSensitive) {
-                                            VideoAutoplay.NEVER
-                                        } else {
-                                            appearanceSettings.videoAutoplay
-                                        },
-                                ),
-                        ) {
-                            val mediaModifier =
-                                Modifier
-                                    .clipToBounds()
-//                                .sharedElement(
-//                                    rememberSharedContentState(
-//                                        when (media) {
-//                                            is UiMedia.Image -> media.previewUrl
-//                                            is UiMedia.Video -> media.thumbnailUrl
-//                                            is UiMedia.Audio -> media.previewUrl ?: media.url
-//                                            is UiMedia.Gif -> media.previewUrl
-//                                        },
-//                                    ),
-//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                )
-                                    .pointerHoverIcon(PointerIcon.Hand)
-                            if (mediaActionConfig != null && !hideSensitive) {
-                                TimelineMediaMenuBox(
-                                    expanded = isMenuExpanded,
-                                    onExpandedChange = {
-                                        isMenuExpanded = it
-                                    },
-                                    onClick = {
-                                        onMediaClick(media)
-                                    },
-                                    modifier = mediaModifier,
-                                    menu = {
-                                        TimelineMediaDropdownMenu(
-                                            expanded = isMenuExpanded,
-                                            media = media,
-                                            showDownloadAll = data.size > 1,
-                                            mediaActionConfig = mediaActionConfig,
-                                            onDismissRequest = {
-                                                isMenuExpanded = false
-                                            },
-                                            onAction = { action ->
-                                                isMenuExpanded = false
-                                                mediaActionConfig.handler.handle(
-                                                    post = post,
-                                                    media = media,
-                                                    action = action,
-                                                )
-                                            },
-                                        )
-                                    },
-                                ) {
-                                    MediaItem(
-                                        media = media,
-                                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                                    )
-                                }
-                            } else {
-                                MediaItem(
-                                    media = media,
-                                    modifier =
-                                        mediaModifier.clickable {
-                                            onMediaClick(media)
-                                        },
-                                    keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                                )
-                            }
-                        }
-                        if (!media.description.isNullOrEmpty()) {
-                            PlatformFlyoutContainer(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomEnd),
-                                content = { requestShowFlyout ->
-                                    PlatformText(
-                                        text = "ALT",
-                                        modifier =
-                                            Modifier
-                                                .pointerHoverIcon(PointerIcon.Hand)
-                                                .padding(16.dp)
-                                                .background(
-                                                    color = Color.Black.copy(alpha = 0.75f),
-                                                    shape = PlatformTheme.shapes.medium,
-                                                ).padding(
-                                                    horizontal = 8.dp,
-                                                    vertical = 2.dp,
-                                                ).clickable {
-                                                    if (!requestShowFlyout.invoke()) {
-                                                        media.description?.let {
-                                                            uriHandler.openUri(DeeplinkRoute.Status.AltText(it).toUri())
-                                                        }
-                                                    }
-                                                },
-                                        color = Color.White,
-                                    )
-                                },
-                                flyout = {
-                                    PlatformText(
-                                        text = media.description ?: "",
-                                        modifier =
-                                            Modifier
-                                                .padding(8.dp)
-                                                .widthIn(max = 240.dp),
-                                    )
-                                },
-                            )
-                        }
-                    }
-                }
+        modifier =
+            if (usesCarousel) {
+                modifier.expandHorizontally(
+                    leading = carouselLeadingPadding,
+                    trailing = carouselTrailingPadding,
+                )
+            } else {
+                modifier.clip(shape)
             },
-            maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,
-            modifier =
-                Modifier
-                    .let {
-//                        if (hideSensitive) {
-//                            it.blur(32.dp)
-//                        } else {
-//                            it
-//                        }
-                        if (hideSensitive && SystemUtils.isBlurSupported) {
-                            it.blur(32.dp)
-                        } else {
-                            it
-                        }
-                    },
-            expandedSize = appearanceSettings.expandMediaSize,
-        )
+    ) {
+        if (usesCarousel) {
+            LazyRow(
+                modifier =
+                    mediaContentModifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 10f),
+                contentPadding =
+                    PaddingValues(
+                        start = carouselLeadingPadding,
+                        end = carouselTrailingPadding,
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items(count = data.size) { index ->
+                    val media = data[index]
+                    val ratio = minOf(media.timelineAspectRatio, 16f / 9f)
+                    StatusMediaItem(
+                        post = post,
+                        media = media,
+                        mediaCount = data.size,
+                        onMediaClick = onMediaClick,
+                        hideSensitive = hideSensitive,
+                        keepAspectRatio = false,
+                        fillContainer = true,
+                        modifier =
+                            Modifier
+                                .fillParentMaxHeight()
+                                .aspectRatio(ratio, matchHeightConstraintsFirst = true)
+                                .clip(shape),
+                    )
+                }
+            }
+        } else {
+            AdaptiveGrid(
+                content = {
+                    data.fastForEach { media ->
+                        StatusMediaItem(
+                            post = post,
+                            media = media,
+                            mediaCount = data.size,
+                            onMediaClick = onMediaClick,
+                            hideSensitive = hideSensitive,
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                        )
+                    }
+                },
+                maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,
+                modifier = mediaContentModifier,
+                expandedSize = appearanceSettings.expandMediaSize,
+            )
+        }
         if (showSensitiveButton) {
             Box(
                 modifier =
@@ -286,6 +231,166 @@ internal fun StatusMediaComponent(
                     }
                 }
             }
+        }
+    }
+}
+
+private fun Modifier.expandHorizontally(
+    leading: Dp,
+    trailing: Dp,
+): Modifier =
+    layout { measurable, constraints ->
+        if (!constraints.hasBoundedWidth) {
+            val placeable = measurable.measure(constraints)
+            layout(placeable.width, placeable.height) {
+                placeable.placeRelative(0, 0)
+            }
+        } else {
+            val leadingPx = leading.roundToPx()
+            val trailingPx = trailing.roundToPx()
+            val expandedWidth = constraints.maxWidth + leadingPx + trailingPx
+            val placeable =
+                measurable.measure(
+                    constraints.copy(
+                        minWidth = expandedWidth,
+                        maxWidth = expandedWidth,
+                    ),
+                )
+            layout(constraints.maxWidth, placeable.height) {
+                placeable.placeRelative(-leadingPx, 0)
+            }
+        }
+    }
+
+private val UiMedia.timelineAspectRatio: Float
+    get() {
+        val ratio =
+            when (this) {
+                is UiMedia.Image -> aspectRatio
+                is UiMedia.Video -> aspectRatio
+                is UiMedia.Gif -> aspectRatio
+                is UiMedia.Audio -> 1f
+            }
+        return ratio.takeIf { it.isFinite() && it > 0f } ?: 1f
+    }
+
+@Composable
+private fun StatusMediaItem(
+    post: UiTimelineV2.Post,
+    media: UiMedia,
+    mediaCount: Int,
+    onMediaClick: (UiMedia) -> Unit,
+    hideSensitive: Boolean,
+    keepAspectRatio: Boolean,
+    modifier: Modifier = Modifier,
+    fillContainer: Boolean = false,
+) {
+    val uriHandler = LocalUriHandler.current
+    val appearanceSettings = LocalTimelineAppearance.current
+    val mediaActionConfig = LocalTimelineMediaActionConfig.current
+    var isMenuExpanded by remember(media.url) {
+        mutableStateOf(false)
+    }
+    Box(modifier = modifier) {
+        CompositionLocalProvider(
+            LocalTimelineAppearance provides
+                appearanceSettings.copy(
+                    videoAutoplay =
+                        if (hideSensitive) {
+                            VideoAutoplay.NEVER
+                        } else {
+                            appearanceSettings.videoAutoplay
+                        },
+                ),
+        ) {
+            val mediaModifier =
+                Modifier
+                    .let { if (fillContainer) it.fillMaxSize() else it }
+                    .clipToBounds()
+                    .pointerHoverIcon(PointerIcon.Hand)
+            if (mediaActionConfig != null && !hideSensitive) {
+                TimelineMediaMenuBox(
+                    expanded = isMenuExpanded,
+                    onExpandedChange = {
+                        isMenuExpanded = it
+                    },
+                    onClick = {
+                        onMediaClick(media)
+                    },
+                    modifier = mediaModifier,
+                    menu = {
+                        TimelineMediaDropdownMenu(
+                            expanded = isMenuExpanded,
+                            media = media,
+                            showDownloadAll = mediaCount > 1,
+                            mediaActionConfig = mediaActionConfig,
+                            onDismissRequest = {
+                                isMenuExpanded = false
+                            },
+                            onAction = { action ->
+                                isMenuExpanded = false
+                                mediaActionConfig.handler.handle(
+                                    post = post,
+                                    media = media,
+                                    action = action,
+                                )
+                            },
+                        )
+                    },
+                ) {
+                    MediaItem(
+                        media = media,
+                        modifier = if (fillContainer) Modifier.fillMaxSize() else Modifier,
+                        keepAspectRatio = keepAspectRatio,
+                    )
+                }
+            } else {
+                MediaItem(
+                    media = media,
+                    modifier =
+                        mediaModifier.clickable {
+                            onMediaClick(media)
+                        },
+                    keepAspectRatio = keepAspectRatio,
+                )
+            }
+        }
+        if (!media.description.isNullOrEmpty()) {
+            PlatformFlyoutContainer(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                content = { requestShowFlyout ->
+                    PlatformText(
+                        text = "ALT",
+                        modifier =
+                            Modifier
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .padding(16.dp)
+                                .background(
+                                    color = Color.Black.copy(alpha = 0.75f),
+                                    shape = PlatformTheme.shapes.medium,
+                                ).padding(
+                                    horizontal = 8.dp,
+                                    vertical = 2.dp,
+                                ).clickable {
+                                    if (!requestShowFlyout.invoke()) {
+                                        media.description?.let {
+                                            uriHandler.openUri(DeeplinkRoute.Status.AltText(it).toUri())
+                                        }
+                                    }
+                                },
+                        color = Color.White,
+                    )
+                },
+                flyout = {
+                    PlatformText(
+                        text = media.description ?: "",
+                        modifier =
+                            Modifier
+                                .padding(8.dp)
+                                .widthIn(max = 240.dp),
+                    )
+                },
+            )
         }
     }
 }

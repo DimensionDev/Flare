@@ -570,6 +570,8 @@ private fun StatusContent(
             CommonStatusComponent(
                 item = post,
                 isDetail = post.statusKey == detailStatusKey,
+                allowMediaCarousel = true,
+                carouselOuterHorizontalPadding = screenHorizontalPadding,
                 modifier =
                     Modifier
                         .padding(

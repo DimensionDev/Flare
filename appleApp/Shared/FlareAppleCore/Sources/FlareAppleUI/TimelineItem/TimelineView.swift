@@ -21,7 +21,13 @@ public struct TimelineView: View {
             FeedView(data: feed)
         case .post(let post):
             VStack {
-                StatusView(data: post, isDetail: detailStatusKey == post.statusKey, showTranslate: showTranslate)
+                StatusView(
+                    data: post,
+                    isDetail: detailStatusKey == post.statusKey,
+                    showTranslate: showTranslate,
+                    allowsMediaCarousel: true,
+                    carouselOuterHorizontalPadding: 16
+                )
             }
         case .timelinePostItem(let item):
             let bodyPost = item.presentation.repost ?? item.post
@@ -32,7 +38,9 @@ public struct TimelineView: View {
                     isDetail: detailStatusKey == bodyPost.statusKey,
                     showTranslate: showTranslate,
                     inlineParents: Array(item.presentation.inlineParents),
-                    quotes: Array(item.presentation.quotes)
+                    quotes: Array(item.presentation.quotes),
+                    allowsMediaCarousel: true,
+                    carouselOuterHorizontalPadding: 16
                 )
             }
         case .user(let user):

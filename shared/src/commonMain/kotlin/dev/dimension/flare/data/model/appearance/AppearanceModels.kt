@@ -8,6 +8,7 @@ import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 
 @Immutable
@@ -37,6 +38,7 @@ public data class TimelineAppearance(
     val showSensitiveContent: Boolean = AppearanceKeys.ShowSensitiveContent.default,
     val expandContentWarning: Boolean = AppearanceKeys.ExpandContentWarning.default,
     val expandMediaSize: Boolean = AppearanceKeys.ExpandMediaSize.default,
+    val mediaLayout: TimelineMediaLayout = AppearanceKeys.MediaLayout.default,
     val limitMediaGridToNine: Boolean = AppearanceKeys.LimitMediaGridToNine.default,
     val videoAutoplay: VideoAutoplay = AppearanceKeys.VideoAutoplay.default,
     val showLinkPreview: Boolean = AppearanceKeys.ShowLinkPreview.default,
@@ -90,6 +92,7 @@ public fun AppearancePatch.toTimelineAppearance(override: AppearancePatch?): Tim
         showSensitiveContent = getTimelineValue(AppearanceKeys.ShowSensitiveContent, override),
         expandContentWarning = getTimelineValue(AppearanceKeys.ExpandContentWarning, override),
         expandMediaSize = getTimelineValue(AppearanceKeys.ExpandMediaSize, override),
+        mediaLayout = getTimelineValue(AppearanceKeys.MediaLayout, override),
         limitMediaGridToNine = getTimelineValue(AppearanceKeys.LimitMediaGridToNine, override),
         videoAutoplay = getTimelineValue(AppearanceKeys.VideoAutoplay, override),
         showLinkPreview = getTimelineValue(AppearanceKeys.ShowLinkPreview, override),
@@ -112,6 +115,7 @@ public fun TimelineAppearance.withPatch(patch: AppearancePatch?): TimelineAppear
         showSensitiveContent = patch.getTimelineValue(AppearanceKeys.ShowSensitiveContent, showSensitiveContent),
         expandContentWarning = patch.getTimelineValue(AppearanceKeys.ExpandContentWarning, expandContentWarning),
         expandMediaSize = patch.getTimelineValue(AppearanceKeys.ExpandMediaSize, expandMediaSize),
+        mediaLayout = patch.getTimelineValue(AppearanceKeys.MediaLayout, mediaLayout),
         limitMediaGridToNine = patch.getTimelineValue(AppearanceKeys.LimitMediaGridToNine, limitMediaGridToNine),
         videoAutoplay = patch.getTimelineValue(AppearanceKeys.VideoAutoplay, videoAutoplay),
         showLinkPreview = patch.getTimelineValue(AppearanceKeys.ShowLinkPreview, showLinkPreview),

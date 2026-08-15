@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,6 +45,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
@@ -108,8 +110,10 @@ import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
 import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -164,10 +168,27 @@ public fun CommonStatusComponent(
     maxLines: Int? = null,
     showExpandButton: Boolean = true,
     quotes: ImmutableList<UiTimelineV2.Post> = persistentListOf(),
+    allowMediaCarousel: Boolean = false,
+    carouselOuterHorizontalPadding: Dp = 0.dp,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalTimelineAppearance.current
     val showAsFullWidth = !appearanceSettings.fullWidthPost && !isQuote && !isDetail
+    val carouselEdgePadding = if (isQuote) 8.dp else carouselOuterHorizontalPadding
+    val carouselLeadingPadding =
+        carouselEdgePadding +
+            if (showAsFullWidth && item.user != null) {
+                AvatarComponentDefaults.size + 8.dp
+            } else {
+                0.dp
+            }
+    val usesSideAvatarCarousel =
+        showAsFullWidth &&
+            item.user != null &&
+            showMedia &&
+            allowMediaCarousel &&
+            appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
+            item.images.size > 1
     Row(
         modifier =
             Modifier
@@ -206,63 +227,39 @@ public fun CommonStatusComponent(
             }
         }
         Column {
-            item.user?.let { user ->
-                val dateContent = @Composable {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        item.visibility?.let {
-                            StatusVisibilityComponent(
-                                visibility = it,
-                                modifier =
-                                    Modifier
-                                        .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                tint = PlatformTheme.colorScheme.caption,
-                            )
-                        }
-                        AnimatedVisibility(
-                            visible = item.translationDisplayState != TranslationDisplayState.Hidden,
+            Column(
+                modifier =
+                    if (usesSideAvatarCarousel) {
+                        Modifier.heightIn(min = AvatarComponentDefaults.size)
+                    } else {
+                        Modifier
+                    },
+            ) {
+                item.user?.let { user ->
+                    val dateContent = @Composable {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            TranslationDisplayBadge(
-                                state = item.translationDisplayState,
-                            )
-                        }
-                        if (appearanceSettings.showPlatformLogo) {
-                            FAIcon(
-                                imageVector = item.platformIcon.toImageVector(),
-                                contentDescription = null,
-                                modifier =
-                                    Modifier
-                                        .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                tint = PlatformTheme.colorScheme.caption,
-                            )
-                        }
-                        if (!isDetail) {
-                            DateTimeText(
-                                item.createdAt,
-                                style = PlatformTheme.typography.caption,
-                                color = PlatformTheme.colorScheme.caption,
-                            )
-                        }
-                        if (appearanceSettings.aiConfig.agent) {
-                            PlatformIconButton(
-                                onClick = {
-                                    uriHandler.openUri(
-                                        DeeplinkRoute
-                                            .Status
-                                            .Insight(
-                                                accountType = item.accountType,
-                                                statusKey = item.statusKey,
-                                            ).toUri(),
-                                    )
-                                },
-                                modifier =
-                                    Modifier
-                                        .size(24.dp),
+                            item.visibility?.let {
+                                StatusVisibilityComponent(
+                                    visibility = it,
+                                    modifier =
+                                        Modifier
+                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                    tint = PlatformTheme.colorScheme.caption,
+                                )
+                            }
+                            AnimatedVisibility(
+                                visible = item.translationDisplayState != TranslationDisplayState.Hidden,
                             ) {
+                                TranslationDisplayBadge(
+                                    state = item.translationDisplayState,
+                                )
+                            }
+                            if (appearanceSettings.showPlatformLogo) {
                                 FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Robot,
+                                    imageVector = item.platformIcon.toImageVector(),
                                     contentDescription = null,
                                     modifier =
                                         Modifier
@@ -270,94 +267,127 @@ public fun CommonStatusComponent(
                                     tint = PlatformTheme.colorScheme.caption,
                                 )
                             }
+                            if (!isDetail) {
+                                DateTimeText(
+                                    item.createdAt,
+                                    style = PlatformTheme.typography.caption,
+                                    color = PlatformTheme.colorScheme.caption,
+                                )
+                            }
+                            if (appearanceSettings.aiConfig.agent) {
+                                PlatformIconButton(
+                                    onClick = {
+                                        uriHandler.openUri(
+                                            DeeplinkRoute
+                                                .Status
+                                                .Insight(
+                                                    accountType = item.accountType,
+                                                    statusKey = item.statusKey,
+                                                ).toUri(),
+                                        )
+                                    },
+                                    modifier =
+                                        Modifier
+                                            .size(24.dp),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Robot,
+                                        contentDescription = null,
+                                        modifier =
+                                            Modifier
+                                                .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                        tint = PlatformTheme.colorScheme.caption,
+                                    )
+                                }
+                            }
                         }
                     }
-                }
-                if (showAsFullWidth) {
-                    UserCompat(
-                        user = user,
-                        onUserClick = {
-                            user.onClicked.invoke(
-                                ClickContext(
-                                    launcher = {
-                                        uriHandler.openUri(it)
-                                    },
-                                ),
-                            )
-                        },
-                        leading = null,
-                    ) {
-                        dateContent.invoke()
+                    if (showAsFullWidth) {
+                        UserCompat(
+                            user = user,
+                            onUserClick = {
+                                user.onClicked.invoke(
+                                    ClickContext(
+                                        launcher = {
+                                            uriHandler.openUri(it)
+                                        },
+                                    ),
+                                )
+                            },
+                            leading = null,
+                        ) {
+                            dateContent.invoke()
+                        }
+                    } else if (isQuote) {
+                        UserCompat(
+                            user,
+                            onUserClick = {
+                                user.onClicked.invoke(
+                                    ClickContext(
+                                        launcher = {
+                                            uriHandler.openUri(it)
+                                        },
+                                    ),
+                                )
+                            },
+                        ) {
+                            dateContent.invoke()
+                        }
+                    } else {
+                        CommonStatusHeaderComponent(
+                            data = user,
+                            onUserClick = {
+                                user.onClicked.invoke(
+                                    ClickContext(
+                                        launcher = {
+                                            uriHandler.openUri(it)
+                                        },
+                                    ),
+                                )
+                            },
+                        ) {
+                            dateContent.invoke()
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
-                } else if (isQuote) {
-                    UserCompat(
-                        user,
-                        onUserClick = {
-                            user.onClicked.invoke(
-                                ClickContext(
-                                    launcher = {
-                                        uriHandler.openUri(it)
-                                    },
-                                ),
-                            )
-                        },
-                    ) {
-                        dateContent.invoke()
+                }
+                item.replyToHandle?.let { replyHandle ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    StatusReplyComponent(
+                        replyHandle = replyHandle,
+                    )
+                }
+                if (isDetail) {
+                    SelectionContainer {
+                        StatusContentComponent(
+                            content = item.content,
+                            contentWarning = item.contentWarning,
+                            poll = item.poll,
+                            maxLines = Int.MAX_VALUE,
+                            showExpandButton = showExpandButton,
+                            translationDisplayed = item.translationDisplayState == TranslationDisplayState.Translated,
+                        )
                     }
                 } else {
-                    CommonStatusHeaderComponent(
-                        data = user,
-                        onUserClick = {
-                            user.onClicked.invoke(
-                                ClickContext(
-                                    launcher = {
-                                        uriHandler.openUri(it)
-                                    },
-                                ),
-                            )
-                        },
-                    ) {
-                        dateContent.invoke()
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-            }
-            item.replyToHandle?.let { replyHandle ->
-                Spacer(modifier = Modifier.height(4.dp))
-                StatusReplyComponent(
-                    replyHandle = replyHandle,
-                )
-            }
-            if (isDetail) {
-                SelectionContainer {
                     StatusContentComponent(
                         content = item.content,
                         contentWarning = item.contentWarning,
                         poll = item.poll,
-                        maxLines = Int.MAX_VALUE,
+                        maxLines = maxLines,
                         showExpandButton = showExpandButton,
                         translationDisplayed = item.translationDisplayState == TranslationDisplayState.Translated,
                     )
                 }
-            } else {
-                StatusContentComponent(
-                    content = item.content,
-                    contentWarning = item.contentWarning,
-                    poll = item.poll,
-                    maxLines = maxLines,
-                    showExpandButton = showExpandButton,
-                    translationDisplayed = item.translationDisplayState == TranslationDisplayState.Translated,
-                )
-            }
 
-            if (isDetail && !item.content.original.isEmpty && appearanceSettings.showTranslateButton) {
-                TranslationComponent(
-                    item = item,
-                    statusKey = item.itemKey ?: item.hashCode().toString(),
-                    contentWarning = item.contentWarning?.original,
-                    rawContent = item.content.original.innerText,
-                    content = item.content.original,
-                )
+                if (isDetail && !item.content.original.isEmpty && appearanceSettings.showTranslateButton) {
+                    TranslationComponent(
+                        item = item,
+                        statusKey = item.itemKey ?: item.hashCode().toString(),
+                        contentWarning = item.contentWarning?.original,
+                        rawContent = item.content.original.innerText,
+                        content = item.content.original,
+                    )
+                }
             }
 
             if (item.images.isNotEmpty() && showMedia) {
@@ -365,6 +395,9 @@ public fun CommonStatusComponent(
                 StatusMediasComponent(
                     item,
                     isQuote = isQuote,
+                    allowMediaCarousel = allowMediaCarousel,
+                    carouselLeadingPadding = carouselLeadingPadding,
+                    carouselTrailingPadding = carouselEdgePadding,
                     onMediaClick = { media ->
                         item.openMedia(
                             media = media,
@@ -463,6 +496,9 @@ public fun CommonStatusComponent(
 internal fun StatusMediasComponent(
     item: UiTimelineV2.Post,
     isQuote: Boolean,
+    allowMediaCarousel: Boolean,
+    carouselLeadingPadding: Dp,
+    carouselTrailingPadding: Dp,
     onMediaClick: (UiMedia) -> Unit,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
@@ -499,14 +535,15 @@ internal fun StatusMediasComponent(
             data = item.images,
             onMediaClick = onMediaClick,
             sensitive = item.sensitive,
-            modifier =
-                Modifier.clip(
-                    if (isQuote) {
-                        PlatformTheme.shapes.small
-                    } else {
-                        PlatformTheme.shapes.medium
-                    },
-                ),
+            shape =
+                if (isQuote) {
+                    PlatformTheme.shapes.small
+                } else {
+                    PlatformTheme.shapes.medium
+                },
+            allowCarousel = allowMediaCarousel,
+            carouselLeadingPadding = carouselLeadingPadding,
+            carouselTrailingPadding = carouselTrailingPadding,
         )
     } else {
         Row(

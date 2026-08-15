@@ -422,13 +422,28 @@ public struct AppearanceMediaSettingsSection: View {
                     Text("appearance_expand_media_size", bundle: FlareAppleUILocalization.bundle)
                     Text("appearance_expand_media_size_description", bundle: FlareAppleUILocalization.bundle)
                 }
-                Toggle(isOn: Binding(get: {
-                    appearance.limitMediaGridToNine
+                Picker(selection: Binding(get: {
+                    appearance.mediaLayout
                 }, set: { newValue in
-                    presenter.state.updateLimitMediaGridToNine(value: newValue)
+                    presenter.state.updateMediaLayout(value: newValue)
                 })) {
-                    Text("appearance_limit_media_grid_to_nine", bundle: FlareAppleUILocalization.bundle)
-                    Text("appearance_limit_media_grid_to_nine_description", bundle: FlareAppleUILocalization.bundle)
+                    Text("appearance_media_layout_grid", bundle: FlareAppleUILocalization.bundle)
+                        .tag(TimelineMediaLayout.grid)
+                    Text("appearance_media_layout_carousel", bundle: FlareAppleUILocalization.bundle)
+                        .tag(TimelineMediaLayout.carousel)
+                } label: {
+                    Text("appearance_media_layout", bundle: FlareAppleUILocalization.bundle)
+                    Text("appearance_media_layout_description", bundle: FlareAppleUILocalization.bundle)
+                }
+                if appearance.mediaLayout == .grid {
+                    Toggle(isOn: Binding(get: {
+                        appearance.limitMediaGridToNine
+                    }, set: { newValue in
+                        presenter.state.updateLimitMediaGridToNine(value: newValue)
+                    })) {
+                        Text("appearance_limit_media_grid_to_nine", bundle: FlareAppleUILocalization.bundle)
+                        Text("appearance_limit_media_grid_to_nine_description", bundle: FlareAppleUILocalization.bundle)
+                    }
                 }
                 Toggle(isOn: Binding(get: {
                     appearance.showSensitiveContent

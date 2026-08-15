@@ -11,10 +11,16 @@ struct StatusMediaView: View {
     let sensitive: Bool
     let onMediaClicked: (any UiMedia, Int) -> Void
     let cornerRadius: CGFloat
+    let allowsCarousel: Bool
+    let carouselLeadingPadding: CGFloat
+    let carouselTrailingPadding: CGFloat
     @Environment(\.timelineAppearance.expandMediaSize) private var expandMediaSize
+    @Environment(\.timelineAppearance.mediaLayout) private var mediaLayout
     @Environment(\.timelineAppearance.limitMediaGridToNine) private var limitMediaGridToNine
     @Environment(\.timelineMediaActionHandler) private var timelineMediaActionHandler
     @State private var isBlur: Bool
+    @State private var activeCarouselIndex: Int?
+    @State private var autoplayCarouselIndex: Int?
 //    @State private var selectedIndex: Int? = nil
 
     init(
@@ -22,6 +28,9 @@ struct StatusMediaView: View {
         data: [any UiMedia],
         sensitive: Bool,
         cornerRadius: CGFloat,
+        allowsCarousel: Bool,
+        carouselLeadingPadding: CGFloat,
+        carouselTrailingPadding: CGFloat,
         onMediaClicked: @escaping (any UiMedia, Int) -> Void
     ) {
         self.post = post
@@ -29,59 +38,16 @@ struct StatusMediaView: View {
         self.sensitive = sensitive
         self.onMediaClicked = onMediaClicked
         self.cornerRadius = cornerRadius
+        self.allowsCarousel = allowsCarousel
+        self.carouselLeadingPadding = carouselLeadingPadding
+        self.carouselTrailingPadding = carouselTrailingPadding
         self._isBlur = State(initialValue: sensitive)
+        self._activeCarouselIndex = State(initialValue: nil)
+        self._autoplayCarouselIndex = State(initialValue: data.indices.first)
     }
 
     var body: some View {
-        let visibleData = limitMediaGridToNine ? Array(data.prefix(statusMediaMaxVisibleMediaCount)) : data
-        let overflowCount = data.count - visibleData.count
-        AdaptiveGrid(
-            singleFollowsImageAspect: expandMediaSize,
-            singleViewAspectRatio: data.first?.aspectRatio,
-            spacing: 4,
-            maxColumns: 3,
-        ) {
-            ForEach(0..<visibleData.count, id: \.self) { index in
-                let item = visibleData[index]
-                MediaView(data: item)
-                    .onTapGesture {
-                        if !sensitive || !isBlur {
-                            onMediaClicked(item, index)
-//                            selectedIndex = index
-                        }
-                    }
-                    .overlay {
-                        if overflowCount > 0, index == visibleData.count - 1 {
-                            MediaOverflowOverlay(count: overflowCount)
-                                .allowsHitTesting(false)
-                        }
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        if let alt = item.description_, !alt.isEmpty {
-                            AltTextOverlay(altText: alt)
-                        }
-                    }
-                    .if(!isBlur && timelineMediaActionHandler != nil) { view in
-                        view.contextMenu {
-                            if let timelineMediaActionHandler {
-                                TimelineMediaContextMenu(
-                                    post: post,
-                                    media: item,
-                                    showsDownloadAll: data.count > 1,
-                                    actionHandler: timelineMediaActionHandler
-                                )
-                            }
-                        }
-                    }
-            }
-        }
-//        .fullScreenCover(item: $selectedIndex) { index in
-//            NavigationStack {
-//                StatusMediaScreen(data: data, selectedIndex: index)
-//            }
-//            .background(ClearFullScreenBackground())
-//            .colorScheme(.dark)
-//        }
+        mediaContent
         .blur(radius: isBlur ? 20 : 0)
         .overlay(
             alignment: isBlur ? .center : .topLeading
@@ -123,7 +89,143 @@ struct StatusMediaView: View {
                 EmptyView()
             }
         }
-        .clipShape(.rect(cornerRadius: cornerRadius))
+        .if(!usesCarousel) { view in
+            view.clipShape(.rect(cornerRadius: cornerRadius))
+        }
+        .onChange(of: usesCarousel) { _, enabled in
+            if enabled {
+                autoplayCarouselIndex = data.indices.first
+            } else {
+                activeCarouselIndex = nil
+                autoplayCarouselIndex = nil
+            }
+        }
+        .onChange(of: data.count) { _, count in
+            if let activeCarouselIndex, activeCarouselIndex >= count {
+                self.activeCarouselIndex = nil
+            }
+            if let autoplayCarouselIndex, autoplayCarouselIndex >= count {
+                self.autoplayCarouselIndex = data.indices.first
+            }
+        }
+    }
+
+    private var usesCarousel: Bool {
+        allowsCarousel && mediaLayout == .carousel && data.count > 1
+    }
+
+    @ViewBuilder
+    private var mediaContent: some View {
+        if usesCarousel {
+            GeometryReader { geometry in
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 4) {
+                        ForEach(data.indices, id: \.self) { index in
+                            let itemSize = carouselItemSize(
+                                data[index],
+                                containerHeight: geometry.size.height
+                            )
+                            mediaItem(
+                                data[index],
+                                index: index,
+                                overflowCount: 0,
+                                allowsAutoplay: !isBlur &&
+                                    index == autoplayCarouselIndex
+                            )
+                            .frame(width: itemSize.width, height: itemSize.height)
+                            .clipShape(.rect(cornerRadius: cornerRadius))
+                            .id(index)
+                        }
+                    }
+                    .scrollTargetLayout()
+                    .frame(height: geometry.size.height)
+                    .padding(.leading, carouselLeadingPadding)
+                    .padding(.trailing, carouselTrailingPadding)
+                }
+                .scrollIndicators(.hidden)
+                .scrollPosition(id: $activeCarouselIndex, anchor: .center)
+                .onChange(of: activeCarouselIndex) { _, index in
+                    if let index, index != autoplayCarouselIndex {
+                        autoplayCarouselIndex = nil
+                    }
+                }
+                .task(id: activeCarouselIndex) {
+                    guard let activeCarouselIndex else { return }
+                    try? await Task.sleep(nanoseconds: 150_000_000)
+                    guard !Task.isCancelled else { return }
+                    autoplayCarouselIndex = activeCarouselIndex
+                }
+            }
+            .aspectRatio(16 / 10, contentMode: .fit)
+            .padding(.leading, -carouselLeadingPadding)
+            .padding(.trailing, -carouselTrailingPadding)
+            .fixedSize(horizontal: false, vertical: true)
+        } else {
+            mediaGrid
+        }
+    }
+
+    private func carouselItemSize(_ item: any UiMedia, containerHeight: CGFloat) -> CGSize {
+        let sourceRatio = item.aspectRatio.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? 1
+        let displayRatio = min(sourceRatio, 16 / 9)
+        return CGSize(width: containerHeight * displayRatio, height: containerHeight)
+    }
+
+    private var mediaGrid: some View {
+        let visibleData = limitMediaGridToNine ? Array(data.prefix(statusMediaMaxVisibleMediaCount)) : data
+        let overflowCount = data.count - visibleData.count
+        return AdaptiveGrid(
+            singleFollowsImageAspect: expandMediaSize,
+            singleViewAspectRatio: data.first?.aspectRatio,
+            spacing: 4,
+            maxColumns: 3,
+        ) {
+            ForEach(0..<visibleData.count, id: \.self) { index in
+                mediaItem(
+                    visibleData[index],
+                    index: index,
+                    overflowCount: index == visibleData.count - 1 ? overflowCount : 0,
+                    allowsAutoplay: !isBlur
+                )
+            }
+        }
+    }
+
+    private func mediaItem(
+        _ item: any UiMedia,
+        index: Int,
+        overflowCount: Int,
+        allowsAutoplay: Bool
+    ) -> some View {
+        MediaView(data: item, allowsAutoplay: allowsAutoplay)
+            .onTapGesture {
+                if !sensitive || !isBlur {
+                    onMediaClicked(item, index)
+                }
+            }
+            .overlay {
+                if overflowCount > 0 {
+                    MediaOverflowOverlay(count: overflowCount)
+                        .allowsHitTesting(false)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if let alt = item.description_, !alt.isEmpty {
+                    AltTextOverlay(altText: alt)
+                }
+            }
+            .if(!isBlur && timelineMediaActionHandler != nil) { view in
+                view.contextMenu {
+                    if let timelineMediaActionHandler {
+                        TimelineMediaContextMenu(
+                            post: post,
+                            media: item,
+                            showsDownloadAll: data.count > 1,
+                            actionHandler: timelineMediaActionHandler
+                        )
+                    }
+                }
+            }
     }
 }
 

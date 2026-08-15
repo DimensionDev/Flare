@@ -42,6 +42,8 @@ struct StatusUIKitAppearance: Equatable {
     let compatLinkPreview: Bool
     let expandMediaSize: Bool
     let limitMediaGridToNine: Bool
+    let mediaLayout: TimelineMediaLayout
+    let mediaLayoutID: String
     let aiAgentEnabled: Bool
     let showOriginalWithTranslation: Bool
 
@@ -70,6 +72,8 @@ struct StatusUIKitAppearance: Equatable {
         compatLinkPreview = timeline.compatLinkPreview
         expandMediaSize = timeline.expandMediaSize
         limitMediaGridToNine = timeline.limitMediaGridToNine
+        mediaLayout = timeline.mediaLayout
+        mediaLayoutID = timeline.mediaLayout.name
         aiAgentEnabled = timeline.aiConfig.agent
         self.showOriginalWithTranslation = showOriginalWithTranslation
     }
@@ -91,6 +95,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
             lhs.expandMediaSize == rhs.expandMediaSize &&
             lhs.limitMediaGridToNine == rhs.limitMediaGridToNine &&
+            lhs.mediaLayoutID == rhs.mediaLayoutID &&
             lhs.aiAgentEnabled == rhs.aiAgentEnabled &&
             lhs.showOriginalWithTranslation == rhs.showOriginalWithTranslation
     }

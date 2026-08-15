@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Übersetzungen der Plattform und eine Option, Originaltext und Übersetzung gemeinsam anzuzeigen, wurden hinzugefügt.</li>
-                <li>Einstellungen zum Aktualisieren der Start-Timeline und eine optionale MXGA-Filterung für X-Beiträge wurden hinzugefügt.</li>
-                <li>Die Einstellung „Nach Zeit sortieren“ für gemischte Timelines wurde korrigiert; Beiträge erscheinen jetzt in ihrer tatsächlichen chronologischen Reihenfolge.</li>
-                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
+                <li>Ein optionales Karussell-Layout für Beiträge mit mehreren Medien wurde hinzugefügt und kann global oder pro Timeline konfiguriert werden.</li>
+                <li>Themen-Timelines aus „Entdecken“ bei X und automatische Linkvorschauen für Bluesky-Beiträge wurden hinzugefügt.</li>
+                <li>Der Galerie-Modus unterstützt jetzt Beitragsaktionen per langem Drücken oder Rechtsklick auf Android, iOS, macOS und Desktop.</li>
+                <li>Die Zuverlässigkeit von Timelines und Medien wurde verbessert, darunter X-Benachrichtigungen, die Paginierung in Mastodon „Entdecken“, die Reihenfolge von Reposts, Nostr-Profile, eingebettete RSS-Videos und die Größenberechnung der iOS-Galerie.</li>
             </ul>
         ]]></string>
 </resources>

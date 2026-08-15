@@ -31268,181 +31268,181 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weergawe %@:\n• Platformverskafde vertalings en ’n opsie om die oorspronklike teks saam met die vertaling te wys, is bygevoeg.\n• Kontroles vir die verfrissing van die tuistydlyn en opsionele MXGA-filtrering vir X-plasings is bygevoeg.\n• Die “Sorteer volgens tyd”-instelling vir gemengde tydlyne is reggestel; plasings verskyn nou in hul werklike chronologiese volgorde.\n• Foutoplossings en prestasieverbeterings."
+            "value" : "Weergawe %@:\n• ’n Opsionele karrouseluitleg vir plasings met verskeie media-items is bygevoeg en kan wêreldwyd of per tydlyn ingestel word.\n• X Discover-onderwerptydlyne en outomatiese skakelvoorskoue vir Bluesky-plasings is bygevoeg.\n• Galerymodus ondersteun nou plasingaksies met langdruk of regsklik op Android, iOS, macOS en Desktop.\n• Die betroubaarheid van tydlyne en media is verbeter, insluitend X-kennisgewings, Mastodon Discover-bladsynavigasie, herplasingsvolgorde, Nostr-profiele, ingebedde RSS-video’s en iOS-galerygroottes."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الإصدار %@:\n• تمت إضافة ترجمات مقدّمة من المنصة وخيار لعرض النص الأصلي مع ترجمته.\n• تمت إضافة عناصر تحكم لتحديث الخط الزمني الرئيسي وفلترة MXGA الاختيارية لمنشورات X.\n• تم إصلاح إعداد «الترتيب حسب الوقت» للخطوط الزمنية المختلطة، وأصبحت المنشورات تظهر الآن بترتيبها الزمني الفعلي.\n• إصلاحات للأخطاء وتحسينات في الأداء."
+            "value" : "الإصدار %@:\n• تمت إضافة تخطيط دائري اختياري للمنشورات التي تحتوي على وسائط متعددة، ويمكن ضبطه بشكل عام أو لكل خط زمني.\n• تمت إضافة خطوط زمنية لمواضيع «استكشاف» في X ومعاينات تلقائية للروابط في منشورات Bluesky.\n• يدعم وضع المعرض الآن إجراءات المنشور بالضغط المطوّل أو النقر بزر الفأرة الأيمن على Android وiOS وmacOS وسطح المكتب.\n• تم تحسين موثوقية الخطوط الزمنية والوسائط، بما في ذلك إشعارات X، وترقيم صفحات «استكشاف» في Mastodon، وترتيب إعادة النشر، وملفات Nostr الشخصية، ومقاطع فيديو RSS المضمّنة، وأحجام معرض iOS."
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Добавени са преводи от платформата и опция за показване на оригиналния текст заедно с превода.\n• Добавени са настройки за опресняване на началната времева линия и незадължително MXGA филтриране за публикации в X.\n• Поправена е настройката „Сортиране по време“ за смесените времеви линии и публикациите вече се показват в действителния им хронологичен ред.\n• Поправки на грешки и подобрения в производителността."
+            "value" : "Версия %@:\n• Добавено е незадължително каруселно оформление за публикации с няколко мултимедийни елемента, което може да се настройва глобално или за всяка времева линия.\n• Добавени са тематични времеви линии в Discover на X и автоматични визуализации на връзки за публикации в Bluesky.\n• Режимът „Галерия“ вече поддържа действия с публикации чрез продължително натискане или щракване с десния бутон в Android, iOS, macOS и Desktop.\n• Подобрена е надеждността на времевите линии и мултимедията, включително известията в X, страниците в Mastodon Discover, подреждането на препубликациите, профилите в Nostr, вградените RSS видеоклипове и размерите на галерията в iOS."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versió %@:\n• S’han afegit traduccions proporcionades per la plataforma i una opció per mostrar el text original juntament amb la traducció.\n• S’han afegit controls d’actualització de la cronologia d’inici i el filtratge MXGA opcional per a les publicacions d’X.\n• S’ha corregit l’opció «Ordena per hora» de les cronologies mixtes; ara les publicacions apareixen en el seu ordre cronològic real.\n• Correccions d'errors i millores de rendiment."
+            "value" : "Versió %@:\n• S’ha afegit un disseny de carrusel opcional per a les publicacions amb diversos elements multimèdia, configurable globalment o per cronologia.\n• S’han afegit cronologies temàtiques de Descobreix d’X i previsualitzacions automàtiques d’enllaços per a les publicacions de Bluesky.\n• El mode Galeria ara admet accions sobre publicacions mitjançant una pulsació llarga o un clic dret a Android, iOS, macOS i l’escriptori.\n• S’ha millorat la fiabilitat de les cronologies i dels continguts multimèdia, incloent-hi les notificacions d’X, la paginació de Descobreix de Mastodon, l’ordre de les republicacions, els perfils de Nostr, els vídeos RSS incrustats i la mida de la Galeria d’iOS."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verze %@:\n• Přidány překlady poskytované platformou a možnost zobrazit původní text společně s překladem.\n• Přidáno ovládání obnovování domovské časové osy a volitelné filtrování MXGA pro příspěvky na X.\n• Opraveno nastavení „Řadit podle času“ pro smíšené časové osy; příspěvky se nyní zobrazují ve skutečném chronologickém pořadí.\n• Opravy chyb a vylepšení výkonu."
+            "value" : "Verze %@:\n• Přidáno volitelné karuselové rozvržení pro příspěvky s více médii, které lze nastavit globálně nebo pro každou časovou osu.\n• Přidány tematické časové osy Objevovat na X a automatické náhledy odkazů pro příspěvky Bluesky.\n• Režim Galerie nyní podporuje akce s příspěvky dlouhým stisknutím nebo kliknutím pravým tlačítkem v systémech Android, iOS, macOS a Desktop.\n• Zlepšena spolehlivost časových os a médií, včetně oznámení X, stránkování Mastodon Objevovat, řazení repostů, profilů Nostr, vložených videí RSS a rozměrů Galerie v iOS."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Tilføjet oversættelser fra platformen og en mulighed for at vise originalteksten sammen med oversættelsen.\n• Tilføjet indstillinger for opdatering af hjemmetidslinjen og valgfri MXGA-filtrering af X-opslag.\n• Indstillingen “Sortér efter tid” for blandede tidslinjer er rettet, så opslag nu vises i deres faktiske kronologiske rækkefølge.\n• Fejlrettelser og forbedringer af ydeevnen."
+            "value" : "Version %@:\n• Tilføjet et valgfrit karrusellayout til opslag med flere medieelementer, som kan indstilles globalt eller pr. tidslinje.\n• Tilføjet emnetidslinjer fra Udforsk på X og automatiske linkforhåndsvisninger til Bluesky-opslag.\n• Galleritilstand understøtter nu opslagshandlinger med langt tryk eller højreklik på Android, iOS, macOS og Desktop.\n• Forbedret stabilitet for tidslinjer og medier, herunder X-notifikationer, sideindlæsning i Mastodon Udforsk, rækkefølgen af genopslag, Nostr-profiler, indlejrede RSS-videoer og størrelsen på iOS-galleriet."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Übersetzungen der Plattform und eine Option, Originaltext und Übersetzung gemeinsam anzuzeigen, wurden hinzugefügt.\n• Einstellungen zum Aktualisieren der Start-Timeline und eine optionale MXGA-Filterung für X-Beiträge wurden hinzugefügt.\n• Die Einstellung „Nach Zeit sortieren“ für gemischte Timelines wurde korrigiert; Beiträge erscheinen jetzt in ihrer tatsächlichen chronologischen Reihenfolge.\n• Fehlerbehebungen und Leistungsverbesserungen."
+            "value" : "Version %@:\n• Ein optionales Karussell-Layout für Beiträge mit mehreren Medien wurde hinzugefügt und kann global oder pro Timeline konfiguriert werden.\n• Themen-Timelines aus „Entdecken“ bei X und automatische Linkvorschauen für Bluesky-Beiträge wurden hinzugefügt.\n• Der Galerie-Modus unterstützt jetzt Beitragsaktionen per langem Drücken oder Rechtsklick auf Android, iOS, macOS und Desktop.\n• Die Zuverlässigkeit von Timelines und Medien wurde verbessert, darunter X-Benachrichtigungen, die Paginierung in Mastodon „Entdecken“, die Reihenfolge von Reposts, Nostr-Profile, eingebettete RSS-Videos und die Größenberechnung der iOS-Galerie."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έκδοση %@:\n• Προστέθηκαν μεταφράσεις από την πλατφόρμα και επιλογή εμφάνισης του πρωτότυπου κειμένου μαζί με τη μετάφραση.\n• Προστέθηκαν ρυθμίσεις ανανέωσης της αρχικής χρονογραμμής και προαιρετικό φιλτράρισμα MXGA για αναρτήσεις του X.\n• Διορθώθηκε η ρύθμιση «Ταξινόμηση κατά χρόνο» για τις μικτές χρονογραμμές, ώστε οι αναρτήσεις να εμφανίζονται πλέον στην πραγματική χρονολογική τους σειρά.\n• Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης."
+            "value" : "Έκδοση %@:\n• Προστέθηκε προαιρετική διάταξη καρουζέλ για αναρτήσεις με πολλά στοιχεία πολυμέσων, με δυνατότητα καθολικής ρύθμισης ή ανά χρονογραμμή.\n• Προστέθηκαν θεματικές χρονογραμμές Ανακάλυψης του X και αυτόματες προεπισκοπήσεις συνδέσμων για αναρτήσεις στο Bluesky.\n• Η λειτουργία Συλλογής υποστηρίζει πλέον ενέργειες ανάρτησης με παρατεταμένο πάτημα ή δεξί κλικ σε Android, iOS, macOS και Desktop.\n• Βελτιώθηκε η αξιοπιστία των χρονογραμμών και των πολυμέσων, συμπεριλαμβανομένων των ειδοποιήσεων X, της σελιδοποίησης Ανακάλυψης Mastodon, της σειράς αναδημοσιεύσεων, των προφίλ Nostr, των ενσωματωμένων βίντεο RSS και του μεγέθους Συλλογής στο iOS."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Added platform-provided translations and an option to show the original text together with its translation.\n• Added home timeline refresh controls and optional MXGA filtering for X posts.\n• Fixed the “Sort by time” setting for mixed timelines so posts now appear in their actual chronological order.\n• Bug fixes and performance improvements."
+            "value" : "Version %@:\n• Added an optional carousel layout for posts with multiple media items, configurable globally or per timeline.\n• Added X Discover topic timelines and automatic link previews for Bluesky posts.\n• Gallery mode now supports long-press or right-click post actions on Android, iOS, macOS, and Desktop.\n• Improved feed and media reliability, including X notifications, Mastodon Discover pagination, repost ordering, Nostr profiles, RSS video embeds, and iOS Gallery sizing."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versio %@:\n• Lisättiin alustan tarjoamat käännökset ja mahdollisuus näyttää alkuperäinen teksti käännöksen rinnalla.\n• Lisättiin kotiaikajanan päivitysasetukset ja valinnainen MXGA-suodatus X-julkaisuille.\n• Yhdistettyjen aikajanojen ”Lajittele ajan mukaan” -asetus on korjattu, ja julkaisut näkyvät nyt todellisessa aikajärjestyksessään.\n• Virhekorjauksia ja suorituskykyparannuksia."
+            "value" : "Versio %@:\n• Lisättiin valinnainen karuselliasettelu useita mediasisältöjä sisältäville julkaisuille. Sen voi määrittää yleisesti tai aikajanakohtaisesti.\n• Lisättiin X:n Löydä-aiheaikajanat ja automaattiset linkkien esikatselut Bluesky-julkaisuihin.\n• Gallerianäkymä tukee nyt julkaisutoimintoja pitkällä painalluksella tai hiiren kakkospainikkeella Androidissa, iOS:ssä, macOS:ssä ja työpöydällä.\n• Aikajanojen ja median luotettavuutta parannettiin, mukaan lukien X-ilmoitukset, Mastodonin Löydä-näkymän sivutus, uudelleenjulkaisujen järjestys, Nostr-profiilit, upotetut RSS-videot ja iOS-gallerian mitoitus."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ :\n• Ajout des traductions fournies par la plateforme et d’une option permettant d’afficher le texte original avec sa traduction.\n• Ajout de réglages d’actualisation du fil d’accueil et d’un filtrage MXGA facultatif pour les publications X.\n• Le réglage « Trier par date » des fils mixtes a été corrigé : les publications suivent désormais leur ordre chronologique réel.\n• Corrections de bugs et améliorations des performances."
+            "value" : "Version %@ :\n• Ajout d’une disposition facultative en carrousel pour les publications contenant plusieurs médias, configurable globalement ou par fil.\n• Ajout des fils thématiques Découvrir de X et des aperçus automatiques des liens pour les publications Bluesky.\n• Le mode Galerie permet désormais d’accéder aux actions d’une publication par appui long ou clic droit sur Android, iOS, macOS et ordinateur.\n• Amélioration de la fiabilité des fils et des médias, notamment pour les notifications X, la pagination de Découvrir sur Mastodon, l’ordre des republications, les profils Nostr, les vidéos RSS intégrées et le dimensionnement de la Galerie sur iOS."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "גרסה %@:\n• נוספו תרגומים שמספקת הפלטפורמה ואפשרות להציג את הטקסט המקורי יחד עם התרגום.\n• נוספו הגדרות לרענון ציר הזמן הראשי וסינון MXGA אופציונלי לפוסטים ב-X.\n• תוקנה ההגדרה „מיון לפי זמן” בצירי זמן משולבים, וכעת הפוסטים מוצגים לפי הסדר הכרונולוגי האמיתי שלהם.\n• תיקוני באגים ושיפורי ביצועים."
+            "value" : "גרסה %@:\n• נוספה פריסת קרוסלה אופציונלית לפוסטים עם כמה פריטי מדיה, שניתנת להגדרה כללית או לכל ציר זמן.\n• נוספו צירי זמן של נושאים מ״גילוי״ ב-X ותצוגות מקדימות אוטומטיות לקישורים בפוסטים של Bluesky.\n• מצב הגלריה תומך כעת בפעולות על פוסטים באמצעות לחיצה ממושכת או לחיצה ימנית ב-Android, ב-iOS, ב-macOS ובמחשב.\n• שופרה האמינות של צירי הזמן והמדיה, כולל התראות X, הדפדוף ב״גילוי״ של Mastodon, סדר הפוסטים החוזרים, פרופילי Nostr, סרטוני RSS מוטמעים וגודל הגלריה ב-iOS."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ verzió:\n• Platform által biztosított fordítások és az eredeti szöveg fordítással együtt való megjelenítésének lehetősége.\n• Új beállítások a kezdőlap idővonalának frissítéséhez, valamint opcionális MXGA-szűrés az X-bejegyzésekhez.\n• Javítottuk a vegyes idővonalak „Rendezés idő szerint” beállítását; a bejegyzések mostantól a tényleges időrendjükben jelennek meg.\n• Hibajavítások és teljesítménybeli fejlesztések."
+            "value" : "%@ verzió:\n• Opcionális körhinta-elrendezés került a több médiát tartalmazó bejegyzésekhez, amely globálisan vagy idővonalanként állítható.\n• X Felfedezés témájú idővonalak és automatikus hivatkozás-előnézetek kerültek a Bluesky-bejegyzésekhez.\n• A Galéria mód mostantól támogatja a bejegyzésműveleteket hosszú nyomással vagy jobb kattintással Androidon, iOS-en, macOS-en és asztali gépen.\n• Javult az idővonalak és a média megbízhatósága, többek között az X-értesítések, a Mastodon Felfedezés lapozása, az újraközlések sorrendje, a Nostr-profilok, a beágyazott RSS-videók és az iOS Galéria méretezése."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versione %@:\n• Aggiunte le traduzioni fornite dalla piattaforma e un’opzione per mostrare il testo originale insieme alla traduzione.\n• Aggiunti i controlli di aggiornamento della timeline Home e il filtro MXGA opzionale per i post di X.\n• È stata corretta l’impostazione “Ordina per data” delle timeline miste: ora i post seguono il loro effettivo ordine cronologico.\n• Correzioni di bug e miglioramenti delle prestazioni."
+            "value" : "Versione %@:\n• Aggiunto un layout a carosello opzionale per i post con più elementi multimediali, configurabile globalmente o per singola timeline.\n• Aggiunte le timeline tematiche Scopri di X e le anteprime automatiche dei link per i post di Bluesky.\n• La modalità Galleria ora supporta le azioni sui post tramite pressione prolungata o clic destro su Android, iOS, macOS e Desktop.\n• Migliorata l’affidabilità di timeline e contenuti multimediali, incluse le notifiche di X, la paginazione di Scopri su Mastodon, l’ordine dei repost, i profili Nostr, i video RSS incorporati e le dimensioni della Galleria su iOS."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン %@:\n• プラットフォーム提供の翻訳と、原文を翻訳と一緒に表示するオプションを追加しました。\n• ホームタイムラインの更新設定と、X の投稿を対象とする任意の MXGA フィルターを追加しました。\n• 混合タイムラインの「時刻順」設定を修正し、投稿が実際の時系列順に並ぶようになりました。\n• バグ修正とパフォーマンス改善。"
+            "value" : "バージョン %@:\n• 複数のメディアを含む投稿向けに、全体またはタイムラインごとに設定できるカルーセルレイアウトを追加しました。\n• X の「話題を見つける」タイムラインと、Bluesky 投稿のリンクプレビュー自動生成を追加しました。\n• ギャラリーモードで、Android、iOS、macOS、デスクトップの長押しまたは右クリックから投稿操作を開けるようになりました。\n• X の通知、Mastodon の「見つける」のページ読み込み、リポスト順、Nostr プロフィール、RSS 動画埋め込み、iOS ギャラリーのサイズなど、タイムラインとメディアの安定性を改善しました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버전 %@:\n• 플랫폼에서 제공하는 번역과 원문을 번역문과 함께 표시하는 옵션을 추가했습니다.\n• 홈 타임라인 새로 고침 설정과 X 게시물용 선택적 MXGA 필터를 추가했습니다.\n• 혼합 타임라인의 ‘시간순 정렬’ 설정을 수정해 게시물이 이제 실제 시간 순서대로 표시됩니다.\n• 버그 수정 및 성능 개선."
+            "value" : "버전 %@:\n• 여러 미디어가 포함된 게시물에 선택형 캐러셀 레이아웃을 추가했습니다. 전체 또는 타임라인별로 설정할 수 있습니다.\n• X 둘러보기 주제 타임라인과 Bluesky 게시물의 자동 링크 미리보기를 추가했습니다.\n• 이제 갤러리 모드에서 Android, iOS, macOS 및 데스크톱의 길게 누르기 또는 오른쪽 클릭으로 게시물 작업을 열 수 있습니다.\n• X 알림, Mastodon 둘러보기 페이지 로딩, 재게시 순서, Nostr 프로필, RSS 동영상 삽입 및 iOS 갤러리 크기 등 타임라인과 미디어 안정성을 개선했습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versjon %@:\n• Lagt til oversettelser fra plattformen og et alternativ for å vise originalteksten sammen med oversettelsen.\n• Lagt til innstillinger for oppdatering av hjemmetidslinjen og valgfri MXGA-filtrering av X-innlegg.\n• Innstillingen «Sorter etter tid» for blandede tidslinjer er rettet, slik at innlegg nå vises i faktisk kronologisk rekkefølge.\n• Feilrettinger og ytelsesforbedringer."
+            "value" : "Versjon %@:\n• Lagt til et valgfritt karuselloppsett for innlegg med flere medieelementer, som kan angis globalt eller per tidslinje.\n• Lagt til emnetidslinjer fra Utforsk på X og automatiske lenkeforhåndsvisninger for Bluesky-innlegg.\n• Gallerimodus støtter nå innleggshandlinger med langt trykk eller høyreklikk på Android, iOS, macOS og skrivebord.\n• Forbedret stabilitet for tidslinjer og medier, blant annet X-varsler, sideinndeling i Mastodon Utforsk, rekkefølgen på viderepubliseringer, Nostr-profiler, innebygde RSS-videoer og størrelsen på iOS-galleriet."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versie %@:\n• Vertalingen van het platform en een optie om de oorspronkelijke tekst samen met de vertaling te tonen zijn toegevoegd.\n• Instellingen voor het vernieuwen van de starttijdlijn en optionele MXGA-filtering voor X-berichten zijn toegevoegd.\n• De instelling ‘Sorteren op tijd’ voor gemengde tijdlijnen is hersteld; berichten verschijnen nu in hun werkelijke chronologische volgorde.\n• Bugfixes en prestatieverbeteringen."
+            "value" : "Versie %@:\n• Een optionele carrouselindeling toegevoegd voor berichten met meerdere media-items, globaal of per tijdlijn instelbaar.\n• Onderwerptijdlijnen uit Ontdekken op X en automatische linkvoorbeelden voor Bluesky-berichten toegevoegd.\n• De Galerijmodus ondersteunt nu berichtacties via lang indrukken of rechtsklikken op Android, iOS, macOS en Desktop.\n• De betrouwbaarheid van tijdlijnen en media is verbeterd, waaronder X-meldingen, paginering van Mastodon Ontdekken, de volgorde van reposts, Nostr-profielen, ingesloten RSS-video’s en de grootte van de iOS-galerij."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wersja %@:\n• Dodano tłumaczenia dostarczane przez platformę i opcję wyświetlania oryginalnego tekstu razem z tłumaczeniem.\n• Dodano ustawienia odświeżania głównej osi czasu i opcjonalne filtrowanie MXGA dla postów z X.\n• Naprawiono ustawienie „Sortuj według czasu” dla mieszanych osi czasu; posty są teraz wyświetlane w rzeczywistej kolejności chronologicznej.\n• Poprawki błędów i ulepszenia wydajności."
+            "value" : "Wersja %@:\n• Dodano opcjonalny układ karuzeli dla postów z wieloma elementami multimedialnymi, konfigurowany globalnie lub dla każdej osi czasu.\n• Dodano tematyczne osie czasu Odkrywaj w X i automatyczne podglądy linków w postach Bluesky.\n• Tryb Galerii obsługuje teraz działania na postach przez długie naciśnięcie lub kliknięcie prawym przyciskiem na Androidzie, iOS, macOS i komputerach.\n• Poprawiono niezawodność osi czasu i multimediów, w tym powiadomień X, stronicowania Odkrywaj w Mastodon, kolejności repostów, profili Nostr, osadzonych filmów RSS i rozmiarów Galerii w iOS."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Foram adicionadas traduções fornecidas pela plataforma e uma opção para mostrar o texto original juntamente com a tradução.\n• Foram adicionados controlos de atualização da cronologia inicial e filtragem MXGA opcional para publicações do X.\n• A definição «Ordenar por hora» das cronologias mistas foi corrigida; as publicações aparecem agora na ordem cronológica real.\n• Correções de erros e melhorias de desempenho."
+            "value" : "Versão %@:\n• Adicionado um esquema de carrossel opcional para publicações com vários elementos multimédia, configurável globalmente ou por cronologia.\n• Adicionadas cronologias de tópicos do Explorar do X e pré-visualizações automáticas de ligações para publicações do Bluesky.\n• O modo Galeria permite agora abrir ações das publicações com um toque prolongado ou clique direito no Android, iOS, macOS e computador.\n• Melhorada a fiabilidade das cronologias e dos conteúdos multimédia, incluindo notificações do X, paginação do Explorar no Mastodon, ordem das republicações, perfis Nostr, vídeos RSS incorporados e dimensionamento da Galeria no iOS."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Adicionadas traduções fornecidas pela plataforma e uma opção para mostrar o texto original junto com a tradução.\n• Adicionados controles de atualização da timeline inicial e filtragem MXGA opcional para publicações do X.\n• A configuração “Ordenar por horário” das timelines mistas foi corrigida; agora as publicações aparecem na ordem cronológica real.\n• Correções de bugs e melhorias de desempenho."
+            "value" : "Versão %@:\n• Adicionado um layout de carrossel opcional para publicações com várias mídias, configurável globalmente ou por timeline.\n• Adicionadas timelines de tópicos do Explorar do X e prévias automáticas de links para publicações do Bluesky.\n• O modo Galeria agora permite abrir ações de publicações com toque longo ou clique direito no Android, iOS, macOS e Desktop.\n• Melhorada a confiabilidade de timelines e mídia, incluindo notificações do X, paginação do Explorar no Mastodon, ordem de reposts, perfis do Nostr, vídeos RSS incorporados e dimensionamento da Galeria no iOS."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versiunea %@:\n• Au fost adăugate traduceri furnizate de platformă și opțiunea de a afișa textul original împreună cu traducerea.\n• Au fost adăugate controale pentru reîmprospătarea cronologiei principale și filtrare MXGA opțională pentru postările X.\n• A fost remediată setarea „Sortare după timp” pentru cronologiile mixte; postările apar acum în ordinea cronologică reală.\n• Remedieri de erori și îmbunătățiri de performanță."
+            "value" : "Versiunea %@:\n• A fost adăugat un aspect opțional de tip carusel pentru postările cu mai multe elemente media, configurabil global sau pentru fiecare cronologie.\n• Au fost adăugate cronologii tematice Descoperă în X și previzualizări automate ale linkurilor pentru postările Bluesky.\n• Modul Galerie acceptă acum acțiuni asupra postărilor prin apăsare lungă sau clic dreapta pe Android, iOS, macOS și Desktop.\n• A fost îmbunătățită fiabilitatea cronologiilor și conținutului media, inclusiv notificările X, paginarea Descoperă din Mastodon, ordinea redistribuirilor, profilurile Nostr, videoclipurile RSS încorporate și dimensionarea Galeriei pe iOS."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Добавлены переводы от платформы и возможность показывать исходный текст вместе с переводом.\n• Добавлены настройки обновления домашней ленты и необязательная MXGA-фильтрация публикаций X.\n• Исправлена настройка «Сортировка по времени» для смешанных лент: публикации теперь отображаются в фактическом хронологическом порядке.\n• Исправления ошибок и улучшения производительности."
+            "value" : "Версия %@:\n• Добавлена необязательная карусельная раскладка для публикаций с несколькими медиафайлами, настраиваемая глобально или отдельно для каждой ленты.\n• Добавлены тематические ленты раздела «Обзор» в X и автоматические предпросмотры ссылок в публикациях Bluesky.\n• В режиме галереи теперь можно открывать действия с публикацией долгим нажатием или правой кнопкой мыши на Android, iOS, macOS и компьютере.\n• Повышена надёжность лент и мультимедиа, включая уведомления X, постраничную загрузку раздела «Обзор» в Mastodon, порядок репостов, профили Nostr, встроенные RSS-видео и размеры галереи в iOS."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Верзија %@:\n• Додати су преводи које обезбеђује платформа и опција за приказ оригиналног текста заједно са преводом.\n• Додате су контроле за освежавање почетне временске линије и опционо MXGA филтрирање X објава.\n• Исправљена је поставка „Сортирај по времену“ за мешовите временске линије; објаве се сада приказују стварним хронолошким редом.\n• Исправке грешака и побољшања перформанси."
+            "value" : "Верзија %@:\n• Додат је опциони распоред вртешке за објаве са више медијских ставки, који се подешава глобално или по временској линији.\n• Додате су тематске временске линије „Откриј“ на X-у и аутоматски прегледи веза за Bluesky објаве.\n• Режим галерије сада подржава радње над објавама дугим притиском или десним кликом на Android-у, iOS-у, macOS-у и рачунару.\n• Побољшана је поузданост временских линија и медија, укључујући X обавештења, пагинацију Mastodon одељка „Откриј“, редослед поновних објава, Nostr профиле, уграђене RSS видео-снимке и величину iOS галерије."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Lade till översättningar från plattformen och ett alternativ för att visa originaltexten tillsammans med översättningen.\n• Lade till inställningar för uppdatering av hemtidslinjen och valfri MXGA-filtrering av X-inlägg.\n• Inställningen ”Sortera efter tid” för blandade tidslinjer har rättats, så att inlägg nu visas i sin faktiska kronologiska ordning.\n• Buggfixar och prestandaförbättringar."
+            "value" : "Version %@:\n• Lade till en valfri karusellayout för inlägg med flera medieobjekt, som kan ställas in globalt eller per tidslinje.\n• Lade till ämnestidslinjer från Utforska på X och automatiska länkförhandsvisningar för Bluesky-inlägg.\n• Galleriläget stöder nu inläggsåtgärder med långtryck eller högerklick på Android, iOS, macOS och dator.\n• Förbättrade tillförlitligheten för tidslinjer och media, inklusive X-aviseringar, sidindelning i Mastodon Utforska, ordningen på återpubliceringar, Nostr-profiler, inbäddade RSS-videor och storleken på iOS-galleriet."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sürüm %@:\n• Platform tarafından sağlanan çeviriler ve özgün metni çeviriyle birlikte gösterme seçeneği eklendi.\n• Ana zaman akışı yenileme ayarları ve X gönderileri için isteğe bağlı MXGA filtreleme eklendi.\n• Karma zaman akışlarındaki “Zamana göre sırala” ayarı düzeltildi; gönderiler artık gerçek kronolojik sıralarıyla gösteriliyor.\n• Hata düzeltmeleri ve performans iyileştirmeleri."
+            "value" : "Sürüm %@:\n• Birden fazla medya öğesi içeren gönderiler için genel olarak veya zaman akışı başına yapılandırılabilen isteğe bağlı bir karusel düzeni eklendi.\n• X Keşfet konu zaman akışları ve Bluesky gönderileri için otomatik bağlantı önizlemeleri eklendi.\n• Galeri modu artık Android, iOS, macOS ve masaüstünde uzun basma veya sağ tıklamayla gönderi işlemlerini destekliyor.\n• X bildirimleri, Mastodon Keşfet sayfalaması, yeniden gönderi sıralaması, Nostr profilleri, gömülü RSS videoları ve iOS Galeri boyutlandırması dahil olmak üzere zaman akışı ve medya güvenilirliği iyileştirildi."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версія %@:\n• Додано переклади від платформи й можливість показувати оригінальний текст разом із перекладом.\n• Додано налаштування оновлення домашньої стрічки й необов’язкову MXGA-фільтрацію дописів X.\n• Виправлено налаштування «Сортувати за часом» для змішаних стрічок: дописи тепер відображаються у фактичному хронологічному порядку.\n• Виправлення помилок і покращення продуктивності."
+            "value" : "Версія %@:\n• Додано необов’язкове карусельне компонування для дописів із кількома медіафайлами, яке можна налаштувати глобально або для кожної стрічки.\n• Додано тематичні стрічки «Огляд» у X та автоматичний попередній перегляд посилань у дописах Bluesky.\n• У режимі галереї тепер можна відкривати дії з дописом довгим натисканням або клацанням правою кнопкою на Android, iOS, macOS і комп’ютері.\n• Покращено надійність стрічок і медіа, зокрема сповіщень X, посторінкового завантаження «Огляду» в Mastodon, порядку репостів, профілів Nostr, вбудованих RSS-відео та розмірів галереї в iOS."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phiên bản %@:\n• Đã thêm bản dịch do nền tảng cung cấp và tùy chọn hiển thị văn bản gốc cùng bản dịch.\n• Đã thêm tùy chọn làm mới dòng thời gian chính và bộ lọc MXGA tùy chọn cho bài đăng X.\n• Đã sửa cài đặt “Sắp xếp theo thời gian” cho dòng thời gian hỗn hợp; bài đăng giờ hiển thị theo đúng thứ tự thời gian thực tế.\n• Sửa lỗi và cải thiện hiệu năng."
+            "value" : "Phiên bản %@:\n• Đã thêm bố cục băng chuyền tùy chọn cho bài đăng có nhiều mục đa phương tiện, có thể cấu hình chung hoặc theo từng dòng thời gian.\n• Đã thêm dòng thời gian chủ đề Khám phá của X và bản xem trước liên kết tự động cho bài đăng Bluesky.\n• Chế độ Thư viện hiện hỗ trợ thao tác bài đăng bằng cách nhấn giữ hoặc nhấp chuột phải trên Android, iOS, macOS và máy tính.\n• Cải thiện độ ổn định của dòng thời gian và nội dung đa phương tiện, bao gồm thông báo X, phân trang Khám phá của Mastodon, thứ tự đăng lại, hồ sơ Nostr, video RSS nhúng và kích thước Thư viện trên iOS."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 新增平台提供的翻译，并可同时显示原文和译文。\n• 新增首页时间线刷新设置和可选的 MXGA 过滤，可隐藏匹配的 X 帖子。\n• 修复混合时间线的“按时间排序”设置，内容现在会按真实时间顺序排列。\n• Bug 修复和性能改进。"
+            "value" : "版本 %@：\n• 新增多媒体帖子的可选轮播布局，可全局设置或为每条时间线单独设置。\n• 新增 X 探索主题时间线和 Bluesky 帖子的自动链接预览。\n• 画廊模式现已支持在 Android、iOS、macOS 和桌面端通过长按或右键打开帖子操作。\n• 改进时间线和媒体稳定性，包括 X 通知、Mastodon 探索分页、转帖排序、Nostr 个人资料、RSS 视频嵌入和 iOS 画廊尺寸。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 新增平台提供的翻譯，並可同時顯示原文與譯文。\n• 新增首頁時間軸重新整理設定及可選的 MXGA 過濾，可隱藏符合規則的 X 貼文。\n• 修正混合時間軸的「依時間排序」設定，內容現在會依實際時間順序排列。\n• 錯誤修正與效能改善。"
+            "value" : "版本 %@：\n• 新增多媒體貼文的可選輪播版面，可全域設定或為每條時間軸個別設定。\n• 新增 X 探索主題時間軸及 Bluesky 貼文的自動連結預覽。\n• 圖庫模式現在可在 Android、iOS、macOS 及桌面版透過長按或按右鍵開啟貼文操作。\n• 改善時間軸與媒體穩定性，包括 X 通知、Mastodon 探索分頁、轉貼排序、Nostr 個人檔案、RSS 影片嵌入及 iOS 圖庫尺寸。"
           }
         }
       }

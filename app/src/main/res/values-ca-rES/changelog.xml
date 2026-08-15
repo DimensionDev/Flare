@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’han afegit traduccions proporcionades per la plataforma i una opció per mostrar el text original juntament amb la traducció.</li>
-                <li>S’han afegit controls d’actualització de la cronologia d’inici i el filtratge MXGA opcional per a les publicacions d’X.</li>
-                <li>S’ha corregit l’opció «Ordena per hora» de les cronologies mixtes; ara les publicacions apareixen en el seu ordre cronològic real.</li>
-                <li>Correccions d\'errors i millores de rendiment.</li>
+                <li>S’ha afegit un disseny de carrusel opcional per a les publicacions amb diversos elements multimèdia, configurable globalment o per cronologia.</li>
+                <li>S’han afegit cronologies temàtiques de Descobreix d’X i previsualitzacions automàtiques d’enllaços per a les publicacions de Bluesky.</li>
+                <li>El mode Galeria ara admet accions sobre publicacions mitjançant una pulsació llarga o un clic dret a Android, iOS, macOS i l’escriptori.</li>
+                <li>S’ha millorat la fiabilitat de les cronologies i dels continguts multimèdia, incloent-hi les notificacions d’X, la paginació de Descobreix de Mastodon, l’ordre de les republicacions, els perfils de Nostr, els vídeos RSS incrustats i la mida de la Galeria d’iOS.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

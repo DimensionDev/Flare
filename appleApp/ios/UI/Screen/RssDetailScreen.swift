@@ -291,6 +291,11 @@ struct HtmlWebView: UIViewRepresentable {
                 return
             }
 
+            if navigationAction.targetFrame?.isMainFrame == false {
+                decisionHandler(.allow)
+                return
+            }
+
             if targetURL.scheme == "flare-media-image",
                let components = URLComponents(url: targetURL, resolvingAgainstBaseURL: false),
                let imageUrl =

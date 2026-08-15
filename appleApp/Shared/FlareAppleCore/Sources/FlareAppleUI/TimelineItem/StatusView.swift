@@ -40,6 +40,7 @@ public struct StatusView: View {
     @Environment(\.timelineAppearance.showPlatformLogo) private var showPlatformLogo
     @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
     @Environment(\.timelineAppearance.lineLimit) private var appearanceLineLimit
+    @Environment(\.timelineAppearance.mediaLayout) private var mediaLayout
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
@@ -126,6 +127,13 @@ public struct StatusView: View {
         let poll = data.poll
         let images = Array(data.images)
         let hasImages = !images.isEmpty
+        let usesSideAvatarCarousel =
+            showAsFullWidth &&
+            user != nil &&
+            showMedia &&
+            allowsMediaCarousel &&
+            mediaLayout == .carousel &&
+            images.count > 1
         let sensitive = data.sensitive
         let card = data.card
         let quoteItems = self.quotes
@@ -148,6 +156,12 @@ public struct StatusView: View {
                 effectiveLineLimit
             }
         let canExpandLineLimitedContent = contentLineLimit != nil && !isDetail && !textExpanded && showExpandTextButton
+        let hasPreMediaBody =
+            replyToHandle != nil ||
+            !contentWarningIsEmpty ||
+            contents.contains { !$0.isEmpty } ||
+            (isDetail && showTranslate) ||
+            (poll != nil && showMedia)
 
         VStack(
             alignment: .leading,
@@ -184,134 +198,151 @@ public struct StatusView: View {
                 }
                 VStack(
                     alignment: .leading,
-                    spacing: nil,
+                    spacing: 8,
                 ) {
-                    if let user {
-                        if showAsFullWidth {
-                            UserOnelineView(data: user, showAvatar: false) {
-                                topEndContent(
-                                    visibility: visibility,
-                                    translationDisplayState: translationDisplayState,
-                                    platformIcon: data.platformIcon,
-                                    createdAt: createdAt,
-                                    accountType: accountType,
-                                    statusKey: statusKey
-                                )
-                            } onClicked: {
-                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                    if user != nil || hasPreMediaBody {
+                        VStack(
+                            alignment: .leading,
+                            spacing: nil,
+                        ) {
+                            if let user {
+                                if showAsFullWidth {
+                                    UserOnelineView(data: user, showAvatar: false) {
+                                        topEndContent(
+                                            visibility: visibility,
+                                            translationDisplayState: translationDisplayState,
+                                            platformIcon: data.platformIcon,
+                                            createdAt: createdAt,
+                                            accountType: accountType,
+                                            statusKey: statusKey
+                                        )
+                                    } onClicked: {
+                                        user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                                    }
+                                } else if isQuote {
+                                    UserOnelineView(data: user, showAvatar: true) {
+                                        topEndContent(
+                                            visibility: visibility,
+                                            translationDisplayState: translationDisplayState,
+                                            platformIcon: data.platformIcon,
+                                            createdAt: createdAt,
+                                            accountType: accountType,
+                                            statusKey: statusKey
+                                        )
+                                    } onClicked: {
+                                        user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                                    }
+                                } else {
+                                    UserCompatView(data: user) {
+                                        topEndContent(
+                                            visibility: visibility,
+                                            translationDisplayState: translationDisplayState,
+                                            platformIcon: data.platformIcon,
+                                            createdAt: createdAt,
+                                            accountType: accountType,
+                                            statusKey: statusKey
+                                        )
+                                    } onClicked: {
+                                        user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                                    }
+                                }
                             }
-                        } else if isQuote {
-                            UserOnelineView(data: user, showAvatar: true) {
-                                topEndContent(
-                                    visibility: visibility,
-                                    translationDisplayState: translationDisplayState,
-                                    platformIcon: data.platformIcon,
-                                    createdAt: createdAt,
-                                    accountType: accountType,
-                                    statusKey: statusKey
-                                )
-                            } onClicked: {
-                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                            }
-                        } else {
-                            UserCompatView(data: user) {
-                                topEndContent(
-                                    visibility: visibility,
-                                    translationDisplayState: translationDisplayState,
-                                    platformIcon: data.platformIcon,
-                                    createdAt: createdAt,
-                                    accountType: accountType,
-                                    statusKey: statusKey
-                                )
-                            } onClicked: {
-                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            if hasPreMediaBody {
+                                VStack(
+                                    alignment: .leading,
+                                    spacing: 8,
+                                ) {
+                                    if let replyToHandle {
+                                        HStack {
+                                            Image(fontAwesome: .reply)
+                                            Text("Reply to \(replyToHandle)", bundle: FlareAppleUILocalization.bundle)
+                                        }
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    }
+                                    if !contentWarningIsEmpty {
+                                        ForEach(Array(contentWarnings.enumerated()), id: \.offset) { _, contentWarning in
+                                            if !contentWarning.isEmpty {
+                                                RichText(text: contentWarning)
+                                                    .fixedSize(horizontal: false, vertical: true)
+                                                    .if(isDetail) { view in
+                                                        view.textSelection(.enabled)
+                                                    }
+                                            }
+                                        }
+
+                                        if !expandContentWarning {
+                                            Button {
+                                                withAnimation {
+                                                    contentWarningExpanded.toggle()
+                                                    if !contentWarningExpanded {
+                                                        textExpanded = false
+                                                        overflowingTextIndexes.removeAll()
+                                                    }
+                                                }
+                                            } label: {
+                                                if contentWarningExpanded {
+                                                    Text("mastodon_item_show_less", bundle: FlareAppleUILocalization.bundle)
+                                                } else {
+                                                    Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
+                                                }
+                                            }
+                                            .backport
+                                            .glassProminentButtonStyle()
+                                        }
+                                    }
+
+                                    if contentWarningExpanded || expandContentWarning || contentWarningIsEmpty {
+                                        ForEach(Array(contents.enumerated()), id: \.offset) { index, content in
+                                            if !content.isEmpty {
+                                                CollapsibleRichText(
+                                                    text: content,
+                                                    lineLimit: contentLineLimit,
+                                                    isExpanded: textExpanded,
+                                                    isTextSelectionEnabled: isDetail
+                                                ) { overflows in
+                                                    if overflows {
+                                                        overflowingTextIndexes.insert(index)
+                                                    } else {
+                                                        overflowingTextIndexes.remove(index)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if !overflowingTextIndexes.isEmpty, canExpandLineLimitedContent {
+                                            Button {
+                                                withAnimation {
+                                                    textExpanded = true
+                                                }
+                                            } label: {
+                                                Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
+                                            }
+                                            .buttonStyle(.borderless)
+                                        }
+                                    }
+
+                                    if isDetail, showTranslate {
+                                        StatusTranslateView(
+                                            content: data.content.original,
+                                            contentWarning: data.contentWarning?.original
+                                        )
+                                    }
+
+                                    if let poll, showMedia {
+                                        StatusPollView(data: poll)
+                                    }
+                                }
                             }
                         }
+                        .frame(
+                            minHeight: usesSideAvatarCarousel ? 44 : nil,
+                            alignment: .topLeading
+                        )
                     }
                     VStack(
                         alignment: .leading,
                         spacing: 8,
                     ) {
-                        if let replyToHandle {
-                            HStack {
-                                Image(fontAwesome: .reply)
-                                Text("Reply to \(replyToHandle)", bundle: FlareAppleUILocalization.bundle)
-                            }
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        }
-                        if !contentWarningIsEmpty {
-                            ForEach(Array(contentWarnings.enumerated()), id: \.offset) { _, contentWarning in
-                                if !contentWarning.isEmpty {
-                                    RichText(text: contentWarning)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                        .if(isDetail) { view in
-                                            view.textSelection(.enabled)
-                                        }
-                                }
-                            }
-                            
-                            if !expandContentWarning {
-                                Button {
-                                    withAnimation {
-                                        contentWarningExpanded.toggle()
-                                        if !contentWarningExpanded {
-                                            textExpanded = false
-                                            overflowingTextIndexes.removeAll()
-                                        }
-                                    }
-                                } label: {
-                                    if contentWarningExpanded {
-                                        Text("mastodon_item_show_less", bundle: FlareAppleUILocalization.bundle)
-                                    } else {
-                                        Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
-                                    }
-                                }
-                                .backport
-                                .glassProminentButtonStyle()
-                            }
-                        }
-
-                        if contentWarningExpanded || expandContentWarning || contentWarningIsEmpty {
-                            ForEach(Array(contents.enumerated()), id: \.offset) { index, content in
-                                if !content.isEmpty {
-                                    CollapsibleRichText(
-                                        text: content,
-                                        lineLimit: contentLineLimit,
-                                        isExpanded: textExpanded,
-                                        isTextSelectionEnabled: isDetail
-                                    ) { overflows in
-                                        if overflows {
-                                            overflowingTextIndexes.insert(index)
-                                        } else {
-                                            overflowingTextIndexes.remove(index)
-                                        }
-                                    }
-                                }
-                            }
-                            if !overflowingTextIndexes.isEmpty, canExpandLineLimitedContent {
-                                Button {
-                                    withAnimation {
-                                        textExpanded = true
-                                    }
-                                } label: {
-                                    Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
-                                }
-                                .buttonStyle(.borderless)
-                            }
-                        }
-                        
-                        if isDetail, showTranslate {
-                            StatusTranslateView(
-                                content: data.content.original,
-                                contentWarning: data.contentWarning?.original
-                            )
-                        }
-                        
-                        if let poll, showMedia {
-                            StatusPollView(data: poll)
-                        }
-                        
                         if hasImages, showMedia {
                             StatusMediaContent(
                                 post: data,

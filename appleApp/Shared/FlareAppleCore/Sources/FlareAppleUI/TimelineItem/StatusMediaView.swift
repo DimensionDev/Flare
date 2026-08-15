@@ -159,6 +159,7 @@ struct StatusMediaView: View {
             .aspectRatio(16 / 10, contentMode: .fit)
             .padding(.leading, -carouselLeadingPadding)
             .padding(.trailing, -carouselTrailingPadding)
+            .fixedSize(horizontal: false, vertical: true)
         } else {
             mediaGrid
         }

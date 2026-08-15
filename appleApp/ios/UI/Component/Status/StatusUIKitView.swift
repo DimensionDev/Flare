@@ -610,6 +610,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // Content column (vertical, spacing 8)
         for (i, child) in contentColumnChildren.enumerated() {
             let isCarousel = child === mediaViewStorage && mediaViewStorage?.isShowingCarousel == true
+            if isCarousel, wantsAvatar {
+                innerY = max(innerY, y + Self.avatarSize + Self.contentColumnSpacing)
+            }
             let childWidth = isCarousel ? width + carouselEdgePadding * 2 : contentWidth
             let childX = isCarousel ? -carouselEdgePadding : contentX
             let h = childHeight(of: child, for: childWidth)

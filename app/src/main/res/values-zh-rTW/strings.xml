@@ -253,6 +253,10 @@
     <string name="settings_appearance_show_cw_img_description">一律展開貼文中的敏感媒體</string>
     <string name="settings_appearance_expand_media">保留媒體寬高比</string>
     <string name="settings_appearance_expand_media_description">在時間軸中以原始寬高比顯示媒體</string>
+    <string name="settings_appearance_media_layout">媒體佈局</string>
+    <string name="settings_appearance_media_layout_description">選擇時間軸貼文中多個媒體項目的排列方式</string>
+    <string name="settings_appearance_media_layout_grid">網格</string>
+    <string name="settings_appearance_media_layout_carousel">輪播</string>
     <string name="settings_appearance_video_autoplay">影片自動播放</string>
     <string name="settings_appearance_video_autoplay_description">自動播放貼文中的影片</string>
     <string name="settings_appearance_video_autoplay_wifi">僅限 Wi-Fi</string>

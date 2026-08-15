@@ -350,6 +350,10 @@
     <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
     <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
+    <string name="settings_appearance_media_layout">Media layout</string>
+    <string name="settings_appearance_media_layout_description">Choose how multiple media items are arranged in timeline posts</string>
+    <string name="settings_appearance_media_layout_grid">Grid</string>
+    <string name="settings_appearance_media_layout_carousel">Carousel</string>
     <string name="settings_appearance_limit_media_grid_to_nine">Limit media grids to 9 items</string>
     <string name="settings_appearance_limit_media_grid_to_nine_description">Show at most 9 media items in each timeline post</string>
     <string name="gallery_detail_tab_info">Info</string>

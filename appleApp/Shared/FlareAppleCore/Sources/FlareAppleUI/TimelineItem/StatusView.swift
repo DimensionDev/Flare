@@ -57,6 +57,8 @@ public struct StatusView: View {
     private let showParents: Bool
     private let inlineParents: [UiTimelineV2.Post]
     private let quotes: [UiTimelineV2.Post]
+    private let allowsMediaCarousel: Bool
+    private let carouselOuterHorizontalPadding: CGFloat
     @State private var contentWarningExpanded = false
     @State private var textExpanded = false
     @State private var overflowingTextIndexes: Set<Int> = []
@@ -74,7 +76,9 @@ public struct StatusView: View {
         showTranslate: Bool = true,
         showParents: Bool = true,
         inlineParents: [UiTimelineV2.Post] = [],
-        quotes: [UiTimelineV2.Post] = []
+        quotes: [UiTimelineV2.Post] = [],
+        allowsMediaCarousel: Bool = false,
+        carouselOuterHorizontalPadding: CGFloat = 0
     ) {
         self.data = data
         self.isDetail = isDetail
@@ -89,6 +93,8 @@ public struct StatusView: View {
         self.showParents = showParents
         self.inlineParents = inlineParents
         self.quotes = quotes
+        self.allowsMediaCarousel = allowsMediaCarousel
+        self.carouselOuterHorizontalPadding = carouselOuterHorizontalPadding
     }
 
     private var showAsFullWidth: Bool {
@@ -97,6 +103,8 @@ public struct StatusView: View {
     public var body: some View {
         let parents = inlineParents
         let user = data.user
+        let carouselEdgePadding: CGFloat = isQuote ? 8 : carouselOuterHorizontalPadding
+        let carouselLeadingPadding = carouselEdgePadding + (showAsFullWidth && user != nil ? 52 : 0)
         let replyToHandle = data.replyToHandle
         let translationDisplayed = data.translationDisplayState == .translated
         let contentWarnings: [UiRichText] = if let warning = data.contentWarning {
@@ -305,7 +313,15 @@ public struct StatusView: View {
                         }
                         
                         if hasImages, showMedia {
-                            StatusMediaContent(post: data, data: images, sensitive: sensitive, cornerRadius: isQuote ? 12 : 16) { media, index in
+                            StatusMediaContent(
+                                post: data,
+                                data: images,
+                                sensitive: sensitive,
+                                cornerRadius: isQuote ? 12 : 16,
+                                allowsCarousel: allowsMediaCarousel,
+                                carouselLeadingPadding: carouselLeadingPadding,
+                                carouselTrailingPadding: carouselEdgePadding
+                            ) { media, index in
                                 if let timelineMediaOpenAction {
                                     timelineMediaOpenAction(data, media, index)
                                 } else {
@@ -584,10 +600,22 @@ struct StatusMediaContent: View {
     let data: [any UiMedia]
     let sensitive: Bool
     let cornerRadius: CGFloat
+    let allowsCarousel: Bool
+    let carouselLeadingPadding: CGFloat
+    let carouselTrailingPadding: CGFloat
     let onMediaClicked: (any UiMedia, Int) -> Void
     var body: some View {
         if showMedia || expandMedia {
-            StatusMediaView(post: post, data: data, sensitive: !(showSensitiveContent) && sensitive, cornerRadius: cornerRadius, onMediaClicked: onMediaClicked)
+            StatusMediaView(
+                post: post,
+                data: data,
+                sensitive: !(showSensitiveContent) && sensitive,
+                cornerRadius: cornerRadius,
+                allowsCarousel: allowsCarousel,
+                carouselLeadingPadding: carouselLeadingPadding,
+                carouselTrailingPadding: carouselTrailingPadding,
+                onMediaClicked: onMediaClicked
+            )
         } else {
             Button {
                 withAnimation {

@@ -63,6 +63,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
@@ -162,6 +163,10 @@ import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
+import dev.dimension.flare.settings_appearance_media_layout
+import dev.dimension.flare.settings_appearance_media_layout_carousel
+import dev.dimension.flare.settings_appearance_media_layout_description
+import dev.dimension.flare.settings_appearance_media_layout_grid
 import dev.dimension.flare.settings_appearance_post_action_layout
 import dev.dimension.flare.settings_appearance_post_action_layout_description
 import dev.dimension.flare.settings_appearance_post_action_style
@@ -1165,21 +1170,68 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {
-                                Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine))
+                                Text(stringResource(Res.string.settings_appearance_media_layout))
                             },
                             caption = {
-                                Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description))
+                                Text(stringResource(Res.string.settings_appearance_media_layout_description))
                             },
                             trailing = {
-                                Switcher(
-                                    checked = LocalTimelineAppearance.current.limitMediaGridToNine,
-                                    {
-                                        state.appearanceState.update(AppearanceKeys.LimitMediaGridToNine, it)
+                                val items =
+                                    remember {
+                                        persistentMapOf(
+                                            TimelineMediaLayout.Grid to Res.string.settings_appearance_media_layout_grid,
+                                            TimelineMediaLayout.Carousel to Res.string.settings_appearance_media_layout_carousel,
+                                        )
+                                    }
+                                MenuFlyoutContainer(
+                                    flyout = {
+                                        items.forEach { (key, value) ->
+                                            MenuFlyoutItem(
+                                                onClick = {
+                                                    state.appearanceState.update(AppearanceKeys.MediaLayout, key)
+                                                    isFlyoutVisible = false
+                                                },
+                                                text = { Text(stringResource(value)) },
+                                            )
+                                        }
                                     },
-                                    textBefore = true,
+                                    content = {
+                                        DropDownButton(
+                                            onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                            content = {
+                                                items[LocalTimelineAppearance.current.mediaLayout]?.let {
+                                                    Text(stringResource(it))
+                                                }
+                                            },
+                                        )
+                                    },
+                                    adaptivePlacement = true,
+                                    placement = FlyoutPlacement.BottomAlignedEnd,
                                 )
                             },
                         )
+                        AnimatedVisibility(LocalTimelineAppearance.current.mediaLayout == TimelineMediaLayout.Grid) {
+                            Column {
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = {
+                                        Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine))
+                                    },
+                                    caption = {
+                                        Text(stringResource(Res.string.settings_appearance_limit_media_grid_to_nine_description))
+                                    },
+                                    trailing = {
+                                        Switcher(
+                                            checked = LocalTimelineAppearance.current.limitMediaGridToNine,
+                                            {
+                                                state.appearanceState.update(AppearanceKeys.LimitMediaGridToNine, it)
+                                            },
+                                            textBefore = true,
+                                        )
+                                    },
+                                )
+                            }
+                        }
                         ExpanderItemSeparator()
                         ExpanderItem(
                             heading = {

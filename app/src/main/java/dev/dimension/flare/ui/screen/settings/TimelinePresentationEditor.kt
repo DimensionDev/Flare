@@ -41,6 +41,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKey
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
@@ -100,6 +101,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
             appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
+            appearancePatch.contains(AppearanceKeys.MediaLayout) ||
             appearancePatch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
     val themeOverridesEnabled = appearancePatch.contains(AppearanceKeys.AvatarShape)
@@ -443,6 +445,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(
+                                        AppearanceKeys.MediaLayout,
+                                        timelineAppearance.mediaLayout,
+                                    ).set(
                                         AppearanceKeys.LimitMediaGridToNine,
                                         timelineAppearance.limitMediaGridToNine,
                                     ).set(AppearanceKeys.VideoAutoplay, timelineAppearance.videoAutoplay)
@@ -452,6 +457,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowSensitiveContent,
                                     AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.MediaLayout,
                                     AppearanceKeys.LimitMediaGridToNine,
                                     AppearanceKeys.VideoAutoplay,
                                 )
@@ -505,20 +511,42 @@ internal fun TimelinePresentationEditor(
                                 },
                                 shapes = ListItemDefaults.item(),
                             )
-                            SwitchSettingsItem(
-                                title = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine),
-                                description = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine_description),
-                                checked = timelineAppearance.limitMediaGridToNine,
-                                onCheckedChange = {
+                            SingleChoiceSettingsItem(
+                                headline = { Text(text = stringResource(id = R.string.settings_appearance_media_layout)) },
+                                supporting = { Text(text = stringResource(id = R.string.settings_appearance_media_layout_description)) },
+                                items =
+                                    persistentMapOf(
+                                        TimelineMediaLayout.Grid to stringResource(id = R.string.settings_appearance_media_layout_grid),
+                                        TimelineMediaLayout.Carousel to
+                                            stringResource(id = R.string.settings_appearance_media_layout_carousel),
+                                    ),
+                                selected = timelineAppearance.mediaLayout,
+                                onSelected = {
                                     onAppearancePatchChange(
                                         appearancePatch.set(
-                                            AppearanceKeys.LimitMediaGridToNine,
+                                            AppearanceKeys.MediaLayout,
                                             it,
                                         ),
                                     )
                                 },
                                 shapes = ListItemDefaults.item(),
                             )
+                            AnimatedVisibility(timelineAppearance.mediaLayout == TimelineMediaLayout.Grid) {
+                                SwitchSettingsItem(
+                                    title = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine),
+                                    description = stringResource(id = R.string.settings_appearance_limit_media_grid_to_nine_description),
+                                    checked = timelineAppearance.limitMediaGridToNine,
+                                    onCheckedChange = {
+                                        onAppearancePatchChange(
+                                            appearancePatch.set(
+                                                AppearanceKeys.LimitMediaGridToNine,
+                                                it,
+                                            ),
+                                        )
+                                    },
+                                    shapes = ListItemDefaults.item(),
+                                )
+                            }
                             SwitchSettingsItem(
                                 title = stringResource(id = R.string.settings_appearance_expand_media),
                                 description = stringResource(id = R.string.settings_appearance_expand_media_description),

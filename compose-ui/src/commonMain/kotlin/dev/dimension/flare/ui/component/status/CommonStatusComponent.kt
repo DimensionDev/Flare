@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
@@ -110,6 +111,7 @@ import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -164,10 +166,20 @@ public fun CommonStatusComponent(
     maxLines: Int? = null,
     showExpandButton: Boolean = true,
     quotes: ImmutableList<UiTimelineV2.Post> = persistentListOf(),
+    allowMediaCarousel: Boolean = false,
+    carouselOuterHorizontalPadding: Dp = 0.dp,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalTimelineAppearance.current
     val showAsFullWidth = !appearanceSettings.fullWidthPost && !isQuote && !isDetail
+    val carouselEdgePadding = if (isQuote) 8.dp else carouselOuterHorizontalPadding
+    val carouselLeadingPadding =
+        carouselEdgePadding +
+            if (showAsFullWidth && item.user != null) {
+                AvatarComponentDefaults.size + 8.dp
+            } else {
+                0.dp
+            }
     Row(
         modifier =
             Modifier
@@ -365,6 +377,9 @@ public fun CommonStatusComponent(
                 StatusMediasComponent(
                     item,
                     isQuote = isQuote,
+                    allowMediaCarousel = allowMediaCarousel,
+                    carouselLeadingPadding = carouselLeadingPadding,
+                    carouselTrailingPadding = carouselEdgePadding,
                     onMediaClick = { media ->
                         item.openMedia(
                             media = media,
@@ -463,6 +478,9 @@ public fun CommonStatusComponent(
 internal fun StatusMediasComponent(
     item: UiTimelineV2.Post,
     isQuote: Boolean,
+    allowMediaCarousel: Boolean,
+    carouselLeadingPadding: Dp,
+    carouselTrailingPadding: Dp,
     onMediaClick: (UiMedia) -> Unit,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
@@ -499,14 +517,15 @@ internal fun StatusMediasComponent(
             data = item.images,
             onMediaClick = onMediaClick,
             sensitive = item.sensitive,
-            modifier =
-                Modifier.clip(
-                    if (isQuote) {
-                        PlatformTheme.shapes.small
-                    } else {
-                        PlatformTheme.shapes.medium
-                    },
-                ),
+            shape =
+                if (isQuote) {
+                    PlatformTheme.shapes.small
+                } else {
+                    PlatformTheme.shapes.medium
+                },
+            allowCarousel = allowMediaCarousel,
+            carouselLeadingPadding = carouselLeadingPadding,
+            carouselTrailingPadding = carouselTrailingPadding,
         )
     } else {
         Row(

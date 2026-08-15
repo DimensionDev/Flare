@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model.appearance
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 
 public object TimelinePresentationAppearancePatchHelper {
@@ -31,6 +32,7 @@ public object TimelinePresentationAppearancePatchHelper {
             patch.contains(AppearanceKeys.ShowSensitiveContent) ||
             patch.contains(AppearanceKeys.ExpandContentWarning) ||
             patch.contains(AppearanceKeys.ExpandMediaSize) ||
+            patch.contains(AppearanceKeys.MediaLayout) ||
             patch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             patch.contains(AppearanceKeys.VideoAutoplay)
 
@@ -81,6 +83,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .set(AppearanceKeys.ShowSensitiveContent, appearance.showSensitiveContent)
             .set(AppearanceKeys.ExpandContentWarning, appearance.expandContentWarning)
             .set(AppearanceKeys.ExpandMediaSize, appearance.expandMediaSize)
+            .set(AppearanceKeys.MediaLayout, appearance.mediaLayout)
             .set(AppearanceKeys.LimitMediaGridToNine, appearance.limitMediaGridToNine)
             .set(AppearanceKeys.VideoAutoplay, appearance.videoAutoplay)
 
@@ -90,6 +93,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .clear(AppearanceKeys.ShowSensitiveContent)
             .clear(AppearanceKeys.ExpandContentWarning)
             .clear(AppearanceKeys.ExpandMediaSize)
+            .clear(AppearanceKeys.MediaLayout)
             .clear(AppearanceKeys.LimitMediaGridToNine)
             .clear(AppearanceKeys.VideoAutoplay)
 
@@ -164,6 +168,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: Boolean,
     ): AppearancePatch = patch.set(AppearanceKeys.ExpandMediaSize, value)
+
+    public fun setMediaLayout(
+        patch: AppearancePatch,
+        value: TimelineMediaLayout,
+    ): AppearancePatch = patch.set(AppearanceKeys.MediaLayout, value)
 
     public fun setLimitMediaGridToNine(
         patch: AppearancePatch,

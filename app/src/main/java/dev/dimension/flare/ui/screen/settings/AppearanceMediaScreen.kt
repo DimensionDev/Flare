@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AndroidMediaSaveLocationRepository
 import dev.dimension.flare.common.MediaSaveLocationMode
+import dev.dimension.flare.data.model.TimelineMediaLayout
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.ui.component.BackButton
@@ -179,6 +180,24 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                 )
             }
             AnimatedVisibility(timelineAppearance.showMedia) {
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_media_layout)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_media_layout_description)) },
+                    items =
+                        persistentMapOf(
+                            TimelineMediaLayout.Grid to stringResource(id = R.string.settings_appearance_media_layout_grid),
+                            TimelineMediaLayout.Carousel to stringResource(id = R.string.settings_appearance_media_layout_carousel),
+                        ),
+                    selected = timelineAppearance.mediaLayout,
+                    onSelected = {
+                        state.update(AppearanceKeys.MediaLayout, it)
+                    },
+                    shapes = ListItemDefaults.item(),
+                )
+            }
+            AnimatedVisibility(
+                timelineAppearance.showMedia && timelineAppearance.mediaLayout == TimelineMediaLayout.Grid,
+            ) {
                 SegmentedListItem(
                     onClick = {
                         state.update(

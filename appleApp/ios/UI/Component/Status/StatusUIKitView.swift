@@ -35,6 +35,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private var showParents: Bool = true
     private var inlineParents: [UiTimelineV2.Post] = []
     private var quotes: [UiTimelineV2.Post] = []
+    private var allowsMediaCarousel: Bool = false
+    private var carouselOuterHorizontalPadding: CGFloat = 0
     private var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default)
     private var lastConfigureSignature: ConfigureSignature?
     private var lastPreparedFittingWidthKey: Int?
@@ -56,6 +58,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let parentRenderHashes: [Int32]
         let quoteKeys: [String]
         let quoteRenderHashes: [Int32]
+        let allowsMediaCarousel: Bool
+        let carouselOuterHorizontalPadding: CGFloat
         let appearance: StatusUIKitAppearance
 
         init(
@@ -72,7 +76,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             forceHideActions: Bool,
             showTranslate: Bool,
             aiTldrEnabled: Bool,
-            showParents: Bool
+            showParents: Bool,
+            allowsMediaCarousel: Bool,
+            carouselOuterHorizontalPadding: CGFloat
         ) {
             statusKey = String(describing: data.statusKey)
             renderHash = data.renderHash
@@ -90,6 +96,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             self.parentRenderHashes = inlineParents.map { $0.renderHash }
             self.quoteKeys = quotes.map { String(describing: $0.statusKey) }
             self.quoteRenderHashes = quotes.map { $0.renderHash }
+            self.allowsMediaCarousel = allowsMediaCarousel
+            self.carouselOuterHorizontalPadding = carouselOuterHorizontalPadding
             self.appearance = appearance
         }
     }
@@ -382,7 +390,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         aiTldrEnabled: Bool = false,
         showParents: Bool = true,
         inlineParents: [UiTimelineV2.Post] = [],
-        quotes: [UiTimelineV2.Post] = []
+        quotes: [UiTimelineV2.Post] = [],
+        allowsMediaCarousel: Bool = false,
+        carouselOuterHorizontalPadding: CGFloat = 0
     ) {
         let newStatusKey = String(describing: data.statusKey)
         if boundStatusKey != newStatusKey {
@@ -403,7 +413,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             forceHideActions: forceHideActions,
             showTranslate: showTranslate,
             aiTldrEnabled: aiTldrEnabled,
-            showParents: showParents
+            showParents: showParents,
+            allowsMediaCarousel: allowsMediaCarousel,
+            carouselOuterHorizontalPadding: carouselOuterHorizontalPadding
         )
         let signatureUnchanged = lastConfigureSignature == signature
         self.data = data
@@ -423,6 +435,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         self.showParents = showParents
         self.inlineParents = inlineParents
         self.quotes = quotes
+        self.allowsMediaCarousel = allowsMediaCarousel
+        self.carouselOuterHorizontalPadding = carouselOuterHorizontalPadding
         self.appearance = appearance
         lastConfigureSignature = signature
         lastPreparedFittingWidthKey = nil
@@ -487,7 +501,10 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         bodyTextStorage?.prepareForFitting(width: contentWidth)
         bodyTranslationTextStorage?.prepareForFitting(width: contentWidth)
         if let mediaViewStorage {
-            mediaViewStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: mediaViewStorage.bounds.height)
+            let mediaWidth = mediaViewStorage.isShowingCarousel
+                ? width + carouselEdgePadding * 2
+                : contentWidth
+            mediaViewStorage.bounds = CGRect(x: 0, y: 0, width: mediaWidth, height: mediaViewStorage.bounds.height)
         }
         if let normalCardViewStorage {
             normalCardViewStorage.bounds = CGRect(x: 0, y: 0, width: contentWidth, height: normalCardViewStorage.bounds.height)
@@ -592,8 +609,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
         // Content column (vertical, spacing 8)
         for (i, child) in contentColumnChildren.enumerated() {
-            let h = childHeight(of: child, for: contentWidth)
-            if assignFrames { child.frame = CGRect(x: contentX, y: innerY, width: contentWidth, height: h) }
+            let isCarousel = child === mediaViewStorage && mediaViewStorage?.isShowingCarousel == true
+            let childWidth = isCarousel ? width + carouselEdgePadding * 2 : contentWidth
+            let childX = isCarousel ? -carouselEdgePadding : contentX
+            let h = childHeight(of: child, for: childWidth)
+            if assignFrames { child.frame = CGRect(x: childX, y: innerY, width: childWidth, height: h) }
             innerY += h
             if i < contentColumnChildren.count - 1 {
                 innerY += Self.contentColumnSpacing
@@ -607,6 +627,10 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     private var showAsFullWidth: Bool {
         (!appearance.fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
+    }
+
+    private var carouselEdgePadding: CGFloat {
+        isQuote ? 8 : carouselOuterHorizontalPadding
     }
 
     private func fittingContentColumnWidth(for width: CGFloat) -> CGFloat {
@@ -839,7 +863,10 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 appearanceShowMedia: appearance.showMedia,
                 appearanceShowSensitive: appearance.showSensitiveContent,
                 appearanceExpandMediaSize: appearance.expandMediaSize,
-                appearanceLimitMediaGridToNine: appearance.limitMediaGridToNine
+                appearanceLimitMediaGridToNine: appearance.limitMediaGridToNine,
+                appearanceMediaLayout: allowsMediaCarousel ? appearance.mediaLayout : .grid,
+                carouselLeadingPadding: carouselEdgePadding + (wantsAvatar ? Self.avatarSize + Self.mainRowSpacing : 0),
+                carouselTrailingPadding: carouselEdgePadding
             )
             mediaView.onMediaClicked = { [weak self] media, index in
                 guard let self else { return }
@@ -964,7 +991,11 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             container.child.onLocalHeightInvalidated = { [weak self] in
                 self?.notifyLocalHeightInvalidated()
             }
-            container.child.configure(data: parent, appearance: appearance, withLeadingPadding: true)
+            container.child.configure(
+                data: parent,
+                appearance: appearance,
+                withLeadingPadding: true
+            )
         }
         return Array(parentContainers.prefix(parentData.count))
     }

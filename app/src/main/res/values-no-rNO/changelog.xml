@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til oversettelser fra plattformen og et alternativ for å vise originalteksten sammen med oversettelsen.</li>
-                <li>Lagt til innstillinger for oppdatering av hjemmetidslinjen og valgfri MXGA-filtrering av X-innlegg.</li>
-                <li>Innstillingen «Sorter etter tid» for blandede tidslinjer er rettet, slik at innlegg nå vises i faktisk kronologisk rekkefølge.</li>
-                <li>Feilrettinger og ytelsesforbedringer.</li>
+                <li>Lagt til et valgfritt karuselloppsett for innlegg med flere medieelementer, som kan angis globalt eller per tidslinje.</li>
+                <li>Lagt til emnetidslinjer fra Utforsk på X og automatiske lenkeforhåndsvisninger for Bluesky-innlegg.</li>
+                <li>Gallerimodus støtter nå innleggshandlinger med langt trykk eller høyreklikk på Android, iOS, macOS og skrivebord.</li>
+                <li>Forbedret stabilitet for tidslinjer og medier, blant annet X-varsler, sideinndeling i Mastodon Utforsk, rekkefølgen på viderepubliseringer, Nostr-profiler, innebygde RSS-videoer og størrelsen på iOS-galleriet.</li>
             </ul>
         ]]></string>
 </resources>

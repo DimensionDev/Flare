@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Weergawe %1$s:</span>
             <ul>
-                <li>Platformverskafde vertalings en ’n opsie om die oorspronklike teks saam met die vertaling te wys, is bygevoeg.</li>
-                <li>Kontroles vir die verfrissing van die tuistydlyn en opsionele MXGA-filtrering vir X-plasings is bygevoeg.</li>
-                <li>Die “Sorteer volgens tyd”-instelling vir gemengde tydlyne is reggestel; plasings verskyn nou in hul werklike chronologiese volgorde.</li>
-                <li>Foutoplossings en prestasieverbeterings.</li>
+                <li>’n Opsionele karrouseluitleg vir plasings met verskeie media-items is bygevoeg en kan wêreldwyd of per tydlyn ingestel word.</li>
+                <li>X Discover-onderwerptydlyne en outomatiese skakelvoorskoue vir Bluesky-plasings is bygevoeg.</li>
+                <li>Galerymodus ondersteun nou plasingaksies met langdruk of regsklik op Android, iOS, macOS en Desktop.</li>
+                <li>Die betroubaarheid van tydlyne en media is verbeter, insluitend X-kennisgewings, Mastodon Discover-bladsynavigasie, herplasingsvolgorde, Nostr-profiele, ingebedde RSS-video’s en iOS-galerygroottes.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Welkom terug!</string>

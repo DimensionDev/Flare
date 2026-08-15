@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Vertalingen van het platform en een optie om de oorspronkelijke tekst samen met de vertaling te tonen zijn toegevoegd.</li>
-                <li>Instellingen voor het vernieuwen van de starttijdlijn en optionele MXGA-filtering voor X-berichten zijn toegevoegd.</li>
-                <li>De instelling ‘Sorteren op tijd’ voor gemengde tijdlijnen is hersteld; berichten verschijnen nu in hun werkelijke chronologische volgorde.</li>
-                <li>Bugfixes en prestatieverbeteringen.</li>
+                <li>Een optionele carrouselindeling toegevoegd voor berichten met meerdere media-items, globaal of per tijdlijn instelbaar.</li>
+                <li>Onderwerptijdlijnen uit Ontdekken op X en automatische linkvoorbeelden voor Bluesky-berichten toegevoegd.</li>
+                <li>De Galerijmodus ondersteunt nu berichtacties via lang indrukken of rechtsklikken op Android, iOS, macOS en Desktop.</li>
+                <li>De betrouwbaarheid van tijdlijnen en media is verbeterd, waaronder X-meldingen, paginering van Mastodon Ontdekken, de volgorde van reposts, Nostr-profielen, ingesloten RSS-video’s en de grootte van de iOS-galerij.</li>
             </ul>
         ]]></string>
 </resources>

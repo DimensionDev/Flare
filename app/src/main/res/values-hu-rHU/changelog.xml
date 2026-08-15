@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
-                <li>Platform által biztosított fordítások és az eredeti szöveg fordítással együtt való megjelenítésének lehetősége.</li>
-                <li>Új beállítások a kezdőlap idővonalának frissítéséhez, valamint opcionális MXGA-szűrés az X-bejegyzésekhez.</li>
-                <li>Javítottuk a vegyes idővonalak „Rendezés idő szerint” beállítását; a bejegyzések mostantól a tényleges időrendjükben jelennek meg.</li>
-                <li>Hibajavítások és teljesítménybeli fejlesztések.</li>
+                <li>Opcionális körhinta-elrendezés került a több médiát tartalmazó bejegyzésekhez, amely globálisan vagy idővonalanként állítható.</li>
+                <li>X Felfedezés témájú idővonalak és automatikus hivatkozás-előnézetek kerültek a Bluesky-bejegyzésekhez.</li>
+                <li>A Galéria mód mostantól támogatja a bejegyzésműveleteket hosszú nyomással vagy jobb kattintással Androidon, iOS-en, macOS-en és asztali gépen.</li>
+                <li>Javult az idővonalak és a média megbízhatósága, többek között az X-értesítések, a Mastodon Felfedezés lapozása, az újraközlések sorrendje, a Nostr-profilok, a beágyazott RSS-videók és az iOS Galéria méretezése.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Üdv újra!</string>

@@ -2,7 +2,6 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import AVFoundation
-import Combine
 
 #if canImport(VideoPlayer)
 import VideoPlayer
@@ -10,9 +9,11 @@ import VideoPlayer
 
 public struct MediaView: View {
     private let data: UiMedia
+    private let allowsAutoplay: Bool
 
-    public init(data: UiMedia) {
+    public init(data: UiMedia, allowsAutoplay: Bool = true) {
         self.data = data
+        self.allowsAutoplay = allowsAutoplay
     }
 
     public var body: some View {
@@ -26,7 +27,7 @@ public struct MediaView: View {
                     }
                     .clipped()
             case .video(let video):
-                MediaVideoView(data: video)
+                MediaVideoView(data: video, allowsAutoplay: allowsAutoplay)
             case .gif(let gif):
                 Color.gray
                     .overlay {
@@ -51,21 +52,24 @@ public struct MediaVideoView: View {
     @State private var time: CMTime = .zero
     @State private var isAppeared = false
     #if os(macOS)
-    @State private var macPlayer = AVQueuePlayer()
+    @State private var macPlayer: AVQueuePlayer?
     @State private var macPlayerURL: URL?
     @State private var macPlayerLooper: AVPlayerLooper?
     #endif
     private let data: UiMediaVideo
+    private let allowsAutoplay: Bool
 
-    public init(data: UiMediaVideo) {
+    public init(data: UiMediaVideo, allowsAutoplay: Bool = true) {
         self.data = data
+        self.allowsAutoplay = allowsAutoplay
     }
 
     private var effectiveIsScrolling: Bool {
         isScrollingState?.isScrolling ?? isScrolling
     }
 
-    private func canPlay() -> Bool {
+    private var canAutoplay: Bool {
+        guard allowsAutoplay else { return false }
         switch videoAutoplay {
         case .always:
             return true
@@ -85,7 +89,9 @@ public struct MediaVideoView: View {
             }
             .clipped()
             .overlay {
-                player
+                if canAutoplay {
+                    player
+                }
             }
             .overlay(alignment: .bottomLeading) {
                 statusOverlay
@@ -118,19 +124,16 @@ public struct MediaVideoView: View {
                 }
                 .contentMode(.scaleAspectFill)
                 .onChange(of: effectiveIsScrolling) { _, newValue in
-                    if !newValue, !play, isAppeared, canPlay() {
-                        play = true
-                    }
+                    play = !newValue && isAppeared && canAutoplay
                 }
                 .onAppear {
                     isAppeared = true
-                    if !effectiveIsScrolling, canPlay() {
-                        play = true
-                    }
+                    play = !effectiveIsScrolling && canAutoplay
                 }
                 .onDisappear {
                     isAppeared = false
                     play = false
+                    videoState = .idle
                 }
                 .allowsHitTesting(false)
         }
@@ -149,7 +152,7 @@ public struct MediaVideoView: View {
             }
             .clipped()
             .overlay {
-                if macPlayerURL != nil {
+                if let macPlayer {
                     MacAVPlayerView(player: macPlayer, videoGravity: .resizeAspectFill, showsControls: false)
                         .allowsHitTesting(false)
                 }
@@ -159,26 +162,29 @@ public struct MediaVideoView: View {
             }
             .onAppear {
                 isAppeared = true
-                configureMacPlayerIfNeeded()
                 updateMacPlayback()
             }
             .onChange(of: effectiveIsScrolling) { _, _ in
                 updateMacPlayback()
             }
-            .onChange(of: networkKind) { _, _ in
+            .onChange(of: canAutoplay) { _, _ in
                 updateMacPlayback()
             }
             .onChange(of: data.url) { _, _ in
-                configureMacPlayerIfNeeded()
                 updateMacPlayback()
             }
-            .onReceive(Timer.publish(every: 0.25, on: .main, in: .common).autoconnect()) { _ in
-                refreshMacState()
+            .task(id: play) {
+                guard play else { return }
+                while !Task.isCancelled {
+                    refreshMacState()
+                    try? await Task.sleep(for: .milliseconds(250))
+                }
             }
             .onDisappear {
                 isAppeared = false
                 play = false
-                macPlayer.pause()
+                resetMacPlayer()
+                videoState = .idle
             }
     }
 
@@ -189,42 +195,53 @@ public struct MediaVideoView: View {
             return
         }
 
-        guard macPlayerURL != videoURL else {
+        if macPlayerURL == videoURL, let macPlayer {
             macPlayer.isMuted = true
             macPlayer.actionAtItemEnd = .advance
             return
         }
 
         resetMacPlayer()
-        macPlayer.isMuted = true
-        macPlayer.actionAtItemEnd = .advance
+        let player = AVQueuePlayer()
+        player.isMuted = true
+        player.actionAtItemEnd = .advance
         let item = AVPlayerItem(url: videoURL)
-        macPlayerLooper = AVPlayerLooper(player: macPlayer, templateItem: item)
+        macPlayer = player
+        macPlayerLooper = AVPlayerLooper(player: player, templateItem: item)
         macPlayerURL = videoURL
         time = .zero
         videoState = .loading
     }
 
     private func updateMacPlayback() {
-        configureMacPlayerIfNeeded()
-        if !play, isAppeared, !effectiveIsScrolling, canPlay() {
-            play = true
+        guard isAppeared, canAutoplay else {
+            play = false
+            resetMacPlayer()
+            videoState = .idle
+            return
         }
 
-        if play {
-            macPlayer.playImmediately(atRate: 1)
-        } else {
-            macPlayer.pause()
+        guard !effectiveIsScrolling else {
+            play = false
+            macPlayer?.pause()
+            videoState = .idle
+            return
         }
+
+        configureMacPlayerIfNeeded()
+        guard let macPlayer else { return }
+        play = true
+        macPlayer.playImmediately(atRate: 1)
     }
 
     private func refreshMacState() {
-        guard let item = macPlayer.currentItem, macPlayerURL != nil else {
+        guard let macPlayer, let item = macPlayer.currentItem, macPlayerURL != nil else {
             return
         }
 
         if let error = item.error {
             videoState = .error(error)
+            play = false
             return
         }
 
@@ -250,6 +267,7 @@ public struct MediaVideoView: View {
             }
         case .failed:
             videoState = .error(item.error ?? URLError(.cannotDecodeContentData))
+            play = false
         case .unknown:
             videoState = play ? .loading : .idle
         @unknown default:
@@ -258,10 +276,9 @@ public struct MediaVideoView: View {
     }
 
     private func resetMacPlayer() {
-        let player = macPlayer
-        player.pause()
+        macPlayer?.pause()
         macPlayerLooper = nil
-        macPlayer = AVQueuePlayer()
+        macPlayer = nil
         macPlayerURL = nil
     }
 

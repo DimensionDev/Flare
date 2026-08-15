@@ -19,6 +19,8 @@ struct StatusMediaView: View {
     @Environment(\.timelineAppearance.limitMediaGridToNine) private var limitMediaGridToNine
     @Environment(\.timelineMediaActionHandler) private var timelineMediaActionHandler
     @State private var isBlur: Bool
+    @State private var activeCarouselIndex: Int?
+    @State private var autoplayCarouselIndex: Int?
 //    @State private var selectedIndex: Int? = nil
 
     init(
@@ -40,6 +42,8 @@ struct StatusMediaView: View {
         self.carouselLeadingPadding = carouselLeadingPadding
         self.carouselTrailingPadding = carouselTrailingPadding
         self._isBlur = State(initialValue: sensitive)
+        self._activeCarouselIndex = State(initialValue: nil)
+        self._autoplayCarouselIndex = State(initialValue: data.indices.first)
     }
 
     var body: some View {
@@ -88,6 +92,22 @@ struct StatusMediaView: View {
         .if(!usesCarousel) { view in
             view.clipShape(.rect(cornerRadius: cornerRadius))
         }
+        .onChange(of: usesCarousel) { _, enabled in
+            if enabled {
+                autoplayCarouselIndex = data.indices.first
+            } else {
+                activeCarouselIndex = nil
+                autoplayCarouselIndex = nil
+            }
+        }
+        .onChange(of: data.count) { _, count in
+            if let activeCarouselIndex, activeCarouselIndex >= count {
+                self.activeCarouselIndex = nil
+            }
+            if let autoplayCarouselIndex, autoplayCarouselIndex >= count {
+                self.autoplayCarouselIndex = data.indices.first
+            }
+        }
     }
 
     private var usesCarousel: Bool {
@@ -108,17 +128,33 @@ struct StatusMediaView: View {
                             mediaItem(
                                 data[index],
                                 index: index,
-                                overflowCount: 0
+                                overflowCount: 0,
+                                allowsAutoplay: !isBlur &&
+                                    index == autoplayCarouselIndex
                             )
                             .frame(width: itemSize.width, height: itemSize.height)
                             .clipShape(.rect(cornerRadius: cornerRadius))
+                            .id(index)
                         }
                     }
+                    .scrollTargetLayout()
                     .frame(height: geometry.size.height)
                     .padding(.leading, carouselLeadingPadding)
                     .padding(.trailing, carouselTrailingPadding)
                 }
                 .scrollIndicators(.hidden)
+                .scrollPosition(id: $activeCarouselIndex, anchor: .center)
+                .onChange(of: activeCarouselIndex) { _, index in
+                    if let index, index != autoplayCarouselIndex {
+                        autoplayCarouselIndex = nil
+                    }
+                }
+                .task(id: activeCarouselIndex) {
+                    guard let activeCarouselIndex else { return }
+                    try? await Task.sleep(nanoseconds: 150_000_000)
+                    guard !Task.isCancelled else { return }
+                    autoplayCarouselIndex = activeCarouselIndex
+                }
             }
             .aspectRatio(16 / 10, contentMode: .fit)
             .padding(.leading, -carouselLeadingPadding)
@@ -147,7 +183,8 @@ struct StatusMediaView: View {
                 mediaItem(
                     visibleData[index],
                     index: index,
-                    overflowCount: index == visibleData.count - 1 ? overflowCount : 0
+                    overflowCount: index == visibleData.count - 1 ? overflowCount : 0,
+                    allowsAutoplay: !isBlur
                 )
             }
         }
@@ -156,9 +193,10 @@ struct StatusMediaView: View {
     private func mediaItem(
         _ item: any UiMedia,
         index: Int,
-        overflowCount: Int
+        overflowCount: Int,
+        allowsAutoplay: Bool
     ) -> some View {
-        MediaView(data: item)
+        MediaView(data: item, allowsAutoplay: allowsAutoplay)
             .onTapGesture {
                 if !sensitive || !isBlur {
                     onMediaClicked(item, index)

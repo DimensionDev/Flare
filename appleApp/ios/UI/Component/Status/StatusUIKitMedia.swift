@@ -278,7 +278,7 @@ final class MediaUIView: UIView {
     }
 }
 
-private final class HorizontalMediaScrollView: UIScrollView {
+private final class HorizontalMediaCollectionView: UICollectionView {
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard gestureRecognizer === panGestureRecognizer else {
             return super.gestureRecognizerShouldBegin(gestureRecognizer)
@@ -290,13 +290,25 @@ private final class HorizontalMediaScrollView: UIScrollView {
 
 // MARK: - StatusMediaUIView
 // Native grid / horizontal carousel with shared sensitive-content and media-cell behavior.
-final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDelegate {
+final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     private static let maxVisibleMediaCount = 9
+    private static let carouselCellReuseIdentifier = "CarouselMediaCollectionCell"
 
     var onMediaClicked: ((UiMedia, Int) -> Void)?
     var onMediaMenuAction: ((UiMedia, TimelineMediaMenuAction) -> Void)?
 
-    private let grid = HorizontalMediaScrollView()
+    private let grid = UIView()
+    private let carouselLayout: UICollectionViewFlowLayout = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 4
+        layout.minimumInteritemSpacing = 4
+        return layout
+    }()
+    private lazy var carousel = HorizontalMediaCollectionView(
+        frame: .zero,
+        collectionViewLayout: carouselLayout
+    )
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
     private let toggleButton = UIButton(type: .system)
     private let overflowView = MediaOverflowView()
@@ -313,6 +325,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
     private var toggleButtonPositionConstraints: [NSLayoutConstraint] = []
     private var aspectConstraint: NSLayoutConstraint?
     private var lastLayoutWidth: CGFloat = 0
+    private var lastCarouselSize: CGSize = .zero
     private let spacing: CGFloat = 4
     private var cellPool: [MediaGridCellView] = []
     private var lastConfigureSignature: ConfigureSignature?
@@ -353,13 +366,25 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
         clipsToBounds = true
 
         grid.translatesAutoresizingMaskIntoConstraints = false
-        grid.delegate = self
-        grid.showsHorizontalScrollIndicator = false
-        grid.showsVerticalScrollIndicator = false
-        grid.isDirectionalLockEnabled = true
         addSubview(grid)
         overflowView.isHidden = true
         grid.addSubview(overflowView)
+
+        carousel.translatesAutoresizingMaskIntoConstraints = false
+        carousel.backgroundColor = .clear
+        carousel.dataSource = self
+        carousel.delegate = self
+        carousel.showsHorizontalScrollIndicator = false
+        carousel.showsVerticalScrollIndicator = false
+        carousel.isDirectionalLockEnabled = true
+        carousel.alwaysBounceHorizontal = true
+        carousel.contentInsetAdjustmentBehavior = .never
+        carousel.register(
+            CarouselMediaCollectionCell.self,
+            forCellWithReuseIdentifier: Self.carouselCellReuseIdentifier
+        )
+        carousel.isHidden = true
+        addSubview(carousel)
 
         blurView.translatesAutoresizingMaskIntoConstraints = false
         blurView.isHidden = true
@@ -374,6 +399,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
             grid.leadingAnchor.constraint(equalTo: leadingAnchor),
             grid.trailingAnchor.constraint(equalTo: trailingAnchor),
             grid.bottomAnchor.constraint(equalTo: bottomAnchor),
+            carousel.topAnchor.constraint(equalTo: topAnchor),
+            carousel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            carousel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            carousel.bottomAnchor.constraint(equalTo: bottomAnchor),
             blurView.topAnchor.constraint(equalTo: topAnchor),
             blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
             blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -385,7 +414,14 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
     override func layoutSubviews() {
         super.layoutSubviews()
         layer.cornerRadius = usesCarousel ? 0 : cornerRadius
-        layoutGrid()
+        if usesCarousel {
+            if carousel.bounds.size != lastCarouselSize {
+                lastCarouselSize = carousel.bounds.size
+                carouselLayout.invalidateLayout()
+            }
+        } else {
+            layoutGrid()
+        }
         if abs(bounds.width - lastLayoutWidth) > 0.5 {
             lastLayoutWidth = bounds.width
             invalidateIntrinsicContentSize()
@@ -468,24 +504,59 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
             self.isBlurred = sensitive
         }
         if shouldResetCarousel {
-            grid.setContentOffset(.zero, animated: false)
+            carousel.setContentOffset(.zero, animated: false)
         }
         layer.cornerRadius = usesCarousel ? 0 : cornerRadius
         updateAspectConstraint()
-        rebuildGrid()
+        reloadMediaLayout()
         updateBlurUI()
     }
 
     func autoplayCandidates(prefix: String) -> [TimelineVideoAutoplayCandidate] {
         guard !isHidden, window != nil, !items.isEmpty, !(sensitive && isBlurred) else { return [] }
-        guard !usesCarousel || (!grid.isDragging && !grid.isDecelerating) else { return [] }
+        if usesCarousel {
+            guard !carousel.isDragging, !carousel.isDecelerating else { return [] }
+            let visibleBounds = CGRect(origin: carousel.contentOffset, size: carousel.bounds.size)
+            let candidate = carousel.visibleCells
+                .compactMap { cell -> (TimelineVideoAutoplayCandidate, CGFloat)? in
+                    guard let cell = cell as? CarouselMediaCollectionCell,
+                          let candidate = cell.mediaCell.autoplayCandidate(prefix: prefix) else {
+                        return nil
+                    }
+                    let visibleWidth = cell.frame.intersection(visibleBounds).width
+                    return visibleWidth > 0 ? (candidate, visibleWidth) : nil
+                }
+                .max { $0.1 < $1.1 }
+            return candidate.map { [$0.0] } ?? []
+        }
         return cellPool
             .prefix(visibleItemCount)
             .compactMap { cell in
-                guard !cell.isHidden,
-                      !usesCarousel || cell.frame.intersects(grid.bounds) else { return nil }
+                guard !cell.isHidden else { return nil }
                 return cell.autoplayCandidate(prefix: prefix)
             }
+    }
+
+    private func reloadMediaLayout() {
+        grid.isHidden = usesCarousel
+        carousel.isHidden = !usesCarousel
+        carouselLayout.sectionInset = UIEdgeInsets(
+            top: 0,
+            left: carouselLeadingPadding,
+            bottom: 0,
+            right: carouselTrailingPadding
+        )
+        carouselLayout.invalidateLayout()
+        carousel.reloadData()
+
+        if usesCarousel {
+            overflowView.isHidden = true
+            trimCellPool(activeCount: 0)
+        } else {
+            rebuildGrid()
+        }
+        setNeedsLayout()
+        invalidateIntrinsicContentSize()
     }
 
     private func rebuildGrid() {
@@ -512,7 +583,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
                 media: item,
                 index: index,
                 showsDownloadAll: items.count > 1,
-                cornerRadius: usesCarousel ? cornerRadius : 0
+                cornerRadius: 0
             )
         }
         if visibleCount < cellPool.count {
@@ -527,17 +598,16 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
         } else {
             overflowView.isHidden = true
         }
-        updateCarouselUI()
         setNeedsLayout()
         invalidateIntrinsicContentSize()
     }
 
     func performDeferredPoolCleanup() {
-        trimCellPool(activeCount: visibleItemCount)
+        trimCellPool(activeCount: usesCarousel ? 0 : visibleItemCount)
     }
 
     func performLightweightPoolCleanup() {
-        trimCellPool(activeCount: visibleItemCount)
+        trimCellPool(activeCount: usesCarousel ? 0 : visibleItemCount)
     }
 
     private func trimCellPool(activeCount: Int) {
@@ -581,32 +651,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
     }
 
     private func layoutGrid() {
-        if usesCarousel {
-            let width = grid.bounds.width
-            let height = grid.bounds.height
-            var x = carouselLeadingPadding
-            for (index, view) in cellPool.prefix(visibleItemCount).enumerated() {
-                let ratio = carouselItemAspectRatio(at: index)
-                let itemWidth = height * ratio
-                view.frame = CGRect(
-                    x: x,
-                    y: 0,
-                    width: itemWidth,
-                    height: height
-                )
-                x += itemWidth + spacing
-            }
-            grid.contentSize = CGSize(
-                width: max(width, x - spacing + carouselTrailingPadding),
-                height: height
-            )
-            return
-        }
-
-        grid.contentSize = grid.bounds.size
-        if grid.contentOffset != .zero {
-            grid.setContentOffset(.zero, animated: false)
-        }
         let frames = gridFrames(for: grid.bounds.width)
         for (view, frame) in zip(cellPool.prefix(visibleItemCount), frames) {
             view.frame = frame
@@ -734,6 +778,54 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
         return min(ratio, 16 / 9)
     }
 
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        usesCarousel ? items.count : 0
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: Self.carouselCellReuseIdentifier,
+            for: indexPath
+        ) as? CarouselMediaCollectionCell else {
+            return UICollectionViewCell()
+        }
+        guard items.indices.contains(indexPath.item) else {
+            cell.resetContent()
+            return cell
+        }
+        let mediaCell = cell.mediaCell
+        mediaCell.isHidden = false
+        mediaCell.onTap = { [weak self] index in
+            self?.handleCellTap(index: index)
+        }
+        mediaCell.onMenuAction = { [weak self] index, action in
+            self?.handleCellMenuAction(index: index, action: action)
+        }
+        mediaCell.configure(
+            media: items[indexPath.item],
+            index: indexPath.item,
+            showsDownloadAll: items.count > 1,
+            cornerRadius: cornerRadius
+        )
+        return cell
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        let height = collectionView.bounds.height
+        guard height > 0 else { return CGSize(width: 1, height: 1) }
+        return CGSize(
+            width: height * carouselItemAspectRatio(at: indexPath.item),
+            height: height
+        )
+    }
+
     private func handleCellTap(index: Int) {
         if sensitive, isBlurred { return }
         guard items.indices.contains(index) else { return }
@@ -747,9 +839,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
     }
 
     private var visibleItemCount: Int {
-        if usesCarousel {
-            return items.count
-        }
         return limitMediaGridToNine ? min(items.count, Self.maxVisibleMediaCount) : items.count
     }
 
@@ -759,11 +848,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UIScrollViewDele
 
     private var usesCarousel: Bool {
         mediaLayout == .carousel && items.count > 1
-    }
-
-    private func updateCarouselUI() {
-        grid.isScrollEnabled = usesCarousel
-        grid.alwaysBounceHorizontal = usesCarousel
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -1000,6 +1084,34 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
 
     @objc private func onCellTapped() {
         onTap?(tag)
+    }
+}
+
+private final class CarouselMediaCollectionCell: UICollectionViewCell {
+    let mediaCell = MediaGridCellView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        contentView.clipsToBounds = true
+        mediaCell.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(mediaCell)
+        NSLayoutConstraint.activate([
+            mediaCell.topAnchor.constraint(equalTo: contentView.topAnchor),
+            mediaCell.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            mediaCell.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            mediaCell.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        resetContent()
+    }
+
+    func resetContent() {
+        mediaCell.prepareForPoolRemoval()
     }
 }
 

@@ -641,6 +641,7 @@ private val SERVER_SUGGESTIONS =
         "https://api.openai.com/v1/",
         "https://generativelanguage.googleapis.com/v1beta/openai/",
         "https://openrouter.ai/api/v1/",
+        "https://api.orcarouter.ai/v1/",
         "https://api.x.ai/v1/",
         "https://dashscope.aliyuncs.com/compatible-mode/v1/",
         "https://open.bigmodel.cn/api/paas/v4/",

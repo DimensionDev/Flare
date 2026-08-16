@@ -43,11 +43,13 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_light
+import dev.dimension.flare.settings_appearance_timeline_display_mode_card
 import dev.dimension.flare.status_share
 import dev.dimension.flare.status_share_crosspost
 import dev.dimension.flare.status_share_crosspost_failed
 import dev.dimension.flare.status_share_image
 import dev.dimension.flare.status_share_save_screenshot
+import dev.dimension.flare.status_share_sheet_preview_content
 import dev.dimension.flare.status_share_via_fixvx
 import dev.dimension.flare.status_share_via_fxembed
 import dev.dimension.flare.ui.component.ComposeInAppNotification
@@ -90,6 +92,11 @@ private enum class SharePreviewTheme {
     Dark,
 }
 
+private enum class SharePreviewStyle {
+    Card,
+    Content,
+}
+
 @Composable
 internal fun StatusShareSheet(
     accountType: AccountType,
@@ -106,6 +113,7 @@ internal fun StatusShareSheet(
     val scope = rememberCoroutineScope()
     val previewGraphicsLayer = rememberGraphicsLayer()
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
+    var previewStyle by remember { mutableStateOf(SharePreviewStyle.Card) }
     var isPreparingCrossPost by remember { mutableStateOf(false) }
 
     val state by producePresenter("DesktopStatusShareSheet_${accountType}_$statusKey") {
@@ -123,22 +131,39 @@ internal fun StatusShareSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            LiteFilter(
+            FlowRow(
                 modifier =
                     Modifier
                         .align(Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                PillButton(
-                    selected = previewTheme == SharePreviewTheme.Light,
-                    onSelectedChanged = { previewTheme = SharePreviewTheme.Light },
-                ) {
-                    Text(stringResource(Res.string.settings_appearance_theme_light))
+                LiteFilter {
+                    PillButton(
+                        selected = previewStyle == SharePreviewStyle.Card,
+                        onSelectedChanged = { previewStyle = SharePreviewStyle.Card },
+                    ) {
+                        Text(stringResource(Res.string.settings_appearance_timeline_display_mode_card))
+                    }
+                    PillButton(
+                        selected = previewStyle == SharePreviewStyle.Content,
+                        onSelectedChanged = { previewStyle = SharePreviewStyle.Content },
+                    ) {
+                        Text(stringResource(Res.string.status_share_sheet_preview_content))
+                    }
                 }
-                PillButton(
-                    selected = previewTheme == SharePreviewTheme.Dark,
-                    onSelectedChanged = { previewTheme = SharePreviewTheme.Dark },
-                ) {
-                    Text(stringResource(Res.string.settings_appearance_theme_dark))
+                LiteFilter {
+                    PillButton(
+                        selected = previewTheme == SharePreviewTheme.Light,
+                        onSelectedChanged = { previewTheme = SharePreviewTheme.Light },
+                    ) {
+                        Text(stringResource(Res.string.settings_appearance_theme_light))
+                    }
+                    PillButton(
+                        selected = previewTheme == SharePreviewTheme.Dark,
+                        onSelectedChanged = { previewTheme = SharePreviewTheme.Dark },
+                    ) {
+                        Text(stringResource(Res.string.settings_appearance_theme_dark))
+                    }
                 }
             }
 
@@ -163,14 +188,7 @@ internal fun StatusShareSheet(
                                     Modifier
                                         .background(FluentTheme.colors.background.mica.base),
                             ) {
-                                Layer(
-                                    modifier =
-                                        Modifier
-                                            .padding(64.dp)
-                                            .width(360.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    elevation = 32.dp,
-                                ) {
+                                val content: @Composable () -> Unit = {
                                     CompositionLocalProvider(
                                         LocalTimelineAppearance provides
                                             LocalTimelineAppearance.current.copy(
@@ -185,6 +203,31 @@ internal fun StatusShareSheet(
                                             item = state.status.takeSuccess(),
                                             detailStatusKey = statusKey,
                                         )
+                                    }
+                                }
+                                when (previewStyle) {
+                                    SharePreviewStyle.Card -> {
+                                        Layer(
+                                            modifier =
+                                                Modifier
+                                                    .padding(64.dp)
+                                                    .width(360.dp),
+                                            shape = RoundedCornerShape(12.dp),
+                                            elevation = 32.dp,
+                                        ) {
+                                            content()
+                                        }
+                                    }
+
+                                    SharePreviewStyle.Content -> {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .width(360.dp)
+                                                    .background(FluentTheme.colors.background.layer.default),
+                                        ) {
+                                            content()
+                                        }
                                     }
                                 }
                                 Box(

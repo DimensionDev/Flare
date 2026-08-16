@@ -104,8 +104,9 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.compose.ShortcutComposeActivity
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import dev.dimension.flare.ui.theme.single
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
@@ -116,6 +117,11 @@ import java.io.FileOutputStream
 private enum class SharePreviewTheme {
     Light,
     Dark,
+}
+
+private enum class SharePreviewStyle {
+    Card,
+    Content,
 }
 
 private val SharePreviewMaxHeight = 360.dp
@@ -152,13 +158,20 @@ internal fun StatusShareSheet(
     var isCrossPosting by remember { mutableStateOf(false) }
     var previewContentHeightPx by remember { mutableIntStateOf(0) }
     var previewTheme by remember { mutableStateOf(SharePreviewTheme.Light) }
+    var previewStyle by remember { mutableStateOf(SharePreviewStyle.Card) }
     val state by producePresenter("status_share_sheet_${statusKey}_$shareUrl") {
         remember(accountType, statusKey) {
             StatusPresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
     }
     val status = state.status.takeSuccess()
-    val shareCaptureWidthPx = with(density) { ShareCaptureWidth.roundToPx() }
+    val shareCaptureWidthPx =
+        with(density) {
+            when (previewStyle) {
+                SharePreviewStyle.Card -> ShareCaptureWidth
+                SharePreviewStyle.Content -> ShareCardWidth
+            }.roundToPx()
+        }
 
     suspend fun captureBitmap(): Bitmap? {
         val isLongCapture =
@@ -182,6 +195,7 @@ internal fun StatusShareSheet(
                         StatusShareCard(
                             statusKey = statusKey,
                             status = status,
+                            previewStyle = previewStyle,
                         )
                     }
                 }
@@ -207,6 +221,7 @@ internal fun StatusShareSheet(
             statusKey = statusKey,
             status = status,
             previewTheme = previewTheme,
+            previewStyle = previewStyle,
             captureRequested = captureRequested,
             previewGraphicsLayer = previewGraphicsLayer,
             onContentHeightChanged = {
@@ -404,44 +419,92 @@ internal fun StatusShareSheet(
                 }
             }
         }
-        SegmentedListItem(
-            onClick = {},
-            shapes = ListItemDefaults.single(),
-            content = {
-                Text(
-                    text = stringResource(id = R.string.status_share_sheet_theme_title),
-                )
-            },
-            trailingContent = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-                ) {
-                    val entries = SharePreviewTheme.entries
-                    entries.forEachIndexed { index, value ->
-                        ToggleButton(
-                            checked = previewTheme == value,
-                            onCheckedChange = {
-                                if (it) previewTheme = value
-                            },
-                            shapes =
-                                when (index) {
-                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                    entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            SegmentedListItem(
+                onClick = {},
+                shapes = ListItemDefaults.first(),
+                content = {
+                    Text(
+                        text = stringResource(id = R.string.settings_appearance_layout_group_title),
+                    )
+                },
+                trailingContent = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                    ) {
+                        val entries = SharePreviewStyle.entries
+                        entries.forEachIndexed { index, value ->
+                            ToggleButton(
+                                checked = previewStyle == value,
+                                onCheckedChange = {
+                                    if (it) previewStyle = value
                                 },
-                        ) {
-                            Text(
-                                text =
-                                    when (value) {
-                                        SharePreviewTheme.Light -> stringResource(R.string.settings_appearance_theme_light)
-                                        SharePreviewTheme.Dark -> stringResource(R.string.settings_appearance_theme_dark)
+                                shapes =
+                                    when (index) {
+                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                                     },
-                            )
+                            ) {
+                                Text(
+                                    text =
+                                        when (value) {
+                                            SharePreviewStyle.Card -> {
+                                                stringResource(R.string.settings_appearance_timeline_display_mode_card)
+                                            }
+
+                                            SharePreviewStyle.Content -> {
+                                                stringResource(R.string.status_share_sheet_preview_content)
+                                            }
+                                        },
+                                )
+                            }
                         }
                     }
-                }
-            },
-        )
+                },
+            )
+            SegmentedListItem(
+                onClick = {},
+                shapes = ListItemDefaults.last(),
+                content = {
+                    Text(
+                        text = stringResource(id = R.string.status_share_sheet_theme_title),
+                    )
+                },
+                trailingContent = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                    ) {
+                        val entries = SharePreviewTheme.entries
+                        entries.forEachIndexed { index, value ->
+                            ToggleButton(
+                                checked = previewTheme == value,
+                                onCheckedChange = {
+                                    if (it) previewTheme = value
+                                },
+                                shapes =
+                                    when (index) {
+                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                    },
+                            ) {
+                                Text(
+                                    text =
+                                        when (value) {
+                                            SharePreviewTheme.Light -> stringResource(R.string.settings_appearance_theme_light)
+                                            SharePreviewTheme.Dark -> stringResource(R.string.settings_appearance_theme_dark)
+                                        },
+                                )
+                            }
+                        }
+                    }
+                },
+            )
+        }
     }
 }
 
@@ -450,6 +513,7 @@ private fun StatusSharePreview(
     statusKey: MicroBlogKey,
     status: UiTimelineV2?,
     previewTheme: SharePreviewTheme,
+    previewStyle: SharePreviewStyle,
     captureRequested: Boolean,
     previewGraphicsLayer: GraphicsLayer,
     onContentHeightChanged: (Int) -> Unit,
@@ -480,6 +544,7 @@ private fun StatusSharePreview(
                 StatusShareCard(
                     statusKey = statusKey,
                     status = status,
+                    previewStyle = previewStyle,
                     blockInteractions = true,
                 )
             }
@@ -491,23 +556,14 @@ private fun StatusSharePreview(
 private fun StatusShareCard(
     statusKey: MicroBlogKey,
     status: UiTimelineV2?,
+    previewStyle: SharePreviewStyle,
     modifier: Modifier = Modifier,
     blockInteractions: Boolean = false,
 ) {
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) {
-        Surface(
-            modifier =
-                Modifier
-                    .padding(ShareCardPadding)
-                    .width(ShareCardWidth)
-                    .captureableShadow(
-                        cornerRadius = ShareCardShadowCornerRadius,
-                        shadowRadius = ShareCardShadowRadius,
-                    ),
-            shape = RoundedCornerShape(ShareCardShapeCornerRadius),
-        ) {
+        val content: @Composable () -> Unit = {
             Box {
                 CompositionLocalProvider(
                     LocalTimelineAppearance provides
@@ -534,6 +590,29 @@ private fun StatusShareCard(
                                 ),
                     )
                 }
+            }
+        }
+        when (previewStyle) {
+            SharePreviewStyle.Card -> {
+                Surface(
+                    modifier =
+                        Modifier
+                            .padding(ShareCardPadding)
+                            .width(ShareCardWidth)
+                            .captureableShadow(
+                                cornerRadius = ShareCardShadowCornerRadius,
+                                shadowRadius = ShareCardShadowRadius,
+                            ),
+                    shape = RoundedCornerShape(ShareCardShapeCornerRadius),
+                    content = content,
+                )
+            }
+
+            SharePreviewStyle.Content -> {
+                Surface(
+                    modifier = Modifier.width(ShareCardWidth),
+                    content = content,
+                )
             }
         }
     }

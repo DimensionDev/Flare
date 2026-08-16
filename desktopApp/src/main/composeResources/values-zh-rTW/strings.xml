@@ -413,6 +413,7 @@
     <string name="tab_settings_filter_desc">選擇可見的貼文類型和內容類型。</string>
     <string name="tab_settings_filter_kind_group">類型</string>
     <string name="tab_settings_filter_content_group">內容</string>
+    <string name="status_share_sheet_preview_content">僅內容</string>
     <string name="tab_settings_filter_reply">回覆</string>
     <string name="tab_settings_filter_repost">轉發</string>
     <string name="tab_settings_filter_quote">引用</string>

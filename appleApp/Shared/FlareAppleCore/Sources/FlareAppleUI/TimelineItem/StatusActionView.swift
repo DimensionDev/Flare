@@ -597,6 +597,11 @@ public enum MacStatusSharePurpose {
     case crossPost
 }
 
+private enum MacStatusSharePreviewStyle: Hashable {
+    case card
+    case content
+}
+
 public struct MacStatusShareSheet: View {
     private let statusKey: MicroBlogKey
     private let purpose: MacStatusSharePurpose
@@ -607,6 +612,7 @@ public struct MacStatusShareSheet: View {
     @Environment(\.timelineAppearance) private var timelineAppearance
     @StateObject private var presenter: KotlinPresenter<StatusState>
     @State private var theme: ColorScheme?
+    @State private var previewStyle: MacStatusSharePreviewStyle = .card
     @State private var screenshotURL: URL?
     @State private var isRenderingScreenshot = false
     @State private var renderRequestID: UUID?
@@ -640,6 +646,7 @@ public struct MacStatusShareSheet: View {
                         data: state,
                         statusKey: statusKey,
                         colorScheme: resolvedColorScheme,
+                        previewStyle: previewStyle,
                         timelineAppearance: timelineAppearance
                     )
                     .allowsHitTesting(false)
@@ -656,6 +663,9 @@ public struct MacStatusShareSheet: View {
                 renderScreenshot(data: state)
             }
             .onChange(of: theme) { _, _ in
+                renderScreenshot(data: state)
+            }
+            .onChange(of: previewStyle) { _, _ in
                 renderScreenshot(data: state)
             }
         } errorContent: { error in
@@ -701,6 +711,16 @@ public struct MacStatusShareSheet: View {
         switch purpose {
         case .shareScreenshot:
             VStack(alignment: .leading, spacing: 16) {
+                Text("appearance_layout_group_title")
+                    .font(.headline)
+
+                Picker("appearance_layout_group_title", selection: $previewStyle) {
+                    Text("appearance_timeline_display_mode_card").tag(MacStatusSharePreviewStyle.card)
+                    Text("status_share_sheet_preview_content").tag(MacStatusSharePreviewStyle.content)
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+
                 Text("appearance_theme")
                     .font(.headline)
 
@@ -767,6 +787,7 @@ public struct MacStatusShareSheet: View {
                         data: data,
                         statusKey: statusKey,
                         colorScheme: resolvedColorScheme,
+                        previewStyle: previewStyle,
                         timelineAppearance: timelineAppearance
                     ),
                     fileName: "flare-status-\(statusKey.description()).png"
@@ -801,6 +822,7 @@ private struct MacStatusSharePreview: View {
     let data: UiTimelineV2
     let statusKey: MicroBlogKey
     let colorScheme: ColorScheme
+    let previewStyle: MacStatusSharePreviewStyle
     let timelineAppearance: TimelineAppearance
 
     var body: some View {
@@ -812,10 +834,13 @@ private struct MacStatusSharePreview: View {
         .frame(width: 360, alignment: .leading)
         .padding()
         .background(Color.flareSecondarySystemGroupedBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .contentShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(radius: 8)
-        .padding(64)
+        .if(previewStyle == .card) { view in
+            view
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .contentShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(radius: 8)
+                .padding(64)
+        }
         .background(Color.flareSystemGroupedBackground)
         .environment(\.colorScheme, colorScheme)
         .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())

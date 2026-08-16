@@ -535,6 +535,7 @@
     <string name="tab_settings_filter_image">圖片</string>
     <string name="tab_settings_filter_video">影片</string>
     <string name="status_share_sheet_theme_title">主題</string>
+    <string name="status_share_sheet_preview_content">僅內容</string>
     <string name="channel_title">頻道</string>
     <string name="channel_item_follow">追蹤</string>
     <string name="channel_item_unfollow">取消追蹤</string>

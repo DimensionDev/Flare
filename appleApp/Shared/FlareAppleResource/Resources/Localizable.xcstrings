@@ -145217,6 +145217,28 @@
         }
       }
     },
+    "status_share_sheet_preview_content" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "僅內容"
+          }
+        }
+      }
+    },
     "status_tldr" : {
       "localizations" : {
         "af" : {

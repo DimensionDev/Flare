@@ -475,6 +475,7 @@
     <string name="tab_settings_filter_desc">选择可见的动态类型和内容类型。</string>
     <string name="tab_settings_filter_kind_group">动态类型</string>
     <string name="tab_settings_filter_content_group">内容类型</string>
+    <string name="status_share_sheet_preview_content">仅内容</string>
     <string name="tab_settings_filter_reply">回复</string>
     <string name="tab_settings_filter_repost">转发</string>
     <string name="tab_settings_filter_quote">引用</string>

@@ -5,6 +5,11 @@ import UniformTypeIdentifiers
 import FlareAppleCore
 import FlareAppleUI
 
+private enum SharePreviewStyle: Hashable {
+    case card
+    case content
+}
+
 struct StatusShareSheet: View {
     let statusKey: MicroBlogKey
     let accountType: AccountType
@@ -19,6 +24,7 @@ struct StatusShareSheet: View {
     @StateObject private var presenter: KotlinPresenter<StatusState>
     @State private var renderScale: CGFloat = 2.0
     @State private var theme: ColorScheme? = nil
+    @State private var previewStyle: SharePreviewStyle = .card
     @State private var image: UIImage? = nil
     
     init(
@@ -104,6 +110,11 @@ struct StatusShareSheet: View {
                     Text("appearance_theme_light").tag(Optional(ColorScheme.light))
                     Text("appearance_theme_dark").tag(Optional(ColorScheme.dark))
                 }
+
+                Picker("appearance_layout_group_title", selection: $previewStyle) {
+                    Text("appearance_timeline_display_mode_card").tag(SharePreviewStyle.card)
+                    Text("status_share_sheet_preview_content").tag(SharePreviewStyle.content)
+                }
             } loadingContent: {
                 TimelinePlaceholderView()
             }
@@ -138,6 +149,14 @@ struct StatusShareSheet: View {
                 }
             }
         }
+        .onChange(of: previewStyle) { oldValue, newValue in
+            if case .success(let data) = onEnum(of: presenter.state.status) {
+                image = nil
+                Task {
+                    image = await renderImage(data: data.data)
+                }
+            }
+        }
     }
     
     @ViewBuilder
@@ -146,10 +165,13 @@ struct StatusShareSheet: View {
             .frame(width: 360)
             .padding()
             .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(.rect(cornerRadius: 16))
-            .contentShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(radius: 8)
-            .padding(64)
+            .if(previewStyle == .card) { view in
+                view
+                    .clipShape(.rect(cornerRadius: 16))
+                    .contentShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(radius: 8)
+                    .padding(64)
+            }
             .background(Color(.systemGroupedBackground))
             .environment(\.colorScheme, theme ?? colorScheme)
             .environment(\.timelineAppearance, timelineAppearance.withSharePreviewDefaults())

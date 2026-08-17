@@ -3,7 +3,10 @@
 First of all, I'd like to express my appreciation to you for contributing to this project.
 Below is the guidance for how to report issues, propose new features, and submit contributions via Pull Requests (PRs).
 
-## Before you start, file an issue
+## Before you start, use Flare
+You **MUST** be a user of Flare, otherwise your issue/PR will be treated as a spam.
+
+## File an issue
 If you have a question, think you've discovered an issue, would like to propose a new feature, etc., then find/file an issue **BEFORE** starting work to fix/implement it.
 
 ### Search existing issues first
@@ -31,9 +34,10 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
  - Run `./gradlew installDebug` to build and install the debug version of the app
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
-### iOS
+### iOS/macOS
  - Make sure you have JDK 25 installed
  - Make sure you have a Mac with Xcode 26 installed
+ - run `xcodegen generate --spec ./appleApp/project.yml`
  - open `appleApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
@@ -44,6 +48,9 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
 ### Project structure
 The project is split into theses parts:
  - `shared`: The common code, including bussiness logic.
+ - `apple-shared`: The common code for Apple target.
+ - `web-shared`: The common code for Web.
+ - `web`: The Web app.
  - `compose-ui`: The Compose UI code that shared between Android, iOS, Desktop.
  - `app`: The Android app.
  - `appleApp`: The iOS and macOS apps.

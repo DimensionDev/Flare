@@ -34,6 +34,7 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
+import dev.dimension.flare.data.network.bluesky.normalizeHttpUrl
 import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -184,11 +185,13 @@ internal suspend fun parseBskyFacets(
         val feature =
             when (token) {
                 is UrlToken -> {
-                    FacetFeatureUnion.Link(
-                        FacetLink(
-                            uri = Uri(token.value),
-                        ),
-                    )
+                    normalizeHttpUrl(token.value)?.let { uri ->
+                        FacetFeatureUnion.Link(
+                            FacetLink(
+                                uri = Uri(uri),
+                            ),
+                        )
+                    }
                 }
 
                 is HashTagToken -> {

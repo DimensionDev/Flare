@@ -75,6 +75,22 @@ class BlueskyFacetsTest {
         }
 
     @Test
+    fun `normalizes bare domain link facet to absolute uri`() =
+        runTest {
+            val content = "aicu.cc"
+
+            val facets = parseBskyFacets(content) { it }
+
+            assertEquals(1, facets.size)
+            val link = facets.single()
+            assertEquals(0L, link.index.byteStart)
+            assertEquals(7L, link.index.byteEnd)
+            val linkFeature = link.features.single()
+            assertTrue(linkFeature is FacetFeatureUnion.Link)
+            assertEquals("https://aicu.cc", linkFeature.value.uri.uri)
+        }
+
+    @Test
     fun `parses real post link and mention facets`() =
         runTest {
             val content =
@@ -94,7 +110,7 @@ class BlueskyFacetsTest {
             assertEquals(86L, link.index.byteEnd)
             val linkFeature = link.features.single()
             assertTrue(linkFeature is FacetFeatureUnion.Link)
-            assertEquals("issteamaudiooutyet.com", linkFeature.value.uri.uri)
+            assertEquals("https://issteamaudiooutyet.com", linkFeature.value.uri.uri)
 
             val mention = facets[1]
             assertEquals(127L, mention.index.byteStart)

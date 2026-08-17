@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import FlareAppleUI
 import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
@@ -86,6 +87,13 @@ struct NotificationScreen: View {
             .id(timelineKey)
             .refreshable {
                 try? await presenter.state.refreshSuspend()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .notificationsTabDoubleTapped)) { _ in
+                guard case .success(let timeline) = onEnum(of: presenter.state.timeline),
+                      !timeline.isRefreshing else { return }
+                Task {
+                    try? await presenter.state.refreshSuspend()
+                }
             }
             .detectScrolling()
             .if(!notificationItems.isEmpty && horizontalSizeClass == .compact && !isSyncingAccountSelection) { view in

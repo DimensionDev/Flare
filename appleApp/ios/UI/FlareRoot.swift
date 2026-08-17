@@ -9,6 +9,7 @@ import UIKit
 
 extension Notification.Name {
     static let homeTabDoubleTapped = Notification.Name("homeTabDoubleTapped")
+    static let notificationsTabDoubleTapped = Notification.Name("notificationsTabDoubleTapped")
 }
 
 @available(iOS 18.0, *)
@@ -72,8 +73,7 @@ struct FlareRoot: View {
                 }
             }
             .onTabBarDoubleTap {
-                guard selectedTab == homeTabKey(.home) else { return }
-                NotificationCenter.default.post(name: .homeTabDoubleTapped, object: nil)
+                postTabDoubleTapRefresh(for: selectedTab)
             }
             .tabViewStyle(.sidebarAdaptable)
             .backport
@@ -169,8 +169,7 @@ struct BackportFlareRoot: View {
                 }
             }
             .onTabBarDoubleTap {
-                guard selectedTab == homeTabKey(.home) else { return }
-                NotificationCenter.default.post(name: .homeTabDoubleTapped, object: nil)
+                postTabDoubleTapRefresh(for: selectedTab)
             }
             .background(Color(.systemGroupedBackground))
             .sheet(item: $reloginRoute) { route in
@@ -243,6 +242,19 @@ private struct TabBarDoubleTapModifier: ViewModifier {
 
 private func homeTabKey(_ tab: HomeTabsPresenterStateHomeTabs) -> String {
     tab.name.lowercased()
+}
+
+private func postTabDoubleTapRefresh(for selectedTab: String?) {
+    let notificationName: Notification.Name
+    switch selectedTab {
+    case homeTabKey(.home):
+        notificationName = .homeTabDoubleTapped
+    case homeTabKey(.notifications):
+        notificationName = .notificationsTabDoubleTapped
+    default:
+        return
+    }
+    NotificationCenter.default.post(name: notificationName, object: nil)
 }
 
 private func homeTabRoute(_ tab: HomeTabsPresenterStateHomeTabs) -> Route {

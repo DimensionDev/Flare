@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.withFrameNanos
@@ -40,6 +41,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.view.RoundedCornerCompat
@@ -81,6 +83,49 @@ internal fun Router(
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val uriHandler = LocalUriHandler.current
+    val latestNavigate = rememberUpdatedState(navigate)
+    val latestOnBack = rememberUpdatedState(onBack)
+    val latestOpenDrawer = rememberUpdatedState(openDrawer)
+    val latestUriHandler = rememberUpdatedState(uriHandler)
+    val stableNavigate: (Route) -> Unit =
+        remember {
+            { route -> latestNavigate.value(route) }
+        }
+    val stableOnBack: () -> Unit =
+        remember {
+            { latestOnBack.value() }
+        }
+    val stableOpenDrawer: () -> Unit =
+        remember {
+            { latestOpenDrawer.value() }
+        }
+    val stableUriHandler: UriHandler =
+        remember {
+            object : UriHandler {
+                override fun openUri(uri: String) {
+                    latestUriHandler.value.openUri(uri)
+                }
+            }
+        }
+    val navEntryProvider =
+        remember {
+            entryProvider<NavKey> {
+                homeEntryBuilder(stableNavigate, stableOnBack, stableOpenDrawer, uriHandler = stableUriHandler)
+                articleEntryBuilder(stableNavigate, stableOnBack)
+                blueskyEntryBuilder(stableNavigate, stableOnBack)
+                composeEntryBuilder(stableNavigate, stableOnBack)
+                dmEntryBuilder(stableNavigate, stableOnBack)
+                galleryEntryBuilder(stableNavigate, stableOnBack)
+                listEntryBuilder(stableNavigate, stableOnBack)
+                mediaEntryBuilder(stableNavigate, stableOnBack, uriHandler = stableUriHandler)
+                profileEntryBuilder(stableNavigate, stableOnBack)
+                rssEntryBuilder(stableNavigate, stableOnBack)
+                serviceSelectEntryBuilder(stableNavigate, stableOnBack)
+                settingsSelectEntryBuilder(stableNavigate, stableOnBack)
+                statusEntryBuilder(stableNavigate, stableOnBack)
+                misskeyEntryBuilder(stableNavigate, stableOnBack)
+            }
+        }
     val isBigScreen = isBigScreen()
     val deviceCornerDecorator =
         rememberDeviceCornerNavEntryDecorator(
@@ -121,7 +166,7 @@ internal fun Router(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
         backStack = backStack,
-        onBack = { onBack() },
+        onBack = stableOnBack,
         transitionSpec = {
             if (isBigScreen) {
                 materialSharedAxisZ(true)
@@ -144,23 +189,7 @@ internal fun Router(
                 scrimColor = predictiveBackScrimColor,
             )
         },
-        entryProvider =
-            entryProvider {
-                homeEntryBuilder(navigate, onBack, openDrawer, uriHandler = uriHandler)
-                articleEntryBuilder(navigate, onBack)
-                blueskyEntryBuilder(navigate, onBack)
-                composeEntryBuilder(navigate, onBack)
-                dmEntryBuilder(navigate, onBack)
-                galleryEntryBuilder(navigate, onBack)
-                listEntryBuilder(navigate, onBack)
-                mediaEntryBuilder(navigate, onBack, uriHandler = uriHandler)
-                profileEntryBuilder(navigate, onBack)
-                rssEntryBuilder(navigate, onBack)
-                serviceSelectEntryBuilder(navigate, onBack)
-                settingsSelectEntryBuilder(navigate, onBack)
-                statusEntryBuilder(navigate, onBack)
-                misskeyEntryBuilder(navigate, onBack)
-            },
+        entryProvider = navEntryProvider,
     )
 }
 

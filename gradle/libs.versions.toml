@@ -137,7 +137,7 @@ sqlite-async = { group = "androidx.sqlite", name = "sqlite-async", version.ref =
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 sqlite-web = { group = "androidx.sqlite", name = "sqlite-web", version.ref = "sqlite" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
-webkit = { group = "androidx.webkit", name = "webkit", version = "1.16.0" }
+webkit = { group = "androidx.webkit", name = "webkit", version = "1.17.0" }
 androidx-browser = { group = "androidx.browser", name = "browser", version = "1.10.0" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }

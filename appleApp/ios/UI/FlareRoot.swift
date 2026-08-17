@@ -1,5 +1,4 @@
 import SwiftUI
-import Combine
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
@@ -8,8 +7,7 @@ import SwiftUIIntrospect
 import UIKit
 
 extension Notification.Name {
-    static let homeTabDoubleTapped = Notification.Name("homeTabDoubleTapped")
-    static let notificationsTabDoubleTapped = Notification.Name("notificationsTabDoubleTapped")
+    static let tabDoubleTapped = Notification.Name("tabDoubleTapped")
 }
 
 @available(iOS 18.0, *)
@@ -72,9 +70,9 @@ struct FlareRoot: View {
                     }
                 }
             }
-            .onTabBarDoubleTap {
-                postTabDoubleTapRefresh(for: selectedTab)
-            }
+            .modifier(TabBarDoubleTapModifier {
+                NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
+            })
             .tabViewStyle(.sidebarAdaptable)
             .backport
             .tabBarMinimizeBehavior(.onScrollDown)
@@ -134,10 +132,6 @@ private extension View {
             self.labelStyle(.iconOnly)
         }
     }
-
-    func onTabBarDoubleTap(perform action: @escaping () -> Void) -> some View {
-        modifier(TabBarDoubleTapModifier(action: action))
-    }
 }
 struct BackportFlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -168,9 +162,9 @@ struct BackportFlareRoot: View {
                     .tag(homeTabKey(tab))
                 }
             }
-            .onTabBarDoubleTap {
-                postTabDoubleTapRefresh(for: selectedTab)
-            }
+            .modifier(TabBarDoubleTapModifier {
+                NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
+            })
             .background(Color(.systemGroupedBackground))
             .sheet(item: $reloginRoute) { route in
                 NavigationStack {
@@ -192,27 +186,21 @@ struct BackportFlareRoot: View {
 }
 
 @MainActor
-private final class TabBarDoubleTapTarget: NSObject, ObservableObject, UIGestureRecognizerDelegate {
-    private weak var tabBar: UITabBar?
+private final class TabBarDoubleTapTarget: NSObject {
     private var action: () -> Void = {}
 
     private lazy var recognizer: UITapGestureRecognizer = {
         let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
         recognizer.numberOfTapsRequired = 2
         recognizer.cancelsTouchesInView = false
-        recognizer.delaysTouchesBegan = false
         recognizer.delaysTouchesEnded = false
-        recognizer.delegate = self
         return recognizer
     }()
 
     func install(on tabBar: UITabBar, action: @escaping () -> Void) {
         self.action = action
-        guard self.tabBar !== tabBar else { return }
-
-        self.tabBar?.removeGestureRecognizer(recognizer)
+        guard recognizer.view !== tabBar else { return }
         tabBar.addGestureRecognizer(recognizer)
-        self.tabBar = tabBar
     }
 
     @objc private func handleDoubleTap() {
@@ -220,17 +208,10 @@ private final class TabBarDoubleTapTarget: NSObject, ObservableObject, UIGesture
             self?.action()
         }
     }
-
-    func gestureRecognizer(
-        _ gestureRecognizer: UIGestureRecognizer,
-        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
-    ) -> Bool {
-        true
-    }
 }
 
 private struct TabBarDoubleTapModifier: ViewModifier {
-    @StateObject private var target = TabBarDoubleTapTarget()
+    @State private var target = TabBarDoubleTapTarget()
     let action: () -> Void
 
     func body(content: Content) -> some View {
@@ -242,19 +223,6 @@ private struct TabBarDoubleTapModifier: ViewModifier {
 
 private func homeTabKey(_ tab: HomeTabsPresenterStateHomeTabs) -> String {
     tab.name.lowercased()
-}
-
-private func postTabDoubleTapRefresh(for selectedTab: String?) {
-    let notificationName: Notification.Name
-    switch selectedTab {
-    case homeTabKey(.home):
-        notificationName = .homeTabDoubleTapped
-    case homeTabKey(.notifications):
-        notificationName = .notificationsTabDoubleTapped
-    default:
-        return
-    }
-    NotificationCenter.default.post(name: notificationName, object: nil)
 }
 
 private func homeTabRoute(_ tab: HomeTabsPresenterStateHomeTabs) -> Route {

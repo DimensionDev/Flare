@@ -1,8 +1,15 @@
 import SwiftUI
+import Combine
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 import SwiftUIBackports
+import SwiftUIIntrospect
+import UIKit
+
+extension Notification.Name {
+    static let homeTabDoubleTapped = Notification.Name("homeTabDoubleTapped")
+}
 
 @available(iOS 18.0, *)
 struct FlareRoot: View {
@@ -64,6 +71,10 @@ struct FlareRoot: View {
                     }
                 }
             }
+            .onTabBarDoubleTap {
+                guard selectedTab == homeTabKey(.home) else { return }
+                NotificationCenter.default.post(name: .homeTabDoubleTapped, object: nil)
+            }
             .tabViewStyle(.sidebarAdaptable)
             .backport
             .tabBarMinimizeBehavior(.onScrollDown)
@@ -123,6 +134,10 @@ private extension View {
             self.labelStyle(.iconOnly)
         }
     }
+
+    func onTabBarDoubleTap(perform action: @escaping () -> Void) -> some View {
+        modifier(TabBarDoubleTapModifier(action: action))
+    }
 }
 struct BackportFlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -153,6 +168,10 @@ struct BackportFlareRoot: View {
                     .tag(homeTabKey(tab))
                 }
             }
+            .onTabBarDoubleTap {
+                guard selectedTab == homeTabKey(.home) else { return }
+                NotificationCenter.default.post(name: .homeTabDoubleTapped, object: nil)
+            }
             .background(Color(.systemGroupedBackground))
             .sheet(item: $reloginRoute) { route in
                 NavigationStack {
@@ -169,6 +188,55 @@ struct BackportFlareRoot: View {
             }
         } loadingContent: {
             SplashScreen()
+        }
+    }
+}
+
+@MainActor
+private final class TabBarDoubleTapTarget: NSObject, ObservableObject, UIGestureRecognizerDelegate {
+    private weak var tabBar: UITabBar?
+    private var action: () -> Void = {}
+
+    private lazy var recognizer: UITapGestureRecognizer = {
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
+        recognizer.numberOfTapsRequired = 2
+        recognizer.cancelsTouchesInView = false
+        recognizer.delaysTouchesBegan = false
+        recognizer.delaysTouchesEnded = false
+        recognizer.delegate = self
+        return recognizer
+    }()
+
+    func install(on tabBar: UITabBar, action: @escaping () -> Void) {
+        self.action = action
+        guard self.tabBar !== tabBar else { return }
+
+        self.tabBar?.removeGestureRecognizer(recognizer)
+        tabBar.addGestureRecognizer(recognizer)
+        self.tabBar = tabBar
+    }
+
+    @objc private func handleDoubleTap() {
+        DispatchQueue.main.async { [weak self] in
+            self?.action()
+        }
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        true
+    }
+}
+
+private struct TabBarDoubleTapModifier: ViewModifier {
+    @StateObject private var target = TabBarDoubleTapTarget()
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        content.introspect(.tabView, on: .iOS(.v17, .v18, .v26, .v27)) { tabBarController in
+            target.install(on: tabBarController.tabBar, action: action)
         }
     }
 }

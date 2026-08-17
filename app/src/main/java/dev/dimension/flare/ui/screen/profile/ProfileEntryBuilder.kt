@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.screen.profile
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import dev.dimension.flare.ui.component.DialogSceneStrategy2
+import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
@@ -250,7 +250,7 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
     }
 
     entry<Route.BlockUser>(
-        metadata = DialogSceneStrategy2.dialog()
+        metadata = DialogSceneStrategy.dialog()
     ) {
         BlockUserDialog(
             accountType = it.accountType,
@@ -260,7 +260,7 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
     }
 
     entry<Route.MuteUser>(
-        metadata = DialogSceneStrategy2.dialog()
+        metadata = DialogSceneStrategy.dialog()
     ) {
         MuteUserDialog(
             accountType = it.accountType,
@@ -270,7 +270,7 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
     }
 
     entry<Route.UnblockUser>(
-        metadata = DialogSceneStrategy2.dialog()
+        metadata = DialogSceneStrategy.dialog()
     ) {
         UnblockUserDialog(
             accountType = it.accountType,
@@ -280,7 +280,7 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
     }
 
     entry<Route.UnmuteUser>(
-        metadata = DialogSceneStrategy2.dialog()
+        metadata = DialogSceneStrategy.dialog()
     ) {
         UnmuteUserDialog(
             accountType = it.accountType,
@@ -290,7 +290,7 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
     }
 
     entry<Route.ReportUser>(
-        metadata = DialogSceneStrategy2.dialog()
+        metadata = DialogSceneStrategy.dialog()
     ) {
         ReportUserDialog(
             accountType = it.accountType,

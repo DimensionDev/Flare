@@ -96,6 +96,8 @@ internal class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
     companion object {
         private const val BOTTOMSHEET_KEY = "bottom_sheet"
 
+        internal fun isBottomSheetEntry(entry: NavEntry<*>): Boolean = entry.metadata[BOTTOMSHEET_KEY] is BottomSheetProperties
+
         fun bottomSheet(
             properties: ModalBottomSheetProperties = ModalBottomSheetProperties(),
             expandFully: Boolean = false,

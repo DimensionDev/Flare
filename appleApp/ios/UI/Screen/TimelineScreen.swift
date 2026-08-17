@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
@@ -41,6 +42,13 @@ struct TimelineScreen: View {
         )
             .refreshable {
                 try? await presenter.state.refreshSuspend()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .tabDoubleTapped)) { notification in
+                guard notification.object as? String == HomeTabsPresenterStateHomeTabs.home.name.lowercased(),
+                      isHomeTimeline, !presenter.state.isRefreshing else { return }
+                Task {
+                    try? await presenter.state.refreshSuspend()
+                }
             }
             .task(id: "\(isHomeTimeline)-\(appSettings.homeTimelineAutoRefreshInterval.minutes)-\(scenePhase)") {
                 try? await autoRefresh()

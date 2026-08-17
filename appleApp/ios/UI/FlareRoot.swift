@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
@@ -186,7 +187,7 @@ struct BackportFlareRoot: View {
 }
 
 @MainActor
-private final class TabBarDoubleTapTarget: NSObject {
+private final class TabBarDoubleTapTarget: NSObject, ObservableObject, UIGestureRecognizerDelegate {
     private var action: () -> Void = {}
 
     private lazy var recognizer: UITapGestureRecognizer = {
@@ -194,6 +195,7 @@ private final class TabBarDoubleTapTarget: NSObject {
         recognizer.numberOfTapsRequired = 2
         recognizer.cancelsTouchesInView = false
         recognizer.delaysTouchesEnded = false
+        recognizer.delegate = self
         return recognizer
     }()
 
@@ -208,10 +210,17 @@ private final class TabBarDoubleTapTarget: NSObject {
             self?.action()
         }
     }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        true
+    }
 }
 
 private struct TabBarDoubleTapModifier: ViewModifier {
-    @State private var target = TabBarDoubleTapTarget()
+    @StateObject private var target = TabBarDoubleTapTarget()
     let action: () -> Void
 
     func body(content: Content) -> some View {

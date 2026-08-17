@@ -46,22 +46,6 @@ Here're some features we're planning to implement in the future.
  - [x] Desktop Client
  - [x] Web Client
 
-## Building
-### Android
- - Make sure you have JDK 25 installed
- - Run `./gradlew installDebug` to build and install the debug version of the app
- - You can open the project in Android Studio or IntelliJ IDEA if you want
-
-### iOS/macOS
- - Make sure you have JDK 25 installed
- - Make sure you have a Mac with Xcode 26 installed
- - open `appleApp/Flare.xcodeproj` in Xcode
- - Build and run the app
-
-### Desktop
- - Make sure you have JDK 25 installed
- - Run `./gradlew run` to build and run the debug version of the desktop app.
-
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 

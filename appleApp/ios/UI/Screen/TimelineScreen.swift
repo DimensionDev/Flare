@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import UIKit
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
@@ -13,6 +14,8 @@ struct TimelineScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
+    @State private var isAtTop = true
+    @State private var isTabRefreshInFlight = false
     init(
         tabItem: UiTimelineTabItem,
         allowGalleryMode: Bool = false,
@@ -38,15 +41,20 @@ struct TimelineScreen: View {
             detailStatusKey: nil,
             key: presenter.key,
             allowGalleryMode: allowGalleryMode,
-            accessoryItems: accessoryItems
+            accessoryItems: accessoryItems,
+            onIsAtTopChanged: { isAtTop = $0 }
         )
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }
             .onReceive(NotificationCenter.default.publisher(for: .tabDoubleTapped)) { notification in
                 guard notification.object as? String == HomeTabsPresenterStateHomeTabs.home.name.lowercased(),
-                      isHomeTimeline, !presenter.state.isRefreshing else { return }
+                      isHomeTimeline, isAtTop, !isTabRefreshInFlight,
+                      !presenter.state.isRefreshing else { return }
+                isTabRefreshInFlight = true
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 Task {
+                    defer { isTabRefreshInFlight = false }
                     try? await presenter.state.refreshSuspend()
                 }
             }

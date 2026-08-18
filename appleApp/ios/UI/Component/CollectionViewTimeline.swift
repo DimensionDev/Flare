@@ -14,6 +14,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
     let columnCount: Int
     let accessoryItems: [UITimelineCollectionViewAccessoryItem]
     let suppressInitialRefreshIndicator: Bool
+    let onIsAtTopChanged: (Bool) -> Void
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.aiConfig) private var aiConfig
@@ -28,7 +29,8 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         topContentInset: CGFloat = 0,
         columnCount: Int = 1,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
-        suppressInitialRefreshIndicator: Bool = false
+        suppressInitialRefreshIndicator: Bool = false,
+        onIsAtTopChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
@@ -36,6 +38,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         self.columnCount = max(columnCount, 1)
         self.accessoryItems = accessoryItems
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
+        self.onIsAtTopChanged = onIsAtTopChanged
     }
 
     func makeUIViewController(context: Context) -> UITimelineCollectionViewController {
@@ -43,6 +46,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
+        controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
@@ -65,6 +69,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         controller.refreshCallback = refreshAction.map { action in
             { await action() }
         }
+        controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
@@ -109,6 +114,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
 
     var refreshCallback: (() async -> Void)?
+    var onIsAtTopChanged: ((Bool) -> Void)?
     var openURL: ((URL) -> Void)?
     var suppressInitialRefreshIndicator = false
     var appearance = TimelineUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
@@ -210,6 +216,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var shouldRevealRefreshControl = false
     private var hasCompletedInitialRefreshCycle = false
     private var scrollingState = IsScrollingState()
+    private var lastReportedIsAtTop: Bool?
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
     private var lastLoadedTimelineItemIDs: Set<String> = []
@@ -302,6 +309,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         super.viewDidLayoutSubviews()
 
         updateContentInsets()
+        reportIsAtTop()
         if shouldRevealRefreshControl {
             revealRefreshControlIfNeeded()
         }
@@ -849,6 +857,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private var effectiveViewportTop: CGFloat {
         collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+    }
+
+    private func reportIsAtTop() {
+        let isAtTop = effectiveViewportTop <= 1
+        guard lastReportedIsAtTop != isAtTop else { return }
+        lastReportedIsAtTop = isAtTop
+        onIsAtTopChanged?(isAtTop)
     }
 
     private var allowsScrollAnchorRestoration: Bool {
@@ -1636,6 +1651,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         restorePendingScrollAnchorIfNeeded()
+        reportIsAtTop()
         validateCurrentAutoplayVisibility()
     }
 

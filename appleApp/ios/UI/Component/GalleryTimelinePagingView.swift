@@ -10,6 +10,7 @@ import FlareAppleCore
 
 struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
     let data: PagingState<UiTimelineV2>
+    var onIsAtTopChanged: (Bool) -> Void = { _ in }
     @Environment(\.timelineAppearance) private var timelineAppearance
     @Environment(\.translateConfig) private var translateConfig
     @Environment(\.openURL) private var openURL
@@ -27,6 +28,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
             { await action() }
         }
         controller.openURL = { url in openURL.callAsFunction(url) }
+        controller.onIsAtTopChanged = onIsAtTopChanged
         // Apply data before appearance so the appearance setter's reconfigure
         // sees a coherent itemIndexMap / currentSuccess pair.
         controller.update(data: data)
@@ -45,6 +47,7 @@ struct UIGalleryTimelinePagingView: UIViewControllerRepresentable {
             showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
         controller.openURL = { url in openURL.callAsFunction(url) }
+        controller.onIsAtTopChanged = onIsAtTopChanged
     }
 }
 
@@ -85,6 +88,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     var refreshCallback: (() async -> Void)?
     var openURL: ((URL) -> Void)?
+    var onIsAtTopChanged: ((Bool) -> Void)?
     var appearance = GalleryUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
@@ -109,6 +113,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var pendingScrollAnchor: ScrollAnchor?
     private var isRestoringScrollAnchor = false
     private var scrollingState = IsScrollingState()
+    private var lastReportedIsAtTop: Bool?
 
     private struct SnapshotSignature: Equatable {
         let itemIDs: [String]
@@ -156,6 +161,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateColumnCount()
+        reportIsAtTop()
     }
 
     // MARK: - Setup
@@ -380,6 +386,13 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     private var effectiveViewportTop: CGFloat {
         collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+    }
+
+    private func reportIsAtTop() {
+        let isAtTop = effectiveViewportTop <= 1
+        guard lastReportedIsAtTop != isAtTop else { return }
+        lastReportedIsAtTop = isAtTop
+        onIsAtTopChanged?(isAtTop)
     }
 
     private var allowsScrollAnchorRestoration: Bool {
@@ -841,6 +854,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         restorePendingScrollAnchorIfNeeded()
+        reportIsAtTop()
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {

@@ -2,11 +2,17 @@ package dev.dimension.flare.ui.model.mapper
 
 import app.bsky.actor.ProfileViewBasic
 import app.bsky.embed.AspectRatio
+import app.bsky.embed.GalleryView
+import app.bsky.embed.GalleryViewImage
+import app.bsky.embed.GalleryViewItemUnion
 import app.bsky.embed.ImagesView
 import app.bsky.embed.ImagesViewImage
 import app.bsky.embed.RecordView
 import app.bsky.embed.RecordViewRecord
+import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
+import app.bsky.embed.RecordWithMediaView
+import app.bsky.embed.RecordWithMediaViewMediaUnion
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
@@ -97,6 +103,91 @@ class BlueskyRenderTest {
         assertEquals("image alt", media.description)
         assertEquals(4f, media.width)
         assertEquals(3f, media.height)
+    }
+
+    @Test
+    fun postRender_mapsDirectGalleryWithoutDroppingItems() {
+        val post =
+            createPostView(
+                uri = "at://did:plc:author/app.bsky.feed.post/gallery",
+                author = createProfile("author", "author.bsky.social"),
+                text = "gallery",
+                embed = PostViewEmbedUnion.GalleryView(galleryView(20)),
+            )
+
+        val rendered = rootPostOf(post.render(accountKey))
+
+        assertEquals(20, rendered.images.size)
+        val last = assertIs<UiMedia.Image>(rendered.images.last())
+        assertEquals("https://cdn.example.com/full-19.jpg", last.url)
+        assertEquals("gallery image 19", last.description)
+        assertEquals(20f, last.width)
+        assertEquals(21f, last.height)
+    }
+
+    @Test
+    fun postRender_mapsGalleryAlongsideQuote() {
+        val quotedRecord =
+            RecordViewRecord(
+                uri = AtUri("at://did:plc:quoted/app.bsky.feed.post/2"),
+                cid = Cid("cid-quoted"),
+                author = createProfile("quoted", "quoted.bsky.social"),
+                value = jsonRecord("quoted content"),
+                indexedAt = Instant.parse("2024-01-01T00:00:00Z"),
+            )
+        val post =
+            createPostView(
+                uri = "at://did:plc:author/app.bsky.feed.post/record-with-gallery",
+                author = createProfile("author", "author.bsky.social"),
+                text = "quote with gallery",
+                embed =
+                    PostViewEmbedUnion.RecordWithMediaView(
+                        RecordWithMediaView(
+                            record = RecordView(RecordViewRecordUnion.ViewRecord(quotedRecord)),
+                            media = RecordWithMediaViewMediaUnion.GalleryView(galleryView(5)),
+                        ),
+                    ),
+            )
+
+        val rendered = timelinePostItemOf(listOf(FeedViewPost(post = post)).render(accountKey).single())
+
+        assertEquals(5, rendered.post.images.size)
+        assertEquals(1, rendered.presentation.quotes.size)
+        assertEquals(
+            "quoted content",
+            rendered.presentation.quotes
+                .single()
+                .content.original.innerText,
+        )
+    }
+
+    @Test
+    fun postRender_mapsGalleryInsideQuotedRecord() {
+        val quotedRecord =
+            RecordViewRecord(
+                uri = AtUri("at://did:plc:quoted/app.bsky.feed.post/gallery"),
+                cid = Cid("cid-quoted-gallery"),
+                author = createProfile("quoted", "quoted.bsky.social"),
+                value = jsonRecord("quoted gallery"),
+                embeds = listOf(RecordViewRecordEmbedUnion.GalleryView(galleryView(6))),
+                indexedAt = Instant.parse("2024-01-01T00:00:00Z"),
+            )
+        val post =
+            createPostView(
+                uri = "at://did:plc:author/app.bsky.feed.post/quote-gallery",
+                author = createProfile("author", "author.bsky.social"),
+                text = "quotes a gallery",
+                embed = PostViewEmbedUnion.RecordView(RecordView(RecordViewRecordUnion.ViewRecord(quotedRecord))),
+            )
+
+        val rendered = timelinePostItemOf(listOf(FeedViewPost(post = post)).render(accountKey).single())
+
+        assertEquals(
+            6,
+            rendered.presentation.quotes
+                .single()
+                .images.size,
+        )
     }
 
     @Test
@@ -299,6 +390,25 @@ class BlueskyRenderTest {
             record = jsonRecord(text),
             embed = embed,
             indexedAt = Instant.parse("2024-01-01T00:00:00Z"),
+        )
+
+    private fun galleryView(count: Int): GalleryView =
+        GalleryView(
+            items =
+                List(count) { index ->
+                    GalleryViewItemUnion.ViewImage(
+                        GalleryViewImage(
+                            thumbnail = Uri("https://cdn.example.com/thumb-$index.jpg"),
+                            fullsize = Uri("https://cdn.example.com/full-$index.jpg"),
+                            alt = "gallery image $index",
+                            aspectRatio =
+                                AspectRatio(
+                                    width = (index + 1).toLong(),
+                                    height = (index + 2).toLong(),
+                                ),
+                        ),
+                    )
+                },
         )
 
     private fun jsonRecord(text: String) =

@@ -9,7 +9,6 @@ import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
-import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
 import app.bsky.feed.GetPostsQueryParams
@@ -120,9 +119,9 @@ private const val LINK_CARD_THUMB_MAX_BYTES = 1_000_000L
 
 private val MEDIA_COMPRESSION =
     ComposeConfig.Media.Compression(
-        maxSizeBytes = 1L * 1024 * 1024,
-        maxWidth = 2000,
-        maxHeight = 2000,
+        maxSizeBytes = 2_000_000L,
+        maxWidth = 4000,
+        maxHeight = 4000,
     )
 
 @OptIn(ExperimentalPagingApi::class)
@@ -292,6 +291,16 @@ internal class BlueskyDataSource(
         data: ComposeData,
         progress: () -> Unit,
     ) {
+        require(data.medias.size <= BLUESKY_GALLERY_AUTHOR_LIMIT) {
+            "Bluesky supports at most $BLUESKY_GALLERY_AUTHOR_LIMIT images when authoring a post"
+        }
+        data.medias.forEach { media ->
+            require(media.file.type == FileType.Image) { "Bluesky image embeds only accept images" }
+            require(media.altText.orEmpty().length <= BLUESKY_ALT_TEXT_LIMIT) {
+                "Bluesky image alt text must be at most $BLUESKY_ALT_TEXT_LIMIT characters"
+            }
+        }
+
         val service = pdsService()
         val quoteId =
             data.referenceStatus
@@ -307,30 +316,33 @@ internal class BlueskyDataSource(
                     it as? ComposeStatus.Reply
                 }?.statusKey
                 ?.id
-        val mediaBlob =
+        val galleryRequiresAspectRatio = data.medias.size > BLUESKY_LEGACY_IMAGE_LIMIT
+        val uploadedImages =
             data.medias
-                .mapIndexedNotNull { index, (item, altText) ->
+                .map { (item, altText) ->
                     val bytes = item.readBytes()
-                    val isImage = item.type == FileType.Image
-
                     val finalBytes =
-                        if (isImage) {
-                            imageCompressor.compress(
-                                imageBytes = bytes,
-                                maxSize = MEDIA_COMPRESSION.maxSizeBytes,
-                                maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
-                            )
+                        imageCompressor.compress(
+                            imageBytes = bytes,
+                            maxSize = MEDIA_COMPRESSION.maxSizeBytes,
+                            maxDimensions = MEDIA_COMPRESSION.maxWidth to MEDIA_COMPRESSION.maxHeight,
+                        )
+                    require(finalBytes.size <= MEDIA_COMPRESSION.maxSizeBytes) {
+                        "Compressed Bluesky image exceeds ${MEDIA_COMPRESSION.maxSizeBytes} bytes"
+                    }
+                    val aspectRatio =
+                        if (galleryRequiresAspectRatio) {
+                            finalBytes.requireJpegAspectRatio()
                         } else {
-                            bytes
+                            null
                         }
-                    service
-                        .uploadBlob(finalBytes)
-                        .also {
-                            progress()
-                        }.maybeResponse()
-                        ?.let {
-                            it.blob to altText
-                        }
+                    val blob = service.uploadBlob(finalBytes).requireResponse().blob
+                    progress()
+                    ImagesImage(
+                        image = blob,
+                        alt = altText.orEmpty(),
+                        aspectRatio = aspectRatio,
+                    )
                 }
         val facets =
             parseBskyFacets(
@@ -342,35 +354,27 @@ internal class BlueskyDataSource(
                         .did.did
                 },
             )
-        val quoteEmbed =
+        val quoteRecord =
             quoteId
                 ?.let {
-                    service
-                        .getPosts(GetPostsQueryParams(persistentListOf(AtUri(it))))
-                        .maybeResponse()
-                        ?.posts
-                        ?.firstOrNull()
+                    requireNotNull(
+                        service
+                            .getPosts(GetPostsQueryParams(persistentListOf(AtUri(it))))
+                            .requireResponse()
+                            .posts
+                            .firstOrNull(),
+                    ) {
+                        "Unable to resolve quoted Bluesky post"
+                    }
                 }?.let { item ->
-                    PostEmbedUnion.Record(
-                        Record(
-                            StrongRef(
-                                uri = item.uri,
-                                cid = item.cid,
-                            ),
+                    Record(
+                        StrongRef(
+                            uri = item.uri,
+                            cid = item.cid,
                         ),
                     )
                 }
-        val imageEmbed =
-            mediaBlob.takeIf { it.any() }?.let { blobs ->
-                PostEmbedUnion.Images(
-                    Images(
-                        blobs
-                            .map { blob ->
-                                ImagesImage(image = blob.first, alt = blob.second.orEmpty())
-                            }.toImmutableList(),
-                    ),
-                )
-            }
+        val imageEmbed = uploadedImages.toBlueskyImageEmbed()
         val externalEmbed =
             if (quoteId == null && data.medias.isEmpty()) {
                 facets
@@ -390,7 +394,12 @@ internal class BlueskyDataSource(
                 text = data.content,
                 facets = facets,
                 createdAt = Clock.System.now(),
-                embed = quoteEmbed ?: imageEmbed ?: externalEmbed,
+                embed =
+                    buildBlueskyPostEmbed(
+                        quote = quoteRecord,
+                        media = imageEmbed,
+                        external = externalEmbed,
+                    ),
                 reply =
                     inReplyToID
                         ?.let {
@@ -681,9 +690,9 @@ internal class BlueskyDataSource(
             text = ComposeConfig.Text(300),
             media =
                 ComposeConfig.Media(
-                    maxCount = 4,
+                    maxCount = BLUESKY_GALLERY_AUTHOR_LIMIT,
                     canSensitive = true,
-                    altTextMaxLength = 2000,
+                    altTextMaxLength = BLUESKY_ALT_TEXT_LIMIT,
                     allowMediaOnly = true,
                     compression = MEDIA_COMPRESSION,
                 ),

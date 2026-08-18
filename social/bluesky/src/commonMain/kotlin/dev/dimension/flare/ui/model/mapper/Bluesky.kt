@@ -6,6 +6,7 @@ import app.bsky.actor.ProfileViewDetailed
 import app.bsky.bookmark.BookmarkView
 import app.bsky.bookmark.BookmarkViewItemUnion
 import app.bsky.embed.ExternalView
+import app.bsky.embed.GalleryView
 import app.bsky.embed.GalleryViewItemUnion
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
@@ -1300,6 +1301,10 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
             )
         }
 
+        is PostViewEmbedUnion.GalleryView -> {
+            embed.value.toUiMedias()
+        }
+
         is PostViewEmbedUnion.RecordWithMediaView -> {
             when (val media = embed.value.media) {
                 is RecordWithMediaViewMediaUnion.ExternalView -> {
@@ -1343,29 +1348,7 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
                 }
 
                 is RecordWithMediaViewMediaUnion.GalleryView -> {
-                    media.value.items
-                        .mapNotNull { item ->
-                            when (item) {
-                                is GalleryViewItemUnion.Unknown -> {
-                                    null
-                                }
-
-                                is GalleryViewItemUnion.ViewImage -> {
-                                    UiMedia.Image(
-                                        url = item.value.fullsize.uri,
-                                        previewUrl = item.value.thumbnail.uri,
-                                        description = item.value.alt,
-                                        width =
-                                            item.value.aspectRatio.width
-                                                .toFloat(),
-                                        height =
-                                            item.value.aspectRatio.height
-                                                .toFloat(),
-                                        sensitive = false,
-                                    )
-                                }
-                            }
-                        }.toImmutableList()
+                    media.value.toUiMedias()
                 }
             }
         }
@@ -1378,6 +1361,33 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
             persistentListOf()
         }
     }
+
+private fun GalleryView.toUiMedias(): SerializableImmutableList<UiMedia> =
+    items
+        .mapNotNull { item ->
+            when (item) {
+                is GalleryViewItemUnion.Unknown -> {
+                    null
+                }
+
+                is GalleryViewItemUnion.ViewImage -> {
+                    UiMedia.Image(
+                        url = item.value.fullsize.uri,
+                        previewUrl = item.value.thumbnail.uri,
+                        description = item.value.alt,
+                        width =
+                            item.value.aspectRatio
+                                .width
+                                .toFloat(),
+                        height =
+                            item.value.aspectRatio
+                                .height
+                                .toFloat(),
+                        sensitive = false,
+                    )
+                }
+            }
+        }.toImmutableList()
 
 private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> {
     val url = Url(value.external.uri.uri)
@@ -1491,6 +1501,10 @@ private fun render(
                                     }
                                 }
 
+                                is RecordViewRecordEmbedUnion.GalleryView -> {
+                                    it.value.toUiMedias()
+                                }
+
                                 is RecordViewRecordEmbedUnion.RecordWithMediaView -> {
                                     when (val media = it.value.media) {
                                         is RecordWithMediaViewMediaUnion.ImagesView -> {
@@ -1524,6 +1538,10 @@ private fun render(
                                                             ?.toFloat() ?: 0f,
                                                 ),
                                             )
+                                        }
+
+                                        is RecordWithMediaViewMediaUnion.GalleryView -> {
+                                            media.value.toUiMedias()
                                         }
 
                                         else -> {

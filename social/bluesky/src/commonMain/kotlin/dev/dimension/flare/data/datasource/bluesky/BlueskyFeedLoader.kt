@@ -58,7 +58,7 @@ internal class BlueskyFeedLoader(
 
         val preferences =
             service
-                .getPreferencesForActor()
+                .getPreferencesForAppBskyActor()
                 .requireResponse()
                 .preferences
 
@@ -115,7 +115,7 @@ internal class BlueskyFeedLoader(
 
     override suspend fun delete(listId: String) {
         val service = getService()
-        val currentPreferences = service.getPreferencesForActor().requireResponse()
+        val currentPreferences = service.getPreferencesForAppBskyActor().requireResponse()
         val feedInfo =
             service
                 .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(listId)))
@@ -160,7 +160,7 @@ internal class BlueskyFeedLoader(
 
     suspend fun subscribe(feedUri: String) {
         val service = getService()
-        val currentPreferences = service.getPreferencesForActor().requireResponse()
+        val currentPreferences = service.getPreferencesForAppBskyActor().requireResponse()
         val feedInfo =
             service
                 .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedUri)))

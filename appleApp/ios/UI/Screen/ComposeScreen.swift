@@ -613,9 +613,7 @@ class MediaViewModel {
     var altTextMaxLength = 500
     func update() {
         if selectedItems.count > maxSize {
-            selectedItems = Array(selectedItems[(selectedItems.count - 4)...(selectedItems.count - 1)])
-        } else {
-            selectedItems = selectedItems
+            selectedItems = Array(selectedItems.suffix(maxSize))
         }
         items = selectedItems.map { item in
             MediaItem(item: item)

@@ -13,6 +13,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
@@ -22,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Rect
@@ -51,9 +51,9 @@ import kotlin.reflect.KClass
 import androidx.compose.ui.geometry.lerp as lerpRect
 
 private const val PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS = 450
-private const val PREDICTIVE_BACK_DEFERRED_POP_HOLD_DURATION_MILLIS = 60_000
+private const val PREDICTIVE_BACK_POST_COMMIT_HOLD_DURATION_MILLIS = 60_000
 private const val PREDICTIVE_BACK_FINALIZE_HOLD_DURATION_MILLIS = 1
-private const val PREDICTIVE_BACK_MIN_DEFERRED_PROGRESS = 0.02f
+private const val PREDICTIVE_BACK_MIN_COMMIT_PROGRESS = 0.02f
 private const val PREDICTIVE_BACK_TARGET_SCALE = 0.9f
 private const val PREDICTIVE_BACK_SPRING_STIFFNESS = 200f
 private const val PREDICTIVE_BACK_SPRING_DAMPING_RATIO = 0.75f
@@ -157,7 +157,7 @@ internal class AndroidPredictiveBackMotionState(
             return when {
                 postCommit == null -> PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS
                 postCommit.finalizing -> PREDICTIVE_BACK_FINALIZE_HOLD_DURATION_MILLIS
-                else -> PREDICTIVE_BACK_DEFERRED_POP_HOLD_DURATION_MILLIS
+                else -> PREDICTIVE_BACK_POST_COMMIT_HOLD_DURATION_MILLIS
             }
         }
 
@@ -249,15 +249,16 @@ internal class AndroidPredictiveBackMotionState(
     }
 
     /**
-     * Defers the real pop until the native-style post-commit motion has finished.
+     * Pops immediately so Navigation3 settles the predictive transition in the completed
+     * direction, while this state continues to own the native-style post-commit motion.
      *
      * Returning false lets the caller perform a regular pop for a non-interactive or effectively
      * zero-progress back event.
      */
-    internal fun commit(onFinished: () -> Unit): Boolean {
+    internal fun commit(performPop: () -> Boolean): Boolean {
         val gesture = phase as? Phase.Gesture ?: return false
         val release = gesture.motion
-        if (release.progress < PREDICTIVE_BACK_MIN_DEFERRED_PROGRESS) {
+        if (release.progress < PREDICTIVE_BACK_MIN_COMMIT_PROGRESS) {
             motionJob?.cancel()
             phase = Phase.Idle
             return false
@@ -265,6 +266,10 @@ internal class AndroidPredictiveBackMotionState(
 
         motionJob?.cancel()
         phase = Phase.PostCommit(release = release)
+        if (!performPop()) {
+            phase = Phase.Idle
+            return true
+        }
         motionJob =
             coroutineScope.launch {
                 val scaleVelocity =
@@ -310,18 +315,32 @@ internal class AndroidPredictiveBackMotionState(
 
                 val current = phase as? Phase.PostCommit
                 if (current?.release != release) return@launch
-                phase = current.copy(finalizing = true)
-                onFinished()
-
-                // Let Navigation3 settle and remove its outgoing scene before restoring identity.
-                withFrameNanos { _ -> }
-                withFrameNanos { _ -> }
-                withFrameNanos { _ -> }
-                if ((phase as? Phase.PostCommit)?.release == release) {
+                if (current.outgoingDisposed) {
                     phase = Phase.Idle
+                } else {
+                    phase = current.copy(finalizing = true)
                 }
             }
         return true
+    }
+
+    /**
+     * Ends the custom transition only after Navigation3 has actually removed the outgoing scene.
+     * Until then its internal [androidx.compose.animation.core.SeekableTransitionState] may still
+     * be settling, so restoring the identity transform would briefly reveal the outgoing page.
+     */
+    internal fun onSceneDisposed(sceneKey: Any) {
+        val postCommit = phase as? Phase.PostCommit ?: return
+        if (
+            sceneKey == postCommit.release.outgoingSceneKey
+        ) {
+            phase =
+                if (postCommit.finalizing) {
+                    Phase.Idle
+                } else {
+                    postCommit.copy(outgoingDisposed = true)
+                }
+        }
     }
 
     internal fun cancel() {
@@ -511,6 +530,7 @@ internal class AndroidPredictiveBackMotionState(
             val linearProgress: Float = 0f,
             val flingScale: Float = 1f,
             val finalizing: Boolean = false,
+            val outgoingDisposed: Boolean = false,
         ) : Phase
     }
 }
@@ -598,6 +618,12 @@ private fun AndroidPredictiveBackSceneContent(
     sceneContent: @Composable () -> Unit,
     motionState: AndroidPredictiveBackMotionState,
 ) {
+    DisposableEffect(motionState, sceneKey) {
+        onDispose {
+            motionState.onSceneDisposed(sceneKey)
+        }
+    }
+
     Box(
         modifier =
             Modifier

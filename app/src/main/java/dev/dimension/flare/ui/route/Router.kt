@@ -213,12 +213,16 @@ internal fun Router(
                     predictiveBackMotionState.cancel()
                 } else {
                     val routesToPop = backStack.takeLast(popCount)
-                    val completeBack = {
-                        if (
+                    val completeBack: () -> Boolean = {
+                        val canPop =
                             backStack.size >= popCount &&
-                            backStack.takeLast(popCount) == routesToPop
-                        ) {
+                                backStack.takeLast(popCount) == routesToPop
+                        if (canPop) {
+                            val previousSize = backStack.size
                             repeat(popCount) { performBack() }
+                            backStack.size == previousSize - popCount
+                        } else {
+                            false
                         }
                     }
                     if (!predictiveBackMotionState.commit(completeBack)) {
@@ -265,10 +269,18 @@ internal fun Router(
                 androidCloseTransition(slideDistance)
             }
         },
-        predictivePopTransitionSpec = { _ ->
-            androidPredictiveBackHoldTransition(
-                ANDROID_NAVIGATION_DURATION_MILLIS,
-            )
+        predictivePopTransitionSpec = { swipeEdge ->
+            if (swipeEdge == NavigationEvent.EDGE_NONE) {
+                if (isBigScreen) {
+                    materialSharedAxisZ(false)
+                } else {
+                    androidCloseTransition(slideDistance)
+                }
+            } else {
+                androidPredictiveBackHoldTransition(
+                    ANDROID_NAVIGATION_DURATION_MILLIS,
+                )
+            }
         },
     )
 }

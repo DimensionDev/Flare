@@ -1106,7 +1106,7 @@ private fun List<ActionMenu>.flattenStatusActionMenuItems(): List<ActionMenu> {
         }
     }
     if (result.lastOrNull() == ActionMenu.Divider) {
-        result.removeLast()
+        result.removeAt(result.lastIndex)
     }
     return result
 }

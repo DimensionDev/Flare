@@ -46,13 +46,12 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sign
 import kotlin.reflect.KClass
 import androidx.compose.ui.geometry.lerp as lerpRect
 
 private const val PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS = 450
-private const val PREDICTIVE_BACK_POST_COMMIT_HOLD_DURATION_MILLIS = 60_000
-private const val PREDICTIVE_BACK_FINALIZE_HOLD_DURATION_MILLIS = 1
 private const val PREDICTIVE_BACK_MIN_COMMIT_PROGRESS = 0.02f
 private const val PREDICTIVE_BACK_TARGET_SCALE = 0.9f
 private const val PREDICTIVE_BACK_SPRING_STIFFNESS = 200f
@@ -152,14 +151,9 @@ internal class AndroidPredictiveBackMotionState(
     internal val isPostCommit by derivedStateOf { phase is Phase.PostCommit }
 
     internal val transitionHoldDurationMillis: Int
-        get() {
-            val postCommit = phase as? Phase.PostCommit
-            return when {
-                postCommit == null -> PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS
-                postCommit.finalizing -> PREDICTIVE_BACK_FINALIZE_HOLD_DURATION_MILLIS
-                else -> PREDICTIVE_BACK_POST_COMMIT_HOLD_DURATION_MILLIS
-            }
-        }
+        get() =
+            (phase as? Phase.PostCommit)?.durationMillis
+                ?: PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS
 
     internal fun ownsPostCommitTransition(
         initialSceneKey: Any,
@@ -265,7 +259,18 @@ internal class AndroidPredictiveBackMotionState(
         }
 
         motionJob?.cancel()
-        phase = Phase.PostCommit(release = release)
+        // AnimatedContent captures its spec for the active segment, so this duration must stay
+        // fixed after the pop starts.
+        val durationMillis =
+            (
+                (1f - release.progress.coerceIn(0f, 1f)) *
+                    PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS
+            ).roundToInt().coerceAtLeast(1)
+        phase =
+            Phase.PostCommit(
+                release = release,
+                durationMillis = durationMillis,
+            )
         if (!performPop()) {
             phase = Phase.Idle
             return true
@@ -302,7 +307,7 @@ internal class AndroidPredictiveBackMotionState(
                     targetValue = 1f,
                     animationSpec =
                         tween(
-                            durationMillis = PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS,
+                            durationMillis = durationMillis,
                             easing = LinearEasing,
                         ),
                 ) { value, _ ->
@@ -318,16 +323,17 @@ internal class AndroidPredictiveBackMotionState(
                 if (current.outgoingDisposed) {
                     phase = Phase.Idle
                 } else {
-                    phase = current.copy(finalizing = true)
+                    phase = current.copy(animationFinished = true)
                 }
             }
         return true
     }
 
     /**
-     * Ends the custom transition only after Navigation3 has actually removed the outgoing scene.
-     * Until then its internal [androidx.compose.animation.core.SeekableTransitionState] may still
-     * be settling, so restoring the identity transform would briefly reveal the outgoing page.
+     * Ends post-commit only after both the custom tail and Navigation3's outgoing scene have
+     * finished. Until then its internal [androidx.compose.animation.core.SeekableTransitionState]
+     * may still be settling, so restoring the identity transform would briefly reveal the outgoing
+     * page.
      */
     internal fun onSceneDisposed(sceneKey: Any) {
         val postCommit = phase as? Phase.PostCommit ?: return
@@ -335,7 +341,7 @@ internal class AndroidPredictiveBackMotionState(
             sceneKey == postCommit.release.outgoingSceneKey
         ) {
             phase =
-                if (postCommit.finalizing) {
+                if (postCommit.animationFinished) {
                     Phase.Idle
                 } else {
                     postCommit.copy(outgoingDisposed = true)
@@ -527,9 +533,10 @@ internal class AndroidPredictiveBackMotionState(
 
         data class PostCommit(
             val release: Motion,
+            val durationMillis: Int,
             val linearProgress: Float = 0f,
             val flingScale: Float = 1f,
-            val finalizing: Boolean = false,
+            val animationFinished: Boolean = false,
             val outgoingDisposed: Boolean = false,
         ) : Phase
     }

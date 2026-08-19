@@ -13,7 +13,8 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
     private var data: UiTimelineV2.Feed?
 
-    private static let spacing: CGFloat = 8
+    private static let verticalSpacing: CGFloat = 4
+    private static let horizontalSpacing: CGFloat = 8
     private static let sourceIconSize: CGFloat = 20
     private static let mediaSize: CGFloat = 72
 
@@ -171,7 +172,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         y += header.height
 
         if !titleLabel.isHidden {
-            y += Self.spacing
+            y += Self.verticalSpacing
             let titleHeight = estimatedLabelHeight(titleLabel, width: width)
             if assignFrames {
                 titleLabel.frame = CGRect(x: 0, y: y, width: width, height: titleHeight)
@@ -180,7 +181,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         }
 
         if hasVisibleBody {
-            y += Self.spacing
+            y += Self.verticalSpacing
             let descriptionWidth = bodyDescriptionWidth(for: width)
             let descriptionHeight = descriptionLabel.isHidden
                 ? 0
@@ -231,7 +232,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
     private func headerMetrics(width: CGFloat) -> HeaderMetrics {
         var leadingX: CGFloat = 0
         if !sourceIcon.isHidden {
-            leadingX += Self.sourceIconSize + Self.spacing
+            leadingX += Self.sourceIconSize + Self.horizontalSpacing
         }
 
         let dateSize = dateLabel.isHidden ? .zero : dateLabel.intrinsicContentSize.ceilPositive()
@@ -251,7 +252,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         let translationX: CGFloat
         if translationSize.width > 0 {
             if dateSize.width > 0 {
-                trailingX -= Self.spacing
+                trailingX -= Self.horizontalSpacing
             }
             trailingX -= translationSize.width
             translationX = trailingX
@@ -260,7 +261,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         }
 
         let hasTrailingContent = dateSize.width > 0 || translationSize.width > 0
-        let trailingSpacing = hasTrailingContent ? Self.spacing : 0
+        let trailingSpacing = hasTrailingContent ? Self.horizontalSpacing : 0
         let sourceNameWidth = max(trailingX - leadingX - trailingSpacing, 1)
         let sourceNameHeight = estimatedLabelHeight(sourceName, width: sourceNameWidth)
         let height = max(
@@ -289,7 +290,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         if descriptionLabel.isHidden {
             return width
         }
-        return max(width - bodyMediaSize(for: width).width - Self.spacing, 1)
+        return max(width - bodyMediaSize(for: width).width - Self.horizontalSpacing, 1)
     }
 
     private func bodyMediaSize(for width: CGFloat) -> CGSize {

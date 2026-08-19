@@ -14,6 +14,7 @@ final class AdaptiveTimelineCardUIView: UIView, ManualLayoutMeasurable, Timeline
     private static let cornerRadius: CGFloat = 32
     private static let plainEdgeRadius: CGFloat = 4
     private static let dividerHeight: CGFloat = 1.0 / UIScreen.main.scale
+    private static let multipleColumnInsets = UIEdgeInsets(top: 6, left: 2, bottom: 6, right: 2)
 
     private let contentContainer = UIView()
     private let cardBackground = CAShapeLayer()
@@ -82,6 +83,9 @@ final class AdaptiveTimelineCardUIView: UIView, ManualLayoutMeasurable, Timeline
             let containerH = max(h - dh, 0)
             contentContainer.frame = CGRect(x: 0, y: 0, width: w, height: containerH)
             divider.frame = CGRect(x: 0, y: containerH, width: w, height: dh)
+        } else if isMultipleColumn {
+            let insets = Self.multipleColumnInsets
+            contentContainer.frame = bounds.inset(by: insets)
         } else {
             contentContainer.frame = CGRect(x: 0, y: 0, width: w, height: h)
         }
@@ -100,14 +104,16 @@ final class AdaptiveTimelineCardUIView: UIView, ManualLayoutMeasurable, Timeline
     }
 
     func timelineHeight(for width: CGFloat) -> CGFloat? {
+        let insets = isMultipleColumn ? Self.multipleColumnInsets : .zero
+        let contentWidth = max(width - insets.left - insets.right, 0)
         let contentH: CGFloat
         if let cv = contentView {
-            contentH = childHeight(of: cv, for: width)
+            contentH = childHeight(of: cv, for: contentWidth)
         } else {
             contentH = 0
         }
         let dividerH = showsDivider ? Self.dividerHeight : 0
-        return ceil(contentH + dividerH)
+        return ceil(contentH + insets.top + insets.bottom + dividerH)
     }
 
     override func systemLayoutSizeFitting(

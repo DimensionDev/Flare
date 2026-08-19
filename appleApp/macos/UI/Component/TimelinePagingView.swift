@@ -38,7 +38,6 @@ struct TimelinePagingView: View {
             ScrollView {
                 content(columnCount: 1, availableWidth: proxy.size.width)
                     .padding(.top, topContentInset)
-                    .padding(.bottom, 12)
             }
             .background(timelineDisplayMode == .card || timelineDisplayMode == .gallery ? Color(.secondarySystemFill) : Color(.windowBackgroundColor))
             .detectScrolling()
@@ -153,7 +152,7 @@ private struct MacTimelineMasonryView: View {
 
     private let loadingCount = 8
     private let columnSpacing: CGFloat = 8
-    private let rowSpacing: CGFloat = 12
+    private let rowSpacing: CGFloat = 0
 
     var body: some View {
         switch onEnum(of: data) {
@@ -191,7 +190,7 @@ private struct MacTimelineMasonryView: View {
                 rowSpacing: rowSpacing,
                 showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
             )
-            VStack(spacing: 12) {
+            VStack(spacing: 0) {
                 columnsView(columns: columns, totalCount: count) { index in
                     _ = success.get(index: Int32(index))
                 }
@@ -201,7 +200,7 @@ private struct MacTimelineMasonryView: View {
     }
 
     private var columnWidth: CGFloat {
-        let horizontalPadding: CGFloat = 16
+        let horizontalPadding: CGFloat = 32
         let totalSpacing = columnSpacing * CGFloat(max(columnCount - 1, 0))
         return max((availableWidth - horizontalPadding - totalSpacing) / CGFloat(max(columnCount, 1)), 1)
     }
@@ -230,7 +229,7 @@ private struct MacTimelineMasonryView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 16)
         .environment(\.isMultipleColumn, true)
     }
 
@@ -245,7 +244,8 @@ private struct MacTimelineMasonryView: View {
             .frame(maxWidth: .infinity, alignment: .center)
         case .loading:
             ProgressView()
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
                 .frame(maxWidth: .infinity, alignment: .center)
         case .notLoading:
             EmptyView()
@@ -268,14 +268,11 @@ private struct MacTimelineMasonryRowView: View {
                     TimelinePlaceholderView()
                 }
             }
-            .padding(.horizontal)
-            #if os(macOS)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
-            #else
-            .padding(.vertical, 12)
-            #endif
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
         }
+        .padding(.horizontal, 2)
+        .padding(.vertical, 6)
         .onAppear {
             onDisplay(row.index)
         }
@@ -324,7 +321,7 @@ private struct MacGalleryTimelineMasonryView: View {
                 rowSpacing: spacing,
                 showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
             )
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 columnsView(columns: columns, totalCount: count) { index in
                     _ = success.get(index: Int32(index))
                 }
@@ -334,7 +331,7 @@ private struct MacGalleryTimelineMasonryView: View {
     }
 
     private var columnWidth: CGFloat {
-        let horizontalPadding: CGFloat = 16
+        let horizontalPadding: CGFloat = 32
         let totalSpacing = spacing * CGFloat(max(columnCount - 1, 0))
         return max((availableWidth - horizontalPadding - totalSpacing) / CGFloat(max(columnCount, 1)), 1)
     }
@@ -361,7 +358,7 @@ private struct MacGalleryTimelineMasonryView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 16)
     }
 
     @ViewBuilder
@@ -375,7 +372,8 @@ private struct MacGalleryTimelineMasonryView: View {
             .frame(maxWidth: .infinity, alignment: .center)
         case .loading:
             ProgressView()
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
                 .frame(maxWidth: .infinity, alignment: .center)
         case .notLoading:
             EmptyView()

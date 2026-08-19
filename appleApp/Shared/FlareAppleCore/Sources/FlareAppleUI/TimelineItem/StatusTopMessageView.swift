@@ -11,7 +11,7 @@ public struct StatusTopMessageView: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 8) {
             topMessage.icon.image
             if let user = topMessage.user {
                 RichText(text: user.name)

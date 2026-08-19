@@ -41,8 +41,8 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
     private var lastContentSignature: String?
     private var lastContentWarningSignature: String?
 
-    private static let verticalSpacing: CGFloat = 8
-    private static let buttonSpacing: CGFloat = 12
+    private static let verticalSpacing: CGFloat = 4
+    private static let buttonSpacing: CGFloat = 0
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -304,13 +304,25 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
         }
         y += rowHeight
 
-        for view in [contentWarningTranslation, contentTranslation, summaryResult] where !view.isHidden {
+        if !summaryResult.isHidden {
             y += Self.verticalSpacing
-            let height = childHeight(of: view, for: width)
+            let height = childHeight(of: summaryResult, for: width)
             if assignFrames {
-                view.frame = CGRect(x: 0, y: y, width: width, height: height)
+                summaryResult.frame = CGRect(x: 0, y: y, width: width, height: height)
             }
             y += height
+        }
+
+        let translationViews = [contentWarningTranslation, contentTranslation].filter { !$0.isHidden }
+        if !translationViews.isEmpty {
+            y += Self.verticalSpacing
+            for view in translationViews {
+                let height = childHeight(of: view, for: width)
+                if assignFrames {
+                    view.frame = CGRect(x: 0, y: y, width: width, height: height)
+                }
+                y += height
+            }
         }
         return y
     }

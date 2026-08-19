@@ -12,10 +12,10 @@ struct StatusTranslateView: View {
     var body: some View {
         VStack(
             alignment: .leading,
-            spacing: 8
+            spacing: 0
         ) {
             if !content.isEmpty {
-                HStack {
+                HStack(spacing: 0) {
                     Button {
                         enableTranslate.toggle()
                     } label: {
@@ -32,14 +32,18 @@ struct StatusTranslateView: View {
                     }
                 }
 
-                if enableTranslate {
-                    if let cw = contentWarning {
-                        TranslateTextView(text: cw)
-                    }
-                    TranslateTextView(text: content)
-                }
                 if enableTLDR, content.isLongText, aiConfig.tldr {
                     TLDRView(content: content, contentWarning: contentWarning)
+                        .padding(.top, 4)
+                }
+                if enableTranslate {
+                    VStack(alignment: .leading, spacing: 0) {
+                        if let cw = contentWarning {
+                            TranslateTextView(text: cw)
+                        }
+                        TranslateTextView(text: content)
+                    }
+                    .padding(.top, 4)
                 }
             }
         }

@@ -379,13 +379,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func makeWaterfallLayout(columns: Int) -> UICollectionViewLayout {
         let layout = CHTCollectionViewWaterfallLayout()
         layout.columnCount = columns
-        layout.minimumColumnSpacing = 12
-        layout.minimumInteritemSpacing = 12
+        layout.minimumColumnSpacing = 8
+        layout.minimumInteritemSpacing = 0
         layout.sectionInset = UIEdgeInsets(
-            top: 12,
-            left: layout.minimumColumnSpacing,
-            bottom: 12,
-            right: layout.minimumColumnSpacing
+            top: 0,
+            left: 16,
+            bottom: 0,
+            right: 16
         )
         layout.itemRenderDirection = .shortestFirst
         return layout
@@ -397,14 +397,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private lazy var sizingTimelineCard: AdaptiveTimelineCardUIView = {
         let card = AdaptiveTimelineCardUIView()
         card.isMultipleColumn = true
-        card.setContent(UIView.padding(sizingTimelineView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        card.setContent(UIView.padding(sizingTimelineView, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         return card
     }()
     private lazy var sizingPlaceholderView = TimelinePlaceholderUIView()
     private lazy var sizingPlaceholderCard: AdaptiveTimelineCardUIView = {
         let card = AdaptiveTimelineCardUIView()
         card.isMultipleColumn = true
-        card.setContent(UIView.padding(sizingPlaceholderView, insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        card.setContent(UIView.padding(sizingPlaceholderView, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         return card
     }()
     private var heightCache: [String: CGFloat] = [:]
@@ -725,7 +725,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func makeLoadingFooterView() -> UIView {
         let progress = UIActivityIndicatorView(style: .medium)
         progress.startAnimating()
-        return UIView.padding(progress, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
+        return UIView.padding(progress, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16))
     }
 
     private func makeTextFooterView(text: String) -> UIView {
@@ -735,7 +735,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         label.textColor = .secondaryLabel
         label.textAlignment = .center
         label.adjustsFontForContentSizeCategory = true
-        return UIView.padding(label, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
+        return UIView.padding(label, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16))
     }
 
     // MARK: - Refresh
@@ -1580,11 +1580,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 aiTldrEnabled: aiTldrEnabled,
                 onOpenURL: nil
             )
-            let contentWidth = max(width - 32, 1)
+            // Compose applies the multi-column card wrapper outside the row:
+            // 2pt horizontally, 6pt vertically.
+            let contentWidth = max(width - 4 - 32, 1)
             sizingTimelineView.prepareForFitting(width: contentWidth)
             let measuredHeight: CGFloat
             if let contentHeight = sizingTimelineView.estimatedHeightForFitting(width: contentWidth) {
-                measuredHeight = ceil(contentHeight + 24) + 1
+                measuredHeight = ceil(contentHeight + 16 + 12) + 1
             } else {
                 measuredHeight = measuredCompressedCardHeight(sizingTimelineCard, width: width)
             }
@@ -1887,7 +1889,8 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         }
 
         if hostedView === timelineCardStorage {
-            timelineViewStorage?.prepareForFitting(width: max(width - 32, 1))
+            let cardWrapperWidth: CGFloat = usesWaterfallLayout ? 4 : 0
+            timelineViewStorage?.prepareForFitting(width: max(width - cardWrapperWidth - 32, 1))
         }
 
         contentView.bounds = CGRect(x: 0, y: 0, width: width, height: contentView.bounds.height)
@@ -1949,7 +1952,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
             return timelineCardStorage
         }
         let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedTimelineView(), insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        card.setContent(UIView.padding(resolvedTimelineView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         timelineCardStorage = card
         return card
     }
@@ -1968,7 +1971,7 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
             return placeholderCardStorage
         }
         let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         placeholderCardStorage = card
         return card
     }
@@ -2058,7 +2061,7 @@ private final class TimelinePlaceholderCollectionViewCell: UICollectionViewCell 
             return placeholderCardStorage
         }
         let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)))
+        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         placeholderCardStorage = card
         return card
     }

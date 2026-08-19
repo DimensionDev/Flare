@@ -14,7 +14,8 @@ public struct StatusPollView: View {
 
     public var body: some View {
         VStack(
-            alignment: .trailing
+            alignment: .trailing,
+            spacing: 8
         ) {
             ForEach(0..<data.options.count, id: \.self) { index in
                 let option = data.options[index]

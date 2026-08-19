@@ -13,7 +13,7 @@ struct StatusReactionView: View {
             }
         } else {
             ScrollView(.horizontal) {
-                HStack {
+                HStack(spacing: 8) {
                     reactionContent
                 }
             }
@@ -26,7 +26,7 @@ struct StatusReactionView: View {
             Button {
                 item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
             } label: {
-                HStack {
+                HStack(spacing: 4) {
                     if item.isUnicode {
                         Text(item.name)
                     } else {
@@ -35,15 +35,22 @@ struct StatusReactionView: View {
                             .fixedSize(horizontal: true, vertical: false)
                     }
                     Text(item.count.humanized)
-                        .foregroundStyle(item.me ? Color.white : Color.flareLabel)
+                }
+                .foregroundStyle(Color.flareLabel)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    item.me
+                        ? Color.accentColor.opacity(0.18)
+                        : Color.flareSecondarySystemGroupedBackground,
+                    in: Capsule()
+                )
+                .overlay {
+                    Capsule()
+                        .stroke(item.me ? Color.accentColor : Color.clear, lineWidth: 1)
                 }
             }
-            .if(item.me, if: { button in
-                button.buttonStyle(.borderedProminent)
-            }, else: { button in
-                button.buttonStyle(.bordered)
-            })
-            .frame(height: 36)
+            .buttonStyle(.plain)
         }
     }
 }

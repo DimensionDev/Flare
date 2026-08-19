@@ -15,9 +15,10 @@ struct FeedView: View {
     var body: some View {
         let desc = descriptionText
         VStack(
-            alignment: .leading
+            alignment: .leading,
+            spacing: 4
         ) {
-            HStack {
+            HStack(spacing: 8) {
                 if let sourceIcon = data.source.icon, !sourceIcon.isEmpty {
                     NetworkImage(data: sourceIcon)
                         .frame(width: 20, height: 20)

@@ -39,7 +39,8 @@ public struct VVOStatusScreen: View {
                         } loadingContent: {
                             TimelinePlaceholderView()
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                     }
                 }
                 .padding(.leading)
@@ -55,8 +56,8 @@ public struct VVOStatusScreen: View {
                         } loadingContent: {
                             TimelinePlaceholderView()
                         }
-                        .padding(.horizontal)
-                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                     }
                     .listRowSeparator(.hidden)
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -143,8 +144,8 @@ public struct VVOCommentScreen: View {
             }
             .listRowSeparator(.hidden)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .padding(.horizontal)
-            .padding()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
             .listRowBackground(Color.clear)
             TimelinePagingListContent(data: presenter.state.list, usesDefaultHorizontalPadding: true)
         }

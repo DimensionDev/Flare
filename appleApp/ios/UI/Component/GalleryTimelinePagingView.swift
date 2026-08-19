@@ -171,7 +171,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         layout.columnCount = 2
         layout.minimumColumnSpacing = 8
         layout.minimumInteritemSpacing = 8
-        layout.sectionInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         layout.itemRenderDirection = .shortestFirst
 
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -707,7 +707,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         }
 
         if itemID.hasPrefix(Self.placeholderPrefix) {
-            return CGSize(width: width, height: width + 40)
+            return CGSize(width: width, height: width + 32)
         }
 
         if itemID.hasPrefix(Self.itemPrefix),
@@ -1099,7 +1099,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
             textStack.topAnchor.constraint(equalTo: textContainer.topAnchor, constant: 8),
             textStack.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 8),
             textStack.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -8),
-            textStack.bottomAnchor.constraint(equalTo: textContainer.bottomAnchor),
+            textStack.bottomAnchor.constraint(equalTo: textContainer.bottomAnchor, constant: -8),
         ])
         stack.addArrangedSubview(textContainer)
 
@@ -1107,7 +1107,7 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
         userRow.alignment = .center
         userRow.spacing = 6
         userRow.isLayoutMarginsRelativeArrangement = true
-        userRow.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8)
+        userRow.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 4, leading: 8, bottom: 8, trailing: 8)
         userRow.setContentHuggingPriority(.required, for: .vertical)
         userRow.setContentCompressionResistancePriority(.required, for: .vertical)
         userRow.addArrangedSubview(avatar)
@@ -1298,7 +1298,7 @@ private final class GalleryFeedTileUIView: UIView {
         textStack.alignment = .fill
         textStack.spacing = 4
         textStack.isLayoutMarginsRelativeArrangement = true
-        textStack.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 0, trailing: 8)
+        textStack.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
         stack.addArrangedSubview(textStack)
 
         titleLabel.font = .preferredFont(forTextStyle: .caption1).bold()
@@ -1314,7 +1314,7 @@ private final class GalleryFeedTileUIView: UIView {
         sourceRow.alignment = .center
         sourceRow.spacing = 6
         sourceRow.isLayoutMarginsRelativeArrangement = true
-        sourceRow.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8)
+        sourceRow.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 4, leading: 8, bottom: 8, trailing: 8)
         sourceRow.addArrangedSubview(sourceIcon)
         sourceRow.addArrangedSubview(sourceName)
         sourceIcon.widthAnchor.constraint(equalToConstant: 20).isActive = true
@@ -1421,7 +1421,8 @@ private final class GalleryPlaceholderTileUIView: UIView {
             imageBlock.heightAnchor.constraint(equalTo: imageBlock.widthAnchor),
 
             avatarBlock.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            avatarBlock.topAnchor.constraint(equalTo: imageBlock.bottomAnchor, constant: 4),
+            avatarBlock.topAnchor.constraint(equalTo: imageBlock.bottomAnchor, constant: 6),
+            avatarBlock.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
             avatarBlock.widthAnchor.constraint(equalToConstant: 20),
             avatarBlock.heightAnchor.constraint(equalToConstant: 20),
 

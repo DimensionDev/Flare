@@ -283,8 +283,8 @@ private struct GalleryCommentsPreview: View {
                         Divider()
                     }
                     TimelinePlaceholderView()
-                        .padding(.horizontal)
-                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                 }
             }
         case .success(let success):
@@ -299,8 +299,8 @@ private struct GalleryCommentsPreview: View {
                                 Divider()
                             }
                             TimelineView(data: item, detailStatusKey: nil)
-                                .padding(.horizontal)
-                                .padding(.vertical, 12)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
                             .onAppear {
                                 success.get(index: Int32(index))
                             }

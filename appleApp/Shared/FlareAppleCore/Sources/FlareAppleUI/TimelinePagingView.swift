@@ -75,7 +75,8 @@ public struct TimelinePagingContent: View {
         case .loading:
             contentLayout {
                 ProgressView()
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
         case .notLoading:
@@ -86,8 +87,8 @@ public struct TimelinePagingContent: View {
     private func loadingRow(index: Int, totalCount: Int) -> some View {
         AdaptiveTimelineCard(index: index, totalCount: totalCount) {
             TimelinePlaceholderView()
-                .padding(.horizontal)
-                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
         }
     }
 
@@ -173,19 +174,14 @@ private struct TimelinePagingRowView: View {
             if let item = row.item {
                 AdaptiveTimelineCard(index: row.index, totalCount: totalCount) {
                     TimelineView(data: item, detailStatusKey: detailStatusKey)
-                        .padding(.horizontal)
-                        #if os(macOS)
-                        .padding(.top, 12)
-                        .padding(.bottom, 8)
-                        #else
-                        .padding(.vertical, 12)
-                        #endif
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                 }
             } else {
                 AdaptiveTimelineCard(index: row.index, totalCount: totalCount) {
                     TimelinePlaceholderView()
-                        .padding(.horizontal)
-                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                 }
             }
         }
@@ -275,7 +271,7 @@ public struct TimelineGalleryItemView: View {
         } else {
             [post.content.original]
         }
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
             if showMedia, let media = post.images.first {
                 MediaView(data: media)
                     .aspectRatio(CGFloat(max(media.aspectRatio ?? 1, 0.3)), contentMode: .fit)
@@ -295,8 +291,7 @@ public struct TimelineGalleryItemView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
+                .padding(8)
             }
 
             if let user = post.user {
@@ -308,6 +303,7 @@ public struct TimelineGalleryItemView: View {
                         .lineLimit(1)
                 }
                 .padding(.horizontal, 8)
+                .padding(.top, 4)
                 .padding(.bottom, 8)
             }
         }
@@ -336,7 +332,7 @@ public struct TimelineGalleryItemView: View {
 
     @ViewBuilder
     private func feedTile(_ feed: UiTimelineV2.Feed) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
             if showMedia, let media = feed.media {
                 NetworkImage(data: media.url, customHeader: media.customHeaders)
                     .aspectRatio(CGFloat(max(media.aspectRatio, 0.3)), contentMode: .fit)
@@ -355,8 +351,7 @@ public struct TimelineGalleryItemView: View {
                             .lineLimit(4)
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
+                .padding(8)
             }
 
             HStack(spacing: 6) {
@@ -370,6 +365,7 @@ public struct TimelineGalleryItemView: View {
                     .lineLimit(1)
             }
             .padding(.horizontal, 8)
+            .padding(.top, 4)
             .padding(.bottom, 8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -380,16 +376,17 @@ public struct TimelineGalleryItemView: View {
 
     private func fallbackTile(_ item: UiTimelineV2) -> some View {
         TimelineView(data: item, detailStatusKey: nil)
-            .padding(10)
+            .padding(8)
     }
 
     private var placeholderTile: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
             Rectangle()
                 .fill(.placeholder)
                 .aspectRatio(placeholderVariant.isMultiple(of: 2) ? 0.75 : 1.2, contentMode: .fit)
             UserLoadingView()
-                .padding(8)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
         }
         .redacted(reason: .placeholder)
     }

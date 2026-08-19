@@ -57,7 +57,7 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             } else {
                 aspectRatio = 16.0 / 9.0
             }
-            textInsets = UIEdgeInsets(top: 4, left: 8, bottom: 8, right: 8)
+            textInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         } else {
             hasMedia = false
             mediaContainer.isHidden = true
@@ -93,7 +93,7 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             limitedToNumberOfLines: 2
         ).height
         titleLabel.frame = CGRect(x: textInsets.left, y: y, width: textWidth, height: ceil(titleH))
-        y += ceil(titleH) + 4
+        y += ceil(titleH)
 
         let subtitleH = subtitleLabel.textRect(
             forBounds: CGRect(x: 0, y: 0, width: textWidth, height: .greatestFiniteMagnitude),
@@ -119,7 +119,7 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             forBounds: CGRect(x: 0, y: 0, width: textWidth, height: .greatestFiniteMagnitude),
             limitedToNumberOfLines: 2
         ).height
-        h += ceil(titleH) + 4
+        h += ceil(titleH)
         let subtitleH = subtitleLabel.textRect(
             forBounds: CGRect(x: 0, y: 0, width: textWidth, height: .greatestFiniteMagnitude),
             limitedToNumberOfLines: 2
@@ -161,10 +161,10 @@ final class StatusCompatCardUIView: UIView, ManualLayoutMeasurable, TimelineHeig
 
     private var data: UiCard?
     private var hasMedia: Bool = false
-    private var textInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+    private var textInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     private static let mediaSize: CGFloat = 72
-    private static let mediaSpacing: CGFloat = 8
-    private static let textSpacing: CGFloat = 4
+    private static let mediaSpacing: CGFloat = 0
+    private static let textSpacing: CGFloat = 0
 
     init(cornerRadius: CGFloat) {
         super.init(frame: .zero)
@@ -199,11 +199,11 @@ final class StatusCompatCardUIView: UIView, ManualLayoutMeasurable, TimelineHeig
             hasMedia = true
             mediaWrap.isHidden = false
             media.set(media: m, cornerRadius: 0)
-            textInsets = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 12)
+            textInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         } else {
             hasMedia = false
             mediaWrap.isHidden = true
-            textInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+            textInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         }
         titleLabel.text = data.title
         if let desc = data.description_, !desc.isEmpty {

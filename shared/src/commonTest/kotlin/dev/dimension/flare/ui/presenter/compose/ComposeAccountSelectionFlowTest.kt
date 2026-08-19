@@ -35,10 +35,31 @@ class ComposeAccountSelectionFlowTest {
                     ),
             )
         val reply = ComposeStatus.Reply(MicroBlogKey("status", "example.com"))
+        val quote = ComposeStatus.Quote(MicroBlogKey("status", "example.com"))
 
-        assertFalse(isComposeContentValid("caption", 0, config, null))
-        assertTrue(isComposeContentValid("caption", 0, config, reply))
-        assertTrue(isComposeContentValid("", 1, config, null))
+        assertFalse(isComposeContentValid("caption", emptyList(), config, null))
+        assertTrue(isComposeContentValid("caption", emptyList(), config, reply))
+        assertFalse(isComposeContentValid("caption", emptyList(), config, quote))
+        assertTrue(isComposeContentValid("", listOf("image/png"), config, null))
+    }
+
+    @Test
+    fun `unsupported media disables send before publishing`() {
+        val config =
+            ComposeConfig(
+                media =
+                    ComposeConfig.Media(
+                        maxCount = 4,
+                        canSensitive = true,
+                        altTextMaxLength = 1_500,
+                        allowMediaOnly = true,
+                        supportedMimeTypes = setOf("image/jpeg", "image/png"),
+                    ),
+            )
+
+        assertTrue(isComposeContentValid("caption", listOf("image/png"), config, null))
+        assertFalse(isComposeContentValid("caption", listOf("image/gif"), config, null))
+        assertFalse(isComposeContentValid("caption", listOf(""), config, null))
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

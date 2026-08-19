@@ -223,6 +223,47 @@ public fun MutationResultV1.requireValid() {
     }
 }
 
+public fun MutationResultV1.requireDeleteResult() {
+    requireValid()
+    require(this === MutationResultV1.Deleted || this === MutationResultV1.NoChange) {
+        "Delete operation returned an incompatible mutation result"
+    }
+}
+
+public fun MutationResultV1.requirePostMutationResult(expectedKey: EntityKeyV1) {
+    requireValid()
+    expectedKey.requireValid()
+    when (this) {
+        is MutationResultV1.UpdatedPost ->
+            require(post.key == expectedKey) { "Post mutation returned a different post" }
+
+        is MutationResultV1.Invalidate ->
+            require(keys.isNotEmpty() && keys.all { it == expectedKey }) {
+                "Post mutation invalidated an unrelated entity"
+            }
+
+        MutationResultV1.Deleted,
+        MutationResultV1.NoChange,
+        -> Unit
+
+        is MutationResultV1.UpdatedProfile,
+        is MutationResultV1.UpdatedRelation,
+        -> require(false) { "Post mutation returned an incompatible mutation result" }
+    }
+}
+
+public fun MutationResultV1.requireRelationMutationResult(expectedKey: EntityKeyV1) {
+    requireValid()
+    expectedKey.requireValid()
+    when (this) {
+        is MutationResultV1.UpdatedRelation ->
+            require(relation.profileKey == expectedKey) { "Relation mutation returned a different profile" }
+
+        MutationResultV1.NoChange -> Unit
+        else -> require(false) { "Relation mutation returned an incompatible mutation result" }
+    }
+}
+
 public fun ComposeResultV1.requireValid() {
     post.requireValid()
 }

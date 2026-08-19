@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.model.asText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import kotlin.native.HiddenFromObjC
@@ -229,30 +230,34 @@ public class LoginPlatformRegistry(
     public suspend fun detectPlatformId(host: String): NodeData {
         val hostCleaned = normalizeHost(host)
         require(hostCleaned.isNotBlank()) { "Host is blank" }
-        return all
-            .sortedByDescending { it.detector.priority }
-            .firstNotNullOfOrNull { provider ->
-                runCatching {
-                    provider.detector.detect(hostCleaned)
-                }.getOrElse {
-                    if (it is CancellationException) {
-                        throw it
+        val detected =
+            withTimeoutOrNull(PLATFORM_DETECTION_TIMEOUT_MILLIS) {
+                all
+                    .sortedByDescending { it.detector.priority }
+                    .firstNotNullOfOrNull { provider ->
+                        runCatching {
+                            provider.detector.detect(hostCleaned)
+                        }.getOrElse {
+                            if (it is CancellationException) {
+                                throw it
+                            }
+                            null
+                        }?.let { detection ->
+                            NodeData(
+                                host = detection.host,
+                                platformId = provider.platformId,
+                                software = detection.software,
+                                compatibleMode = detection.compatibleMode,
+                                platformDisplayName = provider.metadata.displayName,
+                                platformIcon = provider.metadata.icon,
+                                loginMethods = provider.methods.sortedByDescending { it.priority },
+                                platformDisplayNameText = provider.metadata.displayNameText,
+                                platformIconUrl = provider.metadata.iconUrl,
+                            )
+                        }
                     }
-                    null
-                }?.let { detected ->
-                    NodeData(
-                        host = detected.host,
-                        platformId = provider.platformId,
-                        software = detected.software,
-                        compatibleMode = detected.compatibleMode,
-                        platformDisplayName = provider.metadata.displayName,
-                        platformIcon = provider.metadata.icon,
-                        loginMethods = provider.methods.sortedByDescending { it.priority },
-                        platformDisplayNameText = provider.metadata.displayNameText,
-                        platformIconUrl = provider.metadata.iconUrl,
-                    )
-                }
-            } ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
+            }
+        return detected ?: throw IllegalArgumentException("Unsupported platform: $hostCleaned")
     }
 
     private fun normalizeHost(host: String): String =
@@ -265,6 +270,8 @@ public class LoginPlatformRegistry(
             .removeSuffix("/")
             .lowercase()
 }
+
+private const val PLATFORM_DETECTION_TIMEOUT_MILLIS = 30_000L
 
 @HiddenFromObjC
 public class UnsupportedLoginPlatformException(

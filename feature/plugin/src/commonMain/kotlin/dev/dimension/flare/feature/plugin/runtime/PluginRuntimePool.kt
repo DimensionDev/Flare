@@ -157,7 +157,7 @@ public class PluginRuntimePool(
         } catch (error: PluginRuntimeFatalException) {
             withContext(NonCancellable) { handleFatal(plugin.installed.pluginId, key, holder, error) }
             val cause = error.cause ?: error
-            if (cause is kotlinx.coroutines.CancellationException) throw cause
+            if (cause is kotlinx.coroutines.CancellationException && !error.countsTowardPause) throw cause
             throw PluginRuntimeUnavailableException(plugin.installed.pluginId, cause)
         } finally {
             withContext(NonCancellable) { release(holder) }
@@ -218,7 +218,7 @@ public class PluginRuntimePool(
         } catch (error: PluginRuntimeFatalException) {
             withContext(NonCancellable) { recordFailure(plugin.installed.pluginId, error.countsTowardPause) }
             val cause = error.cause ?: error
-            if (cause is kotlinx.coroutines.CancellationException) throw cause
+            if (cause is kotlinx.coroutines.CancellationException && !error.countsTowardPause) throw cause
             throw PluginRuntimeUnavailableException(plugin.installed.pluginId, cause)
         } finally {
             withContext(NonCancellable) { runtime.close() }

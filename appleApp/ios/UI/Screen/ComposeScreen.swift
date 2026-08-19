@@ -5,6 +5,7 @@ import FlareAppleUI
 import PhotosUI
 import SwiftUIIntrospect
 import SwiftUIBackports
+import UniformTypeIdentifiers
 
 final class ComposePrefill: Hashable {
     let id = UUID()
@@ -172,8 +173,8 @@ struct ComposeScreen: View {
                 applyCursorIfPossible()
             }
         }
-        .onChange(of: mediaViewModel.items.count) { _, newValue in
-            presenter.state.setMediaSize(value: Int32(newValue))
+        .onChange(of: mediaViewModel.items.map(\.mimeType)) { _, mimeTypes in
+            presenter.state.setMediaMimeTypes(value: mimeTypes)
         }
         .sheet(isPresented: $showDraftSheet) {
             draftSheet
@@ -460,7 +461,7 @@ struct ComposeScreen: View {
             fileName: prefill.fileName
         )
         presenter.state.setText(value: prefill.text)
-        presenter.state.setMediaSize(value: Int32(mediaViewModel.items.count))
+        presenter.state.setMediaMimeTypes(value: mediaViewModel.items.map(\.mimeType))
         pendingCursor = prefill.cursorPosition
         requestComposerFocus()
         applyCursorIfPossible()
@@ -543,7 +544,12 @@ struct ComposeScreen: View {
                 return nil
             }
             return .init(
-                file: .init(name: item.fileName, data: KotlinByteArray.from(data: data), type: item.type),
+                file: .init(
+                    name: item.fileName,
+                    data: KotlinByteArray.from(data: data),
+                    type: item.type,
+                    mimeType: item.mimeType
+                ),
                 altText: item.altText.isEmpty ? nil : item.altText
             )
         }
@@ -650,12 +656,14 @@ class MediaItem: Equatable, Identifiable {
     var altText: String = ""
     let id: String
     let fileName: String
+    let mimeType: String
     var type: FileType = .other
     
     init(item: PhotosPickerItem) {
         self.item = item
         self.id = item.itemIdentifier ?? UUID().uuidString
         self.fileName = item.itemIdentifier ?? UUID().uuidString
+        self.mimeType = item.supportedContentTypes.first?.preferredMIMEType ?? ""
         
         if let contentType = item.supportedContentTypes.first {
             if contentType.conforms(to: .image) {
@@ -685,6 +693,7 @@ class MediaItem: Equatable, Identifiable {
         self.item = nil
         self.id = UUID().uuidString
         self.fileName = fileName
+        self.mimeType = Self.mimeType(fileName: fileName, fallback: "image/jpeg")
         self.data = data
         self.image = image
         self.type = .image
@@ -699,6 +708,11 @@ class MediaItem: Equatable, Identifiable {
         self.item = nil
         self.id = draftMedia.cachePath
         self.fileName = draftMedia.fileName ?? fileURL.lastPathComponent
+        self.mimeType =
+            Self.mimeType(
+                fileName: self.fileName,
+                fallback: draftMedia.type == .video ? "video/mp4" : "image/jpeg"
+            )
         self.data = data
         self.altText = draftMedia.altText ?? ""
 
@@ -711,6 +725,11 @@ class MediaItem: Equatable, Identifiable {
         default:
             self.type = .other
         }
+    }
+
+    private static func mimeType(fileName: String, fallback: String) -> String {
+        let pathExtension = URL(fileURLWithPath: fileName).pathExtension
+        return UTType(filenameExtension: pathExtension)?.preferredMIMEType ?? fallback
     }
 }
 

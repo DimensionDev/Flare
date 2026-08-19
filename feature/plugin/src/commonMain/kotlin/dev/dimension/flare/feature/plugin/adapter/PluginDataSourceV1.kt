@@ -64,6 +64,8 @@ import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
 import dev.dimension.flare.feature.plugin.wire.TimelinePageRequestV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
+import dev.dimension.flare.feature.plugin.wire.requireDeleteResult
+import dev.dimension.flare.feature.plugin.wire.requirePostMutationResult
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -225,7 +227,7 @@ internal class PluginDataSourceV1 private constructor(
                                     request = EntityRequestV1(statusKey.toWire()),
                                     requestSerializer = EntityRequestV1.serializer(),
                                     responseSerializer = MutationResultV1.serializer(),
-                                    validate = MutationResultV1::requireValid,
+                                    validate = MutationResultV1::requireDeleteResult,
                                 )
                             }
                         },
@@ -252,7 +254,7 @@ internal class PluginDataSourceV1 private constructor(
                                         ),
                                     requestSerializer = MutationRequestV1.serializer(),
                                     responseSerializer = MutationResultV1.serializer(),
-                                    validate = MutationResultV1::requireValid,
+                                    validate = { it.requirePostMutationResult(event.postKey.toWire()) },
                                 )
                             when (result) {
                                 is MutationResultV1.UpdatedPost -> {

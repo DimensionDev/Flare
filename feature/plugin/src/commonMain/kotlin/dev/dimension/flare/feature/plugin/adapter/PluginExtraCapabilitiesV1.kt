@@ -74,6 +74,8 @@ import dev.dimension.flare.feature.plugin.wire.SemanticActionV1
 import dev.dimension.flare.feature.plugin.wire.SocialListV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
 import dev.dimension.flare.feature.plugin.wire.TimelineSectionV1
+import dev.dimension.flare.feature.plugin.wire.requireDeleteResult
+import dev.dimension.flare.feature.plugin.wire.requireRelationMutationResult
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -207,7 +209,7 @@ internal class PluginExtraCapabilitiesV1(
                             request = MutationRequestV1(userKey.toWire(), action, tokens.value[userKey]?.get(action)),
                             requestSerializer = MutationRequestV1.serializer(),
                             responseSerializer = MutationResultV1.serializer(),
-                            validate = MutationResultV1::requireValid,
+                            validate = { it.requireRelationMutationResult(userKey.toWire()) },
                         )
                     if (result is MutationResultV1.UpdatedRelation) {
                         tokens.update { it + (userKey to result.relation.actionTokens) }
@@ -347,7 +349,7 @@ internal class PluginExtraCapabilitiesV1(
                 request = ListMutationRequestV1(id = listId, entityToken = cached.value[listId]?.entityToken),
                 requestSerializer = ListMutationRequestV1.serializer(),
                 responseSerializer = MutationResultV1.serializer(),
-                validate = MutationResultV1::requireValid,
+                validate = MutationResultV1::requireDeleteResult,
             )
             cached.update { it - listId }
         }
@@ -391,7 +393,7 @@ internal class PluginExtraCapabilitiesV1(
                         request = ListMemberRequestV1(listId, userKey.toWire(), cached.value[listId]?.entityToken),
                         requestSerializer = ListMemberRequestV1.serializer(),
                         responseSerializer = MutationResultV1.serializer(),
-                        validate = MutationResultV1::requireValid,
+                        validate = MutationResultV1::requireDeleteResult,
                     )
                 }
 
@@ -571,7 +573,7 @@ internal class PluginExtraCapabilitiesV1(
                     ),
                 requestSerializer = DirectMessageDeleteRequestV1.serializer(),
                 responseSerializer = MutationResultV1.serializer(),
-                validate = MutationResultV1::requireValid,
+                validate = MutationResultV1::requireDeleteResult,
             )
             messages.update { it - messageKey }
         }
@@ -583,7 +585,7 @@ internal class PluginExtraCapabilitiesV1(
                 request = EntityRequestV1(roomKey.toWire(), rooms.value[roomKey]?.entityToken),
                 requestSerializer = EntityRequestV1.serializer(),
                 responseSerializer = MutationResultV1.serializer(),
-                validate = MutationResultV1::requireValid,
+                validate = MutationResultV1::requireDeleteResult,
             )
             rooms.update { it - roomKey }
         }

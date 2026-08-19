@@ -1072,8 +1072,9 @@ private fun composePresenter(
             }
 
     mediaState.onSuccess {
-        LaunchedEffect(it.medias.size) {
-            state.setMediaSize(it.medias.size)
+        val mimeTypes = it.medias.map { media -> FileItem(media.file).mimeType.orEmpty() }
+        LaunchedEffect(mimeTypes) {
+            state.setMediaMimeTypes(mimeTypes)
         }
     }
 

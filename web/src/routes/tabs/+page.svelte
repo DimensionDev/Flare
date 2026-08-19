@@ -3,7 +3,7 @@
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import { useEnvironmentSettings } from '$lib/environment/environmentSettings.svelte';
-	import { localizedUiString } from '$lib/i18n/uiStrings';
+	import { localizedUiText } from '$lib/i18n/uiStrings';
 	import { m } from '$lib/paraglide/messages.js';
 	import {
 		createHomeTabSettingsPresenter,
@@ -182,8 +182,7 @@
 	});
 
 	function tabTitle(title: UiText): string {
-		if (title.type === 'Raw') return title.string;
-		return localizedUiString(title.string);
+		return localizedUiText(title);
 	}
 
 	function tabIconName(tab: UiTimelineTabItem): string {

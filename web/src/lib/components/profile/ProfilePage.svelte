@@ -7,7 +7,7 @@
     import ProfileTimelineTabPanel from "$lib/components/profile/ProfileTimelineTabPanel.svelte";
     import TimelineLoadingPlaceholderList from "$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte";
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
-    import { localizedUiString } from "$lib/i18n/uiStrings";
+    import { localizedUiText } from "$lib/i18n/uiStrings";
     import { m } from "$lib/paraglide/messages.js";
     import {
         type RetainedPresenterController,
@@ -331,7 +331,7 @@
     }
 
     function profileTabTitle(tab: ProfileStateTab): string {
-        return localizedUiString(tab.name);
+        return localizedUiText(tab.name);
     }
 
     function timelinePresenterForTab(tab: ProfileStateTab): TimelinePresenter {

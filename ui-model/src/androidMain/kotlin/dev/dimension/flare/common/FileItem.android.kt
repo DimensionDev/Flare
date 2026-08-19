@@ -2,6 +2,7 @@ package dev.dimension.flare.common
 
 import android.content.Context
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import java.io.File
 import okio.Buffer
 import okio.FileSystem
@@ -20,7 +21,13 @@ public actual class FileItem {
         uri: Uri,
     ) {
         this.name = uri.lastPathSegment
-        this.mimeType = context.contentResolver.getType(uri)
+        this.mimeType =
+            context.contentResolver.getType(uri)
+                ?: uri.lastPathSegment
+                    ?.substringAfterLast('.', missingDelimiterValue = "")
+                    ?.lowercase()
+                    ?.takeIf(String::isNotEmpty)
+                    ?.let(MimeTypeMap.getSingleton()::getMimeTypeFromExtension)
         this.type = resolveType(this.mimeType, uri)
         this.source = Source.UriSource(context, uri)
     }

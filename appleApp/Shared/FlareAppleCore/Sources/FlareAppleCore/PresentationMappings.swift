@@ -27,10 +27,21 @@ public func loginCookieSnapshot(
 private extension HTTPCookie {
     func matchesLogin(url: URL?) -> Bool {
         guard let url, let host = url.host?.lowercased() else { return false }
-        let cookieDomain = domain.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "."))
-        let domainMatches = host == cookieDomain || host.hasSuffix(".\(cookieDomain)")
+        if isSecure && url.scheme?.lowercased() != "https" { return false }
+
+        let rawDomain = domain.lowercased()
+        let cookieDomain = rawDomain.trimmingCharacters(in: CharacterSet(charactersIn: "."))
+        let domainMatches =
+            rawDomain.hasPrefix(".")
+                ? host == cookieDomain || host.hasSuffix(".\(cookieDomain)")
+                : host == cookieDomain
         let requestPath = url.path.isEmpty ? "/" : url.path
-        return domainMatches && requestPath.hasPrefix(path)
+        let cookiePath = path.isEmpty ? "/" : path
+        let pathMatches =
+            requestPath == cookiePath ||
+            (requestPath.hasPrefix(cookiePath) &&
+                (cookiePath.hasSuffix("/") || requestPath.dropFirst(cookiePath.count).first == "/"))
+        return domainMatches && pathMatches
     }
 }
 

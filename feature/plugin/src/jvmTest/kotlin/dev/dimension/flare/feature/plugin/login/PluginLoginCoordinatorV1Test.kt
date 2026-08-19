@@ -132,6 +132,7 @@ class PluginLoginCoordinatorV1Test {
                         .platformIconUrl,
                 )
             assertTrue(iconUrl.contains("/platform-"))
+            assertFalse(iconUrl.contains(plugin.installed.packageHash))
             assertTrue(FileSystem.SYSTEM.exists(iconUrl.removePrefix("file://").toPath()))
         }
 

@@ -72,6 +72,29 @@ class WireV1Test {
     }
 
     @Test
+    fun mutationValidationIsScopedToTheRequestedEntityAndOperation() {
+        val expectedPost = EntityKeyV1("post-1", "example.social")
+        assertFailsWith<IllegalArgumentException> {
+            MutationResultV1
+                .UpdatedPost(validPost().copy(key = EntityKeyV1("post-2", "example.social")))
+                .requirePostMutationResult(expectedPost)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            MutationResultV1
+                .Invalidate(listOf(EntityKeyV1("post-2", "example.social")))
+                .requirePostMutationResult(expectedPost)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            MutationResultV1.UpdatedPost(validPost()).requireDeleteResult()
+        }
+        assertFailsWith<IllegalArgumentException> {
+            MutationResultV1
+                .UpdatedRelation(RelationV1(EntityKeyV1("profile-2", "example.social")))
+                .requireRelationMutationResult(EntityKeyV1("profile-1", "example.social"))
+        }
+    }
+
+    @Test
     fun rejectsInvalidNotificationAndDirectMessageTimestamps() {
         assertFailsWith<IllegalArgumentException> {
             NotificationV1(

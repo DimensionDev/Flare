@@ -3,6 +3,8 @@ package dev.dimension.flare.data.datasource.microblog
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ComposeConfigMediaTest {
     @Test
@@ -60,6 +62,23 @@ class ComposeConfigMediaTest {
             ),
             merged.visibility?.allowedValues,
         )
+    }
+
+    @Test
+    fun mediaMimeTypeConstraintsSupportWildcardsAndRejectUnknownTypes() {
+        val media =
+            ComposeConfig.Media(
+                maxCount = 4,
+                canSensitive = true,
+                altTextMaxLength = 1_000,
+                allowMediaOnly = true,
+                supportedMimeTypes = setOf("image/*", "video/mp4"),
+            )
+
+        assertTrue(media.supportsMimeType("IMAGE/PNG; charset=binary"))
+        assertTrue(media.supportsMimeType("video/mp4"))
+        assertFalse(media.supportsMimeType("audio/mpeg"))
+        assertFalse(media.supportsMimeType(null))
     }
 
     private fun media(

@@ -126,7 +126,7 @@
 
 	$effect(() => {
 		compose.setText(text);
-		compose.setMediaSize(selectedMedia.length);
+		compose.setMediaMimeTypesJson(JSON.stringify(selectedMedia.map((item) => item.file.type)));
 	});
 
 	$effect(() => {

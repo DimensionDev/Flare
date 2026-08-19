@@ -94,8 +94,7 @@ private fun RunningPluginV1.stableAccountIconUrl(): String? =
     runCatching {
         val source = iconPath.toPath()
         val directory = requireNotNull(source.parent)
-        val target =
-            directory / "platform-${installed.pluginId.encodeUtf8().sha256().hex()}-${installed.packageHash}.png"
+        val target = directory / "platform-${installed.pluginId.encodeUtf8().sha256().hex()}.png"
         if (source != target && !FileSystem.SYSTEM.exists(target)) {
             val bytes = FileSystem.SYSTEM.read(source) { readByteArray() }
             val temp = directory / "${target.name}.next"

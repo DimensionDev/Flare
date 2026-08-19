@@ -85,7 +85,6 @@ class PluginInstallerTest {
             assertEquals(first, second)
             assertTrue(fileSystem.exists(stateStore.paths.packagePath(first.packageHash)))
             assertTrue(fileSystem.exists(stateStore.paths.iconPath(first.packageHash)))
-            assertTrue(fileSystem.exists(stateStore.paths.stableIconPath(first.pluginId, first.packageHash)))
         }
 
     @Test
@@ -141,7 +140,12 @@ class PluginInstallerTest {
             uninstalledStore.cleanup()
             assertFalse(fileSystem.exists(uninstalledStore.paths.packagePath(second.packageHash)))
             assertFalse(fileSystem.exists(uninstalledStore.paths.iconPath(second.packageHash)))
-            assertTrue(fileSystem.exists(uninstalledStore.paths.stableIconPath(second.pluginId, second.packageHash)))
+            assertEquals(
+                0,
+                fileSystem
+                    .list(uninstalledStore.paths.icons)
+                    .count { it.name.startsWith("platform-") },
+            )
         }
 
     @Test

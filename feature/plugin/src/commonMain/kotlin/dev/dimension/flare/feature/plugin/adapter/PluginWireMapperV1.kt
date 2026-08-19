@@ -73,9 +73,16 @@ internal class PluginWireMapperV1(
         value.requireValid()
         value.requireSafeUrls()
         val key = value.key.toMicroBlogKey()
+        val handleHost =
+            value.handle
+                .trim()
+                .removePrefix("@")
+                .substringAfterLast('@', missingDelimiterValue = value.key.host)
+                .takeIf(String::isNotBlank)
+                ?: value.key.host
         return UiProfile(
             key = key,
-            handle = UiHandle(value.handle, value.key.host),
+            handle = UiHandle(value.handle, handleHost),
             avatar = value.avatarUrl.toUiImage(),
             nameInternal = value.displayName.toUiPlainText(),
             platformId = platformId,

@@ -16,6 +16,8 @@ import dev.dimension.flare.ui.model.UiStrings
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -133,6 +135,24 @@ class LoginPlatformRegistryTest {
         }
 
     @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun detectionHasAGlobalDeadline() =
+        runTest {
+            val registry =
+                testRegistry(
+                    testProvider(
+                        platformId = "Stalled",
+                        detectorDelayMillis = 31_000,
+                    ),
+                )
+
+            assertFailsWith<IllegalArgumentException> {
+                registry.detectPlatformId("example.social")
+            }
+            assertEquals(30_000, currentTime)
+        }
+
+    @Test
     fun runtimeDataDerivesProvidersFromPlatformSpecs() {
         val mastodon = testProvider("Mastodon")
         val mastodonSpec = testLoginPlatformSpec(mastodon)
@@ -151,6 +171,7 @@ class LoginPlatformRegistryTest {
         detectorPriority: Int = 0,
         detectedSoftware: String? = null,
         detectorFailure: Throwable? = null,
+        detectorDelayMillis: Long = 0,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
             override val platformId: String = platformId
@@ -164,6 +185,7 @@ class LoginPlatformRegistryTest {
                     override val priority: Int = detectorPriority
 
                     override suspend fun detect(host: String): NodeDetection? {
+                        delay(detectorDelayMillis)
                         detectorFailure?.let { throw it }
                         return detectedSoftware?.let {
                             NodeDetection(

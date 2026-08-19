@@ -40,30 +40,23 @@ struct UITimelinePagingView: View {
         if allowGalleryMode && timelineDisplayMode == .gallery {
             UIGalleryTimelinePagingView(data: data, onIsAtTopChanged: onIsAtTopChanged)
                 .ignoresSafeArea(edges: .vertical)
-        } else if horizontalSizeClass == .compact {
+        } else if UIDevice.current.userInterfaceIdiom == .phone ||
+            horizontalSizeClass == .compact {
             singleListView
         } else {
             GeometryReader { proxy in
-                if isIPhoneLandscape(size: proxy.size) {
-                    singleListView
-                } else {
-                    UITimelineCollectionView(
-                        data: data,
-                        detailStatusKey: detailStatusKey,
-                        topContentInset: topContentInset,
-                        columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1),
-                        accessoryItems: accessoryItems,
-                        suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
-                        onIsAtTopChanged: onIsAtTopChanged
-                    )
-                    .ignoresSafeArea(edges: .vertical)
-                }
+                UITimelineCollectionView(
+                    data: data,
+                    detailStatusKey: detailStatusKey,
+                    topContentInset: topContentInset,
+                    columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1),
+                    accessoryItems: accessoryItems,
+                    suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
+                    onIsAtTopChanged: onIsAtTopChanged
+                )
+                .ignoresSafeArea(edges: .vertical)
             }
         }
-    }
-
-    private func isIPhoneLandscape(size: CGSize) -> Bool {
-        UIDevice.current.userInterfaceIdiom == .phone && size.width > size.height
     }
 
     var singleListView: some View {

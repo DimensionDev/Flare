@@ -5,12 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -67,6 +70,7 @@ import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
 import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.model.TimelineCarouselLayout
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -117,36 +121,70 @@ internal fun StatusMediaComponent(
             },
     ) {
         if (usesCarousel) {
-            LazyRow(
+            BoxWithConstraints(
                 modifier =
                     mediaContentModifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 10f),
-                contentPadding =
-                    PaddingValues(
-                        start = carouselLeadingPadding,
-                        end = carouselTrailingPadding,
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                        .fillMaxWidth(),
             ) {
-                items(count = data.size) { index ->
-                    val media = data[index]
-                    val ratio = minOf(media.timelineAspectRatio, 16f / 9f)
-                    StatusMediaItem(
-                        post = post,
-                        media = media,
-                        mediaCount = data.size,
-                        onMediaClick = onMediaClick,
-                        hideSensitive = hideSensitive,
-                        keepAspectRatio = false,
-                        fillContainer = true,
-                        modifier =
-                            Modifier
-                                .fillParentMaxHeight()
-                                .aspectRatio(ratio, matchHeightConstraintsFirst = true)
-                                .clip(shape),
-                    )
+                val layoutSpec =
+                    remember(
+                        data.size,
+                        data[0].carouselAspectRatio,
+                        data[1].carouselAspectRatio,
+                    ) {
+                        TimelineCarouselLayout.spec(
+                            mediaCount = data.size,
+                            firstAspectRatio = data[0].carouselAspectRatio,
+                            secondAspectRatio = data[1].carouselAspectRatio,
+                        )
+                    }
+                val horizontalInsets = carouselLeadingPadding + carouselTrailingPadding
+                val contentWidth = (maxWidth - horizontalInsets).coerceAtLeast(0.dp)
+                val carouselHeight =
+                    layoutSpec
+                        .height(
+                            viewportWidth = maxWidth.value,
+                            horizontalInsets = horizontalInsets.value,
+                            itemSpacing = CarouselItemSpacing.value,
+                        ).dp
+
+                LazyRow(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(carouselHeight),
+                    contentPadding =
+                        PaddingValues(
+                            start = carouselLeadingPadding,
+                            end = carouselTrailingPadding,
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(CarouselItemSpacing),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(count = data.size) { index ->
+                        val media = data[index]
+                        val itemWidth =
+                            layoutSpec
+                                .itemWidth(
+                                    contentWidth = contentWidth.value,
+                                    height = carouselHeight.value,
+                                    aspectRatio = media.timelineAspectRatio,
+                                ).dp
+                        StatusMediaItem(
+                            post = post,
+                            media = media,
+                            mediaCount = data.size,
+                            onMediaClick = onMediaClick,
+                            hideSensitive = hideSensitive,
+                            keepAspectRatio = false,
+                            fillContainer = true,
+                            modifier =
+                                Modifier
+                                    .fillParentMaxHeight()
+                                    .width(itemWidth)
+                                    .clip(shape),
+                        )
+                    }
                 }
             }
         } else {
@@ -262,17 +300,22 @@ private fun Modifier.expandHorizontally(
         }
     }
 
-private val UiMedia.timelineAspectRatio: Float
+private val CarouselItemSpacing = 4.dp
+
+private val UiMedia.carouselAspectRatio: Float
     get() {
         val ratio =
             when (this) {
-                is UiMedia.Image -> aspectRatio
-                is UiMedia.Video -> aspectRatio
-                is UiMedia.Gif -> aspectRatio
-                is UiMedia.Audio -> 1f
+                is UiMedia.Image -> width / height
+                is UiMedia.Video -> width / height
+                is UiMedia.Gif -> width / height
+                is UiMedia.Audio -> 0f
             }
-        return ratio.takeIf { it.isFinite() && it > 0f } ?: 1f
+        return ratio.takeIf { it.isFinite() && it > 0f } ?: 0f
     }
+
+private val UiMedia.timelineAspectRatio: Float
+    get() = carouselAspectRatio.takeIf { it > 0f } ?: 1f
 
 @Composable
 private fun StatusMediaItem(

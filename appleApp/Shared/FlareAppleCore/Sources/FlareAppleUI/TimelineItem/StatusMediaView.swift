@@ -117,46 +117,57 @@ struct StatusMediaView: View {
     @ViewBuilder
     private var mediaContent: some View {
         if usesCarousel {
-            GeometryReader { geometry in
-                ScrollView(.horizontal) {
-                    LazyHStack(spacing: 4) {
-                        ForEach(data.indices, id: \.self) { index in
-                            let itemSize = carouselItemSize(
-                                data[index],
-                                containerHeight: geometry.size.height
-                            )
-                            mediaItem(
-                                data[index],
-                                index: index,
-                                overflowCount: 0,
-                                allowsAutoplay: !isBlur &&
-                                    index == autoplayCarouselIndex
-                            )
-                            .frame(width: itemSize.width, height: itemSize.height)
-                            .clipShape(.rect(cornerRadius: cornerRadius))
-                            .id(index)
+            let layoutSpec = carouselLayoutSpec
+            let horizontalInsets = carouselLeadingPadding + carouselTrailingPadding
+            TimelineCarouselFrameLayout(
+                widthMultiplier: CGFloat(layoutSpec.widthMultiplier),
+                spacingMultiplier: CGFloat(layoutSpec.spacingMultiplier),
+                horizontalInsets: horizontalInsets,
+                itemSpacing: 4
+            ) {
+                GeometryReader { geometry in
+                    let contentWidth = max(0, geometry.size.width - horizontalInsets)
+                    ScrollView(.horizontal) {
+                        LazyHStack(spacing: 4) {
+                            ForEach(data.indices, id: \.self) { index in
+                                let itemSize = carouselItemSize(
+                                    data[index],
+                                    containerHeight: geometry.size.height,
+                                    contentWidth: contentWidth,
+                                    maxItemWidthMultiplier: CGFloat(layoutSpec.maxItemWidthMultiplier)
+                                )
+                                mediaItem(
+                                    data[index],
+                                    index: index,
+                                    overflowCount: 0,
+                                    allowsAutoplay: !isBlur &&
+                                        index == autoplayCarouselIndex
+                                )
+                                .frame(width: itemSize.width, height: itemSize.height)
+                                .clipShape(.rect(cornerRadius: cornerRadius))
+                                .id(index)
+                            }
+                        }
+                        .scrollTargetLayout()
+                        .frame(height: geometry.size.height)
+                        .padding(.leading, carouselLeadingPadding)
+                        .padding(.trailing, carouselTrailingPadding)
+                    }
+                    .scrollIndicators(.hidden)
+                    .scrollPosition(id: $activeCarouselIndex, anchor: .center)
+                    .onChange(of: activeCarouselIndex) { _, index in
+                        if let index, index != autoplayCarouselIndex {
+                            autoplayCarouselIndex = nil
                         }
                     }
-                    .scrollTargetLayout()
-                    .frame(height: geometry.size.height)
-                    .padding(.leading, carouselLeadingPadding)
-                    .padding(.trailing, carouselTrailingPadding)
-                }
-                .scrollIndicators(.hidden)
-                .scrollPosition(id: $activeCarouselIndex, anchor: .center)
-                .onChange(of: activeCarouselIndex) { _, index in
-                    if let index, index != autoplayCarouselIndex {
-                        autoplayCarouselIndex = nil
+                    .task(id: activeCarouselIndex) {
+                        guard let activeCarouselIndex else { return }
+                        try? await Task.sleep(nanoseconds: 150_000_000)
+                        guard !Task.isCancelled else { return }
+                        autoplayCarouselIndex = activeCarouselIndex
                     }
                 }
-                .task(id: activeCarouselIndex) {
-                    guard let activeCarouselIndex else { return }
-                    try? await Task.sleep(nanoseconds: 150_000_000)
-                    guard !Task.isCancelled else { return }
-                    autoplayCarouselIndex = activeCarouselIndex
-                }
             }
-            .aspectRatio(16 / 10, contentMode: .fit)
             .padding(.leading, -carouselLeadingPadding)
             .padding(.trailing, -carouselTrailingPadding)
             .fixedSize(horizontal: false, vertical: true)
@@ -165,10 +176,25 @@ struct StatusMediaView: View {
         }
     }
 
-    private func carouselItemSize(_ item: any UiMedia, containerHeight: CGFloat) -> CGSize {
+    private var carouselLayoutSpec: TimelineCarouselLayoutSpec {
+        TimelineCarouselLayout.shared.spec(
+            mediaCount: Int32(data.count),
+            firstAspectRatio: Float(data.first?.carouselLayoutAspectRatio ?? 0),
+            secondAspectRatio: Float(data.dropFirst().first?.carouselLayoutAspectRatio ?? 0)
+        )
+    }
+
+    private func carouselItemSize(
+        _ item: any UiMedia,
+        containerHeight: CGFloat,
+        contentWidth: CGFloat,
+        maxItemWidthMultiplier: CGFloat
+    ) -> CGSize {
         let sourceRatio = item.aspectRatio.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? 1
-        let displayRatio = min(sourceRatio, 16 / 9)
-        return CGSize(width: containerHeight * displayRatio, height: containerHeight)
+        return CGSize(
+            width: min(containerHeight * sourceRatio, contentWidth * maxItemWidthMultiplier),
+            height: containerHeight
+        )
     }
 
     private var mediaGrid: some View {
@@ -226,6 +252,38 @@ struct StatusMediaView: View {
                     }
                 }
             }
+    }
+}
+
+private struct TimelineCarouselFrameLayout: Layout {
+    let widthMultiplier: CGFloat
+    let spacingMultiplier: CGFloat
+    let horizontalInsets: CGFloat
+    let itemSpacing: CGFloat
+
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
+        let width = max(0, proposal.width ?? 320)
+        let contentWidth = max(0, width - horizontalInsets)
+        let height = max(0, contentWidth * widthMultiplier + itemSpacing * spacingMultiplier)
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) {
+        guard let subview = subviews.first else { return }
+        subview.place(
+            at: bounds.origin,
+            anchor: .topLeading,
+            proposal: ProposedViewSize(width: bounds.width, height: bounds.height)
+        )
     }
 }
 
@@ -332,6 +390,23 @@ public extension UiMedia {
         case .gif(let gifv): return CGFloat(gifv.aspectRatio)
         case .audio: return nil
         }
+    }
+
+    var carouselLayoutAspectRatio: CGFloat? {
+        let size: (width: CGFloat, height: CGFloat)? = switch onEnum(of: self) {
+        case .image(let image): (CGFloat(image.width), CGFloat(image.height))
+        case .video(let video): (CGFloat(video.width), CGFloat(video.height))
+        case .gif(let gif): (CGFloat(gif.width), CGFloat(gif.height))
+        case .audio: nil
+        }
+        guard let size,
+              size.width.isFinite,
+              size.height.isFinite,
+              size.width > 0,
+              size.height > 0 else {
+            return nil
+        }
+        return size.width / size.height
     }
 
     var mediaPreviewURL: String? {

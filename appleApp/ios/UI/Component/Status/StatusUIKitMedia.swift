@@ -31,7 +31,7 @@ private struct MediaItemSignature: Equatable {
 
     init(media: UiMedia) {
         altText = media.description_ ?? ""
-        aspectRatio = media.aspectRatio
+        aspectRatio = media.carouselLayoutAspectRatio
         switch onEnum(of: media) {
         case .image(let image):
             kind = "image"
@@ -633,7 +633,13 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
 
     private func heightSpec() -> (multiplier: CGFloat, constant: CGFloat) {
         if usesCarousel {
-            return (10 / 16, 0)
+            let spec = carouselLayoutSpec
+            let multiplier = CGFloat(spec.widthMultiplier)
+            let horizontalInsets = carouselLeadingPadding + carouselTrailingPadding
+            return (
+                multiplier,
+                -horizontalInsets * multiplier + spacing * CGFloat(spec.spacingMultiplier)
+            )
         }
         switch visibleItemCount {
         case 1:
@@ -664,7 +670,13 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private func gridHeight(for width: CGFloat) -> CGFloat {
         guard !items.isEmpty, width > 0 else { return 0 }
         if usesCarousel {
-            return width * 10 / 16
+            let spec = carouselLayoutSpec
+            let contentWidth = max(0, width - carouselLeadingPadding - carouselTrailingPadding)
+            return max(
+                0,
+                contentWidth * CGFloat(spec.widthMultiplier) +
+                    spacing * CGFloat(spec.spacingMultiplier)
+            )
         }
         switch visibleItemCount {
         case 1:
@@ -775,7 +787,15 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
               ratio > 0 else {
             return 1
         }
-        return min(ratio, 16 / 9)
+        return ratio
+    }
+
+    private var carouselLayoutSpec: TimelineCarouselLayoutSpec {
+        TimelineCarouselLayout.shared.spec(
+            mediaCount: Int32(items.count),
+            firstAspectRatio: Float(items.first?.carouselLayoutAspectRatio ?? 0),
+            secondAspectRatio: Float(items.dropFirst().first?.carouselLayoutAspectRatio ?? 0)
+        )
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -820,8 +840,16 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     ) -> CGSize {
         let height = collectionView.bounds.height
         guard height > 0 else { return CGSize(width: 1, height: 1) }
+        let spec = carouselLayoutSpec
+        let contentWidth = max(
+            0,
+            collectionView.bounds.width - carouselLeadingPadding - carouselTrailingPadding
+        )
         return CGSize(
-            width: height * carouselItemAspectRatio(at: indexPath.item),
+            width: min(
+                height * carouselItemAspectRatio(at: indexPath.item),
+                contentWidth * CGFloat(spec.maxItemWidthMultiplier)
+            ),
             height: height
         )
     }

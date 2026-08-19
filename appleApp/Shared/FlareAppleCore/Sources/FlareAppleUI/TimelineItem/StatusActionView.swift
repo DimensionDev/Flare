@@ -72,7 +72,7 @@ public struct StatusActionsView: View {
                     )
                 }
             }
-            .labelIconToTitleSpacingIfAvailable(4)
+            .labelIconToTitleSpacingIfAvailable(2)
         }
     }
 
@@ -320,7 +320,7 @@ public struct StatusActionItemView: View {
 // MARK: - Helpers
 
 private enum StatusActionHitArea {
-    static let horizontalInset: CGFloat = 6
+    static let horizontalInset: CGFloat = 4
     static let verticalInset: CGFloat = 4
 
     static func labelContentHeight(fontSize: CGFloat) -> CGFloat {

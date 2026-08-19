@@ -10,7 +10,7 @@ public struct TranslateStatusComponent: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 4) {
             Image(fontAwesome: .language)
             switch data {
             case .failed: Image(fontAwesome: .circleExclamation)

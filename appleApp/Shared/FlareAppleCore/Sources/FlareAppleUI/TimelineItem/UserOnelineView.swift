@@ -20,7 +20,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 4) {
             if showAvatar {
                 AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                     .frame(width: 20, height: 20)
@@ -28,7 +28,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
                         onClicked?()
                     }
             }
-            HStack {
+            HStack(spacing: 4) {
                 RichText(text: data.name)
                 Text(data.handle.canonical)
                     .font(.caption)

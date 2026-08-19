@@ -23,11 +23,17 @@ public struct AdaptiveTimelineCard<Content: View>: View {
     }
 
     public var body: some View {
-        if isMultipleColumn || !(timelineDisplayMode == .plain) {
+        if isMultipleColumn {
             ListCardView(index: index, totalCount: totalCount) {
                 content()
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 2)
+            .padding(.vertical, 6)
+        } else if !(timelineDisplayMode == .plain) {
+            ListCardView(index: index, totalCount: totalCount) {
+                content()
+            }
+            .padding(.horizontal, 16)
         } else {
             VStack(spacing: 0) {
                 content()

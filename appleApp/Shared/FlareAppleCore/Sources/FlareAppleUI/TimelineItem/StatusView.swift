@@ -170,11 +170,11 @@ public struct StatusView: View {
             if !parents.isEmpty, showParents {
                 ForEach(parents, id: \.itemKey) { parent in
                     VStack(
-                        spacing: nil
+                        spacing: 0
                     ) {
                         StatusView(data: parent, withLeadingPadding: true)
                         Spacer()
-                            .frame(height: 8)
+                            .frame(height: 18)
                     }
                     .overlay(alignment: .leading) {
                         Rectangle()
@@ -198,12 +198,12 @@ public struct StatusView: View {
                 }
                 VStack(
                     alignment: .leading,
-                    spacing: 8,
+                    spacing: 0,
                 ) {
                     if user != nil || hasPreMediaBody {
                         VStack(
                             alignment: .leading,
-                            spacing: nil,
+                            spacing: 0,
                         ) {
                             if let user {
                                 if showAsFullWidth {
@@ -245,79 +245,93 @@ public struct StatusView: View {
                                     } onClicked: {
                                         user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                                     }
+                                    Spacer()
+                                        .frame(height: 4)
                                 }
                             }
                             if hasPreMediaBody {
                                 VStack(
                                     alignment: .leading,
-                                    spacing: 8,
+                                    spacing: 0,
                                 ) {
                                     if let replyToHandle {
-                                        HStack {
+                                        HStack(spacing: 4) {
                                             Image(fontAwesome: .reply)
                                             Text("Reply to \(replyToHandle)", bundle: FlareAppleUILocalization.bundle)
                                         }
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
+                                        .padding(.top, 4)
                                     }
                                     if !contentWarningIsEmpty {
-                                        ForEach(Array(contentWarnings.enumerated()), id: \.offset) { _, contentWarning in
-                                            if !contentWarning.isEmpty {
-                                                RichText(text: contentWarning)
-                                                    .fixedSize(horizontal: false, vertical: true)
-                                                    .if(isDetail) { view in
-                                                        view.textSelection(.enabled)
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            ForEach(Array(contentWarnings.enumerated()), id: \.offset) { _, contentWarning in
+                                                if !contentWarning.isEmpty {
+                                                    RichText(text: contentWarning)
+                                                        .fixedSize(horizontal: false, vertical: true)
+                                                        .if(isDetail) { view in
+                                                            view.textSelection(.enabled)
+                                                        }
                                                     }
                                             }
-                                        }
 
-                                        if !expandContentWarning {
-                                            Button {
-                                                withAnimation {
-                                                    contentWarningExpanded.toggle()
-                                                    if !contentWarningExpanded {
-                                                        textExpanded = false
-                                                        overflowingTextIndexes.removeAll()
+                                            if !expandContentWarning {
+                                                Button {
+                                                    withAnimation {
+                                                        contentWarningExpanded.toggle()
+                                                        if !contentWarningExpanded {
+                                                            textExpanded = false
+                                                            overflowingTextIndexes.removeAll()
+                                                        }
+                                                    }
+                                                } label: {
+                                                    if contentWarningExpanded {
+                                                        Text("mastodon_item_show_less", bundle: FlareAppleUILocalization.bundle)
+                                                    } else {
+                                                        Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
                                                     }
                                                 }
-                                            } label: {
-                                                if contentWarningExpanded {
-                                                    Text("mastodon_item_show_less", bundle: FlareAppleUILocalization.bundle)
-                                                } else {
-                                                    Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
-                                                }
+                                                .backport
+                                                .glassProminentButtonStyle()
                                             }
-                                            .backport
-                                            .glassProminentButtonStyle()
                                         }
+                                        .padding(.vertical, 4)
                                     }
 
                                     if contentWarningExpanded || expandContentWarning || contentWarningIsEmpty {
-                                        ForEach(Array(contents.enumerated()), id: \.offset) { index, content in
-                                            if !content.isEmpty {
-                                                CollapsibleRichText(
-                                                    text: content,
-                                                    lineLimit: contentLineLimit,
-                                                    isExpanded: textExpanded,
-                                                    isTextSelectionEnabled: isDetail
-                                                ) { overflows in
-                                                    if overflows {
-                                                        overflowingTextIndexes.insert(index)
-                                                    } else {
-                                                        overflowingTextIndexes.remove(index)
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            ForEach(Array(contents.enumerated()), id: \.offset) { index, content in
+                                                if !content.isEmpty {
+                                                    CollapsibleRichText(
+                                                        text: content,
+                                                        lineLimit: contentLineLimit,
+                                                        isExpanded: textExpanded,
+                                                        isTextSelectionEnabled: isDetail
+                                                    ) { overflows in
+                                                        if overflows {
+                                                            overflowingTextIndexes.insert(index)
+                                                        } else {
+                                                            overflowingTextIndexes.remove(index)
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                        if !overflowingTextIndexes.isEmpty, canExpandLineLimitedContent {
-                                            Button {
-                                                withAnimation {
-                                                    textExpanded = true
+                                            if !overflowingTextIndexes.isEmpty, canExpandLineLimitedContent {
+                                                Button {
+                                                    withAnimation {
+                                                        textExpanded = true
+                                                    }
+                                                } label: {
+                                                    Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
                                                 }
-                                            } label: {
-                                                Text("mastodon_item_show_more", bundle: FlareAppleUILocalization.bundle)
+                                                .buttonStyle(.borderless)
                                             }
-                                            .buttonStyle(.borderless)
+
+                                            if let poll, showMedia {
+                                                Spacer()
+                                                    .frame(height: 8)
+                                                StatusPollView(data: poll)
+                                            }
                                         }
                                     }
 
@@ -326,10 +340,6 @@ public struct StatusView: View {
                                             content: data.content.original,
                                             contentWarning: data.contentWarning?.original
                                         )
-                                    }
-
-                                    if let poll, showMedia {
-                                        StatusPollView(data: poll)
                                     }
                                 }
                             }
@@ -341,7 +351,7 @@ public struct StatusView: View {
                     }
                     VStack(
                         alignment: .leading,
-                        spacing: 8,
+                        spacing: 0,
                     ) {
                         if hasImages, showMedia {
                             StatusMediaContent(
@@ -377,13 +387,16 @@ public struct StatusView: View {
                                     }
                                 }
                             }
+                            .padding(.top, 8)
                         }
 
                         if let card, showMedia, !hasImages, !hasQuotes, showLinkPreview {
                             if compatLinkPreview {
                                 StatusCompatCardView(data: card, cornerRadius: isQuote ? 12 : 16)
+                                    .padding(.top, 8)
                             } else {
                                 StatusCardView(data: card, cornerRadius: isQuote ? 12 : 16)
+                                    .padding(.top, 8)
                             }
                         }
 
@@ -401,19 +414,25 @@ public struct StatusView: View {
                                 RoundedRectangle(cornerRadius: 16)
                                     .stroke(Color.flareSeparator, lineWidth: 1)
                             )
+                            .padding(.top, 4)
                         }
 
                         if showMedia, !isQuote {
-                            if let sourceChannelName {
-                                HStack {
-                                    Image(fontAwesome: .tv)
-                                    Text(sourceChannelName)
+                            if sourceChannelName != nil || hasEmojiReactions {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    if let sourceChannelName {
+                                        HStack(spacing: 4) {
+                                            Image(fontAwesome: .tv)
+                                            Text(sourceChannelName)
+                                        }
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                    }
+                                    if hasEmojiReactions {
+                                        StatusReactionView(data: emojiReactions, isDetail: isDetail)
+                                    }
                                 }
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                            }
-                            if hasEmojiReactions {
-                                StatusReactionView(data: emojiReactions, isDetail: isDetail)
+                                .padding(.top, 4)
                             }
                         }
 
@@ -421,6 +440,7 @@ public struct StatusView: View {
                             DateTimeText(data: createdAt, fullTime: true)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .padding(.top, 8)
                         }
 
                         if (postActionStyle != .hidden || isDetail) && !forceHideActions {
@@ -429,8 +449,8 @@ public struct StatusView: View {
                                 .font(isDetail ? .body : .callout)
                             #else
                                 .font(isDetail ? .body : .footnote)
-                                .padding(.top, 4)
                             #endif
+                                .padding(.top, 8)
                                 .foregroundStyle(isDetail ? .primary : .secondary)
                         }
                     }
@@ -477,7 +497,7 @@ public struct StatusView: View {
         accountType: AccountType,
         statusKey: MicroBlogKey
     ) -> some View {
-        HStack {
+        HStack(spacing: 4) {
             if let visibility {
                 StatusVisibilityView(data: visibility)
                     .font(.caption)

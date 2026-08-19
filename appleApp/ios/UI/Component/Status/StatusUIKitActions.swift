@@ -517,6 +517,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
     private var iconSize: CGFloat = 0
     private var currentSpacing: CGFloat = 0
     private var horizontalInset: CGFloat = 0
+    private var verticalInset: CGFloat = 0
     private var onTap: (() -> Void)?
 
     override init(frame: CGRect) {
@@ -586,8 +587,9 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.iconSize = iconSize
         self.onTap = onTap
         self.tintColor = tintColor
-        self.currentSpacing = title != nil || minimumTextWidth != nil ? 4 : 0
-        self.horizontalInset = usesExpandedHitArea ? 6 : 0
+        self.currentSpacing = title != nil || minimumTextWidth != nil ? 2 : 0
+        self.horizontalInset = usesExpandedHitArea ? 4 : 0
+        self.verticalInset = usesExpandedHitArea ? 4 : 0
         menu = nil
         showsMenuAsPrimaryAction = false
 
@@ -615,6 +617,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         minimumTextWidth = nil
         minimumIconOnlySize = nil
         horizontalInset = 0
+        verticalInset = 0
     }
 
     @objc private func onTapped() {
@@ -690,7 +693,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         }
         return CGSize(
             width: ceil(max(w, minimumIconOnlySize) + horizontalInset * 2),
-            height: ceil(max(h, minimumIconOnlySize))
+            height: ceil(max(h, minimumIconOnlySize) + verticalInset * 2)
         )
     }
 

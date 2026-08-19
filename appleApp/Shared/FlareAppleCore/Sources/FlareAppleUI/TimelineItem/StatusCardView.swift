@@ -9,7 +9,8 @@ struct StatusCardView: View {
 
     var body: some View {
         VStack(
-            alignment: .leading
+            alignment: .leading,
+            spacing: 0
         ) {
             if let media = data.media {
                 AdaptiveGrid(singleFollowsImageAspect: false) {
@@ -23,7 +24,8 @@ struct StatusCardView: View {
                 .clipped()
             }
             VStack(
-                alignment: .leading
+                alignment: .leading,
+                spacing: 0
             ) {
                 Text(data.title)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -42,12 +44,7 @@ struct StatusCardView: View {
                         .lineLimit(2)
                 }
             }
-            .if(data.media == nil, if: { stack in
-                stack.padding(8)
-            }, else: { stack in
-                stack.padding(.horizontal, 8)
-                    .padding(.bottom, 8)
-            })
+            .padding(8)
         }
         .clipShape(.rect(cornerRadius: cornerRadius))
         .overlay(
@@ -69,7 +66,7 @@ struct StatusCompatCardView: View {
 
     var body: some View {
         HStack(
-            spacing: 8
+            spacing: 0
         ) {
             if let media = data.media {
                 Color.clear
@@ -81,7 +78,8 @@ struct StatusCompatCardView: View {
                     .frame(width: 72, height: 72)
             }
             VStack(
-                alignment: .leading
+                alignment: .leading,
+                spacing: 0
             ) {
                 Text(data.title)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -100,13 +98,7 @@ struct StatusCompatCardView: View {
                         .lineLimit(1)
                 }
             }
-            
-            .if(data.media == nil, if: { stack in
-                stack.padding()
-            }, else: { stack in
-                stack.padding(.vertical)
-                    .padding(.trailing)
-            })
+            .padding(8)
         }
         .clipShape(.rect(cornerRadius: cornerRadius))
         .overlay(

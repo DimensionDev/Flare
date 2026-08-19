@@ -7,9 +7,9 @@ struct UserListView: View {
     let data: UiTimelineV2.UserList
 
     var body: some View {
-        VStack {
+        VStack(spacing: 8) {
             ScrollView(.horizontal) {
-                HStack {
+                HStack(spacing: 8) {
                     ForEach(data.users, id: \.key) { user in
                         UserCompatView(data: user)
                             .padding(8)
@@ -27,7 +27,7 @@ struct UserListView: View {
             }
             .scrollIndicators(.hidden)
             if let status = data.post {
-                VStack {
+                VStack(spacing: 0) {
                     StatusView(data: status, isQuote: true, forceHideActions: true)
                         .padding(8)
                 }

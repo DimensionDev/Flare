@@ -457,8 +457,8 @@ private struct GalleryCommentsPreview: View {
                 ForEach(0..<3, id: \.self) { index in
                     ListCardView(index: index, totalCount: 3) {
                         TimelinePlaceholderView()
-                            .padding(.horizontal)
-                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                     }
                 }
             }
@@ -472,8 +472,8 @@ private struct GalleryCommentsPreview: View {
                         if let item = success.peek(index: Int32(index)) {
                             ListCardView(index: index, totalCount: visible) {
                                 TimelineView(data: item, detailStatusKey: nil)
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
                             }
                             .onAppear {
                                 success.get(index: Int32(index))

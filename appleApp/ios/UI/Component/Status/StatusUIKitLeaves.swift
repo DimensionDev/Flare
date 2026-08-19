@@ -316,7 +316,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
     private func layout(width: CGFloat, assignFrames: Bool) -> CGFloat {
         let rowHeight = preferredSingleLineHeight(width: width)
         let rowWidth = max(width, 1)
-        let edgeSpacing: CGFloat = 8
+        let edgeSpacing: CGFloat = 4
         let nameSpacing: CGFloat = 4
 
         var leadingX: CGFloat = 0
@@ -414,7 +414,7 @@ final class UserCompatUIView: UIStackView {
 
         column.axis = .vertical
         column.alignment = .leading
-        column.spacing = 2
+        column.spacing = 0
         column.setContentHuggingPriority(.required, for: .horizontal)
         column.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         column.addArrangedSubview(name)
@@ -607,7 +607,7 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             }
             x += size.width
             if index < items.count - 1 {
-                x += 8
+                x += 4
             }
         }
         return height
@@ -617,7 +617,7 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         let items = visibleItems()
         let width = items.reduce(CGFloat(0)) { partial, item in
             partial + item.size.width
-        } + CGFloat(max(items.count - 1, 0)) * 8
+        } + CGFloat(max(items.count - 1, 0)) * 4
         return CGSize(width: ceil(width), height: preferredSingleLineHeight())
     }
 

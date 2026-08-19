@@ -18,7 +18,7 @@ public struct UserCompatView<TrailingContent: View>: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 8) {
             AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                 .frame(width: 44, height: 44)
                 .if(onClicked != nil) { view in
@@ -28,7 +28,8 @@ public struct UserCompatView<TrailingContent: View>: View {
                         }
                 }
             VStack(
-                alignment: .leading
+                alignment: .leading,
+                spacing: 0
             ) {
                 RichText(text: data.name)
                 Text(data.handle.canonical)
@@ -60,13 +61,14 @@ public struct UserLoadingView: View {
     public init() {}
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 8) {
             Rectangle()
                 .fill(.placeholder)
                 .frame(width: 44, height: 44)
                 .clipShape(.circle)
             VStack(
-                alignment: .leading
+                alignment: .leading,
+                spacing: 0
             ) {
                 Text("#loading", bundle: FlareAppleUILocalization.bundle)
                 Text("#loading", bundle: FlareAppleUILocalization.bundle)
@@ -88,12 +90,13 @@ public struct UserErrorView: View {
 
     public var body: some View {
         if let expiredError = error as? LoginExpiredException {
-            HStack {
+            HStack(spacing: 8) {
                 Image(systemName: "person.badge.shield.exclamationmark")
                     .scaledToFit()
                     .frame(width: 44, height: 44)
                 VStack(
-                    alignment: .leading
+                    alignment: .leading,
+                    spacing: 0
                 ) {
                     Text("notification_login_expired", bundle: FlareAppleUILocalization.bundle)
                     Text("error_login_expired \(expiredError.accountKey)", bundle: FlareAppleUILocalization.bundle)
@@ -103,12 +106,13 @@ public struct UserErrorView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         } else {
-            HStack {
+            HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle")
                     .scaledToFit()
                     .frame(width: 44, height: 44)
                 VStack(
-                    alignment: .leading
+                    alignment: .leading,
+                    spacing: 0
                 ) {
                     Text("error", bundle: FlareAppleUILocalization.bundle)
                     Text(error.message ?? "Unknown error")

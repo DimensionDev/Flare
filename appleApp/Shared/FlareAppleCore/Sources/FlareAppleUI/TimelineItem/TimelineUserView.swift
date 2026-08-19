@@ -13,13 +13,13 @@ public struct TimelineUserView: View {
     }
 
     public var body: some View {
-        VStack {
+        VStack(spacing: 8) {
             UserCompatView(data: data.value)
                 .onTapGesture {
                     data.value.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                 }
             if !data.button.isEmpty {
-                HStack {
+                HStack(spacing: 8) {
                     ForEach(Array(data.button.enumerated()), id: \.offset) { _, button in
                         StatusActionItemView(data: button, useText: true, isFixedWidth: false, fontSize: fontSize, showNumbers: showNumbers, openURL: openURL)
                     }

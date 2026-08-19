@@ -12,7 +12,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import okio.Buffer
-import okio.ByteString.Companion.encodeUtf8
 import okio.FileSystem
 import okio.Path
 import okio.buffer
@@ -179,11 +178,8 @@ public class PluginStateStore private constructor(
         index.plugins.forEach { installed ->
             val packagePath = paths.packagePath(installed.packageHash)
             val iconPath = paths.iconPath(installed.packageHash)
-            val stableIconPath = paths.stableIconPath(installed.pluginId, installed.packageHash)
             val packageValid = fileSystem.metadataOrNull(packagePath)?.let { it.isRegularFile && it.size == installed.packageSize } == true
             val iconValid = fileSystem.metadataOrNull(iconPath)?.let { it.isRegularFile && it.size == installed.iconSize } == true
-            val stableIconValid =
-                fileSystem.metadataOrNull(stableIconPath)?.let { it.isRegularFile && it.size == installed.iconSize } == true
             if (!packageValid || !iconValid) {
                 issues +=
                     PluginStateIssueV1(
@@ -196,7 +192,7 @@ public class PluginStateStore private constructor(
                     RunningPluginV1(
                         installed = installed,
                         packagePath = packagePath.toString(),
-                        iconPath = (if (stableIconValid) stableIconPath else iconPath).toString(),
+                        iconPath = iconPath.toString(),
                     )
             }
         }
@@ -257,12 +253,6 @@ internal data class PluginStoragePaths(
     fun packagePath(hash: String): Path = packages / "$hash$PACKAGE_SUFFIX"
 
     fun iconPath(hash: String): Path = icons / "$hash$ICON_SUFFIX"
-
-    // Persisted account rows may keep this versioned icon after the package is uninstalled.
-    fun stableIconPath(
-        pluginId: String,
-        packageHash: String,
-    ): Path = icons / "platform-${pluginId.encodeUtf8().sha256().hex()}-$packageHash$ICON_SUFFIX"
 }
 
 private fun validateIndex(index: PluginStateIndexV1) {

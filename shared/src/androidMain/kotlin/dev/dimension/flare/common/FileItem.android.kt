@@ -3,6 +3,7 @@ package dev.dimension.flare.common
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
 import okio.source
 import java.io.File
 import okio.Source as OkioSource
@@ -21,6 +22,9 @@ public actual class FileItem {
             if (it.moveToFirst()) it.getString(0) else null
         } ?: uri.lastPathSegment
         this.mimeType = context.contentResolver.getType(uri)
+            ?: name?.substringAfterLast('.', missingDelimiterValue = "")
+                ?.lowercase()?.takeIf(String::isNotEmpty)
+                ?.let(MimeTypeMap.getSingleton()::getMimeTypeFromExtension)
         this.type = resolveType(this.mimeType, uri)
         this.source = Source.UriSource(context, uri)
     }

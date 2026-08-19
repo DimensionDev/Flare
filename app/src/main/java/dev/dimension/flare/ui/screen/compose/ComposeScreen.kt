@@ -1234,7 +1234,8 @@ private fun composePresenter(
                 media
             }
 
-    LaunchedEffect(media.medias.size) { state.setMediaSize(media.medias.size) }
+    val mimeTypes = media.medias.map { item -> FileItem(context, item.uri).mimeType.orEmpty() }
+    LaunchedEffect(mimeTypes) { state.setMediaMimeTypes(mimeTypes) }
 
     val contentWarningState =
         state.composeConfig

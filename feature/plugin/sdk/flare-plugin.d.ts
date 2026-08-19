@@ -58,13 +58,13 @@ interface ProfileServiceV1 {
 interface PostServiceV1 {
   detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<PostV1>;
   context(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
-  delete(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
-  mutate(request: MutationRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
+  delete(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
+  mutate(request: MutationRequestV1, context: PluginInvocationContextV1): MaybePromise<PostMutationResultV1>;
 }
 
 interface RelationServiceV1 {
   state(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<RelationV1>;
-  mutate(request: MutationRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
+  mutate(request: MutationRequestV1, context: PluginInvocationContextV1): MaybePromise<RelationMutationResultV1>;
 }
 interface NotificationServiceV1 {
   page(request: NotificationPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<NotificationV1>>;
@@ -75,20 +75,20 @@ interface ListServiceV1 {
   detail(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   create(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
   update(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<SocialListV1>;
-  delete(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
+  delete(request: ListMutationRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
   timeline(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<PostV1>>;
   members(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<ProfileV1>>;
   memberships(request: EntityPageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<SocialListV1>>;
   addMember(request: ListMemberRequestV1, context: PluginInvocationContextV1): MaybePromise<ProfileV1>;
-  removeMember(request: ListMemberRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
+  removeMember(request: ListMemberRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
 }
 interface DirectMessageServiceV1 {
   rooms(request: PageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<DirectMessageRoomV1>>;
   room(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<DirectMessageRoomV1>;
   messages(request: DirectMessagePageRequestV1, context: PluginInvocationContextV1): MaybePromise<PageV1<DirectMessageV1>>;
   send(request: DirectMessageSendRequestV1, context: PluginInvocationContextV1): MaybePromise<DirectMessageV1>;
-  delete(request: DirectMessageDeleteRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
-  leave(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<MutationResultV1>;
+  delete(request: DirectMessageDeleteRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
+  leave(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<DeleteResultV1>;
   create(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<DirectMessageRoomV1>;
   badge(request: EmptyRequestV1, context: PluginInvocationContextV1): MaybePromise<CountResultV1>;
   canSend(request: EntityRequestV1, context: PluginInvocationContextV1): MaybePromise<BooleanResultV1>;
@@ -257,6 +257,9 @@ type MutationResultV1 =
   | { type: "deleted" }
   | { type: "invalidate"; keys: EntityKeyV1[] }
   | { type: "noChange" };
+type DeleteResultV1 = Extract<MutationResultV1, { type: "deleted" | "noChange" }>;
+type PostMutationResultV1 = Extract<MutationResultV1, { type: "updatedPost" | "deleted" | "invalidate" | "noChange" }>;
+type RelationMutationResultV1 = Extract<MutationResultV1, { type: "updatedRelation" | "noChange" }>;
 
 interface RelationV1 {
   profileKey: EntityKeyV1;

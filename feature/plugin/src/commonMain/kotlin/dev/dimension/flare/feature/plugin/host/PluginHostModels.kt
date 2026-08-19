@@ -184,6 +184,7 @@ public class PluginInvocationContextV1 private constructor(
 public enum class PluginCallTimeoutV1(
     public val millis: Long,
 ) {
+    Detector(10_000),
     Normal(30_000),
     Extended(120_000),
 }

@@ -9,7 +9,7 @@
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
 	import HomeTimelineTabPanel from '$lib/components/home/HomeTimelineTabPanel.svelte';
-	import { localizedUiString } from '$lib/i18n/uiStrings';
+	import { localizedUiText } from '$lib/i18n/uiStrings';
 	import { m } from '$lib/paraglide/messages.js';
 	import TimelineLoadingPlaceholderList from '$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte';
 	import { useRetainedPresenter } from '$lib/presenter/presenterStore.svelte';
@@ -102,8 +102,7 @@
 	}
 
 	function tabTitle(title: UiText): string {
-		if (title.type === 'Raw') return title.string;
-		return localizedUiString(title.string);
+		return localizedUiText(title);
 	}
 
 	function tabIconName(tab: UiTimelineTabItem): string {

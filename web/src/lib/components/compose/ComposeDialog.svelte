@@ -127,7 +127,7 @@
 	$effect(() => {
 		compose.setText(text);
 		compose.setSpoilerText(contentWarningEnabled ? spoilerText.trim() || null : null);
-		compose.setMediaSize(selectedMedia.length);
+		compose.setMediaMimeTypesJson(JSON.stringify(selectedMedia.map((item) => item.file.type)));
 	});
 
 	$effect(() => {

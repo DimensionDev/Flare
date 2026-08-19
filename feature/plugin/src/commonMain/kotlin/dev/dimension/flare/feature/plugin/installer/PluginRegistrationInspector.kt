@@ -13,7 +13,7 @@ internal class PluginRegistrationInspector(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
     suspend fun inspect(source: String): PluginMethodTableV1 {
-        require(!DYNAMIC_IMPORT.containsMatchIn(source)) { "Dynamic import is not supported" }
+        require(!containsDynamicImport(source)) { "Dynamic import is not supported" }
         val quickJs = QuickJs.create(dispatcher)
         try {
             quickJs.memoryLimit = VALIDATION_MEMORY_BYTES
@@ -33,7 +33,6 @@ internal class PluginRegistrationInspector(
 private const val VALIDATION_MEMORY_BYTES = 16L * 1024 * 1024
 private const val VALIDATION_STACK_BYTES = 256L * 1024
 private const val VALIDATION_TIMEOUT_MILLIS = 2_000L
-private val DYNAMIC_IMPORT = Regex("\\bimport\\s*\\(")
 
 private val registrationPrelude =
     """

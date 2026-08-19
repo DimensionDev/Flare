@@ -308,8 +308,8 @@ public class ComposePresenter(
         MutableStateFlow("")
     }
 
-    private val mediaSizeFlow by lazy {
-        MutableStateFlow(0)
+    private val mediaMimeTypesFlow by lazy {
+        MutableStateFlow<List<String>>(emptyList())
     }
 
     private val spoilerTextFlow = MutableStateFlow<String?>(null)
@@ -325,16 +325,16 @@ public class ComposePresenter(
     private val composeContentValidFlow by lazy {
         combine(
             textFlow,
-            mediaSizeFlow,
+            mediaMimeTypesFlow,
             composeConfigFlow,
             activeStatusFlow,
         ) {
             text,
-            mediaSize,
+            mediaMimeTypes,
             composeConfig,
             composeStatus,
             ->
-            isComposeContentValid(text, mediaSize, composeConfig, composeStatus)
+            isComposeContentValid(text, mediaMimeTypes, composeConfig, composeStatus)
         }
     }
 
@@ -781,7 +781,15 @@ public class ComposePresenter(
             }
 
             override fun setMediaSize(value: Int) {
-                mediaSizeFlow.value = value
+                mediaMimeTypesFlow.value = List(value) { "" }
+            }
+
+            override fun setMediaMimeTypes(value: List<String>) {
+                mediaMimeTypesFlow.value = value
+            }
+
+            override fun setMediaMimeTypesJson(value: String) {
+                mediaMimeTypesFlow.value = Json.decodeFromString<List<String>>(value)
             }
 
             override fun loadDraft(groupId: String) {
@@ -836,7 +844,7 @@ public class ComposePresenter(
             selectedAccountsKeyFlow.value =
                 draft.accounts.map { it.account.accountKey }.toImmutableList()
             textFlow.value = draft.data.content
-            mediaSizeFlow.value = draft.medias.size
+            mediaMimeTypesFlow.value = List(draft.medias.size) { "" }
             loadedDraftStateFlow.value = UiState.Success(draft)
         }.onFailure {
             loadedDraftStateFlow.value = UiState.Error(it)
@@ -965,15 +973,17 @@ internal fun CoroutineScope.launchComposeWithAccounts(
 
 internal fun isComposeContentValid(
     text: String,
-    mediaSize: Int,
+    mediaMimeTypes: List<String>,
     composeConfig: ComposeConfig,
     composeStatus: ComposeStatus?,
 ): Boolean {
     val media = composeConfig.media
-    val minimumMediaCount = if (composeStatus == null) media?.minCountForNew ?: 0 else 0
+    val mediaSize = mediaMimeTypes.size
+    val minimumMediaCount = if (composeStatus !is ComposeStatus.Reply) media?.minCountForNew ?: 0 else 0
     val mediaCountAllowed = media == null || mediaSize in minimumMediaCount..media.maxCount
+    val mediaTypesAllowed = media == null || mediaMimeTypes.all(media::supportsMimeType)
     val contentPresent = text.isNotBlank() || ((media?.allowMediaOnly == true) && (mediaSize > 0))
-    return contentPresent && mediaCountAllowed
+    return contentPresent && mediaCountAllowed && mediaTypesAllowed
 }
 
 internal fun observeComposeStatusTarget(
@@ -1108,6 +1118,11 @@ public abstract class ComposeState(
     public abstract fun setSpoilerText(value: String?)
 
     public abstract fun setMediaSize(value: Int)
+
+    @WebIgnore
+    public abstract fun setMediaMimeTypes(value: List<String>)
+
+    public abstract fun setMediaMimeTypesJson(value: String)
 
     public abstract fun loadDraft(groupId: String)
 

@@ -264,7 +264,7 @@ private class PluginPlatformSpecV1(
                         request = DetectorRequestV1(origin),
                         requestSerializer = DetectorRequestV1.serializer(),
                         responseSerializer = DetectorResultV1.serializer(),
-                        timeout = PluginCallTimeoutV1.Normal,
+                        timeout = PluginCallTimeoutV1.Detector,
                         validate = DetectorResultV1::requireValid,
                     )
                 if (result.match == DetectorMatchV1.None) return null

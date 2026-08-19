@@ -18,6 +18,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
@@ -230,6 +232,24 @@ class LoginPlatformRegistryTest {
         }
 
     @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun detectionHasAGlobalDeadline() =
+        runTest {
+            val registry =
+                testRegistry(
+                    testProvider(
+                        platformId = "Stalled",
+                        detectorDelayMillis = 31_000,
+                    ),
+                )
+
+            assertFailsWith<IllegalArgumentException> {
+                registry.detectPlatformId("example.social")
+            }
+            assertEquals(10_000, currentTime)
+        }
+
+    @Test
     fun runtimeDataDerivesProvidersFromPlatformSpecs() {
         val mastodon = testProvider("Mastodon")
         val mastodonSpec = testLoginPlatformSpec(mastodon)
@@ -249,6 +269,7 @@ class LoginPlatformRegistryTest {
         detectedSoftware: String? = null,
         detectorFailure: Throwable? = null,
         detectorBlock: (suspend (String) -> NodeDetection?)? = null,
+        detectorDelayMillis: Long = 0,
     ): LoginPlatformProvider =
         object : LoginPlatformProvider {
             override val platformId: String = platformId
@@ -263,6 +284,7 @@ class LoginPlatformRegistryTest {
 
                     override suspend fun detect(host: String): NodeDetection? {
                         detectorBlock?.let { return it(host) }
+                        delay(detectorDelayMillis)
                         detectorFailure?.let { throw it }
                         return detectedSoftware?.let {
                             NodeDetection(

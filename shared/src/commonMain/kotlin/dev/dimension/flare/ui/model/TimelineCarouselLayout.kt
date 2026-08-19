@@ -46,6 +46,7 @@ public object TimelineCarouselLayout {
     public const val WIDE_HEIGHT_WIDTH_MULTIPLIER: Float = 0.68f
     public const val NEXT_ITEM_VISIBLE_FRACTION: Float = 0.67f
     public const val MAX_ITEM_WIDTH_MULTIPLIER: Float = 0.8f
+    public const val MAX_HEIGHT_WIDTH_MULTIPLIER: Float = 21f / 9f
 
     public fun spec(
         mediaCount: Int,
@@ -76,7 +77,11 @@ public object TimelineCarouselLayout {
             } else {
                 NEXT_ITEM_VISIBLE_FRACTION
             }
-        val denominator = firstAspectRatio + secondVisibleFraction * secondAspectRatio
+        val denominator =
+            max(
+                firstAspectRatio + secondVisibleFraction * secondAspectRatio,
+                1f / MAX_HEIGHT_WIDTH_MULTIPLIER,
+            )
         return TimelineCarouselLayoutSpec(
             widthMultiplier = 1f / denominator,
             spacingMultiplier = -1f / denominator,

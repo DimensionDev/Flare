@@ -57,6 +57,20 @@ class TimelineCarouselLayoutTest {
     }
 
     @Test
+    fun veryTallItemsUseTheSingleMediaHeightLimit() {
+        val spec = TimelineCarouselLayout.spec(2, 0.1f, 0.1f)
+        val maxHeightWidthMultiplier = 21f / 9f
+
+        assertEquals(maxHeightWidthMultiplier, spec.widthMultiplier, absoluteTolerance = 0.001f)
+        assertEquals(-maxHeightWidthMultiplier, spec.spacingMultiplier, absoluteTolerance = 0.001f)
+        assertEquals(
+            (566f - 4f) * maxHeightWidthMultiplier,
+            spec.height(viewportWidth = 566f, horizontalInsets = 0f, itemSpacing = 4f),
+            absoluteTolerance = 0.001f,
+        )
+    }
+
+    @Test
     fun horizontalInsetsDoNotIncreaseContentHeight() {
         val spec = TimelineCarouselLayout.spec(2, 1f, 1f)
 

@@ -31,7 +31,7 @@ struct StatusReactionView: View {
                     .background(
                         item.me
                             ? Color.accentColor.opacity(0.18)
-                            : Color.flareSecondarySystemGroupedBackground,
+                            : Color.flareTertiarySystemGroupedBackground,
                         in: Capsule()
                     )
                     .overlay {

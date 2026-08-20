@@ -39,6 +39,14 @@ public extension Color {
         #endif
     }
 
+    static var flareTertiarySystemGroupedBackground: Color {
+        #if os(iOS)
+        Color(.tertiarySystemGroupedBackground)
+        #elseif os(macOS)
+        Color(nsColor: .alternatingContentBackgroundColors[1])
+        #endif
+    }
+
     static var flareSeparator: Color {
         #if os(iOS)
         Color(.separator)

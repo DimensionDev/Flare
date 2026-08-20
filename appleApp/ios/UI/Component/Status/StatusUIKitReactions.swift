@@ -408,7 +408,7 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
         countLabel.textColor = .label
         backgroundColor = isMyReaction
             ? tintColor.withAlphaComponent(0.18)
-            : .secondarySystemGroupedBackground
+            : .tertiarySystemGroupedBackground
         layer.borderWidth = isMyReaction ? Self.borderWidth : 0
         layer.borderColor = isMyReaction ? tintColor.cgColor : UIColor.clear.cgColor
     }

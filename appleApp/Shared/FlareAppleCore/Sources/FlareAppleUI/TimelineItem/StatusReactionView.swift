@@ -72,7 +72,19 @@ private struct ReactionImage: View {
     var body: some View {
         Group {
             if let image {
-                ReactionPlatformImage(image: image)
+                if image.kf.frameSource == nil {
+                    #if os(macOS)
+                    Image(nsImage: image)
+                        .resizable()
+                        .scaledToFit()
+                    #else
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                    #endif
+                } else {
+                    ReactionPlatformImage(image: image)
+                }
             } else {
                 Color.clear
             }

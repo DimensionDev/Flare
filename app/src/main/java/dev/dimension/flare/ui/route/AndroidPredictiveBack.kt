@@ -52,7 +52,6 @@ import kotlin.reflect.KClass
 import androidx.compose.ui.geometry.lerp as lerpRect
 
 private const val PREDICTIVE_BACK_POST_COMMIT_DURATION_MILLIS = 450
-private const val PREDICTIVE_BACK_MIN_COMMIT_PROGRESS = 0.02f
 private const val PREDICTIVE_BACK_TARGET_SCALE = 0.9f
 private const val PREDICTIVE_BACK_SPRING_STIFFNESS = 200f
 private const val PREDICTIVE_BACK_SPRING_DAMPING_RATIO = 0.75f
@@ -246,17 +245,11 @@ internal class AndroidPredictiveBackMotionState(
      * Pops immediately so Navigation3 settles the predictive transition in the completed
      * direction, while this state continues to own the native-style post-commit motion.
      *
-     * Returning false lets the caller perform a regular pop for a non-interactive or effectively
-     * zero-progress back event.
+     * Returning false lets the caller perform a regular pop for a non-interactive back event.
      */
     internal fun commit(performPop: () -> Boolean): Boolean {
         val gesture = phase as? Phase.Gesture ?: return false
         val release = gesture.motion
-        if (release.progress < PREDICTIVE_BACK_MIN_COMMIT_PROGRESS) {
-            motionJob?.cancel()
-            phase = Phase.Idle
-            return false
-        }
 
         motionJob?.cancel()
         // AnimatedContent captures its spec for the active segment, so this duration must stay

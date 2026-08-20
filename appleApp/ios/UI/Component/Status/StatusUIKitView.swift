@@ -352,6 +352,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     private func resolvedReactionView() -> StatusReactionUIView {
         if let reactionViewStorage { return reactionViewStorage }
         let view = StatusReactionUIView()
+        view.onLocalHeightInvalidated = { [weak self] in
+            self?.notifyLocalHeightInvalidated()
+        }
         reactionViewStorage = view
         return view
     }
@@ -402,6 +405,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         let newStatusKey = String(describing: data.statusKey)
         if boundStatusKey != newStatusKey {
             expand = false
+            reactionViewStorage?.resetExpansion()
             boundStatusKey = newStatusKey
         }
         let signature = ConfigureSignature(
@@ -460,6 +464,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         mediaViewStorage?.prepareForPoolRemoval()
         actionsViewStorage?.prepareForPoolRemoval()
         translateViewStorage?.prepareForPoolRemoval()
+        reactionViewStorage?.resetExpansion()
 
         // Remove all managed children
         for view in contentColumnChildren { view.removeFromSuperview() }

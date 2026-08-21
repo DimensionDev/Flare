@@ -63,6 +63,8 @@ public enum class UiStrings {
     Highlights,
     ForYou,
     Popular,
+    Reposts,
+    Articles,
 }
 
 public fun UiStrings.asText(): UiText = UiText.Localized(this)

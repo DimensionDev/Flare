@@ -131,6 +131,14 @@ struct ProfileScreen: View {
                     let selectedTabItem = tabs[selectedTab]
                     ProfileTimelineWaterFallView(presenter: profileTimelinePresenter(for: selectedTabItem))
                         .id(profileTimelineID(for: selectedTabItem))
+                } loadingContent: {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ProfileTabsLoadingPlaceholder()
+                            ProfileTimelineLoadingPlaceholder()
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
             }
         }
@@ -192,6 +200,14 @@ struct ProfileScreen: View {
                         }
                     }
                 )
+            } loadingContent: {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ProfileTabsLoadingPlaceholder()
+                        ProfileTimelineLoadingPlaceholder()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .detectScrolling()
             .ignoresSafeArea(edges: .vertical)

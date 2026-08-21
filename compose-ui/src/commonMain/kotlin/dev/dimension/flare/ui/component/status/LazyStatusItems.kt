@@ -117,19 +117,7 @@ public fun LazyStaggeredGridScope.status(
             }
         }
         onLoading {
-            items(
-                10,
-            ) {
-                AdaptiveCard(
-//                    modifier = Modifier.animateItem(),
-                    index = it,
-                    totalCount = 10,
-                    respectTimelineMode = true,
-                    content = {
-                        OnLoading()
-                    },
-                )
-            }
+            statusLoadingPlaceholders()
         }
         onEmpty {
             item(
@@ -147,6 +135,20 @@ public fun LazyStaggeredGridScope.status(
             }
         }
     }
+
+public fun LazyStaggeredGridScope.statusLoadingPlaceholders() {
+    val placeholderCount = 10
+    items(placeholderCount) { index ->
+        AdaptiveCard(
+            index = index,
+            totalCount = placeholderCount,
+            respectTimelineMode = true,
+            content = {
+                OnLoading()
+            },
+        )
+    }
+}
 
 public fun <T : Any> LazyStaggeredGridScope.appendStateUI(success: PagingState.Success<T>) {
     success.appendState

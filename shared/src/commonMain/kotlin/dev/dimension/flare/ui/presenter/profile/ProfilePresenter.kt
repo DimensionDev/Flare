@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("profile")
@@ -134,7 +135,7 @@ public class ProfilePresenter(
     }
 
     private val tabsFlow by lazy {
-        serviceFlow.map { service ->
+        serviceFlow.mapLatest { service ->
             val actualUserKey =
                 userKey
                     ?: if (service is AuthenticatedMicroblogDataSource) {

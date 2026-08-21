@@ -156,7 +156,7 @@ internal class GuestMastodonDataSource(
             userKey = userKey,
         )
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab(
                 name = UiStrings.Posts,

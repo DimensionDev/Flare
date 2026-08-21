@@ -477,7 +477,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         )
-        return ceil(size.height) + heightPadding
+        return size.height + heightPadding
     }
 
     private func sectionIdentifier(at index: Int) -> Int? {
@@ -1884,6 +1884,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         if itemID.hasPrefix(Self.accessoryPrefix),
            let accessory = accessoryItemMap[itemID] {
+            // Match the fractional self-sizing used by the compositional layout
+            // so switching to the waterfall layout does not move profile tabs.
             let height = max(
                 measuredCompressedCardHeight(accessory.view, width: width, heightPadding: 0),
                 1
@@ -1909,7 +1911,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             sizingPlaceholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
             sizingPlaceholderCard.isMultipleColumn = true
             sizingPlaceholderCard.configure(index: 0, totalCount: totalCount)
-            let height = max(measuredCompressedCardHeight(sizingPlaceholderCard, width: width), 120)
+            let height = max(ceil(measuredCompressedCardHeight(sizingPlaceholderCard, width: width)), 120)
             heightCache[key] = height
             return CGSize(width: width, height: height)
         }
@@ -1957,7 +1959,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             if let contentHeight = sizingTimelineView.estimatedHeightForFitting(width: contentWidth) {
                 measuredHeight = ceil(contentHeight + 16 + 12) + 1
             } else {
-                measuredHeight = measuredCompressedCardHeight(sizingTimelineCard, width: width)
+                measuredHeight = ceil(measuredCompressedCardHeight(sizingTimelineCard, width: width))
             }
             let height = max(measuredHeight, 120)
             heightCache[key] = height

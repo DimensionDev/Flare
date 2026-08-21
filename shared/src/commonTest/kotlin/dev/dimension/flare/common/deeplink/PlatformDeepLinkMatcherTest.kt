@@ -404,6 +404,29 @@ class PlatformDeepLinkMatcherTest {
     }
 
     @Test
+    fun twitterPostWithPlaceholderHandleMatches() {
+        val account =
+            UiAccount(
+                accountKey = MicroBlogKey(id = "4", host = xqtHost),
+                platformId = "xQt",
+            )
+        val matches =
+            PlatformDeepLinkMatcher.matches(
+                "https://twitter.com/_/status/2090282338471346648",
+                deepLinkMapping(account),
+            )
+
+        assertMatch(
+            DeeplinkRoute.Status.Detail(
+                accountType = AccountType.Specific(account.accountKey),
+                statusKey = MicroBlogKey("2090282338471346648", xqtHost),
+            ),
+            "twitter.com",
+            matches[account],
+        )
+    }
+
+    @Test
     fun profileWithFullHandleUsesHandleHost() {
         val account =
             UiAccount(

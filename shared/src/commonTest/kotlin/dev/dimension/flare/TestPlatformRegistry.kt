@@ -279,9 +279,9 @@ private data object TestXqtPlatformSpec : TestDeepLinkPlatformSpec(
         val post =
             listOf(
                 "https://$xqtHost/{handle}/status/{id}",
-                "https://$xqtOldHost/{handle}/",
+                "https://$xqtOldHost/{handle}/status/{id}",
                 "https://www.$xqtHost/{handle}/status/{id}",
-                "https://www.$xqtOldHost/{handle}/",
+                "https://www.$xqtOldHost/{handle}/status/{id}",
             )
         val media =
             listOf(

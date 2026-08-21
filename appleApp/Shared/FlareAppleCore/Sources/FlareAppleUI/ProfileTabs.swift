@@ -23,6 +23,62 @@ public struct ProfileTabPicker: View {
     }
 }
 
+public struct ProfileTabBar: View {
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.isMultipleColumn) private var isMultipleColumn
+    private let tabs: [ProfileState.Tab]
+    @Binding private var selectedTab: Int
+    @Namespace private var selectedTabIndicatorNamespace
+
+    public init(tabs: [ProfileState.Tab], selectedTab: Binding<Int>) {
+        self.tabs = tabs
+        self._selectedTab = selectedTab
+    }
+
+    public var body: some View {
+        ZStack(alignment: .bottom) {
+            if timelineDisplayMode == .plain && !isMultipleColumn {
+                Divider()
+            }
+
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(0..<tabs.count, id: \.self) { index in
+                        Button {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+                                selectedTab = index
+                            }
+                        } label: {
+                            Text(profileTabTitle(for: tabs[index]))
+                                .foregroundStyle(
+                                    selectedTab == index ? Color.primary : Color.secondary
+                                )
+                                .padding(.vertical, 12)
+                                .overlay(alignment: .bottom) {
+                                    if selectedTab == index {
+                                        Capsule()
+                                            .fill(Color.accentColor)
+                                            .frame(height: 3)
+                                            .matchedGeometryEffect(
+                                                id: "selectedTabIndicator",
+                                                in: selectedTabIndicatorNamespace
+                                            )
+                                    }
+                                }
+                                .padding(.horizontal, 8)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(selectedTab == index ? [.isSelected] : [])
+                    }
+                }
+                .padding(.horizontal, 8)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
 public struct ProfileTabsLoadingPlaceholder: View {
     public init() {}
 

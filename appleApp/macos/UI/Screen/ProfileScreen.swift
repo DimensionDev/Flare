@@ -140,15 +140,9 @@ struct ProfileScreen: View {
         case .success(let tabState):
             let tabs = tabState.data.cast(ProfileState.Tab.self)
             if tabs.count > 1 {
-                ProfileTabPicker(tabs: tabs, selectedTab: $selectedTab)
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
+                ProfileTabBar(tabs: tabs, selectedTab: $selectedTab)
                     .frame(maxWidth: .infinity)
                     .background(.bar)
-                    .overlay(alignment: .bottom) {
-                        Divider()
-                    }
             }
         case .error:
             EmptyView()

@@ -425,7 +425,6 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             if tabs.count > 1 {
                 let newPickerSignature = ProfilePickerAccessorySignature(
                     tabs: tabs,
-                    selectedTab: selectedTab.wrappedValue,
                     timelineAppearance: timelineAppearance,
                     horizontalSizeClass: horizontalSizeClass
                 )
@@ -434,9 +433,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                     changed = true
                     pickerView.update(
                         AnyView(
-                            ProfileTabPicker(tabs: tabs, selectedTab: selectedTab)
-                                .pickerStyle(.segmented)
-                                .padding()
+                            ProfileTabBar(tabs: tabs, selectedTab: selectedTab)
                                 .environment(\.timelineAppearance, timelineAppearance)
                                 .environment(\.openURL, openURL)
                                 .environment(\.horizontalSizeClass, horizontalSizeClass)
@@ -619,18 +616,15 @@ private struct ProfileHeaderAccessorySignature: Equatable {
 
 private struct ProfilePickerAccessorySignature: Equatable {
     let tabs: [String]
-    let selectedTab: Int
     let appearance: TimelineUIKitAppearance
     let horizontalSizeClass: UserInterfaceSizeClass?
 
     init(
         tabs: [ProfileState.Tab],
-        selectedTab: Int,
         timelineAppearance: TimelineAppearance,
         horizontalSizeClass: UserInterfaceSizeClass?
     ) {
         self.tabs = tabs.map(profileTimelineID(for:))
-        self.selectedTab = selectedTab
         appearance = TimelineUIKitAppearance(timeline: timelineAppearance)
         self.horizontalSizeClass = horizontalSizeClass
     }

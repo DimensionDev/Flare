@@ -129,8 +129,14 @@ struct ProfileScreen: View {
                 StateView(state: presenter.state.tabs) { tabsArray in
                     let tabs = tabsArray.cast(ProfileState.Tab.self)
                     let selectedTabItem = tabs[selectedTab]
-                    ProfileTimelineWaterFallView(presenter: profileTimelinePresenter(for: selectedTabItem))
-                        .id(profileTimelineID(for: selectedTabItem))
+                    switch onEnum(of: selectedTabItem) {
+                    case .timeline(let tab):
+                        ProfileTimelineWaterFallView(presenter: tab.presenter)
+                            .id(profileTimelineID(for: selectedTabItem))
+                    case .media(let tab):
+                        ProfileMediaWaterFallView(presenter: tab.presenter)
+                            .id(profileTimelineID(for: selectedTabItem))
+                    }
                 } loadingContent: {
                     ScrollView {
                         LazyVStack(spacing: 0) {
@@ -320,7 +326,6 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
         controller.networkKind = networkKind
-        controller.columnCount = 1
         controller.extendsContentUnderTopBars = true
         controller.suppressInitialRefreshIndicator = true
         let accessoriesChanged = context.coordinator.updateAccessories(
@@ -365,7 +370,8 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
 
         private let headerView = ProfileHostedAccessoryView()
         private let pickerView = ProfileHostedAccessoryView()
-        private var presenters: [String: KotlinPresenter<TimelineState>] = [:]
+        private var timelinePresenters: [String: KotlinPresenter<TimelineState>] = [:]
+        private var mediaPresenters: [String: KotlinPresenter<ProfileMediaState>] = [:]
         private var cancellable: AnyCancellable?
         private var currentTabID: String?
         private weak var boundController: UITimelineCollectionViewController?
@@ -470,37 +476,66 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             let offsetBeforeSwitch = controller.currentContentOffset
             let needsBinding = currentTabID != tabID || cancellable == nil || boundController !== controller
 
-            let presenter = presenter(for: tab)
+            if switchedTabs {
+                controller.restoreContentOffsetAfterNextSnapshot(offsetBeforeSwitch)
+            }
+
             controller.openURL = { url in
                 openURL.callAsFunction(url)
             }
-            controller.refreshCallback = { [weak presenter] in
-                guard let presenter else { return }
-                try? await presenter.state.refresh()
-            }
 
-            if needsBinding {
-                currentTabID = tabID
-                boundController = controller
-                controller.resetInitialRefreshIndicatorSuppression()
-                cancellable = presenter.$state
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak controller] state in
-                        controller?.update(data: state.listState)
-                    }
-                controller.update(data: presenter.state.listState)
-            }
-
-            if switchedTabs {
-                DispatchQueue.main.async { [weak controller] in
-                    controller?.restoreContentOffset(offsetBeforeSwitch, animated: false)
+            switch onEnum(of: tab) {
+            case .timeline(let tab):
+                let presenter: KotlinPresenter<TimelineState>
+                if let cached = timelinePresenters[tabID] {
+                    presenter = cached
+                } else {
+                    presenter = KotlinPresenter<TimelineState>(presenter: tab.presenter)
+                    timelinePresenters[tabID] = presenter
+                }
+                controller.refreshCallback = { [weak presenter] in
+                    guard let presenter else { return }
+                    try? await presenter.state.refresh()
+                }
+                if needsBinding {
+                    currentTabID = tabID
+                    boundController = controller
+                    controller.resetInitialRefreshIndicatorSuppression()
+                    cancellable = presenter.$state
+                        .sink { [weak controller] state in
+                            controller?.update(data: state.listState, columnCount: 1)
+                        }
+                }
+            case .media(let tab):
+                let presenter: KotlinPresenter<ProfileMediaState>
+                if let cached = mediaPresenters[tabID] {
+                    presenter = cached
+                } else {
+                    presenter = KotlinPresenter<ProfileMediaState>(presenter: tab.presenter)
+                    mediaPresenters[tabID] = presenter
+                }
+                controller.refreshCallback = { [weak presenter] in
+                    guard let presenter else { return }
+                    await refreshProfileMedia(presenter.state.mediaState)
+                }
+                if needsBinding {
+                    currentTabID = tabID
+                    boundController = controller
+                    controller.resetInitialRefreshIndicatorSuppression()
+                    cancellable = presenter.$state
+                        .sink { [weak controller] state in
+                            controller?.update(profileMediaData: state.mediaState)
+                        }
                 }
             }
         }
 
         func prunePresenters(validIDs: Set<String>) {
-            for key in presenters.keys where !validIDs.contains(key) {
-                presenters.removeValue(forKey: key)
+            for key in timelinePresenters.keys where !validIDs.contains(key) {
+                timelinePresenters.removeValue(forKey: key)
+            }
+            for key in mediaPresenters.keys where !validIDs.contains(key) {
+                mediaPresenters.removeValue(forKey: key)
             }
             if let currentTabID, !validIDs.contains(currentTabID) {
                 self.currentTabID = nil
@@ -510,20 +545,11 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
 
         func close() {
             cancellable = nil
-            presenters.removeAll()
+            timelinePresenters.removeAll()
+            mediaPresenters.removeAll()
             currentTabID = nil
             boundController = nil
             installedAccessoryController = nil
-        }
-
-        private func presenter(for tab: ProfileState.Tab) -> KotlinPresenter<TimelineState> {
-            let id = profileTimelineID(for: tab)
-            if let presenter = presenters[id] {
-                return presenter
-            }
-            let presenter = KotlinPresenter<TimelineState>(presenter: profileTimelinePresenter(for: tab))
-            presenters[id] = presenter
-            return presenter
         }
     }
 }
@@ -776,5 +802,35 @@ struct ProfileTimelineWaterFallView: View {
             .refreshable {
                 try? await presenter.state.refresh()
             }
+    }
+}
+
+struct ProfileMediaWaterFallView: View {
+    @StateObject private var presenter: KotlinPresenter<ProfileMediaState>
+
+    init(presenter: ProfileMediaPresenter) {
+        self._presenter = .init(wrappedValue: .init(presenter: presenter))
+    }
+
+    var body: some View {
+        UITimelineCollectionView(
+            profileMediaData: presenter.state.mediaState,
+            suppressInitialRefreshIndicator: true
+        )
+        .ignoresSafeArea(edges: .vertical)
+        .refreshable {
+            await refreshProfileMedia(presenter.state.mediaState)
+        }
+    }
+}
+
+private func refreshProfileMedia(_ data: PagingState<ProfileMedia>) async {
+    switch onEnum(of: data) {
+    case .success(let success):
+        try? await skie(success).refreshSuspend()
+    case .empty(let empty):
+        empty.refresh()
+    default:
+        break
     }
 }

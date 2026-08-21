@@ -131,12 +131,3 @@ public func profileTimelineID(for tab: ProfileState.Tab) -> String {
         "Media_\(tab.name.name)"
     }
 }
-
-public func profileTimelinePresenter(for tab: ProfileState.Tab) -> TimelinePresenter {
-    switch onEnum(of: tab) {
-    case .timeline(let tab):
-        tab.presenter
-    case .media(let tab):
-        tab.presenter.getMediaTimelinePresenter()
-    }
-}

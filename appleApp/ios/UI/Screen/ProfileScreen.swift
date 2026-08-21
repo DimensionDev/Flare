@@ -128,15 +128,10 @@ struct ProfileScreen: View {
             } else {
                 StateView(state: presenter.state.tabs) { tabsArray in
                     let tabs = tabsArray.cast(ProfileState.Tab.self)
-                    let selectedTabItem = tabs[selectedTab]
-                    switch onEnum(of: selectedTabItem) {
-                    case .timeline(let tab):
-                        ProfileTimelineWaterFallView(presenter: tab.presenter)
-                            .id(profileTimelineID(for: selectedTabItem))
-                    case .media(let tab):
-                        ProfileMediaWaterFallView(presenter: tab.presenter)
-                            .id(profileTimelineID(for: selectedTabItem))
-                    }
+                    profileTimelineCollection(
+                        tabs: tabs,
+                        showsProfileAccessories: false
+                    )
                 } loadingContent: {
                     ScrollView {
                         LazyVStack(spacing: 0) {
@@ -182,29 +177,9 @@ struct ProfileScreen: View {
         } else {
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
-                ProfileCompatTimelineView(
-                    profileState: presenter.state,
+                profileTimelineCollection(
                     tabs: tabs,
-                    selectedTab: $selectedTab,
-                    onFollowClick: { user, followButtonState in
-                        handleFollowAction(user: user, followButtonState: followButtonState)
-                    },
-                    onFollowingClick: onFollowingClick,
-                    onFansClick: onFansClick,
-                    onHeaderVisibilityChanged: { visible in
-                        DispatchQueue.main.async {
-                            guard isProfileHeaderVisible != visible else { return }
-                            isProfileHeaderVisible = visible
-                            updateToolbarTabPickerVisibility()
-                        }
-                    },
-                    onPickerVisibilityChanged: { visible in
-                        DispatchQueue.main.async {
-                            guard isInlineTabPickerVisible != visible else { return }
-                            isInlineTabPickerVisible = visible
-                            updateToolbarTabPickerVisibility()
-                        }
-                    }
+                    showsProfileAccessories: true
                 )
             } loadingContent: {
                 ScrollView {
@@ -217,6 +192,44 @@ struct ProfileScreen: View {
             }
             .detectScrolling()
             .ignoresSafeArea(edges: .vertical)
+        }
+    }
+
+    private func profileTimelineCollection(
+        tabs: [ProfileState.Tab],
+        showsProfileAccessories: Bool
+    ) -> some View {
+        GeometryReader { proxy in
+            ProfileTimelineCollectionView(
+                profileState: presenter.state,
+                tabs: tabs,
+                selectedTab: $selectedTab,
+                showsProfileAccessories: showsProfileAccessories,
+                timelineColumnCount: showsProfileAccessories
+                    ? 1
+                    : max(Int((proxy.size.width / 320).rounded(.down)), 1),
+                onFollowClick: { user, followButtonState in
+                    handleFollowAction(user: user, followButtonState: followButtonState)
+                },
+                onFollowingClick: onFollowingClick,
+                onFansClick: onFansClick,
+                onHeaderVisibilityChanged: { visible in
+                    guard showsProfileAccessories else { return }
+                    DispatchQueue.main.async {
+                        guard isProfileHeaderVisible != visible else { return }
+                        isProfileHeaderVisible = visible
+                        updateToolbarTabPickerVisibility()
+                    }
+                },
+                onPickerVisibilityChanged: { visible in
+                    guard showsProfileAccessories else { return }
+                    DispatchQueue.main.async {
+                        guard isInlineTabPickerVisible != visible else { return }
+                        isInlineTabPickerVisible = visible
+                        updateToolbarTabPickerVisibility()
+                    }
+                }
+            )
         }
     }
 
@@ -282,10 +295,12 @@ private struct BlockedProfileGate: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
-private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
+private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     let profileState: ProfileState
     let tabs: [ProfileState.Tab]
     @Binding var selectedTab: Int
+    let showsProfileAccessories: Bool
+    let timelineColumnCount: Int
     let onFollowClick: (UiProfile, FollowButtonState) -> Void
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
@@ -320,15 +335,18 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
     }
 
     private func apply(to controller: UITimelineCollectionViewController, context: Context) {
-        controller.appearance = TimelineUIKitAppearance(
+        let appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff,
             showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
+        controller.appearance = appearance
+        controller.usesGroupedBackgroundOverride = appearance.usesCardBackground || timelineColumnCount > 1
         controller.networkKind = networkKind
         controller.extendsContentUnderTopBars = true
         controller.suppressInitialRefreshIndicator = true
         let accessoriesChanged = context.coordinator.updateAccessories(
+            showsProfileAccessories: showsProfileAccessories,
             profileState: profileState,
             tabs: tabs,
             selectedTab: $selectedTab,
@@ -361,7 +379,12 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
 
         let tab = tabs[clampedIndex]
         context.coordinator.prunePresenters(validIDs: Set(tabs.map(profileTimelineID(for:))))
-        context.coordinator.show(tab: tab, in: controller, openURL: openURL)
+        context.coordinator.show(
+            tab: tab,
+            timelineColumnCount: timelineColumnCount,
+            in: controller,
+            openURL: openURL
+        )
     }
 
     final class Coordinator {
@@ -374,6 +397,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
         private var mediaPresenters: [String: KotlinPresenter<ProfileMediaState>] = [:]
         private var cancellable: AnyCancellable?
         private var currentTabID: String?
+        private var currentTimelineColumnCount: Int?
         private weak var boundController: UITimelineCollectionViewController?
         private weak var installedAccessoryController: UITimelineCollectionViewController?
         private var headerSignature: ProfileHeaderAccessorySignature?
@@ -381,6 +405,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
 
         @discardableResult
         func updateAccessories(
+            showsProfileAccessories: Bool,
             profileState: ProfileState,
             tabs: [ProfileState.Tab],
             selectedTab: Binding<Int>,
@@ -393,6 +418,16 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             onHeaderVisibilityChanged: @escaping (Bool) -> Void,
             onPickerVisibilityChanged: @escaping (Bool) -> Void
         ) -> Bool {
+            guard showsProfileAccessories else {
+                let changed = !accessoryItems.isEmpty
+                accessoryItems = []
+                headerSignature = nil
+                pickerSignature = nil
+                onHeaderVisibilityChanged(false)
+                onPickerVisibilityChanged(false)
+                return changed
+            }
+
             var changed = false
             let newHeaderSignature = ProfileHeaderAccessorySignature(
                 profileState: profileState,
@@ -470,11 +505,19 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             installedAccessoryController = controller
         }
 
-        func show(tab: ProfileState.Tab, in controller: UITimelineCollectionViewController, openURL: OpenURLAction) {
+        func show(
+            tab: ProfileState.Tab,
+            timelineColumnCount: Int,
+            in controller: UITimelineCollectionViewController,
+            openURL: OpenURLAction
+        ) {
             let tabID = profileTimelineID(for: tab)
             let switchedTabs = currentTabID != nil && currentTabID != tabID
             let offsetBeforeSwitch = controller.currentContentOffset
-            let needsBinding = currentTabID != tabID || cancellable == nil || boundController !== controller
+            let needsBinding = currentTabID != tabID ||
+                cancellable == nil ||
+                boundController !== controller ||
+                currentTimelineColumnCount != timelineColumnCount
 
             if switchedTabs {
                 controller.restoreContentOffsetAfterNextSnapshot(offsetBeforeSwitch)
@@ -499,11 +542,12 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                 }
                 if needsBinding {
                     currentTabID = tabID
+                    currentTimelineColumnCount = timelineColumnCount
                     boundController = controller
                     controller.resetInitialRefreshIndicatorSuppression()
                     cancellable = presenter.$state
                         .sink { [weak controller] state in
-                            controller?.update(data: state.listState, columnCount: 1)
+                            controller?.update(data: state.listState, columnCount: timelineColumnCount)
                         }
                 }
             case .media(let tab):
@@ -516,10 +560,18 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
                 }
                 controller.refreshCallback = { [weak presenter] in
                     guard let presenter else { return }
-                    await refreshProfileMedia(presenter.state.mediaState)
+                    switch onEnum(of: presenter.state.mediaState) {
+                    case .success(let success):
+                        try? await skie(success).refreshSuspend()
+                    case .empty(let empty):
+                        empty.refresh()
+                    default:
+                        break
+                    }
                 }
                 if needsBinding {
                     currentTabID = tabID
+                    currentTimelineColumnCount = timelineColumnCount
                     boundController = controller
                     controller.resetInitialRefreshIndicatorSuppression()
                     cancellable = presenter.$state
@@ -539,6 +591,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             }
             if let currentTabID, !validIDs.contains(currentTabID) {
                 self.currentTabID = nil
+                currentTimelineColumnCount = nil
                 cancellable = nil
             }
         }
@@ -548,6 +601,7 @@ private struct ProfileCompatTimelineView: UIViewControllerRepresentable {
             timelinePresenters.removeAll()
             mediaPresenters.removeAll()
             currentTabID = nil
+            currentTimelineColumnCount = nil
             boundController = nil
             installedAccessoryController = nil
         }
@@ -782,55 +836,5 @@ struct ProfileTimelineView: View {
 //            .refreshable {
 //                try? await presenter.state.refresh()
 //            }
-    }
-}
-
-struct ProfileTimelineWaterFallView: View {
-    @StateObject private var presenter: KotlinPresenter<TimelineState>
-    
-    init(presenter: TimelinePresenter) {
-        self._presenter = .init(wrappedValue: .init(presenter: presenter))
-    }
-    
-    var body: some View {
-        UITimelinePagingView(
-            data: presenter.state.listState,
-            detailStatusKey: nil,
-            key: presenter.key,
-            suppressInitialRefreshIndicator: true
-        )
-            .refreshable {
-                try? await presenter.state.refresh()
-            }
-    }
-}
-
-struct ProfileMediaWaterFallView: View {
-    @StateObject private var presenter: KotlinPresenter<ProfileMediaState>
-
-    init(presenter: ProfileMediaPresenter) {
-        self._presenter = .init(wrappedValue: .init(presenter: presenter))
-    }
-
-    var body: some View {
-        UITimelineCollectionView(
-            profileMediaData: presenter.state.mediaState,
-            suppressInitialRefreshIndicator: true
-        )
-        .ignoresSafeArea(edges: .vertical)
-        .refreshable {
-            await refreshProfileMedia(presenter.state.mediaState)
-        }
-    }
-}
-
-private func refreshProfileMedia(_ data: PagingState<ProfileMedia>) async {
-    switch onEnum(of: data) {
-    case .success(let success):
-        try? await skie(success).refreshSuspend()
-    case .empty(let empty):
-        empty.refresh()
-    default:
-        break
     }
 }

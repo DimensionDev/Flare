@@ -507,11 +507,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         card.setContent(UIView.padding(sizingTimelineView, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         return card
     }()
-    private lazy var sizingPlaceholderView = TimelinePlaceholderUIView()
     private lazy var sizingPlaceholderCard: AdaptiveTimelineCardUIView = {
-        let card = AdaptiveTimelineCardUIView()
+        let card = makeTimelinePlaceholderCardUIView()
         card.isMultipleColumn = true
-        card.setContent(UIView.padding(sizingPlaceholderView, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         return card
     }()
     private var heightCache: [String: CGFloat] = [:]
@@ -2248,7 +2246,6 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var hostedBottomConstraint: NSLayoutConstraint?
     private var timelineViewStorage: TimelineUIView?
     private var timelineCardStorage: AdaptiveTimelineCardUIView?
-    private var placeholderViewStorage: TimelinePlaceholderUIView?
     private var placeholderCardStorage: AdaptiveTimelineCardUIView?
 
     // Rebuild-skip signature. When the incoming data + appearance + detail-key are
@@ -2518,21 +2515,11 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         return card
     }
 
-    private func resolvedPlaceholderView() -> TimelinePlaceholderUIView {
-        if let placeholderViewStorage {
-            return placeholderViewStorage
-        }
-        let view = TimelinePlaceholderUIView()
-        placeholderViewStorage = view
-        return view
-    }
-
     private func resolvedPlaceholderCard() -> AdaptiveTimelineCardUIView {
         if let placeholderCardStorage {
             return placeholderCardStorage
         }
-        let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
+        let card = makeTimelinePlaceholderCardUIView()
         placeholderCardStorage = card
         return card
     }
@@ -2542,7 +2529,6 @@ private final class TimelinePlaceholderCollectionViewCell: UICollectionViewCell 
     private var hostedView: UIView?
     private var hostedConstraints: [NSLayoutConstraint] = []
     private var hostedBottomConstraint: NSLayoutConstraint?
-    private var placeholderViewStorage: TimelinePlaceholderUIView?
     private var placeholderCardStorage: AdaptiveTimelineCardUIView?
     private var usesWaterfallLayout = false
 
@@ -2608,21 +2594,11 @@ private final class TimelinePlaceholderCollectionViewCell: UICollectionViewCell 
         NSLayoutConstraint.activate(hostedConstraints)
     }
 
-    private func resolvedPlaceholderView() -> TimelinePlaceholderUIView {
-        if let placeholderViewStorage {
-            return placeholderViewStorage
-        }
-        let view = TimelinePlaceholderUIView()
-        placeholderViewStorage = view
-        return view
-    }
-
     private func resolvedPlaceholderCard() -> AdaptiveTimelineCardUIView {
         if let placeholderCardStorage {
             return placeholderCardStorage
         }
-        let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
+        let card = makeTimelinePlaceholderCardUIView()
         placeholderCardStorage = card
         return card
     }

@@ -133,13 +133,17 @@ struct ProfileScreen: View {
                         showsProfileAccessories: false
                     )
                 } loadingContent: {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ProfileTabsLoadingPlaceholder()
-                            ProfileTimelineLoadingPlaceholder()
+                    GeometryReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ProfileTabsLoadingPlaceholder()
+                                ProfileTimelineUIKitLoadingPlaceholder(
+                                    columnCount: max(Int((proxy.size.width / 320).rounded(.down)), 1)
+                                )
+                            }
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
             }
         }
@@ -184,8 +188,19 @@ struct ProfileScreen: View {
             } loadingContent: {
                 ScrollView {
                     LazyVStack(spacing: 0) {
+                        ProfileHeader(
+                            user: presenter.state.userState,
+                            relation: presenter.state.relationState,
+                            followButtonState: presenter.state.followButtonState,
+                            isMe: presenter.state.isMe,
+                            onFollowClick: { user, followButtonState in
+                                handleFollowAction(user: user, followButtonState: followButtonState)
+                            },
+                            onFollowingClick: onFollowingClick,
+                            onFansClick: onFansClick
+                        )
                         ProfileTabsLoadingPlaceholder()
-                        ProfileTimelineLoadingPlaceholder()
+                        ProfileTimelineUIKitLoadingPlaceholder(columnCount: 1)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -296,6 +311,87 @@ private struct BlockedProfileGate: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+
+private struct ProfileTimelineUIKitLoadingPlaceholder: View {
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
+
+    let columnCount: Int
+
+    private let placeholderCount = 5
+
+    var body: some View {
+        let resolvedColumnCount = max(columnCount, 1)
+        let isPlainTimelineDisplayMode = timelineDisplayMode == .plain
+
+        if resolvedColumnCount > 1 {
+            LazyVGrid(
+                columns: Array(
+                    repeating: GridItem(.flexible(), spacing: 8),
+                    count: resolvedColumnCount
+                ),
+                spacing: 0
+            ) {
+                placeholderCards(
+                    isPlainTimelineDisplayMode: isPlainTimelineDisplayMode,
+                    isMultipleColumn: true
+                )
+            }
+            .padding(.horizontal, 16)
+        } else {
+            LazyVStack(spacing: 2) {
+                placeholderCards(
+                    isPlainTimelineDisplayMode: isPlainTimelineDisplayMode,
+                    isMultipleColumn: false
+                )
+            }
+            .padding(.horizontal, isPlainTimelineDisplayMode ? 0 : 16)
+        }
+    }
+
+    @ViewBuilder
+    private func placeholderCards(
+        isPlainTimelineDisplayMode: Bool,
+        isMultipleColumn: Bool
+    ) -> some View {
+        ForEach(0..<placeholderCount, id: \.self) { index in
+            TimelineUIKitPlaceholderCard(
+                index: index,
+                totalCount: placeholderCount,
+                isPlainTimelineDisplayMode: isPlainTimelineDisplayMode,
+                isMultipleColumn: isMultipleColumn
+            )
+        }
+    }
+}
+
+private struct TimelineUIKitPlaceholderCard: UIViewRepresentable {
+    let index: Int
+    let totalCount: Int
+    let isPlainTimelineDisplayMode: Bool
+    let isMultipleColumn: Bool
+
+    func makeUIView(context: Context) -> AdaptiveTimelineCardUIView {
+        makeTimelinePlaceholderCardUIView()
+    }
+
+    func updateUIView(_ view: AdaptiveTimelineCardUIView, context: Context) {
+        view.isPlainTimelineDisplayMode = isPlainTimelineDisplayMode
+        view.isMultipleColumn = isMultipleColumn
+        view.configure(index: index, totalCount: totalCount)
+    }
+
+    func sizeThatFits(
+        _ proposal: ProposedViewSize,
+        uiView: AdaptiveTimelineCardUIView,
+        context: Context
+    ) -> CGSize? {
+        guard let width = proposal.width, width > 0 else { return nil }
+        return uiView.sizeThatFits(
+            CGSize(width: width, height: .greatestFiniteMagnitude)
+        )
+    }
+}
+
 private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     let profileState: ProfileState
     let tabs: [ProfileState.Tab]

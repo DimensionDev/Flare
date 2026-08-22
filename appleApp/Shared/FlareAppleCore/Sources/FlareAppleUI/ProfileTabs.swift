@@ -80,19 +80,46 @@ public struct ProfileTabBar: View {
 }
 
 public struct ProfileTabsLoadingPlaceholder: View {
+    @Environment(\.timelineAppearance.timelineDisplayMode) private var timelineDisplayMode
+    @Environment(\.isMultipleColumn) private var isMultipleColumn
+
+    private let placeholderTitles = [
+        "Posts",
+        "Posts and replies",
+        "Reposts",
+        "Highlights",
+        "Media",
+    ]
+
     public init() {}
 
     public var body: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<4, id: \.self) { _ in
-                Capsule()
-                    .fill(.placeholder)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 32)
+        ZStack(alignment: .bottom) {
+            if timelineDisplayMode == .plain && !isMultipleColumn {
+                Divider()
             }
+
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(placeholderTitles.indices, id: \.self) { index in
+                        Text(verbatim: placeholderTitles[index])
+                            .foregroundStyle(.secondary)
+                            .padding(.vertical, 12)
+                            .overlay(alignment: .bottom) {
+                                if index == 0 {
+                                    Capsule()
+                                        .fill(.placeholder)
+                                        .frame(height: 3)
+                                }
+                            }
+                            .padding(.horizontal, 8)
+                    }
+                }
+                .padding(.horizontal, 8)
+            }
+            .scrollIndicators(.hidden)
         }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
         .redacted(reason: .placeholder)
         .allowsHitTesting(false)
         .accessibilityHidden(true)

@@ -3,6 +3,7 @@ package dev.dimension.flare.common
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -10,6 +11,17 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PagingStateTest {
+    @Test
+    fun emptyPagingStateCanBeRefreshed() =
+        runTest {
+            var refreshed = false
+            val state = PagingState.Empty<Any> { refreshed = true }
+
+            state.refreshSuspend()
+
+            assertTrue(refreshed)
+        }
+
     @Test
     fun onlySuccessfulPagingStateCanBeRefreshing() {
         assertFalse(PagingState.Loading<Any>().isRefreshing)

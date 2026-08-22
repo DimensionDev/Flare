@@ -65,6 +65,7 @@ import dev.dimension.flare.pixiv_ranking_week_original_title
 import dev.dimension.flare.pixiv_ranking_week_rookie_title
 import dev.dimension.flare.pixiv_ranking_week_title
 import dev.dimension.flare.posts_title
+import dev.dimension.flare.profile_tab_articles
 import dev.dimension.flare.profile_tab_highlights
 import dev.dimension.flare.profile_tab_media
 import dev.dimension.flare.profile_tab_timeline_with_reply
@@ -73,6 +74,7 @@ import dev.dimension.flare.service_select_next_button
 import dev.dimension.flare.settings_title
 import dev.dimension.flare.social_title
 import dev.dimension.flare.tab_settings_default
+import dev.dimension.flare.tab_settings_filter_repost
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.onSuccess
@@ -270,6 +272,10 @@ private val UiStrings.desktopStringResource: StringResource
             UiStrings.PostsWithReplies -> Res.string.profile_tab_timeline_with_reply
 
             UiStrings.Highlights -> Res.string.profile_tab_highlights
+
+            UiStrings.Reposts -> Res.string.tab_settings_filter_repost
+
+            UiStrings.Articles -> Res.string.profile_tab_articles
 
             UiStrings.Media -> Res.string.profile_tab_media
 

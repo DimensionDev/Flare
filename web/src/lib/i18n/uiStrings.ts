@@ -49,6 +49,10 @@ export function localizedUiString(value: UiStrings): string {
 			return m.profileTabTimelineWithReply();
 		case 'Highlights':
 			return m.profileTabHighlights();
+		case 'Reposts':
+			return m.tabSettingsFilterRepost();
+		case 'Articles':
+			return m.profileTabArticles();
 		case 'Media':
 			return m.profileTabMedia();
 		case 'Channel':

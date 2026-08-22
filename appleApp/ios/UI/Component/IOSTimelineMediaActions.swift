@@ -18,6 +18,35 @@ enum IOSTimelineMediaActions {
         }
     }
 
+    static func open(
+        post: UiTimelineV2.Post,
+        statusKey: MicroBlogKey,
+        index: Int32,
+        preview: String?,
+        openURL: @escaping (URL) -> Void
+    ) {
+        if post.mediaClickPolicy == .openPostClickEvent {
+            let launcher = AppleUriLauncher(
+                openUrl: OpenURLAction { url in
+                    openURL(url)
+                    return .handled
+                }
+            )
+            post.onClicked(ClickContext(launcher: launcher))
+            return
+        }
+
+        let route = DeeplinkRoute.MediaStatusMedia(
+            statusKey: statusKey,
+            accountType: post.accountType,
+            index: index,
+            preview: preview
+        )
+        if let url = URL(string: route.toUri()) {
+            openURL(url)
+        }
+    }
+
     private static func save(
         media: any UiMedia,
         post: UiTimelineV2.Post,

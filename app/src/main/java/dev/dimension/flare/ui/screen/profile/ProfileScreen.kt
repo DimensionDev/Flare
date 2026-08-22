@@ -71,6 +71,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -78,6 +79,7 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
+import dev.dimension.flare.ui.component.ProfileTabsLoadingPlaceholder
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabRowIndicator
@@ -89,6 +91,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.component.status.statusLoadingPlaceholders
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
@@ -273,6 +276,11 @@ internal fun ProfileScreen(
                 .toSize()
                 .toDpSize()
         }
+    val profileTabHeight =
+        with(LocalDensity.current) {
+            MaterialTheme.typography.bodyLarge.lineHeight
+                .toDp()
+        } + 16.dp
     val bigScreen = isBigScreen()
     val scrollBehavior =
         if (bigScreen) {
@@ -450,6 +458,33 @@ internal fun ProfileScreen(
                                 },
                             )
                         } else {
+                            state.tabs.onLoading {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    ProfileTabsLoadingPlaceholder(
+                                        tabHeight = profileTabHeight,
+                                        verticalPadding = 0.dp,
+                                    )
+                                    LazyStatusVerticalStaggeredGrid(
+                                        contentPadding =
+                                            PaddingValues(
+                                                top = 8.dp,
+                                                bottom = 8.dp + it.calculateBottomPadding(),
+                                            ),
+                                        modifier = Modifier.fillMaxSize(),
+                                    ) {
+                                        statusLoadingPlaceholders()
+                                    }
+                                }
+                            }
+                            state.tabs.onError { error ->
+                                ErrorContent(
+                                    error = error,
+                                    onRetry = state.state::retryTabs,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
                             state.pagerState.onSuccess { pagerState ->
                                 state.tabs.onSuccess { tabs ->
                                     Column(

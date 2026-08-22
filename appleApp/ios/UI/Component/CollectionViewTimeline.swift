@@ -1,14 +1,22 @@
 import SwiftUI
+import FlareAppleCore
 import FlareAppleUI
 import KotlinSharedUI
 import CHTCollectionViewWaterfallLayout
 import GSPlayer
 import AVFoundation
 
+enum TimelineUIKitLayoutMetrics {
+    static let horizontalInset: CGFloat = 16
+    static let columnSpacing: CGFloat = 8
+    static let rowSpacing: CGFloat = 2
+    static let timelinePlaceholderCount = 5
+}
+
 // MARK: - SwiftUI Wrapper
 
 struct UITimelineCollectionView: UIViewControllerRepresentable {
-    let data: PagingState<UiTimelineV2>
+    private let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let topContentInset: CGFloat
     let columnCount: Int
@@ -48,6 +56,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         }
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
+        controller.topScrollIndicatorInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff,
@@ -58,10 +67,9 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
             openURL.callAsFunction(url)
         }
         controller.networkKind = networkKind
-        controller.columnCount = columnCount
         controller.accessoryItems = accessoryItems
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
-        controller.update(data: data)
+        controller.update(data: data, columnCount: columnCount)
         return controller
     }
 
@@ -71,6 +79,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         }
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
+        controller.topScrollIndicatorInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff,
@@ -81,10 +90,9 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
             openURL.callAsFunction(url)
         }
         controller.networkKind = networkKind
-        controller.columnCount = columnCount
         controller.accessoryItems = accessoryItems
         controller.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
-        controller.update(data: data)
+        controller.update(data: data, columnCount: columnCount)
     }
 }
 
@@ -109,14 +117,30 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private static let sectionMain = 1
     private static let sectionFooter = 2
 
+    private enum ContentKind: Equatable {
+        case timeline
+        case profileMedia
+    }
+
     private let detailStatusKey: MicroBlogKey?
+    private var contentKind = ContentKind.timeline
     private var currentData: PagingState<UiTimelineV2>?
     private var currentSuccess: PagingStateSuccess<UiTimelineV2>?
+    private var currentProfileMediaData: PagingState<ProfileMedia>?
+    private var currentProfileMediaSuccess: PagingStateSuccess<ProfileMedia>?
 
     var refreshCallback: (() async -> Void)?
     var onIsAtTopChanged: ((Bool) -> Void)?
+    var onContentOffsetChanged: ((CGFloat) -> Void)?
+    var onScrollInteractionBegan: (() -> Void)?
     var openURL: ((URL) -> Void)?
     var suppressInitialRefreshIndicator = false
+    var usesGroupedBackgroundOverride: Bool? {
+        didSet {
+            guard oldValue != usesGroupedBackgroundOverride, isViewLoaded else { return }
+            updateBackgroundColors()
+        }
+    }
     var appearance = TimelineUIKitAppearance(timeline: TimelineAppearance.companion.Default) {
         didSet {
             guard isViewLoaded else { return }
@@ -149,6 +173,18 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             updateContentInsets()
         }
     }
+    var topScrollIndicatorInset: CGFloat = 0 {
+        didSet {
+            guard oldValue != topScrollIndicatorInset, isViewLoaded else { return }
+            updateContentInsets()
+        }
+    }
+    var minimumVerticalScrollDistance: CGFloat = 0 {
+        didSet {
+            guard isViewLoaded else { return }
+            updateContentInsets()
+        }
+    }
     var extendsContentUnderTopBars: Bool = false {
         didSet {
             guard oldValue != extendsContentUnderTopBars, isViewLoaded else { return }
@@ -163,6 +199,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 return
             }
             guard oldValue != columnCount, isViewLoaded else { return }
+            guard !isApplyingContentTransition else { return }
             clearAllHeightCache()
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
@@ -184,19 +221,42 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 reconfigureItems(newIDs)
                 return
             }
-            guard let currentData else { return }
             lastAppliedSignature = nil
-            applySnapshot(data: currentData)
+            applyCurrentSnapshot()
         }
     }
 
-    var currentContentOffset: CGPoint {
-        collectionView?.contentOffset ?? .zero
+    var effectiveContentOffsetY: CGFloat {
+        guard isViewLoaded else { return 0 }
+        return collectionView.contentOffset.y + collectionView.adjustedContentInset.top
     }
 
-    func setContentOffset(_ offset: CGPoint, animated: Bool) {
+    var maximumEffectiveContentOffsetY: CGFloat {
+        guard isViewLoaded else { return 0 }
+        let minimumOffsetY = -collectionView.adjustedContentInset.top
+        let maximumOffsetY = max(
+            minimumOffsetY,
+            collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
+        )
+        return maximumOffsetY + collectionView.adjustedContentInset.top
+    }
+
+    var scrollDecelerationRate: UIScrollView.DecelerationRate {
+        guard isViewLoaded else { return .normal }
+        return collectionView.decelerationRate
+    }
+
+    func beginExternalScrollInteraction() {
+        beginScrollInteraction()
+    }
+
+    func endExternalScrollInteraction() {
+        endScrollInteraction()
+    }
+
+    func restoreEffectiveContentOffsetAfterNextSnapshot(_ offsetY: CGFloat) {
         guard isViewLoaded else { return }
-        collectionView.setContentOffset(offset, animated: animated)
+        pendingEffectiveContentOffsetYAfterSnapshot = offsetY
     }
 
     func restoreContentOffset(_ offset: CGPoint, animated: Bool) {
@@ -205,6 +265,28 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.layoutIfNeeded()
         collectionView.setContentOffset(
             CGPoint(x: offset.x, y: clampedContentOffsetY(offset.y)),
+            animated: animated
+        )
+    }
+
+    func restoreEffectiveContentOffset(_ offsetY: CGFloat, animated: Bool) {
+        guard isViewLoaded else { return }
+        restoreContentOffset(
+            CGPoint(
+                x: collectionView.contentOffset.x,
+                y: offsetY - collectionView.adjustedContentInset.top
+            ),
+            animated: animated
+        )
+    }
+
+    func setEffectiveContentOffset(_ offsetY: CGFloat, animated: Bool) {
+        guard isViewLoaded else { return }
+        collectionView.setContentOffset(
+            CGPoint(
+                x: collectionView.contentOffset.x,
+                y: clampedContentOffsetY(offsetY - collectionView.adjustedContentInset.top)
+            ),
             animated: animated
         )
     }
@@ -219,7 +301,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var lastReportedIsAtTop: Bool?
     private var lastAppliedSignature: SnapshotSignature?
     private var lastRenderHashMap: [String: Int32] = [:]
-    private var lastLoadedTimelineItemIDs: Set<String> = []
+    private var lastLoadedItemIDs: Set<String> = []
     private let autoplayPlayerView = VideoPlayerView()
     private var autoplayPlayerObservation: NSKeyValueObservation?
     private var autoplaySelectionTask: Task<Void, Never>?
@@ -231,11 +313,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var currentAutoplayID: String?
     private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
     private var pendingScrollAnchor: ScrollAnchor?
+    private var pendingEffectiveContentOffsetYAfterSnapshot: CGFloat?
     private var isRestoringScrollAnchor = false
+    private var isApplyingContentTransition = false
     private var snapshotPreparationGeneration = 0
     private var heightCachePruneGeneration = 0
 
-    // Maps item identifier → index for timeline cells
+    // Maps item identifier → paging index.
     private var itemIndexMap: [String: Int] = [:]
 
     private struct SnapshotSignature: Equatable, Sendable {
@@ -251,8 +335,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let footerIDs: [String]
         let indexMap: [String: Int]
         let renderHashMap: [String: Int32]
-        let loadedTimelineItemIDs: Set<String>
+        let loadedItemIDs: Set<String>
         let isRefreshing: Bool
+        let isInitialLoading: Bool
     }
 
     private struct ScrollAnchor {
@@ -263,6 +348,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // Item ID prefixes / constants
     private static let timelinePrefix = "t:"
     private static let placeholderPrefix = "p:"
+    private static let profileMediaPrefix = "m:"
+    private static let profileMediaPlaceholderPrefix = "mp:"
     private static let accessoryPrefix = "a:"
     private static let emptyID = "__empty__"
     private static let errorID = "__error__"
@@ -299,15 +386,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         setupVideoAutoplay()
         updateContentInsets()
         updateBackgroundColors()
-        if let data = currentData {
-            syncRefreshControl(data: data)
-            applySnapshot(data: data)
-        }
+        updateProfileMediaColumnCount()
+        syncRefreshControl(isRefreshing: currentPagingIsRefreshing)
+        applyCurrentSnapshot()
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
+        updateProfileMediaColumnCount()
         updateContentInsets()
         reportIsAtTop()
         if shouldRevealRefreshControl {
@@ -357,7 +444,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func makeSingleColumnLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, _ in
             let isAccessorySection = !self.accessoryItems.isEmpty && sectionIndex == 0
-            let horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode ? 0 : 16
+            let horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode
+                ? 0
+                : TimelineUIKitLayoutMetrics.horizontalInset
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1),
                 heightDimension: .estimated(180)
@@ -365,12 +454,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 2
+            section.interGroupSpacing = TimelineUIKitLayoutMetrics.rowSpacing
             section.contentInsets = NSDirectionalEdgeInsets(
                 top: 0,
-                leading: CGFloat(horizontalInset),
+                leading: horizontalInset,
                 bottom: 0,
-                trailing: CGFloat(horizontalInset)
+                trailing: horizontalInset
             )
             return section
         }
@@ -379,16 +468,40 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func makeWaterfallLayout(columns: Int) -> UICollectionViewLayout {
         let layout = CHTCollectionViewWaterfallLayout()
         layout.columnCount = columns
-        layout.minimumColumnSpacing = 8
+        layout.minimumColumnSpacing = TimelineUIKitLayoutMetrics.columnSpacing
         layout.minimumInteritemSpacing = 0
         layout.sectionInset = UIEdgeInsets(
             top: 0,
-            left: 16,
+            left: TimelineUIKitLayoutMetrics.horizontalInset,
             bottom: 0,
-            right: 16
+            right: TimelineUIKitLayoutMetrics.horizontalInset
         )
         layout.itemRenderDirection = .shortestFirst
         return layout
+    }
+
+    private func updateProfileMediaColumnCount() {
+        guard contentKind == .profileMedia else { return }
+        let columns = resolvedProfileMediaColumnCount()
+        if columnCount != columns {
+            columnCount = columns
+        }
+    }
+
+    private func resolvedProfileMediaColumnCount() -> Int {
+        let width = collectionView?.bounds.width ?? viewIfLoaded?.bounds.width ?? 0
+        let targetWidth: CGFloat = traitCollection.horizontalSizeClass == .regular ? 240 : 120
+        let horizontalInsets = TimelineUIKitLayoutMetrics.horizontalInset * 2
+        let availableWidth = max(width - horizontalInsets, 0)
+        return width > 0
+            ? max(
+                Int(
+                    (availableWidth + TimelineUIKitLayoutMetrics.columnSpacing) /
+                        (targetWidth + TimelineUIKitLayoutMetrics.columnSpacing)
+                ),
+                2
+            )
+            : 2
     }
 
     // MARK: - Sizing (for waterfall)
@@ -400,11 +513,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         card.setContent(UIView.padding(sizingTimelineView, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         return card
     }()
-    private lazy var sizingPlaceholderView = TimelinePlaceholderUIView()
     private lazy var sizingPlaceholderCard: AdaptiveTimelineCardUIView = {
-        let card = AdaptiveTimelineCardUIView()
+        let card = makeTimelinePlaceholderCardUIView()
         card.isMultipleColumn = true
-        card.setContent(UIView.padding(sizingPlaceholderView, insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
         return card
     }()
     private var heightCache: [String: CGFloat] = [:]
@@ -426,7 +537,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         "\(itemID):\(renderHash):\(heightCacheWidthKey(for: width))"
     }
 
-    private func measuredCompressedCardHeight(_ card: UIView, width: CGFloat) -> CGFloat {
+    private func measuredCompressedCardHeight(
+        _ card: UIView,
+        width: CGFloat,
+        heightPadding: CGFloat = 1
+    ) -> CGFloat {
         card.bounds = CGRect(x: 0, y: 0, width: width, height: UIView.layoutFittingCompressedSize.height)
         card.setNeedsLayout()
         let size = card.systemLayoutSizeFitting(
@@ -434,7 +549,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         )
-        return ceil(size.height) + 1
+        return size.height + heightPadding
     }
 
     private func sectionIdentifier(at index: Int) -> Int? {
@@ -446,7 +561,38 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func isFullWidthSection(at index: Int) -> Bool {
         guard let identifier = sectionIdentifier(at: index) else { return false }
-        return identifier == Self.sectionAccessories || identifier == Self.sectionFooter
+        return identifier == Self.sectionAccessories ||
+            identifier == Self.sectionFooter ||
+            (identifier == Self.sectionMain && mainSectionUsesFullWidth)
+    }
+
+    private var mainSectionUsesFullWidth: Bool {
+        switch contentKind {
+        case .timeline:
+            guard let currentData else { return false }
+            switch onEnum(of: currentData) {
+            case .empty, .error: return true
+            default: return false
+            }
+        case .profileMedia:
+            guard let currentProfileMediaData else { return false }
+            switch onEnum(of: currentProfileMediaData) {
+            case .empty, .error: return true
+            default: return false
+            }
+        }
+    }
+
+    private func waterfallInsets(for section: Int, layout: CHTCollectionViewWaterfallLayout) -> UIEdgeInsets {
+        guard contentKind == .profileMedia else { return layout.sectionInset }
+        switch sectionIdentifier(at: section) {
+        case Self.sectionAccessories:
+            return .zero
+        case Self.sectionMain:
+            return UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        default:
+            return UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
     }
 
     private func pruneHeightCache(keepingItemIDs: Set<String>) {
@@ -546,6 +692,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let index = Int(indexStr) ?? 0
             self.configurePlaceholderCell(cell, index: index)
         }
+        let profileMediaCellReg = UICollectionView.CellRegistration<ProfileMediaCollectionViewCell, String> {
+            [weak self] cell, _, itemID in
+            self?.configureProfileMediaCell(cell, itemID: itemID)
+        }
         let hostedCellReg = UICollectionView.CellRegistration<TimelineHostedViewCell, String> {
             [weak self] cell, _, itemID in
             guard let self else { return }
@@ -560,6 +710,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
             if itemID.hasPrefix(Self.placeholderPrefix) {
                 return collectionView.dequeueConfiguredReusableCell(using: placeholderCellReg, for: indexPath, item: itemID)
+            }
+            if itemID.hasPrefix(Self.profileMediaPrefix) || itemID.hasPrefix(Self.profileMediaPlaceholderPrefix) {
+                return collectionView.dequeueConfiguredReusableCell(using: profileMediaCellReg, for: indexPath, item: itemID)
             }
             return collectionView.dequeueConfiguredReusableCell(using: hostedCellReg, for: indexPath, item: itemID)
         }
@@ -601,7 +754,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if abs(collectionView.contentInset.top - desiredTopInset) > 0.5 {
             collectionView.contentInset.top = desiredTopInset
         }
-        collectionView.verticalScrollIndicatorInsets.top = topContentInset
+        collectionView.verticalScrollIndicatorInsets.top = topScrollIndicatorInset
         if wasPinnedToTop {
             let topOffset = -collectionView.adjustedContentInset.top
             if abs(collectionView.contentOffset.y - topOffset) > 0.5 {
@@ -611,10 +764,38 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 )
             }
         }
+        updateMinimumScrollableBottomInset()
+    }
+
+    private func updateMinimumScrollableBottomInset() {
+        guard minimumVerticalScrollDistance > 0, collectionView.bounds.height > 0 else {
+            if collectionView.contentInset.bottom != 0 {
+                collectionView.contentInset.bottom = 0
+            }
+            return
+        }
+        let automaticBottomInset = max(
+            0,
+            collectionView.adjustedContentInset.bottom - collectionView.contentInset.bottom
+        )
+        let maximumOffsetWithoutBottomInset =
+            collectionView.contentSize.height - collectionView.bounds.height +
+            automaticBottomInset + collectionView.adjustedContentInset.top
+        let requiredBottomInset = max(
+            0,
+            minimumVerticalScrollDistance - maximumOffsetWithoutBottomInset
+        )
+        if abs(collectionView.contentInset.bottom - requiredBottomInset) > 0.5 {
+            collectionView.contentInset.bottom = requiredBottomInset
+        }
     }
 
     private func updateBackgroundColors() {
-        let backgroundColor: UIColor = appearance.usesCardBackground || columnCount > 1 ? .systemGroupedBackground : .systemBackground
+        let usesGroupedBackground = usesGroupedBackgroundOverride ?? (
+            appearance.usesCardBackground ||
+                (columnCount > 1 && contentKind != .profileMedia)
+        )
+        let backgroundColor: UIColor = usesGroupedBackground ? .systemGroupedBackground : .systemBackground
         view.backgroundColor = backgroundColor
         collectionView.backgroundColor = backgroundColor
     }
@@ -697,29 +878,65 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         )
     }
 
+    private func configureProfileMediaCell(_ cell: ProfileMediaCollectionViewCell, itemID: String) {
+        guard itemID.hasPrefix(Self.profileMediaPrefix),
+              let index = itemIndexMap[itemID],
+              let success = currentProfileMediaSuccess,
+              index >= 0,
+              index < Int(success.itemCount),
+              let item = success.peek(index: Int32(index)) else {
+            cell.configurePlaceholder()
+            return
+        }
+        cell.configure(item: item, appearance: appearance.status) { [weak self] in
+            self?.openProfileMedia(item)
+        }
+    }
+
+    private func openProfileMedia(_ item: ProfileMedia) {
+        guard let post = item.status.timelineContentPost else { return }
+        IOSTimelineMediaActions.open(
+            post: post,
+            statusKey: item.statusKey,
+            index: Int32(item.index),
+            preview: item.media.mediaPreviewURL,
+            openURL: { [weak self] url in
+                self?.openURL?(url)
+            }
+        )
+    }
+
     private func configureErrorCell(_ cell: TimelineHostedViewCell) {
-        guard let data = currentData, case .error(let errorState) = onEnum(of: data) else { return }
         let errorView = ListErrorUIView()
         errorView.onOpenURL = openURL
-        errorView.configure(error: errorState.error) {
-            errorState.onRetry()
+        switch contentKind {
+        case .timeline:
+            guard let data = currentData, case .error(let errorState) = onEnum(of: data) else { return }
+            errorView.configure(error: errorState.error) { errorState.onRetry() }
+        case .profileMedia:
+            guard let data = currentProfileMediaData, case .error(let errorState) = onEnum(of: data) else { return }
+            errorView.configure(error: errorState.error) { errorState.onRetry() }
         }
         cell.setHostedView(CenteredCellContentView(content: errorView), usesWaterfallLayout: columnCount > 1)
     }
 
     private func configureFooterErrorCell(_ cell: TimelineHostedViewCell) {
-        guard let success = currentSuccess else { return }
-        if case .error(let error) = onEnum(of: success.appendState) {
-            let errorView = ListErrorUIView()
-            errorView.onOpenURL = openURL
-            errorView.configure(error: error.error) {
-                success.retry()
-            }
-            cell.setHostedView(
-                UIView.padding(errorView, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)),
-                usesWaterfallLayout: columnCount > 1
-            )
+        let errorView = ListErrorUIView()
+        errorView.onOpenURL = openURL
+        switch contentKind {
+        case .timeline:
+            guard let success = currentSuccess,
+                  case .error(let error) = onEnum(of: success.appendState) else { return }
+            errorView.configure(error: error.error) { success.retry() }
+        case .profileMedia:
+            guard let success = currentProfileMediaSuccess,
+                  case .error(let error) = onEnum(of: success.appendState) else { return }
+            errorView.configure(error: error.error) { success.retry() }
         }
+        cell.setHostedView(
+            UIView.padding(errorView, insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)),
+            usesWaterfallLayout: columnCount > 1
+        )
     }
 
     private func makeLoadingFooterView() -> UIView {
@@ -747,13 +964,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 await refreshCallback()
             }
             isUserRefreshing = false
-            if let data = currentData, !pagingIsRefreshing(data) {
+            if !currentPagingIsRefreshing {
                 refreshControl.endRefreshing()
             }
         }
     }
 
-    private func pagingIsRefreshing(_ data: PagingState<UiTimelineV2>) -> Bool {
+    private func pagingIsRefreshing<Item: AnyObject>(_ data: PagingState<Item>) -> Bool {
         switch onEnum(of: data) {
         case .loading:
             return true
@@ -761,6 +978,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             return success.isRefreshing
         default:
             return false
+        }
+    }
+
+    private var currentPagingIsRefreshing: Bool {
+        switch contentKind {
+        case .timeline:
+            currentData.map(pagingIsRefreshing) ?? false
+        case .profileMedia:
+            currentProfileMediaData.map(pagingIsRefreshing) ?? false
         }
     }
 
@@ -778,20 +1004,43 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     // MARK: - State Update
 
-    func update(data: PagingState<UiTimelineV2>) {
-        let wasRefreshing = currentData.map(pagingIsRefreshing) ?? false
+    func update(data: PagingState<UiTimelineV2>, columnCount requestedColumnCount: Int) {
+        let wasRefreshing = contentKind == .timeline && currentPagingIsRefreshing
         let isRefreshing = pagingIsRefreshing(data)
-        currentData = data
+        let nextSuccess: PagingStateSuccess<UiTimelineV2>?
         if case .success(let success) = onEnum(of: data) {
-            currentSuccess = success
+            nextSuccess = success
         } else {
-            currentSuccess = nil
+            nextSuccess = nil
+        }
+        let targetColumnCount = max(requestedColumnCount, 1)
+
+        guard isViewLoaded else {
+            setContentKind(.timeline)
+            columnCount = targetColumnCount
+            currentData = data
+            currentSuccess = nextSuccess
+            return
         }
 
-        guard isViewLoaded else { return }
-
-        syncRefreshControl(data: data)
-        applySnapshot(data: data)
+        if contentKind != .timeline || columnCount != targetColumnCount {
+            let plan = makeSnapshotPlan(data: data, columnCount: targetColumnCount)
+            let snapshot = Self.makeSnapshot(from: plan)
+            applyPreparedContentTransition(
+                to: .timeline,
+                columnCount: targetColumnCount,
+                snapshot: snapshot,
+                plan: plan
+            ) {
+                self.currentData = data
+                self.currentSuccess = nextSuccess
+            }
+        } else {
+            currentData = data
+            currentSuccess = nextSuccess
+            syncRefreshControl(isRefreshing: isRefreshing)
+            applySnapshot(data: data)
+        }
         if currentSuccess == nil {
             detachAutoplayPlayer(pause: true)
         } else {
@@ -803,8 +1052,55 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
 
-    private func syncRefreshControl(data: PagingState<UiTimelineV2>) {
+    func update(profileMediaData data: PagingState<ProfileMedia>) {
         let isRefreshing = pagingIsRefreshing(data)
+        let nextSuccess: PagingStateSuccess<ProfileMedia>?
+        if case .success(let success) = onEnum(of: data) {
+            nextSuccess = success
+        } else {
+            nextSuccess = nil
+        }
+        let targetColumnCount = resolvedProfileMediaColumnCount()
+
+        guard isViewLoaded else {
+            setContentKind(.profileMedia)
+            columnCount = targetColumnCount
+            currentProfileMediaData = data
+            currentProfileMediaSuccess = nextSuccess
+            return
+        }
+
+        if contentKind != .profileMedia || columnCount != targetColumnCount {
+            let plan = makeSnapshotPlan(profileMediaData: data, columnCount: targetColumnCount)
+            let snapshot = Self.makeSnapshot(from: plan)
+            applyPreparedContentTransition(
+                to: .profileMedia,
+                columnCount: targetColumnCount,
+                snapshot: snapshot,
+                plan: plan
+            ) {
+                self.currentProfileMediaData = data
+                self.currentProfileMediaSuccess = nextSuccess
+            }
+        } else {
+            currentProfileMediaData = data
+            currentProfileMediaSuccess = nextSuccess
+            syncRefreshControl(isRefreshing: isRefreshing)
+            applySnapshot(profileMediaData: data)
+        }
+    }
+
+    private func setContentKind(_ newKind: ContentKind) {
+        guard contentKind != newKind else { return }
+        contentKind = newKind
+        currentData = nil
+        currentSuccess = nil
+        currentProfileMediaData = nil
+        currentProfileMediaSuccess = nil
+        pendingScrollAnchor = nil
+    }
+
+    private func syncRefreshControl(isRefreshing: Bool) {
         if !isRefreshing {
             hasCompletedInitialRefreshCycle = true
         }
@@ -855,12 +1151,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         shouldRevealRefreshControl = false
     }
 
-    private var effectiveViewportTop: CGFloat {
-        collectionView.contentOffset.y + collectionView.adjustedContentInset.top
-    }
-
     private func reportIsAtTop() {
-        let isAtTop = effectiveViewportTop <= 1
+        let isAtTop = effectiveContentOffsetY <= 1
         guard lastReportedIsAtTop != isAtTop else { return }
         lastReportedIsAtTop = isAtTop
         onIsAtTopChanged?(isAtTop)
@@ -882,24 +1174,24 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         return min(max(offsetY, minY), maxY)
     }
 
-    private func isTimelineDataItemID(_ itemID: String) -> Bool {
-        itemID.hasPrefix(Self.timelinePrefix)
+    private func isDataItemID(_ itemID: String) -> Bool {
+        itemID.hasPrefix(Self.timelinePrefix) || itemID.hasPrefix(Self.profileMediaPrefix)
     }
 
     private func captureScrollAnchor() -> ScrollAnchor? {
         guard isViewLoaded,
-              currentSuccess != nil,
+              currentSuccess != nil || currentProfileMediaSuccess != nil,
               allowsScrollAnchorRestoration,
               collectionView.bounds.height > 1 else {
             return nil
         }
 
-        let viewportTop = effectiveViewportTop
+        let viewportTop = effectiveContentOffsetY
         let viewportBottom = collectionView.contentOffset.y + collectionView.bounds.height - collectionView.adjustedContentInset.bottom
         return collectionView.indexPathsForVisibleItems
             .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
                 guard let itemID = dataSource.itemIdentifier(for: indexPath),
-                      isTimelineDataItemID(itemID) else {
+                      isDataItemID(itemID) else {
                     return nil
                 }
                 let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame
@@ -952,8 +1244,84 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         return true
     }
 
+    private func restorePendingContentOffsetIfNeeded(finalize: Bool) {
+        guard let offsetY = pendingEffectiveContentOffsetYAfterSnapshot else { return }
+        restoreEffectiveContentOffset(offsetY, animated: false)
+        if finalize {
+            pendingEffectiveContentOffsetYAfterSnapshot = nil
+        }
+        collectionView.layer.removeAllAnimations()
+    }
+
+    private func applyPreparedContentTransition(
+        to newKind: ContentKind,
+        columnCount newColumnCount: Int,
+        snapshot: NSDiffableDataSourceSnapshot<Int, String>,
+        plan: SnapshotPlan,
+        updateState: () -> Void
+    ) {
+        // Invalidate any in-flight snapshot for the previous tab before replacing
+        // both its data and layout in the same non-animated transaction.
+        snapshotPreparationGeneration += 1
+        isApplyingContentTransition = true
+        defer { isApplyingContentTransition = false }
+
+        UIView.performWithoutAnimation {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+
+            setContentKind(newKind)
+            columnCount = max(newColumnCount, 1)
+            updateState()
+            clearAllHeightCache()
+            detachAutoplayPlayer(pause: true)
+            pendingScrollAnchor = nil
+            itemIndexMap = plan.indexMap
+
+            // Keep stable accessory and state cells attached, but refresh their
+            // callbacks against the newly selected paging source.
+            var transitionSnapshot = snapshot
+            let existingIDs = Set(dataSource.snapshot().itemIdentifiers)
+            transitionSnapshot.reconfigureItems(
+                transitionSnapshot.itemIdentifiers.filter(existingIDs.contains)
+            )
+            dataSource.apply(transitionSnapshot, animatingDifferences: false)
+            applyLayoutForColumnCount()
+            updateBackgroundColors()
+            syncRefreshControl(isRefreshing: plan.isRefreshing)
+            collectionView.layoutIfNeeded()
+            restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
+            collectionView.layer.removeAllAnimations()
+
+            lastAppliedSignature = plan.signature
+            lastRenderHashMap = plan.renderHashMap
+            lastLoadedItemIDs = plan.loadedItemIDs
+            CATransaction.commit()
+        }
+    }
+
+    private func applyCurrentSnapshot() {
+        switch contentKind {
+        case .timeline:
+            if let currentData {
+                applySnapshot(data: currentData)
+            }
+        case .profileMedia:
+            if let currentProfileMediaData {
+                applySnapshot(profileMediaData: currentProfileMediaData)
+            }
+        }
+    }
+
     private func applySnapshot(data: PagingState<UiTimelineV2>) {
-        let plan = makeSnapshotPlan(data: data)
+        applySnapshot(plan: makeSnapshotPlan(data: data, columnCount: columnCount))
+    }
+
+    private func applySnapshot(profileMediaData data: PagingState<ProfileMedia>) {
+        applySnapshot(plan: makeSnapshotPlan(profileMediaData: data, columnCount: columnCount))
+    }
+
+    private func applySnapshot(plan: SnapshotPlan) {
         snapshotPreparationGeneration += 1
         let generation = snapshotPreparationGeneration
         DispatchQueue.global(qos: .userInitiated).async { [plan] in
@@ -965,75 +1333,134 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
 
-    private func makeSnapshotPlan(data: PagingState<UiTimelineV2>) -> SnapshotPlan {
+    private func makeSnapshotPlan(
+        data: PagingState<UiTimelineV2>,
+        columnCount: Int
+    ) -> SnapshotPlan {
+        makeSnapshotPlan(
+            data: data,
+            loadingItemCount: loadingPlaceholderCount(
+                minimum: TimelineUIKitLayoutMetrics.timelinePlaceholderCount,
+                columnCount: columnCount,
+                estimatedPlaceholderHeight: 120
+            ),
+            placeholderPrefix: Self.placeholderPrefix,
+            itemID: { "\(Self.timelinePrefix)\(Self.itemIdentityKey(for: $0))" },
+            renderHash: { $0.renderHash }
+        )
+    }
+
+    private func makeSnapshotPlan(
+        profileMediaData data: PagingState<ProfileMedia>,
+        columnCount: Int
+    ) -> SnapshotPlan {
+        makeSnapshotPlan(
+            data: data,
+            loadingItemCount: loadingPlaceholderCount(
+                minimum: 8,
+                columnCount: columnCount,
+                estimatedPlaceholderHeight: profileMediaPlaceholderHeight(columnCount: columnCount)
+            ),
+            placeholderPrefix: Self.profileMediaPlaceholderPrefix,
+            itemID: { "\(Self.profileMediaPrefix)\($0.key)" },
+            renderHash: { $0.status.renderHash }
+        )
+    }
+
+    private func makeSnapshotPlan<Item: AnyObject>(
+        data: PagingState<Item>,
+        loadingItemCount: Int,
+        placeholderPrefix: String,
+        itemID: (Item) -> String,
+        renderHash: (Item) -> Int32
+    ) -> SnapshotPlan {
         var newIndexMap: [String: Int] = [:]
         var newRenderHashMap: [String: Int32] = [:]
-        var newLoadedTimelineItemIDs = Set<String>()
+        var newLoadedItemIDs = Set<String>()
         let accessoryIDs = accessoryItems.map { "\(Self.accessoryPrefix)\($0.id)" }
         var itemIDs: [String] = []
         var footerIDs: [String] = []
-
+        var isInitialLoading = false
 
         switch onEnum(of: data) {
         case .loading:
-            let items = (0..<5).map { "\(Self.placeholderPrefix)\($0)" }
-            itemIDs = items
-
+            isInitialLoading = true
+            itemIDs = (0..<loadingItemCount).map { "\(placeholderPrefix)\($0)" }
         case .error:
             itemIDs = [Self.errorID]
-
         case .empty:
             itemIDs = [Self.emptyID]
-
         case .success(let success):
             let itemCount = Int(success.itemCount)
             var loadedIDsByIndex: [Int: String] = [:]
             var loadedRenderHashByItemID: [String: Int32] = [:]
-            var loadedTimelineItemIDs = Set<String>()
 
-            for i in 0..<itemCount {
-                guard let peeked = success.peek(index: Int32(i)) else {
-                    continue
-                }
-                let itemKey = Self.itemIdentityKey(for: peeked)
-                let id = "\(Self.timelinePrefix)\(itemKey)"
-                loadedIDsByIndex[i] = id
-                loadedRenderHashByItemID[id] = peeked.renderHash
-                loadedTimelineItemIDs.insert(id)
+            for index in 0..<itemCount {
+                guard let item = success.peek(index: Int32(index)) else { continue }
+                let id = itemID(item)
+                loadedIDsByIndex[index] = id
+                loadedRenderHashByItemID[id] = renderHash(item)
+                newLoadedItemIDs.insert(id)
             }
 
-            var items: [String] = []
-            items.reserveCapacity(itemCount)
-            for i in 0..<itemCount {
+            itemIDs.reserveCapacity(itemCount)
+            for index in 0..<itemCount {
                 let id: String
-                if let loadedID = loadedIDsByIndex[i] {
+                if let loadedID = loadedIDsByIndex[index] {
                     id = loadedID
                     newRenderHashMap[id] = loadedRenderHashByItemID[id]
                 } else {
-                    id = "\(Self.placeholderPrefix)\(i)"
+                    id = "\(placeholderPrefix)\(index)"
                 }
-                items.append(id)
-                newIndexMap[id] = i
+                itemIDs.append(id)
+                newIndexMap[id] = index
             }
-            itemIDs = items
-            newLoadedTimelineItemIDs = loadedTimelineItemIDs
-
-            // Footer
-            let footer = footerItemIDs(for: success)
-            footerIDs = footer
+            footerIDs = footerItemIDs(for: success)
         }
 
-        let newSignature = SnapshotSignature(accessoryIDs: accessoryIDs, itemIDs: itemIDs, footerIDs: footerIDs)
+        let signature = SnapshotSignature(
+            accessoryIDs: accessoryIDs,
+            itemIDs: itemIDs,
+            footerIDs: footerIDs
+        )
         return SnapshotPlan(
-            signature: newSignature,
+            signature: signature,
             accessoryIDs: accessoryIDs,
             itemIDs: itemIDs,
             footerIDs: footerIDs,
             indexMap: newIndexMap,
             renderHashMap: newRenderHashMap,
-            loadedTimelineItemIDs: newLoadedTimelineItemIDs,
-            isRefreshing: pagingIsRefreshing(data)
+            loadedItemIDs: newLoadedItemIDs,
+            isRefreshing: pagingIsRefreshing(data),
+            isInitialLoading: isInitialLoading
         )
+    }
+
+    private func loadingPlaceholderCount(
+        minimum: Int,
+        columnCount: Int,
+        estimatedPlaceholderHeight: CGFloat
+    ) -> Int {
+        guard let targetOffsetY = pendingEffectiveContentOffsetYAfterSnapshot, isViewLoaded else {
+            return minimum
+        }
+        let viewportHeight = max(collectionView.bounds.height, 1)
+        let targetContentHeight = max(
+            targetOffsetY + viewportHeight,
+            viewportHeight
+        )
+        let rows = max(Int(ceil(targetContentHeight / max(estimatedPlaceholderHeight, 1))) + 1, 1)
+        return max(minimum, rows * max(columnCount, 1))
+    }
+
+    private func profileMediaPlaceholderHeight(columnCount: Int) -> CGFloat {
+        let width = collectionView.bounds.width
+        let horizontalInsets = TimelineUIKitLayoutMetrics.horizontalInset * 2
+        guard width > horizontalInsets else { return 120 }
+        let columns = max(columnCount, 1)
+        let availableWidth = width - horizontalInsets -
+            CGFloat(columns - 1) * TimelineUIKitLayoutMetrics.columnSpacing
+        return max(availableWidth / CGFloat(columns), 1)
     }
 
     nonisolated private static func makeSnapshot(from plan: SnapshotPlan) -> NSDiffableDataSourceSnapshot<Int, String> {
@@ -1058,7 +1485,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         var snapshot = preparedSnapshot
         let newSignature = plan.signature
         let previousSignature = lastAppliedSignature
-        let scrollAnchor = previousSignature != nil &&
+        let scrollAnchor = pendingEffectiveContentOffsetYAfterSnapshot == nil &&
+            previousSignature != nil &&
             previousSignature?.itemIDs != newSignature.itemIDs &&
             allowsScrollAnchorRestoration
             ? captureScrollAnchor()
@@ -1073,11 +1501,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let changedIDs = changedItemIDs(
                 in: plan.itemIDs,
                 newRenderHashMap: plan.renderHashMap,
-                newLoadedItemIDs: plan.loadedTimelineItemIDs
+                newLoadedItemIDs: plan.loadedItemIDs
             )
             lastRenderHashMap = plan.renderHashMap
-            lastLoadedTimelineItemIDs = plan.loadedTimelineItemIDs
+            lastLoadedItemIDs = plan.loadedItemIDs
             reconfigureItems(changedIDs)
+            restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
             return
@@ -1088,12 +1517,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let changedIDs = changedItemIDs(
                 in: plan.itemIDs,
                 newRenderHashMap: plan.renderHashMap,
-                newLoadedItemIDs: plan.loadedTimelineItemIDs
+                newLoadedItemIDs: plan.loadedItemIDs
             )
             applyFooterSnapshot(footerIDs: plan.footerIDs, reconfigureIDs: changedIDs, isRefreshing: plan.isRefreshing)
+            restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
             lastAppliedSignature = newSignature
             lastRenderHashMap = plan.renderHashMap
-            lastLoadedTimelineItemIDs = plan.loadedTimelineItemIDs
+            lastLoadedItemIDs = plan.loadedItemIDs
             validateCurrentAutoplayVisibility()
             scheduleAutoplaySelection()
             return
@@ -1105,16 +1535,17 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             existing.contains($0) && itemNeedsReconfigure(
                 $0,
                 newRenderHashMap: plan.renderHashMap,
-                newLoadedItemIDs: plan.loadedTimelineItemIDs
+                newLoadedItemIDs: plan.loadedItemIDs
             )
         }
         if !toReconfigure.isEmpty {
             snapshot.reconfigureItems(toReconfigure)
         }
-        
+
         let shouldAnimateDifferences =
                     !plan.isRefreshing &&
                     !refreshControl.isRefreshing &&
+                    pendingEffectiveContentOffsetYAfterSnapshot == nil &&
                     scrollAnchor == nil &&
                     !collectionView.isDragging &&
                     !collectionView.isDecelerating
@@ -1127,6 +1558,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
                     guard let self else { return }
                     self.restoreScrollAnchorIfNeeded(scrollAnchor)
+                    self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
                     self.pendingScrollAnchor = nil
                     self.validateCurrentAutoplayVisibility()
                     self.scheduleAutoplaySelection()
@@ -1138,13 +1570,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         } else {
             dataSource.apply(snapshot, animatingDifferences: shouldAnimateDifferences) { [weak self] in
                 guard let self else { return }
+                self.restorePendingContentOffsetIfNeeded(finalize: !plan.isInitialLoading)
                 self.validateCurrentAutoplayVisibility()
                 self.scheduleAutoplaySelection()
             }
         }
         lastAppliedSignature = newSignature
         lastRenderHashMap = plan.renderHashMap
-        lastLoadedTimelineItemIDs = plan.loadedTimelineItemIDs
+        lastLoadedItemIDs = plan.loadedItemIDs
     }
 
     private func changedItemIDs(
@@ -1167,7 +1600,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         newLoadedItemIDs: Set<String>
     ) -> Bool {
         lastRenderHashMap[itemID] != newRenderHashMap[itemID] ||
-            lastLoadedTimelineItemIDs.contains(itemID) != newLoadedItemIDs.contains(itemID)
+            lastLoadedItemIDs.contains(itemID) != newLoadedItemIDs.contains(itemID)
     }
 
     private func restorePendingScrollAnchorIfNeeded() {
@@ -1225,7 +1658,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         dataSource.apply(snapshot, animatingDifferences: shouldAnimateDifferences)
     }
 
-    private func footerItemIDs(for success: PagingStateSuccess<UiTimelineV2>) -> [String] {
+    private func footerItemIDs<Item: AnyObject>(for success: PagingStateSuccess<Item>) -> [String] {
         switch onEnum(of: success.appendState) {
         case .error:
             return [Self.footerErrorID]
@@ -1523,7 +1956,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         let section = indexPath.section
         let columns = isFullWidthSection(at: section) ? 1 : max(columnCount, 1)
-        let insets = layout.sectionInset
+        let insets = waterfallInsets(for: section, layout: layout)
         let available = collectionView.bounds.width - insets.left - insets.right
         let totalSpacing = CGFloat(columns - 1) * layout.minimumColumnSpacing
         let width = max((available - totalSpacing) / CGFloat(columns), 1)
@@ -1534,8 +1967,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
         if itemID.hasPrefix(Self.accessoryPrefix),
            let accessory = accessoryItemMap[itemID] {
+            // Match the fractional self-sizing used by the compositional layout
+            // so switching to the waterfall layout does not move profile tabs.
             let height = max(
-                measuredCompressedCardHeight(accessory.view, width: width),
+                measuredCompressedCardHeight(accessory.view, width: width, heightPadding: 0),
                 1
             )
             return CGSize(width: width, height: height)
@@ -1544,7 +1979,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         switch itemID {
         case Self.emptyID, Self.errorID:
             return CGSize(width: width, height: 240)
-        case Self.footerLoadingID, Self.footerErrorID, Self.footerEndID:
+        case Self.footerLoadingID,
+             Self.footerErrorID,
+             Self.footerEndID:
             return CGSize(width: width, height: 60)
         default:
             break
@@ -1557,9 +1994,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             sizingPlaceholderCard.isPlainTimelineDisplayMode = appearance.isPlainTimelineDisplayMode
             sizingPlaceholderCard.isMultipleColumn = true
             sizingPlaceholderCard.configure(index: 0, totalCount: totalCount)
-            let height = max(measuredCompressedCardHeight(sizingPlaceholderCard, width: width), 120)
+            let height = max(ceil(measuredCompressedCardHeight(sizingPlaceholderCard, width: width)), 120)
             heightCache[key] = height
             return CGSize(width: width, height: height)
+        }
+
+        if itemID.hasPrefix(Self.profileMediaPlaceholderPrefix) {
+            return CGSize(width: width, height: width)
+        }
+
+        if itemID.hasPrefix(Self.profileMediaPrefix),
+           let index = itemIndexMap[itemID],
+           let success = currentProfileMediaSuccess,
+           index >= 0,
+           index < Int(success.itemCount),
+           let item = success.peek(index: Int32(index)) {
+            let rawRatio = item.media.aspectRatio ?? 1
+            let ratio = rawRatio.isFinite && rawRatio > 0
+                ? max(9.0 / 21.0, rawRatio)
+                : 1
+            return CGSize(width: width, height: max(ceil(width / ratio), 1))
         }
 
         if itemID.hasPrefix(Self.timelinePrefix),
@@ -1588,7 +2042,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             if let contentHeight = sizingTimelineView.estimatedHeightForFitting(width: contentWidth) {
                 measuredHeight = ceil(contentHeight + 16 + 12) + 1
             } else {
-                measuredHeight = measuredCompressedCardHeight(sizingTimelineCard, width: width)
+                measuredHeight = ceil(measuredCompressedCardHeight(sizingTimelineCard, width: width))
             }
             let height = max(measuredHeight, 120)
             heightCache[key] = height
@@ -1607,6 +2061,28 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         isFullWidthSection(at: section) ? 1 : max(columnCount, 1)
     }
 
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetsFor section: Int
+    ) -> UIEdgeInsets {
+        guard let layout = collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return .zero }
+        return waterfallInsets(for: section, layout: layout)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingFor section: Int
+    ) -> CGFloat {
+        guard contentKind == .profileMedia else { return 0 }
+        switch sectionIdentifier(at: section) {
+        case Self.sectionAccessories: return 2
+        case Self.sectionMain: return 8
+        default: return 0
+        }
+    }
+
     // MARK: - UICollectionViewDelegate
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -1615,14 +2091,23 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             accessory.onVisibilityChanged?(true)
             return
         }
-        guard let success = currentSuccess else { return }
-        if let itemID = dataSource.itemIdentifier(for: indexPath),
-           let index = itemIndexMap[itemID],
-           index >= 0,
-           index < Int(success.itemCount) {
-            _ = success.get(index: Int32(index))
+        guard let itemID = dataSource.itemIdentifier(for: indexPath),
+              let index = itemIndexMap[itemID] else { return }
+        switch contentKind {
+        case .timeline:
+            if let success = currentSuccess,
+               index >= 0,
+               index < Int(success.itemCount) {
+                _ = success.get(index: Int32(index))
+            }
+            scheduleAutoplaySelection()
+        case .profileMedia:
+            if let success = currentProfileMediaSuccess,
+               index >= 0,
+               index < Int(success.itemCount) {
+                _ = success.get(index: Int32(index))
+            }
         }
-        scheduleAutoplaySelection()
     }
 
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -1644,8 +2129,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - UIScrollViewDelegate
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        onScrollInteractionBegan?()
+        beginScrollInteraction()
+    }
+
+    private func beginScrollInteraction() {
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
+        pendingEffectiveContentOffsetYAfterSnapshot = nil
         autoplaySelectionTask?.cancel()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
@@ -1654,27 +2145,92 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         restorePendingScrollAnchorIfNeeded()
         reportIsAtTop()
+        onContentOffsetChanged?(effectiveContentOffsetY)
         validateCurrentAutoplayVisibility()
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
-            scrollingState.isScrolling = false
-            scheduleAutoplaySelection()
-            scheduleDeferredPoolCleanup()
+            endScrollInteraction()
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        endScrollInteraction()
+    }
+
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        endScrollInteraction()
+    }
+
+    private func endScrollInteraction() {
         scrollingState.isScrolling = false
         scheduleAutoplaySelection()
         scheduleDeferredPoolCleanup()
     }
+}
 
-    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        scrollingState.isScrolling = false
-        scheduleAutoplaySelection()
-        scheduleDeferredPoolCleanup()
+private final class ProfileMediaCollectionViewCell: UICollectionViewCell {
+    private let mediaView = StatusMediaContentUIView()
+    private let placeholderView = UIView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        contentView.clipsToBounds = true
+
+        mediaView.translatesAutoresizingMaskIntoConstraints = false
+        placeholderView.translatesAutoresizingMaskIntoConstraints = false
+        placeholderView.backgroundColor = .tertiarySystemFill
+        placeholderView.layer.cornerRadius = 12
+        placeholderView.clipsToBounds = true
+        contentView.addSubview(mediaView)
+        contentView.addSubview(placeholderView)
+        NSLayoutConstraint.activate([
+            mediaView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            mediaView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            mediaView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            mediaView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            placeholderView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            placeholderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            placeholderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            placeholderView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) not supported")
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        configurePlaceholder()
+    }
+
+    func configure(item: ProfileMedia, appearance: StatusUIKitAppearance, onTap: @escaping () -> Void) {
+        placeholderView.isHidden = true
+        mediaView.isHidden = false
+        mediaView.configure(
+            data: [item.media],
+            sensitive: item.status.timelineContentPost?.sensitive ?? false,
+            cornerRadius: 12,
+            appearanceShowMedia: true,
+            appearanceShowSensitive: appearance.showSensitiveContent,
+            appearanceExpandMediaSize: true,
+            appearanceLimitMediaGridToNine: true,
+            appearanceMediaLayout: .grid,
+            carouselLeadingPadding: 0,
+            carouselTrailingPadding: 0
+        )
+        mediaView.onMediaClicked = { _, _ in onTap() }
+    }
+
+    func configurePlaceholder() {
+        mediaView.onMediaClicked = nil
+        mediaView.prepareForPoolRemoval()
+        mediaView.isHidden = true
+        placeholderView.isHidden = false
     }
 }
 
@@ -1687,7 +2243,6 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
     private var hostedBottomConstraint: NSLayoutConstraint?
     private var timelineViewStorage: TimelineUIView?
     private var timelineCardStorage: AdaptiveTimelineCardUIView?
-    private var placeholderViewStorage: TimelinePlaceholderUIView?
     private var placeholderCardStorage: AdaptiveTimelineCardUIView?
 
     // Rebuild-skip signature. When the incoming data + appearance + detail-key are
@@ -1957,21 +2512,11 @@ private final class TimelineUIKitCollectionViewCell: UICollectionViewCell {
         return card
     }
 
-    private func resolvedPlaceholderView() -> TimelinePlaceholderUIView {
-        if let placeholderViewStorage {
-            return placeholderViewStorage
-        }
-        let view = TimelinePlaceholderUIView()
-        placeholderViewStorage = view
-        return view
-    }
-
     private func resolvedPlaceholderCard() -> AdaptiveTimelineCardUIView {
         if let placeholderCardStorage {
             return placeholderCardStorage
         }
-        let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
+        let card = makeTimelinePlaceholderCardUIView()
         placeholderCardStorage = card
         return card
     }
@@ -1981,7 +2526,6 @@ private final class TimelinePlaceholderCollectionViewCell: UICollectionViewCell 
     private var hostedView: UIView?
     private var hostedConstraints: [NSLayoutConstraint] = []
     private var hostedBottomConstraint: NSLayoutConstraint?
-    private var placeholderViewStorage: TimelinePlaceholderUIView?
     private var placeholderCardStorage: AdaptiveTimelineCardUIView?
     private var usesWaterfallLayout = false
 
@@ -2047,21 +2591,11 @@ private final class TimelinePlaceholderCollectionViewCell: UICollectionViewCell 
         NSLayoutConstraint.activate(hostedConstraints)
     }
 
-    private func resolvedPlaceholderView() -> TimelinePlaceholderUIView {
-        if let placeholderViewStorage {
-            return placeholderViewStorage
-        }
-        let view = TimelinePlaceholderUIView()
-        placeholderViewStorage = view
-        return view
-    }
-
     private func resolvedPlaceholderCard() -> AdaptiveTimelineCardUIView {
         if let placeholderCardStorage {
             return placeholderCardStorage
         }
-        let card = AdaptiveTimelineCardUIView()
-        card.setContent(UIView.padding(resolvedPlaceholderView(), insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)))
+        let card = makeTimelinePlaceholderCardUIView()
         placeholderCardStorage = card
         return card
     }
@@ -2114,7 +2648,11 @@ private final class TimelineHostedViewCell: UICollectionViewCell {
         NSLayoutConstraint.deactivate(hostedConstraints)
         hostedConstraints = []
         hostedBottomConstraint = nil
-        hostedView?.removeFromSuperview()
+        // The view may already have moved to another reusable cell. Only the
+        // cell that still owns it should detach it during reuse.
+        if hostedView?.superview === contentView {
+            hostedView?.removeFromSuperview()
+        }
         hostedView = view
 
         guard let view else { return }

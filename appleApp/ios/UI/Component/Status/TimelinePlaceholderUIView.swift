@@ -67,3 +67,14 @@ final class TimelinePlaceholderUIView: UIView, TimelineHeightProviding {
         Self.measuredHeight
     }
 }
+
+func makeTimelinePlaceholderCardUIView() -> AdaptiveTimelineCardUIView {
+    let card = AdaptiveTimelineCardUIView()
+    card.setContent(
+        UIView.padding(
+            TimelinePlaceholderUIView(),
+            insets: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        )
+    )
+    return card
+}

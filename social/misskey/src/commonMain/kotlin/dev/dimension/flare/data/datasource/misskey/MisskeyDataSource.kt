@@ -633,7 +633,7 @@ internal class MisskeyDataSource(
             accountKey = accountKey,
         )
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
             ProfileTab(
                 name = UiStrings.Posts,

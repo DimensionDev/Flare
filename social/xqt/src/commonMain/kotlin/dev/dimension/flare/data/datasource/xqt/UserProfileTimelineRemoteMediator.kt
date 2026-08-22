@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.XQTTimelineQueryIds
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -15,31 +16,45 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-internal const val USER_HIGHLIGHTS_QUERY_ID = "06hDMOiAMANzKwXHHUwD1w"
+internal enum class UserProfileTimelineType(
+    val queryId: String,
+    val operationName: String,
+    val pagingKey: String,
+) {
+    Highlights(
+        queryId = XQTTimelineQueryIds.USER_HIGHLIGHTS,
+        operationName = "UserHighlightsTweets",
+        pagingKey = "highlights",
+    ),
+    Articles(
+        queryId = XQTTimelineQueryIds.USER_ARTICLES,
+        operationName = "UserArticlesTweets",
+        pagingKey = "articles",
+    ),
+    Reposts(
+        queryId = XQTTimelineQueryIds.USER_REPOSTS,
+        operationName = "UserRepostsTimeline",
+        pagingKey = "reposts",
+    ),
+}
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserHighlightsTimelineRemoteMediator(
+internal class UserProfileTimelineRemoteMediator(
+    private val type: UserProfileTimelineType,
     private val userKey: MicroBlogKey,
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey: String = "user_highlights_${userKey}_$accountKey"
+    override val pagingKey: String = "user_${type.pagingKey}_${userKey}_$accountKey"
 
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
-        val response =
+        val cursor =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service.getUserHighlightsTweets(
-                        pathQueryId = USER_HIGHLIGHTS_QUERY_ID,
-                        variables =
-                            UserHighlightsTimelineRequest(
-                                userID = userKey.id,
-                                count = pageSize.toLong(),
-                            ).encodeJson(),
-                    )
+                    null
                 }
 
                 is PagingRequest.Prepend -> {
@@ -49,19 +64,21 @@ internal class UserHighlightsTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Append -> {
-                    service.getUserHighlightsTweets(
-                        pathQueryId = USER_HIGHLIGHTS_QUERY_ID,
-                        variables =
-                            UserHighlightsTimelineRequest(
-                                userID = userKey.id,
-                                count = pageSize.toLong(),
-                                cursor = request.nextKey,
-                            ).encodeJson(),
-                    )
+                    request.nextKey
                 }
-            }.body()
+            }
         val instructions =
-            response
+            service
+                .getUserProfileTimeline(
+                    pathQueryId = type.queryId,
+                    operationName = type.operationName,
+                    variables =
+                        UserProfileTimelineRequest(
+                            userID = userKey.id,
+                            count = pageSize.toLong(),
+                            cursor = cursor,
+                        ).encodeJson(),
+                ).body()
                 ?.data
                 ?.user
                 ?.result
@@ -83,7 +100,7 @@ internal class UserHighlightsTimelineRemoteMediator(
 }
 
 @Serializable
-internal data class UserHighlightsTimelineRequest(
+internal data class UserProfileTimelineRequest(
     @SerialName("userId")
     @Required
     val userID: String,

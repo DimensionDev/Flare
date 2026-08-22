@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.xqt
 
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.model.User
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -50,3 +51,12 @@ internal suspend fun XQTService.profileSpotlights(screenName: String) =
                 screenName = screenName,
             ).encodeJson(),
     )
+
+internal val User.hasHighlightsTab: Boolean
+    get() =
+        highlightsInfo?.let {
+            it.canHighlightTweets && (it.highlightedTweets.toIntOrNull() ?: 0) > 0
+        } == true
+
+internal val User.hasArticlesTab: Boolean
+    get() = (userSeedTweetCount ?: 0) > 0

@@ -146,8 +146,10 @@ public val <T : Any> PagingState<T>.isRefreshing: Boolean
     get() = this is PagingState.Success && isRefreshing
 
 public suspend fun <T : Any> PagingState<T>.refreshSuspend() {
-    if (this is PagingState.Success) {
-        refreshSuspend()
+    when (this) {
+        is PagingState.Empty -> refresh()
+        is PagingState.Success -> refreshSuspend()
+        else -> Unit
     }
 }
 

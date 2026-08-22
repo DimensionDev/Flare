@@ -1476,7 +1476,7 @@ private object StubMicroblogDataSource : MicroblogDataSource {
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
 }
 
 private class StubNotificationDataSource(
@@ -1523,7 +1523,7 @@ private class StubNotificationDataSource(
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
 }
 
 private class StubRelationDataSource(
@@ -1676,5 +1676,5 @@ private class StubComposeDataSource(
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> = persistentListOf()
 }

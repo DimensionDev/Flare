@@ -58,6 +58,7 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
+import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.platform.XqtPlatformSpec
@@ -762,8 +763,16 @@ internal class XQTDataSource(
             accountKey = accountKey,
         )
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
-        listOfNotNull(
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> {
+        val user =
+            service
+                .userById(userKey.id)
+                .body()
+                ?.data
+                ?.user
+                ?.result as? User
+
+        return listOfNotNull(
             ProfileTab(
                 name = UiStrings.Posts,
                 loader = userTimeline(userKey, false),
@@ -778,19 +787,48 @@ internal class XQTDataSource(
                     ),
             ),
             ProfileTab(
-                name = UiStrings.Highlights,
+                name = UiStrings.Reposts,
                 loader =
-                    UserHighlightsTimelineRemoteMediator(
+                    UserProfileTimelineRemoteMediator(
+                        type = UserProfileTimelineType.Reposts,
                         service = service,
                         accountKey = accountKey,
                         userKey = userKey,
                     ),
             ),
+            if (user?.hasHighlightsTab == true) {
+                ProfileTab(
+                    name = UiStrings.Highlights,
+                    loader =
+                        UserProfileTimelineRemoteMediator(
+                            type = UserProfileTimelineType.Highlights,
+                            service = service,
+                            accountKey = accountKey,
+                            userKey = userKey,
+                        ),
+                )
+            } else {
+                null
+            },
             ProfileTab(
                 name = UiStrings.Media,
                 displayType = ProfileTab.DisplayType.Gallery,
                 loader = userTimeline(userKey, mediaOnly = true),
             ),
+            if (user?.hasArticlesTab == true) {
+                ProfileTab(
+                    name = UiStrings.Articles,
+                    loader =
+                        UserProfileTimelineRemoteMediator(
+                            type = UserProfileTimelineType.Articles,
+                            service = service,
+                            accountKey = accountKey,
+                            userKey = userKey,
+                        ),
+                )
+            } else {
+                null
+            },
             if (userKey == accountKey) {
                 ProfileTab(
                     name = UiStrings.Liked,
@@ -805,6 +843,7 @@ internal class XQTDataSource(
                 null
             },
         ).toPersistentList()
+    }
 
     override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(

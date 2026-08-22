@@ -228,6 +228,9 @@
                 report(userKey) {
                     controller.state.report(userKey);
                 },
+                retryTabs() {
+                    controller.state.retryTabs();
+                },
             },
             mount: controller.mount,
             close: controller.close,
@@ -694,6 +697,9 @@
                         >{profileState.tabs.message ??
                             m.profileUnableToLoadTabs()}</span
                     >
+                    <button class="btn btn-sm" type="button" onclick={() => profileState.retryTabs()}>
+                        {m.actionRetry()}
+                    </button>
                 </div>
             </div>
         {:else if selectedTab}

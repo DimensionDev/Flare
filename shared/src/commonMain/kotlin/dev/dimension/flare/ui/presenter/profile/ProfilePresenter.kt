@@ -48,6 +48,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("profile")
@@ -63,6 +65,7 @@ public class ProfilePresenter(
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileState>() {
     private val accountRepository: AccountRepository by koinInject()
+    private val tabsReloadVersion = MutableStateFlow(0)
 
     private val serviceFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
@@ -135,48 +138,57 @@ public class ProfilePresenter(
     }
 
     private val tabsFlow by lazy {
-        serviceFlow.mapLatest { service ->
-            val actualUserKey =
-                userKey
-                    ?: if (service is AuthenticatedMicroblogDataSource) {
-                        service.accountKey
-                    } else {
-                        null
-                    } ?: run {
-                    throw NoActiveAccountException
+        tabsReloadVersion.flatMapLatest {
+            serviceFlow
+                .mapLatest { service ->
+                    val actualUserKey =
+                        userKey
+                            ?: if (service is AuthenticatedMicroblogDataSource) {
+                                service.accountKey
+                            } else {
+                                null
+                            } ?: run {
+                            throw NoActiveAccountException
+                        }
+
+                    service
+                        .profileTabs(actualUserKey)
+                        .map { tab ->
+                            val tabId = "${accountType}_${actualUserKey}_${tab.id}"
+                            val timelinePresenter =
+                                object : TimelinePresenter() {
+                                    override val loader: Flow<RemoteLoader<UiTimelineV2>>
+                                        get() = flowOf(tab.loader)
+                                }
+                            when (tab.displayType) {
+                                ProfileTab.DisplayType.Timeline -> {
+                                    ProfileState.Tab.Timeline(
+                                        id = tabId,
+                                        name = tab.name,
+                                        presenter = timelinePresenter,
+                                    )
+                                }
+
+                                ProfileTab.DisplayType.Gallery -> {
+                                    ProfileState.Tab.Media(
+                                        id = tabId,
+                                        name = tab.name,
+                                        presenter =
+                                            ProfileMediaPresenter(
+                                                mediaTimelinePresenter = timelinePresenter,
+                                                showAllImages = tab.showAllImagesInGallery,
+                                            ),
+                                    )
+                                }
+                            }
+                        }.toImmutableList()
+                }.map<ImmutableList<ProfileState.Tab>, UiState<ImmutableList<ProfileState.Tab>>> {
+                    UiState.Success(it)
+                }.onStart {
+                    emit(UiState.Loading())
+                }.catch {
+                    emit(UiState.Error(it))
                 }
-
-            service
-                .profileTabs(actualUserKey)
-                .map { tab ->
-                    val tabId = "${accountType}_${actualUserKey}_${tab.id}"
-                    val timelinePresenter =
-                        object : TimelinePresenter() {
-                            override val loader: Flow<RemoteLoader<UiTimelineV2>>
-                                get() = flowOf(tab.loader)
-                        }
-                    when (tab.displayType) {
-                        ProfileTab.DisplayType.Timeline -> {
-                            ProfileState.Tab.Timeline(
-                                id = tabId,
-                                name = tab.name,
-                                presenter = timelinePresenter,
-                            )
-                        }
-
-                        ProfileTab.DisplayType.Gallery -> {
-                            ProfileState.Tab.Media(
-                                id = tabId,
-                                name = tab.name,
-                                presenter =
-                                    ProfileMediaPresenter(
-                                        mediaTimelinePresenter = timelinePresenter,
-                                        showAllImages = tab.showAllImagesInGallery,
-                                    ),
-                            )
-                        }
-                    }
-                }.toImmutableList()
         }
     }
 
@@ -245,7 +257,7 @@ public class ProfilePresenter(
         val isMe by isMeFlow.collectAsUiState()
         val myAccountKey by myAccountKeyFlow.collectAsUiState()
         val profileMenus by profileMenusFlow.collectAsState(emptyList<ActionMenu>().toImmutableList())
-        val tabs by tabsFlow.collectAsUiState()
+        val tabs by tabsFlow.collectAsState(UiState.Loading())
         val followButtonState =
             zipState(userState, relationState) { user, relation ->
                 FollowButtonState.from(
@@ -285,6 +297,10 @@ public class ProfilePresenter(
             }
 
             override fun report(userKey: MicroBlogKey) {
+            }
+
+            override fun retryTabs() {
+                tabsReloadVersion.value += 1
             }
         }
     }
@@ -456,6 +472,8 @@ public abstract class ProfileState(
     public abstract fun unblock(userKey: MicroBlogKey)
 
     public abstract fun report(userKey: MicroBlogKey)
+
+    public abstract fun retryTabs()
 
     @Immutable
     public sealed class Tab {

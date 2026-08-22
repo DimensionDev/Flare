@@ -58,6 +58,10 @@ struct ProfileScreen: View {
                     StateView(state: presenter.state.tabs) { tabsArray in
                         let tabs = tabsArray.cast(ProfileState.Tab.self)
                         profileTabsContent(tabs: tabs)
+                    } errorContent: { error in
+                        ListErrorView(error: error) {
+                            presenter.state.retryTabs()
+                        }
                     } loadingContent: {
                         ProfileTimelineLoadingPlaceholder()
                     }

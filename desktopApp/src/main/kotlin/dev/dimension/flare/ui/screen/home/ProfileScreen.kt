@@ -53,6 +53,7 @@ import dev.dimension.flare.profile_blocked_gate_title
 import dev.dimension.flare.profile_insight_title
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -392,6 +393,16 @@ internal fun ProfileScreen(
                                             ),
                                     )
                                 }
+                            }
+                        }
+                        state.state.tabs.onError { error ->
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ErrorContent(
+                                    error = error,
+                                    onRetry = state.state::retryTabs,
+                                )
                             }
                         }
                         state.state.tabs.onSuccess { tabs ->

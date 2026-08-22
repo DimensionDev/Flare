@@ -132,6 +132,10 @@ struct ProfileScreen: View {
                         tabs: tabs,
                         showsProfileAccessories: false
                     )
+                } errorContent: { error in
+                    ListErrorView(error: error) {
+                        presenter.state.retryTabs()
+                    }
                 } loadingContent: {
                     GeometryReader { proxy in
                         ScrollView {
@@ -185,6 +189,10 @@ struct ProfileScreen: View {
                     tabs: tabs,
                     showsProfileAccessories: true
                 )
+            } errorContent: { error in
+                ListErrorView(error: error) {
+                    presenter.state.retryTabs()
+                }
             } loadingContent: {
                 ScrollView {
                     LazyVStack(spacing: 0) {
@@ -317,7 +325,7 @@ private struct ProfileTimelineUIKitLoadingPlaceholder: View {
 
     let columnCount: Int
 
-    private let placeholderCount = 5
+    private let placeholderCount = TimelineUIKitLayoutMetrics.timelinePlaceholderCount
 
     var body: some View {
         let resolvedColumnCount = max(columnCount, 1)
@@ -326,7 +334,10 @@ private struct ProfileTimelineUIKitLoadingPlaceholder: View {
         if resolvedColumnCount > 1 {
             LazyVGrid(
                 columns: Array(
-                    repeating: GridItem(.flexible(), spacing: 8),
+                    repeating: GridItem(
+                        .flexible(),
+                        spacing: TimelineUIKitLayoutMetrics.columnSpacing
+                    ),
                     count: resolvedColumnCount
                 ),
                 spacing: 0
@@ -336,15 +347,18 @@ private struct ProfileTimelineUIKitLoadingPlaceholder: View {
                     isMultipleColumn: true
                 )
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, TimelineUIKitLayoutMetrics.horizontalInset)
         } else {
-            LazyVStack(spacing: 2) {
+            LazyVStack(spacing: TimelineUIKitLayoutMetrics.rowSpacing) {
                 placeholderCards(
                     isPlainTimelineDisplayMode: isPlainTimelineDisplayMode,
                     isMultipleColumn: false
                 )
             }
-            .padding(.horizontal, isPlainTimelineDisplayMode ? 0 : 16)
+            .padding(
+                .horizontal,
+                isPlainTimelineDisplayMode ? 0 : TimelineUIKitLayoutMetrics.horizontalInset
+            )
         }
     }
 
@@ -463,8 +477,8 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
         }
 
         guard !tabs.isEmpty else {
-            context.coordinator.prunePages(validIDs: [])
             controller.setPages([], selectedIndex: 0)
+            context.coordinator.prunePages(validIDs: [])
             return
         }
 
@@ -477,8 +491,9 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
         let validIDs = Set(tabs.map(profileTimelineID(for:)))
         let coordinator = context.coordinator
         let pageConfigurations = tabs.map { tab in
-            ProfileTimelinePageConfiguration(
-                id: profileTimelineID(for: tab),
+            let tabID = profileTimelineID(for: tab)
+            return ProfileTimelinePageConfiguration(
+                id: tabID,
                 makeController: {
                     coordinator.pageController(
                         for: tab,
@@ -488,21 +503,62 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                         extendsContentUnderTopBars: showsProfileAccessories,
                         openURL: openURL
                     )
+                },
+                releaseController: {
+                    coordinator.releasePage(id: tabID)
                 }
             )
         }
-        context.coordinator.prunePages(validIDs: validIDs)
         controller.setPages(pageConfigurations, selectedIndex: clampedIndex)
+        context.coordinator.prunePages(validIDs: validIDs)
     }
 
     final class Coordinator {
+        private final class PageRecord {
+            enum Kind {
+                case timeline
+                case media
+            }
+
+            let controller = UITimelineCollectionViewController(detailStatusKey: nil)
+            var cancellable: AnyCancellable?
+            var columnCount: Int?
+            var kind: Kind?
+            var presenterSource: AnyObject?
+            var timelinePresenter: KotlinPresenter<TimelineState>?
+            var mediaPresenter: KotlinPresenter<ProfileMediaState>?
+
+            func prepare(kind: Kind, columnCount: Int, presenterSource: AnyObject) -> Bool {
+                let kindChanged = self.kind != kind
+                let presenterChanged = self.presenterSource !== presenterSource
+                if kindChanged || presenterChanged {
+                    cancellable = nil
+                    timelinePresenter = nil
+                    mediaPresenter = nil
+                }
+                let needsBinding = cancellable == nil || self.columnCount != columnCount
+                self.kind = kind
+                self.columnCount = columnCount
+                self.presenterSource = presenterSource
+                return needsBinding
+            }
+
+            func close() {
+                cancellable = nil
+                controller.onContentOffsetChanged = nil
+                controller.onScrollInteractionBegan = nil
+                controller.refreshCallback = nil
+                columnCount = nil
+                kind = nil
+                presenterSource = nil
+                timelinePresenter = nil
+                mediaPresenter = nil
+            }
+        }
+
         private let headerView = ProfileHostedAccessoryView(ignoresSafeArea: true)
         private let pickerView = ProfileHostedAccessoryView(ignoresSafeArea: false)
-        private var pageControllers: [String: UITimelineCollectionViewController] = [:]
-        private var pageCancellables: [String: AnyCancellable] = [:]
-        private var pageColumnCounts: [String: Int] = [:]
-        private var timelinePresenters: [String: KotlinPresenter<TimelineState>] = [:]
-        private var mediaPresenters: [String: KotlinPresenter<ProfileMediaState>] = [:]
+        private var pageRecords: [String: PageRecord] = [:]
         private var headerSignature: ProfileHeaderAccessorySignature?
         private var pickerSignature: ProfilePickerAccessorySignature?
 
@@ -581,13 +637,9 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             openURL: OpenURLAction
         ) -> UITimelineCollectionViewController {
             let tabID = profileTimelineID(for: tab)
-            let controller: UITimelineCollectionViewController
-            if let cached = pageControllers[tabID] {
-                controller = cached
-            } else {
-                controller = UITimelineCollectionViewController(detailStatusKey: nil)
-                pageControllers[tabID] = controller
-            }
+            let record = pageRecords[tabID] ?? PageRecord()
+            pageRecords[tabID] = record
+            let controller = record.controller
             controller.appearance = appearance
             controller.usesGroupedBackgroundOverride = appearance.usesCardBackground || timelineColumnCount > 1
             controller.networkKind = networkKind
@@ -599,53 +651,55 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 openURL.callAsFunction(url)
             }
 
-            let needsBinding = pageCancellables[tabID] == nil ||
-                pageColumnCounts[tabID] != timelineColumnCount
-            if needsBinding {
-                pageColumnCounts[tabID] = timelineColumnCount
-                controller.resetInitialRefreshIndicatorSuppression()
-            }
-
             switch onEnum(of: tab) {
             case .timeline(let tab):
+                let needsBinding = record.prepare(
+                    kind: .timeline,
+                    columnCount: timelineColumnCount,
+                    presenterSource: tab.presenter
+                )
+                if needsBinding {
+                    controller.resetInitialRefreshIndicatorSuppression()
+                }
                 let presenter: KotlinPresenter<TimelineState>
-                if let cached = timelinePresenters[tabID] {
+                if let cached = record.timelinePresenter {
                     presenter = cached
                 } else {
                     presenter = KotlinPresenter<TimelineState>(presenter: tab.presenter)
-                    timelinePresenters[tabID] = presenter
+                    record.timelinePresenter = presenter
                 }
                 controller.refreshCallback = { [weak presenter] in
                     guard let presenter else { return }
                     try? await presenter.state.refresh()
                 }
                 if needsBinding {
-                    pageCancellables[tabID] = presenter.$state
+                    record.cancellable = presenter.$state
                         .sink { [weak controller] state in
                             controller?.update(data: state.listState, columnCount: timelineColumnCount)
                         }
                 }
             case .media(let tab):
+                let needsBinding = record.prepare(
+                    kind: .media,
+                    columnCount: timelineColumnCount,
+                    presenterSource: tab.presenter
+                )
+                if needsBinding {
+                    controller.resetInitialRefreshIndicatorSuppression()
+                }
                 let presenter: KotlinPresenter<ProfileMediaState>
-                if let cached = mediaPresenters[tabID] {
+                if let cached = record.mediaPresenter {
                     presenter = cached
                 } else {
                     presenter = KotlinPresenter<ProfileMediaState>(presenter: tab.presenter)
-                    mediaPresenters[tabID] = presenter
+                    record.mediaPresenter = presenter
                 }
                 controller.refreshCallback = { [weak presenter] in
                     guard let presenter else { return }
-                    switch onEnum(of: presenter.state.mediaState) {
-                    case .success(let success):
-                        try? await skie(success).refreshSuspend()
-                    case .empty(let empty):
-                        empty.refresh()
-                    default:
-                        break
-                    }
+                    try? await presenter.state.refreshSuspend()
                 }
                 if needsBinding {
-                    pageCancellables[tabID] = presenter.$state
+                    record.cancellable = presenter.$state
                         .sink { [weak controller] state in
                             controller?.update(profileMediaData: state.mediaState)
                         }
@@ -654,32 +708,19 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             return controller
         }
 
+        func releasePage(id: String) {
+            pageRecords.removeValue(forKey: id)?.close()
+        }
+
         func prunePages(validIDs: Set<String>) {
-            for key in pageControllers.keys where !validIDs.contains(key) {
-                pageControllers[key]?.onContentOffsetChanged = nil
-                pageControllers[key]?.onScrollInteractionBegan = nil
-                pageControllers.removeValue(forKey: key)
-                pageCancellables.removeValue(forKey: key)
-                pageColumnCounts.removeValue(forKey: key)
-            }
-            for key in timelinePresenters.keys where !validIDs.contains(key) {
-                timelinePresenters.removeValue(forKey: key)
-            }
-            for key in mediaPresenters.keys where !validIDs.contains(key) {
-                mediaPresenters.removeValue(forKey: key)
+            for key in pageRecords.keys.filter({ !validIDs.contains($0) }) {
+                releasePage(id: key)
             }
         }
 
         func close() {
-            pageCancellables.removeAll()
-            pageControllers.values.forEach {
-                $0.onContentOffsetChanged = nil
-                $0.onScrollInteractionBegan = nil
-            }
-            pageControllers.removeAll()
-            pageColumnCounts.removeAll()
-            timelinePresenters.removeAll()
-            mediaPresenters.removeAll()
+            pageRecords.values.forEach { $0.close() }
+            pageRecords.removeAll()
         }
     }
 }
@@ -687,17 +728,21 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 private struct ProfileTimelinePageConfiguration {
     let id: String
     let makeController: () -> UITimelineCollectionViewController
+    let releaseController: () -> Void
 }
 
 private final class ProfileTimelinePageViewController: UIViewController {
     let id: String
     private(set) var timelineController: UITimelineCollectionViewController?
     private var makeController: () -> UITimelineCollectionViewController
+    private var releaseController: () -> Void
     private var pageBackgroundColor: UIColor
+    private(set) var savedEffectiveContentOffsetY: CGFloat = 0
 
     init(configuration: ProfileTimelinePageConfiguration, backgroundColor: UIColor) {
         id = configuration.id
         makeController = configuration.makeController
+        releaseController = configuration.releaseController
         pageBackgroundColor = backgroundColor
         super.init(nibName: nil, bundle: nil)
     }
@@ -715,6 +760,7 @@ private final class ProfileTimelinePageViewController: UIViewController {
 
     func update(configuration: ProfileTimelinePageConfiguration) {
         makeController = configuration.makeController
+        releaseController = configuration.releaseController
     }
 
     func setBackgroundColor(_ color: UIColor) {
@@ -746,6 +792,20 @@ private final class ProfileTimelinePageViewController: UIViewController {
         ])
         controller.didMove(toParent: self)
         return controller
+    }
+
+    func deactivate(savingOffset: Bool = true) {
+        guard let timelineController else { return }
+        if savingOffset {
+            savedEffectiveContentOffsetY = max(timelineController.effectiveContentOffsetY, 0)
+        }
+        timelineController.onContentOffsetChanged = nil
+        timelineController.onScrollInteractionBegan = nil
+        timelineController.willMove(toParent: nil)
+        timelineController.view.removeFromSuperview()
+        timelineController.removeFromParent()
+        self.timelineController = nil
+        releaseController()
     }
 }
 
@@ -786,6 +846,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     private let accessoryScrollView = ProfileAccessoryScrollView()
     private var pages: [ProfileTimelinePageViewController] = []
     private var currentIndex = 0
+    private weak var pendingTransitionPage: ProfileTimelinePageViewController?
     private var headerView: UIView?
     private var pickerView: UIView?
     private var pageBackgroundColor = UIColor.clear
@@ -884,9 +945,11 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         let previousIDs = pages.map(\.id)
         let existingPages = Dictionary(uniqueKeysWithValues: pages.map { ($0.id, $0) })
         let newIDs = Set(configurations.map(\.id))
+        if let pendingTransitionPage, !newIDs.contains(pendingTransitionPage.id) {
+            self.pendingTransitionPage = nil
+        }
         for page in pages where !newIDs.contains(page.id) {
-            page.timelineController?.onContentOffsetChanged = nil
-            page.timelineController?.onScrollInteractionBegan = nil
+            page.deactivate()
         }
         pages = configurations.map { configuration in
             if let page = existingPages[configuration.id] {
@@ -901,6 +964,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
 
         guard !pages.isEmpty else {
             currentIndex = 0
+            pendingTransitionPage = nil
             accessoryScrollView.isScrollEnabled = false
             pageViewController.setViewControllers(nil, direction: .forward, animated: false)
             reportVisibility(effectiveOffsetY: 0)
@@ -938,13 +1002,16 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         previousViewControllers: [UIViewController],
         transitionCompleted completed: Bool
     ) {
-        guard completed,
-              let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController,
+        guard let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController,
               let index = index(of: visiblePage) else { return }
         currentIndex = index
         let timeline = activate(visiblePage)
+        pendingTransitionPage = nil
+        deactivatePages(except: visiblePage, savingOffsets: completed)
         updateAccessoryFrames(effectiveOffsetY: timeline.effectiveContentOffsetY)
-        onSelectedIndexChanged?(index)
+        if completed {
+            onSelectedIndexChanged?(index)
+        }
     }
 
     func pageViewController(
@@ -955,6 +1022,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
             return
         }
         for case let target as ProfileTimelinePageViewController in pendingViewControllers {
+            pendingTransitionPage = target
             synchronizeOffset(from: source, to: activate(target))
         }
     }
@@ -971,6 +1039,9 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController
         if visiblePage === target {
             currentIndex = index
+            if pendingTransitionPage == nil {
+                deactivatePages(except: target, savingOffsets: false)
+            }
             updateAccessoryFrames(effectiveOffsetY: targetTimeline.effectiveContentOffsetY)
             return
         }
@@ -979,19 +1050,31 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         }
         let direction: UIPageViewController.NavigationDirection = index >= currentIndex ? .forward : .reverse
         currentIndex = index
+        pendingTransitionPage = target
         pageViewController.setViewControllers(
             [target],
             direction: direction,
             animated: animated
-        ) { [weak self, weak targetTimeline] _ in
-            guard let self, let targetTimeline else { return }
-            self.updateAccessoryFrames(effectiveOffsetY: targetTimeline.effectiveContentOffsetY)
+        ) { [weak self, weak target] _ in
+            guard let self, let target,
+                  let visiblePage = self.pageViewController.viewControllers?.first
+                    as? ProfileTimelinePageViewController else { return }
+            self.pendingTransitionPage = nil
+            let visibleTimeline = self.activate(visiblePage)
+            self.currentIndex = self.index(of: visiblePage) ?? index
+            self.deactivatePages(except: visiblePage, savingOffsets: visiblePage === target)
+            self.updateAccessoryFrames(effectiveOffsetY: visibleTimeline.effectiveContentOffsetY)
         }
     }
 
     private func activate(_ page: ProfileTimelinePageViewController) -> UITimelineCollectionViewController {
+        let needsOffsetRestoration = page.timelineController == nil
         let timeline = page.activate()
         configure(timeline)
+        if needsOffsetRestoration {
+            timeline.restoreEffectiveContentOffset(page.savedEffectiveContentOffsetY, animated: false)
+            timeline.restoreEffectiveContentOffsetAfterNextSnapshot(page.savedEffectiveContentOffsetY)
+        }
         timeline.onContentOffsetChanged = { [weak self, weak timeline] offsetY in
             guard let timeline else { return }
             self?.pageDidScroll(timeline, effectiveOffsetY: offsetY)
@@ -1008,10 +1091,23 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         to target: UITimelineCollectionViewController
     ) {
         guard let source = source.timelineController else { return }
-        let offsetY = max(source.effectiveContentOffsetY, 0)
+        let sourceOffsetY = max(source.effectiveContentOffsetY, 0)
+        let targetOffsetY = max(target.effectiveContentOffsetY, 0)
+        let offsetY = sourceOffsetY < collapseDistance
+            ? sourceOffsetY
+            : max(targetOffsetY, collapseDistance)
         target.loadViewIfNeeded()
         target.restoreEffectiveContentOffset(offsetY, animated: false)
         target.restoreEffectiveContentOffsetAfterNextSnapshot(offsetY)
+    }
+
+    private func deactivatePages(
+        except activePage: ProfileTimelinePageViewController?,
+        savingOffsets: Bool
+    ) {
+        for page in pages where page !== activePage {
+            page.deactivate(savingOffset: savingOffsets)
+        }
     }
 
     private func index(of viewController: ProfileTimelinePageViewController) -> Int? {

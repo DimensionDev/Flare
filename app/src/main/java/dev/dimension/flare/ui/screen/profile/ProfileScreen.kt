@@ -71,6 +71,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -476,6 +477,13 @@ internal fun ProfileScreen(
                                         statusLoadingPlaceholders()
                                     }
                                 }
+                            }
+                            state.tabs.onError { error ->
+                                ErrorContent(
+                                    error = error,
+                                    onRetry = state.state::retryTabs,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
                             }
                             state.pagerState.onSuccess { pagerState ->
                                 state.tabs.onSuccess { tabs ->

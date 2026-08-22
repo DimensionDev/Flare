@@ -151,10 +151,5 @@ public func profileTabTitle(for tab: ProfileState.Tab) -> String {
 }
 
 public func profileTimelineID(for tab: ProfileState.Tab) -> String {
-    switch onEnum(of: tab) {
-    case .timeline:
-        "Timeline_\(tab.name.name)"
-    case .media:
-        "Media_\(tab.name.name)"
-    }
+    tab.id
 }

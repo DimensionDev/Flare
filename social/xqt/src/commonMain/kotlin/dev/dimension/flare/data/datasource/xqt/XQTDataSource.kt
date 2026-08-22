@@ -63,7 +63,6 @@ import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.XQTCredential
 import dev.dimension.flare.data.platform.XqtPlatformSpec
 import dev.dimension.flare.data.platform.toTimelineCandidate
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -85,7 +84,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -767,20 +765,12 @@ internal class XQTDataSource(
 
     override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> {
         val user =
-            try {
-                service
-                    .userById(userKey.id)
-                    .body()
-                    ?.data
-                    ?.user
-                    ?.result as? User
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: LoginExpiredException) {
-                throw error
-            } catch (_: Exception) {
-                null
-            }
+            service
+                .userById(userKey.id)
+                .body()
+                ?.data
+                ?.user
+                ?.result as? User
 
         return listOfNotNull(
             ProfileTab(

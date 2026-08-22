@@ -6,6 +6,13 @@ import CHTCollectionViewWaterfallLayout
 import GSPlayer
 import AVFoundation
 
+enum TimelineUIKitLayoutMetrics {
+    static let horizontalInset: CGFloat = 16
+    static let columnSpacing: CGFloat = 8
+    static let rowSpacing: CGFloat = 2
+    static let timelinePlaceholderCount = 5
+}
+
 // MARK: - SwiftUI Wrapper
 
 struct UITimelineCollectionView: UIViewControllerRepresentable {
@@ -219,10 +226,6 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
 
-    var currentContentOffset: CGPoint {
-        collectionView?.contentOffset ?? .zero
-    }
-
     var effectiveContentOffsetY: CGFloat {
         guard isViewLoaded else { return 0 }
         return collectionView.contentOffset.y + collectionView.adjustedContentInset.top
@@ -251,23 +254,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         endScrollInteraction()
     }
 
-    func restoreContentOffsetAfterNextSnapshot(_ offset: CGPoint) {
-        pendingContentOffsetAfterSnapshot = offset
-    }
-
     func restoreEffectiveContentOffsetAfterNextSnapshot(_ offsetY: CGFloat) {
         guard isViewLoaded else { return }
-        restoreContentOffsetAfterNextSnapshot(
-            CGPoint(
-                x: collectionView.contentOffset.x,
-                y: offsetY - collectionView.adjustedContentInset.top
-            )
-        )
-    }
-
-    func setContentOffset(_ offset: CGPoint, animated: Bool) {
-        guard isViewLoaded else { return }
-        collectionView.setContentOffset(offset, animated: animated)
+        pendingEffectiveContentOffsetYAfterSnapshot = offsetY
     }
 
     func restoreContentOffset(_ offset: CGPoint, animated: Bool) {
@@ -324,7 +313,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var currentAutoplayID: String?
     private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
     private var pendingScrollAnchor: ScrollAnchor?
-    private var pendingContentOffsetAfterSnapshot: CGPoint?
+    private var pendingEffectiveContentOffsetYAfterSnapshot: CGFloat?
     private var isRestoringScrollAnchor = false
     private var isApplyingContentTransition = false
     private var snapshotPreparationGeneration = 0
@@ -455,7 +444,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func makeSingleColumnLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, _ in
             let isAccessorySection = !self.accessoryItems.isEmpty && sectionIndex == 0
-            let horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode ? 0 : 16
+            let horizontalInset = isAccessorySection || self.appearance.isPlainTimelineDisplayMode
+                ? 0
+                : TimelineUIKitLayoutMetrics.horizontalInset
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1),
                 heightDimension: .estimated(180)
@@ -463,12 +454,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 2
+            section.interGroupSpacing = TimelineUIKitLayoutMetrics.rowSpacing
             section.contentInsets = NSDirectionalEdgeInsets(
                 top: 0,
-                leading: CGFloat(horizontalInset),
+                leading: horizontalInset,
                 bottom: 0,
-                trailing: CGFloat(horizontalInset)
+                trailing: horizontalInset
             )
             return section
         }
@@ -477,13 +468,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func makeWaterfallLayout(columns: Int) -> UICollectionViewLayout {
         let layout = CHTCollectionViewWaterfallLayout()
         layout.columnCount = columns
-        layout.minimumColumnSpacing = 8
+        layout.minimumColumnSpacing = TimelineUIKitLayoutMetrics.columnSpacing
         layout.minimumInteritemSpacing = 0
         layout.sectionInset = UIEdgeInsets(
             top: 0,
-            left: 16,
+            left: TimelineUIKitLayoutMetrics.horizontalInset,
             bottom: 0,
-            right: 16
+            right: TimelineUIKitLayoutMetrics.horizontalInset
         )
         layout.itemRenderDirection = .shortestFirst
         return layout
@@ -500,9 +491,16 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func resolvedProfileMediaColumnCount() -> Int {
         let width = collectionView?.bounds.width ?? viewIfLoaded?.bounds.width ?? 0
         let targetWidth: CGFloat = traitCollection.horizontalSizeClass == .regular ? 240 : 120
-        let availableWidth = max(width - 32, 0)
+        let horizontalInsets = TimelineUIKitLayoutMetrics.horizontalInset * 2
+        let availableWidth = max(width - horizontalInsets, 0)
         return width > 0
-            ? max(Int((availableWidth + 8) / (targetWidth + 8)), 2)
+            ? max(
+                Int(
+                    (availableWidth + TimelineUIKitLayoutMetrics.columnSpacing) /
+                        (targetWidth + TimelineUIKitLayoutMetrics.columnSpacing)
+                ),
+                2
+            )
             : 2
     }
 
@@ -897,26 +895,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func openProfileMedia(_ item: ProfileMedia) {
         guard let post = item.status.timelineContentPost else { return }
-        if post.mediaClickPolicy == .openPostClickEvent {
-            post.onClicked(ClickContext(launcher: makeLauncher()))
-            return
-        }
-        let route = DeeplinkRoute.MediaStatusMedia(
+        IOSTimelineMediaActions.open(
+            post: post,
             statusKey: item.statusKey,
-            accountType: post.accountType,
             index: Int32(item.index),
-            preview: item.media.mediaPreviewURL
+            preview: item.media.mediaPreviewURL,
+            openURL: { [weak self] url in
+                self?.openURL?(url)
+            }
         )
-        if let url = URL(string: route.toUri()) {
-            openURL?(url)
-        }
-    }
-
-    private func makeLauncher() -> AppleUriLauncher {
-        AppleUriLauncher(openUrl: OpenURLAction { [weak self] url in
-            self?.openURL?(url)
-            return .handled
-        })
     }
 
     private func configureErrorCell(_ cell: TimelineHostedViewCell) {
@@ -1258,10 +1245,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func restorePendingContentOffsetIfNeeded(finalize: Bool) {
-        guard let offset = pendingContentOffsetAfterSnapshot else { return }
-        restoreContentOffset(offset, animated: false)
+        guard let offsetY = pendingEffectiveContentOffsetYAfterSnapshot else { return }
+        restoreEffectiveContentOffset(offsetY, animated: false)
         if finalize {
-            pendingContentOffsetAfterSnapshot = nil
+            pendingEffectiveContentOffsetYAfterSnapshot = nil
         }
         collectionView.layer.removeAllAnimations()
     }
@@ -1353,7 +1340,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         makeSnapshotPlan(
             data: data,
             loadingItemCount: loadingPlaceholderCount(
-                minimum: 5,
+                minimum: TimelineUIKitLayoutMetrics.timelinePlaceholderCount,
                 columnCount: columnCount,
                 estimatedPlaceholderHeight: 120
             ),
@@ -1454,12 +1441,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         columnCount: Int,
         estimatedPlaceholderHeight: CGFloat
     ) -> Int {
-        guard let targetOffset = pendingContentOffsetAfterSnapshot, isViewLoaded else {
+        guard let targetOffsetY = pendingEffectiveContentOffsetYAfterSnapshot, isViewLoaded else {
             return minimum
         }
         let viewportHeight = max(collectionView.bounds.height, 1)
         let targetContentHeight = max(
-            targetOffset.y + viewportHeight + collectionView.adjustedContentInset.top,
+            targetOffsetY + viewportHeight,
             viewportHeight
         )
         let rows = max(Int(ceil(targetContentHeight / max(estimatedPlaceholderHeight, 1))) + 1, 1)
@@ -1468,9 +1455,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func profileMediaPlaceholderHeight(columnCount: Int) -> CGFloat {
         let width = collectionView.bounds.width
-        guard width > 32 else { return 120 }
+        let horizontalInsets = TimelineUIKitLayoutMetrics.horizontalInset * 2
+        guard width > horizontalInsets else { return 120 }
         let columns = max(columnCount, 1)
-        let availableWidth = width - 32 - CGFloat(columns - 1) * 8
+        let availableWidth = width - horizontalInsets -
+            CGFloat(columns - 1) * TimelineUIKitLayoutMetrics.columnSpacing
         return max(availableWidth / CGFloat(columns), 1)
     }
 
@@ -1496,7 +1485,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         var snapshot = preparedSnapshot
         let newSignature = plan.signature
         let previousSignature = lastAppliedSignature
-        let scrollAnchor = pendingContentOffsetAfterSnapshot == nil &&
+        let scrollAnchor = pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             previousSignature != nil &&
             previousSignature?.itemIDs != newSignature.itemIDs &&
             allowsScrollAnchorRestoration
@@ -1556,7 +1545,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         let shouldAnimateDifferences =
                     !plan.isRefreshing &&
                     !refreshControl.isRefreshing &&
-                    pendingContentOffsetAfterSnapshot == nil &&
+                    pendingEffectiveContentOffsetYAfterSnapshot == nil &&
                     scrollAnchor == nil &&
                     !collectionView.isDragging &&
                     !collectionView.isDecelerating
@@ -2147,7 +2136,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func beginScrollInteraction() {
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
-        pendingContentOffsetAfterSnapshot = nil
+        pendingEffectiveContentOffsetYAfterSnapshot = nil
         autoplaySelectionTask?.cancel()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()

@@ -2581,7 +2581,11 @@ private final class TimelineHostedViewCell: UICollectionViewCell {
         NSLayoutConstraint.deactivate(hostedConstraints)
         hostedConstraints = []
         hostedBottomConstraint = nil
-        hostedView?.removeFromSuperview()
+        // The view may already have moved to another reusable cell. Only the
+        // cell that still owns it should detach it during reuse.
+        if hostedView?.superview === contentView {
+            hostedView?.removeFromSuperview()
+        }
         hostedView = view
 
         guard let view else { return }

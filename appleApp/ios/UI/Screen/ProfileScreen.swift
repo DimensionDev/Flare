@@ -231,6 +231,7 @@ struct ProfileScreen: View {
                 }
             )
         }
+        .ignoresSafeArea(edges: .vertical)
     }
 
     @ViewBuilder
@@ -343,7 +344,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
         controller.appearance = appearance
         controller.usesGroupedBackgroundOverride = appearance.usesCardBackground || timelineColumnCount > 1
         controller.networkKind = networkKind
-        controller.extendsContentUnderTopBars = true
+        controller.extendsContentUnderTopBars = showsProfileAccessories
         controller.suppressInitialRefreshIndicator = true
         let accessoriesChanged = context.coordinator.updateAccessories(
             showsProfileAccessories: showsProfileAccessories,

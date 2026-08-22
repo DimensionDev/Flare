@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">ברוך שובך!</string>
+    <string name="changelog_message">ביצענו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:</string>
     <string name="changelog_current"><![CDATA[
             <span>גרסה %1$s:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>שופרה האמינות של צירי הזמן והמדיה, כולל התראות X, הדפדוף ב״גילוי״ של Mastodon, סדר הפוסטים החוזרים, פרופילי Nostr, סרטוני RSS מוטמעים וגודל הגלריה ב-iOS.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">ברוך שובך!</string>
-    <string name="changelog_message">ביצענו כמה שינויים מאז ההתחברות האחרונה שלך. הנה הפרטים:</string>
 </resources>

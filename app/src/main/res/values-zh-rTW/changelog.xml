@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">歡迎回來！</string>
+    <string name="changelog_message">自你上次登入以來我們做了一些變更。詳情如下：</string>
     <string name="changelog_current"><![CDATA[
             <span>版本 %1$s：</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>改善時間軸與媒體穩定性，包括 X 通知、Mastodon 探索分頁、轉貼排序、Nostr 個人檔案、RSS 影片嵌入及 iOS 圖庫尺寸。</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">歡迎回來！</string>
-    <string name="changelog_message">自你上次登入以來我們做了一些變更。詳情如下：</string>
 </resources>

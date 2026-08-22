@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Üdv újra!</string>
+    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
     <string name="changelog_current"><![CDATA[
             <span>%1$s verzió:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>Javult az idővonalak és a média megbízhatósága, többek között az X-értesítések, a Mastodon Felfedezés lapozása, az újraközlések sorrendje, a Nostr-profilok, a beágyazott RSS-videók és az iOS Galéria méretezése.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Üdv újra!</string>
-    <string name="changelog_message">Néhány változtatást végeztünk a legutóbbi bejelentkezésed óta. Íme a részletek:</string>
 </resources>

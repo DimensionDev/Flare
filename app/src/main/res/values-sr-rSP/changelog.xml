@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Добро дошли назад!</string>
+    <string name="changelog_message">Направили смо неке измене од ваше последње пријаве. Ево детаља:</string>
     <string name="changelog_current"><![CDATA[
             <span>Верзија %1$s:</span>
             <ul>
@@ -9,6 +11,4 @@
                 <li>Побољшана је поузданост временских линија и медија, укључујући X обавештења, пагинацију Mastodon одељка „Откриј“, редослед поновних објава, Nostr профиле, уграђене RSS видео-снимке и величину iOS галерије.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Добро дошли назад!</string>
-    <string name="changelog_message">Направили смо неке измене од ваше последње пријаве. Ево детаља:</string>
 </resources>

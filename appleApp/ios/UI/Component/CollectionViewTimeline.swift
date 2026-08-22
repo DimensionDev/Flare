@@ -49,6 +49,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         }
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
+        controller.topScrollIndicatorInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff,
@@ -71,6 +72,7 @@ struct UITimelineCollectionView: UIViewControllerRepresentable {
         }
         controller.onIsAtTopChanged = onIsAtTopChanged
         controller.topContentInset = topContentInset
+        controller.topScrollIndicatorInset = topContentInset
         controller.appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff,
@@ -161,6 +163,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     var topContentInset: CGFloat = 0 {
         didSet {
             guard isViewLoaded else { return }
+            updateContentInsets()
+        }
+    }
+    var topScrollIndicatorInset: CGFloat = 0 {
+        didSet {
+            guard oldValue != topScrollIndicatorInset, isViewLoaded else { return }
             updateContentInsets()
         }
     }
@@ -748,7 +756,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         if abs(collectionView.contentInset.top - desiredTopInset) > 0.5 {
             collectionView.contentInset.top = desiredTopInset
         }
-        collectionView.verticalScrollIndicatorInsets.top = topContentInset
+        collectionView.verticalScrollIndicatorInsets.top = topScrollIndicatorInset
         if wasPinnedToTop {
             let topOffset = -collectionView.adjustedContentInset.top
             if abs(collectionView.contentOffset.y - topOffset) > 0.5 {

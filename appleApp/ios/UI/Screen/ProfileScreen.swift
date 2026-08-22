@@ -592,6 +592,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             controller.usesGroupedBackgroundOverride = appearance.usesCardBackground || timelineColumnCount > 1
             controller.networkKind = networkKind
             controller.extendsContentUnderTopBars = extendsContentUnderTopBars
+            controller.topScrollIndicatorInset = 0
             controller.suppressInitialRefreshIndicator = true
             controller.accessoryItems = []
             controller.openURL = { url in

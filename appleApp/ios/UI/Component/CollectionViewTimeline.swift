@@ -122,6 +122,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     var refreshCallback: (() async -> Void)?
     var onIsAtTopChanged: ((Bool) -> Void)?
+    var onContentOffsetChanged: ((CGFloat) -> Void)?
+    var onScrollInteractionBegan: (() -> Void)?
     var openURL: ((URL) -> Void)?
     var suppressInitialRefreshIndicator = false
     var usesGroupedBackgroundOverride: Bool? {
@@ -157,6 +159,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
     }
     var topContentInset: CGFloat = 0 {
+        didSet {
+            guard isViewLoaded else { return }
+            updateContentInsets()
+        }
+    }
+    var minimumVerticalScrollDistance: CGFloat = 0 {
         didSet {
             guard isViewLoaded else { return }
             updateContentInsets()
@@ -207,8 +215,46 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView?.contentOffset ?? .zero
     }
 
+    var effectiveContentOffsetY: CGFloat {
+        guard isViewLoaded else { return 0 }
+        return collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+    }
+
+    var maximumEffectiveContentOffsetY: CGFloat {
+        guard isViewLoaded else { return 0 }
+        let minimumOffsetY = -collectionView.adjustedContentInset.top
+        let maximumOffsetY = max(
+            minimumOffsetY,
+            collectionView.contentSize.height - collectionView.bounds.height + collectionView.adjustedContentInset.bottom
+        )
+        return maximumOffsetY + collectionView.adjustedContentInset.top
+    }
+
+    var scrollDecelerationRate: UIScrollView.DecelerationRate {
+        guard isViewLoaded else { return .normal }
+        return collectionView.decelerationRate
+    }
+
+    func beginExternalScrollInteraction() {
+        beginScrollInteraction()
+    }
+
+    func endExternalScrollInteraction() {
+        endScrollInteraction()
+    }
+
     func restoreContentOffsetAfterNextSnapshot(_ offset: CGPoint) {
         pendingContentOffsetAfterSnapshot = offset
+    }
+
+    func restoreEffectiveContentOffsetAfterNextSnapshot(_ offsetY: CGFloat) {
+        guard isViewLoaded else { return }
+        restoreContentOffsetAfterNextSnapshot(
+            CGPoint(
+                x: collectionView.contentOffset.x,
+                y: offsetY - collectionView.adjustedContentInset.top
+            )
+        )
     }
 
     func setContentOffset(_ offset: CGPoint, animated: Bool) {
@@ -222,6 +268,28 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.layoutIfNeeded()
         collectionView.setContentOffset(
             CGPoint(x: offset.x, y: clampedContentOffsetY(offset.y)),
+            animated: animated
+        )
+    }
+
+    func restoreEffectiveContentOffset(_ offsetY: CGFloat, animated: Bool) {
+        guard isViewLoaded else { return }
+        restoreContentOffset(
+            CGPoint(
+                x: collectionView.contentOffset.x,
+                y: offsetY - collectionView.adjustedContentInset.top
+            ),
+            animated: animated
+        )
+    }
+
+    func setEffectiveContentOffset(_ offsetY: CGFloat, animated: Bool) {
+        guard isViewLoaded else { return }
+        collectionView.setContentOffset(
+            CGPoint(
+                x: collectionView.contentOffset.x,
+                y: clampedContentOffsetY(offsetY - collectionView.adjustedContentInset.top)
+            ),
             animated: animated
         )
     }
@@ -692,6 +760,30 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 )
             }
         }
+        updateMinimumScrollableBottomInset()
+    }
+
+    private func updateMinimumScrollableBottomInset() {
+        guard minimumVerticalScrollDistance > 0, collectionView.bounds.height > 0 else {
+            if collectionView.contentInset.bottom != 0 {
+                collectionView.contentInset.bottom = 0
+            }
+            return
+        }
+        let automaticBottomInset = max(
+            0,
+            collectionView.adjustedContentInset.bottom - collectionView.contentInset.bottom
+        )
+        let maximumOffsetWithoutBottomInset =
+            collectionView.contentSize.height - collectionView.bounds.height +
+            automaticBottomInset + collectionView.adjustedContentInset.top
+        let requiredBottomInset = max(
+            0,
+            minimumVerticalScrollDistance - maximumOffsetWithoutBottomInset
+        )
+        if abs(collectionView.contentInset.bottom - requiredBottomInset) > 0.5 {
+            collectionView.contentInset.bottom = requiredBottomInset
+        }
     }
 
     private func updateBackgroundColors() {
@@ -1066,12 +1158,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         shouldRevealRefreshControl = false
     }
 
-    private var effectiveViewportTop: CGFloat {
-        collectionView.contentOffset.y + collectionView.adjustedContentInset.top
-    }
-
     private func reportIsAtTop() {
-        let isAtTop = effectiveViewportTop <= 1
+        let isAtTop = effectiveContentOffsetY <= 1
         guard lastReportedIsAtTop != isAtTop else { return }
         lastReportedIsAtTop = isAtTop
         onIsAtTopChanged?(isAtTop)
@@ -1105,7 +1193,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             return nil
         }
 
-        let viewportTop = effectiveViewportTop
+        let viewportTop = effectiveContentOffsetY
         let viewportBottom = collectionView.contentOffset.y + collectionView.bounds.height - collectionView.adjustedContentInset.bottom
         return collectionView.indexPathsForVisibleItems
             .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
@@ -2046,6 +2134,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     // MARK: - UIScrollViewDelegate
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        onScrollInteractionBegan?()
+        beginScrollInteraction()
+    }
+
+    private func beginScrollInteraction() {
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
         pendingContentOffsetAfterSnapshot = nil
@@ -2057,24 +2150,25 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         restorePendingScrollAnchorIfNeeded()
         reportIsAtTop()
+        onContentOffsetChanged?(effectiveContentOffsetY)
         validateCurrentAutoplayVisibility()
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
-            scrollingState.isScrolling = false
-            scheduleAutoplaySelection()
-            scheduleDeferredPoolCleanup()
+            endScrollInteraction()
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        scrollingState.isScrolling = false
-        scheduleAutoplaySelection()
-        scheduleDeferredPoolCleanup()
+        endScrollInteraction()
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        endScrollInteraction()
+    }
+
+    private func endScrollInteraction() {
         scrollingState.isScrolling = false
         scheduleAutoplaySelection()
         scheduleDeferredPoolCleanup()

@@ -42,7 +42,7 @@ struct ProfileScreen: View {
             }
         }
         .toolbar {
-            if horizontalSizeClass == .compact && showToolbarTabPicker && !shouldGateBlockedProfile, case .success(let userState) = onEnum(of: presenter.state.userState) {
+            if horizontalSizeClass == .compact && !isProfileHeaderVisible && !shouldGateBlockedProfile, case .success(let userState) = onEnum(of: presenter.state.userState) {
                 ToolbarItem(placement: .principal) {
                     RichText(text: userState.data.name)
                 }
@@ -319,34 +319,27 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
         Coordinator()
     }
 
-    func makeUIViewController(context: Context) -> UITimelineCollectionViewController {
-        let controller = UITimelineCollectionViewController(detailStatusKey: nil)
-        context.coordinator.controller = controller
+    func makeUIViewController(context: Context) -> ProfileTimelinePagerViewController {
+        let controller = ProfileTimelinePagerViewController()
         apply(to: controller, context: context)
         return controller
     }
 
-    func updateUIViewController(_ controller: UITimelineCollectionViewController, context: Context) {
-        context.coordinator.controller = controller
+    func updateUIViewController(_ controller: ProfileTimelinePagerViewController, context: Context) {
         apply(to: controller, context: context)
     }
 
-    static func dismantleUIViewController(_ controller: UITimelineCollectionViewController, coordinator: Coordinator) {
+    static func dismantleUIViewController(_ controller: ProfileTimelinePagerViewController, coordinator: Coordinator) {
         coordinator.close()
     }
 
-    private func apply(to controller: UITimelineCollectionViewController, context: Context) {
+    private func apply(to controller: ProfileTimelinePagerViewController, context: Context) {
         let appearance = TimelineUIKitAppearance(
             timeline: timelineAppearance,
             fontSizeDiff: globalAppearance.fontSizeDiff,
             showOriginalWithTranslation: translateConfig.showOriginalWithTranslation
         )
-        controller.appearance = appearance
-        controller.usesGroupedBackgroundOverride = appearance.usesCardBackground || timelineColumnCount > 1
-        controller.networkKind = networkKind
-        controller.extendsContentUnderTopBars = showsProfileAccessories
-        controller.suppressInitialRefreshIndicator = true
-        let accessoriesChanged = context.coordinator.updateAccessories(
+        let accessories = context.coordinator.updateAccessories(
             showsProfileAccessories: showsProfileAccessories,
             profileState: profileState,
             tabs: tabs,
@@ -356,15 +349,26 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             horizontalSizeClass: horizontalSizeClass,
             onFollowClick: onFollowClick,
             onFollowingClick: onFollowingClick,
-            onFansClick: onFansClick,
-            onHeaderVisibilityChanged: onHeaderVisibilityChanged,
-            onPickerVisibilityChanged: onPickerVisibilityChanged
+            onFansClick: onFansClick
         )
-        context.coordinator.installAccessoriesIfNeeded(on: controller, changed: accessoriesChanged)
+        controller.onHeaderVisibilityChanged = onHeaderVisibilityChanged
+        controller.onPickerVisibilityChanged = onPickerVisibilityChanged
+        controller.setAccessories(header: accessories.header, picker: accessories.picker)
+        controller.setBackgroundColor(
+            appearance.usesCardBackground || timelineColumnCount > 1
+                ? .systemGroupedBackground
+                : .systemBackground
+        )
+
+        let selectedTabBinding = $selectedTab
+        controller.onSelectedIndexChanged = { index in
+            guard selectedTabBinding.wrappedValue != index else { return }
+            selectedTabBinding.wrappedValue = index
+        }
 
         guard !tabs.isEmpty else {
-            onPickerVisibilityChanged(false)
-            context.coordinator.prunePresenters(validIDs: [])
+            context.coordinator.prunePages(validIDs: [])
+            controller.setPages([], selectedIndex: 0)
             return
         }
 
@@ -374,37 +378,38 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 selectedTab = clampedIndex
             }
         }
-        if tabs.count <= 1 {
-            onPickerVisibilityChanged(false)
+        let validIDs = Set(tabs.map(profileTimelineID(for:)))
+        let coordinator = context.coordinator
+        let pageConfigurations = tabs.map { tab in
+            ProfileTimelinePageConfiguration(
+                id: profileTimelineID(for: tab),
+                makeController: {
+                    coordinator.pageController(
+                        for: tab,
+                        timelineColumnCount: timelineColumnCount,
+                        appearance: appearance,
+                        networkKind: networkKind,
+                        extendsContentUnderTopBars: showsProfileAccessories,
+                        openURL: openURL
+                    )
+                }
+            )
         }
-
-        let tab = tabs[clampedIndex]
-        context.coordinator.prunePresenters(validIDs: Set(tabs.map(profileTimelineID(for:))))
-        context.coordinator.show(
-            tab: tab,
-            timelineColumnCount: timelineColumnCount,
-            in: controller,
-            openURL: openURL
-        )
+        context.coordinator.prunePages(validIDs: validIDs)
+        controller.setPages(pageConfigurations, selectedIndex: clampedIndex)
     }
 
     final class Coordinator {
-        fileprivate weak var controller: UITimelineCollectionViewController?
-        fileprivate var accessoryItems: [UITimelineCollectionViewAccessoryItem] = []
-
-        private let headerView = ProfileHostedAccessoryView()
-        private let pickerView = ProfileHostedAccessoryView()
+        private let headerView = ProfileHostedAccessoryView(ignoresSafeArea: true)
+        private let pickerView = ProfileHostedAccessoryView(ignoresSafeArea: false)
+        private var pageControllers: [String: UITimelineCollectionViewController] = [:]
+        private var pageCancellables: [String: AnyCancellable] = [:]
+        private var pageColumnCounts: [String: Int] = [:]
         private var timelinePresenters: [String: KotlinPresenter<TimelineState>] = [:]
         private var mediaPresenters: [String: KotlinPresenter<ProfileMediaState>] = [:]
-        private var cancellable: AnyCancellable?
-        private var currentTabID: String?
-        private var currentTimelineColumnCount: Int?
-        private weak var boundController: UITimelineCollectionViewController?
-        private weak var installedAccessoryController: UITimelineCollectionViewController?
         private var headerSignature: ProfileHeaderAccessorySignature?
         private var pickerSignature: ProfilePickerAccessorySignature?
 
-        @discardableResult
         func updateAccessories(
             showsProfileAccessories: Bool,
             profileState: ProfileState,
@@ -415,21 +420,14 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             horizontalSizeClass: UserInterfaceSizeClass?,
             onFollowClick: @escaping (UiProfile, FollowButtonState) -> Void,
             onFollowingClick: @escaping (MicroBlogKey) -> Void,
-            onFansClick: @escaping (MicroBlogKey) -> Void,
-            onHeaderVisibilityChanged: @escaping (Bool) -> Void,
-            onPickerVisibilityChanged: @escaping (Bool) -> Void
-        ) -> Bool {
+            onFansClick: @escaping (MicroBlogKey) -> Void
+        ) -> (header: UIView?, picker: UIView?) {
             guard showsProfileAccessories else {
-                let changed = !accessoryItems.isEmpty
-                accessoryItems = []
                 headerSignature = nil
                 pickerSignature = nil
-                onHeaderVisibilityChanged(false)
-                onPickerVisibilityChanged(false)
-                return changed
+                return (nil, nil)
             }
 
-            var changed = false
             let newHeaderSignature = ProfileHeaderAccessorySignature(
                 profileState: profileState,
                 timelineAppearance: timelineAppearance,
@@ -437,7 +435,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             )
             if headerSignature != newHeaderSignature {
                 headerSignature = newHeaderSignature
-                changed = true
                 headerView.update(
                     AnyView(
                         ProfileHeader(
@@ -456,14 +453,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 )
             }
 
-            var newAccessoryItems = [
-                UITimelineCollectionViewAccessoryItem(
-                    id: "profile_header",
-                    view: headerView,
-                    onVisibilityChanged: onHeaderVisibilityChanged
-                ),
-            ]
-
             if tabs.count > 1 {
                 let newPickerSignature = ProfilePickerAccessorySignature(
                     tabs: tabs,
@@ -472,7 +461,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 )
                 if pickerSignature != newPickerSignature {
                     pickerSignature = newPickerSignature
-                    changed = true
                     pickerView.update(
                         AnyView(
                             ProfileTabBar(tabs: tabs, selectedTab: selectedTab)
@@ -482,50 +470,43 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                         )
                     )
                 }
-                newAccessoryItems.append(
-                    UITimelineCollectionViewAccessoryItem(
-                        id: "profile_picker",
-                        view: pickerView,
-                        onVisibilityChanged: onPickerVisibilityChanged
-                    )
-                )
             } else {
                 pickerSignature = nil
             }
-
-            if accessoryItems.map(\.id) != newAccessoryItems.map(\.id) {
-                changed = true
-            }
-            accessoryItems = newAccessoryItems
-            return changed
+            return (headerView, tabs.count > 1 ? pickerView : nil)
         }
 
-        func installAccessoriesIfNeeded(on controller: UITimelineCollectionViewController, changed: Bool) {
-            guard changed || installedAccessoryController !== controller else { return }
-            controller.accessoryItems = accessoryItems
-            installedAccessoryController = controller
-        }
-
-        func show(
-            tab: ProfileState.Tab,
+        func pageController(
+            for tab: ProfileState.Tab,
             timelineColumnCount: Int,
-            in controller: UITimelineCollectionViewController,
+            appearance: TimelineUIKitAppearance,
+            networkKind: NetworkKind,
+            extendsContentUnderTopBars: Bool,
             openURL: OpenURLAction
-        ) {
+        ) -> UITimelineCollectionViewController {
             let tabID = profileTimelineID(for: tab)
-            let switchedTabs = currentTabID != nil && currentTabID != tabID
-            let offsetBeforeSwitch = controller.currentContentOffset
-            let needsBinding = currentTabID != tabID ||
-                cancellable == nil ||
-                boundController !== controller ||
-                currentTimelineColumnCount != timelineColumnCount
-
-            if switchedTabs {
-                controller.restoreContentOffsetAfterNextSnapshot(offsetBeforeSwitch)
+            let controller: UITimelineCollectionViewController
+            if let cached = pageControllers[tabID] {
+                controller = cached
+            } else {
+                controller = UITimelineCollectionViewController(detailStatusKey: nil)
+                pageControllers[tabID] = controller
             }
-
+            controller.appearance = appearance
+            controller.usesGroupedBackgroundOverride = appearance.usesCardBackground || timelineColumnCount > 1
+            controller.networkKind = networkKind
+            controller.extendsContentUnderTopBars = extendsContentUnderTopBars
+            controller.suppressInitialRefreshIndicator = true
+            controller.accessoryItems = []
             controller.openURL = { url in
                 openURL.callAsFunction(url)
+            }
+
+            let needsBinding = pageCancellables[tabID] == nil ||
+                pageColumnCounts[tabID] != timelineColumnCount
+            if needsBinding {
+                pageColumnCounts[tabID] = timelineColumnCount
+                controller.resetInitialRefreshIndicatorSuppression()
             }
 
             switch onEnum(of: tab) {
@@ -542,11 +523,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     try? await presenter.state.refresh()
                 }
                 if needsBinding {
-                    currentTabID = tabID
-                    currentTimelineColumnCount = timelineColumnCount
-                    boundController = controller
-                    controller.resetInitialRefreshIndicatorSuppression()
-                    cancellable = presenter.$state
+                    pageCancellables[tabID] = presenter.$state
                         .sink { [weak controller] state in
                             controller?.update(data: state.listState, columnCount: timelineColumnCount)
                         }
@@ -571,40 +548,596 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     }
                 }
                 if needsBinding {
-                    currentTabID = tabID
-                    currentTimelineColumnCount = timelineColumnCount
-                    boundController = controller
-                    controller.resetInitialRefreshIndicatorSuppression()
-                    cancellable = presenter.$state
+                    pageCancellables[tabID] = presenter.$state
                         .sink { [weak controller] state in
                             controller?.update(profileMediaData: state.mediaState)
                         }
                 }
             }
+            return controller
         }
 
-        func prunePresenters(validIDs: Set<String>) {
+        func prunePages(validIDs: Set<String>) {
+            for key in pageControllers.keys where !validIDs.contains(key) {
+                pageControllers[key]?.onContentOffsetChanged = nil
+                pageControllers[key]?.onScrollInteractionBegan = nil
+                pageControllers.removeValue(forKey: key)
+                pageCancellables.removeValue(forKey: key)
+                pageColumnCounts.removeValue(forKey: key)
+            }
             for key in timelinePresenters.keys where !validIDs.contains(key) {
                 timelinePresenters.removeValue(forKey: key)
             }
             for key in mediaPresenters.keys where !validIDs.contains(key) {
                 mediaPresenters.removeValue(forKey: key)
             }
-            if let currentTabID, !validIDs.contains(currentTabID) {
-                self.currentTabID = nil
-                currentTimelineColumnCount = nil
-                cancellable = nil
-            }
         }
 
         func close() {
-            cancellable = nil
+            pageCancellables.removeAll()
+            pageControllers.values.forEach {
+                $0.onContentOffsetChanged = nil
+                $0.onScrollInteractionBegan = nil
+            }
+            pageControllers.removeAll()
+            pageColumnCounts.removeAll()
             timelinePresenters.removeAll()
             mediaPresenters.removeAll()
-            currentTabID = nil
-            currentTimelineColumnCount = nil
-            boundController = nil
-            installedAccessoryController = nil
+        }
+    }
+}
+
+private struct ProfileTimelinePageConfiguration {
+    let id: String
+    let makeController: () -> UITimelineCollectionViewController
+}
+
+private final class ProfileTimelinePageViewController: UIViewController {
+    let id: String
+    private(set) var timelineController: UITimelineCollectionViewController?
+    private var makeController: () -> UITimelineCollectionViewController
+    private var pageBackgroundColor: UIColor
+
+    init(configuration: ProfileTimelinePageConfiguration, backgroundColor: UIColor) {
+        id = configuration.id
+        makeController = configuration.makeController
+        pageBackgroundColor = backgroundColor
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func loadView() {
+        let view = UIView()
+        view.backgroundColor = pageBackgroundColor
+        self.view = view
+    }
+
+    func update(configuration: ProfileTimelinePageConfiguration) {
+        makeController = configuration.makeController
+    }
+
+    func setBackgroundColor(_ color: UIColor) {
+        pageBackgroundColor = color
+        if isViewLoaded {
+            view.backgroundColor = color
+        }
+    }
+
+    func activate() -> UITimelineCollectionViewController {
+        let controller = makeController()
+        guard timelineController !== controller else { return controller }
+
+        if let timelineController {
+            timelineController.willMove(toParent: nil)
+            timelineController.view.removeFromSuperview()
+            timelineController.removeFromParent()
+        }
+
+        timelineController = controller
+        addChild(controller)
+        controller.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(controller.view)
+        NSLayoutConstraint.activate([
+            controller.view.topAnchor.constraint(equalTo: view.topAnchor),
+            controller.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            controller.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            controller.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        controller.didMove(toParent: self)
+        return controller
+    }
+}
+
+private final class ProfileAccessoryScrollView: UIScrollView {
+    weak var headerView: UIView?
+    weak var pickerView: UIView?
+
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        guard super.point(inside: point, with: event) else { return false }
+        return [headerView, pickerView].compactMap({ $0 }).contains { accessory in
+            guard !accessory.isHidden, accessory.alpha > 0.01 else { return false }
+            let pointInAccessory = accessory.convert(point, from: self)
+            return accessory.point(inside: pointInAccessory, with: event)
+        }
+    }
+
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer === panGestureRecognizer else {
+            return super.gestureRecognizerShouldBegin(gestureRecognizer)
+        }
+        let velocity = panGestureRecognizer.velocity(in: self)
+        return abs(velocity.y) > abs(velocity.x)
+    }
+
+    override func touchesShouldCancel(in view: UIView) -> Bool {
+        true
+    }
+}
+
+private final class ProfileTimelinePagerViewController: UIViewController,
+    UIPageViewControllerDataSource,
+    UIPageViewControllerDelegate,
+    UIScrollViewDelegate {
+    private let pageViewController = UIPageViewController(
+        transitionStyle: .scroll,
+        navigationOrientation: .horizontal
+    )
+    private let accessoryScrollView = ProfileAccessoryScrollView()
+    private var pages: [ProfileTimelinePageViewController] = []
+    private var currentIndex = 0
+    private var headerView: UIView?
+    private var pickerView: UIView?
+    private var pageBackgroundColor = UIColor.clear
+    private var headerHeight: CGFloat = 0
+    private var pickerHeight: CGFloat = 0
+    private var collapseDistance: CGFloat = 0
+    private var isApplyingTimelineOffsetToAccessories = false
+    private var isApplyingAccessoryOffsetToTimeline = false
+    private var isStoppingAccessoryScroll = false
+    private weak var externallyScrollingPage: UITimelineCollectionViewController?
+    private var lastHeaderVisibility: Bool?
+    private var lastPickerVisibility: Bool?
+    var onSelectedIndexChanged: ((Int) -> Void)?
+    var onHeaderVisibilityChanged: ((Bool) -> Void)?
+    var onPickerVisibilityChanged: ((Bool) -> Void)?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .clear
+        pageViewController.dataSource = self
+        pageViewController.delegate = self
+        addChild(pageViewController)
+        pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(pageViewController.view)
+        NSLayoutConstraint.activate([
+            pageViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        pageViewController.didMove(toParent: self)
+
+        accessoryScrollView.backgroundColor = .clear
+        accessoryScrollView.contentInsetAdjustmentBehavior = .never
+        accessoryScrollView.showsHorizontalScrollIndicator = false
+        accessoryScrollView.showsVerticalScrollIndicator = false
+        accessoryScrollView.alwaysBounceVertical = true
+        accessoryScrollView.isDirectionalLockEnabled = true
+        accessoryScrollView.isScrollEnabled = false
+        accessoryScrollView.scrollsToTop = false
+        accessoryScrollView.delegate = self
+        accessoryScrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(accessoryScrollView)
+        NSLayoutConstraint.activate([
+            accessoryScrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            accessoryScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            accessoryScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            accessoryScrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        installAccessoryViews()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        layoutAccessories()
+    }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        view.setNeedsLayout()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        externallyScrollingPage?.endExternalScrollInteraction()
+        externallyScrollingPage = nil
+    }
+
+    func setAccessories(header: UIView?, picker: UIView?) {
+        if headerView !== header {
+            headerView?.removeFromSuperview()
+            headerView = header
+        }
+        if pickerView !== picker {
+            pickerView?.removeFromSuperview()
+            pickerView = picker
+        }
+        guard isViewLoaded else { return }
+        installAccessoryViews()
+        view.setNeedsLayout()
+        reportVisibility(effectiveOffsetY: currentPage?.effectiveContentOffsetY ?? 0)
+    }
+
+    func setBackgroundColor(_ color: UIColor) {
+        loadViewIfNeeded()
+        pageBackgroundColor = color
+        view.backgroundColor = color
+        pageViewController.view.backgroundColor = color
+        pages.forEach { $0.setBackgroundColor(color) }
+        headerView?.backgroundColor = color
+        pickerView?.backgroundColor = color
+    }
+
+    func setPages(_ configurations: [ProfileTimelinePageConfiguration], selectedIndex: Int) {
+        loadViewIfNeeded()
+        let previousIDs = pages.map(\.id)
+        let existingPages = Dictionary(uniqueKeysWithValues: pages.map { ($0.id, $0) })
+        let newIDs = Set(configurations.map(\.id))
+        for page in pages where !newIDs.contains(page.id) {
+            page.timelineController?.onContentOffsetChanged = nil
+            page.timelineController?.onScrollInteractionBegan = nil
+        }
+        pages = configurations.map { configuration in
+            if let page = existingPages[configuration.id] {
+                page.update(configuration: configuration)
+                return page
+            }
+            return ProfileTimelinePageViewController(
+                configuration: configuration,
+                backgroundColor: pageBackgroundColor
+            )
+        }
+
+        guard !pages.isEmpty else {
+            currentIndex = 0
+            accessoryScrollView.isScrollEnabled = false
+            pageViewController.setViewControllers(nil, direction: .forward, animated: false)
+            reportVisibility(effectiveOffsetY: 0)
+            return
+        }
+
+        accessoryScrollView.isScrollEnabled = true
+        let targetIndex = min(max(selectedIndex, 0), pages.count - 1)
+        view.setNeedsLayout()
+        let pagesChanged = previousIDs != pages.map(\.id)
+        selectPage(at: targetIndex, animated: !pagesChanged && view.window != nil)
+    }
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
+        guard let page = viewController as? ProfileTimelinePageViewController,
+              let index = index(of: page), index > 0 else { return nil }
+        return pages[index - 1]
+    }
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController
+    ) -> UIViewController? {
+        guard let page = viewController as? ProfileTimelinePageViewController,
+              let index = index(of: page), index + 1 < pages.count else { return nil }
+        return pages[index + 1]
+    }
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool
+    ) {
+        guard completed,
+              let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController,
+              let index = index(of: visiblePage) else { return }
+        currentIndex = index
+        let timeline = activate(visiblePage)
+        updateAccessoryFrames(effectiveOffsetY: timeline.effectiveContentOffsetY)
+        onSelectedIndexChanged?(index)
+    }
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        willTransitionTo pendingViewControllers: [UIViewController]
+    ) {
+        guard let source = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController else {
+            return
+        }
+        for case let target as ProfileTimelinePageViewController in pendingViewControllers {
+            synchronizeOffset(from: source, to: activate(target))
+        }
+    }
+
+    private var currentPage: UITimelineCollectionViewController? {
+        guard pages.indices.contains(currentIndex) else { return nil }
+        return pages[currentIndex].timelineController
+    }
+
+    private func selectPage(at index: Int, animated: Bool) {
+        guard pages.indices.contains(index) else { return }
+        let target = pages[index]
+        let targetTimeline = activate(target)
+        let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController
+        if visiblePage === target {
+            currentIndex = index
+            updateAccessoryFrames(effectiveOffsetY: targetTimeline.effectiveContentOffsetY)
+            return
+        }
+        if let visiblePage {
+            synchronizeOffset(from: visiblePage, to: targetTimeline)
+        }
+        let direction: UIPageViewController.NavigationDirection = index >= currentIndex ? .forward : .reverse
+        currentIndex = index
+        pageViewController.setViewControllers(
+            [target],
+            direction: direction,
+            animated: animated
+        ) { [weak self, weak targetTimeline] _ in
+            guard let self, let targetTimeline else { return }
+            self.updateAccessoryFrames(effectiveOffsetY: targetTimeline.effectiveContentOffsetY)
+        }
+    }
+
+    private func activate(_ page: ProfileTimelinePageViewController) -> UITimelineCollectionViewController {
+        let timeline = page.activate()
+        configure(timeline)
+        timeline.onContentOffsetChanged = { [weak self, weak timeline] offsetY in
+            guard let timeline else { return }
+            self?.pageDidScroll(timeline, effectiveOffsetY: offsetY)
+        }
+        timeline.onScrollInteractionBegan = { [weak self, weak timeline] in
+            guard let timeline else { return }
+            self?.pageWillBeginDragging(timeline)
+        }
+        return timeline
+    }
+
+    private func synchronizeOffset(
+        from source: ProfileTimelinePageViewController,
+        to target: UITimelineCollectionViewController
+    ) {
+        guard let source = source.timelineController else { return }
+        let offsetY = max(source.effectiveContentOffsetY, 0)
+        target.loadViewIfNeeded()
+        target.restoreEffectiveContentOffset(offsetY, animated: false)
+        target.restoreEffectiveContentOffsetAfterNextSnapshot(offsetY)
+    }
+
+    private func index(of viewController: ProfileTimelinePageViewController) -> Int? {
+        pages.firstIndex { $0 === viewController }
+    }
+
+    private func pageDidScroll(_ page: UITimelineCollectionViewController, effectiveOffsetY: CGFloat) {
+        guard let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController,
+              visiblePage.timelineController === page else { return }
+        if isApplyingAccessoryOffsetToTimeline || accessoryScrollView.isTracking ||
+            accessoryScrollView.isDragging || accessoryScrollView.isDecelerating {
+            updateAccessoryTransforms(offsetY: accessoryScrollView.contentOffset.y)
+            reportVisibility(effectiveOffsetY: accessoryScrollView.contentOffset.y)
+            return
+        }
+        updateAccessoryFrames(effectiveOffsetY: effectiveOffsetY)
+    }
+
+    private func pageWillBeginDragging(_ page: UITimelineCollectionViewController) {
+        guard let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController,
+              visiblePage.timelineController === page else { return }
+        stopAccessoryScroll(handingOffTo: page)
+    }
+
+    private func installAccessoryViews() {
+        accessoryScrollView.headerView = headerView
+        accessoryScrollView.pickerView = pickerView
+        for accessory in [headerView, pickerView].compactMap({ $0 }) {
+            if accessory.superview !== accessoryScrollView {
+                accessory.removeFromSuperview()
+                accessoryScrollView.addSubview(accessory)
+            }
+            accessoryScrollView.bringSubviewToFront(accessory)
+        }
+        view.bringSubviewToFront(accessoryScrollView)
+    }
+
+    private func layoutAccessories() {
+        let width = view.bounds.width
+        guard width > 0 else { return }
+        let activePages = pages.compactMap(\.timelineController)
+        let effectiveOffsets = activePages.reduce(into: [ObjectIdentifier: CGFloat]()) { result, page in
+            guard page.isViewLoaded else { return }
+            result[ObjectIdentifier(page)] = page.effectiveContentOffsetY
+        }
+
+        headerHeight = fittingHeight(of: headerView, width: width)
+        pickerHeight = fittingHeight(of: pickerView, width: width)
+        collapseDistance = max(headerHeight - view.safeAreaInsets.top, 0)
+
+        headerView?.transform = .identity
+        headerView?.frame = CGRect(x: 0, y: 0, width: width, height: headerHeight)
+        pickerView?.transform = .identity
+        pickerView?.frame = CGRect(x: 0, y: headerHeight, width: width, height: pickerHeight)
+
+        for page in activePages {
+            configure(page, oldEffectiveOffset: effectiveOffsets[ObjectIdentifier(page)])
+        }
+
+        updateAccessoryScrollRange(for: currentPage)
+        updateAccessoryFrames(effectiveOffsetY: currentPage?.effectiveContentOffsetY ?? 0)
+    }
+
+    private func fittingHeight(of accessory: UIView?, width: CGFloat) -> CGFloat {
+        guard let accessory else { return 0 }
+        return ceil(
+            accessory.systemLayoutSizeFitting(
+                CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            ).height
+        )
+    }
+
+    private func configure(
+        _ page: UITimelineCollectionViewController,
+        oldEffectiveOffset: CGFloat? = nil
+    ) {
+        let topInset = headerHeight + pickerHeight
+        let insetChanged = abs(page.topContentInset - topInset) > 0.5
+        if insetChanged {
+            page.topContentInset = topInset
+        }
+        if abs(page.minimumVerticalScrollDistance - collapseDistance) > 0.5 {
+            page.minimumVerticalScrollDistance = collapseDistance
+        }
+        if insetChanged, let oldEffectiveOffset {
+            page.restoreEffectiveContentOffset(oldEffectiveOffset, animated: false)
+        }
+    }
+
+    private func updateAccessoryFrames(effectiveOffsetY: CGFloat) {
+        updateAccessoryScrollRange(for: currentPage)
+        let accessoryIsScrolling = accessoryScrollView.isTracking ||
+            accessoryScrollView.isDragging || accessoryScrollView.isDecelerating
+        if !isApplyingAccessoryOffsetToTimeline && !accessoryIsScrolling {
+            applyTimelineOffsetToAccessories(effectiveOffsetY)
+        }
+        let displayedOffsetY = accessoryIsScrolling
+            ? accessoryScrollView.contentOffset.y
+            : effectiveOffsetY
+        updateAccessoryTransforms(offsetY: displayedOffsetY)
+        reportVisibility(effectiveOffsetY: displayedOffsetY)
+    }
+
+    private func updateAccessoryScrollRange(for page: UITimelineCollectionViewController?) {
+        let width = accessoryScrollView.bounds.width
+        let height = accessoryScrollView.bounds.height
+        guard width > 0, height > 0 else { return }
+        let maximumOffsetY = max(page?.maximumEffectiveContentOffsetY ?? 0, collapseDistance)
+        let contentSize = CGSize(width: width, height: height + maximumOffsetY)
+        if abs(accessoryScrollView.contentSize.width - contentSize.width) > 0.5 ||
+            abs(accessoryScrollView.contentSize.height - contentSize.height) > 0.5 {
+            accessoryScrollView.contentSize = contentSize
+        }
+        if let page {
+            accessoryScrollView.decelerationRate = page.scrollDecelerationRate
+        }
+    }
+
+    private func applyTimelineOffsetToAccessories(_ offsetY: CGFloat) {
+        guard abs(accessoryScrollView.contentOffset.y - offsetY) > 0.5 else { return }
+        isApplyingTimelineOffsetToAccessories = true
+        accessoryScrollView.setContentOffset(
+            CGPoint(x: 0, y: offsetY),
+            animated: false
+        )
+        isApplyingTimelineOffsetToAccessories = false
+    }
+
+    private func updateAccessoryTransforms(offsetY: CGFloat) {
+        let collapsedOffsetY = min(max(offsetY, 0), collapseDistance)
+        let compensationY = offsetY - collapsedOffsetY
+        let transform = CGAffineTransform(translationX: 0, y: compensationY)
+        headerView?.transform = transform
+        pickerView?.transform = transform
+    }
+
+    private func stopAccessoryScroll(handingOffTo page: UITimelineCollectionViewController) {
+        guard externallyScrollingPage != nil || accessoryScrollView.isTracking ||
+            accessoryScrollView.isDragging || accessoryScrollView.isDecelerating else { return }
+
+        isStoppingAccessoryScroll = true
+        isApplyingTimelineOffsetToAccessories = true
+        if #available(iOS 17.4, *) {
+            accessoryScrollView.stopScrollingAndZooming()
+        } else {
+            let wasScrollEnabled = accessoryScrollView.isScrollEnabled
+            accessoryScrollView.setContentOffset(accessoryScrollView.contentOffset, animated: false)
+            accessoryScrollView.isScrollEnabled = false
+            accessoryScrollView.isScrollEnabled = wasScrollEnabled
+        }
+        isApplyingTimelineOffsetToAccessories = false
+        if externallyScrollingPage !== page {
+            externallyScrollingPage?.endExternalScrollInteraction()
+        }
+        externallyScrollingPage = nil
+        isStoppingAccessoryScroll = false
+
+        applyTimelineOffsetToAccessories(page.effectiveContentOffsetY)
+        updateAccessoryTransforms(offsetY: accessoryScrollView.contentOffset.y)
+        reportVisibility(effectiveOffsetY: page.effectiveContentOffsetY)
+    }
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        guard scrollView === accessoryScrollView, let page = currentPage else { return }
+        page.view.layoutIfNeeded()
+        updateAccessoryScrollRange(for: page)
+        if externallyScrollingPage !== page {
+            externallyScrollingPage?.endExternalScrollInteraction()
+            externallyScrollingPage = page
+            page.beginExternalScrollInteraction()
+        }
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === accessoryScrollView else { return }
+        let offsetY = scrollView.contentOffset.y
+        updateAccessoryTransforms(offsetY: offsetY)
+        reportVisibility(effectiveOffsetY: offsetY)
+        guard !isApplyingTimelineOffsetToAccessories, let page = currentPage else { return }
+        isApplyingAccessoryOffsetToTimeline = true
+        page.setEffectiveContentOffset(offsetY, animated: false)
+        isApplyingAccessoryOffsetToTimeline = false
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        guard scrollView === accessoryScrollView, !decelerate, !isStoppingAccessoryScroll else { return }
+        finishAccessoryScrollInteraction()
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard scrollView === accessoryScrollView, !isStoppingAccessoryScroll else { return }
+        finishAccessoryScrollInteraction()
+    }
+
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        guard scrollView === accessoryScrollView, !isStoppingAccessoryScroll else { return }
+        finishAccessoryScrollInteraction()
+    }
+
+    private func finishAccessoryScrollInteraction() {
+        externallyScrollingPage?.endExternalScrollInteraction()
+        externallyScrollingPage = nil
+        guard let page = currentPage else { return }
+        updateAccessoryScrollRange(for: page)
+        applyTimelineOffsetToAccessories(page.effectiveContentOffsetY)
+        updateAccessoryTransforms(offsetY: accessoryScrollView.contentOffset.y)
+        reportVisibility(effectiveOffsetY: page.effectiveContentOffsetY)
+    }
+
+    private func reportVisibility(effectiveOffsetY: CGFloat) {
+        let headerVisible = headerView != nil && (
+            collapseDistance <= 0.5 || effectiveOffsetY < collapseDistance - 0.5
+        )
+        if lastHeaderVisibility != headerVisible {
+            lastHeaderVisibility = headerVisible
+            onHeaderVisibilityChanged?(headerVisible)
+        }
+        let pickerVisible = pickerView != nil
+        if lastPickerVisibility != pickerVisible {
+            lastPickerVisibility = pickerVisible
+            onPickerVisibilityChanged?(pickerVisible)
         }
     }
 }
@@ -713,13 +1246,22 @@ private struct ProfilePickerAccessorySignature: Equatable {
 
 private final class ProfileHostedAccessoryView: UIView {
     private let host = UIHostingController(rootView: AnyView(EmptyView()))
+    private let ignoresSafeArea: Bool
+
+    init(ignoresSafeArea: Bool) {
+        self.ignoresSafeArea = ignoresSafeArea
+        super.init(frame: .zero)
+        commonInit()
+    }
 
     override init(frame: CGRect) {
+        ignoresSafeArea = false
         super.init(frame: frame)
         commonInit()
     }
 
     required init?(coder: NSCoder) {
+        ignoresSafeArea = false
         super.init(coder: coder)
         commonInit()
     }
@@ -748,6 +1290,9 @@ private final class ProfileHostedAccessoryView: UIView {
         host.view.translatesAutoresizingMaskIntoConstraints = false
         if #available(iOS 16.0, *) {
             host.sizingOptions = [.intrinsicContentSize]
+        }
+        if ignoresSafeArea, #available(iOS 16.4, *) {
+            host.safeAreaRegions = []
         }
         addSubview(host.view)
         NSLayoutConstraint.activate([

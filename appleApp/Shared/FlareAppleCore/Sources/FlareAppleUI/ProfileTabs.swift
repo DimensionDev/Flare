@@ -28,11 +28,16 @@ public struct ProfileTabBar: View {
     @Environment(\.isMultipleColumn) private var isMultipleColumn
     private let tabs: [ProfileState.Tab]
     @Binding private var selectedTab: Int
-    @Namespace private var selectedTabIndicatorNamespace
+    private let selectionProgress: CGFloat?
 
-    public init(tabs: [ProfileState.Tab], selectedTab: Binding<Int>) {
+    public init(
+        tabs: [ProfileState.Tab],
+        selectedTab: Binding<Int>,
+        selectionProgress: CGFloat? = nil
+    ) {
         self.tabs = tabs
         self._selectedTab = selectedTab
+        self.selectionProgress = selectionProgress
     }
 
     public var body: some View {
@@ -45,25 +50,29 @@ public struct ProfileTabBar: View {
                 HStack {
                     ForEach(0..<tabs.count, id: \.self) { index in
                         Button {
-                            withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+                            if selectionProgress == nil {
+                                withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+                                    selectedTab = index
+                                }
+                            } else {
                                 selectedTab = index
                             }
                         } label: {
-                            Text(profileTabTitle(for: tabs[index]))
-                                .foregroundStyle(
-                                    selectedTab == index ? Color.primary : Color.secondary
-                                )
+                            let title = profileTabTitle(for: tabs[index])
+                            Text(title)
+                                .foregroundStyle(Color.secondary)
+                                .overlay {
+                                    Text(title)
+                                        .foregroundStyle(Color.primary)
+                                        .opacity(tabEmphasis(at: index))
+                                        .accessibilityHidden(true)
+                                }
                                 .padding(.vertical, 12)
-                                .overlay(alignment: .bottom) {
-                                    if selectedTab == index {
-                                        Capsule()
-                                            .fill(Color.accentColor)
-                                            .frame(height: 3)
-                                            .matchedGeometryEffect(
-                                                id: "selectedTabIndicator",
-                                                in: selectedTabIndicatorNamespace
-                                            )
-                                    }
+                                .anchorPreference(
+                                    key: ProfileTabFramePreferenceKey.self,
+                                    value: .bounds
+                                ) { anchor in
+                                    [index: anchor]
                                 }
                                 .padding(.horizontal, 8)
                         }
@@ -76,6 +85,64 @@ public struct ProfileTabBar: View {
             .scrollIndicators(.hidden)
         }
         .frame(maxWidth: .infinity)
+        .overlayPreferenceValue(ProfileTabFramePreferenceKey.self) { anchors in
+            GeometryReader { proxy in
+                if let frame = indicatorFrame(anchors: anchors, proxy: proxy) {
+                    Capsule()
+                        .fill(Color.accentColor)
+                        .frame(width: frame.width, height: 3)
+                        .position(x: frame.midX, y: proxy.size.height - 1.5)
+                }
+            }
+            .allowsHitTesting(false)
+        }
+        .clipped()
+    }
+
+    private var resolvedSelectionProgress: CGFloat {
+        guard !tabs.isEmpty else { return 0 }
+        return min(
+            max(selectionProgress ?? CGFloat(selectedTab), 0),
+            CGFloat(tabs.count - 1)
+        )
+    }
+
+    private func tabEmphasis(at index: Int) -> CGFloat {
+        max(1 - abs(resolvedSelectionProgress - CGFloat(index)), 0)
+    }
+
+    private func indicatorFrame(
+        anchors: [Int: Anchor<CGRect>],
+        proxy: GeometryProxy
+    ) -> CGRect? {
+        let progress = resolvedSelectionProgress
+        let fromIndex = Int(floor(progress))
+        let toIndex = Int(ceil(progress))
+        guard let fromAnchor = anchors[fromIndex] else { return nil }
+        let fromFrame = proxy[fromAnchor]
+        guard toIndex != fromIndex, let toAnchor = anchors[toIndex] else {
+            return fromFrame
+        }
+
+        let toFrame = proxy[toAnchor]
+        let fraction = progress - CGFloat(fromIndex)
+        return CGRect(
+            x: fromFrame.minX + (toFrame.minX - fromFrame.minX) * fraction,
+            y: fromFrame.minY + (toFrame.minY - fromFrame.minY) * fraction,
+            width: fromFrame.width + (toFrame.width - fromFrame.width) * fraction,
+            height: fromFrame.height + (toFrame.height - fromFrame.height) * fraction
+        )
+    }
+}
+
+private struct ProfileTabFramePreferenceKey: PreferenceKey {
+    static let defaultValue: [Int: Anchor<CGRect>] = [:]
+
+    static func reduce(
+        value: inout [Int: Anchor<CGRect>],
+        nextValue: () -> [Int: Anchor<CGRect>]
+    ) {
+        value.merge(nextValue(), uniquingKeysWith: { _, next in next })
     }
 }
 

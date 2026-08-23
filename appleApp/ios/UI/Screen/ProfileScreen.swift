@@ -406,6 +406,29 @@ private struct TimelineUIKitPlaceholderCard: UIViewRepresentable {
     }
 }
 
+private final class ProfileTabSelectionProgress: ObservableObject {
+    @Published private(set) var pagePosition: CGFloat = 0
+
+    func update(_ pagePosition: CGFloat) {
+        guard abs(self.pagePosition - pagePosition) > 0.0001 else { return }
+        self.pagePosition = pagePosition
+    }
+}
+
+private struct ProfileProgressTabBar: View {
+    let tabs: [ProfileState.Tab]
+    @Binding var selectedTab: Int
+    @ObservedObject var progress: ProfileTabSelectionProgress
+
+    var body: some View {
+        ProfileTabBar(
+            tabs: tabs,
+            selectedTab: $selectedTab,
+            selectionProgress: progress.pagePosition
+        )
+    }
+}
+
 private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     let profileState: ProfileState
     let tabs: [ProfileState.Tab]
@@ -440,6 +463,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     }
 
     static func dismantleUIViewController(_ controller: ProfileTimelinePagerViewController, coordinator: Coordinator) {
+        controller.onPagePositionChanged = nil
         coordinator.close()
     }
 
@@ -463,6 +487,10 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
         )
         controller.onHeaderVisibilityChanged = onHeaderVisibilityChanged
         controller.onPickerVisibilityChanged = onPickerVisibilityChanged
+        let tabSelectionProgress = context.coordinator.tabSelectionProgress
+        controller.onPagePositionChanged = { [weak tabSelectionProgress] pagePosition in
+            tabSelectionProgress?.update(pagePosition)
+        }
         controller.setAccessories(header: accessories.header, picker: accessories.picker)
         controller.setBackgroundColor(
             appearance.usesCardBackground || timelineColumnCount > 1
@@ -554,6 +582,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
         private let headerView = ProfileHostedAccessoryView(ignoresSafeArea: true)
         private let pickerView = ProfileHostedAccessoryView(ignoresSafeArea: false)
+        let tabSelectionProgress = ProfileTabSelectionProgress()
         private var pageRecords: [String: PageRecord] = [:]
         private var headerSignature: ProfileHeaderAccessorySignature?
         private var pickerSignature: ProfilePickerAccessorySignature?
@@ -611,7 +640,11 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                     pickerSignature = newPickerSignature
                     pickerView.update(
                         AnyView(
-                            ProfileTabBar(tabs: tabs, selectedTab: selectedTab)
+                            ProfileProgressTabBar(
+                                tabs: tabs,
+                                selectedTab: selectedTab,
+                                progress: tabSelectionProgress
+                            )
                                 .environment(\.timelineAppearance, timelineAppearance)
                                 .environment(\.openURL, openURL)
                                 .environment(\.horizontalSizeClass, horizontalSizeClass)
@@ -816,6 +849,14 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     UIPageViewControllerDataSource,
     UIPageViewControllerDelegate,
     UIScrollViewDelegate {
+    private struct PageTransition {
+        let fromIndex: Int
+        let toIndex: Int
+        let idleOffsetX: CGFloat
+        let isProgrammatic: Bool
+        var maximumFraction: CGFloat = 0
+    }
+
     private let pageViewController = UIPageViewController(
         transitionStyle: .scroll,
         navigationOrientation: .horizontal
@@ -834,9 +875,15 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     private var isApplyingAccessoryOffsetToTimeline = false
     private var isStoppingAccessoryScroll = false
     private weak var externallyScrollingPage: UITimelineCollectionViewController?
+    private weak var pageScrollView: UIScrollView?
+    private var pageScrollObservation: NSKeyValueObservation?
+    private var idlePageOffsetX: CGFloat?
+    private var pageTransition: PageTransition?
+    private var lastReportedPagePosition: CGFloat?
     private var lastHeaderVisibility: Bool?
     private var lastPickerVisibility: Bool?
     var onSelectedIndexChanged: ((Int) -> Void)?
+    var onPagePositionChanged: ((CGFloat) -> Void)?
     var onHeaderVisibilityChanged: ((Bool) -> Void)?
     var onPickerVisibilityChanged: ((Bool) -> Void)?
 
@@ -855,6 +902,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
             pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         pageViewController.didMove(toParent: self)
+        observePageScrollView()
 
         accessoryScrollView.backgroundColor = .clear
         accessoryScrollView.contentInsetAdjustmentBehavior = .never
@@ -879,6 +927,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         layoutAccessories()
+        updateIdlePageOffsetIfNeeded()
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -890,6 +939,10 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         super.viewWillDisappear(animated)
         externallyScrollingPage?.endExternalScrollInteraction()
         externallyScrollingPage = nil
+    }
+
+    deinit {
+        pageScrollObservation?.invalidate()
     }
 
     func setAccessories(header: UIView?, picker: UIView?) {
@@ -942,6 +995,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
             currentIndex = 0
             accessoryScrollView.isScrollEnabled = false
             pageViewController.setViewControllers(nil, direction: .forward, animated: false)
+            finishPageTransition(at: 0)
             reportVisibility(effectiveOffsetY: 0)
             return
         }
@@ -982,6 +1036,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         currentIndex = index
         let timeline = activate(visiblePage)
         updateAccessoryFrames(effectiveOffsetY: timeline.effectiveContentOffsetY)
+        finishPageTransition(at: index)
         if completed {
             onSelectedIndexChanged?(index)
         }
@@ -991,10 +1046,18 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         _ pageViewController: UIPageViewController,
         willTransitionTo pendingViewControllers: [UIViewController]
     ) {
-        guard let source = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController else {
+        guard let source = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController,
+              let sourceIndex = index(of: source) else {
             return
         }
         for case let target as ProfileTimelinePageViewController in pendingViewControllers {
+            if let targetIndex = index(of: target) {
+                beginPageTransition(
+                    from: sourceIndex,
+                    to: targetIndex,
+                    isProgrammatic: false
+                )
+            }
             let isFirstActivation = target.timelineController == nil
             let timeline = activate(target)
             if isFirstActivation {
@@ -1014,15 +1077,25 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         let isFirstActivation = target.timelineController == nil
         let targetTimeline = activate(target)
         let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController
+        let sourceIndex = visiblePage.flatMap(index(of:)) ?? currentIndex
         if visiblePage === target {
             currentIndex = index
             updateAccessoryFrames(effectiveOffsetY: targetTimeline.effectiveContentOffsetY)
+            if pageTransition == nil {
+                reportPagePosition(CGFloat(index))
+            }
             return
         }
         if isFirstActivation, let visiblePage {
             synchronizeInitialOffset(from: visiblePage, to: targetTimeline)
         }
-        let direction: UIPageViewController.NavigationDirection = index >= currentIndex ? .forward : .reverse
+        let direction: UIPageViewController.NavigationDirection = index >= sourceIndex ? .forward : .reverse
+        if animated {
+            beginPageTransition(from: sourceIndex, to: index, isProgrammatic: true)
+        } else {
+            pageTransition = nil
+            reportPagePosition(CGFloat(index))
+        }
         currentIndex = index
         pageViewController.setViewControllers(
             [target],
@@ -1035,7 +1108,102 @@ private final class ProfileTimelinePagerViewController: UIViewController,
             let visibleTimeline = self.activate(visiblePage)
             self.currentIndex = self.index(of: visiblePage) ?? index
             self.updateAccessoryFrames(effectiveOffsetY: visibleTimeline.effectiveContentOffsetY)
+            self.finishPageTransition(at: self.currentIndex)
         }
+    }
+
+    private func observePageScrollView() {
+        guard let scrollView = pageViewController.view.subviews
+            .compactMap({ $0 as? UIScrollView })
+            .first else { return }
+        pageScrollView = scrollView
+        idlePageOffsetX = scrollView.contentOffset.x
+        pageScrollObservation = scrollView.observe(\.contentOffset, options: [.new]) {
+            [weak self, weak scrollView] _, _ in
+            guard let self, let scrollView else { return }
+            MainActor.assumeIsolated {
+                self.pageScrollViewDidScroll(scrollView)
+            }
+        }
+    }
+
+    private func updateIdlePageOffsetIfNeeded() {
+        guard pageTransition == nil,
+              let scrollView = pageScrollView,
+              !scrollView.isTracking,
+              !scrollView.isDragging,
+              !scrollView.isDecelerating else { return }
+        idlePageOffsetX = scrollView.contentOffset.x
+    }
+
+    private func beginPageTransition(
+        from fromIndex: Int,
+        to toIndex: Int,
+        isProgrammatic: Bool
+    ) {
+        guard fromIndex != toIndex else {
+            finishPageTransition(at: toIndex)
+            return
+        }
+        let idleOffsetX = idlePageOffsetX ?? pageScrollView?.contentOffset.x ?? 0
+        pageTransition = PageTransition(
+            fromIndex: fromIndex,
+            toIndex: toIndex,
+            idleOffsetX: idleOffsetX,
+            isProgrammatic: isProgrammatic
+        )
+        reportPagePosition(CGFloat(fromIndex))
+        if let pageScrollView {
+            pageScrollViewDidScroll(pageScrollView)
+        }
+    }
+
+    private func pageScrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard var transition = pageTransition else {
+            updateIdlePageOffsetIfNeeded()
+            return
+        }
+        let width = scrollView.bounds.width
+        guard width > 0 else { return }
+
+        var fraction = min(
+            max(abs(scrollView.contentOffset.x - transition.idleOffsetX) / width, 0),
+            1
+        )
+        if transition.isProgrammatic {
+            fraction = max(fraction, transition.maximumFraction)
+        }
+        transition.maximumFraction = max(transition.maximumFraction, fraction)
+        pageTransition = transition
+
+        let pagePosition = CGFloat(transition.fromIndex) +
+            CGFloat(transition.toIndex - transition.fromIndex) * fraction
+        reportPagePosition(pagePosition)
+    }
+
+    private func finishPageTransition(at index: Int) {
+        pageTransition = nil
+        reportPagePosition(CGFloat(index))
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.pageTransition == nil, let pageScrollView = self.pageScrollView else {
+                return
+            }
+            self.idlePageOffsetX = pageScrollView.contentOffset.x
+        }
+    }
+
+    private func reportPagePosition(_ pagePosition: CGFloat) {
+        let clampedPosition: CGFloat
+        if pages.isEmpty {
+            clampedPosition = 0
+        } else {
+            clampedPosition = min(max(pagePosition, 0), CGFloat(pages.count - 1))
+        }
+        guard lastReportedPagePosition.map({ abs($0 - clampedPosition) > 0.0001 }) ?? true else {
+            return
+        }
+        lastReportedPagePosition = clampedPosition
+        onPagePositionChanged?(clampedPosition)
     }
 
     private func activate(_ page: ProfileTimelinePageViewController) -> UITimelineCollectionViewController {

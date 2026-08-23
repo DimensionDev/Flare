@@ -33,7 +33,7 @@ struct ProfileScreen: View {
         }
         .background(Color(timelineDisplayMode == .plain && horizontalSizeClass == .compact ? .clear : .systemGroupedBackground))
         .toolbarBackground(
-            horizontalSizeClass == .compact && isProfileHeaderVisible ? Visibility.hidden : Visibility.automatic,
+            horizontalSizeClass == .compact ? Visibility.hidden : Visibility.automatic,
             for: .navigationBar
         )
         .onChange(of: isBlockedProfile) { _, isBlocked in
@@ -821,6 +821,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         navigationOrientation: .horizontal
     )
     private let accessoryScrollView = ProfileAccessoryScrollView()
+    private let collapsedGlassView = ProfileGlassBackgroundView()
     private var pages: [ProfileTimelinePageViewController] = []
     private var currentIndex = 0
     private var headerView: UIView?
@@ -912,8 +913,9 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         view.backgroundColor = color
         pageViewController.view.backgroundColor = color
         pages.forEach { $0.setBackgroundColor(color) }
-        headerView?.backgroundColor = color
-        pickerView?.backgroundColor = color
+        setBaseBackgroundColor(color, for: headerView)
+        setBaseBackgroundColor(color, for: pickerView)
+        updateAccessoryAppearance(navigationTitleVisible: lastHeaderVisibility == false)
     }
 
     func setPages(_ configurations: [ProfileTimelinePageConfiguration], selectedIndex: Int) {
@@ -1086,6 +1088,10 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     private func installAccessoryViews() {
         accessoryScrollView.headerView = headerView
         accessoryScrollView.pickerView = pickerView
+        if collapsedGlassView.superview !== accessoryScrollView {
+            accessoryScrollView.addSubview(collapsedGlassView)
+        }
+        accessoryScrollView.bringSubviewToFront(collapsedGlassView)
         for accessory in [headerView, pickerView].compactMap({ $0 }) {
             if accessory.superview !== accessoryScrollView {
                 accessory.removeFromSuperview()
@@ -1111,6 +1117,13 @@ private final class ProfileTimelinePagerViewController: UIViewController,
 
         headerView?.transform = .identity
         headerView?.frame = CGRect(x: 0, y: 0, width: width, height: headerHeight)
+        collapsedGlassView.transform = .identity
+        collapsedGlassView.frame = CGRect(
+            x: 0,
+            y: collapseDistance,
+            width: width,
+            height: max(headerHeight - collapseDistance, 0) + pickerHeight
+        )
         pickerView?.transform = .identity
         pickerView?.frame = CGRect(x: 0, y: headerHeight, width: width, height: pickerHeight)
 
@@ -1198,6 +1211,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         let compensationY = offsetY - collapsedOffsetY
         let transform = CGAffineTransform(translationX: 0, y: compensationY)
         headerView?.transform = transform
+        collapsedGlassView.transform = transform
         pickerView?.transform = transform
     }
 
@@ -1278,6 +1292,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         let headerVisible = headerView != nil && (
             collapseDistance <= 0.5 || effectiveOffsetY < collapseDistance - 0.5
         )
+        updateAccessoryAppearance(navigationTitleVisible: !headerVisible)
         if lastHeaderVisibility != headerVisible {
             lastHeaderVisibility = headerVisible
             onHeaderVisibilityChanged?(headerVisible)
@@ -1286,6 +1301,22 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         if lastPickerVisibility != pickerVisible {
             lastPickerVisibility = pickerVisible
             onPickerVisibilityChanged?(pickerVisible)
+        }
+    }
+
+    private func setBaseBackgroundColor(_ color: UIColor, for view: UIView?) {
+        if let accessory = view as? ProfileHostedAccessoryView {
+            accessory.setBaseBackgroundColor(color)
+        } else {
+            view?.backgroundColor = color
+        }
+    }
+
+    private func updateAccessoryAppearance(navigationTitleVisible: Bool) {
+        headerView?.alpha = navigationTitleVisible ? 0 : 1
+        collapsedGlassView.isHidden = !navigationTitleVisible || headerView == nil
+        if let picker = pickerView as? ProfileHostedAccessoryView {
+            picker.setBaseBackgroundHidden(navigationTitleVisible)
         }
     }
 }
@@ -1395,6 +1426,8 @@ private struct ProfilePickerAccessorySignature: Equatable {
 private final class ProfileHostedAccessoryView: UIView {
     private let host = UIHostingController(rootView: AnyView(EmptyView()))
     private let ignoresSafeArea: Bool
+    private var baseBackgroundColor = UIColor.clear
+    private var hidesBaseBackground = false
 
     init(ignoresSafeArea: Bool) {
         self.ignoresSafeArea = ignoresSafeArea
@@ -1419,6 +1452,17 @@ private final class ProfileHostedAccessoryView: UIView {
         host.view.invalidateIntrinsicContentSize()
         invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+
+    func setBaseBackgroundColor(_ color: UIColor) {
+        baseBackgroundColor = color
+        backgroundColor = hidesBaseBackground ? .clear : color
+    }
+
+    func setBaseBackgroundHidden(_ hidden: Bool) {
+        guard hidesBaseBackground != hidden else { return }
+        hidesBaseBackground = hidden
+        backgroundColor = hidden ? .clear : baseBackgroundColor
     }
 
     override func didMoveToWindow() {
@@ -1460,6 +1504,25 @@ private final class ProfileHostedAccessoryView: UIView {
             responder = current.next
         }
         return nil
+    }
+}
+
+private final class ProfileGlassBackgroundView: UIVisualEffectView {
+    init() {
+        let effect: UIVisualEffect
+        if #available(iOS 26.0, *) {
+            effect = UIGlassEffect(style: .regular)
+        } else {
+            effect = UIBlurEffect(style: .systemMaterial)
+        }
+        super.init(effect: effect)
+        isHidden = true
+        isUserInteractionEnabled = false
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 

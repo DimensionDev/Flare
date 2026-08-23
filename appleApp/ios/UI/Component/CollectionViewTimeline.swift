@@ -200,10 +200,27 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             }
             guard oldValue != columnCount, isViewLoaded else { return }
             guard !isApplyingContentTransition else { return }
+            let scrollAnchor: ScrollAnchor?
+            if contentKind == .profileMedia {
+                if let transition = profileMediaGeometryTransition,
+                   transition.originColumnCount == columnCount {
+                    scrollAnchor = transition.anchor
+                } else {
+                    scrollAnchor = captureScrollAnchor()
+                        ?? profileMediaGeometryTransition?.anchor
+                        ?? lastProfileMediaScrollAnchor
+                }
+            } else {
+                scrollAnchor = nil
+            }
             clearAllHeightCache()
             applyLayoutForColumnCount()
             reconfigureVisibleCells()
             updateBackgroundColors()
+            if restoreScrollAnchorIfNeeded(scrollAnchor) {
+                collectionView.layer.removeAllAnimations()
+                rememberProfileMediaScrollAnchor()
+            }
         }
     }
     var accessoryItems: [UITimelineCollectionViewAccessoryItem] = [] {
@@ -313,6 +330,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private var currentAutoplayID: String?
     private var accessoryItemMap: [String: UITimelineCollectionViewAccessoryItem] = [:]
     private var pendingScrollAnchor: ScrollAnchor?
+    private var lastProfileMediaScrollAnchor: ScrollAnchor?
+    private var profileMediaGeometryTransition: (anchor: ScrollAnchor, originColumnCount: Int)?
     private var pendingEffectiveContentOffsetYAfterSnapshot: CGFloat?
     private var isRestoringScrollAnchor = false
     private var isApplyingContentTransition = false
@@ -391,11 +410,21 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         applyCurrentSnapshot()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        reconfigureVisibleCells()
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
         updateProfileMediaColumnCount()
         updateContentInsets()
+        if profileMediaGeometryTransition?.originColumnCount == columnCount {
+            restoreProfileMediaGeometryTransition(finalize: false)
+        } else {
+            rememberProfileMediaScrollAnchor()
+        }
         reportIsAtTop()
         if shouldRevealRefreshControl {
             revealRefreshControlIfNeeded()
@@ -406,6 +435,28 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
         updateContentInsets()
+    }
+
+    override func viewWillTransition(
+        to size: CGSize,
+        with coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        super.viewWillTransition(to: size, with: coordinator)
+        guard contentKind == .profileMedia else { return }
+        if profileMediaGeometryTransition == nil,
+           let anchor = captureScrollAnchor(requiringStableInteraction: false)
+                ?? lastProfileMediaScrollAnchor {
+            profileMediaGeometryTransition = (anchor, columnCount)
+        }
+        guard profileMediaGeometryTransition != nil else { return }
+        coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.view.layoutIfNeeded()
+                self.collectionView.layoutIfNeeded()
+                self.restoreProfileMediaGeometryTransition(finalize: true)
+            }
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -1098,6 +1149,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         currentProfileMediaData = nil
         currentProfileMediaSuccess = nil
         pendingScrollAnchor = nil
+        lastProfileMediaScrollAnchor = nil
+        profileMediaGeometryTransition = nil
     }
 
     private func syncRefreshControl(isRefreshing: Bool) {
@@ -1178,15 +1231,15 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         itemID.hasPrefix(Self.timelinePrefix) || itemID.hasPrefix(Self.profileMediaPrefix)
     }
 
-    private func captureScrollAnchor() -> ScrollAnchor? {
+    private func captureScrollAnchor(requiringStableInteraction: Bool = true) -> ScrollAnchor? {
         guard isViewLoaded,
               currentSuccess != nil || currentProfileMediaSuccess != nil,
-              allowsScrollAnchorRestoration,
+              !requiringStableInteraction || allowsScrollAnchorRestoration,
               collectionView.bounds.height > 1 else {
             return nil
         }
 
-        let viewportTop = effectiveContentOffsetY
+        let viewportTop = collectionView.contentOffset.y
         let viewportBottom = collectionView.contentOffset.y + collectionView.bounds.height - collectionView.adjustedContentInset.bottom
         return collectionView.indexPathsForVisibleItems
             .compactMap { indexPath -> (itemID: String, frame: CGRect)? in
@@ -1234,7 +1287,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             return false
         }
 
-        let targetOffsetY = attributes.frame.minY - anchor.distanceFromViewportTop - collectionView.adjustedContentInset.top
+        let targetOffsetY = attributes.frame.minY - anchor.distanceFromViewportTop
         let targetOffset = CGPoint(x: collectionView.contentOffset.x, y: clampedContentOffsetY(targetOffsetY))
         if abs(collectionView.contentOffset.y - targetOffset.y) > 0.5 {
             isRestoringScrollAnchor = true
@@ -1251,6 +1304,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             pendingEffectiveContentOffsetYAfterSnapshot = nil
         }
         collectionView.layer.removeAllAnimations()
+    }
+
+    private func rememberProfileMediaScrollAnchor() {
+        guard contentKind == .profileMedia,
+              let anchor = captureScrollAnchor(requiringStableInteraction: false) else {
+            return
+        }
+        lastProfileMediaScrollAnchor = anchor
+    }
+
+    private func restoreProfileMediaGeometryTransition(finalize: Bool) {
+        guard let transition = profileMediaGeometryTransition,
+              restoreScrollAnchorIfNeeded(transition.anchor) else {
+            return
+        }
+        collectionView.layer.removeAllAnimations()
+        rememberProfileMediaScrollAnchor()
+        if finalize, columnCount == transition.originColumnCount {
+            profileMediaGeometryTransition = nil
+        }
     }
 
     private func applyPreparedContentTransition(
@@ -2134,6 +2207,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }
 
     private func beginScrollInteraction() {
+        if contentKind == .profileMedia {
+            profileMediaGeometryTransition = nil
+        }
         scrollingState.isScrolling = true
         pendingScrollAnchor = nil
         pendingEffectiveContentOffsetYAfterSnapshot = nil
@@ -2144,6 +2220,9 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         restorePendingScrollAnchorIfNeeded()
+        if allowsScrollAnchorRestoration {
+            rememberProfileMediaScrollAnchor()
+        }
         reportIsAtTop()
         onContentOffsetChanged?(effectiveContentOffsetY)
         validateCurrentAutoplayVisibility()
@@ -2165,6 +2244,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func endScrollInteraction() {
         scrollingState.isScrolling = false
+        rememberProfileMediaScrollAnchor()
         scheduleAutoplaySelection()
         scheduleDeferredPoolCleanup()
     }

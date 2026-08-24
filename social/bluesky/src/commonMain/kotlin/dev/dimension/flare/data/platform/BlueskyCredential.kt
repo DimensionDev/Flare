@@ -26,6 +26,7 @@ internal sealed interface BlueskyCredential {
     data class OAuthCredential(
         override val baseUrl: String,
         val oAuthToken: OAuthToken,
+        val pdsUrlVerified: Boolean = false,
     ) : BlueskyCredential {
         override val accessToken: String
             get() = oAuthToken.accessToken
@@ -42,13 +43,20 @@ internal sealed interface BlueskyCredential {
             if (oAuthToken.refreshToken != other.oAuthToken.refreshToken) return false
             if (oAuthToken.nonce != other.oAuthToken.nonce) return false
             if (oAuthToken.expiresIn != other.oAuthToken.expiresIn) return false
+            if (oAuthToken.pdsUrl != other.oAuthToken.pdsUrl) return false
+            if (pdsUrlVerified != other.pdsUrlVerified) return false
 
             return true
         }
 
         override fun hashCode(): Int {
             var result = baseUrl.hashCode()
-            result = 31 * result + oAuthToken.hashCode()
+            result = 31 * result + oAuthToken.accessToken.hashCode()
+            result = 31 * result + oAuthToken.refreshToken.hashCode()
+            result = 31 * result + oAuthToken.nonce.hashCode()
+            result = 31 * result + oAuthToken.expiresIn.hashCode()
+            result = 31 * result + oAuthToken.pdsUrl.hashCode()
+            result = 31 * result + pdsUrlVerified.hashCode()
             return result
         }
     }

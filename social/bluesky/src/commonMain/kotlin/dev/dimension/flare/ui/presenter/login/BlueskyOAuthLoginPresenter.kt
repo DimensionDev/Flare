@@ -168,6 +168,7 @@ internal class BlueskyOAuthLoginPresenter(
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
                 oAuthToken = token,
+                pdsUrlVerified = true,
             )
         accountService.addAccount(
             account =

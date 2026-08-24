@@ -491,6 +491,7 @@ private class BlueskyOAuthLoginHandler(
             BlueskyCredential.OAuthCredential(
                 baseUrl = iss,
                 oAuthToken = token,
+                pdsUrlVerified = true,
             )
         val missingScopes = token.missingFlareOAuthScopes()
         if (missingScopes.isNotEmpty()) {

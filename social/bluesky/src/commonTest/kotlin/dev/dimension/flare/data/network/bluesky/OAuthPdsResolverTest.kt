@@ -46,6 +46,7 @@ class OAuthPdsResolverTest {
                     BlueskyCredential.OAuthCredential(
                         baseUrl = "https://bsky.social",
                         oAuthToken = resolvedToken,
+                        pdsUrlVerified = true,
                     ),
                 )
             val apiClient =

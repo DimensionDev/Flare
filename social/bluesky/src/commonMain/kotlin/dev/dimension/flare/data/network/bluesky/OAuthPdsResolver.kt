@@ -46,20 +46,17 @@ internal suspend fun OAuthToken.withResolvedPds(
         "Resolved DID document id ${didDocument.id} does not match OAuth subject $did"
     }
 
-    val matchingServices =
-        didDocument.services.filter { service ->
+    val pdsService =
+        didDocument.services.firstOrNull { service ->
             service.type == AT_PROTO_PDS_SERVICE_TYPE &&
                 (service.id == AT_PROTO_PDS_SERVICE_ID || service.id == "$did$AT_PROTO_PDS_SERVICE_ID")
         }
-    check(matchingServices.size == 1) {
-        "DID document for $did must declare exactly one $AT_PROTO_PDS_SERVICE_TYPE service"
+    checkNotNull(pdsService) {
+        "DID document for $did must declare an $AT_PROTO_PDS_SERVICE_TYPE service"
     }
     val pdsUrl =
         Url(
-            matchingServices
-                .single()
-                .serviceEndpoint
-                .orEmpty(),
+            pdsService.serviceEndpoint.orEmpty(),
         ).requireHttpsOrigin("PDS service endpoint")
 
     val protectedResource =
@@ -80,6 +77,17 @@ internal suspend fun OAuthToken.withResolvedPds(
             .requireHttpsOrigin("PDS authorization server")
     check(declaredIssuer.sameOriginAs(issuerUrl)) {
         "PDS $pdsUrl is bound to OAuth issuer $declaredIssuer, not $issuerUrl"
+    }
+    val authorizationServer =
+        httpClient.getJson<OAuthAuthorizationServer>(
+            url = declaredIssuer.authorizationServerMetadataUrl(),
+            description = "OAuth authorization-server metadata for $declaredIssuer",
+        )
+    val metadataIssuer =
+        Url(authorizationServer.issuer)
+            .requireHttpsOrigin("OAuth authorization-server metadata issuer")
+    check(metadataIssuer.sameOriginAs(declaredIssuer)) {
+        "OAuth authorization-server metadata issuer $metadataIssuer does not match $declaredIssuer"
     }
 
     return copy(pdsUrl = pdsUrl.toString())
@@ -110,25 +118,19 @@ private fun didDocumentUrl(did: String): Url =
 
 private fun didWebDocumentUrl(did: String): Url {
     val components = did.removePrefix("did:web:").split(':')
-    require(components.isNotEmpty() && components.none(String::isEmpty)) {
-        "Invalid did:web identifier: $did"
+    require(components.size == 1 && components.single().isNotEmpty()) {
+        "AT Protocol only supports hostname-level did:web identifiers: $did"
     }
     val authority = components.first().decodeURLPart()
     require(authority.none { it == '/' || it == '?' || it == '#' || it == '@' }) {
         "Invalid did:web authority: $authority"
     }
     val authorityUrl = Url("https://$authority").requireHttpsOrigin("did:web authority")
-    val pathSegments =
-        if (components.size == 1) {
-            listOf(".well-known", "did.json")
-        } else {
-            components.drop(1).map(String::decodeURLPart) + "did.json"
-        }
     return buildUrl {
         protocol = authorityUrl.protocol
         host = authorityUrl.host
         port = authorityUrl.port
-        appendPathSegments(*pathSegments.toTypedArray(), encodeSlash = true)
+        appendPathSegments(".well-known", "did.json")
     }
 }
 
@@ -138,6 +140,14 @@ private fun Url.protectedResourceMetadataUrl(): Url =
         host = this@protectedResourceMetadataUrl.host
         port = this@protectedResourceMetadataUrl.port
         appendPathSegments(".well-known", "oauth-protected-resource")
+    }
+
+private fun Url.authorizationServerMetadataUrl(): Url =
+    buildUrl {
+        protocol = this@authorizationServerMetadataUrl.protocol
+        host = this@authorizationServerMetadataUrl.host
+        port = this@authorizationServerMetadataUrl.port
+        appendPathSegments(".well-known", "oauth-authorization-server")
     }
 
 private fun Url.requireHttpsOrigin(description: String): Url {
@@ -173,4 +183,9 @@ private data class OAuthProtectedResource(
     val resource: String,
     @SerialName("authorization_servers")
     val authorizationServers: List<String> = emptyList(),
+)
+
+@Serializable
+private data class OAuthAuthorizationServer(
+    val issuer: String,
 )

@@ -10,8 +10,8 @@ import dev.dimension.flare.data.datastore.PlatformOAuthPending
 import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.bluesky.FLARE_BLUESKY_OAUTH_SCOPES
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
+import dev.dimension.flare.data.network.bluesky.requestBlueskyOAuthCredential
 import dev.dimension.flare.data.network.bluesky.requireFlareOAuthScopes
-import dev.dimension.flare.data.network.bluesky.withResolvedPds
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
@@ -155,21 +155,17 @@ internal class BlueskyOAuthLoginPresenter(
             throw IllegalArgumentException("State mismatch: expected ${request.state}, got $state")
         }
         val host = Url(iss).host
-        val token =
+        val credential =
             createOAuthApi(host)
-                .requestToken(
+                .requestBlueskyOAuthCredential(
+                    issuer = iss,
                     oauthClient = oauthClient,
                     code = code,
                     nonce = request.nonce,
                     codeVerifier = request.codeVerifier,
-                ).withResolvedPds(iss)
+                )
+        val token = credential.oAuthToken
         token.requireFlareOAuthScopes()
-        val credential: BlueskyCredential =
-            BlueskyCredential.OAuthCredential(
-                baseUrl = iss,
-                oAuthToken = token,
-                pdsUrlVerified = true,
-            )
         accountService.addAccount(
             account =
                 UiAccount(

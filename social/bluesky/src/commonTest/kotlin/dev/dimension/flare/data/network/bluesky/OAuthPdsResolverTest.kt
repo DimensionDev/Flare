@@ -91,6 +91,7 @@ class OAuthPdsResolverTest {
                     listOf(
                         "plc.directory/did:plc:alice",
                         "puffball.us-east.host.bsky.network/.well-known/oauth-protected-resource",
+                        "bsky.social/.well-known/oauth-authorization-server",
                     ),
                     resolverRequests,
                 )
@@ -124,7 +125,98 @@ class OAuthPdsResolverTest {
         }
 
     @Test
-    fun resolvesDidWebDocumentPath() =
+    fun rejectsAuthorizationServerMetadataIssuerMismatch() =
+        runTest {
+            val resolverClient =
+                resolverClient(
+                    did = "did:plc:alice",
+                    pdsUrl = "https://pds.example",
+                    issuer = "https://auth.example",
+                    metadataIssuer = "https://evil.example",
+                )
+
+            try {
+                val error =
+                    assertFailsWith<IllegalStateException> {
+                        oauthToken(subject = "did:plc:alice")
+                            .withResolvedPds("https://auth.example", resolverClient)
+                    }
+
+                assertTrue(error.message.orEmpty().contains("metadata issuer"))
+            } finally {
+                resolverClient.close()
+            }
+        }
+
+    @Test
+    fun usesFirstMatchingPdsService() =
+        runTest {
+            val requests = mutableListOf<String>()
+            val resolverClient =
+                resolverClient(
+                    did = "did:plc:alice",
+                    pdsUrl = "https://first-pds.example",
+                    issuer = "https://auth.example",
+                    requests = requests,
+                    pdsServiceEndpoints =
+                        listOf(
+                            "https://first-pds.example",
+                            "https://second-pds.example",
+                        ),
+                )
+
+            try {
+                val resolvedToken =
+                    oauthToken(subject = "did:plc:alice")
+                        .withResolvedPds("https://auth.example", resolverClient)
+
+                assertEquals("https://first-pds.example", resolvedToken.pdsUrl)
+                assertEquals(
+                    listOf(
+                        "plc.directory/did:plc:alice",
+                        "first-pds.example/.well-known/oauth-protected-resource",
+                        "auth.example/.well-known/oauth-authorization-server",
+                    ),
+                    requests,
+                )
+            } finally {
+                resolverClient.close()
+            }
+        }
+
+    @Test
+    fun resolvesHostnameDidWebDocument() =
+        runTest {
+            val requests = mutableListOf<String>()
+            val resolverClient =
+                resolverClient(
+                    did = "did:web:pds.example",
+                    pdsUrl = "https://pds.example",
+                    issuer = "https://auth.example",
+                    requests = requests,
+                )
+
+            try {
+                val resolvedToken =
+                    oauthToken(subject = "did:web:pds.example")
+                        .withResolvedPds("https://auth.example", resolverClient)
+
+                assertEquals("https://pds.example", resolvedToken.pdsUrl)
+                assertEquals(
+                    listOf(
+                        "pds.example/.well-known/did.json",
+                        "pds.example/.well-known/oauth-protected-resource",
+                        "auth.example/.well-known/oauth-authorization-server",
+                    ),
+                    requests,
+                )
+            } finally {
+                resolverClient.close()
+            }
+        }
+
+    @Test
+    fun rejectsPathBasedDidWeb() =
         runTest {
             val requests = mutableListOf<String>()
             val resolverClient =
@@ -136,18 +228,14 @@ class OAuthPdsResolverTest {
                 )
 
             try {
-                val resolvedToken =
-                    oauthToken(subject = "did:web:pds.example:users:alice")
-                        .withResolvedPds("https://auth.example", resolverClient)
+                val error =
+                    assertFailsWith<IllegalArgumentException> {
+                        oauthToken(subject = "did:web:pds.example:users:alice")
+                            .withResolvedPds("https://auth.example", resolverClient)
+                    }
 
-                assertEquals("https://pds.example", resolvedToken.pdsUrl)
-                assertEquals(
-                    listOf(
-                        "pds.example/users/alice/did.json",
-                        "pds.example/.well-known/oauth-protected-resource",
-                    ),
-                    requests,
-                )
+                assertTrue(error.message.orEmpty().contains("hostname-level did:web"))
+                assertTrue(requests.isEmpty())
             } finally {
                 resolverClient.close()
             }
@@ -173,12 +261,24 @@ class OAuthPdsResolverTest {
         pdsUrl: String,
         issuer: String,
         requests: MutableList<String> = mutableListOf(),
+        pdsServiceEndpoints: List<String> = listOf(pdsUrl),
+        metadataIssuer: String = issuer,
     ): HttpClient =
         HttpClient(
             MockEngine { request ->
                 requests += "${request.url.host}${request.url.encodedPath}"
                 when (request.url.encodedPath) {
-                    "/did:plc:alice", "/users/alice/did.json" -> {
+                    "/did:plc:alice", "/.well-known/did.json" -> {
+                        val services =
+                            pdsServiceEndpoints.joinToString(separator = ",") { endpoint ->
+                                """
+                                {
+                                  "id": "#atproto_pds",
+                                  "type": "AtprotoPersonalDataServer",
+                                  "serviceEndpoint": "$endpoint"
+                                }
+                                """.trimIndent()
+                            }
                         respond(
                             content =
                                 """
@@ -186,11 +286,7 @@ class OAuthPdsResolverTest {
                                   "@context": ["https://www.w3.org/ns/did/v1"],
                                   "id": "$did",
                                   "service": [
-                                    {
-                                      "id": "#atproto_pds",
-                                      "type": "AtprotoPersonalDataServer",
-                                      "serviceEndpoint": "$pdsUrl"
-                                    }
+                                    $services
                                   ]
                                 }
                                 """.trimIndent(),
@@ -205,6 +301,18 @@ class OAuthPdsResolverTest {
                                 {
                                   "resource": "$pdsUrl",
                                   "authorization_servers": ["$issuer"]
+                                }
+                                """.trimIndent(),
+                            headers = jsonHeaders,
+                        )
+                    }
+
+                    "/.well-known/oauth-authorization-server" -> {
+                        respond(
+                            content =
+                                """
+                                {
+                                  "issuer": "$metadataIssuer"
                                 }
                                 """.trimIndent(),
                             headers = jsonHeaders,

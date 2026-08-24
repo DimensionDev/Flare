@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.oauth.DpopKeyPair
+import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthScope
 import sh.christian.ozone.oauth.OAuthToken
 import kotlin.test.Test
@@ -75,6 +76,11 @@ class OAuthPdsResolverTest {
                         accountKey = MicroBlogKey("did:plc:alice", "bsky.social")
                         authTokenFlow = credentialFlow
                         onAuthTokensChanged = { credentialFlow.value = it }
+                        oauthApi =
+                            OAuthApi(
+                                httpClient = resolverClient,
+                                challengeSelector = { OAuthCodeChallengeMethodS256 },
+                            )
                     }
                 }
 

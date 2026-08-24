@@ -233,6 +233,17 @@ class BlueskyAuthPluginTest {
             var persistedCredential: BlueskyCredential? = null
             var resolverCalls = 0
             val requestHosts = mutableListOf<String>()
+            val oauthHttpClient =
+                HttpClient(
+                    MockEngine { request ->
+                        error("Unexpected OAuth request: ${request.url}")
+                    },
+                )
+            val oauthApi =
+                OAuthApi(
+                    httpClient = oauthHttpClient,
+                    challengeSelector = { OAuthCodeChallengeMethodS256 },
+                )
             val client =
                 HttpClient(
                     MockEngine { request ->
@@ -259,6 +270,7 @@ class BlueskyAuthPluginTest {
                             assertEquals("https://auth.example", issuer)
                             token.copy(pdsUrl = "https://pds.example")
                         }
+                        this.oauthApi = oauthApi
                     }
                 }
 
@@ -284,6 +296,7 @@ class BlueskyAuthPluginTest {
                 assertEquals(true, migratedCredential.pdsUrlVerified)
             } finally {
                 client.close()
+                oauthHttpClient.close()
             }
         }
 

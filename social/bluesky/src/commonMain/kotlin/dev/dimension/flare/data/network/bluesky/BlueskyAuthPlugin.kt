@@ -272,7 +272,10 @@ internal class BlueskyAuthPlugin(
                         ).let { refreshed ->
                             BlueskyCredential.OAuthCredential(
                                 baseUrl = tokens.baseUrl,
-                                oAuthToken = refreshed,
+                                oAuthToken =
+                                    refreshed.copy(
+                                        pdsUrl = tokens.oAuthToken.pdsUrl,
+                                    ),
                             )
                         }
                 }
@@ -305,6 +308,7 @@ internal class BlueskyAuthPlugin(
         ) {
             url.protocol = tokens.oAuthToken.pds.protocol
             url.host = tokens.oAuthToken.pds.host
+            url.port = tokens.oAuthToken.pds.port
 
             val dpopHeader =
                 oAuthApi.createDpopHeaderValue(

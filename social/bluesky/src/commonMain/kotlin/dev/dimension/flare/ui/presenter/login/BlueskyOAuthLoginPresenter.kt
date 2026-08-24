@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datastore.PlatformOAuthPendingRepository
 import dev.dimension.flare.data.network.bluesky.FLARE_BLUESKY_OAUTH_SCOPES
 import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.bluesky.requireFlareOAuthScopes
+import dev.dimension.flare.data.network.bluesky.withResolvedPds
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
@@ -155,12 +156,13 @@ internal class BlueskyOAuthLoginPresenter(
         }
         val host = Url(iss).host
         val token =
-            createOAuthApi(host).requestToken(
-                oauthClient = oauthClient,
-                code = code,
-                nonce = request.nonce,
-                codeVerifier = request.codeVerifier,
-            )
+            createOAuthApi(host)
+                .requestToken(
+                    oauthClient = oauthClient,
+                    code = code,
+                    nonce = request.nonce,
+                    codeVerifier = request.codeVerifier,
+                ).withResolvedPds(iss)
         token.requireFlareOAuthScopes()
         val credential: BlueskyCredential =
             BlueskyCredential.OAuthCredential(

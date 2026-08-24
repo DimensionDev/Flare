@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.bluesky.delegationControllerDidOrNull
 import dev.dimension.flare.data.network.bluesky.missingFlareOAuthScopes
 import dev.dimension.flare.data.network.bluesky.repairTranquilDelegationScopes
+import dev.dimension.flare.data.network.bluesky.requestBlueskyOAuthCredential
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.data.platform.BlueskyCredential
@@ -478,18 +479,16 @@ private class BlueskyOAuthLoginHandler(
             throw IllegalArgumentException("State mismatch: expected ${request.state}, got $state")
         }
         val host = Url(iss).host
-        val token =
-            createOAuthApi(host).requestToken(
-                oauthClient = oauthClient(redirectUri),
-                code = code,
-                nonce = request.nonce,
-                codeVerifier = request.codeVerifier,
-            )
         val credential =
-            BlueskyCredential.OAuthCredential(
-                baseUrl = iss,
-                oAuthToken = token,
-            )
+            createOAuthApi(host)
+                .requestBlueskyOAuthCredential(
+                    issuer = iss,
+                    oauthClient = oauthClient(redirectUri),
+                    code = code,
+                    nonce = request.nonce,
+                    codeVerifier = request.codeVerifier,
+                )
+        val token = credential.oAuthToken
         val missingScopes = token.missingFlareOAuthScopes()
         if (missingScopes.isNotEmpty()) {
             val controllerDid = token.delegationControllerDidOrNull()

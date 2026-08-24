@@ -32,6 +32,7 @@ import sh.christian.ozone.api.response.AtpException
 import sh.christian.ozone.api.response.AtpResponse
 import sh.christian.ozone.api.response.StatusCode
 import sh.christian.ozone.oauth.OAuthApi
+import sh.christian.ozone.oauth.OAuthToken
 
 /**
  * Appends the `Authorization` header to XRPC requests, as well as automatically refreshing and
@@ -40,16 +41,22 @@ import sh.christian.ozone.oauth.OAuthApi
 internal class BlueskyAuthPlugin(
     private val json: Json,
     private val oauthApi: OAuthApi,
+    private val resolveOAuthPds: suspend (OAuthToken, String) -> OAuthToken,
     private val accountKey: MicroBlogKey?,
     private val baseUrlFlow: Flow<String>? = null,
     private val authTokenFlow: Flow<BlueskyCredential>?,
     private val onAuthTokensChanged: suspend (BlueskyCredential) -> Unit,
 ) {
     private val refreshMutex = Mutex()
+    private val oauthPdsMigrationMutex = Mutex()
+    private var oauthPdsMigration: OAuthPdsMigration? = null
 
     class Config(
         var json: Json = BlueskyJson,
         var oauthApi: OAuthApi = OAuthApi(),
+        var resolveOAuthPds: suspend (OAuthToken, String) -> OAuthToken = { token, issuer ->
+            token.withResolvedPds(issuer)
+        },
         var accountKey: MicroBlogKey? = null,
         var baseUrlFlow: Flow<String>? = null,
         var authTokenFlow: Flow<BlueskyCredential>? = null,
@@ -64,6 +71,7 @@ internal class BlueskyAuthPlugin(
             return BlueskyAuthPlugin(
                 json = config.json,
                 oauthApi = config.oauthApi,
+                resolveOAuthPds = config.resolveOAuthPds,
                 accountKey = config.accountKey,
                 baseUrlFlow = config.baseUrlFlow,
                 authTokenFlow = config.authTokenFlow,
@@ -272,7 +280,11 @@ internal class BlueskyAuthPlugin(
                         ).let { refreshed ->
                             BlueskyCredential.OAuthCredential(
                                 baseUrl = tokens.baseUrl,
-                                oAuthToken = refreshed,
+                                oAuthToken =
+                                    refreshed.copy(
+                                        pdsUrl = tokens.oAuthToken.pdsUrl,
+                                    ),
+                                pdsUrlVerified = tokens.pdsUrlVerified,
                             )
                         }
                 }
@@ -305,6 +317,7 @@ internal class BlueskyAuthPlugin(
         ) {
             url.protocol = tokens.oAuthToken.pds.protocol
             url.host = tokens.oAuthToken.pds.host
+            url.port = tokens.oAuthToken.pds.port
 
             val dpopHeader =
                 oAuthApi.createDpopHeaderValue(
@@ -320,7 +333,43 @@ internal class BlueskyAuthPlugin(
         }
     }
 
-    private suspend fun currentCredential(): BlueskyCredential? = authTokenFlow?.firstOrNull()
+    private suspend fun currentCredential(): BlueskyCredential? {
+        val credential = authTokenFlow?.firstOrNull() ?: return null
+        if (credential !is BlueskyCredential.OAuthCredential || credential.pdsUrlVerified) {
+            return credential
+        }
+
+        return oauthPdsMigrationMutex.withLock {
+            val migrationKey =
+                OAuthPdsMigrationKey(
+                    accessToken = credential.oAuthToken.accessToken,
+                    baseUrl = credential.baseUrl,
+                    pdsUrl = credential.oAuthToken.pdsUrl,
+                )
+            oauthPdsMigration
+                ?.takeIf { it.key == migrationKey }
+                ?.let { migration ->
+                    credential.copy(
+                        oAuthToken = credential.oAuthToken.copy(pdsUrl = migration.pdsUrl),
+                        pdsUrlVerified = true,
+                    )
+                }
+                ?: run {
+                    val resolvedCredential =
+                        credential.copy(
+                            oAuthToken = resolveOAuthPds(credential.oAuthToken, credential.baseUrl),
+                            pdsUrlVerified = true,
+                        )
+                    cacheCredential(resolvedCredential)
+                    oauthPdsMigration =
+                        OAuthPdsMigration(
+                            key = migrationKey,
+                            pdsUrl = resolvedCredential.oAuthToken.pdsUrl,
+                        )
+                    resolvedCredential
+                }
+        }
+    }
 
     private suspend fun cacheCredential(credential: BlueskyCredential) {
         onAuthTokensChanged(credential)
@@ -343,6 +392,17 @@ internal class BlueskyAuthPlugin(
                 )?.also { cacheCredential(it) }
             }
         }
+
+    private data class OAuthPdsMigrationKey(
+        val accessToken: String,
+        val baseUrl: String,
+        val pdsUrl: String,
+    )
+
+    private data class OAuthPdsMigration(
+        val key: OAuthPdsMigrationKey,
+        val pdsUrl: String,
+    )
 }
 
 private suspend inline fun <reified T : Any> HttpResponse.toAtpResponse(): AtpResponse<T> {

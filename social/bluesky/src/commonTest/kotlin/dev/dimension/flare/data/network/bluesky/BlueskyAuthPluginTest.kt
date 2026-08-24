@@ -26,8 +26,14 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import sh.christian.ozone.BlueskyJson
+import sh.christian.ozone.api.Did
+import sh.christian.ozone.oauth.DpopKeyPair
+import sh.christian.ozone.oauth.OAuthApi
+import sh.christian.ozone.oauth.OAuthScope
+import sh.christian.ozone.oauth.OAuthToken
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.minutes
 
 class BlueskyAuthPluginTest {
     @Test
@@ -204,6 +210,230 @@ class BlueskyAuthPluginTest {
         }
 
     @Test
+    fun persistedOAuthCredentialResolvesPdsBeforeFirstRequest() =
+        runTest {
+            val credentialFlow =
+                MutableStateFlow<BlueskyCredential>(
+                    BlueskyCredential.OAuthCredential(
+                        baseUrl = "https://auth.example",
+                        oAuthToken =
+                            OAuthToken(
+                                accessToken = "access-old",
+                                refreshToken = "refresh-old",
+                                keyPair = DpopKeyPair.generateKeyPair(),
+                                expiresIn = 10.minutes,
+                                scopes = listOf(OAuthScope.AtProto),
+                                subject = Did("did:plc:alice"),
+                                nonce = "nonce-old",
+                                clientId = "https://client.example/metadata.json",
+                                pdsUrl = "https://auth.example",
+                            ),
+                    ),
+                )
+            var persistedCredential: BlueskyCredential? = null
+            var resolverCalls = 0
+            val requestHosts = mutableListOf<String>()
+            val oauthHttpClient =
+                HttpClient(
+                    MockEngine { request ->
+                        error("Unexpected OAuth request: ${request.url}")
+                    },
+                )
+            val oauthApi =
+                OAuthApi(
+                    httpClient = oauthHttpClient,
+                    challengeSelector = { OAuthCodeChallengeMethodS256 },
+                )
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        requestHosts += request.url.host
+                        if (request.url.host == "auth.example") {
+                            jsonResponse(
+                                HttpStatusCode.Unauthorized,
+                                """{"error":"InvalidToken","message":"OAuth tokens are meant for PDS access only"}""",
+                            )
+                        } else {
+                            jsonResponse(HttpStatusCode.OK, """{"ok":true}""")
+                        }
+                    },
+                ) {
+                    install(BlueskyAuthPlugin) {
+                        accountKey = MicroBlogKey("did:plc:alice", "auth.example")
+                        authTokenFlow = credentialFlow
+                        onAuthTokensChanged = {
+                            persistedCredential = it
+                            credentialFlow.value = it
+                        }
+                        resolveOAuthPds = { token, issuer ->
+                            resolverCalls += 1
+                            assertEquals("https://auth.example", issuer)
+                            token.copy(pdsUrl = "https://pds.example")
+                        }
+                        this.oauthApi = oauthApi
+                    }
+                }
+
+            try {
+                val firstResponse =
+                    client
+                        .get("https://auth.example/xrpc/app.bsky.feed.getTimeline")
+                        .bodyAsText()
+                val secondResponse =
+                    client
+                        .get("https://auth.example/xrpc/app.bsky.actor.getProfile")
+                        .bodyAsText()
+
+                assertEquals("""{"ok":true}""", firstResponse)
+                assertEquals("""{"ok":true}""", secondResponse)
+                assertEquals(1, resolverCalls)
+                assertEquals(listOf("pds.example", "pds.example"), requestHosts)
+                val migratedCredential = persistedCredential as BlueskyCredential.OAuthCredential
+                assertEquals(
+                    "https://pds.example",
+                    migratedCredential.oAuthToken.pdsUrl,
+                )
+                assertEquals(true, migratedCredential.pdsUrlVerified)
+            } finally {
+                client.close()
+                oauthHttpClient.close()
+            }
+        }
+
+    @Test
+    fun oauthRefreshKeepsResolvedPds() =
+        runTest {
+            val resolvedPds = "https://pds.example:8443"
+            val credentialFlow =
+                MutableStateFlow<BlueskyCredential>(
+                    BlueskyCredential.OAuthCredential(
+                        baseUrl = "https://auth.example",
+                        oAuthToken =
+                            OAuthToken(
+                                accessToken = "access-old",
+                                refreshToken = "refresh-old",
+                                keyPair = DpopKeyPair.generateKeyPair(),
+                                expiresIn = 10.minutes,
+                                scopes = listOf(OAuthScope.AtProto),
+                                subject = Did("did:plc:alice"),
+                                nonce = "nonce-old",
+                                clientId = "https://client.example/metadata.json",
+                                pdsUrl = resolvedPds,
+                            ),
+                        pdsUrlVerified = true,
+                    ),
+                )
+            var refreshCalls = 0
+            val oauthHttpClient =
+                HttpClient(
+                    MockEngine { request ->
+                        when (request.url.encodedPath) {
+                            "/.well-known/oauth-authorization-server" -> {
+                                jsonResponse(
+                                    HttpStatusCode.OK,
+                                    """
+                                    {
+                                      "issuer": "https://auth.example",
+                                      "authorization_endpoint": "https://auth.example/authorize",
+                                      "token_endpoint": "https://auth.example/token"
+                                    }
+                                    """.trimIndent(),
+                                )
+                            }
+
+                            "/token" -> {
+                                refreshCalls += 1
+                                jsonResponse(
+                                    HttpStatusCode.OK,
+                                    """
+                                    {
+                                      "access_token": "access-new",
+                                      "token_type": "DPoP",
+                                      "expires_in": 3600,
+                                      "refresh_token": "refresh-new",
+                                      "scope": "atproto",
+                                      "sub": "did:plc:alice"
+                                    }
+                                    """.trimIndent(),
+                                    dpopNonce = "nonce-new",
+                                )
+                            }
+
+                            else -> {
+                                error("Unexpected OAuth request: ${request.url}")
+                            }
+                        }
+                    },
+                )
+            val oauthApi =
+                OAuthApi(
+                    httpClient = oauthHttpClient,
+                    challengeSelector = { OAuthCodeChallengeMethodS256 },
+                )
+            var retriedHost: String? = null
+            var retriedPort: Int? = null
+            val apiClient =
+                HttpClient(
+                    MockEngine { request ->
+                        when (request.headers[HttpHeaders.Authorization]) {
+                            "DPoP access-old" -> {
+                                jsonResponse(
+                                    HttpStatusCode.Unauthorized,
+                                    """{"error":"invalid_token","message":"token expired"}""",
+                                )
+                            }
+
+                            "DPoP access-new" -> {
+                                retriedHost = request.url.host
+                                retriedPort = request.url.port
+                                if (request.url.host == "auth.example") {
+                                    jsonResponse(
+                                        HttpStatusCode.Unauthorized,
+                                        """{"error":"InvalidToken","message":"OAuth tokens are meant for PDS access only"}""",
+                                    )
+                                } else {
+                                    jsonResponse(HttpStatusCode.OK, """{"ok":true}""")
+                                }
+                            }
+
+                            else -> {
+                                error(
+                                    "Unexpected authorization header: " +
+                                        request.headers[HttpHeaders.Authorization],
+                                )
+                            }
+                        }
+                    },
+                ) {
+                    install(BlueskyAuthPlugin) {
+                        accountKey = MicroBlogKey("did:plc:alice", "auth.example")
+                        authTokenFlow = credentialFlow
+                        onAuthTokensChanged = { credentialFlow.value = it }
+                        this.oauthApi = oauthApi
+                    }
+                }
+
+            try {
+                val response =
+                    apiClient
+                        .get("https://auth.example/xrpc/app.bsky.feed.getTimeline")
+                        .bodyAsText()
+
+                assertEquals("""{"ok":true}""", response)
+                assertEquals(1, refreshCalls)
+                assertEquals("pds.example", retriedHost)
+                assertEquals(8443, retriedPort)
+                assertEquals(
+                    resolvedPds,
+                    (credentialFlow.value as BlueskyCredential.OAuthCredential).oAuthToken.pdsUrl,
+                )
+            } finally {
+                apiClient.close()
+                oauthHttpClient.close()
+            }
+        }
+
+    @Test
     fun credentialFlowChangeUsesNewCredential() =
         runTest {
             val credentialFlow =
@@ -291,12 +521,14 @@ class BlueskyAuthPluginTest {
     private fun MockRequestHandleScope.jsonResponse(
         status: HttpStatusCode,
         body: String,
+        dpopNonce: String? = null,
     ) = respond(
         content = body,
         status = status,
         headers =
             Headers.build {
                 append(HttpHeaders.ContentType, "application/json")
+                dpopNonce?.let { append("DPoP-Nonce", it) }
             },
     )
 }

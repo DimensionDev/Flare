@@ -150,6 +150,10 @@ public extension UiStrings {
             localizedPresentationString("posts_with_replies_title", fallback: "Posts & Replies")
         case .highlights:
             localizedPresentationString("profile_tab_highlights", fallback: "Highlights")
+        case .reposts:
+            localizedPresentationString("vvo_status_reposts", fallback: "Reposts")
+        case .articles:
+            localizedPresentationString("profile_tab_articles", fallback: "Articles")
         case .media:
             localizedPresentationString("appearance_media_group_title", fallback: "Media")
         }

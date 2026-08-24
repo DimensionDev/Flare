@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.flatMap
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
@@ -36,6 +37,10 @@ public class ProfileMediaPresenter(
                 .toPagingState()
         return object : ProfileMediaState {
             override val mediaState = state
+
+            override suspend fun refreshSuspend() {
+                mediaState.refreshSuspend()
+            }
         }
     }
 
@@ -82,6 +87,8 @@ private fun TimelinePresenter.createTransformedPager(
 @Immutable
 public interface ProfileMediaState {
     public val mediaState: PagingState<ProfileMedia>
+
+    public suspend fun refreshSuspend()
 }
 
 @Immutable

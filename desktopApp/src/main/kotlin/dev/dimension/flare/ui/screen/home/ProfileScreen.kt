@@ -53,12 +53,14 @@ import dev.dimension.flare.profile_blocked_gate_title
 import dev.dimension.flare.profile_insight_title
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
+import dev.dimension.flare.ui.component.ProfileTabsLoadingPlaceholder
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -376,6 +378,33 @@ internal fun ProfileScreen(
                             }
                         }
                     } else {
+                        state.state.tabs.onLoading {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ProfileTabsLoadingPlaceholder()
+                            }
+                            repeat(5) {
+                                item {
+                                    StatusPlaceholder(
+                                        modifier =
+                                            Modifier.padding(
+                                                horizontal = screenHorizontalPadding,
+                                            ),
+                                    )
+                                }
+                            }
+                        }
+                        state.state.tabs.onError { error ->
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ErrorContent(
+                                    error = error,
+                                    onRetry = state.state::retryTabs,
+                                )
+                            }
+                        }
                         state.state.tabs.onSuccess { tabs ->
                             if (tabs.size > 1 && isBigScreen) {
                                 item(

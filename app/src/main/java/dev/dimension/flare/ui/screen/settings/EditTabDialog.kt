@@ -219,6 +219,10 @@ private val UiStrings.androidStringRes: Int
 
             UiStrings.Highlights -> R.string.profile_tab_highlights
 
+            UiStrings.Reposts -> R.string.tab_settings_filter_repost
+
+            UiStrings.Articles -> R.string.profile_tab_articles
+
             UiStrings.Media -> R.string.profile_tab_media
 
             UiStrings.Channel -> R.string.channel_title

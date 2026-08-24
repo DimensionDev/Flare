@@ -885,8 +885,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         // media grid
         if !data.images.isEmpty, showMediaInput {
             let corner: CGFloat = isQuote ? 12 : 16
-            let statusKey = data.statusKey
-            let accountType = data.accountType
             let mediaView = resolvedMediaView()
             mediaView.configure(
                 data: data.images,
@@ -902,25 +900,19 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             )
             mediaView.onMediaClicked = { [weak self] media, index in
                 guard let self else { return }
-                if data.mediaClickPolicy == .openPostClickEvent {
-                    data.onClicked(ClickContext(launcher: self.makeLauncher()))
-                    return
-                }
                 let preview: String? = switch onEnum(of: media) {
                 case .image(let image): image.previewUrl
                 case .video(let video): video.thumbnailUrl
                 case .gif(let gif): gif.previewUrl
                 case .audio: nil
                 }
-                let route = DeeplinkRoute.MediaStatusMedia(
-                    statusKey: statusKey,
-                    accountType: accountType,
+                IOSTimelineMediaActions.open(
+                    post: data,
+                    statusKey: data.statusKey,
                     index: Int32(index),
-                    preview: preview
+                    preview: preview,
+                    openURL: { [weak self] url in self?.openURL?(url) }
                 )
-                if let url = URL(string: route.toUri()) {
-                    self.openURL?(url)
-                }
             }
             mediaView.onMediaMenuAction = { media, action in
                 IOSTimelineMediaActions.handler(data, media, action)

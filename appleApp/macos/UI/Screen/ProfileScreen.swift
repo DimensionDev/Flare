@@ -58,10 +58,12 @@ struct ProfileScreen: View {
                     StateView(state: presenter.state.tabs) { tabsArray in
                         let tabs = tabsArray.cast(ProfileState.Tab.self)
                         profileTabsContent(tabs: tabs)
+                    } errorContent: { error in
+                        ListErrorView(error: error) {
+                            presenter.state.retryTabs()
+                        }
                     } loadingContent: {
-                        ProgressView()
-                            .padding()
-                            .frame(maxWidth: .infinity)
+                        ProfileTimelineLoadingPlaceholder()
                     }
                 } header: {
                     profileTabPinnedHeader
@@ -131,19 +133,23 @@ struct ProfileScreen: View {
 
     @ViewBuilder
     private var profileTabPinnedHeader: some View {
-        if case .success(let tabState) = onEnum(of: presenter.state.tabs) {
+        switch onEnum(of: presenter.state.tabs) {
+        case .loading:
+            ProfileTabsLoadingPlaceholder()
+                .frame(maxWidth: .infinity)
+                .background(.bar)
+                .overlay(alignment: .bottom) {
+                    Divider()
+                }
+        case .success(let tabState):
             let tabs = tabState.data.cast(ProfileState.Tab.self)
             if tabs.count > 1 {
-                ProfileTabPicker(tabs: tabs, selectedTab: $selectedTab)
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
+                ProfileTabBar(tabs: tabs, selectedTab: $selectedTab)
                     .frame(maxWidth: .infinity)
                     .background(.bar)
-                    .overlay(alignment: .bottom) {
-                        Divider()
-                    }
             }
+        case .error:
+            EmptyView()
         }
     }
 

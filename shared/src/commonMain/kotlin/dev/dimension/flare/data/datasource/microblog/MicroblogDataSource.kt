@@ -33,5 +33,5 @@ public interface MicroblogDataSource {
 
     public fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile>
 
-    public fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab>
+    public suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab>
 }

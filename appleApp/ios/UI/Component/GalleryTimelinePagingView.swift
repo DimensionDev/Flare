@@ -1224,19 +1224,13 @@ private final class GalleryPostTileUIView: UIView, UIGestureRecognizerDelegate {
 
     @objc private func onImageTapped() {
         guard let post, let mediaPreviewURL else { return }
-        if post.mediaClickPolicy == .openPostClickEvent {
-            post.onClicked(ClickContext(launcher: makeLauncher()))
-            return
-        }
-        let route = DeeplinkRoute.MediaStatusMedia(
+        IOSTimelineMediaActions.open(
+            post: post,
             statusKey: post.statusKey,
-            accountType: post.accountType,
             index: 0,
-            preview: mediaPreviewURL
+            preview: mediaPreviewURL,
+            openURL: { [weak self] url in self?.onOpenURL?(url) }
         )
-        if let url = URL(string: route.toUri()) {
-            onOpenURL?(url)
-        }
     }
 
     @objc private func onRootTapped() {

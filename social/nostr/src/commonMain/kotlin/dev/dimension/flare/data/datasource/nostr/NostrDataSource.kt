@@ -353,7 +353,7 @@ internal class NostrDataSource(
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> = notSupported()
 
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
+    override suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab(
                 name = UiStrings.Posts,

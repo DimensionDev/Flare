@@ -67,12 +67,14 @@ import dev.dimension.flare.compose.ui.pixiv_ranking_week_rookie_title
 import dev.dimension.flare.compose.ui.pixiv_ranking_week_title
 import dev.dimension.flare.compose.ui.posts_title
 import dev.dimension.flare.compose.ui.posts_with_replies_title
+import dev.dimension.flare.compose.ui.profile_tab_articles
 import dev.dimension.flare.compose.ui.profile_tab_highlights
 import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.service_select_next_button
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
 import dev.dimension.flare.compose.ui.tab_settings_default
+import dev.dimension.flare.compose.ui.tab_settings_filter_repost
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.model.AccountType
@@ -338,6 +340,10 @@ internal val UiStrings.res: StringResource
             UiStrings.PostsWithReplies -> Res.string.posts_with_replies_title
 
             UiStrings.Highlights -> Res.string.profile_tab_highlights
+
+            UiStrings.Reposts -> Res.string.tab_settings_filter_repost
+
+            UiStrings.Articles -> Res.string.profile_tab_articles
 
             UiStrings.Media -> Res.string.media_title
 

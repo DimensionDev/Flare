@@ -228,6 +228,9 @@
                 report(userKey) {
                     controller.state.report(userKey);
                 },
+                retryTabs() {
+                    controller.state.retryTabs();
+                },
             },
             mount: controller.mount,
             close: controller.close,
@@ -663,9 +666,11 @@
     >
         <div class="tabs tabs-border profile-tabs" role="tablist">
             {#if hasProfileRoute && (!hasCurrentProfileState || profileState.tabs.type === "Loading")}
-                <div class="tab profile-tab">
-                    <div class="skeleton h-5 w-20"></div>
-                </div>
+                {#each [0, 1, 2, 3] as placeholder (placeholder)}
+                    <div class="tab profile-tab" aria-hidden="true">
+                        <div class="skeleton h-5 w-20"></div>
+                    </div>
+                {/each}
             {:else}
                 {#each profileTabs as tab, index (profileTabId(tab, index))}
                     {@const tabId = profileTabId(tab, index)}
@@ -692,6 +697,9 @@
                         >{profileState.tabs.message ??
                             m.profileUnableToLoadTabs()}</span
                     >
+                    <button class="btn btn-sm" type="button" onclick={() => profileState.retryTabs()}>
+                        {m.actionRetry()}
+                    </button>
                 </div>
             </div>
         {:else if selectedTab}

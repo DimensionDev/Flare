@@ -440,6 +440,7 @@ public fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusQuoteComponent(
                     quotes = quotes,
+                    allowMediaCarousel = allowMediaCarousel,
                 )
             }
 
@@ -576,6 +577,7 @@ internal fun StatusMediasComponent(
 @Composable
 private fun StatusQuoteComponent(
     quotes: ImmutableList<UiTimelineV2.Post>,
+    allowMediaCarousel: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -600,6 +602,7 @@ private fun StatusQuoteComponent(
                     CommonStatusComponent(
                         quote,
                         isQuote = true,
+                        allowMediaCarousel = allowMediaCarousel,
                         modifier =
                             Modifier
                                 .padding(8.dp),

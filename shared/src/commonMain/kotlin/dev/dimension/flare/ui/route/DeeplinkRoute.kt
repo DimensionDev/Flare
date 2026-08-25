@@ -175,6 +175,8 @@ public sealed class DeeplinkRoute {
             val accountType: AccountType,
             val index: Int,
             val preview: String?,
+            val aspectRatio: Float = 0f,
+            val previewIsImage: Boolean = true,
         ) : Media()
 
         @Serializable

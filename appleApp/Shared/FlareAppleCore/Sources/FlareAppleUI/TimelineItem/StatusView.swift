@@ -172,7 +172,12 @@ public struct StatusView: View {
                     VStack(
                         spacing: 0
                     ) {
-                        StatusView(data: parent, withLeadingPadding: true)
+                        StatusView(
+                            data: parent,
+                            withLeadingPadding: true,
+                            allowsMediaCarousel: allowsMediaCarousel,
+                            carouselOuterHorizontalPadding: carouselOuterHorizontalPadding
+                        )
                         Spacer()
                             .frame(height: 18)
                     }
@@ -376,11 +381,19 @@ public struct StatusView: View {
                                     case .audio:
                                         nil
                                     }
+                                    let previewIsImage: Bool
+                                    if case .image = onEnum(of: media) {
+                                        previewIsImage = true
+                                    } else {
+                                        previewIsImage = false
+                                    }
                                     let route = DeeplinkRoute.MediaStatusMedia(
                                         statusKey: statusKey,
                                         accountType: accountType,
                                         index: Int32(index),
-                                        preview: preview
+                                        preview: preview,
+                                        aspectRatio: Float(media.aspectRatio ?? 0),
+                                        previewIsImage: previewIsImage
                                     )
                                     if let url = URL(string: route.toUri()) {
                                         openURL(url)
@@ -403,7 +416,12 @@ public struct StatusView: View {
                         if hasQuotes, !isQuote {
                             VStack(alignment: .leading, spacing: 8) {
                                 ForEach(Array(quoteItems.enumerated()), id: \.offset) { index, quote in
-                                    StatusView(data: quote, isQuote: true, forceHideActions: true)
+                                    StatusView(
+                                        data: quote,
+                                        isQuote: true,
+                                        forceHideActions: true,
+                                        allowsMediaCarousel: allowsMediaCarousel
+                                    )
                                     if index < quoteItems.count - 1 {
                                         Divider()
                                     }

@@ -1018,7 +1018,9 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             container.child.configure(
                 data: parent,
                 appearance: appearance,
-                withLeadingPadding: true
+                withLeadingPadding: true,
+                allowsMediaCarousel: allowsMediaCarousel,
+                carouselOuterHorizontalPadding: carouselOuterHorizontalPadding
             )
         }
         return Array(parentContainers.prefix(parentData.count))
@@ -1040,7 +1042,13 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             child.onLocalHeightInvalidated = { [weak self] in
                 self?.notifyLocalHeightInvalidated()
             }
-            child.configure(data: quote, appearance: appearance, isQuote: true, forceHideActions: true)
+            child.configure(
+                data: quote,
+                appearance: appearance,
+                isQuote: true,
+                forceHideActions: true,
+                allowsMediaCarousel: allowsMediaCarousel
+            )
             desired.append(child)
             if i != quotes.count - 1 {
                 desired.append(quoteDividers[i])

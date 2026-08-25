@@ -239,6 +239,8 @@ class DeeplinkRouteTest {
                 accountType = activeAccountType,
                 index = 2,
                 preview = "preview_data",
+                aspectRatio = 9f / 30f,
+                previewIsImage = false,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)

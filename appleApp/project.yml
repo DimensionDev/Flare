@@ -236,6 +236,7 @@ targets:
     sources:
       - path: iosTests
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
+      - path: ios/Common/MediaViewerImageLayoutPolicy.swift
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

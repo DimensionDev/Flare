@@ -16,6 +16,7 @@ struct StatusMediaScreen: View {
     let statusKey: MicroBlogKey
     let initialIndex: Int
     let preview: String?
+    let initialMediaAspectRatio: CGFloat?
     @StateObject private var presenter: KotlinPresenter<StatusState>
     @State private var medias: [any UiMedia] = []
 
@@ -24,6 +25,7 @@ struct StatusMediaScreen: View {
             medias: medias,
             initialIndex: initialIndex,
             preview: preview,
+            previewAspectRatio: initialMediaAspectRatio,
             shareContext: MediaViewerShareContext(
                 statusKey: statusKey.description(),
                 userHandle: statusUserHandle
@@ -94,12 +96,14 @@ extension StatusMediaScreen {
         accountType: AccountType,
         statusKey: MicroBlogKey,
         initialIndex: Int,
-        preview: String?
+        preview: String?,
+        initialMediaAspectRatio: CGFloat?
     ) {
         self.accountType = accountType
         self.statusKey = statusKey
         self.initialIndex = initialIndex
         self.preview = preview
+        self.initialMediaAspectRatio = initialMediaAspectRatio
         self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
     }
 }
@@ -131,14 +135,27 @@ struct AdaptiveKFImage: View {
     let data: String
     let placeholder: String?
     let customHeader: [String: String]?
+    let mediaAspectRatio: CGFloat?
 
-    @State private var shouldFill = false
-    private let wideThreshold: CGFloat = 19.5 / 9.0
+    @State private var measuredImageSize: CGSize?
 
-    init(data: String, placeholder: String?, customHeader: [String: String]? = nil) {
+    init(
+        data: String,
+        placeholder: String?,
+        customHeader: [String: String]? = nil,
+        mediaAspectRatio: CGFloat? = nil
+    ) {
         self.data = data
         self.placeholder = placeholder
         self.customHeader = customHeader
+        self.mediaAspectRatio = mediaAspectRatio
+    }
+
+    private var shouldFill: Bool {
+        MediaViewerImageLayoutPolicy.shouldFillWidth(
+            mediaAspectRatio: mediaAspectRatio,
+            measuredImageSize: measuredImageSize
+        )
     }
 
     var body: some View {
@@ -163,17 +180,15 @@ struct AdaptiveKFImage: View {
                         }
                     })
                     .onSuccess { result in
-                        let size = result.image.size
-                        let ratio = size.height / size.width
-                        if ratio > wideThreshold {
-                            shouldFill = true
-                        } else {
-                            shouldFill = false
-                        }
+                        measuredImageSize = result.image.size
                     }
                     .placeholder {
                         if let placeholder {
-                            AdaptiveKFImage(data: placeholder, placeholder: nil, customHeader: customHeader)
+                            NetworkImage(
+                                data: placeholder,
+                                customHeader: customHeader,
+                                contentMode: shouldFill ? .fill : .fit
+                            )
                         } else {
                             ProgressView()
                         }
@@ -189,17 +204,15 @@ struct AdaptiveKFImage: View {
                         }
                     })
                     .onSuccess { result in
-                        let size = result.image.size
-                        let ratio = size.height / size.width
-                        if ratio > wideThreshold {
-                            shouldFill = true
-                        } else {
-                            shouldFill = false
-                        }
+                        measuredImageSize = result.image.size
                     }
                     .placeholder {
                         if let placeholder {
-                            AdaptiveKFImage(data: placeholder, placeholder: nil, customHeader: customHeader)
+                            NetworkImage(
+                                data: placeholder,
+                                customHeader: customHeader,
+                                contentMode: shouldFill ? .fill : .fit
+                            )
                         } else {
                             ProgressView()
                         }

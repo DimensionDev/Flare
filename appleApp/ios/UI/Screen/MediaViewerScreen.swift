@@ -30,6 +30,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     let medias: [any UiMedia]
     let initialIndex: Int
     let preview: String?
+    let previewAspectRatio: CGFloat?
     let shareContext: MediaViewerShareContext?
     let showsSupplementaryOverlay: Bool
     @ViewBuilder let supplementaryOverlay: (MediaViewerOverlayContext) -> SupplementaryOverlay
@@ -53,6 +54,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         medias: [any UiMedia],
         initialIndex: Int,
         preview: String?,
+        previewAspectRatio: CGFloat? = nil,
         shareContext: MediaViewerShareContext? = nil,
         showsSupplementaryOverlay: Bool = false,
         @ViewBuilder supplementaryOverlay: @escaping (MediaViewerOverlayContext) -> SupplementaryOverlay
@@ -60,6 +62,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         self.medias = medias
         self.initialIndex = initialIndex
         self.preview = preview
+        self.previewAspectRatio = previewAspectRatio
         self.shareContext = shareContext
         self.showsSupplementaryOverlay = showsSupplementaryOverlay
         self.supplementaryOverlay = supplementaryOverlay
@@ -73,7 +76,14 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                 if medias.isEmpty {
                     Group {
                         if let preview {
-                            AdaptiveKFImage(data: preview, placeholder: nil)
+                            LazyPager(data: [preview]) { preview in
+                                AdaptiveKFImage(
+                                    data: preview,
+                                    placeholder: nil,
+                                    mediaAspectRatio: previewAspectRatio
+                                )
+                            }
+                            .zoomable(min: 1, max: 5, doubleTapGesture: .scale(2))
                         } else {
                             ProgressView()
                         }
@@ -137,6 +147,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                                         translationY: dismissOffset
                                     )
                                 )
+                                .opacity(opacity)
                         }
 
                         MediaViewerDismissGestureHost(
@@ -195,7 +206,12 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     private func mediaContent(_ media: any UiMedia) -> some View {
         switch onEnum(of: media) {
         case .image(let image):
-            AdaptiveKFImage(data: image.url, placeholder: image.previewUrl, customHeader: image.customHeaders)
+            AdaptiveKFImage(
+                data: image.url,
+                placeholder: image.previewUrl,
+                customHeader: image.customHeaders,
+                mediaAspectRatio: CGFloat(image.aspectRatio)
+            )
         case .video(let video):
             if medias.indices.contains(selectedIndex), medias[selectedIndex].url == video.url {
                 StatusMediaVideoView(

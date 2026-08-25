@@ -36,11 +36,17 @@ enum IOSTimelineMediaActions {
             return
         }
 
+        let medias = Array(post.images)
+        let selectedIndex = Int(index)
+        let aspectRatio = medias.indices.contains(selectedIndex)
+            ? medias[selectedIndex].aspectRatio
+            : nil
         let route = DeeplinkRoute.MediaStatusMedia(
             statusKey: statusKey,
             accountType: post.accountType,
             index: index,
-            preview: preview
+            preview: preview,
+            aspectRatio: Float(aspectRatio ?? 0)
         )
         if let url = URL(string: route.toUri()) {
             openURL(url)

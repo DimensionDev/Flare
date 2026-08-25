@@ -226,8 +226,14 @@ enum Route: Hashable, Identifiable {
             MediaScreen(url: url, preview: preview, customHeaders: customHeaders)
         case .mediaRaw(let medias, let selectedIndex, let preview):
             RawMediaScreen(medias: medias, initialIndex: selectedIndex, preview: preview)
-        case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
-            StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
+        case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview, let aspectRatio):
+            StatusMediaScreen(
+                accountType: accountType,
+                statusKey: statusKey,
+                initialIndex: Int(selectedIndex),
+                preview: preview,
+                initialMediaAspectRatio: aspectRatio > 0 ? CGFloat(aspectRatio) : nil
+            )
         case .appLog:
             AppLogScreen()
         case .deepLinkAccountPicker(let originalUrl, let data):
@@ -288,7 +294,7 @@ enum Route: Hashable, Identifiable {
     case mediaImage(String, String?, [String: String]?)
     case mediaRaw([any UiMedia], Int, String?)
     case mediaPodcast(AccountType, String)
-    case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
+    case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?, Float)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
     case profileInsight(AccountType, MicroBlogKey)
@@ -383,7 +389,13 @@ enum Route: Hashable, Identifiable {
         case .podcast(let data):
             return Route.mediaPodcast(data.accountType, data.id)
         case .statusMedia(let data):
-            return Route.mediaStatusMedia(data.accountType, data.statusKey, Int32(data.index), data.preview)
+            return Route.mediaStatusMedia(
+                data.accountType,
+                data.statusKey,
+                Int32(data.index),
+                data.preview,
+                data.aspectRatio
+            )
         }
     }
 

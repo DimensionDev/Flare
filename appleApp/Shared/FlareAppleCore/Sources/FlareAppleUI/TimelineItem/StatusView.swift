@@ -380,7 +380,8 @@ public struct StatusView: View {
                                         statusKey: statusKey,
                                         accountType: accountType,
                                         index: Int32(index),
-                                        preview: preview
+                                        preview: preview,
+                                        aspectRatio: Float(media.aspectRatio ?? 0)
                                     )
                                     if let url = URL(string: route.toUri()) {
                                         openURL(url)

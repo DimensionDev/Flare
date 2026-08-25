@@ -473,9 +473,10 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         }
 
         isDismissing = true
-        let direction: CGFloat = translationY == 0
-            ? (velocityY < 0 ? -1 : 1)
-            : (translationY < 0 ? -1 : 1)
+        let direction = MediaViewerDismissGesturePolicy.dismissDirection(
+            translationY: translationY,
+            velocityY: velocityY
+        )
         withAnimation(.linear(duration: 0.2)) {
             dismissOffset = direction * containerHeight
             opacity = 0

@@ -90,6 +90,16 @@ enum MediaViewerDismissGesturePolicy {
             abs(translationY) >= containerHeight * distanceThreshold
     }
 
+    static func dismissDirection(
+        translationY: CGFloat,
+        velocityY: CGFloat
+    ) -> CGFloat {
+        let directionValue = abs(velocityY) >= velocityThreshold
+            ? velocityY
+            : translationY
+        return directionValue < 0 ? -1 : 1
+    }
+
     static func progress(translationY: CGFloat, containerHeight: CGFloat) -> CGFloat {
         guard containerHeight > 0 else { return 0 }
         return min(abs(translationY) / containerHeight, 1)

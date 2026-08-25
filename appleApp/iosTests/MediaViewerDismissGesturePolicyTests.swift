@@ -36,6 +36,40 @@ final class MediaViewerDismissGesturePolicyTests: XCTestCase {
         )
     }
 
+    func testVelocityTriggeredDismissUsesReleaseDirection() {
+        XCTAssertEqual(
+            MediaViewerDismissGesturePolicy.dismissDirection(
+                translationY: 40,
+                velocityY: -1_301
+            ),
+            -1
+        )
+        XCTAssertEqual(
+            MediaViewerDismissGesturePolicy.dismissDirection(
+                translationY: -40,
+                velocityY: 1_301
+            ),
+            1
+        )
+    }
+
+    func testDistanceTriggeredDismissUsesTranslationDirection() {
+        XCTAssertEqual(
+            MediaViewerDismissGesturePolicy.dismissDirection(
+                translationY: 401,
+                velocityY: -500
+            ),
+            1
+        )
+        XCTAssertEqual(
+            MediaViewerDismissGesturePolicy.dismissDirection(
+                translationY: -401,
+                velocityY: 500
+            ),
+            -1
+        )
+    }
+
     func testShortSlowDragDoesNotDismiss() {
         XCTAssertFalse(
             MediaViewerDismissGesturePolicy.shouldDismiss(

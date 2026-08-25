@@ -230,6 +230,18 @@ targets:
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
         SWIFT_STRICT_CONCURRENCY: targeted
 
+  iOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: iosTests
+      - path: ios/Common/MediaViewerDismissGesturePolicy.swift
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.tests
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   macOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -387,6 +399,8 @@ schemes:
       config: Debug
     test:
       config: Debug
+      targets:
+        - iOSTests
     profile:
       config: Release
     analyze:

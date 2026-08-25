@@ -39,6 +39,8 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     @State private var videoState: VideoState = .idle
     @State private var currentTime: CMTime = .zero
     @State private var opacity: CGFloat = 1
+    @State private var dismissOffset: CGFloat = 0
+    @State private var isDismissing = false
     @State private var showData = true
     @State private var protectInitialPagerSelection: Bool
     @State private var didApplyInitialSelection = false
@@ -67,62 +69,93 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
 
     var body: some View {
         ZStack {
-            if medias.isEmpty {
-                if let preview {
-                    AdaptiveKFImage(data: preview, placeholder: nil)
-                } else {
-                    ProgressView()
-                }
-            } else {
-                LazyPager(data: medias, page: pagerSelectedIndex) { media in
-                    mediaContent(media)
-                        .contextMenu {
-                            MediaViewerContextMenu(
-                                media: media,
-                                showsDownloadAll: medias.count > 1,
-                                isPreparingShare: isPreparingShare,
-                                onDownload: {
-                                    saveMedia(media)
-                                },
-                                onDownloadAll: {
-                                    saveAllMedia()
-                                },
-                                onShareImage: {
-                                    shareSelectedImage(media)
-                                },
-                                onCopyLink: {
-                                    UIPasteboard.general.string = media.url
-                                }
-                            )
+            Group {
+                if medias.isEmpty {
+                    Group {
+                        if let preview {
+                            AdaptiveKFImage(data: preview, placeholder: nil)
+                        } else {
+                            ProgressView()
                         }
-                }
-                .onDismiss(backgroundOpacity: $opacity) {
-                    dismiss()
-                }
-                .onTap {
-                    withAnimation {
-                        showData.toggle()
+                    }
+                } else {
+                    // LazyPager 1.2.1 only supports downward dismissal.
+                    ZStack(alignment: .bottom) {
+                        LazyPager(data: medias, page: pagerSelectedIndex) { media in
+                            mediaContent(media)
+                                .contextMenu {
+                                    MediaViewerContextMenu(
+                                        media: media,
+                                        showsDownloadAll: medias.count > 1,
+                                        isPreparingShare: isPreparingShare,
+                                        onDownload: {
+                                            saveMedia(media)
+                                        },
+                                        onDownloadAll: {
+                                            saveAllMedia()
+                                        },
+                                        onShareImage: {
+                                            shareSelectedImage(media)
+                                        },
+                                        onCopyLink: {
+                                            UIPasteboard.general.string = media.url
+                                        }
+                                    )
+                                }
+                        }
+                        .onTap {
+                            withAnimation {
+                                showData.toggle()
+                            }
+                        }
+                        .onDoubleTap {}
+                        .onDrag {
+                            protectInitialPagerSelection = false
+                        }
+                        .zoomable { item in
+                            if item.isVideoMedia {
+                                return .disabled
+                            } else {
+                                return .custom(min: 1, max: 5, doubleTap: .scale(2))
+                            }
+                        }
+                        .settings { config in
+                            config.preloadAmount = 99
+                        }
+                        .offset(
+                            y: MediaViewerDismissGesturePolicy.verticalOffset(
+                                for: .media,
+                                translationY: dismissOffset
+                            )
+                        )
+
+                        if shouldShowBottomOverlay {
+                            bottomOverlay
+                                .offset(
+                                    y: MediaViewerDismissGesturePolicy.verticalOffset(
+                                        for: .bottomOverlay,
+                                        translationY: dismissOffset
+                                    )
+                                )
+                        }
+
+                        MediaViewerDismissGestureHost(
+                            onChanged: updateDismissGesture,
+                            onEnded: endDismissGesture,
+                            onCancelled: cancelDismissGesture
+                        )
                     }
                 }
-                .onDoubleTap {}
-                .onDrag {
-                    protectInitialPagerSelection = false
-                }
-                .zoomable { item in
-                    if item.isVideoMedia {
-                        return .disabled
-                    } else {
-                        return .custom(min: 1, max: 5, doubleTap: .scale(2))
-                    }
-                }
-                .settings { config in
-                    config.preloadAmount = 99
-                }
-                .overlay(alignment: .bottom) {
-                    if shouldShowBottomOverlay {
-                        bottomOverlay
-                    }
-                }
+            }
+            .ignoresSafeArea()
+
+            if showData {
+                topOverlay
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .opacity(opacity)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .allowsHitTesting(!isDismissing)
+                    .zIndex(3)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -155,54 +188,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         }
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
-        .ignoresSafeArea()
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(fontAwesome: .xmark)
-                }
-            }
-            if !medias.isEmpty {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isLandscapeViewing.toggle()
-                        }
-                    } label: {
-                        Image(systemName: isLandscapeViewing ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
-                    }
-                    .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
-                }
-                if let selectedMedia, case .image = onEnum(of: selectedMedia) {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            saveMedia(selectedMedia)
-                        } label: {
-                            Image(fontAwesome: .download)
-                        }
-                    }
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            shareSelectedImage(selectedMedia)
-                        } label: {
-                            Image(fontAwesome: .shareNodes)
-                        }
-                        .disabled(isPreparingShare)
-                        .accessibilityLabel("Share image")
-                    }
-                } else if let selectedMedia, case .video = onEnum(of: selectedMedia) {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            saveMedia(selectedMedia)
-                        } label: {
-                            Image(fontAwesome: .download)
-                        }
-                    }
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     @ViewBuilder
@@ -229,6 +215,72 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         case .audio:
             EmptyView()
         }
+    }
+
+    private var topOverlay: some View {
+        HStack(spacing: 8) {
+            topOverlayButton(width: 44, action: { dismiss() }) {
+                Image(fontAwesome: .xmark)
+            }
+            .accessibilityLabel("Close")
+            .backport
+            .glassEffect(.regularInteractive, in: .capsule, fallbackBackground: .regularMaterial)
+
+            Spacer()
+
+            if !medias.isEmpty {
+                HStack(spacing: 0) {
+                    topOverlayButton {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isLandscapeViewing.toggle()
+                        }
+                    } label: {
+                        Image(systemName: isLandscapeViewing ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                    }
+                    .accessibilityLabel(Text(verbatim: isLandscapeViewing ? "Exit landscape view" : "Landscape view"))
+
+                    if let selectedMedia, case .image = onEnum(of: selectedMedia) {
+                        topOverlayButton {
+                            saveMedia(selectedMedia)
+                        } label: {
+                            Image(fontAwesome: .download)
+                        }
+
+                        topOverlayButton {
+                            shareSelectedImage(selectedMedia)
+                        } label: {
+                            Image(fontAwesome: .shareNodes)
+                        }
+                        .disabled(isPreparingShare)
+                        .accessibilityLabel("Share image")
+                    } else if let selectedMedia, case .video = onEnum(of: selectedMedia) {
+                        topOverlayButton {
+                            saveMedia(selectedMedia)
+                        } label: {
+                            Image(fontAwesome: .download)
+                        }
+                    }
+                }
+                .padding(.horizontal, 4)
+                .backport
+                .glassEffect(.regularInteractive, in: .capsule, fallbackBackground: .regularMaterial)
+            }
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.white)
+        .padding(.horizontal)
+    }
+
+    private func topOverlayButton<Label: View>(
+        width: CGFloat = 48,
+        action: @escaping () -> Void,
+        @ViewBuilder label: () -> Label
+    ) -> some View {
+        Button(action: action, label: label)
+            .frame(width: width, height: 44)
+            .font(.body)
+            .imageScale(.large)
+            .contentShape(Rectangle())
     }
 
     @ViewBuilder
@@ -361,6 +413,59 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             return 0
         }
         return min(max(index, 0), count - 1)
+    }
+
+    private func updateDismissGesture(translationY: CGFloat, containerHeight: CGFloat) {
+        guard !isDismissing else { return }
+        dismissOffset = translationY
+        opacity = 1 - MediaViewerDismissGesturePolicy.progress(
+            translationY: translationY,
+            containerHeight: containerHeight
+        )
+    }
+
+    private func endDismissGesture(
+        translationY: CGFloat,
+        velocityY: CGFloat,
+        containerHeight: CGFloat
+    ) -> Bool {
+        guard !isDismissing else { return true }
+        guard MediaViewerDismissGesturePolicy.shouldDismiss(
+            translationY: translationY,
+            velocityY: velocityY,
+            containerHeight: containerHeight
+        ) else {
+            cancelDismissGesture()
+            return false
+        }
+
+        isDismissing = true
+        let direction: CGFloat = translationY == 0
+            ? (velocityY < 0 ? -1 : 1)
+            : (translationY < 0 ? -1 : 1)
+        withAnimation(.linear(duration: 0.2)) {
+            dismissOffset = direction * containerHeight
+            opacity = 0
+        } completion: {
+            if MediaViewerDismissGesturePolicy.disablesSystemAnimationOnDismiss {
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    dismiss()
+                }
+            } else {
+                dismiss()
+            }
+        }
+        return true
+    }
+
+    private func cancelDismissGesture() {
+        guard !isDismissing else { return }
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+            dismissOffset = 0
+            opacity = 1
+        }
     }
 
     private func saveMedia(
@@ -506,6 +611,203 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             return topViewController(from: presentedViewController)
         }
         return viewController
+    }
+}
+
+private struct MediaViewerDismissGestureHost: UIViewRepresentable {
+    let onChanged: (CGFloat, CGFloat) -> Void
+    let onEnded: (CGFloat, CGFloat, CGFloat) -> Bool
+    let onCancelled: () -> Void
+
+    func makeUIView(context: Context) -> MediaViewerDismissGestureHostView {
+        let view = MediaViewerDismissGestureHostView()
+        view.backgroundColor = .clear
+        view.onWindowChanged = { [weak coordinator = context.coordinator, weak view] in
+            coordinator?.installGesture(from: view)
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: MediaViewerDismissGestureHostView, context: Context) {
+        context.coordinator.onChanged = onChanged
+        context.coordinator.onEnded = onEnded
+        context.coordinator.onCancelled = onCancelled
+        DispatchQueue.main.async {
+            context.coordinator.installGesture(from: uiView)
+        }
+    }
+
+    static func dismantleUIView(
+        _ uiView: MediaViewerDismissGestureHostView,
+        coordinator: Coordinator
+    ) {
+        coordinator.uninstallGesture()
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(
+            onChanged: onChanged,
+            onEnded: onEnded,
+            onCancelled: onCancelled
+        )
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var onChanged: (CGFloat, CGFloat) -> Void
+        var onEnded: (CGFloat, CGFloat, CGFloat) -> Bool
+        var onCancelled: () -> Void
+
+        private weak var sourceView: UIView?
+        private weak var installedWindow: UIWindow?
+        private weak var touchedZoomScrollView: UIScrollView?
+        private var touchedZoomScrollViewInitialOffset: CGPoint?
+        private var panRecognizer: UIPanGestureRecognizer?
+
+        init(
+            onChanged: @escaping (CGFloat, CGFloat) -> Void,
+            onEnded: @escaping (CGFloat, CGFloat, CGFloat) -> Bool,
+            onCancelled: @escaping () -> Void
+        ) {
+            self.onChanged = onChanged
+            self.onEnded = onEnded
+            self.onCancelled = onCancelled
+        }
+
+        func installGesture(from view: UIView?) {
+            sourceView = view
+            guard let window = view?.window, installedWindow !== window else { return }
+            uninstallGesture()
+            sourceView = view
+
+            let recognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+            recognizer.maximumNumberOfTouches = 1
+            recognizer.cancelsTouchesInView = false
+            recognizer.delegate = self
+            window.addGestureRecognizer(recognizer)
+
+            installedWindow = window
+            panRecognizer = recognizer
+        }
+
+        func uninstallGesture() {
+            if let panRecognizer {
+                installedWindow?.removeGestureRecognizer(panRecognizer)
+            }
+            installedWindow = nil
+            touchedZoomScrollView = nil
+            touchedZoomScrollViewInitialOffset = nil
+            panRecognizer = nil
+        }
+
+        @objc private func handlePan(_ recognizer: UIPanGestureRecognizer) {
+            guard let sourceView else { return }
+            let translationY = recognizer.translation(in: sourceView).y
+            let containerHeight = sourceView.bounds.height
+
+            switch recognizer.state {
+            case .began, .changed:
+                onChanged(translationY, containerHeight)
+            case .ended:
+                let didDismiss = onEnded(
+                    translationY,
+                    recognizer.velocity(in: sourceView).y,
+                    containerHeight
+                )
+                finishTrackingTouchedScrollView(didDismiss: didDismiss)
+            case .cancelled, .failed:
+                onCancelled()
+                finishTrackingTouchedScrollView(didDismiss: false)
+            default:
+                break
+            }
+        }
+
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            guard gestureRecognizer === panRecognizer,
+                  let panRecognizer,
+                  let sourceView else { return false }
+            let velocity = panRecognizer.velocity(in: sourceView)
+            return MediaViewerDismissGesturePolicy.shouldBegin(
+                velocityX: velocity.x,
+                velocityY: velocity.y,
+                zoomScale: touchedZoomScrollView?.zoomScale,
+                minimumZoomScale: touchedZoomScrollView?.minimumZoomScale
+            )
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            guard let sourceView,
+                  let window = installedWindow else { return false }
+            let point = touch.location(in: window)
+            guard sourceView.convert(sourceView.bounds, to: window).contains(point) else {
+                return false
+            }
+            let touchedScrollViews = ancestorScrollViews(from: touch.view)
+            touchedZoomScrollView = touchedScrollViews.first {
+                $0.maximumZoomScale > $0.minimumZoomScale
+            }
+            touchedZoomScrollViewInitialOffset = touchedZoomScrollView?.contentOffset
+            return true
+        }
+
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
+            guard gestureRecognizer === panRecognizer else { return false }
+            return MediaViewerDismissGesturePolicy.shouldTakePriority(
+                over: otherGestureRecognizer
+            )
+        }
+
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
+            true
+        }
+
+        private func ancestorScrollViews(from view: UIView?) -> [UIScrollView] {
+            var scrollViews: [UIScrollView] = []
+            var candidate = view
+            while let current = candidate, current !== installedWindow {
+                if let scrollView = current as? UIScrollView {
+                    scrollViews.append(scrollView)
+                }
+                candidate = current.superview
+            }
+            return scrollViews
+        }
+
+        private func finishTrackingTouchedScrollView(didDismiss: Bool) {
+            if MediaViewerDismissGesturePolicy.shouldRestoreTouchedScrollPosition(
+                didDismiss: didDismiss
+            ),
+               let touchedZoomScrollView,
+               let touchedZoomScrollViewInitialOffset {
+                DispatchQueue.main.async { [weak touchedZoomScrollView] in
+                    touchedZoomScrollView?.setContentOffset(
+                        touchedZoomScrollViewInitialOffset,
+                        animated: false
+                    )
+                }
+            }
+            touchedZoomScrollView = nil
+            touchedZoomScrollViewInitialOffset = nil
+        }
+    }
+}
+
+private final class MediaViewerDismissGestureHostView: UIView {
+    var onWindowChanged: (() -> Void)?
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        onWindowChanged?()
+    }
+
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        false
     }
 }
 

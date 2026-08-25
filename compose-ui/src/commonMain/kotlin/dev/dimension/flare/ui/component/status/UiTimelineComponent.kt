@@ -499,6 +499,8 @@ private fun StatusContent(
                                 CommonStatusComponent(
                                     item = it,
                                     isDetail = false,
+                                    allowMediaCarousel = true,
+                                    carouselOuterHorizontalPadding = screenHorizontalPadding,
                                     modifier =
                                         Modifier.padding(
                                             horizontal = screenHorizontalPadding,

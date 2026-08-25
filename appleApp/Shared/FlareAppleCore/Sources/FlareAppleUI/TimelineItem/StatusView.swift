@@ -172,7 +172,12 @@ public struct StatusView: View {
                     VStack(
                         spacing: 0
                     ) {
-                        StatusView(data: parent, withLeadingPadding: true)
+                        StatusView(
+                            data: parent,
+                            withLeadingPadding: true,
+                            allowsMediaCarousel: allowsMediaCarousel,
+                            carouselOuterHorizontalPadding: carouselOuterHorizontalPadding
+                        )
                         Spacer()
                             .frame(height: 18)
                     }
@@ -404,7 +409,12 @@ public struct StatusView: View {
                         if hasQuotes, !isQuote {
                             VStack(alignment: .leading, spacing: 8) {
                                 ForEach(Array(quoteItems.enumerated()), id: \.offset) { index, quote in
-                                    StatusView(data: quote, isQuote: true, forceHideActions: true)
+                                    StatusView(
+                                        data: quote,
+                                        isQuote: true,
+                                        forceHideActions: true,
+                                        allowsMediaCarousel: allowsMediaCarousel
+                                    )
                                     if index < quoteItems.count - 1 {
                                         Divider()
                                     }

@@ -31,6 +31,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
     let initialIndex: Int
     let preview: String?
     let previewAspectRatio: CGFloat?
+    let previewIsImage: Bool
     let shareContext: MediaViewerShareContext?
     let showsSupplementaryOverlay: Bool
     @ViewBuilder let supplementaryOverlay: (MediaViewerOverlayContext) -> SupplementaryOverlay
@@ -55,6 +56,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         initialIndex: Int,
         preview: String?,
         previewAspectRatio: CGFloat? = nil,
+        previewIsImage: Bool = true,
         shareContext: MediaViewerShareContext? = nil,
         showsSupplementaryOverlay: Bool = false,
         @ViewBuilder supplementaryOverlay: @escaping (MediaViewerOverlayContext) -> SupplementaryOverlay
@@ -63,6 +65,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
         self.initialIndex = initialIndex
         self.preview = preview
         self.previewAspectRatio = previewAspectRatio
+        self.previewIsImage = previewIsImage
         self.shareContext = shareContext
         self.showsSupplementaryOverlay = showsSupplementaryOverlay
         self.supplementaryOverlay = supplementaryOverlay
@@ -77,13 +80,25 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                     Group {
                         if let preview {
                             LazyPager(data: [preview]) { preview in
-                                AdaptiveKFImage(
-                                    data: preview,
-                                    placeholder: nil,
-                                    mediaAspectRatio: previewAspectRatio
-                                )
+                                switch MediaViewerImageLayoutPolicy.previewLayout(isImage: previewIsImage) {
+                                case .adaptiveImage:
+                                    AdaptiveKFImage(
+                                        data: preview,
+                                        placeholder: nil,
+                                        mediaAspectRatio: previewAspectRatio
+                                    )
+                                case .aspectFit:
+                                    NetworkImage(data: preview)
+                                        .scaledToFit()
+                                }
                             }
                             .zoomable(min: 1, max: 5, doubleTapGesture: .scale(2))
+                            .offset(
+                                y: MediaViewerDismissGesturePolicy.verticalOffset(
+                                    for: .media,
+                                    translationY: dismissOffset
+                                )
+                            )
                         } else {
                             ProgressView()
                         }
@@ -149,15 +164,17 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                                 )
                                 .opacity(opacity)
                         }
-
-                        MediaViewerDismissGestureHost(
-                            onChanged: updateDismissGesture,
-                            onEnded: endDismissGesture,
-                            onCancelled: cancelDismissGesture
-                        )
                     }
                 }
             }
+            .ignoresSafeArea()
+
+            MediaViewerDismissGestureHost(
+                onChanged: updateDismissGesture,
+                onEnded: endDismissGesture,
+                onCancelled: cancelDismissGesture
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
 
             if showData {
@@ -463,13 +480,9 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
             dismissOffset = direction * containerHeight
             opacity = 0
         } completion: {
-            if MediaViewerDismissGesturePolicy.disablesSystemAnimationOnDismiss {
-                var transaction = Transaction()
-                transaction.disablesAnimations = true
-                withTransaction(transaction) {
-                    dismiss()
-                }
-            } else {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
                 dismiss()
             }
         }
@@ -676,6 +689,7 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
         private weak var sourceView: UIView?
         private weak var installedWindow: UIWindow?
         private weak var touchedZoomScrollView: UIScrollView?
+        private weak var touchedVerticalScrollView: UIScrollView?
         private var touchedZoomScrollViewInitialOffset: CGPoint?
         private var panRecognizer: UIPanGestureRecognizer?
 
@@ -711,6 +725,7 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
             }
             installedWindow = nil
             touchedZoomScrollView = nil
+            touchedVerticalScrollView = nil
             touchedZoomScrollViewInitialOffset = nil
             panRecognizer = nil
         }
@@ -743,11 +758,17 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
                   let panRecognizer,
                   let sourceView else { return false }
             let velocity = panRecognizer.velocity(in: sourceView)
-            return MediaViewerDismissGesturePolicy.shouldBegin(
+            guard MediaViewerDismissGesturePolicy.shouldBegin(
                 velocityX: velocity.x,
                 velocityY: velocity.y,
                 zoomScale: touchedZoomScrollView?.zoomScale,
                 minimumZoomScale: touchedZoomScrollView?.minimumZoomScale
+            ) else {
+                return false
+            }
+            return MediaViewerDismissGesturePolicy.shouldBeginDismissPan(
+                in: touchedVerticalScrollView,
+                velocityY: velocity.y
             )
         }
 
@@ -762,6 +783,9 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
             touchedZoomScrollView = touchedScrollViews.first {
                 $0.maximumZoomScale > $0.minimumZoomScale
             }
+            touchedVerticalScrollView = touchedScrollViews.first {
+                MediaViewerDismissGesturePolicy.hasScrollableVerticalContent($0)
+            }
             touchedZoomScrollViewInitialOffset = touchedZoomScrollView?.contentOffset
             return true
         }
@@ -771,8 +795,10 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
             shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer
         ) -> Bool {
             guard gestureRecognizer === panRecognizer else { return false }
+            let velocityY = panRecognizer?.velocity(in: sourceView).y ?? 0
             return MediaViewerDismissGesturePolicy.shouldTakePriority(
-                over: otherGestureRecognizer
+                over: otherGestureRecognizer,
+                velocityY: velocityY
             )
         }
 
@@ -809,6 +835,7 @@ private struct MediaViewerDismissGestureHost: UIViewRepresentable {
                 }
             }
             touchedZoomScrollView = nil
+            touchedVerticalScrollView = nil
             touchedZoomScrollViewInitialOffset = nil
         }
     }

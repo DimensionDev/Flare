@@ -381,12 +381,19 @@ public struct StatusView: View {
                                     case .audio:
                                         nil
                                     }
+                                    let previewIsImage: Bool
+                                    if case .image = onEnum(of: media) {
+                                        previewIsImage = true
+                                    } else {
+                                        previewIsImage = false
+                                    }
                                     let route = DeeplinkRoute.MediaStatusMedia(
                                         statusKey: statusKey,
                                         accountType: accountType,
                                         index: Int32(index),
                                         preview: preview,
-                                        aspectRatio: Float(media.aspectRatio ?? 0)
+                                        aspectRatio: Float(media.aspectRatio ?? 0),
+                                        previewIsImage: previewIsImage
                                     )
                                     if let url = URL(string: route.toUri()) {
                                         openURL(url)

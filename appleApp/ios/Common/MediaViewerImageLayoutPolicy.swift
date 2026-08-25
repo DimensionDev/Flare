@@ -1,5 +1,10 @@
 import CoreGraphics
 
+enum MediaViewerPreviewLayout {
+    case adaptiveImage
+    case aspectFit
+}
+
 enum MediaViewerImageLayoutPolicy {
     static let tallHeightToWidthThreshold: CGFloat = 19.5 / 9.0
 
@@ -26,14 +31,18 @@ enum MediaViewerImageLayoutPolicy {
         mediaAspectRatio: CGFloat?,
         measuredImageSize: CGSize?
     ) -> Bool {
+        if let measuredImageSize {
+            return shouldFillWidth(imageSize: measuredImageSize)
+        }
         if let mediaAspectRatio,
            mediaAspectRatio.isFinite,
            mediaAspectRatio > 0 {
             return shouldFillWidth(mediaAspectRatio: mediaAspectRatio)
         }
-        if let measuredImageSize {
-            return shouldFillWidth(imageSize: measuredImageSize)
-        }
         return shouldFillWidth(mediaAspectRatio: mediaAspectRatio)
+    }
+
+    static func previewLayout(isImage: Bool) -> MediaViewerPreviewLayout {
+        isImage ? .adaptiveImage : .aspectFit
     }
 }

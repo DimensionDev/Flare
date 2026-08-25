@@ -17,10 +17,30 @@ final class MediaViewerImageLayoutPolicyTests: XCTestCase {
         )
     }
 
+    func testOnlyImagesUseAdaptivePreviewLayout() {
+        XCTAssertEqual(
+            MediaViewerImageLayoutPolicy.previewLayout(isImage: true),
+            .adaptiveImage
+        )
+        XCTAssertEqual(
+            MediaViewerImageLayoutPolicy.previewLayout(isImage: false),
+            .aspectFit
+        )
+    }
+
     func testLoadedTallImageUsesTheSameFillWidthRule() {
         XCTAssertTrue(
             MediaViewerImageLayoutPolicy.shouldFillWidth(
                 imageSize: CGSize(width: 900, height: 3_000)
+            )
+        )
+    }
+
+    func testLoadedTallImageMeasurementOverridesFallbackAspectRatio() {
+        XCTAssertTrue(
+            MediaViewerImageLayoutPolicy.shouldFillWidth(
+                mediaAspectRatio: 1,
+                measuredImageSize: CGSize(width: 900, height: 3_000)
             )
         )
     }
@@ -38,7 +58,7 @@ final class MediaViewerImageLayoutPolicyTests: XCTestCase {
         let mediaAspectRatio: CGFloat = 9.0 / 30.0
         let previewShouldFill = MediaViewerImageLayoutPolicy.shouldFillWidth(
             mediaAspectRatio: mediaAspectRatio,
-            measuredImageSize: CGSize(width: 300, height: 300)
+            measuredImageSize: nil
         )
         let loadedShouldFill = MediaViewerImageLayoutPolicy.shouldFillWidth(
             mediaAspectRatio: mediaAspectRatio,

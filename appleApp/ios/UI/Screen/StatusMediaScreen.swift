@@ -17,6 +17,7 @@ struct StatusMediaScreen: View {
     let initialIndex: Int
     let preview: String?
     let initialMediaAspectRatio: CGFloat?
+    let initialMediaIsImage: Bool
     @StateObject private var presenter: KotlinPresenter<StatusState>
     @State private var medias: [any UiMedia] = []
 
@@ -26,6 +27,7 @@ struct StatusMediaScreen: View {
             initialIndex: initialIndex,
             preview: preview,
             previewAspectRatio: initialMediaAspectRatio,
+            previewIsImage: initialMediaIsImage,
             shareContext: MediaViewerShareContext(
                 statusKey: statusKey.description(),
                 userHandle: statusUserHandle
@@ -97,13 +99,15 @@ extension StatusMediaScreen {
         statusKey: MicroBlogKey,
         initialIndex: Int,
         preview: String?,
-        initialMediaAspectRatio: CGFloat?
+        initialMediaAspectRatio: CGFloat?,
+        initialMediaIsImage: Bool
     ) {
         self.accountType = accountType
         self.statusKey = statusKey
         self.initialIndex = initialIndex
         self.preview = preview
         self.initialMediaAspectRatio = initialMediaAspectRatio
+        self.initialMediaIsImage = initialMediaIsImage
         self._presenter = .init(wrappedValue: .init(presenter: StatusPresenter(accountType: accountType, statusKey: statusKey)))
     }
 }

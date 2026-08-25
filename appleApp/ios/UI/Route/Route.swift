@@ -226,13 +226,21 @@ enum Route: Hashable, Identifiable {
             MediaScreen(url: url, preview: preview, customHeaders: customHeaders)
         case .mediaRaw(let medias, let selectedIndex, let preview):
             RawMediaScreen(medias: medias, initialIndex: selectedIndex, preview: preview)
-        case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview, let aspectRatio):
+        case .mediaStatusMedia(
+            let accountType,
+            let statusKey,
+            let selectedIndex,
+            let preview,
+            let aspectRatio,
+            let previewIsImage
+        ):
             StatusMediaScreen(
                 accountType: accountType,
                 statusKey: statusKey,
                 initialIndex: Int(selectedIndex),
                 preview: preview,
-                initialMediaAspectRatio: aspectRatio > 0 ? CGFloat(aspectRatio) : nil
+                initialMediaAspectRatio: aspectRatio > 0 ? CGFloat(aspectRatio) : nil,
+                initialMediaIsImage: previewIsImage
             )
         case .appLog:
             AppLogScreen()
@@ -294,7 +302,7 @@ enum Route: Hashable, Identifiable {
     case mediaImage(String, String?, [String: String]?)
     case mediaRaw([any UiMedia], Int, String?)
     case mediaPodcast(AccountType, String)
-    case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?, Float)
+    case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?, Float, Bool)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
     case profileInsight(AccountType, MicroBlogKey)
@@ -394,7 +402,8 @@ enum Route: Hashable, Identifiable {
                 data.statusKey,
                 Int32(data.index),
                 data.preview,
-                data.aspectRatio
+                data.aspectRatio,
+                data.previewIsImage
             )
         }
     }

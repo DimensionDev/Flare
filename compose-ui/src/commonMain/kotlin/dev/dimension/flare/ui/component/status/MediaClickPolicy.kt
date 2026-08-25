@@ -43,5 +43,6 @@ private fun UiTimelineV2.Post.statusMediaRoute(media: UiMedia): DeeplinkRoute.Me
                 is UiMedia.Gif -> media.aspectRatio
                 is UiMedia.Audio -> 0f
             },
+        previewIsImage = media is UiMedia.Image,
     )
 }

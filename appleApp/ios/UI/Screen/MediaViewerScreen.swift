@@ -377,7 +377,7 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
 
     private var shouldShowBottomOverlay: Bool {
         if selectedMediaIsVideo {
-            return showData || playbackRate > 1
+            return showData
         }
         return showData && !isLandscapeViewing && (medias.count > 1 || showsSupplementaryOverlay)
     }

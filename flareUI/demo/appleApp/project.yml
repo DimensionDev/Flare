@@ -47,7 +47,7 @@ targets:
             -Pmoko.resources.CONFIGURATION="${KOTLIN_FRAMEWORK_BUILD_TYPE:-$CONFIGURATION}" \
             -Pmoko.resources.ARCHS="$ARCHS" \
             -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
-            -Pmoko.resources.CONTENTS_FOLDER_PATH="$CONTENTS_FOLDER_PATH"
+            -Pmoko.resources.CONTENTS_FOLDER_PATH="$UNLOCALIZED_RESOURCES_FOLDER_PATH"
 
   macOSDemo:
     type: application
@@ -76,7 +76,7 @@ targets:
             -Pmoko.resources.CONFIGURATION="${KOTLIN_FRAMEWORK_BUILD_TYPE:-$CONFIGURATION}" \
             -Pmoko.resources.ARCHS="$ARCHS" \
             -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
-            -Pmoko.resources.CONTENTS_FOLDER_PATH="$CONTENTS_FOLDER_PATH"
+            -Pmoko.resources.CONTENTS_FOLDER_PATH="$UNLOCALIZED_RESOURCES_FOLDER_PATH"
 
   macOSDemoTests:
     type: bundle.unit-test
@@ -88,6 +88,20 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.macos.tests
+        ARCHS: arm64
+
+  macOSDemoUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: Tests/macOSUITests
+    dependencies:
+      - target: macOSDemo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.macos.uitests
+        TEST_TARGET_NAME: macOSDemo
         ARCHS: arm64
 
 schemes:
@@ -147,3 +161,13 @@ schemes:
       config: Debug
       targets:
         - macOSDemoTests
+
+  FlareUIDemo-macOS-UITests:
+    build:
+      targets:
+        macOSDemo: all
+        macOSDemoUITests: test
+    test:
+      config: Debug
+      targets:
+        - macOSDemoUITests

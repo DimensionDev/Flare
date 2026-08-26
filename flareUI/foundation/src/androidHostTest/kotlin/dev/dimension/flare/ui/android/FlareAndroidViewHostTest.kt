@@ -2,15 +2,19 @@ package dev.dimension.flare.ui.android
 
 import android.app.Activity
 import android.os.Looper
-import android.widget.Button
+import android.view.ContextThemeWrapper
+import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textview.MaterialTextView
 import dev.dimension.flare.ui.FlareModifier
 import dev.dimension.flare.ui.foundation.Column
+import dev.dimension.flare.ui.foundation.HorizontalAlignment
 import dev.dimension.flare.ui.foundation.NativeButton
 import dev.dimension.flare.ui.foundation.Text
 import org.junit.Assert.assertEquals
@@ -23,6 +27,8 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import java.time.Duration
+import kotlin.math.roundToInt
+import com.google.android.material.R as MaterialR
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -32,9 +38,10 @@ public class FlareAndroidViewHostTest {
     public fun rendersAndRecomposesInPlace() {
         val controller = Robolectric.buildActivity(Activity::class.java).setup()
         val activity = controller.get()
+        val context = ContextThemeWrapper(activity, MaterialR.style.Theme_Material3_DayNight)
         val host =
             FlareAndroidViewHost(
-                context = activity,
+                context = context,
                 widgetSystem = createAndroidWidgetSystem(),
             )
 
@@ -42,7 +49,10 @@ public class FlareAndroidViewHostTest {
             activity.setContentView(host)
             host.setContent {
                 var count by remember { mutableIntStateOf(0) }
-                Column {
+                Column(
+                    spacing = 12f,
+                    horizontalAlignment = HorizontalAlignment.End,
+                ) {
                     Text(
                         text = "Count $count",
                         modifier = FlareModifier(testTag = "count"),
@@ -56,10 +66,17 @@ public class FlareAndroidViewHostTest {
             shadowOf(Looper.getMainLooper()).idle()
 
             val column = host.getChildAt(0) as LinearLayout
-            val label = column.getChildAt(0) as TextView
-            val button = column.getChildAt(1) as Button
+            val label = column.getChildAt(0) as MaterialTextView
+            val button = column.getChildAt(1) as MaterialButton
             assertEquals("Count 0", label.text.toString())
             assertEquals("count", label.tag)
+            assertEquals(ViewGroup.LayoutParams.WRAP_CONTENT, column.layoutParams.width)
+            assertEquals(ViewGroup.LayoutParams.WRAP_CONTENT, label.layoutParams.width)
+            assertEquals(Gravity.TOP or Gravity.END, column.gravity)
+            assertEquals(
+                (12 * activity.resources.displayMetrics.density).roundToInt(),
+                column.dividerDrawable.intrinsicHeight,
+            )
 
             button.performClick()
             shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(32))

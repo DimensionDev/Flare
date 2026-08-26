@@ -79,6 +79,13 @@ Android View, UIKit, and AppKit apply insert, move, and remove operations direct
 APIs. Android suppresses root layout during a Compose apply transaction where supported. UIKit and
 AppKit rely on their native stack-view operations and do not keep shadow child lists.
 
+Foundation's stacks have one backend-independent contract. Children wrap content, main-axis
+placement begins at the start, `Column` controls horizontal alignment, and `Row` controls vertical
+alignment. Spacing uses dp on Android and points on Apple platforms. Android View explicitly avoids
+`LinearLayout`'s vertical-container `MATCH_PARENT` child default so alignment matches Compose,
+UIKit, and AppKit. Both Android renderers use Material 3 text and button primitives; native Apple
+renderers retain UIKit/AppKit controls.
+
 Jetpack Compose stores renderer widgets in a `mutableStateListOf`. Each widget exposes a
 `@UiComposable Render` function and keeps changed properties in snapshot state. `AndroidCompose`
 is the escape hatch for Android-only components which already provide a Compose API.
@@ -114,18 +121,25 @@ retain declarative content for reattachment. The Compose host owns its child Fla
 | --- | --- |
 | `flare-runtime` | Runtime contracts, applier, lifecycle, Android View/Compose/UIKit/AppKit hosts, frame clocks |
 | `foundation` | Four common primitives and their four renderer sets |
+| `flare-resources-moko` | Optional Moko resource environment, backend-neutral image value, and image renderers |
 | `demo/shared` | Shared composition and framework exports |
 | `demo/androidApp`, `demo/appleApp` | Native application shells |
 
 `flare-runtime` does not depend on Foundation. Foundation depends one-way on runtime. A new host
-belongs in runtime; a renderer for a Foundation primitive belongs in Foundation. A separate plugin
-module should be added only for a real publication or dependency-footprint boundary.
+belongs in runtime; a renderer for a Foundation primitive belongs in Foundation. Moko integration
+is separate because it is an optional dependency and resource-generation boundary.
 
 ## Resources
 
-The runtime does not own localization or assets. Applications resolve platform resources and pass
-values into primitives. Density, locale, layout direction, theme, safe area, and a shared resource
-environment are not implemented yet.
+The runtime and Foundation do not own localization or assets. The optional `flare-resources-moko`
+module provides one composition-local resolver plus Compose-style `stringResource`,
+`pluralStringResource`, and `imageResource` functions. Strings become ordinary `String` values, so
+components need no resource overloads. Images become an opaque `FlareImage`; the optional module's
+`ResourceImage` primitive demonstrates all four renderer plugins.
+
+The consuming application owns the generated resource catalog. Android resolvers use the host
+`Context`; UIKit/AppKit resolvers use Moko's localized bundle lookup. Static Apple frameworks copy
+their generated bundle into the application during an Xcode build phase.
 
 ## Verification gates
 
@@ -135,6 +149,8 @@ environment are not implemented yet.
 - A Compose UI smoke test covers Foundation rendering, events, and `AndroidCompose` content.
 - Native UIKit and AppKit tests cover modifiers and direct hierarchy operations.
 - macOS tests request real display-link frames and verify monotonic timestamps.
+- Resource tests cover resolver injection, Android View/Compose rendering, Apple localization,
+  plurals, image loading, and static-framework bundle packaging.
 - The shared framework and UIKit/AppKit demo applications compile through Xcode.
 
 Performance benchmark matrices were removed until a real product screen and regression budget
@@ -145,7 +161,7 @@ exist.
 Flare UI is not production complete. The next gates are:
 
 1. Constraints/measure/place layout beyond native stack containers.
-2. Density, locale, layout direction, safe area, theme, and resource environments.
+2. Density, layout direction, safe area, and theme environments.
 3. Accessibility semantics and focus.
 4. Text input with selection and IME composition synchronization.
 5. Scrolling and native lazy collections.

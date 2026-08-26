@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="demo_title">Flare UI 渲染运行时</string>
+    <string name="demo_description">同一份组合内容通过所选 backend 渲染。</string>
+    <string name="count_format">计数：%d</string>
+    <string name="increment">增加</string>
+    <string name="reset">重置</string>
+    <string name="flare_mark_description">Flare 资源图片</string>
+</resources>

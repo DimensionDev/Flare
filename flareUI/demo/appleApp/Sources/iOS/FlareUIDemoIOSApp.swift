@@ -50,9 +50,7 @@ private final class FlareUIKitDemoViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             contentView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(
-                lessThanOrEqualTo: view.layoutMarginsGuide.trailingAnchor
-            ),
+            contentView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             contentView.bottomAnchor.constraint(
                 lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor,

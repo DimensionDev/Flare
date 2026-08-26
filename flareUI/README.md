@@ -6,7 +6,7 @@ Runtime for reconciliation and render through a selected platform backend.
 - Android renders Android Views or Jetpack Compose UI.
 - iOS renders UIKit views.
 - macOS renders AppKit views.
-- There is no SwiftUI backend, schema, reflection, or code generation.
+- There is no SwiftUI backend, schema, or reflection. Core UI modules use no code generation.
 
 See [`ARCHITECTURE.md`](ARCHITECTURE.md) for runtime invariants and the remaining production work.
 
@@ -16,6 +16,7 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for runtime invariants and the remainin
 | --- | --- |
 | `flare-runtime` | Composition, applier, modifiers, renderer registry, Android hosts, and Apple frame clocks |
 | `foundation` | `Column`, `Row`, `Text`, and `NativeButton` plus Android View/Compose/UIKit/AppKit renderers |
+| `flare-resources-moko` | Optional Moko `stringResource`, `pluralStringResource`, `imageResource`, and image renderers |
 | `demo/shared` | One shared demo composition and native host factories |
 | `demo/androidApp`, `demo/appleApp` | Thin Android, UIKit, and AppKit application shells |
 
@@ -68,7 +69,36 @@ FlareAppKitHost(createAppKitWidgetSystem()).setContent {
 ```
 
 The Compose backend keeps lightweight Flare widget state and emits real Compose UI nodes. It uses
-the surrounding Compose composition's Recomposer and frame clock.
+the surrounding Compose composition's Recomposer and frame clock. Both Android renderer sets use
+Material 3 controls: the View host must receive a Material 3-themed `Context`, and the Compose host
+must run below `androidx.compose.material3.MaterialTheme`.
+
+## Layout semantics
+
+`Column` and `Row` use one shared stack-layout contract on every backend. Children wrap their
+content by default, main-axis placement starts at the beginning, and `spacing` is expressed in
+logical platform units (dp on Android and points on Apple platforms). Cross-axis alignment is
+explicit:
+
+```kotlin
+Column(
+    spacing = 12f,
+    horizontalAlignment = HorizontalAlignment.Start,
+) {
+    Text("Title")
+    Row(
+        spacing = 8f,
+        verticalAlignment = VerticalAlignment.Center,
+    ) {
+        NativeButton(label = "Cancel", onClick = ::cancel)
+        NativeButton(label = "Save", onClick = ::save)
+    }
+}
+```
+
+`Column` supports `Start`, `Center`, and `End`; `Row` supports `Top`, `Center`, and `Bottom`.
+Text wraps on all four renderer paths. Sizing, padding, main-axis arrangement, and constraint-based
+layout remain outside the current Foundation API.
 
 ## Define a primitive
 
@@ -110,9 +140,30 @@ Duplicate registrations fail when the widget system is created.
 
 ## Resources and localization
 
-Flare currently has no cross-platform asset or localization pipeline. Applications resolve native
-localized strings, images, colors, and SVG/vector assets and pass the resulting values into
-primitives. A shared resource environment remains future work.
+Foundation stays resource-agnostic: its APIs continue to accept plain `String` values. Applications
+that use Moko Resources can add `flare-resources-moko`, apply Moko's generator plugin in the module
+which owns the resource catalog, and resolve values at the call site:
+
+```kotlin
+ProvideMokoResources(platformResolver) {
+    Text(stringResource(AppRes.strings.title))
+    Text(pluralStringResource(AppRes.plurals.items, itemCount, itemCount))
+    ResourceImage(
+        image = imageResource(AppRes.images.logo),
+        contentDescription = stringResource(AppRes.strings.logo_description),
+    )
+}
+```
+
+The host installs the matching optional image renderer plugin, for example
+`AndroidViewMokoResourcesRendererPlugin` or `UIKitMokoResourcesRendererPlugin`. Android uses
+`AndroidMokoResourceResolver(context)`; UIKit and AppKit use `AppleMokoResourceResolver`.
+
+For Moko itself, the adapter uses only the base `resources` artifact (not
+`resources-compose`) and does not depend on Flare's `foundation` module. Generated `AppRes`/`MR`
+classes and localization files
+belong to the consuming application. Static Apple frameworks must run Moko's
+`copyFrameworkResourcesToApp` build phase; `demo/appleApp/project.yml` contains a working example.
 
 ## Verify
 

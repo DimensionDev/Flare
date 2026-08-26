@@ -12,6 +12,7 @@ import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSThread
 import platform.UIKit.UILayoutConstraintAxisVertical
 import platform.UIKit.UIStackView
+import platform.UIKit.UIStackViewAlignmentLeading
 import kotlin.native.HiddenFromObjC
 
 /**
@@ -26,6 +27,7 @@ public class FlareUIKitHost(
     public val view: UIStackView =
         UIKitHostView(controller).apply {
             axis = UILayoutConstraintAxisVertical
+            alignment = UIStackViewAlignmentLeading
         }
 
     init {

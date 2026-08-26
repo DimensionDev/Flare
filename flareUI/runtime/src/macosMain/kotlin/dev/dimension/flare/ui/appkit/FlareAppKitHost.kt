@@ -8,6 +8,7 @@ package dev.dimension.flare.ui.appkit
 import dev.dimension.flare.ui.FlareAppleComposition
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareWidgetSystem
+import platform.AppKit.NSLayoutAttributeLeading
 import platform.AppKit.NSStackView
 import platform.AppKit.NSUserInterfaceLayoutOrientationVertical
 import platform.CoreGraphics.CGRectMake
@@ -23,6 +24,7 @@ public class FlareAppKitHost(
     public val view: NSStackView =
         AppKitHostView(controller).apply {
             orientation = NSUserInterfaceLayoutOrientationVertical
+            alignment = NSLayoutAttributeLeading
         }
 
     init {

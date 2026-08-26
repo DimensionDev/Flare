@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="demo_title">Flare UI renderer runtime</string>
+    <string name="demo_description">One shared composition renders through the selected backend.</string>
+    <string name="count_format">Count: %d</string>
+    <string name="increment">Increment</string>
+    <string name="reset">Reset</string>
+    <string name="flare_mark_description">Flare resource image</string>
+</resources>

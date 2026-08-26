@@ -31,13 +31,23 @@ targets:
         FRAMEWORK_SEARCH_PATHS:
           - "$(inherited)"
           - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info-iOS.plist
         OTHER_LDFLAGS: "$(inherited) -framework FlareUI"
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.ios
         PRODUCT_NAME: Flare UI Demo
         TARGETED_DEVICE_FAMILY: "1,2"
+    postBuildScripts:
+      - name: Copy Moko resources
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../../.."
+          ./gradlew -p flareUI :demo:shared:copyFrameworkResourcesToApp \
+            -Pmoko.resources.PLATFORM_NAME="$PLATFORM_NAME" \
+            -Pmoko.resources.CONFIGURATION="${KOTLIN_FRAMEWORK_BUILD_TYPE:-$CONFIGURATION}" \
+            -Pmoko.resources.ARCHS="$ARCHS" \
+            -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
+            -Pmoko.resources.CONTENTS_FOLDER_PATH="$CONTENTS_FOLDER_PATH"
 
   macOSDemo:
     type: application
@@ -50,13 +60,23 @@ targets:
         FRAMEWORK_SEARCH_PATHS:
           - "$(inherited)"
           - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Flare UI Demo
-        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info-macOS.plist
         OTHER_LDFLAGS: "$(inherited) -framework FlareUI"
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.macos
         PRODUCT_NAME: Flare UI Demo
         ARCHS: arm64
+    postBuildScripts:
+      - name: Copy Moko resources
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../../.."
+          ./gradlew -p flareUI :demo:shared:copyFrameworkResourcesToApp \
+            -Pmoko.resources.PLATFORM_NAME="$PLATFORM_NAME" \
+            -Pmoko.resources.CONFIGURATION="${KOTLIN_FRAMEWORK_BUILD_TYPE:-$CONFIGURATION}" \
+            -Pmoko.resources.ARCHS="$ARCHS" \
+            -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
+            -Pmoko.resources.CONTENTS_FOLDER_PATH="$CONTENTS_FOLDER_PATH"
 
 schemes:
   FlareUIDemo-iOS:

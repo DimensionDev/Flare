@@ -9,13 +9,22 @@ import dev.dimension.flare.ui.FlareRendererPlugin
 import dev.dimension.flare.ui.FlareWidgetRegistrar
 import dev.dimension.flare.ui.FlareWidgetSystem
 import dev.dimension.flare.ui.foundation.ColumnWidget
+import dev.dimension.flare.ui.foundation.HorizontalAlignment
 import dev.dimension.flare.ui.foundation.NativeButtonWidget
 import dev.dimension.flare.ui.foundation.RowWidget
 import dev.dimension.flare.ui.foundation.TextWidget
+import dev.dimension.flare.ui.foundation.VerticalAlignment
 import kotlinx.cinterop.ObjCAction
 import platform.AppKit.NSBezelStyleRounded
 import platform.AppKit.NSButton
 import platform.AppKit.NSButtonTypeMomentaryPushIn
+import platform.AppKit.NSLayoutAttributeBottom
+import platform.AppKit.NSLayoutAttributeCenterX
+import platform.AppKit.NSLayoutAttributeCenterY
+import platform.AppKit.NSLayoutAttributeLeading
+import platform.AppKit.NSLayoutAttributeTop
+import platform.AppKit.NSLayoutAttributeTrailing
+import platform.AppKit.NSLineBreakByWordWrapping
 import platform.AppKit.NSStackView
 import platform.AppKit.NSTextField
 import platform.AppKit.NSUserInterfaceLayoutOrientationHorizontal
@@ -49,6 +58,19 @@ internal class AppKitColumnWidget :
     ),
     ColumnWidget {
     override val children: AppKitChildren = AppKitChildren(view)
+
+    override fun setSpacing(value: Float) {
+        view.spacing = value.toDouble()
+    }
+
+    override fun setHorizontalAlignment(value: HorizontalAlignment) {
+        view.alignment =
+            when (value) {
+                HorizontalAlignment.Start -> NSLayoutAttributeLeading
+                HorizontalAlignment.Center -> NSLayoutAttributeCenterX
+                HorizontalAlignment.End -> NSLayoutAttributeTrailing
+            }
+    }
 }
 
 internal class AppKitRowWidget :
@@ -60,11 +82,29 @@ internal class AppKitRowWidget :
     ),
     RowWidget {
     override val children: AppKitChildren = AppKitChildren(view)
+
+    override fun setSpacing(value: Float) {
+        view.spacing = value.toDouble()
+    }
+
+    override fun setVerticalAlignment(value: VerticalAlignment) {
+        view.alignment =
+            when (value) {
+                VerticalAlignment.Top -> NSLayoutAttributeTop
+                VerticalAlignment.Center -> NSLayoutAttributeCenterY
+                VerticalAlignment.Bottom -> NSLayoutAttributeBottom
+            }
+    }
 }
 
 internal class AppKitTextWidget :
     AbstractAppKitWidget<NSTextField>(
-        view = NSTextField.labelWithString(""),
+        view =
+            NSTextField.labelWithString("").apply {
+                maximumNumberOfLines = 0
+                lineBreakMode = NSLineBreakByWordWrapping
+                usesSingleLineMode = false
+            },
     ),
     TextWidget {
     override fun setText(value: String) {

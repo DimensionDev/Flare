@@ -24,7 +24,7 @@ import kotlin.test.assertSame
 
 class FlareRuntimeTest {
     @Test
-    fun directlyBuildsNamedNativeTreeAndDisposesBottomUp() {
+    fun directlyBuildsNativeTreeAndDisposesBottomUp() {
         val events = mutableListOf<String>()
         val root = RecordingChildren()
         val system = testWidgetSystem(events)
@@ -108,11 +108,8 @@ class FlareRuntimeTest {
 
 private data object TestBackend : FlareBackend
 
-private val ContainerType =
-    FlareComponentType<TestContainerWidget>("dev.dimension.flare.runtime.test.Container")
-private val LeafType =
-    FlareComponentType<TestLeafWidget>("dev.dimension.flare.runtime.test.Leaf")
-private val ContentSlot = FlareSlotId("content")
+private val ContainerType = TestContainerWidget::class
+private val LeafType = TestLeafWidget::class
 
 private interface TestContainerWidget : FlareWidget
 
@@ -127,9 +124,7 @@ private interface TestLeafWidget : FlareWidget {
 private fun TestContainer(content: FlareContent) {
     EmitFlareWidget(
         componentType = ContainerType,
-        slots = {
-            FlareSlot(ContentSlot, content)
-        },
+        content = content,
     )
 }
 
@@ -205,12 +200,9 @@ private class RecordingContainerWidget(
     private val events: MutableList<String>,
 ) : AbstractFlareWidget(),
     TestContainerWidget {
-    val content = RecordingChildren()
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == ContentSlot)
-        return content
-    }
+    override val children: RecordingChildren = RecordingChildren()
+    val content: RecordingChildren
+        get() = children
 
     override fun dispose() {
         events += "dispose:container"

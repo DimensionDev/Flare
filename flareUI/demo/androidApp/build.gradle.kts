@@ -1,5 +1,3 @@
-import org.gradle.api.JavaVersion
-
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -22,16 +20,8 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
 }
 
 dependencies {
     implementation(project(":demo:shared"))
-    implementation(libs.androidx.activity)
-    testImplementation(libs.junit)
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

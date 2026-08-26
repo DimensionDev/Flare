@@ -2,10 +2,8 @@
 
 package dev.dimension.flare.ui.uikit
 
-import dev.dimension.flare.ui.FlareChildren
-import dev.dimension.flare.ui.FlareRenderer
 import dev.dimension.flare.ui.FlareRendererPlugin
-import dev.dimension.flare.ui.FlareSlotId
+import dev.dimension.flare.ui.FlareWidgetRegistrar
 import dev.dimension.flare.ui.FlareWidgetSystem
 import dev.dimension.flare.ui.foundation.ColumnWidget
 import dev.dimension.flare.ui.foundation.NativeButtonWidget
@@ -21,8 +19,14 @@ import platform.UIKit.UILayoutConstraintAxisHorizontal
 import platform.UIKit.UILayoutConstraintAxisVertical
 import platform.UIKit.UIStackView
 
-/** Target-specific Foundation plugin generated for each iOS binary. */
-public expect val UIKitFoundationRendererPlugin: FlareRendererPlugin<UIKitBackend>
+public object UIKitFoundationRendererPlugin : FlareRendererPlugin<UIKitBackend> {
+    override fun register(registrar: FlareWidgetRegistrar<UIKitBackend>) {
+        registrar.register(ColumnWidget::class) { _ -> UIKitColumnWidget() }
+        registrar.register(RowWidget::class) { _ -> UIKitRowWidget() }
+        registrar.register(TextWidget::class) { _ -> UIKitTextWidget() }
+        registrar.register(NativeButtonWidget::class) { _ -> UIKitNativeButtonWidget() }
+    }
+}
 
 /** Builds the UIKit renderer set supplied by Foundation and optional plugins. */
 public fun createUIKitWidgetSystem(vararg plugins: FlareRendererPlugin<UIKitBackend>): FlareWidgetSystem<UIKitBackend> =
@@ -31,43 +35,28 @@ public fun createUIKitWidgetSystem(vararg plugins: FlareRendererPlugin<UIKitBack
         *plugins,
     )
 
-@FlareRenderer
-internal class UIKitColumnWidget(
-    backend: UIKitBackend,
-) : AbstractUIKitWidget<UIStackView>(
+internal class UIKitColumnWidget :
+    AbstractUIKitWidget<UIStackView>(
         view =
             UIStackView().apply {
                 axis = UILayoutConstraintAxisVertical
             },
     ),
     ColumnWidget {
-    private val content = UIKitChildren(view, backend)
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == ColumnWidget.Content) { "Column does not expose slot '$slot'." }
-        return content
-    }
+    override val children: UIKitChildren = UIKitChildren(view)
 }
 
-@FlareRenderer
-internal class UIKitRowWidget(
-    backend: UIKitBackend,
-) : AbstractUIKitWidget<UIStackView>(
+internal class UIKitRowWidget :
+    AbstractUIKitWidget<UIStackView>(
         view =
             UIStackView().apply {
                 axis = UILayoutConstraintAxisHorizontal
             },
     ),
     RowWidget {
-    private val content = UIKitChildren(view, backend)
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == RowWidget.Content) { "Row does not expose slot '$slot'." }
-        return content
-    }
+    override val children: UIKitChildren = UIKitChildren(view)
 }
 
-@FlareRenderer
 internal class UIKitTextWidget :
     AbstractUIKitWidget<UILabel>(
         view = UILabel(),
@@ -78,7 +67,6 @@ internal class UIKitTextWidget :
     }
 }
 
-@FlareRenderer
 internal class UIKitNativeButtonWidget :
     AbstractUIKitWidget<UIButton>(
         view = UIButton.buttonWithType(UIButtonTypeSystem),

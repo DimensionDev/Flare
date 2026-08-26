@@ -19,7 +19,7 @@ import kotlin.native.HiddenFromObjC
 /**
  * Shared Compose Runtime driver for Apple renderer hosts.
  *
- * UIKit and SwiftUI own different widget trees, but they must use the same snapshot notification,
+ * UIKit and AppKit own different widget trees, but they must use the same snapshot notification,
  * frame-clock, and disposal rules. Keeping that machinery here prevents each backend from
  * installing a subtly different Apple recomposer.
  */
@@ -74,64 +74,34 @@ public class FlareAppleComposition<B : FlareBackend>(
     }
 }
 
-private object AppleFlareSnapshotManager {
-    private var users = 0
-    private var scope: CoroutineScope? = null
-    private var notifications: Channel<Unit>? = null
-    private var observerHandle: ObserverHandle? = null
-
-    fun acquire() {
-        users += 1
-        if (users != 1) return
-
-        val newNotifications = Channel<Unit>(capacity = Channel.CONFLATED)
-        // Keep notification delivery out of the global write observer to avoid snapshot re-entry.
-        val newScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        notifications = newNotifications
-        scope = newScope
-        newScope.launch {
-            for (notification in newNotifications) {
-                Snapshot.sendApplyNotifications()
-            }
-        }
-        observerHandle =
-            Snapshot.registerGlobalWriteObserver {
-                newNotifications.trySend(Unit)
-            }
-    }
-
-    fun release() {
-        check(users > 0) { "AppleFlareSnapshotManager was released without an active user." }
-        users -= 1
-        if (users != 0) return
-
-        observerHandle?.dispose()
-        observerHandle = null
-        notifications?.close()
-        notifications = null
-        scope?.cancel()
-        scope = null
-    }
-}
-
 private class AppleRecomposerRuntime {
     private val frameClock: AppleFrameClock = createAppleFrameClock()
     private val coroutineContext = appleRecomposerContext(frameClock)
     private val scope = CoroutineScope(coroutineContext)
+    private val notifications = Channel<Unit>(capacity = Channel.CONFLATED)
+    private val observerHandle: ObserverHandle =
+        Snapshot.registerGlobalWriteObserver {
+            notifications.trySend(Unit)
+        }
     val recomposer: Recomposer = Recomposer(coroutineContext)
 
     init {
-        AppleFlareSnapshotManager.acquire()
+        // Keep delivery out of the global write observer to avoid snapshot re-entry.
+        scope.launch {
+            for (notification in notifications) {
+                Snapshot.sendApplyNotifications()
+            }
+        }
         scope.launch {
             recomposer.runRecomposeAndApplyChanges()
         }
     }
 
     fun dispose() {
+        observerHandle.dispose()
+        notifications.close()
         recomposer.cancel()
         scope.cancel()
-        frameClock.dispose()
-        AppleFlareSnapshotManager.release()
     }
 }
 
@@ -163,9 +133,7 @@ private object AppleRecomposerRuntimePool {
     }
 }
 
-internal interface AppleFrameClock : MonotonicFrameClock {
-    fun dispose()
-}
+internal interface AppleFrameClock : MonotonicFrameClock
 
 internal expect fun createAppleFrameClock(): AppleFrameClock
 

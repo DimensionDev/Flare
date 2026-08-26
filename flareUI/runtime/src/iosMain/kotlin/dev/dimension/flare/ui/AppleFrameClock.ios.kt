@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023 Square, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 @file:OptIn(
     kotlinx.cinterop.BetaInteropApi::class,
     kotlinx.cinterop.ExperimentalForeignApi::class,
@@ -6,59 +22,50 @@
 package dev.dimension.flare.ui
 
 import androidx.compose.runtime.BroadcastFrameClock
+import androidx.compose.runtime.MonotonicFrameClock
 import kotlinx.cinterop.ObjCAction
 import platform.Foundation.NSRunLoop
 import platform.Foundation.NSRunLoopCommonModes
+import platform.Foundation.NSSelectorFromString
 import platform.Foundation.NSThread
 import platform.QuartzCore.CADisplayLink
 import platform.darwin.NSObject
-import platform.darwin.sel_registerName
 
-internal actual fun createAppleFrameClock(): AppleFrameClock = IOSDisplayLinkFrameClock()
+internal actual fun createAppleFrameClock(): AppleFrameClock = IOSDisplayLinkFrameClock
 
-/**
- * VSync-backed iOS frame clock which wakes only while Compose has frame awaiters.
- */
-private class IOSDisplayLinkFrameClock : AppleFrameClock {
-    private var displayLink: CADisplayLink? = null
+/** On-demand CADisplayLink clock adapted from Cash App Molecule's iOS clock. */
+private object IOSDisplayLinkFrameClock : AppleFrameClock {
+    private val target = DisplayLinkTarget(this)
+    private val displayLink =
+        CADisplayLink.displayLinkWithTarget(
+            target = target,
+            selector = NSSelectorFromString(DisplayLinkTarget::tickClock.name),
+        )
     private val broadcastFrameClock =
         BroadcastFrameClock {
-            displayLink?.paused = false
-        }
-    private val target =
-        object : NSObject() {
-            @Suppress("unused")
-            @ObjCAction
-            fun displayLinkDidFire(link: CADisplayLink) {
-                link.paused = true
-                broadcastFrameClock.sendFrame(
-                    (link.targetTimestamp * NANOS_PER_SECOND).toLong(),
-                )
-            }
+            displayLink.addToRunLoop(NSRunLoop.mainRunLoop, NSRunLoopCommonModes)
         }
 
     init {
         check(NSThread.isMainThread) {
             "The iOS frame clock must be created on the main thread."
         }
-        displayLink =
-            CADisplayLink
-                .displayLinkWithTarget(
-                    target = target,
-                    selector = sel_registerName("displayLinkDidFire:"),
-                ).also { link ->
-                    link.paused = true
-                    link.addToRunLoop(NSRunLoop.mainRunLoop, NSRunLoopCommonModes)
-                }
     }
 
     override suspend fun <R> withFrameNanos(onFrame: (Long) -> R): R = broadcastFrameClock.withFrameNanos(onFrame)
 
-    override fun dispose() {
-        displayLink?.invalidate()
-        displayLink = null
-        broadcastFrameClock.cancel()
+    private fun tickClock() {
+        broadcastFrameClock.sendFrame(monotonicFrameTimeNanos())
+        displayLink.removeFromRunLoop(NSRunLoop.mainRunLoop, NSRunLoopCommonModes)
+    }
+
+    /** Objective-C selector bridge for the Kotlin [MonotonicFrameClock] object. */
+    private class DisplayLinkTarget(
+        private val frameClock: IOSDisplayLinkFrameClock,
+    ) : NSObject() {
+        @ObjCAction
+        fun tickClock() {
+            frameClock.tickClock()
+        }
     }
 }
-
-private const val NANOS_PER_SECOND: Double = 1_000_000_000.0

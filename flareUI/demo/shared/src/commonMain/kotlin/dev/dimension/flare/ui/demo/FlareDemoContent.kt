@@ -11,9 +11,6 @@ import dev.dimension.flare.ui.foundation.Column
 import dev.dimension.flare.ui.foundation.NativeButton
 import dev.dimension.flare.ui.foundation.Row
 import dev.dimension.flare.ui.foundation.Text
-import dev.dimension.flare.ui.plugin.badge.Badge
-import dev.dimension.flare.ui.plugin.badge.BadgeTone
-import dev.dimension.flare.ui.testTag
 
 /** The complete demo screen shared by every platform host. */
 @Composable
@@ -24,16 +21,9 @@ public fun FlareDemoContent() {
     Column {
         Text("Flare UI renderer runtime")
         Text("One shared composition renders through the selected backend.")
-        Badge(
-            text = "External plugin · $count",
-            modifier = FlareModifier.testTag("demo-badge"),
-            tone =
-                if (count == 0) {
-                    BadgeTone.Neutral
-                } else {
-                    BadgeTone.Positive
-                },
-            onClick = { count += 1 },
+        Text(
+            text = "Count: $count",
+            modifier = FlareModifier(testTag = "demo-count"),
         )
         Row {
             NativeButton(

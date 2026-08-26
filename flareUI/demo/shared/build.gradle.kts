@@ -15,10 +15,11 @@ kotlin {
         platforms(
             FlareUiPlatform.ANDROID,
             FlareUiPlatform.IOS,
+            FlareUiPlatform.MACOS,
         )
     }
 
-    listOf("iosArm64", "iosSimulatorArm64")
+    listOf("iosArm64", "iosSimulatorArm64", "macosArm64")
         .map { targetName -> targets.getByName(targetName) as KotlinNativeTarget }
         .forEach { appleTarget ->
             appleTarget.binaries.framework {
@@ -26,7 +27,6 @@ kotlin {
                 isStatic = true
                 export(project(":flare-runtime"))
                 export(project(":foundation"))
-                export(project(":plugins:badge"))
             }
         }
 
@@ -34,23 +34,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":foundation"))
-                api(project(":plugins:badge"))
-            }
-        }
-        val androidMain by getting {
-            dependencies {
-                implementation(dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.foundation)
             }
         }
     }
 }
-
-tasks
-    .matching { task -> task.name == "embedAndSignAppleFrameworkForXcode" }
-    .configureEach {
-        dependsOn(
-            ":foundation:generateFlareSwiftUISources",
-            ":plugins:badge:generateFlareSwiftUISources",
-        )
-    }

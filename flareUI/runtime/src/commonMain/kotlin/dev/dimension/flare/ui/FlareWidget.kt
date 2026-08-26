@@ -1,28 +1,29 @@
 package dev.dimension.flare.ui
 
 /**
- * One platform-native primitive managed by Flare's Compose Runtime applier.
+ * One backend primitive managed by Flare's Compose Runtime applier.
  *
- * Implementations normally wrap an Android View, UIView, or NSView. Declarative backends may
- * instead use a state node rendered by their host, while layout-only primitives may use a
- * renderer-owned layout object.
+ * Implementations wrap an Android View, UIView, or NSView, or hold observable renderer state for
+ * Compose UI. Layout primitives normally expose their backend container through [children].
  */
 public interface FlareWidget {
     public val modifier: FlareModifier
 
     public fun updateModifier(modifier: FlareModifier)
 
-    public fun children(slot: FlareSlotId): FlareChildren = error("$this does not expose child slot '$slot'.")
+    /** The primitive's single child container, or null for a leaf primitive. */
+    public val children: FlareChildren?
+        get() = null
 
     /** Releases callbacks and platform resources. Called exactly once. */
     public fun dispose(): Unit = Unit
 }
 
 /**
- * Structural operations for one native child slot.
+ * Structural operations for one backend child container.
  *
- * These methods change only the platform hierarchy. Runtime lifecycle callbacks are dispatched by
- * Flare itself so every backend observes the same ordering.
+ * Runtime lifecycle callbacks are dispatched by Flare itself so every backend observes the same
+ * ordering.
  */
 public interface FlareChildren {
     /** Called before one Compose Runtime apply transaction mutates this tree. */
@@ -49,18 +50,10 @@ public interface FlareChildren {
 }
 
 /**
- * Associates a native widget family with its strongly typed backend.
- *
- * Platform base widgets implement this once; renderer code generation then infers the backend from
- * the renderer's supertypes.
- */
-public interface FlareBackendWidget<B : FlareBackend> : FlareWidget
-
-/**
  * Convenience base which owns modifier state while leaving platform application to subclasses.
  */
 public abstract class AbstractFlareWidget : FlareWidget {
-    final override var modifier: FlareModifier = FlareModifier
+    final override var modifier: FlareModifier = FlareModifier.None
         private set
 
     final override fun updateModifier(modifier: FlareModifier) {
@@ -79,7 +72,7 @@ public abstract class AbstractFlareWidget : FlareWidget {
 /** Scoped registration surface supplied to one renderer plugin. */
 public interface FlareWidgetRegistrar<B : FlareBackend> {
     public fun <W : FlareWidget> register(
-        componentType: FlareComponentType<W>,
+        componentType: kotlin.reflect.KClass<W>,
         factory: (B) -> W,
     )
 }

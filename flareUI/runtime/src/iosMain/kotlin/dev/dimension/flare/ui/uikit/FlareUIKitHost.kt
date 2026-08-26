@@ -16,7 +16,7 @@ import kotlin.native.HiddenFromObjC
 
 /**
  * Direct UIKit host supplied by Flare Runtime.
- * Its [view] can be wrapped by SwiftUI without a snapshot bridge.
+ * Its [view] can be embedded directly in any UIKit view hierarchy.
  */
 public class FlareUIKitHost(
     private val widgetSystem: FlareWidgetSystem<UIKitBackend>,
@@ -56,7 +56,7 @@ private class UIKitHostView(
 private class UIKitHostController(
     private val widgetSystem: FlareWidgetSystem<UIKitBackend>,
 ) {
-    private val backend = UIKitBackend()
+    private val backend = UIKitBackend
     private var content: FlareContent? = null
     private var composition: FlareAppleComposition<UIKitBackend>? = null
     private var disposed: Boolean = false
@@ -96,7 +96,7 @@ private class UIKitHostController(
         val currentContent = content ?: return
         val newComposition =
             FlareAppleComposition(
-                root = UIKitChildren(view, backend),
+                root = UIKitChildren(view),
                 widgetSystem = widgetSystem,
                 backend = backend,
                 hostName = "FlareUIKitHost",

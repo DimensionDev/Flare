@@ -11,10 +11,11 @@ import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Updater
 import androidx.compose.runtime.staticCompositionLocalOf
+import kotlin.reflect.KClass
 
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,
-    message = "This is a low-level Flare renderer/code-generation API.",
+    message = "This is a low-level Flare renderer API.",
 )
 @Retention(AnnotationRetention.BINARY)
 public annotation class LowLevelFlareApi
@@ -38,7 +39,7 @@ private val LocalFlareWidgetFactory =
     }
 
 private interface BoundFlareWidgetFactory {
-    fun <W : FlareWidget> create(componentType: FlareComponentType<W>): W
+    fun <W : FlareWidget> create(componentType: KClass<W>): W
 }
 
 @OptIn(LowLevelFlareApi::class)
@@ -46,7 +47,7 @@ private class DefaultBoundFlareWidgetFactory<B : FlareBackend>(
     private val widgetSystem: FlareWidgetSystem<B>,
     private val backend: B,
 ) : BoundFlareWidgetFactory {
-    override fun <W : FlareWidget> create(componentType: FlareComponentType<W>): W = widgetSystem.create(backend, componentType)
+    override fun <W : FlareWidget> create(componentType: KClass<W>): W = widgetSystem.create(backend, componentType)
 }
 
 /**
@@ -90,7 +91,7 @@ public class FlareComposition<B : FlareBackend>(
 }
 
 /**
- * Update surface consumed by generated primitive functions.
+ * Typed update surface consumed by primitive functions.
  *
  * It deliberately exposes typed values one at a time rather than passing an untyped props object
  * through the renderer registry.
@@ -117,16 +118,16 @@ public class FlareWidgetUpdater<W : FlareWidget> internal constructor(
 }
 
 /**
- * Emits one renderer-provided primitive. Normally called only by generated primitive APIs.
+ * Emits one renderer-provided primitive. Normally called only by primitive APIs.
  */
 @LowLevelFlareApi
 @Composable
 @FlareUiComposable
 public fun <W : FlareWidget> EmitFlareWidget(
-    componentType: FlareComponentType<W>,
-    modifier: FlareModifier = FlareModifier,
+    componentType: KClass<W>,
+    modifier: FlareModifier = FlareModifier.None,
     update: FlareWidgetUpdater<W>.() -> Unit = {},
-    slots: FlareContent? = null,
+    content: FlareContent? = null,
 ) {
     val widgetFactory = LocalFlareWidgetFactory.current
     ComposeNode<RuntimeNode, FlareApplier>(
@@ -141,22 +142,7 @@ public fun <W : FlareWidget> EmitFlareWidget(
                 update()
             }
         },
-        content = slots ?: {},
-    )
-}
-
-/** Emits a named child group below the current primitive. */
-@LowLevelFlareApi
-@Composable
-@FlareUiComposable
-public fun FlareSlot(
-    slotId: FlareSlotId,
-    content: FlareContent,
-) {
-    ComposeNode<RuntimeNode, FlareApplier>(
-        factory = { SlotRuntimeNode(slotId) },
-        update = {},
-        content = { content() },
+        content = content ?: {},
     )
 }
 

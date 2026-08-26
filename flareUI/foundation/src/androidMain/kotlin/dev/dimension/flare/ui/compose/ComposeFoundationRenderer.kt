@@ -14,10 +14,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.ui.FlareChildren
-import dev.dimension.flare.ui.FlareRenderer
 import dev.dimension.flare.ui.FlareRendererPlugin
-import dev.dimension.flare.ui.FlareSlotId
+import dev.dimension.flare.ui.FlareWidgetRegistrar
 import dev.dimension.flare.ui.FlareWidgetSystem
 import dev.dimension.flare.ui.foundation.ColumnWidget
 import dev.dimension.flare.ui.foundation.NativeButtonWidget
@@ -31,51 +29,48 @@ public fun createAndroidComposeWidgetSystem(
     vararg plugins: FlareRendererPlugin<AndroidComposeBackend>,
 ): FlareWidgetSystem<AndroidComposeBackend> =
     FlareWidgetSystem(
+        AndroidComposeRuntimeRendererPlugin,
         AndroidComposeFoundationRendererPlugin,
         *plugins,
     )
 
-@FlareRenderer
+public object AndroidComposeFoundationRendererPlugin : FlareRendererPlugin<AndroidComposeBackend> {
+    override fun register(registrar: FlareWidgetRegistrar<AndroidComposeBackend>) {
+        registrar.register(ColumnWidget::class) { _ -> AndroidComposeColumnWidget() }
+        registrar.register(RowWidget::class) { _ -> AndroidComposeRowWidget() }
+        registrar.register(TextWidget::class) { _ -> AndroidComposeTextWidget() }
+        registrar.register(NativeButtonWidget::class) { _ -> AndroidComposeNativeButtonWidget() }
+    }
+}
+
 internal class AndroidComposeColumnWidget :
     AbstractAndroidComposeWidget(),
     ColumnWidget {
-    private val content = AndroidComposeChildren()
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == ColumnWidget.Content) { "Column does not expose slot '$slot'." }
-        return content
-    }
+    override val children: AndroidComposeChildren = AndroidComposeChildren()
 
     @Composable
     @UiComposable
     override fun Render() {
         ComposeColumn(modifier = composeModifier) {
-            content.Render()
+            children.Render()
         }
     }
 }
 
-@FlareRenderer
 internal class AndroidComposeRowWidget :
     AbstractAndroidComposeWidget(),
     RowWidget {
-    private val content = AndroidComposeChildren()
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == RowWidget.Content) { "Row does not expose slot '$slot'." }
-        return content
-    }
+    override val children: AndroidComposeChildren = AndroidComposeChildren()
 
     @Composable
     @UiComposable
     override fun Render() {
         ComposeRow(modifier = composeModifier) {
-            content.Render()
+            children.Render()
         }
     }
 }
 
-@FlareRenderer
 internal class AndroidComposeTextWidget :
     AbstractAndroidComposeWidget(),
     TextWidget {
@@ -95,7 +90,6 @@ internal class AndroidComposeTextWidget :
     }
 }
 
-@FlareRenderer
 internal class AndroidComposeNativeButtonWidget :
     AbstractAndroidComposeWidget(),
     NativeButtonWidget {

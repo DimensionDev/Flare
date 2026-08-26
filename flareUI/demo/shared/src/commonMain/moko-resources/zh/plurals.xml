@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plural name="update_count">
+        <item quantity="other">已更新 %d 次</item>
+    </plural>
+</resources>

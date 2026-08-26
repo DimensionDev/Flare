@@ -54,7 +54,13 @@ public class AndroidViewChildren(
         widget: FlareWidget,
     ) {
         val child = widget.requireAndroidWidget().view
-        parent.addView(child, index)
+        val layoutParams =
+            child.layoutParams
+                ?: ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                )
+        parent.addView(child, index, layoutParams)
     }
 
     override fun move(

@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -20,8 +23,23 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
     implementation(project(":demo:shared"))
+    implementation(libs.androidx.activity)
+    implementation(libs.material.components)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+}
+
+tasks.withType<Test>().configureEach {
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get()))
+        },
+    )
 }

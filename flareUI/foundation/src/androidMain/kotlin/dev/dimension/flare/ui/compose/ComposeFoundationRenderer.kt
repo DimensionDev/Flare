@@ -1,26 +1,26 @@
 package dev.dimension.flare.ui.compose
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.UiComposable
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.FlareRendererPlugin
 import dev.dimension.flare.ui.FlareWidgetRegistrar
 import dev.dimension.flare.ui.FlareWidgetSystem
 import dev.dimension.flare.ui.foundation.ColumnWidget
+import dev.dimension.flare.ui.foundation.HorizontalAlignment
 import dev.dimension.flare.ui.foundation.NativeButtonWidget
 import dev.dimension.flare.ui.foundation.RowWidget
 import dev.dimension.flare.ui.foundation.TextWidget
+import dev.dimension.flare.ui.foundation.VerticalAlignment
 import androidx.compose.foundation.layout.Column as ComposeColumn
 import androidx.compose.foundation.layout.Row as ComposeRow
 
@@ -47,11 +47,25 @@ internal class AndroidComposeColumnWidget :
     AbstractAndroidComposeWidget(),
     ColumnWidget {
     override val children: AndroidComposeChildren = AndroidComposeChildren()
+    private var itemSpacing: Float by mutableFloatStateOf(0f)
+    private var itemAlignment: HorizontalAlignment by mutableStateOf(HorizontalAlignment.Start)
+
+    override fun setSpacing(value: Float) {
+        itemSpacing = value
+    }
+
+    override fun setHorizontalAlignment(value: HorizontalAlignment) {
+        itemAlignment = value
+    }
 
     @Composable
     @UiComposable
     override fun Render() {
-        ComposeColumn(modifier = composeModifier) {
+        ComposeColumn(
+            modifier = composeModifier,
+            verticalArrangement = Arrangement.spacedBy(itemSpacing.dp),
+            horizontalAlignment = itemAlignment.toComposeAlignment(),
+        ) {
             children.Render()
         }
     }
@@ -61,11 +75,25 @@ internal class AndroidComposeRowWidget :
     AbstractAndroidComposeWidget(),
     RowWidget {
     override val children: AndroidComposeChildren = AndroidComposeChildren()
+    private var itemSpacing: Float by mutableFloatStateOf(0f)
+    private var itemAlignment: VerticalAlignment by mutableStateOf(VerticalAlignment.Center)
+
+    override fun setSpacing(value: Float) {
+        itemSpacing = value
+    }
+
+    override fun setVerticalAlignment(value: VerticalAlignment) {
+        itemAlignment = value
+    }
 
     @Composable
     @UiComposable
     override fun Render() {
-        ComposeRow(modifier = composeModifier) {
+        ComposeRow(
+            modifier = composeModifier,
+            horizontalArrangement = Arrangement.spacedBy(itemSpacing.dp),
+            verticalAlignment = itemAlignment.toComposeAlignment(),
+        ) {
             children.Render()
         }
     }
@@ -83,9 +111,10 @@ internal class AndroidComposeTextWidget :
     @Composable
     @UiComposable
     override fun Render() {
-        BasicText(
+        Text(
             text = currentText,
             modifier = composeModifier,
+            style = MaterialTheme.typography.bodyLarge,
         )
     }
 }
@@ -113,23 +142,13 @@ internal class AndroidComposeNativeButtonWidget :
     @Composable
     @UiComposable
     override fun Render() {
-        BasicText(
-            text = currentLabel,
-            modifier =
-                composeModifier
-                    .alpha(if (enabledState) 1f else DISABLED_ALPHA)
-                    .background(
-                        color = Color(0xFFE0E0E0),
-                        shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
-                    ).clickable(
-                        enabled = enabledState,
-                        role = Role.Button,
-                        onClick = performClick,
-                    ).padding(
-                        horizontal = BUTTON_HORIZONTAL_PADDING,
-                        vertical = BUTTON_VERTICAL_PADDING,
-                    ),
-        )
+        Button(
+            onClick = performClick,
+            modifier = composeModifier,
+            enabled = enabledState,
+        ) {
+            Text(currentLabel)
+        }
     }
 
     override fun dispose() {
@@ -137,7 +156,16 @@ internal class AndroidComposeNativeButtonWidget :
     }
 }
 
-private const val DISABLED_ALPHA: Float = 0.38f
-private val BUTTON_CORNER_RADIUS = 4.dp
-private val BUTTON_HORIZONTAL_PADDING = 16.dp
-private val BUTTON_VERTICAL_PADDING = 8.dp
+private fun HorizontalAlignment.toComposeAlignment(): Alignment.Horizontal =
+    when (this) {
+        HorizontalAlignment.Start -> Alignment.Start
+        HorizontalAlignment.Center -> Alignment.CenterHorizontally
+        HorizontalAlignment.End -> Alignment.End
+    }
+
+private fun VerticalAlignment.toComposeAlignment(): Alignment.Vertical =
+    when (this) {
+        VerticalAlignment.Top -> Alignment.Top
+        VerticalAlignment.Center -> Alignment.CenterVertically
+        VerticalAlignment.Bottom -> Alignment.Bottom
+    }

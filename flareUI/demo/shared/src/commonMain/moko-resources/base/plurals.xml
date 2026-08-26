@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plural name="update_count">
+        <item quantity="one">%d update</item>
+        <item quantity="other">%d updates</item>
+    </plural>
+</resources>

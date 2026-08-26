@@ -51,13 +51,13 @@ private final class FlareAppKitDemoViewController: NSViewController {
         NSLayoutConstraint.activate([
             contentView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 24),
             contentView.trailingAnchor.constraint(
-                lessThanOrEqualTo: rootView.trailingAnchor,
+                equalTo: rootView.trailingAnchor,
                 constant: -24
             ),
-            contentView.topAnchor.constraint(equalTo: rootView.topAnchor, constant: 24),
+            contentView.topAnchor.constraint(equalTo: rootView.topAnchor, constant: -24),
             contentView.bottomAnchor.constraint(
-                lessThanOrEqualTo: rootView.bottomAnchor,
-                constant: -24
+                greaterThanOrEqualTo: rootView.bottomAnchor,
+                constant: 24
             ),
         ])
         view = rootView

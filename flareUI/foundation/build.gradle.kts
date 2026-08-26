@@ -33,6 +33,8 @@ kotlin {
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
+                implementation(libs.compose.material3)
+                implementation(libs.material.components)
             }
         }
         val androidHostTest by getting {
@@ -41,6 +43,11 @@ kotlin {
                 implementation(libs.compose.ui.test.manifest)
                 implementation(libs.junit)
                 implementation(libs.robolectric)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }

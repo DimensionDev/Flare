@@ -41,6 +41,8 @@ import platform.CoreVideo.CVOptionFlagsVar
 import platform.CoreVideo.CVTimeStamp
 import platform.CoreVideo.kCVReturnSuccess
 import platform.Foundation.NSThread
+import platform.darwin.dispatch_async
+import platform.darwin.dispatch_get_main_queue
 
 internal actual fun createAppleFrameClock(): AppleFrameClock = MacOSDisplayLinkFrameClock
 
@@ -99,11 +101,18 @@ private fun displayLinkCallback(
     outputFlags: CPointer<CVOptionFlagsVar>?,
     userInfo: COpaquePointer?,
 ): Int {
-    userInfo
-        ?.asStableRef<BroadcastFrameClock>()
-        ?.get()
-        ?.sendFrame(monotonicFrameTimeNanos())
+    val clock =
+        userInfo
+            ?.asStableRef<BroadcastFrameClock>()
+            ?.get()
+    val frameTimeNanos = monotonicFrameTimeNanos()
 
     // Sleep after one delivered frame. BroadcastFrameClock restarts the link for new awaiters.
-    return CVDisplayLinkStop(displayLink)
+    val stopResult = CVDisplayLinkStop(displayLink)
+    if (clock != null) {
+        dispatch_async(dispatch_get_main_queue()) {
+            clock.sendFrame(frameTimeNanos)
+        }
+    }
+    return stopResult
 }

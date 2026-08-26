@@ -139,7 +139,7 @@ public extension PostActionFamily {
         case .share:
             "fx_share"
         case .fxShare:
-            "Fx share"
+            "share_via_fxembed"
         case .delete:
             "delete"
         case .report:

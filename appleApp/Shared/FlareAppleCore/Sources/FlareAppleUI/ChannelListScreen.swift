@@ -63,7 +63,7 @@ public struct ChannelListScreen<Destination: Hashable>: View {
                                              presenter.state.favorite(list: item)
                                          } label: {
                                              Label {
-                                                 Text("Favourite", bundle: FlareAppleUILocalization.bundle)
+                                                 Text("Favorite", bundle: FlareAppleUILocalization.bundle)
                                              } icon: {
                                                  Image(fontAwesome: .heartCirclePlus)
                                              }

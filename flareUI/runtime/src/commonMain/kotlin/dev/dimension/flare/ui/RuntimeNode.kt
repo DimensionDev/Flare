@@ -2,27 +2,45 @@ package dev.dimension.flare.ui
 
 internal abstract class RuntimeNode {
     protected val nodes: MutableList<RuntimeNode> = mutableListOf()
+    protected abstract val target: FlareChildren
 
     open fun prepareInsert(
         index: Int,
         instance: RuntimeNode,
-    ): Unit = Unit
+    ) {
+        require(instance is WidgetRuntimeNode) {
+            "A Flare container can contain only primitive widgets."
+        }
+        require(index in 0..nodes.size) { "Invalid child insertion index $index." }
+    }
 
-    abstract fun commitInsert(
+    fun commitInsert(
         index: Int,
         instance: RuntimeNode,
-    )
+    ) {
+        val child = instance as WidgetRuntimeNode
+        target.insert(index, child.widget)
+        nodes.add(index, child)
+    }
 
-    abstract fun remove(
+    fun remove(
         index: Int,
         count: Int,
-    )
+    ) {
+        requireRange(index, count)
+        val removed = nodes.subList(index, index + count).map { it as WidgetRuntimeNode }
+        target.remove(index, count)
+        nodes.subList(index, index + count).clear()
+        removed.forEach(WidgetRuntimeNode::disposeSubtree)
+    }
 
-    open fun move(
+    fun move(
         from: Int,
         to: Int,
         count: Int,
     ) {
+        if (from == to || count == 0) return
+        target.move(from, to, count)
         nodes.moveRange(from, to, count)
     }
 
@@ -33,54 +51,6 @@ internal abstract class RuntimeNode {
     }
 
     abstract fun disposeSubtree()
-}
-
-internal abstract class ChildrenRuntimeNode : RuntimeNode() {
-    protected abstract val target: FlareChildren
-
-    override fun prepareInsert(
-        index: Int,
-        instance: RuntimeNode,
-    ) {
-        require(instance is WidgetRuntimeNode) {
-            "A root or slot can contain only primitive widgets."
-        }
-        require(index in 0..nodes.size) { "Invalid child insertion index $index." }
-    }
-
-    override fun commitInsert(
-        index: Int,
-        instance: RuntimeNode,
-    ) {
-        val child = instance as WidgetRuntimeNode
-        target.insert(index, child.widget)
-        nodes.add(index, child)
-    }
-
-    override fun remove(
-        index: Int,
-        count: Int,
-    ) {
-        requireRange(index, count)
-        val removed = nodes.subList(index, index + count).map { node -> node as WidgetRuntimeNode }
-        target.remove(index, count)
-        nodes.subList(index, index + count).clear()
-        removed.forEach(WidgetRuntimeNode::disposeSubtree)
-    }
-
-    override fun move(
-        from: Int,
-        to: Int,
-        count: Int,
-    ) {
-        if (from == to || count == 0) return
-        target.move(from, to, count)
-        super.move(from, to, count)
-    }
-
-    override fun disposeSubtree() {
-        clear()
-    }
 
     private fun requireRange(
         index: Int,
@@ -94,7 +64,7 @@ internal abstract class ChildrenRuntimeNode : RuntimeNode() {
 
 internal class RootRuntimeNode(
     override val target: FlareChildren,
-) : ChildrenRuntimeNode() {
+) : RuntimeNode() {
     fun onBeginChanges() {
         target.onBeginChanges()
     }
@@ -102,31 +72,10 @@ internal class RootRuntimeNode(
     fun onEndChanges() {
         target.onEndChanges()
     }
-}
-
-internal class SlotRuntimeNode(
-    private val slotId: FlareSlotId,
-) : ChildrenRuntimeNode() {
-    private var boundTarget: FlareChildren? = null
-
-    override val target: FlareChildren
-        get() = checkNotNull(boundTarget) { "Slot '$slotId' was used before it was bound to a widget." }
-
-    fun bind(widget: FlareWidget) {
-        check(boundTarget == null) { "Slot '$slotId' is already bound." }
-        boundTarget = widget.children(slotId)
-    }
-
-    fun unbind() {
-        clear()
-        boundTarget = null
-    }
 
     override fun disposeSubtree() {
-        unbind()
+        clear()
     }
-
-    override fun toString(): String = "BoundSlot($slotId)"
 }
 
 internal class WidgetRuntimeNode(
@@ -134,35 +83,8 @@ internal class WidgetRuntimeNode(
 ) : RuntimeNode() {
     private var disposed: Boolean = false
 
-    override fun prepareInsert(
-        index: Int,
-        instance: RuntimeNode,
-    ) {
-        val slot =
-            instance as? SlotRuntimeNode
-                ?: error("A primitive can contain only named Flare slots.")
-        require(index in 0..nodes.size) { "Invalid slot insertion index $index." }
-        slot.bind(widget)
-    }
-
-    override fun commitInsert(
-        index: Int,
-        instance: RuntimeNode,
-    ) {
-        nodes.add(index, instance)
-    }
-
-    override fun remove(
-        index: Int,
-        count: Int,
-    ) {
-        require(index >= 0 && count >= 0 && index + count <= nodes.size) {
-            "Invalid slot range index=$index, count=$count, size=${nodes.size}."
-        }
-        val removed = nodes.subList(index, index + count).map { node -> node as SlotRuntimeNode }
-        removed.forEach(SlotRuntimeNode::disposeSubtree)
-        nodes.subList(index, index + count).clear()
-    }
+    override val target: FlareChildren
+        get() = checkNotNull(widget.children) { "$widget does not accept children." }
 
     fun setModifier(modifier: FlareModifier) {
         widget.updateModifier(modifier)

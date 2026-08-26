@@ -11,7 +11,6 @@ repositories {
 
 dependencies {
     compileOnly("com.android.tools.build:gradle:9.3.0")
-    compileOnly("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.3.10")
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10")
     implementation("org.jlleitschuh.gradle:ktlint-gradle:14.2.0")
 }

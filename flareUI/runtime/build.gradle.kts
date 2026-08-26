@@ -15,6 +15,7 @@ kotlin {
             FlareUiPlatform.ANDROID,
             FlareUiPlatform.JVM,
             FlareUiPlatform.IOS,
+            FlareUiPlatform.MACOS,
         )
     }
     sourceSets {
@@ -27,8 +28,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.foundation)
-                api(libs.compose.ui)
+                implementation(libs.compose.ui)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(
                     "org.jetbrains.kotlinx:kotlinx-coroutines-android:" +

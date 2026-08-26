@@ -6,11 +6,6 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.ksp)
-}
-
-dependencies {
-    add("kspCommonMainMetadata", project(":codegen"))
 }
 
 kotlin {
@@ -19,8 +14,8 @@ kotlin {
         platforms(
             FlareUiPlatform.ANDROID,
             FlareUiPlatform.IOS,
+            FlareUiPlatform.MACOS,
         )
-        swiftUI("Foundation")
     }
     android {
         withHostTest {
@@ -49,10 +44,4 @@ kotlin {
             }
         }
     }
-}
-
-dependencies {
-    add("kspAndroid", project(":codegen"))
-    add("kspIosArm64", project(":codegen"))
-    add("kspIosSimulatorArm64", project(":codegen"))
 }

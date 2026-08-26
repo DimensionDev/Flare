@@ -1,22 +1,24 @@
 package dev.dimension.flare.ui
 
+import kotlin.reflect.KClass
+
 /**
  * Immutable, statically assembled set of native widget factories for one backend type.
  *
  * The backend instance is supplied only when a widget is created. A reusable widget system
- * therefore cannot accidentally retain a host-owned Android Context or SwiftUI tree.
+ * therefore cannot accidentally retain a host-owned Android Context or Apple view hierarchy.
  */
 public class FlareWidgetSystem<B : FlareBackend>(
     vararg plugins: FlareRendererPlugin<B>,
 ) {
-    private val factories: Map<FlareComponentType<*>, (B) -> FlareWidget> =
+    private val factories: Map<KClass<out FlareWidget>, (B) -> FlareWidget> =
         run {
             val result =
-                linkedMapOf<FlareComponentType<*>, (B) -> FlareWidget>()
+                linkedMapOf<KClass<out FlareWidget>, (B) -> FlareWidget>()
             val registrar =
                 object : FlareWidgetRegistrar<B> {
                     override fun <W : FlareWidget> register(
-                        componentType: FlareComponentType<W>,
+                        componentType: KClass<W>,
                         factory: (B) -> W,
                     ) {
                         check(componentType !in result) {
@@ -32,7 +34,7 @@ public class FlareWidgetSystem<B : FlareBackend>(
     @LowLevelFlareApi
     public fun <W : FlareWidget> create(
         backend: B,
-        componentType: FlareComponentType<W>,
+        componentType: KClass<W>,
     ): W {
         val factory =
             factories[componentType]

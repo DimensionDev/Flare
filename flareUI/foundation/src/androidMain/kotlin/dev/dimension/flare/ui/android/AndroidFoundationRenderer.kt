@@ -3,10 +3,8 @@ package dev.dimension.flare.ui.android
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import dev.dimension.flare.ui.FlareChildren
-import dev.dimension.flare.ui.FlareRenderer
 import dev.dimension.flare.ui.FlareRendererPlugin
-import dev.dimension.flare.ui.FlareSlotId
+import dev.dimension.flare.ui.FlareWidgetRegistrar
 import dev.dimension.flare.ui.FlareWidgetSystem
 import dev.dimension.flare.ui.foundation.ColumnWidget
 import dev.dimension.flare.ui.foundation.NativeButtonWidget
@@ -20,7 +18,15 @@ public fun createAndroidWidgetSystem(vararg plugins: FlareRendererPlugin<Android
         *plugins,
     )
 
-@FlareRenderer
+public object AndroidViewFoundationRendererPlugin : FlareRendererPlugin<AndroidViewBackend> {
+    override fun register(registrar: FlareWidgetRegistrar<AndroidViewBackend>) {
+        registrar.register(ColumnWidget::class) { backend -> AndroidColumnWidget(backend) }
+        registrar.register(RowWidget::class) { backend -> AndroidRowWidget(backend) }
+        registrar.register(TextWidget::class) { backend -> AndroidTextWidget(backend) }
+        registrar.register(NativeButtonWidget::class) { backend -> AndroidNativeButtonWidget(backend) }
+    }
+}
+
 internal class AndroidColumnWidget(
     backend: AndroidViewBackend,
 ) : AbstractAndroidWidget<LinearLayout>(
@@ -30,15 +36,9 @@ internal class AndroidColumnWidget(
             },
     ),
     ColumnWidget {
-    private val content = AndroidViewChildren(view)
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == ColumnWidget.Content) { "Column does not expose slot '$slot'." }
-        return content
-    }
+    override val children: AndroidViewChildren = AndroidViewChildren(view)
 }
 
-@FlareRenderer
 internal class AndroidRowWidget(
     backend: AndroidViewBackend,
 ) : AbstractAndroidWidget<LinearLayout>(
@@ -48,15 +48,9 @@ internal class AndroidRowWidget(
             },
     ),
     RowWidget {
-    private val content = AndroidViewChildren(view)
-
-    override fun children(slot: FlareSlotId): FlareChildren {
-        require(slot == RowWidget.Content) { "Row does not expose slot '$slot'." }
-        return content
-    }
+    override val children: AndroidViewChildren = AndroidViewChildren(view)
 }
 
-@FlareRenderer
 internal class AndroidTextWidget(
     backend: AndroidViewBackend,
 ) : AbstractAndroidWidget<TextView>(
@@ -68,7 +62,6 @@ internal class AndroidTextWidget(
     }
 }
 
-@FlareRenderer
 internal class AndroidNativeButtonWidget(
     backend: AndroidViewBackend,
 ) : AbstractAndroidWidget<Button>(

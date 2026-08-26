@@ -6,11 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import dev.dimension.flare.ui.AbstractFlareWidget
 import dev.dimension.flare.ui.FlareBackend
-import dev.dimension.flare.ui.FlareBackendWidget
 import dev.dimension.flare.ui.FlareChildren
 import dev.dimension.flare.ui.FlareModifier
 import dev.dimension.flare.ui.FlareWidget
-import dev.dimension.flare.ui.testTagOrNull
 
 /** Strong type token for Android View renderer plugins. */
 public class AndroidViewBackend(
@@ -20,7 +18,7 @@ public class AndroidViewBackend(
 }
 
 /** Renderer contract implemented by Android View-backed primitive plugins. */
-public interface AndroidNativeWidget : FlareBackendWidget<AndroidViewBackend> {
+public interface AndroidNativeWidget : FlareWidget {
     public val view: View
 }
 
@@ -32,26 +30,21 @@ public abstract class AbstractAndroidWidget<V : View>(
         previous: FlareModifier,
         current: FlareModifier,
     ) {
-        view.tag = current.testTagOrNull()
+        view.tag = current.testTag
     }
 }
 
 public class AndroidViewChildren(
     private val parent: ViewGroup,
 ) : FlareChildren {
-    private var changeDepth: Int = 0
-
     override fun onBeginChanges() {
-        changeDepth += 1
-        if (changeDepth == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             parent.suppressLayout(true)
         }
     }
 
     override fun onEndChanges() {
-        check(changeDepth > 0) { "AndroidViewChildren received an unmatched endChanges call." }
-        changeDepth -= 1
-        if (changeDepth == 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             parent.suppressLayout(false)
         }
     }

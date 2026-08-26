@@ -1,3 +1,6 @@
+@file:OptIn(dev.dimension.flare.ui.LowLevelFlareApi::class)
+@file:Suppress("ktlint:standard:annotation")
+
 package dev.dimension.flare.ui.compose
 
 import androidx.compose.runtime.Composable
@@ -10,34 +13,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.UiComposable
 import androidx.compose.ui.platform.testTag
 import dev.dimension.flare.ui.AbstractFlareWidget
+import dev.dimension.flare.ui.EmitFlareWidget
 import dev.dimension.flare.ui.FlareBackend
-import dev.dimension.flare.ui.FlareBackendWidget
 import dev.dimension.flare.ui.FlareChildren
+import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareModifier
+import dev.dimension.flare.ui.FlareRendererPlugin
+import dev.dimension.flare.ui.FlareUiComposable
 import dev.dimension.flare.ui.FlareWidget
-import dev.dimension.flare.ui.testTagOrNull
+import dev.dimension.flare.ui.FlareWidgetRegistrar
 
-/** Strong type token for Jetpack Compose renderer plugins and widget systems. */
+/** Strong type token for the Jetpack Compose renderer. */
 public data object AndroidComposeBackend : FlareBackend
 
-/**
- * Stateful renderer node consumed by [FlareComposeHost].
- *
- * Unlike an Android View widget, this object is not itself visible. It owns the snapshot state
- * from which [Render] emits Compose UI.
- */
-public interface AndroidComposeWidget : FlareBackendWidget<AndroidComposeBackend> {
+/** Snapshot-backed renderer node consumed by [FlareComposeHost]. */
+public interface AndroidComposeWidget : FlareWidget {
     @Composable
     @UiComposable
     public fun Render()
 }
 
-/**
- * Base for custom Compose primitive renderers.
- *
- * Flare modifiers are converted into Compose modifiers and kept as observable state so modifier
- * changes invalidate only the affected renderer node.
- */
+/** Base for typed Compose primitive renderers. */
 public abstract class AbstractAndroidComposeWidget :
     AbstractFlareWidget(),
     AndroidComposeWidget {
@@ -48,11 +44,14 @@ public abstract class AbstractAndroidComposeWidget :
         previous: FlareModifier,
         current: FlareModifier,
     ) {
-        composeModifier = current.toComposeModifier()
+        composeModifier =
+            current.testTag
+                ?.let(Modifier::testTag)
+                ?: Modifier
     }
 }
 
-/** Observable child slot used by Compose-backed container primitives. */
+/** Observable child container used by Compose-backed layout primitives. */
 public class AndroidComposeChildren : FlareChildren {
     private val widgets = mutableStateListOf<AndroidComposeWidget>()
 
@@ -97,7 +96,46 @@ public class AndroidComposeChildren : FlareChildren {
             ?: error("Android Compose backend received non-Compose widget $this.")
 }
 
-private fun FlareModifier.toComposeModifier(): Modifier =
-    testTagOrNull()
-        ?.let(Modifier::testTag)
-        ?: Modifier
+/** Compose UI content rendered directly inside a Flare Compose tree. */
+public typealias AndroidComposeContent = @Composable @UiComposable () -> Unit
+
+/** Escape hatch for Android-only components which already expose a Compose API. */
+@Composable
+@FlareUiComposable
+public fun AndroidCompose(content: AndroidComposeContent) {
+    EmitFlareWidget(
+        componentType = AndroidComposeContentWidget::class,
+        update = {
+            set(content, AndroidComposeContentWidget::setContent)
+        },
+    )
+}
+
+/** Registration required by [AndroidCompose]. */
+public object AndroidComposeRuntimeRendererPlugin : FlareRendererPlugin<AndroidComposeBackend> {
+    override fun register(registrar: FlareWidgetRegistrar<AndroidComposeBackend>) {
+        registrar.register(AndroidComposeContentWidget::class) { _ ->
+            AndroidComposeContentWidget()
+        }
+    }
+}
+
+private class AndroidComposeContentWidget :
+    AbstractFlareWidget(),
+    AndroidComposeWidget {
+    private var renderedContent: AndroidComposeContent by mutableStateOf({})
+
+    fun setContent(value: AndroidComposeContent) {
+        renderedContent = value
+    }
+
+    @Composable
+    @UiComposable
+    override fun Render() {
+        renderedContent()
+    }
+
+    override fun dispose() {
+        renderedContent = {}
+    }
+}

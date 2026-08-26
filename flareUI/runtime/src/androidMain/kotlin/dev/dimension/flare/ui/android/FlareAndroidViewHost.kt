@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.android
 import android.content.Context
 import android.os.Looper
 import android.widget.FrameLayout
+import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.runtime.Recomposer
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import dev.dimension.flare.ui.FlareComposition
@@ -86,6 +87,9 @@ public class FlareAndroidViewHost(
         snapshotManagerAcquired = true
         try {
             val coroutineContext = AndroidUiDispatcher.Main + SupervisorJob()
+            checkNotNull(coroutineContext[MonotonicFrameClock]) {
+                "AndroidUiDispatcher.Main must provide its Choreographer frame clock."
+            }
             val scope = CoroutineScope(coroutineContext)
             val newRecomposer = Recomposer(coroutineContext)
             val newComposition =

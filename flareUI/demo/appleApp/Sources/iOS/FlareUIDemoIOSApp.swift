@@ -1,124 +1,63 @@
 @preconcurrency import FlareUI
-import SwiftUI
 import UIKit
 
 @main
-struct FlareUIDemoIOSApp: App {
-    var body: some Scene {
-        WindowGroup {
-            NavigationStack {
-                FlareBackendList()
-            }
-        }
-    }
-}
+final class FlareUIDemoIOSApp: UIResponder, UIApplicationDelegate {
+    private var host: FlareDemoHost?
+    var window: UIWindow?
 
-private struct FlareBackendList: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Select a renderer backend")
-                .font(.title2)
-
-            NavigationLink {
-                FlareUIKitDemoPage()
-            } label: {
-                BackendRow(
-                    title: "UIKit",
-                    detail: "Native UIView renderer"
-                )
-            }
-
-            NavigationLink {
-                FlareSwiftUIDemoPage()
-            } label: {
-                BackendRow(
-                    title: "SwiftUI",
-                    detail: "Native SwiftUI renderer"
-                )
-            }
-
-            Spacer()
-        }
-        .padding()
-        .navigationTitle("Flare UI Demo")
-    }
-}
-
-private struct BackendRow: View {
-    let title: String
-    let detail: String
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                Text(detail)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.tertiary)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            Color(uiColor: .secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 12)
-        )
-    }
-}
-
-private struct FlareUIKitDemoPage: View {
-    var body: some View {
-        FlareUIKitDemoView()
-            .padding()
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
-            )
-            .navigationTitle("Flare UI · UIKit")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct FlareSwiftUIDemoPage: View {
-    var body: some View {
-        FlareSwiftUIDemoView()
-            .padding()
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
-            )
-            .navigationTitle("Flare UI · SwiftUI")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct FlareUIKitDemoView: UIViewRepresentable {
-    final class Coordinator {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         let host = FlareDemoHost()
+        let viewController = FlareUIKitDemoViewController(contentView: host.view)
+        let navigationController = UINavigationController(rootViewController: viewController)
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
 
-        deinit {
-            host.dispose()
-        }
+        self.host = host
+        self.window = window
+        return true
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
+    func applicationWillTerminate(_ application: UIApplication) {
+        host?.dispose()
+        host = nil
+    }
+}
+
+private final class FlareUIKitDemoViewController: UIViewController {
+    private let contentView: UIView
+
+    init(contentView: UIView) {
+        self.contentView = contentView
+        super.init(nibName: nil, bundle: nil)
+        title = "Flare UI · UIKit"
     }
 
-    func makeUIView(context: Context) -> UIView {
-        context.coordinator.host.view
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("Use init(contentView:) instead")
     }
 
-    func updateUIView(
-        _ uiView: UIView,
-        context: Context
-    ) {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(contentView)
+
+        NSLayoutConstraint.activate([
+            contentView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(
+                lessThanOrEqualTo: view.layoutMarginsGuide.trailingAnchor
+            ),
+            contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            contentView.bottomAnchor.constraint(
+                lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor,
+                constant: -24
+            ),
+        ])
     }
 }

@@ -184,6 +184,9 @@ Generate and build the UIKit/AppKit demo project:
 ```shell
 xcodegen generate --spec flareUI/demo/appleApp/project.yml
 xcodebuild -project flareUI/demo/appleApp/FlareUIDemo.xcodeproj \
+  -scheme FlareUIDemo-macOS-Tests -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGNING_ALLOWED=NO test
+xcodebuild -project flareUI/demo/appleApp/FlareUIDemo.xcodeproj \
   -scheme FlareUIDemo-iOS -sdk iphonesimulator \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 xcodebuild -project flareUI/demo/appleApp/FlareUIDemo.xcodeproj \

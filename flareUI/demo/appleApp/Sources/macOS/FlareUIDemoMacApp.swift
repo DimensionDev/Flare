@@ -45,21 +45,7 @@ private final class FlareAppKitDemoViewController: NSViewController {
 
     override func loadView() {
         let rootView = NSView()
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        rootView.addSubview(contentView)
-
-        NSLayoutConstraint.activate([
-            contentView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 24),
-            contentView.trailingAnchor.constraint(
-                equalTo: rootView.trailingAnchor,
-                constant: -24
-            ),
-            contentView.topAnchor.constraint(equalTo: rootView.topAnchor, constant: -24),
-            contentView.bottomAnchor.constraint(
-                greaterThanOrEqualTo: rootView.bottomAnchor,
-                constant: 24
-            ),
-        ])
+        installFlareDemoContentView(contentView, in: rootView)
         view = rootView
     }
 }

@@ -5,118 +5,57 @@
 
 package dev.dimension.flare.ui.appkit
 
-import dev.dimension.flare.ui.FlareAppleComposition
+import dev.dimension.flare.ui.AppleHostController
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareWidgetSystem
 import platform.AppKit.NSLayoutAttributeLeading
 import platform.AppKit.NSStackView
 import platform.AppKit.NSUserInterfaceLayoutOrientationVertical
 import platform.CoreGraphics.CGRectMake
-import platform.Foundation.NSThread
 import kotlin.native.HiddenFromObjC
 
 /** Direct AppKit host supplied by Flare Runtime. */
 public class FlareAppKitHost(
-    private val widgetSystem: FlareWidgetSystem<AppKitBackend>,
+    widgetSystem: FlareWidgetSystem<AppKitBackend>,
 ) {
-    private val controller = AppKitHostController(widgetSystem)
-
-    public val view: NSStackView =
-        AppKitHostView(controller).apply {
+    private val hostView =
+        AppKitHostView().apply {
             orientation = NSUserInterfaceLayoutOrientationVertical
             alignment = NSLayoutAttributeLeading
         }
+    private val controller =
+        AppleHostController(
+            root = AppKitChildren(hostView),
+            widgetSystem = widgetSystem,
+            backend = AppKitBackend,
+            hostName = HOST_NAME,
+        )
+
+    public val view: NSStackView
+        get() = hostView
 
     init {
-        checkMainThread()
+        hostView.onAttachmentChanged = controller::attachmentChanged
     }
 
     @HiddenFromObjC
     public fun setContent(content: FlareContent) {
-        checkMainThread()
-        controller.setContent(content, view)
+        controller.setContent(content)
     }
 
     public fun dispose() {
-        checkMainThread()
         controller.dispose()
+        hostView.onAttachmentChanged = null
     }
 }
 
-private class AppKitHostView(
-    private val controller: AppKitHostController,
-) : NSStackView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0)) {
+private class AppKitHostView : NSStackView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0)) {
+    var onAttachmentChanged: ((Boolean) -> Unit)? = null
+
     override fun viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        controller.windowDidChange(this)
+        onAttachmentChanged?.invoke(window != null)
     }
 }
 
-private class AppKitHostController(
-    private val widgetSystem: FlareWidgetSystem<AppKitBackend>,
-) {
-    private val backend = AppKitBackend
-    private var content: FlareContent? = null
-    private var composition: FlareAppleComposition<AppKitBackend>? = null
-    private var disposed: Boolean = false
-
-    fun setContent(
-        value: FlareContent,
-        view: NSStackView,
-    ) {
-        check(!disposed) { "FlareAppKitHost is already disposed." }
-        content = value
-        val current = composition
-        if (current != null) {
-            current.setContent(value)
-        } else if (view.window != null) {
-            createComposition(view)
-        }
-    }
-
-    fun windowDidChange(view: NSStackView) {
-        if (disposed) return
-        if (view.window == null) {
-            disposeComposition()
-        } else {
-            createComposition(view)
-        }
-    }
-
-    fun dispose() {
-        if (disposed) return
-        disposed = true
-        content = null
-        disposeComposition()
-    }
-
-    private fun createComposition(view: NSStackView) {
-        if (composition != null) return
-        val currentContent = content ?: return
-        val newComposition =
-            FlareAppleComposition(
-                root = AppKitChildren(view),
-                widgetSystem = widgetSystem,
-                backend = backend,
-                hostName = "FlareAppKitHost",
-            )
-        composition = newComposition
-        try {
-            newComposition.setContent(currentContent)
-        } catch (throwable: Throwable) {
-            disposeComposition()
-            throw throwable
-        }
-    }
-
-    private fun disposeComposition() {
-        composition?.dispose()
-        composition = null
-    }
-}
-
-private fun checkMainThread() {
-    check(NSThread.isMainThread) {
-        "FlareAppKitHost must be used from the Apple main thread."
-    }
-}
+private const val HOST_NAME: String = "FlareAppKitHost"

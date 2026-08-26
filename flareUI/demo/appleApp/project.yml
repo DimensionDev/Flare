@@ -78,6 +78,18 @@ targets:
             -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
             -Pmoko.resources.CONTENTS_FOLDER_PATH="$CONTENTS_FOLDER_PATH"
 
+  macOSDemoTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/macOS
+      - path: Sources/macOS/FlareAppKitDemoLayout.swift
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.macos.tests
+        ARCHS: arm64
+
 schemes:
   FlareUIDemo-iOS:
     build:
@@ -126,3 +138,12 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  FlareUIDemo-macOS-Tests:
+    build:
+      targets:
+        macOSDemoTests: test
+    test:
+      config: Debug
+      targets:
+        - macOSDemoTests

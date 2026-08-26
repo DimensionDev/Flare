@@ -147,7 +147,7 @@ public extension UiStrings {
         case .following:
             localizedPresentationString("matrix_following", fallback: "Following")
         case .postsWithReplies:
-            localizedPresentationString("posts_with_replies_title", fallback: "Posts & Replies")
+            localizedPresentationString("posts_with_replies_title", fallback: "Posts and replies")
         case .highlights:
             localizedPresentationString("profile_tab_highlights", fallback: "Highlights")
         case .reposts:
@@ -172,9 +172,9 @@ public extension ActionMenuItemText {
             case .unlike:
                 localizedPresentationString("unlike", fallback: "Unlike")
             case .retweet:
-                localizedPresentationString("Repost", fallback: "Retweet")
+                localizedPresentationString("Repost", fallback: "Repost")
             case .unretweet:
-                localizedPresentationString("retweet_remove", fallback: "Remove retweet")
+                localizedPresentationString("retweet_remove", fallback: "Remove repost")
             case .reply:
                 localizedPresentationString("compose_title_reply", fallback: "compose_title_reply")
             case .comment:
@@ -194,9 +194,9 @@ public extension ActionMenuItemText {
             case .react:
                 localizedPresentationString("reaction_add", fallback: "Add reaction")
             case .share:
-                localizedPresentationString("fx_share", fallback: "fx_share")
+                localizedPresentationString("fx_share", fallback: "Share")
             case .fxShare:
-                localizedPresentationString("fx_share", fallback: "FX Share")
+                localizedPresentationString("share_via_fxembed", fallback: "Share via FxEmbed")
             case .unReact:
                 localizedPresentationString("reaction_remove", fallback: "Remove reaction")
             case .editUserList:
@@ -234,7 +234,7 @@ public extension ActionMenuItemText {
             case .showOriginal:
                 localizedPresentationString("Show original", fallback: "Show original")
             case .favorite:
-                localizedPresentationString("Favourite", fallback: "Favourite")
+                localizedPresentationString("Favorite", fallback: "Favorite")
             case .unFavorite:
                 localizedPresentationString("misskey_channel_unfavorite", fallback: "misskey_channel_unfavorite")
             }

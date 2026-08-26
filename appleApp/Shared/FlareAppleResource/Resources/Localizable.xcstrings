@@ -2449,7 +2449,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Manage signed-in accounts"
+            "value" : "Manage logged-in accounts"
           }
         },
         "fi" : {
@@ -3369,7 +3369,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Subscription"
+            "value" : "Add subscription"
           }
         },
         "fi" : {
@@ -3921,7 +3921,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ask anything..."
+            "value" : "Ask anything…"
           }
         },
         "fi" : {
@@ -4289,7 +4289,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thinking..."
+            "value" : "Thinking…"
           }
         },
         "fi" : {
@@ -25050,7 +25050,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reposted a post"
+            "value" : "posted"
           }
         },
         "fi" : {
@@ -39613,7 +39613,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conversation"
+            "value" : "Direct message conversation"
           }
         },
         "fi" : {
@@ -40719,7 +40719,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sending..."
+            "value" : "Sending…"
           }
         },
         "fi" : {
@@ -43116,7 +43116,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Subscription"
+            "value" : "Edit subscription"
           }
         },
         "fi" : {
@@ -46985,7 +46985,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Favourite"
+            "value" : "Favorite"
           }
         },
         "fi" : {
@@ -47354,7 +47354,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fx share"
+            "value" : "Share via FxEmbed"
           }
         },
         "fi" : {
@@ -54033,7 +54033,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading..."
+            "value" : "Loading…"
           }
         },
         "fi" : {
@@ -66050,7 +66050,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Available Timelines"
+            "value" : "Available timelines"
           }
         },
         "fi" : {
@@ -66234,7 +66234,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Federated Timeline"
+            "value" : "Federated timeline"
           }
         },
         "fi" : {
@@ -66786,7 +66786,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Local Timeline"
+            "value" : "Local timeline"
           }
         },
         "fi" : {
@@ -66971,7 +66971,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "favourited"
+            "value" : "favorited your post"
           }
         },
         "fi" : {
@@ -67156,7 +67156,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "request to follow you"
+            "value" : "requested to follow you"
           }
         },
         "fi" : {
@@ -67526,7 +67526,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reblogged a post"
+            "value" : "reposted a post"
           }
         },
         "fi" : {
@@ -68264,7 +68264,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trending Statuses"
+            "value" : "Trending Posts"
           }
         },
         "fi" : {
@@ -102107,7 +102107,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unfavourite"
+            "value" : "Unfavorite"
           }
         },
         "fi" : {
@@ -102846,7 +102846,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App"
+            "value" : "sent an app notification"
           }
         },
         "fi" : {
@@ -103216,7 +103216,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Access token created"
+            "value" : "created a token"
           }
         },
         "fi" : {
@@ -103401,7 +103401,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Export completed"
+            "value" : "export completed"
           }
         },
         "fi" : {
@@ -103771,7 +103771,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Login detected"
+            "value" : "new login"
           }
         },
         "fi" : {
@@ -103956,7 +103956,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "quoted"
+            "value" : "quoted your post"
           }
         },
         "fi" : {
@@ -104141,7 +104141,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reposted"
+            "value" : "reacted to your post"
           }
         },
         "fi" : {
@@ -104511,7 +104511,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "renote"
+            "value" : "reposted a post"
           }
         },
         "fi" : {
@@ -104696,7 +104696,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "reply"
+            "value" : "replied to you"
           }
         },
         "fi" : {
@@ -104881,7 +104881,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Role assigned"
+            "value" : "assigned you a role"
           }
         },
         "fi" : {
@@ -105066,7 +105066,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled note failed to post"
+            "value" : "scheduled note failed to post"
           }
         },
         "fi" : {
@@ -105251,7 +105251,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled note posted"
+            "value" : "scheduled note posted"
           }
         },
         "fi" : {
@@ -105436,7 +105436,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Test notification"
+            "value" : "sent a test notification"
           }
         },
         "fi" : {
@@ -105621,7 +105621,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unknwon"
+            "value" : "Unknown"
           }
         },
         "fi" : {
@@ -112081,7 +112081,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Login expired, please login again"
+            "value" : "Login expired. Please log in again."
           }
         },
         "fi" : {
@@ -115039,7 +115039,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You need re-login in order to access this page"
+            "value" : "Log in again to access this page"
           }
         },
         "fi" : {
@@ -119007,7 +119007,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Posts & Replies"
+            "value" : "Posts and replies"
           }
         },
         "fi" : {
@@ -124779,7 +124779,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You need to set the RssHub host if you want to use RssHub, or select the public RssHub server"
+            "value" : "Set an RSSHub host to use RSSHub, or choose the public RSSHub server"
           }
         },
         "fi" : {
@@ -124963,7 +124963,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please input RssHub host here"
+            "value" : "Enter an RSSHub host"
           }
         },
         "fi" : {
@@ -125147,7 +125147,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RssHub Host"
+            "value" : "RSSHub Host"
           }
         },
         "fi" : {
@@ -125884,7 +125884,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show description only"
+            "value" : "Description only"
           }
         },
         "fi" : {
@@ -126068,7 +126068,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsing content"
+            "value" : "Full content"
           }
         },
         "fi" : {
@@ -129749,7 +129749,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No instances found"
+            "value" : "No servers found"
           }
         },
         "fi" : {
@@ -129933,7 +129933,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instance URL"
+            "value" : "Server URL"
           }
         },
         "fi" : {
@@ -139005,7 +139005,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Post Detail"
+            "value" : "Post detail"
           }
         },
         "fi" : {
@@ -139189,7 +139189,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyzing this post..."
+            "value" : "Analyzing this post…"
           }
         },
         "fi" : {
@@ -139743,7 +139743,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Closing analysis..."
+            "value" : "Closing analysis…"
           }
         },
         "fi" : {
@@ -139928,7 +139928,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finishing analysis..."
+            "value" : "Finishing analysis…"
           }
         },
         "fi" : {
@@ -140298,7 +140298,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starting analysis..."
+            "value" : "Starting analysis…"
           }
         },
         "fi" : {
@@ -140483,7 +140483,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asking %@..."
+            "value" : "Asking %@…"
           }
         },
         "fi" : {
@@ -140668,7 +140668,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Images are unsupported; retrying with text..."
+            "value" : "Images are unsupported; retrying with text…"
           }
         },
         "fi" : {
@@ -140853,7 +140853,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading post context..."
+            "value" : "Loading post context…"
           }
         },
         "fi" : {
@@ -141038,7 +141038,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reading model response..."
+            "value" : "Reading model response…"
           }
         },
         "fi" : {
@@ -141408,7 +141408,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preparing images..."
+            "value" : "Preparing images…"
           }
         },
         "fi" : {
@@ -141593,7 +141593,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Running analysis step..."
+            "value" : "Running analysis step…"
           }
         },
         "fi" : {
@@ -142333,7 +142333,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Planning analysis..."
+            "value" : "Planning analysis…"
           }
         },
         "fi" : {
@@ -142888,7 +142888,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Receiving response..."
+            "value" : "Receiving response…"
           }
         },
         "fi" : {
@@ -143073,7 +143073,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Streaming from %@..."
+            "value" : "Streaming from %@…"
           }
         },
         "fi" : {
@@ -143628,7 +143628,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entering analysis stage..."
+            "value" : "Entering analysis stage…"
           }
         },
         "fi" : {
@@ -144738,7 +144738,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Searching..."
+            "value" : "Searching…"
           }
         },
         "fi" : {
@@ -145314,7 +145314,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Summary post"
+            "value" : "Summarize"
           }
         },
         "fi" : {
@@ -145498,7 +145498,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Translate post"
+            "value" : "Translate"
           }
         },
         "fi" : {
@@ -145868,7 +145868,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Only users on this instance can see this post"
+            "value" : "Visible on home timelines"
           }
         },
         "fi" : {
@@ -146238,7 +146238,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anyone can see and repost this post"
+            "value" : "Anyone can see this post"
           }
         },
         "fi" : {
@@ -150291,7 +150291,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Group"
+            "value" : "Add group"
           }
         },
         "fi" : {
@@ -150843,7 +150843,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit Group"
+            "value" : "Edit group"
           }
         },
         "fi" : {
@@ -154339,7 +154339,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Group Name"
+            "value" : "Group name"
           }
         },
         "fi" : {

@@ -199,7 +199,9 @@ import dev.dimension.flare.compose.ui.misskey_notification_item_create_token
 import dev.dimension.flare.compose.ui.misskey_notification_item_export_completed
 import dev.dimension.flare.compose.ui.misskey_notification_item_follow_request_accepted
 import dev.dimension.flare.compose.ui.misskey_notification_item_login
+import dev.dimension.flare.compose.ui.misskey_notification_item_quoted_your_status
 import dev.dimension.flare.compose.ui.misskey_notification_item_reacted_to_your_status
+import dev.dimension.flare.compose.ui.misskey_notification_item_replied_to_you
 import dev.dimension.flare.compose.ui.misskey_notification_item_role_assigned
 import dev.dimension.flare.compose.ui.misskey_notification_item_scheduled_note_post_failed
 import dev.dimension.flare.compose.ui.misskey_notification_item_scheduled_note_posted
@@ -640,11 +642,11 @@ private fun TopMessageComponent(
                     }
 
                     UiTimelineV2.Message.Type.Localized.MessageId.Reply -> {
-                        stringResource(resource = Res.string.mastodon_notification_item_mentioned_you)
+                        stringResource(resource = Res.string.misskey_notification_item_replied_to_you)
                     }
 
                     UiTimelineV2.Message.Type.Localized.MessageId.Quote -> {
-                        stringResource(resource = Res.string.mastodon_notification_item_reblogged_your_status)
+                        stringResource(resource = Res.string.misskey_notification_item_quoted_your_status)
                     }
 
                     UiTimelineV2.Message.Type.Localized.MessageId.Reaction -> {

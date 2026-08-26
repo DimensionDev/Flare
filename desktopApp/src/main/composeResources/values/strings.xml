@@ -29,13 +29,13 @@
         <item quantity="other">%1$d New Posts</item>
     </plurals>
 
-    <string name="navigate_back">Back</string>
-    <string name="service_select_instance_input_placeholder">Instance URL</string>
+    <string name="navigate_back">Go back</string>
+    <string name="service_select_instance_input_placeholder">Server URL</string>
     <string name="service_select_next_button">Next</string>
-    <string name="service_select_empty_message">No instances found</string>
+    <string name="service_select_empty_message">No servers found</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
-    <string name="service_select_welcome_message">Flare is a social media client for %1$s.\nChoose a service to connect and get started.</string>
+    <string name="service_select_welcome_message">Enter a server to get started.</string>
     <string name="mastodon_login_verify_message">Verifying your credentials…</string>
 
     <string name="profile_tab_timeline">Posts</string>
@@ -423,7 +423,7 @@
     <string name="settings_post_action_family_bookmark">Bookmark</string>
     <string name="settings_post_action_family_favorite">Favorite</string>
     <string name="settings_post_action_family_share">Share</string>
-    <string name="settings_post_action_family_fx_share">Fx share</string>
+    <string name="settings_post_action_family_fx_share">Share via FxEmbed</string>
     <string name="settings_post_action_family_delete">Delete</string>
     <string name="settings_post_action_family_report">Report</string>
     <string name="settings_post_action_family_mute_user">Mute user</string>
@@ -464,7 +464,7 @@
     <string name="compose_poll_expiration_7_days">7 days</string>
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
-    <string name="compose_notification_title">Post sent</string>
+    <string name="compose_notification_title">Sending post</string>
     <string name="compose_notification_progress">Sending post</string>
     <string name="compose_notification_success">Post sent</string>
     <string name="compose_notification_error">Failed to send post</string>
@@ -473,16 +473,16 @@
     <string name="misskey_visibility_home">Home</string>
     <string name="misskey_visibility_followers">Followers</string>
     <string name="misskey_visibility_specified">Specified</string>
-    <string name="misskey_visibility_public_description">Anyone can see and boost this post</string>
-    <string name="misskey_visibility_home_description">Only users on this instance can see this post</string>
+    <string name="misskey_visibility_public_description">Anyone can see this post</string>
+    <string name="misskey_visibility_home_description">Visible on home timelines</string>
     <string name="misskey_visibility_followers_description">Only followers can see this post</string>
     <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
 
 
     <string name="rss_sources_title">Subscriptions</string>
-    <string name="add_rss_source">Add Subscription</string>
-    <string name="edit_rss_source">Edit Subscription</string>
-    <string name="delete_rss_source">Delete Subscription</string>
+    <string name="add_rss_source">Add subscription</string>
+    <string name="edit_rss_source">Edit subscription</string>
+    <string name="delete_rss_source">Delete subscription</string>
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">URL</string>
@@ -505,7 +505,7 @@
     <string name="article_content_gate_subscription_description">This article is only available to supporters. Open it in the browser to support the creator and read the full content.</string>
     <string name="article_content_gate_subscription_description_with_fee">This article is only available to supporters from ¥%1$d. Open it in the browser to support the creator and read the full content.</string>
     <string name="mastodon_available_timelines">Available timelines</string>
-    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_trending_statuses">Trending Posts</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>
     <string name="mastodon_local_timeline">Local timeline</string>
     <string name="subscription_url_hint">Paste an RSS feed URL or a Mastodon instance URL</string>
@@ -521,14 +521,14 @@
     <string name="notification_login_expired">Login expired for %1$s</string>
 
     <string name="dm_list_empty">No direct messages</string>
-    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="dm_list_error">Unable to load direct messages</string>
     <string name="send">Send</string>
     <string name="dm_send_placeholder">Send a message</string>
-    <string name="dm_deleted">Deleted</string>
+    <string name="dm_deleted">Deleted message</string>
     <string name="dm_conversation">Direct message conversation</string>
-    <string name="dm_sending">Sending</string>
+    <string name="dm_sending">Sending…</string>
     <string name="dm_leave">Leave conversation</string>
-    <string name="dm_to_profile">Show profile</string>
+    <string name="dm_to_profile">Open profile</string>
     <string name="tab_settings_mixed_timeline">Enable mixed timeline tab</string>
     <string name="tab_settings_mixed_timeline_desc">Combine posts from all tabs into a single Home tab.</string>
     <string name="tab_settings_add_group">Add group</string>

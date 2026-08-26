@@ -49,7 +49,7 @@
     <string name="status_insight_title">Post insight</string>
     <string name="profile_insight_title">Profile insight</string>
     <string name="profile_blocked_gate_title">Blocked profile</string>
-    <string name="profile_blocked_gate_description">You blocked this profile. Their tabs and timeline are hidden until you choose to show them.</string>
+    <string name="profile_blocked_gate_description">You blocked this user. Their tabs and timeline are hidden until you choose to show them.</string>
     <string name="profile_blocked_gate_show">Show</string>
     <string name="status_insight_input_placeholder">Ask a follow-up…</string>
     <string name="status_insight_send">Send</string>
@@ -109,7 +109,7 @@
     <string name="settings_title">Settings</string>
 
     <string name="settings_accounts_title">Accounts</string>
-    <string name="settings_accounts_subtitle">Manage signed-in accounts</string>
+    <string name="settings_accounts_subtitle">Manage logged-in accounts</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
     <string name="settings_appearance_theme_group_title">Theme</string>
@@ -241,7 +241,7 @@
     <string name="login_expired_relogin">Log in again</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
-    <string name="service_select_welcome_message">Flare is a social media client for Android.\nChoose a service to connect and get started.</string>
+    <string name="service_select_welcome_message">Enter a server to get started.</string>
 
     <string name="mastodon_login_verify_message">Verifying your credentials…</string>
 
@@ -251,8 +251,8 @@
     <string name="misskey_visibility_home">Home</string>
     <string name="misskey_visibility_followers">Followers</string>
     <string name="misskey_visibility_specified">Specified</string>
-    <string name="misskey_visibility_public_description">Anyone can see and boost this post</string>
-    <string name="misskey_visibility_home_description">Only users on this instance can see this post</string>
+    <string name="misskey_visibility_public_description">Anyone can see this post</string>
+    <string name="misskey_visibility_home_description">Visible on home timelines</string>
     <string name="misskey_visibility_followers_description">Only followers can see this post</string>
     <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
 
@@ -339,7 +339,7 @@
     <string name="settings_post_action_family_bookmark">Bookmark</string>
     <string name="settings_post_action_family_favorite">Favorite</string>
     <string name="settings_post_action_family_share">Share</string>
-    <string name="settings_post_action_family_fx_share">Fx share</string>
+    <string name="settings_post_action_family_fx_share">Share via FxEmbed</string>
     <string name="settings_post_action_family_delete">Delete</string>
     <string name="settings_post_action_family_report">Report</string>
     <string name="settings_post_action_family_mute_user">Mute user</string>
@@ -435,9 +435,9 @@
     <string name="settings_media_save_location_reset_downloads">Reset to Downloads</string>
     <string name="settings_media_save_location_ask_every_time">Ask Every Time</string>
 
-    <string name="service_select_instance_input_placeholder">Instance URL</string>
+    <string name="service_select_instance_input_placeholder">Server URL</string>
     <string name="service_select_next_button">Next</string>
-    <string name="service_select_empty_message">No instances found</string>
+    <string name="service_select_empty_message">No servers found</string>
 
     <string name="media_viewer_title">Media viewer</string>
 
@@ -454,7 +454,7 @@
     <string name="media_save_success">Saved</string>
     <string name="media_save_fail">Failed to save</string>
     <string name="media_download_started">Download started.</string>
-    <string name="media_prepare_started">Preparing media...</string>
+    <string name="media_prepare_started">Preparing media…</string>
     <string name="media_alt_text">Alt text</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 
@@ -563,14 +563,14 @@
 
     <string name="dm_list_title">Direct Messages</string>
     <string name="dm_list_empty">No direct messages</string>
-    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="dm_list_error">Unable to load direct messages</string>
     <string name="send">Send</string>
     <string name="dm_send_placeholder">Send a message</string>
-    <string name="dm_deleted">Deleted</string>
+    <string name="dm_deleted">Deleted message</string>
     <string name="dm_conversation">Direct message conversation</string>
-    <string name="dm_sending">Sending</string>
+    <string name="dm_sending">Sending…</string>
     <string name="dm_leave">Leave conversation</string>
-    <string name="dm_to_profile">Show profile</string>
+    <string name="dm_to_profile">Open profile</string>
 
 
     <string name="notification_login_expired">Login expired for %1$s</string>
@@ -583,9 +583,9 @@
     <string name="local_history_search_user_title">User</string>
 
     <string name="rss_sources_title">Subscriptions</string>
-    <string name="add_rss_source">Add Subscription</string>
-    <string name="edit_rss_source">Edit Subscription</string>
-    <string name="delete_rss_source">Delete Subscription</string>
+    <string name="add_rss_source">Add subscription</string>
+    <string name="edit_rss_source">Edit subscription</string>
+    <string name="delete_rss_source">Delete subscription</string>
     <string name="opml_import">Import from OPML</string>
     <string name="opml_export">Export to OPML</string>
     <string name="export_completed">Export completed</string>
@@ -603,7 +603,7 @@
     <string name="rss_sources_full_content">Full content</string>
     <string name="rss_sources_description_only">Description only</string>
     <string name="mastodon_available_timelines">Available timelines</string>
-    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_trending_statuses">Trending Posts</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>
     <string name="mastodon_local_timeline">Local timeline</string>
     <string name="subscription_url_hint">Paste an RSS feed URL or a Mastodon instance URL</string>

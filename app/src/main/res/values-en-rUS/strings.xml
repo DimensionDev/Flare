@@ -56,7 +56,7 @@
     <string name="settings_title">Settings</string>
 
     <string name="settings_accounts_title">Accounts</string>
-    <string name="settings_accounts_subtitle">Manage signed-in accounts</string>
+    <string name="settings_accounts_subtitle">Manage logged-in accounts</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
     <string name="settings_appearance_theme_group_title">Theme</string>
@@ -159,7 +159,7 @@
     <string name="login_expired_relogin">Log in again</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
-    <string name="service_select_welcome_message">Flare is a social media client for Android.\nChoose a service to connect and get started.</string>
+    <string name="service_select_welcome_message">Enter a server to get started.</string>
 
     <string name="mastodon_login_verify_message">Verifying your credentials…</string>
 
@@ -169,8 +169,8 @@
     <string name="misskey_visibility_home">Home</string>
     <string name="misskey_visibility_followers">Followers</string>
     <string name="misskey_visibility_specified">Specified</string>
-    <string name="misskey_visibility_public_description">Anyone can see and boost this post</string>
-    <string name="misskey_visibility_home_description">Only users on this instance can see this post</string>
+    <string name="misskey_visibility_public_description">Anyone can see this post</string>
+    <string name="misskey_visibility_home_description">Visible on home timelines</string>
     <string name="misskey_visibility_followers_description">Only followers can see this post</string>
     <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
 
@@ -250,7 +250,7 @@
     <string name="settings_post_action_family_bookmark">Bookmark</string>
     <string name="settings_post_action_family_favorite">Favorite</string>
     <string name="settings_post_action_family_share">Share</string>
-    <string name="settings_post_action_family_fx_share">Fx share</string>
+    <string name="settings_post_action_family_fx_share">Share via FxEmbed</string>
     <string name="settings_post_action_family_delete">Delete</string>
     <string name="settings_post_action_family_report">Report</string>
     <string name="settings_post_action_family_mute_user">Mute user</string>
@@ -334,9 +334,9 @@
     <string name="settings_media_save_location_reset_downloads">Reset to Downloads</string>
     <string name="settings_media_save_location_ask_every_time">Ask Every Time</string>
 
-    <string name="service_select_instance_input_placeholder">Instance URL</string>
+    <string name="service_select_instance_input_placeholder">Server URL</string>
     <string name="service_select_next_button">Next</string>
-    <string name="service_select_empty_message">No instances found</string>
+    <string name="service_select_empty_message">No servers found</string>
 
     <string name="media_viewer_title">Media viewer</string>
 
@@ -353,7 +353,7 @@
     <string name="media_save_success">Saved</string>
     <string name="media_save_fail">Failed to save</string>
     <string name="media_download_started">Download started.</string>
-    <string name="media_prepare_started">Preparing media...</string>
+    <string name="media_prepare_started">Preparing media…</string>
     <string name="media_alt_text">Alt text</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 
@@ -446,14 +446,14 @@
 
     <string name="dm_list_title">Direct Messages</string>
     <string name="dm_list_empty">No direct messages</string>
-    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="dm_list_error">Unable to load direct messages</string>
     <string name="send">Send</string>
     <string name="dm_send_placeholder">Send a message</string>
-    <string name="dm_deleted">Deleted</string>
+    <string name="dm_deleted">Deleted message</string>
     <string name="dm_conversation">Direct message conversation</string>
-    <string name="dm_sending">Sending</string>
+    <string name="dm_sending">Sending…</string>
     <string name="dm_leave">Leave conversation</string>
-    <string name="dm_to_profile">Show profile</string>
+    <string name="dm_to_profile">Open profile</string>
 
 
     <string name="notification_login_expired">Login expired for %1$s</string>
@@ -466,9 +466,9 @@
     <string name="local_history_search_user_title">User</string>
 
     <string name="rss_sources_title">Subscriptions</string>
-    <string name="add_rss_source">Add Subscription</string>
-    <string name="edit_rss_source">Edit Subscription</string>
-    <string name="delete_rss_source">Delete Subscription</string>
+    <string name="add_rss_source">Add subscription</string>
+    <string name="edit_rss_source">Edit subscription</string>
+    <string name="delete_rss_source">Delete subscription</string>
     <string name="opml_import">Import from OPML</string>
     <string name="opml_export">Export to OPML</string>
     <string name="export_completed">Export completed</string>
@@ -486,7 +486,7 @@
     <string name="rss_sources_full_content">Full content</string>
     <string name="rss_sources_description_only">Description only</string>
     <string name="mastodon_available_timelines">Available timelines</string>
-    <string name="mastodon_trending_statuses">Trending statuses</string>
+    <string name="mastodon_trending_statuses">Trending Posts</string>
     <string name="mastodon_federated_timeline">Federated timeline</string>
     <string name="mastodon_local_timeline">Local timeline</string>
     <string name="subscription_url_hint">Paste an RSS feed URL or a Mastodon instance URL</string>
@@ -594,51 +594,51 @@
     <string name="profile_insight_title">Profile insight</string>
     <string name="status_insight_input_placeholder">Ask a follow-up…</string>
     <string name="status_insight_send">Send</string>
-    <string name="status_insight_analyzing">Analyzing this post...</string>
+    <string name="status_insight_analyzing">Analyzing this post…</string>
     <string name="profile_insight_analyzing">Analyzing this profile…</string>
     <string name="status_insight_error">Unable to analyze this post.</string>
     <string name="profile_insight_error">Unable to analyze this profile.</string>
-    <string name="status_insight_trace_loading_post_context">Loading post context...</string>
+    <string name="status_insight_trace_loading_post_context">Loading post context…</string>
     <string name="status_insight_trace_post_context_loaded">Post context loaded</string>
-    <string name="status_insight_trace_preparing_images">Preparing images...</string>
-    <string name="status_insight_trace_images_unsupported_fallback">Images are unsupported; retrying with text...</string>
-    <string name="status_insight_trace_agent_started">Starting analysis...</string>
-    <string name="status_insight_trace_strategy_started">Planning analysis...</string>
+    <string name="status_insight_trace_preparing_images">Preparing images…</string>
+    <string name="status_insight_trace_images_unsupported_fallback">Images are unsupported; retrying with text…</string>
+    <string name="status_insight_trace_agent_started">Starting analysis…</string>
+    <string name="status_insight_trace_strategy_started">Planning analysis…</string>
     <string name="status_insight_trace_strategy_completed">Analysis plan completed</string>
-    <string name="status_insight_trace_subgraph_started">Entering analysis stage...</string>
+    <string name="status_insight_trace_subgraph_started">Entering analysis stage…</string>
     <string name="status_insight_trace_subgraph_completed">Analysis stage completed</string>
     <string name="status_insight_trace_subgraph_failed">Analysis stage failed</string>
-    <string name="status_insight_trace_asking_model">Asking %1$s...</string>
-    <string name="status_insight_trace_model_response_received">Reading model response...</string>
-    <string name="status_insight_trace_streaming_started">Streaming from %1$s...</string>
-    <string name="status_insight_trace_streaming_response">Receiving response...</string>
+    <string name="status_insight_trace_asking_model">Asking %1$s…</string>
+    <string name="status_insight_trace_model_response_received">Reading model response…</string>
+    <string name="status_insight_trace_streaming_started">Streaming from %1$s…</string>
+    <string name="status_insight_trace_streaming_response">Receiving response…</string>
     <string name="status_insight_trace_streaming_completed">Response stream completed</string>
     <string name="status_insight_trace_streaming_failed">Response stream failed</string>
-    <string name="status_insight_trace_running_step">Running analysis step...</string>
+    <string name="status_insight_trace_running_step">Running analysis step…</string>
     <string name="status_insight_trace_step_completed">Analysis step completed</string>
     <string name="status_insight_trace_step_failed">Analysis step failed</string>
     <string name="status_insight_trace_tool_call_started">%1$s</string>
     <string name="status_insight_trace_tool_call_completed">%1$s</string>
     <string name="status_insight_trace_tool_validation_failed">%1$s</string>
     <string name="status_insight_trace_tool_call_failed">%1$s</string>
-    <string name="status_insight_trace_tool_load_status_context_started">Loading post context...</string>
+    <string name="status_insight_trace_tool_load_status_context_started">Loading post context…</string>
     <string name="status_insight_trace_tool_load_status_context_completed">Post context loaded</string>
     <string name="status_insight_trace_tool_load_status_context_validation_failed">Post context input was rejected</string>
     <string name="status_insight_trace_tool_load_status_context_failed">Failed to load post context</string>
-    <string name="status_insight_trace_tool_search_status_started">Searching...</string>
+    <string name="status_insight_trace_tool_search_status_started">Searching…</string>
     <string name="status_insight_trace_tool_search_status_completed">Search completed</string>
     <string name="status_insight_trace_tool_search_status_validation_failed">Search input was rejected</string>
     <string name="status_insight_trace_tool_search_status_failed">Search failed</string>
-    <string name="status_insight_trace_agent_completed">Finishing analysis...</string>
+    <string name="status_insight_trace_agent_completed">Finishing analysis…</string>
     <string name="status_insight_trace_agent_failed">Analysis failed</string>
-    <string name="status_insight_trace_agent_closing">Closing analysis...</string>
+    <string name="status_insight_trace_agent_closing">Closing analysis…</string>
     <string name="ask_ai">Ask AI</string>
     <string name="agent_chat_title">AI Chat</string>
     <string name="agent_history_title">Flare AI</string>
     <string name="agent_history_empty">No AI chat history yet.</string>
-    <string name="agent_chat_input_placeholder">Ask anything...</string>
+    <string name="agent_chat_input_placeholder">Ask anything…</string>
     <string name="agent_chat_send">Send</string>
-    <string name="agent_chat_thinking">Thinking...</string>
+    <string name="agent_chat_thinking">Thinking…</string>
     <string name="agent_compose_confirmation_prompt">Send this post?</string>
     <string name="settings_about_description">An open-source, AI-powered client for decentralized social platforms.</string>
     <string name="settings_about_source_code">Source code</string>
@@ -720,7 +720,7 @@
     <string name="profile_blocked_gate_description">You blocked this user. Their tabs and timeline are hidden until you choose to show them.</string>
     <string name="profile_blocked_gate_show">Show</string>
     <string name="settings_behavior_title">Behavior</string>
-    <string name="settings_behavior_description">Browser and link handling preferences</string>
+    <string name="settings_behavior_description">Timeline refresh, browser, and link handling preferences</string>
     <string name="bluesky_login_fix_delegation_scopes_button">Fix Tranquil permissions</string>
     <string name="gallery_detail_tab_info">Info</string>
     <string name="gallery_detail_tab_comments">Comments</string>

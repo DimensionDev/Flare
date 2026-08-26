@@ -2,9 +2,21 @@
 import AppKit
 
 @main
+@MainActor
 final class FlareUIDemoMacApp: NSObject, NSApplicationDelegate {
+    private static var retainedDelegate: FlareUIDemoMacApp?
+
     private var host: FlareDemoHost?
     private var window: NSWindow?
+
+    static func main() {
+        let application = NSApplication.shared
+        let delegate = FlareUIDemoMacApp()
+        retainedDelegate = delegate
+        application.delegate = delegate
+        application.setActivationPolicy(.regular)
+        application.run()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let host = FlareDemoHost()

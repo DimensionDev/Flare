@@ -6,6 +6,7 @@ import dev.dimension.flare.ui.resources.moko.AppleMokoResourceResolver
 import dev.dimension.flare.ui.resources.moko.ProvideMokoResources
 import dev.dimension.flare.ui.resources.moko.UIKitMokoResourcesRendererPlugin
 import dev.dimension.flare.ui.uikit.FlareUIKitHost
+import dev.dimension.flare.ui.uikit.UIKitLazyLayoutRendererPlugin
 import dev.dimension.flare.ui.uikit.createUIKitWidgetSystem
 import platform.UIKit.UIView
 
@@ -13,7 +14,11 @@ import platform.UIKit.UIView
 public class FlareDemoHost {
     private val host =
         FlareUIKitHost(
-            widgetSystem = createUIKitWidgetSystem(UIKitMokoResourcesRendererPlugin),
+            widgetSystem =
+                createUIKitWidgetSystem(
+                    UIKitMokoResourcesRendererPlugin,
+                    UIKitLazyLayoutRendererPlugin,
+                ),
         )
 
     public val view: UIView

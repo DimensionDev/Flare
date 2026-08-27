@@ -2,6 +2,7 @@
 
 package dev.dimension.flare.ui.demo
 
+import dev.dimension.flare.ui.appkit.AppKitLazyLayoutRendererPlugin
 import dev.dimension.flare.ui.appkit.FlareAppKitHost
 import dev.dimension.flare.ui.appkit.createAppKitWidgetSystem
 import dev.dimension.flare.ui.resources.moko.AppKitMokoResourcesRendererPlugin
@@ -13,7 +14,11 @@ import platform.AppKit.NSView
 public class FlareDemoHost {
     private val host =
         FlareAppKitHost(
-            widgetSystem = createAppKitWidgetSystem(AppKitMokoResourcesRendererPlugin),
+            widgetSystem =
+                createAppKitWidgetSystem(
+                    AppKitMokoResourcesRendererPlugin,
+                    AppKitLazyLayoutRendererPlugin,
+                ),
         )
 
     public val view: NSView

@@ -22,6 +22,7 @@ import platform.AppKit.NSLayoutAttributeBottom
 import platform.AppKit.NSLayoutAttributeCenterX
 import platform.AppKit.NSLayoutAttributeCenterY
 import platform.AppKit.NSLayoutAttributeLeading
+import platform.AppKit.NSLayoutAttributeNotAnAttribute
 import platform.AppKit.NSLayoutAttributeTop
 import platform.AppKit.NSLayoutAttributeTrailing
 import platform.AppKit.NSLineBreakByWordWrapping
@@ -69,6 +70,7 @@ internal class AppKitColumnWidget :
                 HorizontalAlignment.Start -> NSLayoutAttributeLeading
                 HorizontalAlignment.Center -> NSLayoutAttributeCenterX
                 HorizontalAlignment.End -> NSLayoutAttributeTrailing
+                HorizontalAlignment.Stretch -> NSLayoutAttributeNotAnAttribute
             }
     }
 }
@@ -93,6 +95,7 @@ internal class AppKitRowWidget :
                 VerticalAlignment.Top -> NSLayoutAttributeTop
                 VerticalAlignment.Center -> NSLayoutAttributeCenterY
                 VerticalAlignment.Bottom -> NSLayoutAttributeBottom
+                VerticalAlignment.Stretch -> NSLayoutAttributeNotAnAttribute
             }
     }
 }

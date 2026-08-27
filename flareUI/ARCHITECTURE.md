@@ -115,19 +115,34 @@ retain declarative content for reattachment. The Compose host owns its child Fla
 
 `FlareWidget.dispose` is the single widget cleanup hook.
 
+### Deferred item compositions and lazy collections
+
+`rememberFlareSubcompositionFactory` creates independently disposable child compositions which
+inherit the active widget system and parent composition context. The factory owns every child and
+disposes it with the parent; a native lazy cell owns one child composition while realized.
+
+`flare-lazy-layout` records interval providers without composing item content. Stable keys drive
+identity, dataset diffing, saveable item state, and visible-anchor restoration; `contentType`
+drives native reuse compatibility. One shared coordinator serializes item binding, disposal,
+viewport reports, and programmatic scroll commands. Platform renderers delegate measurement,
+scrolling, recycling, and accessibility to RecyclerView, Compose LazyList, UICollectionView, and
+NSCollectionView. `LazyColumn` and `LazyRow` differ only by orientation.
+
 ## Modules
 
 | Module | Responsibility |
 | --- | --- |
 | `flare-runtime` | Runtime contracts, applier, lifecycle, Android View/Compose/UIKit/AppKit hosts, frame clocks |
 | `foundation` | Four common primitives and their four renderer sets |
+| `flare-lazy-layout` | Lazy DSL/state/coordinator and four native virtual-list adapters |
 | `flare-resources-moko` | Optional Moko resource environment, backend-neutral image value, and image renderers |
 | `demo/shared` | Shared composition and framework exports |
 | `demo/androidApp`, `demo/appleApp` | Native application shells |
 
-`flare-runtime` does not depend on Foundation. Foundation depends one-way on runtime. A new host
-belongs in runtime; a renderer for a Foundation primitive belongs in Foundation. Moko integration
-is separate because it is an optional dependency and resource-generation boundary.
+`flare-runtime` does not depend on Foundation. Foundation depends one-way on runtime, and lazy
+layout depends on Foundation for shared alignment vocabulary. A new host belongs in runtime; a
+renderer for a Foundation primitive belongs in Foundation. Moko integration is separate because
+it is an optional dependency and resource-generation boundary.
 
 ## Resources
 
@@ -151,6 +166,9 @@ their generated bundle into the application during an Xcode build phase.
 - macOS tests request real display-link frames and verify monotonic timestamps.
 - Resource tests cover resolver injection, Android View/Compose rendering, Apple localization,
   plurals, image loading, and static-framework bundle packaging.
+- Lazy tests cover large logical datasets with bounded realization, both orientations on all four
+  renderers, stable-key updates/anchors, heterogeneous dimensions, saveable state, multi-root
+  items, viewport reporting, programmatic scrolling, and child-composition disposal.
 - The shared framework and UIKit/AppKit demo applications compile through Xcode.
 
 Performance benchmark matrices were removed until a real product screen and regression budget
@@ -164,11 +182,10 @@ Flare UI is not production complete. The next gates are:
 2. Density, layout direction, safe area, and theme environments.
 3. Accessibility semantics and focus.
 4. Text input with selection and IME composition synchronization.
-5. Scrolling and native lazy collections.
-6. Screen-specific macOS display-link selection and multi-display validation.
-7. Intel macOS support if a compatible Compose Runtime artifact is available.
-8. Publication and Kotlin API/binary compatibility validation.
-9. Product-screen validation of the Compose backend's extra state invalidation hop.
-10. Product-screen migration, stability hardening, and performance budgets.
+5. Screen-specific macOS display-link selection and multi-display validation.
+6. Intel macOS support if a compatible Compose Runtime artifact is available.
+7. Publication and Kotlin API/binary compatibility validation.
+8. Product-screen validation of the Compose backend's extra state invalidation hop.
+9. Product-screen migration, stability hardening, and performance budgets.
 
 Navigation, networking, and application state management remain outside the runtime.

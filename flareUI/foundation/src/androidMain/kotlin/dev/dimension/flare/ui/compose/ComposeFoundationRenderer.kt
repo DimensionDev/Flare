@@ -161,6 +161,7 @@ private fun HorizontalAlignment.toComposeAlignment(): Alignment.Horizontal =
         HorizontalAlignment.Start -> Alignment.Start
         HorizontalAlignment.Center -> Alignment.CenterHorizontally
         HorizontalAlignment.End -> Alignment.End
+        HorizontalAlignment.Stretch -> Alignment.Start
     }
 
 private fun VerticalAlignment.toComposeAlignment(): Alignment.Vertical =
@@ -168,4 +169,5 @@ private fun VerticalAlignment.toComposeAlignment(): Alignment.Vertical =
         VerticalAlignment.Top -> Alignment.Top
         VerticalAlignment.Center -> Alignment.CenterVertically
         VerticalAlignment.Bottom -> Alignment.Bottom
+        VerticalAlignment.Stretch -> Alignment.Top
     }

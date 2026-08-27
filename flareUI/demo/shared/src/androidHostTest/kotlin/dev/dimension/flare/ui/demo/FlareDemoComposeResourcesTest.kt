@@ -4,13 +4,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.compose.AndroidComposeLazyLayoutRendererPlugin
 import dev.dimension.flare.ui.compose.FlareComposeHost
 import dev.dimension.flare.ui.compose.createAndroidComposeWidgetSystem
 import dev.dimension.flare.ui.resources.moko.AndroidComposeMokoResourcesRendererPlugin
@@ -32,7 +35,10 @@ public class FlareDemoComposeResourcesTest {
     @Test
     public fun rendersAndUpdatesGeneratedResources() {
         val widgetSystem =
-            createAndroidComposeWidgetSystem(AndroidComposeMokoResourcesRendererPlugin)
+            createAndroidComposeWidgetSystem(
+                AndroidComposeMokoResourcesRendererPlugin,
+                AndroidComposeLazyLayoutRendererPlugin,
+            )
         composeRule.setContent {
             val context = LocalContext.current
             val resolver = remember(context) { AndroidMokoResourceResolver(context) }
@@ -57,10 +63,15 @@ public class FlareDemoComposeResourcesTest {
         composeRule
             .onNodeWithTag("demo-increment")
             .assertHeightIsAtLeast(40.dp)
+        composeRule.onNodeWithTag("demo-lazy-row-item-0").assertTextEquals("Card 0")
+        composeRule.onNodeWithTag("demo-lazy-column-item-0").assertTextEquals("Lazy item 0")
+        composeRule.onAllNodesWithTag("demo-lazy-column-item-9999").assertCountEquals(0)
 
         val incrementBounds = composeRule.onNodeWithTag("demo-increment").getUnclippedBoundsInRoot()
         val resetBounds = composeRule.onNodeWithTag("demo-reset").getUnclippedBoundsInRoot()
         assertEquals(12f, (resetBounds.left - incrementBounds.right).value, 0.1f)
+        val firstLazyItem = composeRule.onNodeWithTag("demo-lazy-column-item-0").getUnclippedBoundsInRoot()
+        assertEquals(36f, (firstLazyItem.bottom - firstLazyItem.top).value, 0.1f)
 
         composeRule
             .onNodeWithTag("demo-increment")

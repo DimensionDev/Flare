@@ -16,6 +16,7 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for runtime invariants and the remainin
 | --- | --- |
 | `flare-runtime` | Composition, applier, modifiers, renderer registry, Android hosts, and Apple frame clocks |
 | `foundation` | `Column`, `Row`, `Text`, and `NativeButton` plus Android View/Compose/UIKit/AppKit renderers |
+| `flare-lazy-layout` | Stable-key `LazyColumn`/`LazyRow`, state, diffing, and four native virtual-list renderers |
 | `flare-resources-moko` | Optional Moko `stringResource`, `pluralStringResource`, `imageResource`, and image renderers |
 | `demo/shared` | One shared demo composition and native host factories |
 | `demo/androidApp`, `demo/appleApp` | Thin Android, UIKit, and AppKit application shells |
@@ -96,9 +97,46 @@ Column(
 }
 ```
 
-`Column` supports `Start`, `Center`, and `End`; `Row` supports `Top`, `Center`, and `Bottom`.
-Text wraps on all four renderer paths. Sizing, padding, main-axis arrangement, and constraint-based
-layout remain outside the current Foundation API.
+`Column` supports `Start`, `Center`, `End`, and `Stretch`; `Row` supports `Top`, `Center`, `Bottom`,
+and `Stretch`. `FlareModifier` supports wrap (the default), fill, and fixed width/height in dp on
+Android or points on Apple. Text wraps on all four renderer paths. Padding and main-axis
+arrangement remain outside the current Foundation API.
+
+## Lazy collections
+
+`flare-lazy-layout` keeps item declarations lightweight and delegates virtualization to
+`RecyclerView`, Compose `LazyColumn`/`LazyRow`, `UICollectionView`, or `NSCollectionView`:
+
+```kotlin
+val state = rememberLazyListState()
+
+LazyColumn(
+    modifier = FlareModifier.None.fillMaxWidth().height(320f),
+    state = state,
+    spacing = 8f,
+) {
+    item(key = "header", contentType = "header") {
+        Text("Timeline")
+    }
+    items(
+        items = posts,
+        key = Post::id,
+        contentType = Post::kind,
+    ) { post ->
+        PostRow(post)
+    }
+}
+```
+
+Keys are required, unique, and stable across updates. They preserve item identity, keyed
+`rememberSaveable` state, and the visible anchor during prepend/reorder. `contentType` selects a
+compatible native reuse pool; it is not identity. A lazy list needs a bounded main-axis viewport,
+normally supplied by its parent or a fixed/fill modifier. `LazyListState` exposes visible-item
+layout information plus immediate and animated index/offset scrolling.
+
+Install the matching optional renderer plugin in the host widget system, for example
+`AndroidViewLazyLayoutRendererPlugin`, `AndroidComposeLazyLayoutRendererPlugin`,
+`UIKitLazyLayoutRendererPlugin`, or `AppKitLazyLayoutRendererPlugin`.
 
 ## Define a primitive
 

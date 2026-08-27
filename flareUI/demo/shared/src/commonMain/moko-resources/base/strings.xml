@@ -6,4 +6,8 @@
     <string name="increment">Increment</string>
     <string name="reset">Reset</string>
     <string name="flare_mark_description">Flare resource image</string>
+    <string name="lazy_row_title">LazyRow: 50 cards</string>
+    <string name="lazy_column_title">LazyColumn: 10,000+ stable-key items</string>
+    <string name="lazy_card_format">Card %d</string>
+    <string name="lazy_item_format">Lazy item %d</string>
 </resources>

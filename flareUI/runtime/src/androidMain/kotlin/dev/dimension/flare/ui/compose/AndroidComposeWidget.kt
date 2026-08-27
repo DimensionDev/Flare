@@ -3,6 +3,10 @@
 
 package dev.dimension.flare.ui.compose
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -12,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.UiComposable
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.AbstractFlareWidget
 import dev.dimension.flare.ui.EmitFlareWidget
 import dev.dimension.flare.ui.FlareBackend
@@ -19,6 +24,7 @@ import dev.dimension.flare.ui.FlareChildren
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareModifier
 import dev.dimension.flare.ui.FlareRendererPlugin
+import dev.dimension.flare.ui.FlareSize
 import dev.dimension.flare.ui.FlareUiComposable
 import dev.dimension.flare.ui.FlareWidget
 import dev.dimension.flare.ui.FlareWidgetRegistrar
@@ -44,10 +50,21 @@ public abstract class AbstractAndroidComposeWidget :
         previous: FlareModifier,
         current: FlareModifier,
     ) {
-        composeModifier =
-            current.testTag
-                ?.let(Modifier::testTag)
-                ?: Modifier
+        var result: Modifier = Modifier
+        current.testTag?.let { result = result.testTag(it) }
+        result =
+            when (val width = current.width) {
+                FlareSize.Wrap -> result
+                FlareSize.Fill -> result.fillMaxWidth()
+                is FlareSize.Fixed -> result.width(width.value.dp)
+            }
+        result =
+            when (val height = current.height) {
+                FlareSize.Wrap -> result
+                FlareSize.Fill -> result.fillMaxHeight()
+                is FlareSize.Fixed -> result.height(height.value.dp)
+            }
+        composeModifier = result
     }
 }
 

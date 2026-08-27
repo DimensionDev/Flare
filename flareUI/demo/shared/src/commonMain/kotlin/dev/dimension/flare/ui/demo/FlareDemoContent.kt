@@ -14,6 +14,8 @@ import dev.dimension.flare.ui.foundation.NativeButton
 import dev.dimension.flare.ui.foundation.Row
 import dev.dimension.flare.ui.foundation.Text
 import dev.dimension.flare.ui.foundation.VerticalAlignment
+import dev.dimension.flare.ui.lazy.LazyColumn
+import dev.dimension.flare.ui.lazy.LazyRow
 import dev.dimension.flare.ui.resources.moko.ResourceImage
 import dev.dimension.flare.ui.resources.moko.imageResource
 import dev.dimension.flare.ui.resources.moko.pluralStringResource
@@ -62,7 +64,61 @@ public fun FlareDemoContent() {
                 onClick = { count = 0 },
             )
         }
+        Text(stringResource(DemoRes.strings.lazy_row_title))
+        LazyRow(
+            modifier =
+                FlareModifier(testTag = "demo-lazy-row")
+                    .fillMaxWidth()
+                    .height(DEMO_LAZY_ROW_HEIGHT),
+            spacing = DEMO_LAZY_ITEM_SPACING,
+            verticalAlignment = VerticalAlignment.Center,
+        ) {
+            items(
+                count = DEMO_CARD_COUNT,
+                key = { index -> "card-$index" },
+                contentType = { "card" },
+            ) { index ->
+                Text(
+                    text = stringResource(DemoRes.strings.lazy_card_format, index),
+                    modifier =
+                        FlareModifier(testTag = "demo-lazy-row-item-$index")
+                            .width(DEMO_CARD_WIDTH)
+                            .height(DEMO_CARD_HEIGHT),
+                )
+            }
+        }
+        Text(stringResource(DemoRes.strings.lazy_column_title))
+        val lazyItemOffset = count
+        LazyColumn(
+            modifier =
+                FlareModifier(testTag = "demo-lazy-column")
+                    .fillMaxWidth()
+                    .height(DEMO_LAZY_COLUMN_HEIGHT),
+            spacing = DEMO_LAZY_ITEM_SPACING,
+        ) {
+            items(
+                count = DEMO_LAZY_ITEM_COUNT + lazyItemOffset,
+                key = { index -> index - lazyItemOffset },
+                contentType = { "item" },
+            ) { index ->
+                val value = index - lazyItemOffset
+                Text(
+                    text = stringResource(DemoRes.strings.lazy_item_format, value),
+                    modifier =
+                        FlareModifier(testTag = "demo-lazy-column-item-$value")
+                            .height(DEMO_ITEM_HEIGHT),
+                )
+            }
+        }
     }
 }
 
 private const val DEMO_ITEM_SPACING: Float = 12f
+private const val DEMO_LAZY_ITEM_SPACING: Float = 6f
+private const val DEMO_LAZY_ROW_HEIGHT: Float = 80f
+private const val DEMO_LAZY_COLUMN_HEIGHT: Float = 240f
+private const val DEMO_CARD_WIDTH: Float = 96f
+private const val DEMO_CARD_HEIGHT: Float = 56f
+private const val DEMO_ITEM_HEIGHT: Float = 36f
+private const val DEMO_CARD_COUNT: Int = 50
+private const val DEMO_LAZY_ITEM_COUNT: Int = 10_000

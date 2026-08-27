@@ -33,6 +33,7 @@ kotlin {
                 isStatic = true
                 export(project(":flare-runtime"))
                 export(project(":foundation"))
+                export(project(":flare-lazy-layout"))
                 export(project(":flare-resources-moko"))
             }
         }
@@ -41,6 +42,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":foundation"))
+                api(project(":flare-lazy-layout"))
                 api(project(":flare-resources-moko"))
             }
         }

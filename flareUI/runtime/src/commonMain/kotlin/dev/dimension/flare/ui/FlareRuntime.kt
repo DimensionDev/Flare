@@ -9,7 +9,10 @@ import androidx.compose.runtime.ComposeNode
 import androidx.compose.runtime.Composition
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Updater
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.staticCompositionLocalOf
 import kotlin.reflect.KClass
 
@@ -32,6 +35,20 @@ public annotation class LowLevelFlareApi
 public annotation class FlareUiComposable
 
 public typealias FlareContent = @Composable @FlareUiComposable () -> Unit
+
+/** Creates independently disposable Flare compositions which share the current renderer context. */
+@LowLevelFlareApi
+public interface FlareSubcompositionFactory {
+    public fun create(root: FlareChildren): FlareSubcomposition
+}
+
+/** One independently disposable Flare composition created for deferred content such as a list item. */
+@LowLevelFlareApi
+public interface FlareSubcomposition {
+    public fun setContent(content: FlareContent)
+
+    public fun dispose()
+}
 
 private val LocalFlareWidgetFactory =
     staticCompositionLocalOf<BoundFlareWidgetFactory> {
@@ -61,8 +78,81 @@ public class FlareComposition<B : FlareBackend>(
     backend: B,
     parent: CompositionContext,
 ) {
+    private val delegate =
+        DefaultFlareSubcomposition(
+            root = root,
+            widgetFactory = DefaultBoundFlareWidgetFactory(widgetSystem, backend),
+            parent = parent,
+        )
+
+    public fun setContent(content: FlareContent) {
+        delegate.setContent(content)
+    }
+
+    public fun dispose() {
+        delegate.dispose()
+    }
+}
+
+/** Remembers an owner for deferred child compositions and closes every child with its parent. */
+@LowLevelFlareApi
+@Composable
+@FlareUiComposable
+public fun rememberFlareSubcompositionFactory(): FlareSubcompositionFactory {
+    val parent = rememberCompositionContext()
+    val widgetFactory = LocalFlareWidgetFactory.current
+    val factory =
+        remember(parent, widgetFactory) {
+            DefaultFlareSubcompositionFactory(
+                parent = parent,
+                widgetFactory = widgetFactory,
+            )
+        }
+    DisposableEffect(factory) {
+        onDispose(factory::dispose)
+    }
+    return factory
+}
+
+@OptIn(LowLevelFlareApi::class)
+private class DefaultFlareSubcompositionFactory(
+    private val parent: CompositionContext,
+    private val widgetFactory: BoundFlareWidgetFactory,
+) : FlareSubcompositionFactory {
+    private val compositions = mutableSetOf<DefaultFlareSubcomposition>()
+    private var disposed: Boolean = false
+
+    override fun create(root: FlareChildren): FlareSubcomposition {
+        check(!disposed) { "FlareSubcompositionFactory is already disposed." }
+        lateinit var result: DefaultFlareSubcomposition
+        result =
+            DefaultFlareSubcomposition(
+                root = root,
+                widgetFactory = widgetFactory,
+                parent = parent,
+                onDisposed = { compositions.remove(result) },
+            )
+        compositions += result
+        return result
+    }
+
+    fun dispose() {
+        if (disposed) return
+        disposed = true
+        val current = compositions.toList()
+        compositions.clear()
+        current.forEach(DefaultFlareSubcomposition::dispose)
+    }
+}
+
+@OptIn(LowLevelFlareApi::class)
+private class DefaultFlareSubcomposition(
+    root: FlareChildren,
+    private val widgetFactory: BoundFlareWidgetFactory,
+    parent: CompositionContext,
+    private val onDisposed: () -> Unit = {},
+) : FlareSubcomposition {
     private val rootNode = RootRuntimeNode(root)
-    private val widgetFactory = DefaultBoundFlareWidgetFactory(widgetSystem, backend)
     private val composition: Composition =
         Composition(
             applier = FlareApplier(rootNode),
@@ -70,8 +160,8 @@ public class FlareComposition<B : FlareBackend>(
         )
     private var disposed: Boolean = false
 
-    public fun setContent(content: FlareContent) {
-        check(!disposed) { "FlareComposition is already disposed." }
+    override fun setContent(content: FlareContent) {
+        check(!disposed) { "FlareSubcomposition is already disposed." }
         composition.setContent {
             CompositionLocalProvider(LocalFlareWidgetFactory provides widgetFactory) {
                 content()
@@ -79,13 +169,17 @@ public class FlareComposition<B : FlareBackend>(
         }
     }
 
-    public fun dispose() {
+    override fun dispose() {
         if (disposed) return
         disposed = true
         try {
             composition.dispose()
         } finally {
-            rootNode.clear()
+            try {
+                rootNode.clear()
+            } finally {
+                onDisposed()
+            }
         }
     }
 }

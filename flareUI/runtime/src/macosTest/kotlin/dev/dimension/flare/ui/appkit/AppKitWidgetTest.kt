@@ -3,8 +3,11 @@
 package dev.dimension.flare.ui.appkit
 
 import dev.dimension.flare.ui.FlareModifier
+import kotlinx.cinterop.useContents
 import platform.AppKit.NSButton
 import platform.AppKit.NSStackView
+import platform.AppKit.NSUserInterfaceLayoutOrientationVertical
+import platform.CoreGraphics.CGRectMake
 import platform.Foundation.valueForKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,6 +50,24 @@ public class AppKitWidgetTest {
 
         children.remove(index = 0, count = 1)
         assertEquals(listOf(first.view), stack.arrangedSubviews)
+    }
+
+    @Test
+    public fun fixedAndFillSizesBecomeNativeConstraints() {
+        val stack =
+            NSStackView(frame = CGRectMake(0.0, 0.0, 200.0, 100.0)).apply {
+                orientation = NSUserInterfaceLayoutOrientationVertical
+            }
+        val widget = TestButtonWidget(NSButton())
+        widget.updateModifier(FlareModifier.None.fillMaxWidth().height(32f))
+
+        AppKitChildren(stack).insert(0, widget)
+        stack.layoutSubtreeIfNeeded()
+
+        widget.view.frame.useContents {
+            assertEquals(200.0, size.width, absoluteTolerance = 0.5)
+            assertEquals(32.0, size.height, absoluteTolerance = 0.5)
+        }
     }
 
     private class TestButtonWidget(

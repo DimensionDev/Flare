@@ -24,6 +24,58 @@ import kotlin.test.assertSame
 
 class FlareRuntimeTest {
     @Test
+    fun createsAndDisposesIndependentSubcomposition() {
+        val events = mutableListOf<String>()
+        val parentRoot = RecordingChildren()
+        val itemRoot = RecordingChildren()
+        val system = testWidgetSystem(events)
+        lateinit var factory: FlareSubcompositionFactory
+
+        HeadlessTestHost(parentRoot, system, TestBackend).use { host ->
+            host.setContent {
+                factory = rememberFlareSubcompositionFactory()
+            }
+
+            val itemComposition = factory.create(itemRoot)
+            itemComposition.setContent {
+                TestLeaf("item")
+            }
+
+            assertEquals("item", (itemRoot.widgets.single() as RecordingLeafWidget).renderedText)
+
+            itemComposition.dispose()
+
+            assertEquals(emptyList(), itemRoot.widgets)
+            assertEquals(listOf("dispose:leaf"), events)
+        }
+    }
+
+    @Test
+    fun parentDisposesOwnedSubcompositions() {
+        val events = mutableListOf<String>()
+        val parentRoot = RecordingChildren()
+        val itemRoot = RecordingChildren()
+        val system = testWidgetSystem(events)
+        lateinit var factory: FlareSubcompositionFactory
+
+        HeadlessTestHost(parentRoot, system, TestBackend).use { host ->
+            host.setContent {
+                factory = rememberFlareSubcompositionFactory()
+            }
+            factory.create(itemRoot).setContent {
+                TestLeaf("item")
+            }
+            assertEquals(1, itemRoot.widgets.size)
+        }
+
+        assertEquals(emptyList(), itemRoot.widgets)
+        assertEquals(listOf("dispose:leaf"), events)
+        assertFailsWith<IllegalStateException> {
+            factory.create(RecordingChildren())
+        }
+    }
+
+    @Test
     fun directlyBuildsNativeTreeAndDisposesBottomUp() {
         val events = mutableListOf<String>()
         val root = RecordingChildren()

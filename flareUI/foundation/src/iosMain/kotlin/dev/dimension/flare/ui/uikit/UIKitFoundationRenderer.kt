@@ -22,6 +22,7 @@ import platform.UIKit.UILayoutConstraintAxisVertical
 import platform.UIKit.UIStackView
 import platform.UIKit.UIStackViewAlignmentBottom
 import platform.UIKit.UIStackViewAlignmentCenter
+import platform.UIKit.UIStackViewAlignmentFill
 import platform.UIKit.UIStackViewAlignmentLeading
 import platform.UIKit.UIStackViewAlignmentTop
 import platform.UIKit.UIStackViewAlignmentTrailing
@@ -62,6 +63,7 @@ internal class UIKitColumnWidget :
                 HorizontalAlignment.Start -> UIStackViewAlignmentLeading
                 HorizontalAlignment.Center -> UIStackViewAlignmentCenter
                 HorizontalAlignment.End -> UIStackViewAlignmentTrailing
+                HorizontalAlignment.Stretch -> UIStackViewAlignmentFill
             }
     }
 }
@@ -86,6 +88,7 @@ internal class UIKitRowWidget :
                 VerticalAlignment.Top -> UIStackViewAlignmentTop
                 VerticalAlignment.Center -> UIStackViewAlignmentCenter
                 VerticalAlignment.Bottom -> UIStackViewAlignmentBottom
+                VerticalAlignment.Stretch -> UIStackViewAlignmentFill
             }
     }
 }

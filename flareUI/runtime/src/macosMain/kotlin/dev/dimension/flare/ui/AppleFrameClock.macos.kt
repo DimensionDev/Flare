@@ -30,7 +30,9 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.value
+import platform.CoreGraphics.CGMainDisplayID
 import platform.CoreVideo.CVDisplayLinkCreateWithActiveCGDisplays
+import platform.CoreVideo.CVDisplayLinkCreateWithCGDisplay
 import platform.CoreVideo.CVDisplayLinkRef
 import platform.CoreVideo.CVDisplayLinkRefVar
 import platform.CoreVideo.CVDisplayLinkSetOutputCallback
@@ -80,7 +82,10 @@ private object MacOSDisplayLinkFrameClock : AppleFrameClock {
 private fun createDisplayLink(): CVDisplayLinkRef =
     memScoped {
         val displayLink = alloc<CVDisplayLinkRefVar>()
-        checkDisplayLink(CVDisplayLinkCreateWithActiveCGDisplays(displayLink.ptr))
+        val activeDisplaysResult = CVDisplayLinkCreateWithActiveCGDisplays(displayLink.ptr)
+        if (activeDisplaysResult != kCVReturnSuccess) {
+            checkDisplayLink(CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), displayLink.ptr))
+        }
         requireNotNull(displayLink.value) {
             "CVDisplayLinkCreateWithActiveCGDisplays returned no display link."
         }

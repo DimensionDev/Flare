@@ -8,7 +8,9 @@ import dev.dimension.flare.ui.AbstractFlareWidget
 import dev.dimension.flare.ui.FlareBackend
 import dev.dimension.flare.ui.FlareChildren
 import dev.dimension.flare.ui.FlareModifier
+import dev.dimension.flare.ui.FlareSize
 import dev.dimension.flare.ui.FlareWidget
+import kotlin.math.roundToInt
 
 /** Strong type token for Android View renderer plugins. */
 public class AndroidViewBackend(
@@ -31,8 +33,25 @@ public abstract class AbstractAndroidWidget<V : View>(
         current: FlareModifier,
     ) {
         view.tag = current.testTag
+        val currentParams = view.layoutParams
+        val width = current.width.toLayoutSize(view)
+        val height = current.height.toLayoutSize(view)
+        if (currentParams == null) {
+            view.layoutParams = ViewGroup.LayoutParams(width, height)
+        } else {
+            currentParams.width = width
+            currentParams.height = height
+            view.layoutParams = currentParams
+        }
     }
 }
+
+private fun FlareSize.toLayoutSize(view: View): Int =
+    when (this) {
+        FlareSize.Wrap -> ViewGroup.LayoutParams.WRAP_CONTENT
+        FlareSize.Fill -> ViewGroup.LayoutParams.MATCH_PARENT
+        is FlareSize.Fixed -> (value * view.resources.displayMetrics.density).roundToInt()
+    }
 
 public class AndroidViewChildren(
     private val parent: ViewGroup,

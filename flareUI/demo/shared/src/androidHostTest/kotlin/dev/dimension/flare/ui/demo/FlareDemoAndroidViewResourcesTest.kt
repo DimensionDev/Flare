@@ -5,6 +5,7 @@ import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.widget.LinearLayout
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
@@ -45,12 +46,20 @@ public class FlareDemoAndroidViewResourcesTest {
             assertEquals(12.dp(column), column.dividerDrawable.intrinsicHeight)
             assertEquals(12.dp(actions), actions.dividerDrawable.intrinsicWidth)
 
+            val lazyRow = column.findViewWithTag<RecyclerView>("demo-lazy-row")
+            val lazyColumn = column.findViewWithTag<RecyclerView>("demo-lazy-column")
+            assertNotNull(lazyRow)
+            assertNotNull(lazyColumn)
+            assertEquals(50, checkNotNull(lazyRow.adapter).itemCount)
+            assertEquals(10_000, checkNotNull(lazyColumn.adapter).itemCount)
+
             increment.performClick()
             shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(32))
 
             assertSame(count, column.getChildAt(3))
             assertEquals("Count: 1", count.text.toString())
             assertEquals("1 update", updates.text.toString())
+            assertEquals(10_001, checkNotNull(lazyColumn.adapter).itemCount)
         }
     }
 

@@ -13,6 +13,7 @@ kotlin {
         namespace = "dev.dimension.flare.ui.foundation"
         platforms(
             FlareUiPlatform.ANDROID,
+            FlareUiPlatform.JVM,
             FlareUiPlatform.IOS,
             FlareUiPlatform.MACOS,
         )

@@ -6,4 +6,8 @@
     <string name="increment">增加</string>
     <string name="reset">重置</string>
     <string name="flare_mark_description">Flare 资源图片</string>
+    <string name="lazy_row_title">LazyRow：50 个卡片</string>
+    <string name="lazy_column_title">LazyColumn：10,000+ 个稳定 key 项</string>
+    <string name="lazy_card_format">卡片 %d</string>
+    <string name="lazy_item_format">Lazy 项 %d</string>
 </resources>

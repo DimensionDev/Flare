@@ -28,6 +28,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
+                implementation(libs.compose.foundation)
                 implementation(libs.compose.ui)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(

@@ -57,6 +57,7 @@ internal class AndroidColumnWidget(
                 HorizontalAlignment.Start -> Gravity.START
                 HorizontalAlignment.Center -> Gravity.CENTER_HORIZONTAL
                 HorizontalAlignment.End -> Gravity.END
+                HorizontalAlignment.Stretch -> Gravity.FILL_HORIZONTAL
             }
     }
 }
@@ -84,6 +85,7 @@ internal class AndroidRowWidget(
                 VerticalAlignment.Top -> Gravity.TOP
                 VerticalAlignment.Center -> Gravity.CENTER_VERTICAL
                 VerticalAlignment.Bottom -> Gravity.BOTTOM
+                VerticalAlignment.Stretch -> Gravity.FILL_VERTICAL
             }
     }
 }

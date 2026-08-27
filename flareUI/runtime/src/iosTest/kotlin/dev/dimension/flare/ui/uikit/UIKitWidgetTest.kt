@@ -3,13 +3,19 @@
 package dev.dimension.flare.ui.uikit
 
 import dev.dimension.flare.ui.FlareModifier
+import kotlinx.cinterop.useContents
+import platform.CoreGraphics.CGRectMake
 import platform.Foundation.valueForKey
+import platform.UIKit.NSLayoutConstraint
 import platform.UIKit.UIButton
 import platform.UIKit.UIButtonTypeSystem
+import platform.UIKit.UILayoutConstraintAxisVertical
 import platform.UIKit.UIStackView
+import platform.UIKit.UIStackViewAlignmentFill
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /** Verifies the UIKit widget bridge independently of the demo application. */
 public class UIKitWidgetTest {
@@ -48,6 +54,30 @@ public class UIKitWidgetTest {
 
         children.remove(index = 0, count = 1)
         assertEquals(listOf(first.view), stack.arrangedSubviews)
+    }
+
+    @Test
+    public fun fixedAndFillSizesBecomeNativeConstraints() {
+        val stack =
+            UIStackView(frame = CGRectMake(0.0, 0.0, 200.0, 100.0)).apply {
+                axis = UILayoutConstraintAxisVertical
+                alignment = UIStackViewAlignmentFill
+            }
+        val widget = TestButtonWidget(UIButton.buttonWithType(UIButtonTypeSystem))
+        widget.updateModifier(FlareModifier.None.fillMaxWidth().height(32f))
+
+        UIKitChildren(stack).insert(0, widget)
+        stack.layoutIfNeeded()
+
+        widget.view.frame.useContents {
+            assertEquals(200.0, size.width, absoluteTolerance = 0.5)
+        }
+        assertTrue(
+            widget.view.constraints.filterIsInstance<NSLayoutConstraint>().any { constraint ->
+                constraint.active && constraint.constant == 32.0
+            },
+            "The fixed height must be represented by an active native constraint.",
+        )
     }
 
     private class TestButtonWidget(

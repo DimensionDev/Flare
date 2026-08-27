@@ -16,8 +16,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.android.AndroidViewLazyLayoutRendererPlugin
 import dev.dimension.flare.ui.android.FlareAndroidViewHost
 import dev.dimension.flare.ui.android.createAndroidWidgetSystem
+import dev.dimension.flare.ui.compose.AndroidComposeLazyLayoutRendererPlugin
 import dev.dimension.flare.ui.compose.FlareComposeHost
 import dev.dimension.flare.ui.compose.createAndroidComposeWidgetSystem
 import dev.dimension.flare.ui.resources.moko.AndroidComposeMokoResourcesRendererPlugin
@@ -31,7 +33,11 @@ public fun createAndroidViewDemoView(context: Context): View {
     val resolver = AndroidMokoResourceResolver(context)
     return FlareAndroidViewHost(
         context = context,
-        widgetSystem = createAndroidWidgetSystem(AndroidViewMokoResourcesRendererPlugin),
+        widgetSystem =
+            createAndroidWidgetSystem(
+                AndroidViewMokoResourcesRendererPlugin,
+                AndroidViewLazyLayoutRendererPlugin,
+            ),
     ).apply {
         setPadding(padding, padding, padding, padding)
         setContent {
@@ -45,7 +51,10 @@ public fun createAndroidViewDemoView(context: Context): View {
 /** Creates the same demo with the Android Compose renderer backend. */
 public fun createAndroidComposeDemoView(context: Context): View {
     val widgetSystem =
-        createAndroidComposeWidgetSystem(AndroidComposeMokoResourcesRendererPlugin)
+        createAndroidComposeWidgetSystem(
+            AndroidComposeMokoResourcesRendererPlugin,
+            AndroidComposeLazyLayoutRendererPlugin,
+        )
     return ComposeView(context).apply {
         setContent {
             val currentContext = LocalContext.current

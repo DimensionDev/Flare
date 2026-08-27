@@ -10,6 +10,7 @@ kotlinx-coroutines = "1.11.0"
 material-components = "1.14.0"
 minSdk = "26"
 moko-resources = "0.26.4"
+recyclerview = "1.4.0"
 robolectric = "4.16.1"
 
 [libraries]
@@ -18,6 +19,7 @@ compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-runtime = { module = "androidx.compose.runtime:runtime" }
+compose-runtime-saveable = { module = "androidx.compose.runtime:runtime-saveable" }
 compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
@@ -25,6 +27,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 material-components = { module = "com.google.android.material:material", version.ref = "material-components" }
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-resources" }
+recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]

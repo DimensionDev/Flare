@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.lazy
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
@@ -55,6 +56,65 @@ public class ComposeLazyListTest {
 
         composeRule.onNodeWithTag("item-0").assertTextEquals("Item 0")
         composeRule.onAllNodesWithTag("item-9999").assertCountEquals(0)
+    }
+
+    @Test
+    public fun largeModelUpdateDoesNotScanEveryKey() {
+        var generation by mutableIntStateOf(0)
+        var keyLookups = 0
+        composeRule.setContent {
+            MaterialTheme {
+                FlareComposeHost(
+                    widgetSystem = createAndroidComposeWidgetSystem(AndroidComposeLazyLayoutRendererPlugin),
+                ) {
+                    val generationSnapshot = generation
+                    LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                        items(
+                            count = 10_000,
+                            key = { index ->
+                                keyLookups += 1
+                                index
+                            },
+                            contentType = { generationSnapshot },
+                        ) { index ->
+                            Text("Item $index")
+                        }
+                    }
+                }
+            }
+        }
+        composeRule.waitForIdle()
+
+        keyLookups = 0
+        composeRule.runOnIdle { generation = 1 }
+        composeRule.waitForIdle()
+
+        org.junit.Assert.assertTrue("Model update resolved $keyLookups keys.", keyLookups < 500)
+    }
+
+    @Test
+    public fun visibleStableItemRebindsContentWithoutACoordinatorScan() {
+        var label by mutableStateOf("Before")
+        composeRule.setContent {
+            MaterialTheme {
+                FlareComposeHost(
+                    widgetSystem = createAndroidComposeWidgetSystem(AndroidComposeLazyLayoutRendererPlugin),
+                ) {
+                    val labelSnapshot = label
+                    LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                        item(key = "stable") {
+                            Text(labelSnapshot, modifier = FlareModifier(testTag = "stable-item"))
+                        }
+                    }
+                }
+            }
+        }
+        composeRule.onNodeWithTag("stable-item").assertTextEquals("Before")
+
+        composeRule.runOnIdle { label = "After" }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("stable-item").assertTextEquals("After")
     }
 
     @Test

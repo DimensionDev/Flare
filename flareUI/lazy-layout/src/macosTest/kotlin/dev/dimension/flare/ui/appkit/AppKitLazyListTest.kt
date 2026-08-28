@@ -3,6 +3,7 @@
 package dev.dimension.flare.ui.appkit
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.ui.FlareContent
@@ -16,6 +17,9 @@ import dev.dimension.flare.ui.lazy.LazyRow
 import dev.dimension.flare.ui.lazy.awaitAppleUi
 import dev.dimension.flare.ui.lazy.items
 import kotlinx.cinterop.useContents
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import platform.AppKit.NSApplication
 import platform.AppKit.NSBackingStoreBuffered
@@ -26,6 +30,8 @@ import platform.AppKit.NSView
 import platform.AppKit.NSWindow
 import platform.AppKit.NSWindowStyleMaskBorderless
 import platform.AppKit.alignmentRectForFrame
+import platform.CoreFoundation.CFRunLoopRunInMode
+import platform.CoreFoundation.kCFRunLoopDefaultMode
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSThread
@@ -169,6 +175,48 @@ public class AppKitLazyListTest {
 
             assertTrue(keyLookups < 500, "First viewport resolved $keyLookups of 10,000 keys.")
             assertTrue(scroll.itemRoots().size < 100, "The adaptive recycler realized too much overscan.")
+        }
+    }
+
+    @Test
+    public fun shrinkingTheModelCancelsAnInFlightNativeAnimation() {
+        var count by mutableIntStateOf(1_000)
+        val state = LazyListState()
+        var result: Result<Unit>? = null
+        val content: FlareContent = {
+            val countSnapshot = count
+            LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                items(count = countSnapshot, key = { it }) { index ->
+                    Text("Item $index", modifier = FlareModifier.None.height(36f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit cancellation fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 1_000 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                result = runCatching { state.animateScrollToItem(999) }
+            }
+            count = 1
+            host.setContent(content)
+
+            awaitAppleUi("AppKit did not cancel the outdated native animation.") {
+                result?.isFailure == true &&
+                    state.layoutInfo.totalItemsCount == 1 &&
+                    state.layoutInfo.visibleItems.map { it.index } == listOf(0)
+            }
+            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.4, false)
+            assertEquals(listOf(0), state.layoutInfo.visibleItems.map { it.index })
+            assertEquals(
+                0.0,
+                scroll.contentView().bounds.useContents { origin.y },
+                absoluteTolerance = 0.5,
+            )
         }
     }
 

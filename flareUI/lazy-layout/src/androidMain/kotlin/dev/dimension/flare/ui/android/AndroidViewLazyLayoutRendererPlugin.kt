@@ -2,13 +2,14 @@
 
 package dev.dimension.flare.ui.android
 
+import android.content.Context
 import android.graphics.Rect
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import dev.dimension.flare.ui.FlareRendererPlugin
 import dev.dimension.flare.ui.FlareWidgetRegistrar
@@ -46,6 +47,7 @@ private class AndroidViewLazyCollectionWidget(
             owner = this,
             onModelChanged = ::applyModel,
             onScroll = ::performScroll,
+            onScrollCancelled = ::cancelScroll,
         )
     private val lazyAdapter = AndroidLazyAdapter(coordinator, ::currentModel)
     private val scrollListener =
@@ -62,6 +64,9 @@ private class AndroidViewLazyCollectionWidget(
                 recyclerView: RecyclerView,
                 newState: Int,
             ) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    cancelPendingAnimatedScroll()
+                }
                 coordinator.reportScrollInProgress(newState != RecyclerView.SCROLL_STATE_IDLE)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     completeAnimatedScroll()
@@ -104,11 +109,11 @@ private class AndroidViewLazyCollectionWidget(
             }
         spacingDecoration.orientation = current.orientation
         spacingDecoration.spacing = (current.spacing * density).roundToInt()
-        lazyAdapter.update(previous, current)
+        lazyAdapter.update()
         anchor?.let { restoreAnchor(it, current) }
         view.invalidateItemDecorations()
         view.post(::reportLayoutInfo)
-        return LazyRealizedItemUpdate.Rebind
+        return LazyRealizedItemUpdate.RendererManaged
     }
 
     private fun captureAnchor(model: LazyCollectionModel): AndroidLazyAnchor? {
@@ -135,14 +140,16 @@ private class AndroidViewLazyCollectionWidget(
 
     private fun performScroll(request: LazyListScrollRequest) {
         if (request.animated) {
-            pendingAnimatedScroll?.cancel()
+            cancelPendingAnimatedScroll(stopScroll = true)
             pendingAnimatedScroll = request
-            view.smoothScrollToPosition(request.index)
-            view.post {
-                if (view.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                    completeAnimatedScroll()
-                }
-            }
+            val offset = -(request.scrollOffset * density).roundToInt()
+            layoutManager.startSmoothScroll(
+                OffsetLinearSmoothScroller(view.context, offset) {
+                    completeAnimatedScroll(request)
+                }.apply {
+                    targetPosition = request.index
+                },
+            )
         } else {
             layoutManager.scrollToPositionWithOffset(
                 request.index,
@@ -156,13 +163,32 @@ private class AndroidViewLazyCollectionWidget(
     }
 
     private fun completeAnimatedScroll() {
+        completeAnimatedScroll(pendingAnimatedScroll ?: return)
+    }
+
+    private fun completeAnimatedScroll(request: LazyListScrollRequest) {
+        if (pendingAnimatedScroll !== request) return
+        pendingAnimatedScroll = null
+        val itemCount = coordinator.model?.itemProvider?.itemCount ?: 0
+        if (request.isActive && request.index in 0 until itemCount) {
+            request.complete()
+        } else {
+            request.cancel()
+        }
+    }
+
+    private fun cancelScroll(request: LazyListScrollRequest) {
+        if (pendingAnimatedScroll !== request) return
+        pendingAnimatedScroll = null
+        view.stopScroll()
+        coordinator.reportScrollInProgress(false)
+    }
+
+    private fun cancelPendingAnimatedScroll(stopScroll: Boolean = false) {
         val request = pendingAnimatedScroll ?: return
         pendingAnimatedScroll = null
-        layoutManager.scrollToPositionWithOffset(
-            request.index,
-            -(request.scrollOffset * density).roundToInt(),
-        )
-        request.complete()
+        if (stopScroll) view.stopScroll()
+        request.cancel()
     }
 
     private fun reportLayoutInfo() {
@@ -216,7 +242,10 @@ private class AndroidLazyAdapter(
 ) : RecyclerView.Adapter<AndroidLazyViewHolder>() {
     private val holders = mutableSetOf<AndroidLazyViewHolder>()
     private val viewTypes = mutableMapOf<Any, Int>()
-    private val stableIds = mutableMapOf<Any, Long>()
+    private val stableIds =
+        object : LinkedHashMap<Any, Long>(16, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Any, Long>?): Boolean = size > MAX_RETAINED_STABLE_IDS
+        }
     private var nextViewType = 0
     private var nextStableId = 0L
 
@@ -252,41 +281,11 @@ private class AndroidLazyAdapter(
         holder.recycle()
     }
 
-    fun update(
-        previous: LazyCollectionModel?,
-        current: LazyCollectionModel,
-    ) {
-        if (previous == null ||
-            previous.orientation != current.orientation ||
-            previous.crossAxisAlignment != current.crossAxisAlignment
-        ) {
-            notifyDataSetChanged()
-            pruneStableIds(current)
-            return
-        }
-        val oldProvider = previous.itemProvider
-        val newProvider = current.itemProvider
-        val diff =
-            DiffUtil.calculateDiff(
-                object : DiffUtil.Callback() {
-                    override fun getOldListSize(): Int = oldProvider.itemCount
-
-                    override fun getNewListSize(): Int = newProvider.itemCount
-
-                    override fun areItemsTheSame(
-                        oldItemPosition: Int,
-                        newItemPosition: Int,
-                    ): Boolean = oldProvider.key(oldItemPosition) == newProvider.key(newItemPosition)
-
-                    override fun areContentsTheSame(
-                        oldItemPosition: Int,
-                        newItemPosition: Int,
-                    ): Boolean = true
-                },
-                true,
-            )
-        diff.dispatchUpdatesTo(this)
-        pruneStableIds(current)
+    fun update() {
+        // Provider callbacks may observe Compose snapshot state and cannot safely be diffed on a
+        // worker thread. Stable IDs let RecyclerView preserve its visible holders while avoiding
+        // a synchronous walk over every key on each model generation.
+        notifyDataSetChanged()
     }
 
     fun dispose() {
@@ -296,14 +295,11 @@ private class AndroidLazyAdapter(
         viewTypes.clear()
     }
 
-    private fun pruneStableIds(model: LazyCollectionModel) {
-        if (stableIds.isEmpty()) return
-        val retainedKeys = HashSet<Any>(model.itemProvider.itemCount)
-        repeat(model.itemProvider.itemCount) { index -> retainedKeys += model.itemProvider.key(index) }
-        stableIds.keys.retainAll(retainedKeys)
-    }
-
     private data object NullContentType
+
+    private companion object {
+        private const val MAX_RETAINED_STABLE_IDS = 4_096
+    }
 }
 
 private class AndroidLazyViewHolder(
@@ -316,7 +312,6 @@ private class AndroidLazyViewHolder(
         index: Int,
         model: LazyCollectionModel,
     ) {
-        recycle()
         root.bindModel(model)
         root.layoutParams =
             when (model.orientation) {
@@ -334,12 +329,36 @@ private class AndroidLazyViewHolder(
                     )
                 }
             }
-        itemHost = coordinator.createItemHost(AndroidViewChildren(root)).also { it.bind(index) }
+        val host = itemHost ?: coordinator.createItemHost(AndroidViewChildren(root)).also { itemHost = it }
+        host.bind(index)
     }
 
     fun recycle() {
         itemHost?.dispose()
         itemHost = null
+    }
+}
+
+private class OffsetLinearSmoothScroller(
+    context: Context,
+    private val offset: Int,
+    private val onStopped: () -> Unit,
+) : LinearSmoothScroller(context) {
+    override fun getVerticalSnapPreference(): Int = SNAP_TO_START
+
+    override fun getHorizontalSnapPreference(): Int = SNAP_TO_START
+
+    override fun calculateDtToFit(
+        viewStart: Int,
+        viewEnd: Int,
+        boxStart: Int,
+        boxEnd: Int,
+        snapPreference: Int,
+    ): Int = boxStart + offset - viewStart
+
+    override fun onStop() {
+        super.onStop()
+        onStopped()
     }
 }
 

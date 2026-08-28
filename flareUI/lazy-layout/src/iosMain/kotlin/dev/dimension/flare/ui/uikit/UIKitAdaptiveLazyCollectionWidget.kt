@@ -11,12 +11,14 @@ import dev.dimension.flare.ui.lazy.LazyCollectionModel
 import dev.dimension.flare.ui.lazy.LazyCollectionWidget
 import dev.dimension.flare.ui.lazy.LazyCrossAxisAlignment
 import dev.dimension.flare.ui.lazy.LazyItemHost
+import dev.dimension.flare.ui.lazy.LazyItemReusePool
 import dev.dimension.flare.ui.lazy.LazyListItemInfo
 import dev.dimension.flare.ui.lazy.LazyListLayoutInfo
 import dev.dimension.flare.ui.lazy.LazyListOrientation
 import dev.dimension.flare.ui.lazy.LazyListScrollRequest
 import dev.dimension.flare.ui.lazy.LazyRealizedItemUpdate
 import dev.dimension.flare.ui.lazy.VariableExtentLayoutState
+import dev.dimension.flare.ui.lazy.needsAdaptiveLazyScrollCorrection
 import kotlinx.cinterop.useContents
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
@@ -52,6 +54,7 @@ internal class UIKitAdaptiveLazyCollectionWidget :
             owner = this,
             onModelChanged = ::applyModel,
             onScroll = ::performScroll,
+            onScrollCancelled = ::cancelScroll,
         )
     private val bridge = UIKitAdaptiveLazyBridge(view, coordinator)
     private var pendingAnchor: UIKitAdaptiveAnchor? = null
@@ -94,6 +97,10 @@ internal class UIKitAdaptiveLazyCollectionWidget :
     private fun performScroll(request: LazyListScrollRequest) {
         bridge.performScroll(request)
     }
+
+    private fun cancelScroll(request: LazyListScrollRequest) {
+        bridge.cancelScroll(request)
+    }
 }
 
 private class UIKitAdaptiveLazyBridge(
@@ -103,8 +110,12 @@ private class UIKitAdaptiveLazyBridge(
     UIScrollViewDelegateProtocol {
     private val geometry = VariableExtentLayoutState()
     private val realized = mutableMapOf<Int, UIKitAdaptiveItemBinding>()
-    private val pooled = mutableMapOf<Any, MutableList<UIKitAdaptiveItemBinding>>()
     private val allBindings = mutableSetOf<UIKitAdaptiveItemBinding>()
+    private val pooled =
+        LazyItemReusePool<UIKitAdaptiveItemBinding>(MIN_RETAINED_BINDINGS) { binding ->
+            allBindings.remove(binding)
+            binding.dispose()
+        }
     private var environment: UIKitExtentEnvironment? = null
     private var layoutScheduled: Boolean = false
     private var layingOut: Boolean = false
@@ -119,6 +130,7 @@ private class UIKitAdaptiveLazyBridge(
     }
 
     override fun scrollViewWillBeginDragging(scrollView: UIScrollView) {
+        cancelPendingScroll()
         coordinator.reportScrollInProgress(true)
     }
 
@@ -134,10 +146,14 @@ private class UIKitAdaptiveLazyBridge(
     }
 
     override fun scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
-        val request = pendingScroll
-        request?.let(::settleScrollRequest)
-        pendingScroll = null
-        request?.complete()
+        val request = pendingScroll ?: return
+        val settled = settleScrollRequest(request)
+        if (pendingScroll === request) pendingScroll = null
+        if (settled) {
+            request.complete()
+        } else {
+            request.cancel()
+        }
         coordinator.reportScrollInProgress(false)
     }
 
@@ -192,7 +208,7 @@ private class UIKitAdaptiveLazyBridge(
         resolveExtent(model, request.index)
         val target = geometry.itemStart(request.index) + request.scrollOffset
         if (request.animated) {
-            pendingScroll?.cancel()
+            cancelPendingScroll(stopAnimation = true)
             pendingScroll = request
             coordinator.reportScrollInProgress(true)
             scrollView.setContentOffset(model.mainAxisPoint(target), animated = true)
@@ -200,12 +216,22 @@ private class UIKitAdaptiveLazyBridge(
             programmaticScrollInProgress = true
             try {
                 scrollView.setContentOffset(model.mainAxisPoint(target), animated = false)
-                settleScrollRequest(request)
+                if (!settleScrollRequest(request)) {
+                    request.cancel()
+                    return
+                }
             } finally {
                 programmaticScrollInProgress = false
             }
             request.complete()
         }
+    }
+
+    fun cancelScroll(request: LazyListScrollRequest) {
+        if (pendingScroll !== request) return
+        pendingScroll = null
+        scrollView.setContentOffset(scrollView.contentOffset, animated = false)
+        coordinator.reportScrollInProgress(false)
     }
 
     fun dispose() {
@@ -312,6 +338,7 @@ private class UIKitAdaptiveLazyBridge(
         model: LazyCollectionModel,
         desired: IntRange,
     ) {
+        pooled.resize(maxOf(MIN_RETAINED_BINDINGS, desired.count()))
         realized.keys.toList().forEach { index ->
             if (index !in desired) recycle(index)
         }
@@ -346,11 +373,7 @@ private class UIKitAdaptiveLazyBridge(
         key: Any,
     ): UIKitAdaptiveItemBinding {
         val typeKey = contentType.cacheKey()
-        val pool = pooled[typeKey]
-        val stableKeyIndex = pool?.indexOfFirst { it.key == key } ?: -1
-        if (stableKeyIndex >= 0) return checkNotNull(pool).removeAt(stableKeyIndex)
-        disposePooledBindingForKey(key)
-        if (!pool.isNullOrEmpty()) return pool.removeAt(pool.lastIndex)
+        pooled.take(typeKey, key)?.let { return it }
         val root = UIKitAdaptiveItemStackView()
         return UIKitAdaptiveItemBinding(
             root = root,
@@ -361,22 +384,16 @@ private class UIKitAdaptiveLazyBridge(
         ).also(allBindings::add)
     }
 
-    private fun disposePooledBindingForKey(key: Any) {
-        pooled.values.forEach { bindings ->
-            val index = bindings.indexOfFirst { it.key == key }
-            if (index >= 0) {
-                val binding = bindings.removeAt(index)
-                allBindings.remove(binding)
-                binding.dispose()
-                return
-            }
-        }
-    }
-
     private fun recycle(index: Int) {
         val binding = realized.remove(index) ?: return
         binding.root.removeFromSuperview()
-        pooled.getOrPut(binding.contentType.cacheKey()) { mutableListOf() }.add(binding)
+        val key = binding.key
+        if (key == null) {
+            allBindings.remove(binding)
+            binding.dispose()
+        } else {
+            pooled.put(binding.contentType.cacheKey(), key, binding)
+        }
     }
 
     private fun recycleAll() {
@@ -438,18 +455,35 @@ private class UIKitAdaptiveLazyBridge(
         if (index !in 0 until model.itemProvider.itemCount) return
         resolveExtent(model, index)
         val target = geometry.itemStart(index) - anchor.offset
-        scrollView.setContentOffset(model.mainAxisPoint(target), animated = false)
+        if (needsAdaptiveLazyScrollCorrection(scrollView.mainAxisOffset(model.orientation), target)) {
+            scrollView.setContentOffset(model.mainAxisPoint(target), animated = false)
+        }
     }
 
-    private fun settleScrollRequest(request: LazyListScrollRequest) {
-        val model = coordinator.model ?: return
-        repeat(PROGRAMMATIC_SCROLL_SETTLING_PASSES) {
+    private fun settleScrollRequest(request: LazyListScrollRequest): Boolean {
+        val model = coordinator.model ?: return false
+        var pass = 0
+        while (pass < MAX_PROGRAMMATIC_SCROLL_CORRECTIONS) {
+            if (!request.isActive || request.index !in 0 until model.itemProvider.itemCount) return false
             layoutVisibleItems()
             resolveExtent(model, request.index)
             val target = geometry.itemStart(request.index) + request.scrollOffset
+            val current = scrollView.mainAxisOffset(model.orientation)
+            if (!needsAdaptiveLazyScrollCorrection(current, target)) break
             scrollView.setContentOffset(model.mainAxisPoint(target), animated = false)
+            pass += 1
         }
         reportLayoutInfo(model)
+        return request.isActive && request.index in 0 until model.itemProvider.itemCount
+    }
+
+    private fun cancelPendingScroll(stopAnimation: Boolean = false) {
+        val request = pendingScroll ?: return
+        pendingScroll = null
+        if (stopAnimation) {
+            scrollView.setContentOffset(scrollView.contentOffset, animated = false)
+        }
+        request.cancel()
     }
 
     private fun finishPhysicalScroll() {
@@ -682,6 +716,7 @@ internal fun shouldDeferUIKitLazyOffsetCorrection(
 
 private const val OVERSCAN_VIEWPORTS = 0.5
 private const val MAX_LAYOUT_PASSES = 2
-private const val PROGRAMMATIC_SCROLL_SETTLING_PASSES = 3
+private const val MAX_PROGRAMMATIC_SCROLL_CORRECTIONS = 3
+private const val MIN_RETAINED_BINDINGS = 32
 private const val LOCAL_ANCHOR_SEARCH_DISTANCE = 64
 private const val CONTENT_SIZE_TOLERANCE = 0.5

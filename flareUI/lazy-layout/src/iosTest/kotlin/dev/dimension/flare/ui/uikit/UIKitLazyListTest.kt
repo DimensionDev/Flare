@@ -18,7 +18,12 @@ import dev.dimension.flare.ui.lazy.LazyRow
 import dev.dimension.flare.ui.lazy.awaitAppleUi
 import dev.dimension.flare.ui.lazy.items
 import kotlinx.cinterop.useContents
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import platform.CoreFoundation.CFRunLoopRunInMode
+import platform.CoreFoundation.kCFRunLoopDefaultMode
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSThread
@@ -183,6 +188,44 @@ public class UIKitLazyListTest {
 
             assertTrue(keyLookups < 500, "First viewport resolved $keyLookups of 10,000 keys.")
             assertTrue(scroll.itemRoots().size < 100, "The adaptive recycler realized too much overscan.")
+        }
+    }
+
+    @Test
+    public fun shrinkingTheModelCancelsAnInFlightNativeAnimation() {
+        var count by mutableIntStateOf(1_000)
+        val state = LazyListState()
+        var result: Result<Unit>? = null
+        val content: FlareContent = {
+            val countSnapshot = count
+            LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                items(count = countSnapshot, key = { it }) { index ->
+                    Text("Item $index", modifier = FlareModifier.None.height(36f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("UIKit cancellation fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 1_000 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                result = runCatching { state.animateScrollToItem(999) }
+            }
+            count = 1
+            host.setContent(content)
+
+            awaitAppleUi("UIKit did not cancel the outdated native animation.") {
+                result?.isFailure == true &&
+                    state.layoutInfo.totalItemsCount == 1 &&
+                    state.layoutInfo.visibleItems.map { it.index } == listOf(0)
+            }
+            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.4, false)
+            assertEquals(listOf(0), state.layoutInfo.visibleItems.map { it.index })
+            assertEquals(0.0, scroll.contentOffset.useContents { y }, absoluteTolerance = 0.5)
         }
     }
 

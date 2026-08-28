@@ -61,6 +61,59 @@ public class AndroidViewLazyListTest {
     }
 
     @Test
+    public fun largeModelUpdateAvoidsRedundantFullKeyScans() {
+        var generation by mutableStateOf(0)
+        var keyLookups = 0
+        withHost { host ->
+            host.setContent {
+                val generationSnapshot = generation
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                    items(
+                        count = 10_000,
+                        key = { index ->
+                            keyLookups += 1
+                            index
+                        },
+                        contentType = { generationSnapshot },
+                    ) { index ->
+                        Text("Item $index")
+                    }
+                }
+            }
+            layout(host)
+
+            keyLookups = 0
+            generation = 1
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(32))
+            layout(host)
+
+            assertTrue("Model update resolved $keyLookups keys.", keyLookups < 25_000)
+        }
+    }
+
+    @Test
+    public fun visibleStableHolderRebindsContentWithoutRecreatingTheDataset() {
+        var label by mutableStateOf("Before")
+        withHost { host ->
+            host.setContent {
+                val labelSnapshot = label
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                    item(key = "stable") { Text(labelSnapshot) }
+                }
+            }
+            layout(host)
+            val recycler = host.getChildAt(0) as RecyclerView
+            assertEquals("Before", recycler.firstRenderedText())
+
+            label = "After"
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(32))
+            layout(host)
+
+            assertEquals("After", recycler.firstRenderedText())
+        }
+    }
+
+    @Test
     public fun lazyRowUsesHorizontalNativeLayout() {
         withHost { host ->
             host.setContent {
@@ -275,6 +328,38 @@ public class AndroidViewLazyListTest {
             assertEquals(expectedOffset, layoutManager.getDecoratedTop(target))
             assertEquals(1_000, state.layoutInfo.totalItemsCount)
             assertTrue(state.layoutInfo.visibleItems.any { it.index == 80 })
+        }
+    }
+
+    @Test
+    public fun animatedStateScrollFinishesAtTheRequestedOffsetWithoutASnap() {
+        val state = LazyListState()
+        var result: Result<Unit>? = null
+        withHost { host ->
+            host.setContent {
+                LazyColumn(
+                    modifier = FlareModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    items(count = 200, key = { it }) { index ->
+                        Text("Item $index", modifier = FlareModifier.None.height(40f))
+                    }
+                }
+            }
+            layout(host)
+
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                result = runCatching { state.animateScrollToItem(index = 80, scrollOffset = 12f) }
+            }
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+            layout(host)
+
+            val recycler = host.getChildAt(0) as RecyclerView
+            val layoutManager = recycler.layoutManager as LinearLayoutManager
+            val target = checkNotNull(layoutManager.findViewByPosition(80))
+            val expectedOffset = -(12 * recycler.resources.displayMetrics.density).roundToInt()
+            assertTrue(result?.isSuccess == true)
+            assertEquals(expectedOffset, layoutManager.getDecoratedTop(target))
         }
     }
 

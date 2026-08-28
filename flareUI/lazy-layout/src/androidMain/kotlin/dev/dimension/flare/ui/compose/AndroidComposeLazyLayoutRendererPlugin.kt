@@ -37,6 +37,8 @@ import dev.dimension.flare.ui.lazy.LazyListOrientation
 import dev.dimension.flare.ui.lazy.LazyListScrollRequest
 import dev.dimension.flare.ui.lazy.LazyRealizedItemUpdate
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.compose.foundation.lazy.LazyColumn as ComposeLazyColumn
@@ -58,14 +60,16 @@ private class AndroidComposeLazyCollectionWidget :
     private var renderedModel: LazyCollectionModel? by mutableStateOf(null)
     private var scrollExecutor: ((LazyListScrollRequest) -> Unit)? = null
     private val pendingScrolls = mutableListOf<LazyListScrollRequest>()
+    private val scrollJobs = mutableMapOf<LazyListScrollRequest, Job>()
     private val coordinator =
         LazyCollectionCoordinator(
             owner = this,
             onModelChanged = { _, current ->
                 renderedModel = current
-                LazyRealizedItemUpdate.Rebind
+                LazyRealizedItemUpdate.RendererManaged
             },
             onScroll = ::performScroll,
+            onScrollCancelled = ::cancelScroll,
         )
 
     override fun setModel(model: LazyCollectionModel) {
@@ -122,6 +126,8 @@ private class AndroidComposeLazyCollectionWidget :
     override fun dispose() {
         pendingScrolls.forEach(LazyListScrollRequest::cancel)
         pendingScrolls.clear()
+        scrollJobs.values.toList().forEach(Job::cancel)
+        scrollJobs.clear()
         scrollExecutor = null
         renderedModel = null
         coordinator.dispose()
@@ -180,19 +186,24 @@ private class AndroidComposeLazyCollectionWidget :
     ) {
         DisposableEffect(state, scope, density) {
             val executor: (LazyListScrollRequest) -> Unit = { request ->
-                scope.launch {
-                    try {
-                        val offset = (request.scrollOffset * density).roundToInt()
-                        if (request.animated) {
-                            state.animateScrollToItem(request.index, offset)
-                        } else {
-                            state.scrollToItem(request.index, offset)
+                val job =
+                    scope.launch(start = CoroutineStart.LAZY) {
+                        try {
+                            val offset = (request.scrollOffset * density).roundToInt()
+                            if (request.animated) {
+                                state.animateScrollToItem(request.index, offset)
+                            } else {
+                                state.scrollToItem(request.index, offset)
+                            }
+                            request.complete()
+                        } catch (_: Exception) {
+                            request.cancel()
+                        } finally {
+                            scrollJobs.remove(request)
                         }
-                        request.complete()
-                    } catch (throwable: Throwable) {
-                        request.cancel()
                     }
-                }
+                scrollJobs[request] = job
+                job.start()
             }
             scrollExecutor = executor
             val pending = pendingScrolls.toList()
@@ -244,6 +255,11 @@ private class AndroidComposeLazyCollectionWidget :
         } else {
             executor(request)
         }
+    }
+
+    private fun cancelScroll(request: LazyListScrollRequest) {
+        pendingScrolls.remove(request)
+        scrollJobs.remove(request)?.cancel()
     }
 }
 

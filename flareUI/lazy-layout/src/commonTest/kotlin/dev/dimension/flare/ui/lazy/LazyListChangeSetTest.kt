@@ -45,6 +45,19 @@ public class LazyListChangeSetTest {
     }
 
     @Test
+    public fun layoutVersionChangeReloadsAnOtherwiseStableItem() {
+        val previous = versionedProvider("post" to 1)
+        val current = versionedProvider("post" to 2)
+
+        val changes = calculateLazyListChangeSet(previous, current)
+
+        assertEquals(emptyList(), changes.removedIndices)
+        assertEquals(emptyList(), changes.insertedIndices)
+        assertEquals(emptyList(), changes.moves)
+        assertEquals(listOf(0), changes.reloadedIndices)
+    }
+
+    @Test
     public fun duplicateKeysInAnUpdatedSnapshotFailDeterministically() {
         val previous = provider("a" to null)
         val current = provider("duplicate" to null, "duplicate" to null)
@@ -78,6 +91,16 @@ public class LazyListChangeSetTest {
                     count = entries.size,
                     key = { index -> entries[index].first },
                     contentType = { index -> entries[index].second },
+                ) {}
+            }.build()
+
+    private fun versionedProvider(vararg entries: Pair<Any, Any?>): LazyItemProvider =
+        IntervalLazyListScope()
+            .apply {
+                items(
+                    count = entries.size,
+                    key = { index -> entries[index].first },
+                    layoutVersion = { index -> entries[index].second },
                 ) {}
             }.build()
 

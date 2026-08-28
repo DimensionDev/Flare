@@ -55,8 +55,10 @@ private object IOSDisplayLinkFrameClock : AppleFrameClock {
     override suspend fun <R> withFrameNanos(onFrame: (Long) -> R): R = broadcastFrameClock.withFrameNanos(onFrame)
 
     private fun tickClock() {
-        broadcastFrameClock.sendFrame(monotonicFrameTimeNanos())
+        // Remove the completed request before resuming frame awaiters. Resumed work can request
+        // another frame synchronously; removing afterwards would detach that newly scheduled tick.
         displayLink.removeFromRunLoop(NSRunLoop.mainRunLoop, NSRunLoopCommonModes)
+        broadcastFrameClock.sendFrame(monotonicFrameTimeNanos())
     }
 
     /** Objective-C selector bridge for the Kotlin [MonotonicFrameClock] object. */

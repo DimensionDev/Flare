@@ -29,6 +29,9 @@ public interface LazyItemProvider {
 
     public fun contentType(index: Int): Any?
 
+    /** Invalidates a cached measurement when layout-affecting content changes under a stable key. */
+    public fun layoutVersion(index: Int): Any? = Unit
+
     @Composable
     @FlareUiComposable
     public fun Item(index: Int)
@@ -45,7 +48,7 @@ public data class LazyCollectionModel(
     public val state: LazyListState,
 )
 
-/** Renderer seam implemented by RecyclerView, Compose LazyList, UICollectionView, and NSCollectionView. */
+/** Renderer seam implemented by the platform lazy-list adapters. */
 @LowLevelFlareApi
 public interface LazyCollectionWidget : FlareWidget {
     public fun setModel(model: LazyCollectionModel)

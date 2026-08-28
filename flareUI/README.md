@@ -104,8 +104,9 @@ arrangement remain outside the current Foundation API.
 
 ## Lazy collections
 
-`flare-lazy-layout` keeps item declarations lightweight and delegates virtualization to
-`RecyclerView`, Compose `LazyColumn`/`LazyRow`, `UICollectionView`, or `NSCollectionView`:
+`flare-lazy-layout` keeps item declarations lightweight. Android delegates virtualization to
+`RecyclerView` or Compose `LazyColumn`/`LazyRow`; Apple uses native `UIScrollView`/`NSScrollView`
+adapters backed by a shared variable-extent index and viewport-bound item recycling:
 
 ```kotlin
 val state = rememberLazyListState()
@@ -122,6 +123,7 @@ LazyColumn(
         items = posts,
         key = Post::id,
         contentType = Post::kind,
+        layoutVersion = Post::layoutRevision,
     ) { post ->
         PostRow(post)
     }
@@ -130,9 +132,15 @@ LazyColumn(
 
 Keys are required, unique, and stable across updates. They preserve item identity, keyed
 `rememberSaveable` state, and the visible anchor during prepend/reorder. `contentType` selects a
-compatible native reuse pool; it is not identity. A lazy list needs a bounded main-axis viewport,
-normally supplied by its parent or a fixed/fill modifier. `LazyListState` exposes visible-item
-layout information plus immediate and animated index/offset scrolling.
+compatible native reuse pool and improves the estimate for not-yet-measured items; it is not
+identity. Item size is measured from content and may vary freely. A visible item's geometry is
+invalidated after its child composition changes. Use `layoutVersion` when layout-affecting data can
+change under the same key while the item is off-screen; it invalidates only that key's cached
+measurement and does not impose a fixed size.
+
+A lazy list needs a bounded main-axis viewport, normally supplied by its parent or a fixed/fill
+modifier. `LazyListState` exposes visible-item layout information plus immediate and animated
+index/offset scrolling.
 
 Install the matching optional renderer plugin in the host widget system, for example
 `AndroidViewLazyLayoutRendererPlugin`, `AndroidComposeLazyLayoutRendererPlugin`,

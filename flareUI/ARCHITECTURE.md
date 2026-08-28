@@ -123,10 +123,17 @@ disposes it with the parent; a native lazy cell owns one child composition while
 
 `flare-lazy-layout` records interval providers without composing item content. Stable keys drive
 identity, dataset diffing, saveable item state, and visible-anchor restoration; `contentType`
-drives native reuse compatibility. One shared coordinator serializes item binding, disposal,
-viewport reports, and programmatic scroll commands. Platform renderers delegate measurement,
-scrolling, recycling, and accessibility to RecyclerView, Compose LazyList, UICollectionView, and
-NSCollectionView. `LazyColumn` and `LazyRow` differ only by orientation.
+drives native reuse compatibility. `layoutVersion` explicitly invalidates a stable key's cached
+measurement when off-screen layout-affecting data changes. One shared coordinator serializes item
+binding, disposal, viewport reports, and programmatic scroll commands.
+
+Android uses RecyclerView or Compose LazyList. UIKit and AppKit keep native scrolling but use a
+shared sparse variable-extent index: unknown items have an internal estimate, realized items are
+measured from intrinsic content, and one correction updates prefix geometry in O(log n). Exact
+measurements follow stable keys across model updates, content-type medians improve cold estimates,
+and child-composition apply transactions invalidate visible geometry. Apple adapters realize only
+the viewport plus bounded overscan and recycle item hosts by `contentType`. `LazyColumn` and
+`LazyRow` differ only by orientation.
 
 ## Modules
 

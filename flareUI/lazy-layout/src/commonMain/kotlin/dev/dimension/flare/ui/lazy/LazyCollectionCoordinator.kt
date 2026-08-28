@@ -152,6 +152,7 @@ internal class LazyItemHost(
     private var compositionFactory: FlareSubcompositionFactory? = null
     private var content: FlareContent? = null
     private var contentVersion: MutableState<Int>? = null
+    private var boundModel: LazyCollectionModel? = null
     private var disposed: Boolean = false
     private val hostedContent: FlareContent = {
         contentVersion?.value
@@ -182,6 +183,9 @@ internal class LazyItemHost(
             "Lazy list index $index is outside 0 until ${provider.itemCount}."
         }
         val nextKey = provider.key(index)
+        if (composition != null && boundModel === model && this.index == index && key == nextKey) {
+            return
+        }
         coordinator.bindKey(this, key, nextKey, index, updateContentSynchronously)
         val nextContent: FlareContent = {
             composeKey(nextKey) {
@@ -213,6 +217,7 @@ internal class LazyItemHost(
 
         this.index = index
         key = nextKey
+        boundModel = model
     }
 
     fun dispose() {
@@ -222,6 +227,7 @@ internal class LazyItemHost(
         composition = null
         content = null
         contentVersion = null
+        boundModel = null
         coordinator.release(this, key)
         key = null
         index = -1
@@ -234,6 +240,7 @@ internal class LazyItemHost(
         composition = null
         content = null
         contentVersion = null
+        boundModel = null
         key = null
         index = -1
     }

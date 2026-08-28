@@ -36,7 +36,9 @@ internal fun calculateLazyListChangeSet(
         retainedKeys.mapNotNull { key ->
             val oldIndex = checkNotNull(oldSnapshot.indicesByKey[key])
             val newIndex = checkNotNull(newSnapshot.indicesByKey[key])
-            if (oldSnapshot.contentTypes[oldIndex] == newSnapshot.contentTypes[newIndex]) {
+            if (oldSnapshot.contentTypes[oldIndex] == newSnapshot.contentTypes[newIndex] &&
+                oldSnapshot.layoutVersions[oldIndex] == newSnapshot.layoutVersions[newIndex]
+            ) {
                 null
             } else {
                 newIndex
@@ -82,6 +84,7 @@ private fun calculateMoves(
 private fun LazyItemProvider.snapshot(label: String): LazyListSnapshot {
     val keys = ArrayList<Any>(itemCount)
     val contentTypes = ArrayList<Any?>(itemCount)
+    val layoutVersions = ArrayList<Any?>(itemCount)
     val indicesByKey = HashMap<Any, Int>(itemCount)
     repeat(itemCount) { index ->
         val key = key(index)
@@ -92,12 +95,14 @@ private fun LazyItemProvider.snapshot(label: String): LazyListSnapshot {
         }
         keys += key
         contentTypes += contentType(index)
+        layoutVersions += layoutVersion(index)
     }
-    return LazyListSnapshot(keys, contentTypes, indicesByKey)
+    return LazyListSnapshot(keys, contentTypes, layoutVersions, indicesByKey)
 }
 
 private class LazyListSnapshot(
     val keys: List<Any>,
     val contentTypes: List<Any?>,
+    val layoutVersions: List<Any?>,
     val indicesByKey: Map<Any, Int>,
 )

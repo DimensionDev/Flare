@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareModifier
+import dev.dimension.flare.ui.foundation.Column
 import dev.dimension.flare.ui.foundation.Text
 import dev.dimension.flare.ui.foundation.VerticalAlignment
 import dev.dimension.flare.ui.lazy.LazyColumn
@@ -18,97 +19,136 @@ import kotlinx.cinterop.useContents
 import kotlinx.coroutines.runBlocking
 import platform.AppKit.NSApplication
 import platform.AppKit.NSBackingStoreBuffered
-import platform.AppKit.NSCollectionView
-import platform.AppKit.NSCollectionViewFlowLayout
-import platform.AppKit.NSCollectionViewScrollDirection.NSCollectionViewScrollDirectionHorizontal
-import platform.AppKit.NSCollectionViewScrollDirection.NSCollectionViewScrollDirectionVertical
-import platform.AppKit.NSCollectionViewScrollPositionTop
 import platform.AppKit.NSScrollView
+import platform.AppKit.NSStackView
+import platform.AppKit.NSTextField
 import platform.AppKit.NSView
 import platform.AppKit.NSWindow
 import platform.AppKit.NSWindowStyleMaskBorderless
 import platform.AppKit.alignmentRectForFrame
-import platform.AppKit.indexPathForItem
-import platform.AppKit.layoutAttributesForItemAtIndexPath
+import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
-import platform.Foundation.NSIndexPath
 import platform.Foundation.NSThread
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 public class AppKitLazyListTest {
     @Test
-    public fun largeModelUpdateKeepsKeyResolutionViewportBound() {
+    public fun adaptiveRecyclerMeasuresMainAxisWithoutAFixedItemContract() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = FlareModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    item(key = "dynamic") {
+                        Text("Dynamic", modifier = FlareModifier.None.height(73f))
+                    }
+                }
+            }
+
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit adaptive item was not measured.") {
+                scroll.documentView?.layoutSubtreeIfNeeded()
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.size == 73f
+            }
+
+            assertEquals(
+                73f,
+                state.layoutInfo.visibleItems
+                    .single()
+                    .size,
+                absoluteTolerance = 0.5f,
+            )
+            assertEquals(
+                73.0,
+                scroll
+                    .itemRoots()
+                    .single()
+                    .frame
+                    .useContents { size.height },
+                absoluteTolerance = 0.5,
+            )
+        }
+    }
+
+    @Test
+    public fun largeModelUpdateAndScrollingStayViewportBoundWithoutBlankItems() {
         var count by mutableStateOf(0)
         var keyLookups = 0
-        NSApplication.sharedApplication
-        val window =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        window.contentView = root
-        val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
+        val state = LazyListState()
         val content: FlareContent = {
-            LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+            val itemOffset = count
+            LazyColumn(
+                modifier = FlareModifier.None.fillMaxSize(),
+                state = state,
+            ) {
                 items(
-                    count = 10_000 + count,
+                    count = 10_000 + itemOffset,
                     key = { index ->
                         keyLookups += 1
-                        index - count
+                        index - itemOffset
                     },
-                ) { index -> Text("Item ${index - count}") }
+                    contentType = { index -> if ((index - itemOffset) % 5 == 0) "highlight" else "standard" },
+                ) { index ->
+                    val value = index - itemOffset
+                    Text(
+                        "Item $value",
+                        modifier = FlareModifier.None.height(if (value % 5 == 0) 52f else 36f),
+                    )
+                }
             }
         }
-        try {
-            host.view.frame = root.bounds
-            host.setContent(content)
-            root.addSubview(host.view)
+
+        withLazyHost { host, _ ->
+            val render: (Int) -> Unit = { revision ->
+                host.setContent {
+                    check(revision >= 0)
+                    content()
+                }
+            }
+            render(0)
+            val scroll = host.awaitScrollView()
             awaitAppleUi("AppKit large lazy list did not realize its first viewport.") {
-                val scroll = host.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                scroll?.frame = host.view.bounds
-                val collection = scroll?.documentView as? NSCollectionView
-                collection?.layoutSubtreeIfNeeded()
-                collection?.numberOfItemsInSection(0) == 10_000L &&
-                    collection.visibleItems().isNotEmpty()
+                state.layoutInfo.totalItemsCount == 10_000 && state.layoutInfo.visibleItems.isNotEmpty()
             }
 
+            runBlocking { state.scrollToItem(538) }
+            awaitAppleUi("AppKit did not realize the deep anchor before the update.") {
+                state.layoutInfo.visibleItems.any { it.index == 538 }
+            }
+            val anchor = state.layoutInfo.visibleItems.first { it.offset + it.size > 0f }
             keyLookups = 0
             count = 1
-            val collection =
-                (host.view.arrangedSubviews.single() as NSScrollView).documentView as NSCollectionView
-            awaitAppleUi("AppKit large lazy list did not apply its update.") {
-                collection.layoutSubtreeIfNeeded()
-                collection.numberOfItemsInSection(0) == 10_001L
+            render(1)
+            awaitAppleUi("AppKit did not preserve the deep stable-key anchor after the prepend.") {
+                state.layoutInfo.totalItemsCount == 10_001 &&
+                    state.layoutInfo.visibleItems.singleOrNull { it.key == anchor.key }?.let {
+                        it.index == anchor.index + 1 && abs(it.offset - anchor.offset) < 1f
+                    } == true
             }
+            assertTrue(keyLookups < 500, "Deep prepend resolved $keyLookups keys instead of using the local anchor.")
+            assertVisibleContentMatchesLayout(scroll, state, itemOffset = 1)
 
-            assertTrue(keyLookups < 500, "Large-list update resolved $keyLookups keys instead of staying viewport-bound.")
-        } finally {
-            host.dispose()
-            window.close()
+            listOf(24, 900, 40, 538).forEach { position ->
+                runBlocking { state.scrollToItem(position) }
+                awaitAppleUi("AppKit did not realize item $position after the update.") {
+                    state.layoutInfo.visibleItems.any { it.index == position }
+                }
+                assertVisibleContentMatchesLayout(scroll, state, itemOffset = 1)
+            }
         }
     }
 
     @Test
     public fun firstViewportDoesNotResolveEveryItemKey() {
         var keyLookups = 0
-        NSApplication.sharedApplication
-        val window =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        window.contentView = root
-        val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
-        try {
-            host.view.frame = root.bounds
+        withLazyHost { host, _ ->
             host.setContent {
                 LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
                     items(
@@ -120,428 +160,331 @@ public class AppKitLazyListTest {
                     ) { index -> Text("Item $index") }
                 }
             }
-            root.addSubview(host.view)
+
+            val scroll = host.awaitScrollView()
             awaitAppleUi("AppKit lazy viewport did not realize items.") {
-                val scroll = host.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                scroll?.frame = host.view.bounds
-                val collection = scroll?.documentView as? NSCollectionView
-                collection?.layoutSubtreeIfNeeded()
-                collection?.visibleItems()?.isNotEmpty() == true
+                scroll.documentView?.layoutSubtreeIfNeeded()
+                scroll.itemRoots().isNotEmpty()
             }
 
             assertTrue(keyLookups < 500, "First viewport resolved $keyLookups of 10,000 keys.")
-        } finally {
-            host.dispose()
-            window.close()
+            assertTrue(scroll.itemRoots().size < 100, "The adaptive recycler realized too much overscan.")
         }
     }
 
     @Test
-    public fun collectionViewSupportsBothLazyDirections() {
+    public fun nativeScrollViewSupportsBothLazyDirections() {
         assertTrue(NSThread.isMainThread)
-        assertDirection(
-            expected = NSCollectionViewScrollDirectionVertical,
-            content = {
-                LazyColumn {
-                    items(
-                        count = 10_000,
-                        key = { index -> index },
-                    ) { index -> Text("Item $index") }
-                }
-            },
-        )
-        assertDirection(
-            expected = NSCollectionViewScrollDirectionHorizontal,
-            content = {
-                LazyRow {
-                    items(
-                        count = 10_000,
-                        key = { index -> index },
-                    ) { index -> Text("Item $index") }
-                }
-            },
-        )
+        assertDirection(vertical = true) {
+            LazyColumn {
+                items(count = 10_000, key = { it }) { index -> Text("Item $index") }
+            }
+        }
+        assertDirection(vertical = false) {
+            LazyRow {
+                items(count = 10_000, key = { it }) { index -> Text("Item $index") }
+            }
+        }
     }
 
     @Test
-    public fun collectionViewUsesMeasuredVariableItemExtents() {
-        NSApplication.sharedApplication
-        val window =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        window.contentView = root
-        val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
-        try {
-            host.view.frame = root.bounds
-            host.setContent {
-                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
-                    item(key = "short") { Text("Short", modifier = FlareModifier.None.height(32f)) }
-                    item(key = "tall") { Text("Tall", modifier = FlareModifier.None.height(88f)) }
+    public fun variableExtentsAndLayoutVersionUpdatesAreMeasuredIndividually() {
+        var expanded by mutableStateOf(false)
+        val state = LazyListState()
+        val content: FlareContent = {
+            LazyColumn(
+                modifier = FlareModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                item(key = "short") { Text("Short", modifier = FlareModifier.None.height(32f)) }
+                item(key = "dynamic", layoutVersion = expanded) {
+                    Text("Dynamic", modifier = FlareModifier.None.height(if (expanded) 126f else 88f))
                 }
             }
-            root.addSubview(host.view)
-            awaitAppleUi("AppKit lazy items were not measured.") {
-                val scroll = host.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                scroll?.frame = host.view.bounds
-                val collection = scroll?.documentView as? NSCollectionView
-                collection?.layoutSubtreeIfNeeded()
-                val layout = collection?.collectionViewLayout
-                val first =
-                    layout
-                        ?.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(0, 0))
-                        ?.frame
-                        ?.useContents { size.height }
-                val second =
-                    layout
-                        ?.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(1, 0))
-                        ?.frame
-                        ?.useContents { size.height }
-                collection?.visibleItems()?.size == 2 && first == 32.0 && second == 88.0
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            host.awaitScrollView()
+            awaitAppleUi("AppKit variable lazy items were not measured.") {
+                state.layoutInfo.visibleItems.map { it.size } == listOf(32f, 88f)
             }
 
-            val collection = (host.view.arrangedSubviews.single() as NSScrollView).documentView as NSCollectionView
-            val layout = checkNotNull(collection.collectionViewLayout)
-            val short = layout.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(0, 0))
-            val tall = layout.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(1, 0))
-            assertEquals(32.0, checkNotNull(short).frame.useContents { size.height }, absoluteTolerance = 1.0)
-            assertEquals(88.0, checkNotNull(tall).frame.useContents { size.height }, absoluteTolerance = 1.0)
-        } finally {
-            host.dispose()
-            window.close()
+            expanded = true
+            host.setContent(content)
+            awaitAppleUi("AppKit did not invalidate the changed layout version.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == "dynamic" }
+                    ?.size == 126f
+            }
+            assertEquals(
+                126f,
+                state.layoutInfo.visibleItems
+                    .single { it.key == "dynamic" }
+                    .size,
+            )
+        }
+    }
+
+    @Test
+    public fun visibleItemRemeasuresWhenItsIntrinsicContentChanges() {
+        var expanded by mutableStateOf(false)
+        val state = LazyListState()
+        val content: FlareContent = {
+            val expandedSnapshot = expanded
+            LazyColumn(
+                modifier = FlareModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                item(key = "timeline-post") {
+                    Column(spacing = 4f) {
+                        Text("Timeline title")
+                        if (expandedSnapshot) {
+                            Text("First dynamic body line")
+                            Text("Second dynamic body line")
+                            Text("Third dynamic body line")
+                        }
+                    }
+                }
+            }
+        }
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            host.awaitScrollView()
+            awaitAppleUi("AppKit intrinsic timeline item was not measured.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.size
+                    ?.let { it > 0f } == true
+            }
+            val collapsedSize =
+                state.layoutInfo.visibleItems
+                    .single()
+                    .size
+
+            expanded = true
+            host.setContent(content)
+            awaitAppleUi("AppKit did not remeasure intrinsic content after recomposition.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull()
+                    ?.size
+                    ?.let { it > collapsedSize + 20f } == true
+            }
         }
     }
 
     @Test
     public fun lazyGeometryMatchesTheSharedSpacingAndAlignmentContract() {
-        val state = LazyListState()
-        val columnWindow =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val columnRoot = NSView(frame = columnWindow.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        columnWindow.contentView = columnRoot
-        val columnHost = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
-        try {
-            columnHost.view.frame = columnRoot.bounds
-            columnHost.setContent {
+        val columnState = LazyListState()
+        withLazyHost(width = 200.0, height = 120.0) { host, _ ->
+            host.setContent {
                 LazyColumn(
                     modifier = FlareModifier.None.width(200f).height(120f),
-                    state = state,
+                    state = columnState,
                     spacing = 6f,
                 ) {
                     item(key = "first") { Text("First", modifier = FlareModifier.None.height(32f)) }
                     item(key = "second") { Text("Second", modifier = FlareModifier.None.height(48f)) }
                 }
             }
-            columnRoot.addSubview(columnHost.view)
+            val scroll = host.awaitScrollView()
             awaitAppleUi("AppKit column geometry did not settle.") {
-                val scroll = columnHost.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                val collection = scroll?.documentView as? NSCollectionView
-                collection?.layoutSubtreeIfNeeded()
-                val first =
-                    collection
-                        ?.collectionViewLayout
-                        ?.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(0, 0))
-                val second =
-                    collection
-                        ?.collectionViewLayout
-                        ?.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(1, 0))
-                first?.frame?.useContents { size.width == 200.0 && size.height == 32.0 && origin.y == 0.0 } == true &&
-                    second?.frame?.useContents { size.height == 48.0 && origin.y == 38.0 } == true
+                val items = columnState.layoutInfo.visibleItems
+                items.size == 2 && items[0].size == 32f && items[1].offset == 38f && items[1].size == 48f
             }
 
-            val scroll = columnHost.view.arrangedSubviews.single() as NSScrollView
             assertTrue(scroll.hasVerticalScroller)
             assertTrue(!scroll.hasHorizontalScroller)
-            runBlocking { state.scrollToItem(0) }
-            val first = state.layoutInfo.visibleItems.single { it.key == "first" }
-            val second = state.layoutInfo.visibleItems.single { it.key == "second" }
-            assertEquals(0f, first.offset, absoluteTolerance = 0.5f)
-            assertEquals(32f, first.size, absoluteTolerance = 0.5f)
-            assertEquals(38f, second.offset, absoluteTolerance = 0.5f)
-            assertEquals(48f, second.size, absoluteTolerance = 0.5f)
-            val firstItem = checkNotNull((scroll.documentView as NSCollectionView).itemAtIndexPath(NSIndexPath.indexPathForItem(0, 0)))
-            firstItem.view.layoutSubtreeIfNeeded()
-            val firstLabel = firstItem.view.subviews.single() as NSView
-            val firstLabelAlignmentRect = firstLabel.alignmentRectForFrame(firstLabel.frame)
-            assertEquals(
-                200.0,
-                firstLabelAlignmentRect.useContents { size.width },
-                absoluteTolerance = 1.0,
-                message = "The default Stretch alignment must fill the lazy column cross axis.",
-            )
-        } finally {
-            columnHost.dispose()
-            columnWindow.close()
+            val firstRoot = scroll.itemRoots().minBy { it.frame.useContents { origin.y } }
+            val firstLabel = firstRoot.arrangedSubviews.single() as NSView
+            val alignmentRect = firstLabel.alignmentRectForFrame(firstLabel.frame)
+            assertEquals(200.0, alignmentRect.useContents { size.width }, absoluteTolerance = 1.0)
         }
 
-        val rowWindow =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val rowRoot = NSView(frame = rowWindow.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        rowWindow.contentView = rowRoot
-        val rowHost = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
-        try {
-            rowHost.view.frame = rowRoot.bounds
-            rowHost.setContent {
+        val rowState = LazyListState()
+        withLazyHost(width = 200.0, height = 80.0) { host, _ ->
+            host.setContent {
                 LazyRow(
                     modifier = FlareModifier.None.width(200f).height(80f),
+                    state = rowState,
                     spacing = 6f,
                     verticalAlignment = VerticalAlignment.Center,
                 ) {
-                    item(key = "first") {
-                        Text("First", modifier = FlareModifier.None.width(40f).height(24f))
-                    }
-                    item(key = "second") {
-                        Text("Second", modifier = FlareModifier.None.width(60f).height(24f))
-                    }
+                    item(key = "first") { Text("First", modifier = FlareModifier.None.width(40f).height(24f)) }
+                    item(key = "second") { Text("Second", modifier = FlareModifier.None.width(60f).height(24f)) }
                 }
             }
-            rowRoot.addSubview(rowHost.view)
+            val scroll = host.awaitScrollView()
             awaitAppleUi("AppKit row geometry did not settle.") {
-                val scroll = rowHost.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                val collection = scroll?.documentView as? NSCollectionView
-                collection?.layoutSubtreeIfNeeded()
-                val first =
-                    collection
-                        ?.collectionViewLayout
-                        ?.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(0, 0))
-                val second =
-                    collection
-                        ?.collectionViewLayout
-                        ?.layoutAttributesForItemAtIndexPath(NSIndexPath.indexPathForItem(1, 0))
-                first?.frame?.useContents { size.width == 40.0 && size.height == 80.0 && origin.x == 0.0 } == true &&
-                    second?.frame?.useContents { size.width == 60.0 && origin.x == 46.0 } == true
+                val items = rowState.layoutInfo.visibleItems
+                items.size == 2 && items[0].size == 40f && items[1].offset == 46f && items[1].size == 60f
             }
 
-            val scroll = rowHost.view.arrangedSubviews.single() as NSScrollView
             assertTrue(!scroll.hasVerticalScroller)
             assertTrue(scroll.hasHorizontalScroller)
-            val collection = scroll.documentView as NSCollectionView
-            val firstItem = checkNotNull(collection.itemAtIndexPath(NSIndexPath.indexPathForItem(0, 0)))
-            val firstRoot = firstItem.view
-            firstRoot.layoutSubtreeIfNeeded()
-            val firstLabel = firstRoot.subviews.single() as NSView
+            val firstRoot = scroll.itemRoots().minBy { it.frame.useContents { origin.x } }
+            assertEquals(80.0, firstRoot.frame.useContents { size.height }, absoluteTolerance = 0.5)
+            val firstLabel = firstRoot.arrangedSubviews.single() as NSView
             assertEquals(28.0, firstLabel.frame.useContents { origin.y }, absoluteTolerance = 1.0)
-        } finally {
-            rowHost.dispose()
-            rowWindow.close()
         }
     }
 
     @Test
-    public fun prependUsesBatchUpdatesAndKeepsTheStableKeyAnchor() {
+    public fun prependKeepsTheStableKeyAnchorWithVariableExtents() {
         var items by mutableStateOf((0 until 100).toList())
-        NSApplication.sharedApplication
-        val window =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        window.contentView = root
-        val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
-        try {
-            host.view.frame = root.bounds
-            host.setContent {
-                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
-                    items(items = items, key = { it }) { item ->
-                        Text("Item $item", modifier = FlareModifier.None.height(40f))
-                    }
+        val state = LazyListState()
+        val content: FlareContent = {
+            val reverseContentTypes = items.size > 100
+            LazyColumn(
+                modifier = FlareModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                items(
+                    items = items,
+                    key = { it },
+                    contentType = { if ((it % 2 == 0) xor reverseContentTypes) "even" else "odd" },
+                ) { item ->
+                    Text("Item $item", modifier = FlareModifier.None.height(if (item % 2 == 0) 36f else 64f))
                 }
             }
-            root.addSubview(host.view)
-            awaitAppleUi("AppKit lazy collection was not ready for scrolling.") {
-                val scroll = host.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                scroll?.frame = host.view.bounds
-                (scroll?.documentView as? NSCollectionView)?.numberOfItemsInSection(0) == 100L
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            host.awaitScrollView()
+            awaitAppleUi("AppKit lazy list was not ready for prepend.") {
+                state.layoutInfo.totalItemsCount == 100
             }
-            val scroll = host.view.arrangedSubviews.single() as NSScrollView
-            val collection = scroll.documentView as NSCollectionView
-            val originalPath = NSIndexPath.indexPathForItem(20, 0)
-            collection.scrollToItemsAtIndexPaths(setOf(originalPath), NSCollectionViewScrollPositionTop)
-            var originalOrigin = Double.NaN
-            var stableLayoutPasses = 0
-            awaitAppleUi("AppKit lazy anchor did not settle before the update.") {
-                collection.layoutSubtreeIfNeeded()
-                collection.indexPathsForVisibleItems()
-                collection.layoutSubtreeIfNeeded()
-                val nextOrigin =
-                    collection.collectionViewLayout
-                        ?.layoutAttributesForItemAtIndexPath(originalPath)
-                        ?.frame
-                        ?.useContents { origin.y }
-                        ?: return@awaitAppleUi false
-                scroll.contentView().setBoundsOrigin(platform.CoreGraphics.CGPointMake(0.0, nextOrigin + 17.0))
-                scroll.reflectScrolledClipView(scroll.contentView())
-                collection.layoutSubtreeIfNeeded()
-                collection.indexPathsForVisibleItems()
-                val settledOrigin =
-                    collection.collectionViewLayout
-                        ?.layoutAttributesForItemAtIndexPath(originalPath)
-                        ?.frame
-                        ?.useContents { origin.y }
-                        ?: return@awaitAppleUi false
-                val settledOffset = scroll.contentView().bounds.useContents { origin.y }
-                stableLayoutPasses =
-                    if (kotlin.math.abs(settledOrigin - nextOrigin) < 0.1 &&
-                        kotlin.math.abs(settledOffset - (settledOrigin + 17.0)) < 0.1
-                    ) {
-                        stableLayoutPasses + 1
-                    } else {
-                        0
-                    }
-                originalOrigin = settledOrigin
-                stableLayoutPasses >= 2
+            runBlocking { state.scrollToItem(index = 20, scrollOffset = 17f) }
+            awaitAppleUi("AppKit anchor did not settle before prepend.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 20 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
             }
-            val requestedOffset = originalOrigin + 17.0
-            val appliedOffset = scroll.contentView().bounds.useContents { origin.y }
-            val documentHeight = collection.frame.useContents { size.height }
 
             items = listOf(-2, -1) + items
-            var diagnostic = "the update did not finish"
-            try {
-                awaitAppleUi("AppKit did not restore the stable-key anchor after prepend.") {
-                    collection.layoutSubtreeIfNeeded()
-                    val itemCount = collection.numberOfItemsInSection(0)
-                    diagnostic = "item count=$itemCount"
-                    if (itemCount != 102L) return@awaitAppleUi false
-                    val restoredPath = NSIndexPath.indexPathForItem(22, 0)
-                    val restoredOrigin =
-                        collection.collectionViewLayout
-                            ?.layoutAttributesForItemAtIndexPath(restoredPath)
-                            ?.frame
-                            ?.useContents { origin.y }
-                            ?: return@awaitAppleUi false
-                    val offset = scroll.contentView().bounds.useContents { origin.y }
-                    diagnostic =
-                        "item origin=$restoredOrigin, content offset=$offset, " +
-                        "original origin=$originalOrigin, requested offset=$requestedOffset, " +
-                        "applied offset=$appliedOffset, document height=$documentHeight"
-                    kotlin.math.abs((restoredOrigin - offset) + 17.0) < 1.0
-                }
-            } catch (failure: IllegalStateException) {
-                throw IllegalStateException("${failure.message}: $diagnostic", failure)
+            host.setContent(content)
+            awaitAppleUi("AppKit did not restore the stable-key anchor after prepend.") {
+                state.layoutInfo.totalItemsCount == 102 &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == 20 }
+                        ?.offset
+                        ?.let { abs(it + 17f) < 1f } == true
             }
-        } finally {
-            host.dispose()
-            window.close()
         }
     }
 
     @Test
-    public fun stateScrollsToAnItemWithOffsetAndReportsTheViewport() {
+    public fun stateScrollsToAnUnmeasuredItemWithOffsetAndReportsTheViewport() {
         val state = LazyListState()
-        NSApplication.sharedApplication
-        val window =
-            NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
-                styleMask = NSWindowStyleMaskBorderless,
-                backing = NSBackingStoreBuffered,
-                defer = false,
-            )
-        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
-        window.contentView = root
-        val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
-        try {
-            host.view.frame = root.bounds
+        withLazyHost { host, _ ->
             host.setContent {
                 LazyColumn(
                     modifier = FlareModifier.None.fillMaxSize(),
                     state = state,
                 ) {
-                    items(count = 100, key = { it }) { index ->
-                        Text("Item $index", modifier = FlareModifier.None.height(40f))
+                    items(count = 100, key = { it }, contentType = { it % 3 }) { index ->
+                        Text("Item $index", modifier = FlareModifier.None.height((28 + index % 3 * 17).toFloat()))
                     }
                 }
             }
-            root.addSubview(host.view)
-            awaitAppleUi("AppKit lazy collection was not ready for programmatic scrolling.") {
-                val scroll = host.view.arrangedSubviews.singleOrNull() as? NSScrollView
-                scroll?.frame = host.view.bounds
-                val collection = scroll?.documentView as? NSCollectionView
-                collection?.layoutSubtreeIfNeeded()
-                collection?.numberOfItemsInSection(0) == 100L
+            host.awaitScrollView()
+            awaitAppleUi("AppKit lazy list was not ready for programmatic scrolling.") {
+                state.layoutInfo.totalItemsCount == 100
             }
 
-            val scroll = host.view.arrangedSubviews.single() as NSScrollView
-            val collection = scroll.documentView as NSCollectionView
             runBlocking { state.scrollToItem(index = 40, scrollOffset = 13f) }
-            val path = NSIndexPath.indexPathForItem(40, 0)
-            val itemOrigin =
-                checkNotNull(collection.collectionViewLayout?.layoutAttributesForItemAtIndexPath(path))
-                    .frame
-                    .useContents { origin.y }
-            val viewportOrigin = scroll.contentView().bounds.useContents { origin.y }
-            assertEquals(
-                itemOrigin + 13.0,
-                viewportOrigin,
-                absoluteTolerance = 1.0,
-                message =
-                    "itemOrigin=$itemOrigin, viewportOrigin=$viewportOrigin, " +
-                        "documentHeight=${collection.frame.useContents { size.height }}, " +
-                        "viewportHeight=${scroll.contentView().bounds.useContents { size.height }}",
-            )
+            awaitAppleUi("AppKit did not settle the requested dynamic item offset.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.index == 40 }
+                    ?.offset
+                    ?.let { abs(it + 13f) < 1f } == true
+            }
             assertEquals(100, state.layoutInfo.totalItemsCount)
-            assertTrue(state.layoutInfo.visibleItems.any { it.index == 40 })
-        } finally {
-            host.dispose()
-            window.close()
         }
     }
 
     private fun assertDirection(
-        expected: platform.AppKit.NSCollectionViewScrollDirection,
-        content: dev.dimension.flare.ui.FlareContent,
+        vertical: Boolean,
+        content: FlareContent,
+    ) {
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit lazy direction did not settle.") {
+                scroll.documentView?.layoutSubtreeIfNeeded()
+                scroll.itemRoots().isNotEmpty()
+            }
+            assertEquals(vertical, scroll.hasVerticalScroller)
+            assertEquals(!vertical, scroll.hasHorizontalScroller)
+            val documentSize = checkNotNull(scroll.documentView).frame.useContents { size.width to size.height }
+            val viewportSize = scroll.contentView().bounds.useContents { size.width to size.height }
+            if (vertical) {
+                assertTrue(documentSize.second > viewportSize.second)
+            } else {
+                assertTrue(documentSize.first > viewportSize.first)
+            }
+            assertTrue(scroll.itemRoots().size < 100)
+        }
+    }
+
+    private fun assertVisibleContentMatchesLayout(
+        scroll: NSScrollView,
+        state: LazyListState,
+        itemOffset: Int,
+    ) {
+        val labels =
+            scroll
+                .itemRoots()
+                .mapNotNull { it.arrangedSubviews.singleOrNull() as? NSTextField }
+                .map { it.stringValue }
+                .toSet()
+        state.layoutInfo.visibleItems.forEach { item ->
+            assertTrue(
+                "Item ${item.index - itemOffset}" in labels,
+                "Visible item ${item.index} rendered a blank or stale view. labels=$labels",
+            )
+        }
+    }
+
+    private fun withLazyHost(
+        width: Double = 320.0,
+        height: Double = 480.0,
+        block: (FlareAppKitHost, NSWindow) -> Unit,
     ) {
         NSApplication.sharedApplication
         val window =
             NSWindow(
-                contentRect = CGRectMake(0.0, 0.0, 320.0, 480.0),
+                contentRect = CGRectMake(0.0, 0.0, width, height),
                 styleMask = NSWindowStyleMaskBorderless,
                 backing = NSBackingStoreBuffered,
                 defer = false,
             )
-        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, 320.0, 480.0))
+        val root = NSView(frame = window.contentView?.frame ?: CGRectMake(0.0, 0.0, width, height))
         window.contentView = root
         val host = FlareAppKitHost(createAppKitWidgetSystem(AppKitLazyLayoutRendererPlugin))
         try {
             host.view.frame = root.bounds
-            host.setContent(content)
             root.addSubview(host.view)
-            awaitAppleUi("AppKit lazy collection was not created.") {
-                host.view.arrangedSubviews.size == 1
-            }
-
-            val scrollView = host.view.arrangedSubviews.single() as NSScrollView
-            scrollView.frame = host.view.bounds
-            val collection = scrollView.documentView as NSCollectionView
-            collection.reloadData()
-            collection.layoutSubtreeIfNeeded()
-
-            assertEquals(
-                expected,
-                (collection.collectionViewLayout as NSCollectionViewFlowLayout).scrollDirection,
-            )
-            assertEquals(10_000L, collection.numberOfItemsInSection(0))
-            assertTrue(collection.visibleItems().size < 10_000)
+            block(host, window)
         } finally {
             host.dispose()
             window.close()
         }
     }
+
+    private fun FlareAppKitHost.awaitScrollView(): NSScrollView {
+        var scroll: NSScrollView? = null
+        awaitAppleUi("AppKit adaptive lazy scroll view was not created.") {
+            view.layoutSubtreeIfNeeded()
+            scroll = view.arrangedSubviews.filterIsInstance<NSScrollView>().singleOrNull()
+            scroll?.frame = view.bounds
+            scroll?.layoutSubtreeIfNeeded()
+            scroll != null
+        }
+        return checkNotNull(scroll)
+    }
+
+    private fun NSScrollView.itemRoots(): List<NSStackView> = documentView?.subviews?.filterIsInstance<NSStackView>().orEmpty()
 }

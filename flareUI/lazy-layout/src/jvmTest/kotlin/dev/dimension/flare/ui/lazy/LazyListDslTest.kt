@@ -36,6 +36,48 @@ import kotlin.test.assertTrue
 
 class LazyListDslTest {
     @Test
+    fun rebindingTheSameItemInTheSameModelKeepsItsComposition() {
+        var contentUpdates = 0
+        val factory =
+            object : FlareSubcompositionFactory {
+                override fun create(root: FlareChildren): FlareSubcomposition =
+                    object : FlareSubcomposition {
+                        override fun setContent(content: FlareContent) {
+                            contentUpdates += 1
+                        }
+
+                        override fun dispose() = Unit
+                    }
+            }
+        val coordinator =
+            LazyCollectionCoordinator(
+                owner = this,
+                onModelChanged = { _, _ -> LazyRealizedItemUpdate.RendererManaged },
+                onScroll = {},
+            )
+        val model =
+            LazyCollectionModel(
+                orientation = LazyListOrientation.Vertical,
+                spacing = 0f,
+                crossAxisAlignment = LazyCrossAxisAlignment.Stretch,
+                itemProvider =
+                    IntervalLazyListScope()
+                        .apply { item(key = "stable") { TestLeaf("content") } }
+                        .build(),
+                subcompositions = factory,
+                state = LazyListState(),
+            )
+
+        coordinator.setModel(model)
+        val itemHost = coordinator.createItemHost(RecordingChildren())
+        itemHost.bind(0)
+        itemHost.bind(0)
+
+        assertEquals(1, contentUpdates)
+        coordinator.dispose()
+    }
+
+    @Test
     fun updatingAModelDoesNotSynchronouslyReenterARealizedItemComposition() {
         var applyingParentModel = false
         var contentUpdates = 0
@@ -442,6 +484,21 @@ class LazyListDslTest {
     }
 
     @Test
+    fun itemProviderForwardsLayoutVersions() {
+        val scope = IntervalLazyListScope()
+        scope.items(
+            count = 3,
+            key = { index -> "key-$index" },
+            layoutVersion = { index -> "revision-$index" },
+        ) {}
+
+        val provider = scope.build()
+
+        assertEquals("revision-0", provider.layoutVersion(0))
+        assertEquals("revision-2", provider.layoutVersion(2))
+    }
+
+    @Test
     fun rememberSaveableStateReturnsWhenAStableKeyIsRealizedAgain() {
         val root = RecordingChildren()
         val widget = RecordingLazyCollectionWidget()
@@ -471,6 +528,40 @@ class LazyListDslTest {
             host.awaitIdle()
 
             assertEquals("Count 1", (secondRoot.widgets.single() as RecordingLeafWidget).renderedText)
+        }
+    }
+
+    @Test
+    fun itemApplyTransactionNotifiesTheNativeMeasurementOwner() {
+        val widget = RecordingLazyCollectionWidget()
+        var expand: () -> Unit = {}
+        var appliedTransactions = 0
+
+        HeadlessTestHost(RecordingChildren(), testWidgetSystem(widget)).use { host ->
+            host.setContent {
+                LazyColumn {
+                    item(key = "timeline-post") {
+                        var expanded by rememberSaveable { mutableStateOf(false) }
+                        expand = { expanded = true }
+                        TestLeaf(if (expanded) "expanded body" else "title")
+                    }
+                }
+            }
+            val itemRoot = RecordingChildren()
+            val invalidatingRoot =
+                InvalidatingLazyItemChildren(itemRoot) {
+                    appliedTransactions += 1
+                }
+            val itemHost = widget.coordinator.createItemHost(invalidatingRoot)
+            itemHost.bind(0)
+            host.awaitIdle()
+            val initialTransactions = appliedTransactions
+
+            expand()
+            host.awaitIdle()
+
+            assertTrue(appliedTransactions > initialTransactions)
+            assertEquals("expanded body", (itemRoot.widgets.single() as RecordingLeafWidget).renderedText)
         }
     }
 }

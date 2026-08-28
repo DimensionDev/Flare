@@ -17,6 +17,7 @@ internal class LazyCollectionCoordinator(
         current: LazyCollectionModel,
     ) -> LazyRealizedItemUpdate,
     private val onScroll: (LazyListScrollRequest) -> Unit,
+    private val onScrollCancelled: (LazyListScrollRequest) -> Unit = {},
 ) {
     private val itemHosts = mutableSetOf<LazyItemHost>()
     private val realizedKeys = mutableMapOf<Any, LazyItemHost>()
@@ -34,6 +35,7 @@ internal class LazyCollectionCoordinator(
             owner = owner,
             itemCount = value.itemProvider.itemCount,
             onScroll = onScroll,
+            onScrollCancelled = onScrollCancelled,
         )
         val realizedItemUpdate = onModelChanged(previous, value)
         if (previous != null && realizedItemUpdate == LazyRealizedItemUpdate.Rebind) {

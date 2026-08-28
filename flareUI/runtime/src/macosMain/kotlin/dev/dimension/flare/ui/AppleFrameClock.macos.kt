@@ -41,6 +41,7 @@ import platform.CoreVideo.CVDisplayLinkStop
 import platform.CoreVideo.CVOptionFlags
 import platform.CoreVideo.CVOptionFlagsVar
 import platform.CoreVideo.CVTimeStamp
+import platform.CoreVideo.kCVReturnDisplayLinkAlreadyRunning
 import platform.CoreVideo.kCVReturnSuccess
 import platform.Foundation.NSThread
 import platform.darwin.dispatch_async
@@ -58,7 +59,7 @@ private object MacOSDisplayLinkFrameClock : AppleFrameClock {
     private val displayLink: CVDisplayLinkRef = createDisplayLink()
     private val broadcastFrameClock =
         BroadcastFrameClock {
-            checkDisplayLink(CVDisplayLinkStart(displayLink))
+            checkDisplayLinkStart(CVDisplayLinkStart(displayLink))
         }
     private val clockReference: StableRef<BroadcastFrameClock> =
         StableRef.create(broadcastFrameClock)
@@ -94,6 +95,12 @@ private fun createDisplayLink(): CVDisplayLinkRef =
 private fun checkDisplayLink(result: Int) {
     check(result == kCVReturnSuccess) {
         "Could not operate the macOS CVDisplayLink. Error code $result."
+    }
+}
+
+private fun checkDisplayLinkStart(result: Int) {
+    check(result == kCVReturnSuccess || result == kCVReturnDisplayLinkAlreadyRunning) {
+        "Could not start the macOS CVDisplayLink. Error code $result."
     }
 }
 

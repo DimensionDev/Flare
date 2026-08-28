@@ -60,28 +60,27 @@ public class LazyListState internal constructor() {
         owner: Any,
         itemCount: Int,
         onScroll: (LazyListScrollRequest) -> Unit,
+        onScrollCancelled: (LazyListScrollRequest) -> Unit = {},
     ) {
         val current = attachment
         check(current == null || current.owner === owner) {
             "A LazyListState cannot control more than one lazy collection at the same time."
         }
-        attachment = LazyListStateAttachment(owner, itemCount, onScroll)
+        attachment = LazyListStateAttachment(owner, itemCount, onScroll, onScrollCancelled)
         layoutInfo =
             layoutInfo.copy(
                 totalItemsCount = itemCount,
                 visibleItems = layoutInfo.visibleItems.filter { it.index < itemCount },
             )
         if (activeRequest?.index?.let { it >= itemCount } == true) {
-            activeRequest?.cancel()
-            activeRequest = null
+            cancelActiveRequest()
         }
     }
 
     internal fun detach(owner: Any) {
         if (attachment?.owner !== owner) return
+        cancelActiveRequest()
         attachment = null
-        activeRequest?.cancel()
-        activeRequest = null
         isScrollInProgress = false
     }
 
@@ -117,7 +116,7 @@ public class LazyListState internal constructor() {
         require(index < target.itemCount) {
             "Lazy list scroll index $index is outside 0 until ${target.itemCount}."
         }
-        activeRequest?.cancel()
+        cancelActiveRequest()
         val request = LazyListScrollRequest(index, scrollOffset, animated)
         activeRequest = request
         try {
@@ -125,8 +124,22 @@ public class LazyListState internal constructor() {
             request.awaitCompletion()
         } finally {
             if (activeRequest === request) {
-                activeRequest = null
+                if (request.isActive) {
+                    cancelActiveRequest()
+                } else {
+                    activeRequest = null
+                }
             }
+        }
+    }
+
+    private fun cancelActiveRequest() {
+        val request = activeRequest ?: return
+        activeRequest = null
+        try {
+            attachment?.onScrollCancelled?.invoke(request)
+        } finally {
+            request.cancel()
         }
     }
 }
@@ -140,6 +153,7 @@ private class LazyListStateAttachment(
     val owner: Any,
     val itemCount: Int,
     val onScroll: (LazyListScrollRequest) -> Unit,
+    val onScrollCancelled: (LazyListScrollRequest) -> Unit,
 )
 
 internal class LazyListScrollRequest(
@@ -148,6 +162,9 @@ internal class LazyListScrollRequest(
     val animated: Boolean,
 ) {
     private val completion = CompletableDeferred<Unit>()
+
+    val isActive: Boolean
+        get() = completion.isActive
 
     fun complete() {
         completion.complete(Unit)

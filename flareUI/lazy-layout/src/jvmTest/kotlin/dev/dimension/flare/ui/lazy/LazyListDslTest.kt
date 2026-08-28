@@ -240,6 +240,49 @@ class LazyListDslTest {
     }
 
     @Test
+    fun shrinkingTheProviderCancelsTheRendererScrollRequest() {
+        val state = LazyListState()
+        val owner = Any()
+        var pendingRequest: LazyListScrollRequest? = null
+        val cancelledRequests = mutableListOf<LazyListScrollRequest>()
+        var result: Result<Unit>? = null
+        val onScroll: (LazyListScrollRequest) -> Unit = { pendingRequest = it }
+        val onScrollCancelled: (LazyListScrollRequest) -> Unit = cancelledRequests::add
+        state.attach(owner, itemCount = 10, onScroll, onScrollCancelled)
+
+        CoroutineScope(Dispatchers.Unconfined).launch {
+            result = runCatching { state.animateScrollToItem(9) }
+        }
+        state.attach(owner, itemCount = 1, onScroll, onScrollCancelled)
+
+        assertEquals(listOf(pendingRequest), cancelledRequests)
+        assertTrue(result?.isFailure == true)
+    }
+
+    @Test
+    fun cancellingTheCallingCoroutineCancelsTheRendererScrollRequest() {
+        val state = LazyListState()
+        val owner = Any()
+        var pendingRequest: LazyListScrollRequest? = null
+        val cancelledRequests = mutableListOf<LazyListScrollRequest>()
+        state.attach(
+            owner = owner,
+            itemCount = 10,
+            onScroll = { pendingRequest = it },
+            onScrollCancelled = cancelledRequests::add,
+        )
+
+        val job =
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                state.animateScrollToItem(9)
+            }
+        job.cancel()
+        runBlocking { job.join() }
+
+        assertEquals(listOf(pendingRequest), cancelledRequests)
+    }
+
+    @Test
     fun realizesOnlyRequestedItemAndDisposesItsSubtree() {
         val root = RecordingChildren()
         val widget = RecordingLazyCollectionWidget()

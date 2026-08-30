@@ -1,0 +1,35 @@
+[versions]
+agp = "9.3.0"
+androidx-activity = "1.7.0"
+compileSdk = "37"
+compose-bom = "2026.06.01"
+java = "25"
+junit = "4.13.2"
+kotlin = "2.4.0"
+kotlinx-coroutines = "1.11.0"
+material-components = "1.14.0"
+minSdk = "26"
+moko-resources = "0.26.4"
+robolectric = "4.16.1"
+
+[libraries]
+androidx-activity = { module = "androidx.activity:activity", version.ref = "androidx-activity" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-runtime = { module = "androidx.compose.runtime:runtime" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+material-components = { module = "com.google.android.material:material", version.ref = "material-components" }
+moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-resources" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+moko-resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko-resources" }

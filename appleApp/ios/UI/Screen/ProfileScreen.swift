@@ -675,6 +675,7 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             controller.extendsContentUnderTopBars = extendsContentUnderTopBars
             controller.topScrollIndicatorInset = 0
             controller.suppressInitialRefreshIndicator = true
+            controller.restoresScrollAnchorOnSnapshotChanges = false
             controller.accessoryItems = []
             controller.openURL = { url in
                 openURL.callAsFunction(url)

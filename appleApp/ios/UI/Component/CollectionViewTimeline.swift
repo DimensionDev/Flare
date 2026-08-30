@@ -135,6 +135,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     var onScrollInteractionBegan: (() -> Void)?
     var openURL: ((URL) -> Void)?
     var suppressInitialRefreshIndicator = false
+    var restoresScrollAnchorOnSnapshotChanges = true
     var usesGroupedBackgroundOverride: Bool? {
         didSet {
             guard oldValue != usesGroupedBackgroundOverride, isViewLoaded else { return }
@@ -1558,7 +1559,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         var snapshot = preparedSnapshot
         let newSignature = plan.signature
         let previousSignature = lastAppliedSignature
-        let scrollAnchor = pendingEffectiveContentOffsetYAfterSnapshot == nil &&
+        let scrollAnchor = restoresScrollAnchorOnSnapshotChanges &&
+            pendingEffectiveContentOffsetYAfterSnapshot == nil &&
             previousSignature != nil &&
             previousSignature?.itemIDs != newSignature.itemIDs &&
             allowsScrollAnchorRestoration

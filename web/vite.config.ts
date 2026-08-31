@@ -10,7 +10,7 @@ const sqliteWebWorker = decodeURI(
 	new URL('../shared/sqlite-web-worker/worker.js', import.meta.url).pathname
 );
 const sqliteWasm = decodeURI(
-	new URL('./node_modules/@sqlite.org/sqlite-wasm/index.mjs', import.meta.url).pathname
+	new URL('./node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs', import.meta.url).pathname
 );
 const jsJoda = decodeURI(
 	new URL('./node_modules/@js-joda/core/dist/js-joda.esm.js', import.meta.url).pathname

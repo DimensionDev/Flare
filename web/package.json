@@ -17,30 +17,30 @@
     "test:codegen": "node --test scripts/*.test.mjs"
   },
   "devDependencies": {
-    "@inlang/paraglide-js": "^2.18.1",
-    "@inlang/plugin-m-function-matcher": "^2.2.6",
-    "@inlang/plugin-message-format": "^4.4.0",
+    "@inlang/paraglide-js": "^2.24.1",
+    "@inlang/plugin-m-function-matcher": "^2.2.12",
+    "@inlang/plugin-message-format": "^4.4.3",
     "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.57.0",
-    "@sveltejs/vite-plugin-svelte": "^7.0.0",
-    "@tailwindcss/vite": "^4.3.0",
-    "daisyui": "^5.5.20",
-    "svelte": "^5.55.2",
-    "svelte-check": "^4.4.6",
-    "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.7"
+    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "daisyui": "^5.7.22",
+    "svelte": "^5.56.10",
+    "svelte-check": "^4.7.6",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2"
   },
   "dependencies": {
     "@androidx/sqlite-web-worker": "file:../shared/sqlite-web-worker",
-    "@fortawesome/fontawesome-svg-core": "^7.1.0",
-    "@fortawesome/free-brands-svg-icons": "^7.1.0",
-    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/fontawesome-svg-core": "^7.3.1",
+    "@fortawesome/free-brands-svg-icons": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/svelte-fontawesome": "^0.2.4",
-    "@js-joda/core": "3.2.0",
-    "@sqlite.org/sqlite-wasm": "3.50.1-build1",
-    "dayjs": "^1.11.21",
-    "firebase": "^12.14.0",
-    "ws": "8.18.3"
+    "@js-joda/core": "6.1.0",
+    "@sqlite.org/sqlite-wasm": "3.53.0-build1",
+    "dayjs": "^1.11.23",
+    "firebase": "^12.18.0",
+    "ws": "8.21.3"
   }
 }

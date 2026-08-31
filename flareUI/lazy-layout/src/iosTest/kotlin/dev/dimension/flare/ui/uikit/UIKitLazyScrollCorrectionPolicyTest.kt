@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.uikit
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -34,6 +35,30 @@ public class UIKitLazyScrollCorrectionPolicyTest {
                 isDragging = false,
                 isDecelerating = true,
             ),
+        )
+    }
+
+    @Test
+    public fun deferredCorrectionPreservesThePhysicalViewportDelta() {
+        assertEquals(
+            expected = 146.0,
+            actual =
+                restoredUIKitLazyViewportOffset(
+                    anchorTargetAtCapture = 130.0,
+                    capturedViewportOffset = 100.0,
+                    currentViewportOffset = 116.0,
+                    preserveViewportDelta = true,
+                ),
+        )
+        assertEquals(
+            expected = 130.0,
+            actual =
+                restoredUIKitLazyViewportOffset(
+                    anchorTargetAtCapture = 130.0,
+                    capturedViewportOffset = 100.0,
+                    currentViewportOffset = 116.0,
+                    preserveViewportDelta = false,
+                ),
         )
     }
 }

@@ -33,6 +33,39 @@ public class ComposeLazyListTest {
     public val composeRule = createComposeRule()
 
     @Test
+    public fun customBusinessKeyIsAcceptedByTheComposeRenderer() {
+        val state = LazyListState()
+        composeRule.setContent {
+            MaterialTheme {
+                FlareComposeHost(
+                    widgetSystem = createAndroidComposeWidgetSystem(AndroidComposeLazyLayoutRendererPlugin),
+                ) {
+                    LazyColumn(modifier = FlareModifier.None.fillMaxSize(), state = state) {
+                        items(
+                            count = 100,
+                            key = { index -> CustomBusinessKey(index) },
+                        ) { index ->
+                            Text(
+                                text = "Item $index",
+                                modifier = FlareModifier(testTag = "custom-key-item-$index"),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        composeRule.onNodeWithTag("custom-key-item-0").assertTextEquals("Item 0")
+        composeRule.waitForIdle()
+        org.junit.Assert.assertEquals(
+            CustomBusinessKey(0),
+            state.layoutInfo.visibleItems
+                .first()
+                .key,
+        )
+    }
+
+    @Test
     public fun lazyColumnKeepsGlobalCountButComposesOnlyViewport() {
         composeRule.setContent {
             MaterialTheme {
@@ -363,4 +396,8 @@ public class ComposeLazyListTest {
             )
         }
     }
+
+    private data class CustomBusinessKey(
+        val value: Int,
+    )
 }

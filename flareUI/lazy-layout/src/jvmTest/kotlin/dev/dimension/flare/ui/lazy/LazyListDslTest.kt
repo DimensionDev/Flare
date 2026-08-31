@@ -23,12 +23,17 @@ import dev.dimension.flare.ui.FlareUiComposable
 import dev.dimension.flare.ui.FlareWidget
 import dev.dimension.flare.ui.FlareWidgetRegistrar
 import dev.dimension.flare.ui.FlareWidgetSystem
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -54,6 +59,7 @@ class LazyListDslTest {
                 owner = this,
                 onModelChanged = { _, _ -> LazyRealizedItemUpdate.RendererManaged },
                 onScroll = {},
+                uiDispatcher = Dispatchers.Unconfined,
             )
         val model =
             LazyCollectionModel(
@@ -100,6 +106,7 @@ class LazyListDslTest {
                 owner = this,
                 onModelChanged = { _, _ -> LazyRealizedItemUpdate.Rebind },
                 onScroll = {},
+                uiDispatcher = Dispatchers.Unconfined,
             )
         val model = { label: String ->
             LazyCollectionModel(
@@ -248,12 +255,12 @@ class LazyListDslTest {
         var result: Result<Unit>? = null
         val onScroll: (LazyListScrollRequest) -> Unit = { pendingRequest = it }
         val onScrollCancelled: (LazyListScrollRequest) -> Unit = cancelledRequests::add
-        state.attach(owner, itemCount = 10, onScroll, onScrollCancelled)
+        state.attach(owner, itemCount = 10, onScroll, onScrollCancelled, Dispatchers.Unconfined)
 
         CoroutineScope(Dispatchers.Unconfined).launch {
             result = runCatching { state.animateScrollToItem(9) }
         }
-        state.attach(owner, itemCount = 1, onScroll, onScrollCancelled)
+        state.attach(owner, itemCount = 1, onScroll, onScrollCancelled, Dispatchers.Unconfined)
 
         assertEquals(listOf(pendingRequest), cancelledRequests)
         assertTrue(result?.isFailure == true)
@@ -270,6 +277,7 @@ class LazyListDslTest {
             itemCount = 10,
             onScroll = { pendingRequest = it },
             onScrollCancelled = cancelledRequests::add,
+            uiDispatcher = Dispatchers.Unconfined,
         )
 
         val job =
@@ -280,6 +288,78 @@ class LazyListDslTest {
         runBlocking { job.join() }
 
         assertEquals(listOf(pendingRequest), cancelledRequests)
+    }
+
+    @Test
+    fun cancellationDuringUiDispatcherResultHandoffStillCancelsTheRendererRequest() {
+        Executors
+            .newSingleThreadExecutor { runnable -> Thread(runnable, "lazy-list-ui-handoff") }
+            .asCoroutineDispatcher()
+            .use { uiDispatcher ->
+                val state = LazyListState()
+                val owner = Any()
+                var callerJob: Job? = null
+                var pendingRequest: LazyListScrollRequest? = null
+                val cancelledRequests = mutableListOf<LazyListScrollRequest>()
+                state.attach(
+                    owner = owner,
+                    itemCount = 10,
+                    onScroll = { request ->
+                        pendingRequest = request
+                        checkNotNull(callerJob).cancel()
+                    },
+                    onScrollCancelled = cancelledRequests::add,
+                    uiDispatcher = uiDispatcher,
+                )
+
+                val job =
+                    CoroutineScope(Dispatchers.Default).launch {
+                        callerJob = coroutineContext[Job]
+                        state.animateScrollToItem(9)
+                    }
+                runBlocking { job.join() }
+
+                assertEquals(listOf(pendingRequest), cancelledRequests)
+            }
+    }
+
+    @Test
+    fun stateSerializesScrollAndCancellationOnTheAttachedUiDispatcher() {
+        Executors
+            .newSingleThreadExecutor { runnable -> Thread(runnable, "lazy-list-ui") }
+            .asCoroutineDispatcher()
+            .use { uiDispatcher ->
+                val state = LazyListState()
+                val owner = Any()
+                val scrollThread = CompletableDeferred<Thread>()
+                val cancellationThread = CompletableDeferred<Thread>()
+                val requestStarted = CompletableDeferred<Unit>()
+                state.attach(
+                    owner = owner,
+                    itemCount = 10,
+                    onScroll = { request ->
+                        scrollThread.complete(Thread.currentThread())
+                        requestStarted.complete(Unit)
+                    },
+                    onScrollCancelled = {
+                        cancellationThread.complete(Thread.currentThread())
+                    },
+                    uiDispatcher = uiDispatcher,
+                )
+                val expectedThread = runBlocking(uiDispatcher) { Thread.currentThread() }
+                val job =
+                    CoroutineScope(Dispatchers.Default).launch {
+                        state.animateScrollToItem(9)
+                    }
+
+                runBlocking {
+                    requestStarted.await()
+                    job.cancelAndJoin()
+                }
+
+                assertEquals(expectedThread, runBlocking { scrollThread.await() })
+                assertEquals(expectedThread, runBlocking { cancellationThread.await() })
+            }
     }
 
     @Test
@@ -384,14 +464,17 @@ class LazyListDslTest {
             val itemHost = widget.coordinator.createItemHost(itemRoot)
             itemHost.bind(0)
             host.awaitIdle()
-            assertEquals("A", (itemRoot.widgets.single() as RecordingLeafWidget).renderedText)
+            val originalLeaf = itemRoot.widgets.single() as RecordingLeafWidget
+            assertEquals("A", originalLeaf.renderedText)
 
             items = listOf(TestItem("b", "B2"), TestItem("a", "A2"))
             host.awaitIdle()
 
             assertEquals("a", itemHost.key)
             assertEquals(1, itemHost.index)
-            assertEquals("A2", (itemRoot.widgets.single() as RecordingLeafWidget).renderedText)
+            val updatedLeaf = itemRoot.widgets.single() as RecordingLeafWidget
+            assertEquals("A2", updatedLeaf.renderedText)
+            assertTrue(updatedLeaf === originalLeaf)
         }
     }
 
@@ -458,6 +541,63 @@ class LazyListDslTest {
     }
 
     @Test
+    fun duplicateKeysRealizedAtDifferentTimesCannotShareSaveableState() {
+        val widget = RecordingLazyCollectionWidget()
+
+        HeadlessTestHost(RecordingChildren(), testWidgetSystem(widget)).use { host ->
+            host.setContent {
+                LazyColumn {
+                    items(count = 2, key = { "duplicate" }) { index ->
+                        rememberSaveable { index }
+                        TestLeaf("Item $index")
+                    }
+                }
+            }
+            widget.coordinator.createItemHost(RecordingChildren()).apply {
+                bind(0)
+                dispose()
+            }
+
+            assertFailsWith<IllegalStateException> {
+                widget.coordinator.createItemHost(RecordingChildren()).bind(1)
+            }
+        }
+    }
+
+    @Test
+    fun duplicateKeysRemainDetectableAcrossProviderGenerations() {
+        val widget = RecordingLazyCollectionWidget()
+        var generation by mutableStateOf(0)
+
+        HeadlessTestHost(RecordingChildren(), testWidgetSystem(widget)).use { host ->
+            host.setContent {
+                val generationSnapshot = generation
+                LazyColumn {
+                    items(
+                        count = 2,
+                        key = { index ->
+                            if (index == 0 || generationSnapshot > 0) "duplicate" else "other"
+                        },
+                    ) { index ->
+                        rememberSaveable { index }
+                        TestLeaf("Item $index")
+                    }
+                }
+            }
+            widget.coordinator.createItemHost(RecordingChildren()).apply {
+                bind(0)
+                dispose()
+            }
+            generation = 1
+            host.awaitIdle()
+
+            assertFailsWith<IllegalStateException> {
+                widget.coordinator.createItemHost(RecordingChildren()).bind(1)
+            }
+        }
+    }
+
+    @Test
     fun staleRealizedKeyOwnershipTransfersWithoutBlankingThePreviousHost() {
         var keyOffset = 0
         val coordinator =
@@ -465,6 +605,7 @@ class LazyListDslTest {
                 owner = this,
                 onModelChanged = { _, _ -> LazyRealizedItemUpdate.Rebind },
                 onScroll = {},
+                uiDispatcher = Dispatchers.Unconfined,
             )
         val provider =
             IntervalLazyListScope()
@@ -639,6 +780,7 @@ private class RecordingLazyCollectionWidget(
                 scrolls += RecordedScroll(request.index, request.scrollOffset, request.animated)
                 request.complete()
             },
+            uiDispatcher = Dispatchers.Unconfined,
         )
 
     override fun setModel(model: LazyCollectionModel) {

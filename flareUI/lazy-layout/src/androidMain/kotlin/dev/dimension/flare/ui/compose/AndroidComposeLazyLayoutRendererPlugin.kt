@@ -38,6 +38,7 @@ import dev.dimension.flare.ui.lazy.LazyListScrollRequest
 import dev.dimension.flare.ui.lazy.LazyRealizedItemUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -70,6 +71,7 @@ private class AndroidComposeLazyCollectionWidget :
             },
             onScroll = ::performScroll,
             onScrollCancelled = ::cancelScroll,
+            uiDispatcher = Dispatchers.Main.immediate,
         )
 
     override fun setModel(model: LazyCollectionModel) {
@@ -96,7 +98,7 @@ private class AndroidComposeLazyCollectionWidget :
                 ) {
                     items(
                         count = model.itemProvider.itemCount,
-                        key = model.itemProvider::key,
+                        key = { index -> coordinator.itemIdentities.idFor(model.itemProvider.key(index)) },
                         contentType = model.itemProvider::contentType,
                     ) { index ->
                         RenderItem(model, index)
@@ -113,7 +115,7 @@ private class AndroidComposeLazyCollectionWidget :
                 ) {
                     items(
                         count = model.itemProvider.itemCount,
-                        key = model.itemProvider::key,
+                        key = { index -> coordinator.itemIdentities.idFor(model.itemProvider.key(index)) },
                         contentType = model.itemProvider::contentType,
                     ) { index ->
                         RenderItem(model, index)
@@ -228,15 +230,19 @@ private class AndroidComposeLazyCollectionWidget :
             snapshotFlow { state.layoutInfo to state.isScrollInProgress }
                 .collect { (layoutInfo, scrolling) ->
                     coordinator.reportScrollInProgress(scrolling)
+                    if (layoutInfo.totalItemsCount != model.itemProvider.itemCount) return@collect
                     coordinator.reportLayoutInfo(
                         LazyListLayoutInfo(
                             totalItemsCount = layoutInfo.totalItemsCount,
                             viewportStartOffset = layoutInfo.viewportStartOffset / density,
                             viewportEndOffset = layoutInfo.viewportEndOffset / density,
                             visibleItems =
-                                layoutInfo.visibleItemsInfo.map { item ->
+                                layoutInfo.visibleItemsInfo.mapNotNull { item ->
+                                    val rendererId = item.key as? Long
+                                    val businessKey = rendererId?.let(coordinator.itemIdentities::keyFor)
+                                    if (businessKey == null) return@mapNotNull null
                                     LazyListItemInfo(
-                                        key = item.key,
+                                        key = businessKey,
                                         index = item.index,
                                         offset = item.offset / density,
                                         size = item.size / density,

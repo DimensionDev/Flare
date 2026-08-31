@@ -8,7 +8,8 @@ import kotlin.math.min
  * Sparse main-axis geometry for a variable-size lazy list.
  *
  * Unknown items use an estimate. Real measurements are retained by stable key across data-set
- * resets, while the sparse Fenwick tree makes one measured-size correction O(log itemCount).
+ * resets, while the sparse Fenwick tree keeps measured-size corrections and viewport endpoint
+ * lookup O(log itemCount).
  */
 internal class VariableExtentLayoutState(
     private val defaultEstimatedExtent: Double = DEFAULT_ESTIMATED_EXTENT,
@@ -128,6 +129,27 @@ internal class VariableExtentLayoutState(
         viewportStart: Double,
         viewportEnd: Double,
         overscan: Double = 0.0,
+    ): IntRange = calculateVisibleRange(viewportStart, viewportEnd, overscan) {}
+
+    /** Test-only complexity seam; production calls inline an empty node-visit callback. */
+    internal fun visibleRangeWithSearchNodeVisitsForTesting(
+        viewportStart: Double,
+        viewportEnd: Double,
+        overscan: Double = 0.0,
+    ): Pair<IntRange, Int> {
+        var nodeVisits = 0
+        val range =
+            calculateVisibleRange(viewportStart, viewportEnd, overscan) {
+                nodeVisits += 1
+            }
+        return range to nodeVisits
+    }
+
+    private inline fun calculateVisibleRange(
+        viewportStart: Double,
+        viewportEnd: Double,
+        overscan: Double,
+        onSearchNodeVisited: () -> Unit,
     ): IntRange {
         if (itemCount == 0) return IntRange.EMPTY
         require(overscan.isFinite() && overscan >= 0.0) {
@@ -135,26 +157,20 @@ internal class VariableExtentLayoutState(
         }
         val start = max(0.0, min(viewportStart, viewportEnd) - overscan)
         val end = max(viewportStart, viewportEnd) + overscan
-        val first = indexAtOffset(start)
-        val last = indexAtOffset(end)
+        val first = indexAtOffset(start, onSearchNodeVisited)
+        val last = indexAtOffset(end, onSearchNodeVisited)
         return first..last
     }
 
-    private fun indexAtOffset(offset: Double): Int {
-        var low = 0
-        var high = itemCount - 1
-        var result = 0
-        while (low <= high) {
-            val middle = low + (high - low) / 2
-            if (itemStart(middle) <= offset) {
-                result = middle
-                low = middle + 1
-            } else {
-                high = middle - 1
-            }
-        }
-        return result
-    }
+    private inline fun indexAtOffset(
+        offset: Double,
+        onSearchNodeVisited: () -> Unit,
+    ): Int =
+        extentDeltas.indexAtOrBefore(
+            offset = offset,
+            estimatedStride = defaultEstimatedExtent + spacing,
+            onNodeVisited = onSearchNodeVisited,
+        )
 
     private fun assign(
         index: Int,
@@ -237,7 +253,9 @@ private class SparseFenwickTree {
             } else {
                 nodes[node] = value
             }
-            node += node and -node
+            val increment = node and -node
+            if (node > size - increment) break
+            node += increment
         }
     }
 
@@ -249,6 +267,37 @@ private class SparseFenwickTree {
             node -= node and -node
         }
         return result
+    }
+
+    /** Returns the greatest item start at or before [offset] in one Fenwick descent. */
+    inline fun indexAtOrBefore(
+        offset: Double,
+        estimatedStride: Double,
+        onNodeVisited: () -> Unit,
+    ): Int {
+        if (size == 0) return 0
+
+        var step = 1
+        while (step <= size / 2) {
+            step = step shl 1
+        }
+
+        var prefixLength = 0
+        var prefixDelta = 0.0
+        while (step > 0) {
+            if (step <= size - prefixLength) {
+                val candidate = prefixLength + step
+                onNodeVisited()
+                val candidateDelta = prefixDelta + (nodes[candidate] ?: 0.0)
+                val candidateOffset = candidate * estimatedStride + candidateDelta
+                if (candidateOffset <= offset) {
+                    prefixLength = candidate
+                    prefixDelta = candidateDelta
+                }
+            }
+            step = step ushr 1
+        }
+        return min(prefixLength, size - 1)
     }
 }
 

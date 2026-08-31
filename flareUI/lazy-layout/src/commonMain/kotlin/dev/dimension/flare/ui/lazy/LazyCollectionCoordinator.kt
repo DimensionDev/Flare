@@ -8,6 +8,7 @@ import dev.dimension.flare.ui.FlareChildren
 import dev.dimension.flare.ui.FlareContent
 import dev.dimension.flare.ui.FlareSubcomposition
 import dev.dimension.flare.ui.FlareSubcompositionFactory
+import kotlinx.coroutines.CoroutineDispatcher
 import androidx.compose.runtime.key as composeKey
 
 internal class LazyCollectionCoordinator(
@@ -18,9 +19,11 @@ internal class LazyCollectionCoordinator(
     ) -> LazyRealizedItemUpdate,
     private val onScroll: (LazyListScrollRequest) -> Unit,
     private val onScrollCancelled: (LazyListScrollRequest) -> Unit = {},
+    private val uiDispatcher: CoroutineDispatcher,
 ) {
     private val itemHosts = mutableSetOf<LazyItemHost>()
     private val realizedKeys = mutableMapOf<Any, LazyItemHost>()
+    internal val itemIdentities = LazyItemIdentityRegistry()
     var model: LazyCollectionModel? = null
         private set
 
@@ -31,11 +34,15 @@ internal class LazyCollectionCoordinator(
             previous?.state?.detach(owner)
         }
         model = value
+        if (value.itemProvider.itemCount <= MAX_EAGER_RENDERER_IDENTITY_PRUNE_ITEMS) {
+            itemIdentities.removeMissingKeys(value.itemProvider)
+        }
         value.state.attach(
             owner = owner,
             itemCount = value.itemProvider.itemCount,
             onScroll = onScroll,
             onScrollCancelled = onScrollCancelled,
+            uiDispatcher = uiDispatcher,
         )
         val realizedItemUpdate = onModelChanged(previous, value)
         if (previous != null && realizedItemUpdate == LazyRealizedItemUpdate.Rebind) {
@@ -141,6 +148,8 @@ internal class LazyCollectionCoordinator(
     }
 }
 
+private const val MAX_EAGER_RENDERER_IDENTITY_PRUNE_ITEMS: Int = 1_000
+
 internal enum class LazyRealizedItemUpdate {
     Rebind,
     RendererManaged,
@@ -227,6 +236,7 @@ internal class LazyItemHost(
         disposed = true
         composition?.dispose()
         composition = null
+        compositionFactory = null
         content = null
         contentVersion = null
         boundModel = null
@@ -240,6 +250,7 @@ internal class LazyItemHost(
         disposed = true
         composition?.dispose()
         composition = null
+        compositionFactory = null
         content = null
         contentVersion = null
         boundModel = null

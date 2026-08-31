@@ -124,6 +124,7 @@ internal fun Router(
     onBack: () -> Unit,
     enableDeepLinkHandler: Boolean = true,
     modifier: Modifier = Modifier,
+    singlePane: Boolean = false,
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
@@ -148,12 +149,14 @@ internal fun Router(
     NavDisplay(
         modifier = modifier,
         sceneStrategies =
-            remember(listDetailStrategy) {
-                listOf(
-                    FluentDialogSceneStrategy(),
-                    WindowSceneStrategy(),
-                    listDetailStrategy,
-                )
+            remember(listDetailStrategy, singlePane) {
+                buildList {
+                    add(FluentDialogSceneStrategy())
+                    add(WindowSceneStrategy())
+                    if (!singlePane) {
+                        add(listDetailStrategy)
+                    }
+                }
             },
         entryDecorators =
             listOf(

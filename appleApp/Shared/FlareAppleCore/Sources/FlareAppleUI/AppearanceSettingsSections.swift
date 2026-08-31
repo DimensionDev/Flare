@@ -90,13 +90,20 @@ public struct AppearanceLayoutSettingsSection<PostActionLayoutLink: View>: View 
                 Text("appearance_show_bottom_bar_labels", bundle: FlareAppleUILocalization.bundle)
                 Text("appearance_show_bottom_bar_labels_description", bundle: FlareAppleUILocalization.bundle)
             }
-            Toggle(isOn: Binding(get: {
-                globalAppearance.deckMode
+            Picker(selection: Binding(get: {
+                globalAppearance.largeScreenLayoutMode
             }, set: { newValue in
-                presenter.state.updateDeckMode(value: newValue)
+                presenter.state.updateLargeScreenLayoutMode(value: newValue)
             })) {
-                Text("appearance_deck_mode", bundle: FlareAppleUILocalization.bundle)
-                Text("appearance_deck_mode_description", bundle: FlareAppleUILocalization.bundle)
+                Text("appearance_large_screen_layout_auto", bundle: FlareAppleUILocalization.bundle)
+                    .tag(LargeScreenLayoutMode.auto)
+                Text("appearance_large_screen_layout_deck", bundle: FlareAppleUILocalization.bundle)
+                    .tag(LargeScreenLayoutMode.deck)
+                Text("appearance_large_screen_layout_single_column", bundle: FlareAppleUILocalization.bundle)
+                    .tag(LargeScreenLayoutMode.singleColumn)
+            } label: {
+                Text("appearance_large_screen_layout", bundle: FlareAppleUILocalization.bundle)
+                Text("appearance_large_screen_layout_description", bundle: FlareAppleUILocalization.bundle)
             }
             #endif
         }

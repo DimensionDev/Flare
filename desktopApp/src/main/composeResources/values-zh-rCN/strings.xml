@@ -286,6 +286,11 @@
     <string name="settings_appearance_show_bottom_bar_labels_description">在底部导航栏和侧边栏显示文字标签</string>
     <string name="settings_appearance_deck_mode">分栏模式</string>
     <string name="settings_appearance_deck_mode_description">为支持的时间轴使用多列布局</string>
+    <string name="settings_appearance_large_screen_layout">大屏幕布局</string>
+    <string name="settings_appearance_large_screen_layout_description">选择 Flare 在大屏幕上如何使用空间</string>
+    <string name="settings_appearance_large_screen_layout_auto">自动</string>
+    <string name="settings_appearance_large_screen_layout_deck">多栏模式</string>
+    <string name="settings_appearance_large_screen_layout_single_column">单栏</string>
     <string name="settings_appearance_show_actions">显示操作按钮</string>
     <string name="settings_appearance_show_actions_description">在每条内容下方显示操作按钮</string>
     <string name="settings_appearance_show_media">显示媒体</string>

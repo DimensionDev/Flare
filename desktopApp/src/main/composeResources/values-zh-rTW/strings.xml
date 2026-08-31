@@ -230,6 +230,11 @@
     <string name="settings_appearance_show_bottom_bar_labels_description">在底部導航和側邊欄顯示文字標籤</string>
     <string name="settings_appearance_deck_mode">分欄模式 (Deck mode)</string>
     <string name="settings_appearance_deck_mode_description">為支援的時間軸使用分欄佈局</string>
+    <string name="settings_appearance_large_screen_layout">大螢幕佈局</string>
+    <string name="settings_appearance_large_screen_layout_description">選擇 Flare 在大螢幕上如何使用空間</string>
+    <string name="settings_appearance_large_screen_layout_auto">自動</string>
+    <string name="settings_appearance_large_screen_layout_deck">多欄模式</string>
+    <string name="settings_appearance_large_screen_layout_single_column">單欄</string>
     <string name="settings_appearance_show_actions">顯示動作按鈕</string>
     <string name="settings_appearance_show_actions_description">在每則貼文下方顯示動作按鈕</string>
     <string name="settings_appearance_show_media">顯示媒體</string>

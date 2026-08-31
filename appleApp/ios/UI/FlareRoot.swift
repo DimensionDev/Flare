@@ -20,63 +20,75 @@ struct FlareRoot: View {
     @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @StateObject private var inAppNotification = SwiftInAppNotification.shared
+    @StateObject private var navigationModel = HomeNavigationModel()
     @State var selectedTab: String?
     @State private var reloginRoute: Route?
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
             let items = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
-            TabView(selection: $selectedTab) {
-                ForEach(items, id: \.name) { tab in
-                    Tab(value: homeTabKey(tab), role: homeTabRoute(tab) == .discover ? .some(.search) : .none) {
-                        Router { onNavigate in
-                            homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
-                        }
-                    } label: {
-                        Label {
-                            Text(homeTabTitle(tab))
-                        } icon: {
-                            Image(fontAwesome: homeTabIcon(tab))
-                        }
-                        .adaptiveLabelStyle(globalAppearance.showBottomBarLabels || horizontalSizeClass == .regular)
-                    }
-                    .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
-                }
-                if horizontalSizeClass == .regular {
-                    if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
-                        let items = data.data.cast(SecondaryTabsPresenter.Item.self)
-                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                            TabSection {
-                                ForEach(item.tabs, id: \.self) { tab in
-                                    if let route = route(for: tab) {
-                                        secondarySidebarShortcut(tab, route: route)
-                                    }
+            Group {
+                if globalAppearance.largeScreenLayoutMode == .singleColumn && horizontalSizeClass == .regular {
+                    SingleColumnFlareRoot(
+                        tabs: items,
+                        selectedTab: $selectedTab,
+                        notificationCount: Int(notificationBadgePresenter.state.count),
+                        navigationModel: navigationModel
+                    )
+                } else {
+                    TabView(selection: $selectedTab) {
+                        ForEach(items, id: \.name) { tab in
+                            Tab(value: homeTabKey(tab), role: homeTabRoute(tab) == .discover ? .some(.search) : .none) {
+                                Router(backStack: navigationModel.binding(for: homeTabKey(tab))) { onNavigate in
+                                    homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
                                 }
-                            } header: {
-                                StateView(state: item.user) { user in
-                                    UserOnelineView(data: user)
-                                } errorContent: { _ in
-                                    Text("account_management_title")
-                                } loadingContent: {
-                                    Text("account_management_title")
+                            } label: {
+                                Label {
+                                    Text(homeTabTitle(tab))
+                                } icon: {
+                                    Image(fontAwesome: homeTabIcon(tab))
+                                }
+                                .adaptiveLabelStyle(globalAppearance.showBottomBarLabels || horizontalSizeClass == .regular)
+                            }
+                            .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
+                        }
+                        if horizontalSizeClass == .regular {
+                            if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
+                                let items = data.data.cast(SecondaryTabsPresenter.Item.self)
+                                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                    TabSection {
+                                        ForEach(item.tabs, id: \.self) { tab in
+                                            if let route = route(for: tab) {
+                                                secondarySidebarShortcut(tab, route: route)
+                                            }
+                                        }
+                                    } header: {
+                                        StateView(state: item.user) { user in
+                                            UserOnelineView(data: user)
+                                        } errorContent: { _ in
+                                            Text("account_management_title")
+                                        } loadingContent: {
+                                            Text("account_management_title")
+                                        }
+                                    }
+                                    .tabPlacement(.sidebarOnly)
                                 }
                             }
-                            .tabPlacement(.sidebarOnly)
+                            ForEach(SecondarySidebarStaticRoute.allCases.filter { route in
+                                route != .agentHistory || aiAgentEnabledPresenter.state.enabled
+                            }, id: \.self) { route in
+                                secondarySidebarStaticRoute(route)
+                            }
                         }
                     }
-                    ForEach(SecondarySidebarStaticRoute.allCases.filter { route in
-                        route != .agentHistory || aiAgentEnabledPresenter.state.enabled
-                    }, id: \.self) { route in
-                        secondarySidebarStaticRoute(route)
-                    }
+                    .modifier(TabBarDoubleTapModifier {
+                        NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
+                    })
+                    .tabViewStyle(.sidebarAdaptable)
+                    .backport
+                    .tabBarMinimizeBehavior(.onScrollDown)
                 }
             }
-            .modifier(TabBarDoubleTapModifier {
-                NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
-            })
-            .tabViewStyle(.sidebarAdaptable)
-            .backport
-            .tabBarMinimizeBehavior(.onScrollDown)
             .background(Color(.systemGroupedBackground))
             .sheet(item: $reloginRoute) { route in
                 NavigationStack {
@@ -140,32 +152,44 @@ struct BackportFlareRoot: View {
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @StateObject private var inAppNotification = SwiftInAppNotification.shared
+    @StateObject private var navigationModel = HomeNavigationModel()
     @State var selectedTab: String?
     @State private var reloginRoute: Route?
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
             let items = tabs.cast(HomeTabsPresenterStateHomeTabs.self)
-            TabView(selection: $selectedTab) {
-                ForEach(items, id: \.name) { tab in
-                    Router { onNavigate in
-                        homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
-                    }
-                    .tabItem {
-                        Label {
-                            Text(homeTabTitle(tab))
-                        } icon: {
-                            Image(fontAwesome: homeTabIcon(tab))
+            Group {
+                if globalAppearance.largeScreenLayoutMode == .singleColumn && horizontalSizeClass == .regular {
+                    SingleColumnFlareRoot(
+                        tabs: items,
+                        selectedTab: $selectedTab,
+                        notificationCount: Int(notificationBadgePresenter.state.count),
+                        navigationModel: navigationModel
+                    )
+                } else {
+                    TabView(selection: $selectedTab) {
+                        ForEach(items, id: \.name) { tab in
+                            Router(backStack: navigationModel.binding(for: homeTabKey(tab))) { onNavigate in
+                                homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
+                            }
+                            .tabItem {
+                                Label {
+                                    Text(homeTabTitle(tab))
+                                } icon: {
+                                    Image(fontAwesome: homeTabIcon(tab))
+                                }
+                                .adaptiveLabelStyle(globalAppearance.showBottomBarLabels)
+                            }
+                            .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
+                            .tag(homeTabKey(tab))
                         }
-                        .adaptiveLabelStyle(globalAppearance.showBottomBarLabels)
                     }
-                    .badge(homeTabRoute(tab) == .notification ? Int(notificationBadgePresenter.state.count) : 0)
-                    .tag(homeTabKey(tab))
+                    .modifier(TabBarDoubleTapModifier {
+                        NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
+                    })
                 }
             }
-            .modifier(TabBarDoubleTapModifier {
-                NotificationCenter.default.post(name: .tabDoubleTapped, object: selectedTab)
-            })
             .background(Color(.systemGroupedBackground))
             .sheet(item: $reloginRoute) { route in
                 NavigationStack {
@@ -345,5 +369,219 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
         case .settings:
             return .gear
         }
+    }
+}
+
+@MainActor
+private final class HomeNavigationModel: ObservableObject {
+    @Published private var backStacks: [String: [Route]] = [:]
+    let navigator = RouterNavigator()
+
+    func binding(for key: String) -> Binding<[Route]> {
+        Binding(
+            get: { self.backStacks[key] ?? [] },
+            set: { self.backStacks[key] = $0 }
+        )
+    }
+}
+
+private struct SingleColumnFlareRoot: View {
+    let tabs: [HomeTabsPresenterStateHomeTabs]
+    @Binding var selectedTab: String?
+    let notificationCount: Int
+    @ObservedObject var navigationModel: HomeNavigationModel
+    @Environment(\.globalAppearance) private var globalAppearance
+
+    private var activeTab: HomeTabsPresenterStateHomeTabs? {
+        tabs.first { homeTabKey($0) == selectedTab } ?? tabs.first
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let showRightSidebar = proxy.size.width >= 900
+            HStack(spacing: 0) {
+                VStack(spacing: 8) {
+                    ForEach(tabs, id: \.name) { tab in
+                        let key = homeTabKey(tab)
+                        let selected = key == activeTab.map { homeTabKey($0) }
+                        Button {
+                            if selected {
+                                NotificationCenter.default.post(name: .tabDoubleTapped, object: key)
+                            } else {
+                                selectedTab = key
+                            }
+                        } label: {
+                            VStack(spacing: 4) {
+                                ZStack(alignment: .topTrailing) {
+                                    Image(fontAwesome: homeTabIcon(tab))
+                                        .font(.title3)
+                                    if homeTabRoute(tab) == .notification && notificationCount > 0 {
+                                        Text(notificationCount.formatted())
+                                            .font(.caption2)
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 5)
+                                            .background(.red, in: Capsule())
+                                            .offset(x: 12, y: -8)
+                                    }
+                                }
+                                if globalAppearance.showBottomBarLabels {
+                                    Text(homeTabTitle(tab))
+                                        .font(.caption2)
+                                        .lineLimit(1)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(selected ? Color.accentColor : Color.secondary)
+                        .background(
+                            selected ? Color.accentColor.opacity(0.12) : Color.clear,
+                            in: RoundedRectangle(cornerRadius: 12)
+                        )
+                        .padding(.horizontal, 8)
+                    }
+                    Spacer(minLength: 0)
+                    if !showRightSidebar {
+                        Button {
+                            navigationModel.navigator.navigate(.secondaryMenu)
+                        } label: {
+                            VStack(spacing: 4) {
+                                Image(fontAwesome: .ellipsis)
+                                    .font(.title3)
+                                if globalAppearance.showBottomBarLabels {
+                                    Text("more")
+                                        .font(.caption2)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(Color.secondary)
+                        .padding(.horizontal, 8)
+                    }
+                }
+                .padding(.top, 12)
+                .frame(width: 80)
+                .background(.bar)
+
+                Divider()
+
+                HStack(spacing: 0) {
+                    if let activeTab {
+                        Router(
+                            backStack: navigationModel.binding(for: homeTabKey(activeTab)),
+                            navigator: navigationModel.navigator
+                        ) { onNavigate in
+                            homeTabRoute(activeTab).view(onNavigate: onNavigate, goBack: {})
+                        }
+                        .environment(\.horizontalSizeClass, .compact)
+                        .frame(maxWidth: 480, maxHeight: .infinity)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
+
+                    if showRightSidebar {
+                        Divider()
+                        SingleColumnSecondarySidebar(navigator: navigationModel.navigator)
+                            .frame(width: 320)
+                    }
+                }
+            }
+        }
+        .onAppear {
+            if !tabs.contains(where: { homeTabKey($0) == selectedTab }) {
+                selectedTab = tabs.first.map { homeTabKey($0) }
+            }
+        }
+    }
+}
+
+private struct SingleColumnSecondarySidebar: View {
+    @ObservedObject var navigator: RouterNavigator
+    @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
+    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
+    @State private var searchQuery = ""
+
+    private var accounts: [SecondaryTabsPresenter.Item] {
+        guard case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) else {
+            return []
+        }
+        return data.data.cast(SecondaryTabsPresenter.Item.self)
+    }
+
+    private var searchAccount: AccountType {
+        accounts.first?.accountType ?? AccountType.Guest.shared
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            TextField("search", text: $searchQuery)
+                .textFieldStyle(.roundedBorder)
+                .submitLabel(.search)
+                .onSubmit {
+                    navigator.navigate(.search(searchAccount, searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)))
+                }
+                .padding(16)
+
+            List {
+                if case .success(let loggedIn) = onEnum(of: loggedInPresenter.state.isLoggedIn),
+                   !loggedIn.data.boolValue {
+                    Button {
+                        navigator.navigate(.serviceSelect)
+                    } label: {
+                        Label("login_title", systemImage: "person.badge.plus")
+                    }
+                }
+
+                if !accounts.isEmpty {
+                    Section("account_management_title") {
+                        ForEach(Array(accounts.enumerated()), id: \.offset) { _, account in
+                            DisclosureGroup {
+                                ForEach(account.tabs, id: \.self) { tab in
+                                    if let route = route(for: tab) {
+                                        Button {
+                                            navigator.navigate(route)
+                                        } label: {
+                                            Label {
+                                                Text(tab.title.text)
+                                            } icon: {
+                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            } label: {
+                                StateView(state: account.user) { user in
+                                    UserCompatView(data: user)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    ForEach(SecondarySidebarStaticRoute.allCases.filter { route in
+                        route != .agentHistory || aiAgentEnabledPresenter.state.enabled
+                    }, id: \.self) { item in
+                        Button {
+                            navigator.navigate(item.route)
+                        } label: {
+                            Label {
+                                Text(item.title)
+                            } icon: {
+                                Image(fontAwesome: item.icon)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .listStyle(.sidebar)
+        }
+        .background(Color(.secondarySystemGroupedBackground))
     }
 }

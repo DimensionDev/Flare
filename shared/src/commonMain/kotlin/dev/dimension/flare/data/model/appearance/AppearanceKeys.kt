@@ -53,6 +53,12 @@ public object AppearanceKeys {
 
     public object DeckMode : Global<Boolean>("app.deck_mode", false, Boolean.serializer())
 
+    public object LargeScreenLayout : Global<LargeScreenLayoutMode>(
+        "app.large_screen_layout_mode",
+        LargeScreenLayoutMode.Auto,
+        LargeScreenLayoutMode.serializer(),
+    )
+
     public object ShowMedia : PerTimeline<Boolean>("timeline.show_media", true, Boolean.serializer())
 
     public object ShowSensitiveContent : PerTimeline<Boolean>("timeline.show_sensitive_content", false, Boolean.serializer())
@@ -130,6 +136,7 @@ public object AppearanceKeys {
             ShowComposeInHomeTimeline,
             ShowBottomBarLabels,
             DeckMode,
+            LargeScreenLayout,
             ShowMedia,
             ShowSensitiveContent,
             ExpandContentWarning,

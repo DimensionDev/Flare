@@ -36,7 +36,7 @@ readability = "1.0.0"
 reorderable = "3.1.0"
 richtextUiMaterial3 = "1.0.0-alpha05"
 sentry = "8.54.0"
-twitter-parser = "0.5.9"
+twitter-parser = "0.5.11"
 molecule = "2.2.0"
 accompanist = "0.37.3"
 compose-lint-checks = "1.6.0"
@@ -200,7 +200,7 @@ accompanist-drawablepainter = { group = "com.google.accompanist", name = "accomp
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.2.7"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.2.8"
 
 compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.6" }
 

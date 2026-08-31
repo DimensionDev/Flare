@@ -189,6 +189,8 @@ import dev.dimension.flare.settings_appearance_show_numbers
 import dev.dimension.flare.settings_appearance_show_numbers_description
 import dev.dimension.flare.settings_appearance_show_platform_logo
 import dev.dimension.flare.settings_appearance_show_platform_logo_description
+import dev.dimension.flare.settings_appearance_show_reactions
+import dev.dimension.flare.settings_appearance_show_reactions_description
 import dev.dimension.flare.settings_appearance_theme
 import dev.dimension.flare.settings_appearance_theme_auto
 import dev.dimension.flare.settings_appearance_theme_dark
@@ -1049,6 +1051,24 @@ internal fun SettingsScreen(
                             checked = LocalTimelineAppearance.current.showPlatformLogo,
                             {
                                 state.appearanceState.update(AppearanceKeys.ShowPlatformLogo, it)
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_show_reactions))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_show_reactions_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalTimelineAppearance.current.showEmojiReactions,
+                            {
+                                state.appearanceState.update(AppearanceKeys.ShowEmojiReactions, it)
                             },
                             textBefore = true,
                         )

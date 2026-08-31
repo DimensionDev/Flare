@@ -433,6 +433,8 @@
 
     <string name="settings_appearance_show_platform_logo">Show source platform icons</string>
     <string name="settings_appearance_show_platform_logo_description">Show which platform each post came from</string>
+    <string name="settings_appearance_show_reactions">Show reactions</string>
+    <string name="settings_appearance_show_reactions_description">Show emoji reactions below posts</string>
 
     <string name="settings_about_source_code">Source code</string>
     <string name="settings_about_telegram">Telegram</string>

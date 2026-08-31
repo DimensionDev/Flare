@@ -36,6 +36,7 @@ public struct StatusView: View {
     @Environment(\.timelineAppearance.fullWidthPost) private var fullWidthPost
     @Environment(\.timelineAppearance.showLinkPreview) private var showLinkPreview
     @Environment(\.timelineAppearance.compatLinkPreview) private var compatLinkPreview
+    @Environment(\.timelineAppearance.showEmojiReactions) private var showEmojiReactions
     @Environment(\.timelineAppearance.postActionStyle) private var postActionStyle
     @Environment(\.timelineAppearance.showPlatformLogo) private var showPlatformLogo
     @Environment(\.timelineAppearance.expandContentWarning) private var expandContentWarning
@@ -140,7 +141,7 @@ public struct StatusView: View {
         let hasQuotes = !quoteItems.isEmpty
         let sourceChannelName = data.sourceChannel?.name
         let emojiReactions = Array(data.emojiReactions)
-        let hasEmojiReactions = !emojiReactions.isEmpty
+        let hasEmojiReactions = showEmojiReactions && !emojiReactions.isEmpty
         let visibility = data.visibility
         let translationDisplayState = data.translationDisplayState
         let createdAt = data.createdAt

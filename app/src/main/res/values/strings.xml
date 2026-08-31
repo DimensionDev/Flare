@@ -419,6 +419,8 @@
 
     <string name="settings_appearance_show_platform_logo">Show source platform icons</string>
     <string name="settings_appearance_show_platform_logo_description">Show which platform each post came from</string>
+    <string name="settings_appearance_show_reactions">Show reactions</string>
+    <string name="settings_appearance_show_reactions_description">Show emoji reactions below posts</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">Remove %1$s MB of cached images</string>

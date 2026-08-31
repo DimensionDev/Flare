@@ -129,6 +129,26 @@ internal fun AppearanceDisplayScreen(onBack: () -> Unit) {
             )
             SegmentedListItem(
                 onClick = {
+                    state.update(AppearanceKeys.ShowEmojiReactions, !timelineAppearance.showEmojiReactions)
+                },
+                shapes = ListItemDefaults.item(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_appearance_show_reactions))
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_appearance_show_reactions_description))
+                },
+                trailingContent = {
+                    Switch(
+                        checked = timelineAppearance.showEmojiReactions,
+                        onCheckedChange = {
+                            state.update(AppearanceKeys.ShowEmojiReactions, it)
+                        },
+                    )
+                },
+            )
+            SegmentedListItem(
+                onClick = {
                     state.update(AppearanceKeys.ShowLinkPreview, !timelineAppearance.showLinkPreview)
                 },
                 shapes =

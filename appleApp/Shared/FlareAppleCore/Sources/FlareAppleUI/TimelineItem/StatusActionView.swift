@@ -937,6 +937,7 @@ private extension TimelineAppearance {
             videoAutoplay: .never,
             showLinkPreview: showLinkPreview,
             compatLinkPreview: compatLinkPreview,
+            showEmojiReactions: showEmojiReactions,
             showNumbers: showNumbers,
             postActionStyle: postActionStyle,
             postActionLayout: postActionLayout,

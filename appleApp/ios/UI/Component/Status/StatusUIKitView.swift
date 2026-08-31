@@ -960,7 +960,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 sourceChannelContainer.configure(text: channel.name)
                 append(sourceChannelContainer, before: 4)
             }
-            if !data.emojiReactions.isEmpty {
+            if appearance.showEmojiReactions, !data.emojiReactions.isEmpty {
                 let reactionView = resolvedReactionView()
                 reactionView.configure(data: Array(data.emojiReactions), isDetail: isDetail)
                 reactionView.onReactionTapped = { [weak self] reaction in

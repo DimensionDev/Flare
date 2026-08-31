@@ -25,7 +25,8 @@ public object TimelinePresentationAppearancePatchHelper {
         patch.contains(AppearanceKeys.AbsoluteTimestamp) ||
             patch.contains(AppearanceKeys.ShowPlatformLogo) ||
             patch.contains(AppearanceKeys.ShowLinkPreview) ||
-            patch.contains(AppearanceKeys.CompatLinkPreview)
+            patch.contains(AppearanceKeys.CompatLinkPreview) ||
+            patch.contains(AppearanceKeys.ShowEmojiReactions)
 
     public fun mediaOverridesEnabled(patch: AppearancePatch): Boolean =
         patch.contains(AppearanceKeys.ShowMedia) ||
@@ -66,6 +67,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .set(AppearanceKeys.ShowPlatformLogo, appearance.showPlatformLogo)
             .set(AppearanceKeys.ShowLinkPreview, appearance.showLinkPreview)
             .set(AppearanceKeys.CompatLinkPreview, appearance.compatLinkPreview)
+            .set(AppearanceKeys.ShowEmojiReactions, appearance.showEmojiReactions)
 
     public fun disableDisplayOverrides(patch: AppearancePatch): AppearancePatch =
         patch
@@ -73,6 +75,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .clear(AppearanceKeys.ShowPlatformLogo)
             .clear(AppearanceKeys.ShowLinkPreview)
             .clear(AppearanceKeys.CompatLinkPreview)
+            .clear(AppearanceKeys.ShowEmojiReactions)
 
     public fun enableMediaOverrides(
         patch: AppearancePatch,
@@ -148,6 +151,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: Boolean,
     ): AppearancePatch = patch.set(AppearanceKeys.CompatLinkPreview, value)
+
+    public fun setShowEmojiReactions(
+        patch: AppearancePatch,
+        value: Boolean,
+    ): AppearancePatch = patch.set(AppearanceKeys.ShowEmojiReactions, value)
 
     public fun setShowMedia(
         patch: AppearancePatch,

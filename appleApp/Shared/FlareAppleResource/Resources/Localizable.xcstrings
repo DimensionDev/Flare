@@ -17623,6 +17623,50 @@
         }
       }
     },
+    "appearance_show_reactions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show reactions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示回应"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示回應"
+          }
+        }
+      }
+    },
+    "appearance_show_reactions_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show emoji reactions below posts"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在帖子下方显示 Emoji 回应"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在貼文下方顯示 Emoji 回應"
+          }
+        }
+      }
+    },
     "appearance_show_sensitive_content" : {
       "localizations" : {
         "af" : {

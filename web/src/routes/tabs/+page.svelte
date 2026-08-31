@@ -74,6 +74,7 @@
 		videoAutoplay: 'WIFI',
 		showLinkPreview: true,
 		compatLinkPreview: false,
+		showEmojiReactions: true,
 		showNumbers: true,
 		postActionStyle: 'LeftAligned',
 		postActionFixedWidth: true,

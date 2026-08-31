@@ -359,6 +359,8 @@
     <string name="settings_appearance_absolute_timestamp_description">在动态上显示精确的时间戳</string>
     <string name="settings_appearance_show_platform_logo">显示来源平台图标</string>
     <string name="settings_appearance_show_platform_logo_description">显示每条动态来自哪个平台</string>
+    <string name="settings_appearance_show_reactions">显示回应</string>
+    <string name="settings_appearance_show_reactions_description">在帖子下方显示 Emoji 回应</string>
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">移除 %1$s MB 缓存图片</string>
     <string name="settings_storage_clear_database">清除缓存数据库</string>

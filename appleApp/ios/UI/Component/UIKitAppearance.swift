@@ -40,6 +40,7 @@ struct StatusUIKitAppearance: Equatable {
     let expandContentWarning: Bool
     let showLinkPreview: Bool
     let compatLinkPreview: Bool
+    let showEmojiReactions: Bool
     let expandMediaSize: Bool
     let limitMediaGridToNine: Bool
     let mediaLayout: TimelineMediaLayout
@@ -70,6 +71,7 @@ struct StatusUIKitAppearance: Equatable {
         expandContentWarning = timeline.expandContentWarning
         showLinkPreview = timeline.showLinkPreview
         compatLinkPreview = timeline.compatLinkPreview
+        showEmojiReactions = timeline.showEmojiReactions
         expandMediaSize = timeline.expandMediaSize
         limitMediaGridToNine = timeline.limitMediaGridToNine
         mediaLayout = timeline.mediaLayout
@@ -93,6 +95,7 @@ struct StatusUIKitAppearance: Equatable {
             lhs.expandContentWarning == rhs.expandContentWarning &&
             lhs.showLinkPreview == rhs.showLinkPreview &&
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
+            lhs.showEmojiReactions == rhs.showEmojiReactions &&
             lhs.expandMediaSize == rhs.expandMediaSize &&
             lhs.limitMediaGridToNine == rhs.limitMediaGridToNine &&
             lhs.mediaLayoutID == rhs.mediaLayoutID &&

@@ -86,6 +86,8 @@ import dev.dimension.flare.settings_appearance_show_numbers
 import dev.dimension.flare.settings_appearance_show_numbers_description
 import dev.dimension.flare.settings_appearance_show_platform_logo
 import dev.dimension.flare.settings_appearance_show_platform_logo_description
+import dev.dimension.flare.settings_appearance_show_reactions
+import dev.dimension.flare.settings_appearance_show_reactions_description
 import dev.dimension.flare.settings_appearance_theme_group_subtitle
 import dev.dimension.flare.settings_appearance_theme_group_title
 import dev.dimension.flare.settings_appearance_timeline_display_mode
@@ -167,7 +169,8 @@ internal fun TimelinePresentationEditor(
         appearancePatch.contains(AppearanceKeys.AbsoluteTimestamp) ||
             appearancePatch.contains(AppearanceKeys.ShowPlatformLogo) ||
             appearancePatch.contains(AppearanceKeys.ShowLinkPreview) ||
-            appearancePatch.contains(AppearanceKeys.CompatLinkPreview)
+            appearancePatch.contains(AppearanceKeys.CompatLinkPreview) ||
+            appearancePatch.contains(AppearanceKeys.ShowEmojiReactions)
     val mediaOverridesEnabled =
         appearancePatch.contains(AppearanceKeys.ShowMedia) ||
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
@@ -365,6 +368,9 @@ internal fun TimelinePresentationEditor(
                                     ).set(
                                         AppearanceKeys.CompatLinkPreview,
                                         timelineAppearance.compatLinkPreview,
+                                    ).set(
+                                        AppearanceKeys.ShowEmojiReactions,
+                                        timelineAppearance.showEmojiReactions,
                                     )
                             } else {
                                 appearancePatch.clearAll(
@@ -372,6 +378,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowPlatformLogo,
                                     AppearanceKeys.ShowLinkPreview,
                                     AppearanceKeys.CompatLinkPreview,
+                                    AppearanceKeys.ShowEmojiReactions,
                                 )
                             },
                         )
@@ -399,6 +406,20 @@ internal fun TimelinePresentationEditor(
                             onAppearancePatchChange(
                                 appearancePatch.set(
                                     AppearanceKeys.ShowPlatformLogo,
+                                    it,
+                                ),
+                            )
+                        },
+                    )
+                    ExpanderItemSeparator()
+                    SwitchItem(
+                        title = stringResource(Res.string.settings_appearance_show_reactions),
+                        caption = stringResource(Res.string.settings_appearance_show_reactions_description),
+                        checked = timelineAppearance.showEmojiReactions,
+                        onCheckedChange = {
+                            onAppearancePatchChange(
+                                appearancePatch.set(
+                                    AppearanceKeys.ShowEmojiReactions,
                                     it,
                                 ),
                             )

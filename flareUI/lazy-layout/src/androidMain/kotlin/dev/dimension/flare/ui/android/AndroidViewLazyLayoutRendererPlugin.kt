@@ -23,6 +23,8 @@ import dev.dimension.flare.ui.lazy.LazyListLayoutInfo
 import dev.dimension.flare.ui.lazy.LazyListOrientation
 import dev.dimension.flare.ui.lazy.LazyListScrollRequest
 import dev.dimension.flare.ui.lazy.LazyRealizedItemUpdate
+import dev.dimension.flare.ui.lazy.findIndexByKey
+import kotlinx.coroutines.Dispatchers
 import kotlin.math.roundToInt
 
 /** RecyclerView renderer for Flare lazy collections. */
@@ -48,6 +50,7 @@ private class AndroidViewLazyCollectionWidget(
             onModelChanged = ::applyModel,
             onScroll = ::performScroll,
             onScrollCancelled = ::cancelScroll,
+            uiDispatcher = Dispatchers.Main.immediate,
         )
     private val lazyAdapter = AndroidLazyAdapter(coordinator, ::currentModel)
     private val scrollListener =
@@ -125,14 +128,24 @@ private class AndroidViewLazyCollectionWidget(
                 LazyListOrientation.Vertical -> layoutManager.getDecoratedTop(child) - view.paddingTop
                 LazyListOrientation.Horizontal -> layoutManager.getDecoratedLeft(child) - view.paddingLeft
             }
-        return AndroidLazyAnchor(model.itemProvider.key(position), offset)
+        return AndroidLazyAnchor(
+            key = model.itemProvider.key(position),
+            index = position,
+            itemCount = model.itemProvider.itemCount,
+            offset = offset,
+        )
     }
 
     private fun restoreAnchor(
         anchor: AndroidLazyAnchor,
         model: LazyCollectionModel,
     ) {
-        val index = model.itemProvider.indexOfKey(anchor.key)
+        val index =
+            model.itemProvider.findIndexByKey(
+                key = anchor.key,
+                expectedIndex = anchor.index,
+                previousItemCount = anchor.itemCount,
+            )
         if (index >= 0) {
             layoutManager.scrollToPositionWithOffset(index, anchor.offset)
         }
@@ -241,13 +254,6 @@ private class AndroidLazyAdapter(
     private val model: () -> LazyCollectionModel,
 ) : RecyclerView.Adapter<AndroidLazyViewHolder>() {
     private val holders = mutableSetOf<AndroidLazyViewHolder>()
-    private val viewTypes = mutableMapOf<Any, Int>()
-    private val stableIds =
-        object : LinkedHashMap<Any, Long>(16, 0.75f, true) {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Any, Long>?): Boolean = size > MAX_RETAINED_STABLE_IDS
-        }
-    private var nextViewType = 0
-    private var nextStableId = 0L
 
     init {
         setHasStableIds(true)
@@ -257,27 +263,29 @@ private class AndroidLazyAdapter(
 
     override fun getItemId(position: Int): Long {
         val key = model().itemProvider.key(position)
-        return stableIds.getOrPut(key) { nextStableId++ }
+        return coordinator.itemIdentities.idFor(key)
     }
 
-    override fun getItemViewType(position: Int): Int {
-        val contentType = model().itemProvider.contentType(position) ?: NullContentType
-        return viewTypes.getOrPut(contentType) { nextViewType++ }
-    }
+    // Every Android View item uses the same LazyItemLinearLayout shell. Keeping native view types
+    // split by arbitrary business contentType only fragments RecyclerView's pool and retains one
+    // bucket per type; the Flare item host already resets composition content when it is rebound.
+    override fun getItemViewType(position: Int): Int = 0
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): AndroidLazyViewHolder = AndroidLazyViewHolder(LazyItemLinearLayout(parent.context)).also(holders::add)
+    ): AndroidLazyViewHolder = AndroidLazyViewHolder(LazyItemLinearLayout(parent.context))
 
     override fun onBindViewHolder(
         holder: AndroidLazyViewHolder,
         position: Int,
     ) {
+        holders += holder
         holder.bind(coordinator, position, model())
     }
 
     override fun onViewRecycled(holder: AndroidLazyViewHolder) {
+        holders -= holder
         holder.recycle()
     }
 
@@ -291,14 +299,6 @@ private class AndroidLazyAdapter(
     fun dispose() {
         holders.toList().forEach(AndroidLazyViewHolder::recycle)
         holders.clear()
-        stableIds.clear()
-        viewTypes.clear()
-    }
-
-    private data object NullContentType
-
-    private companion object {
-        private const val MAX_RETAINED_STABLE_IDS = 4_096
     }
 }
 
@@ -456,12 +456,7 @@ private class LazySpacingDecoration : RecyclerView.ItemDecoration() {
 
 private data class AndroidLazyAnchor(
     val key: Any,
+    val index: Int,
+    val itemCount: Int,
     val offset: Int,
 )
-
-private fun dev.dimension.flare.ui.lazy.LazyItemProvider.indexOfKey(key: Any): Int {
-    repeat(itemCount) { index ->
-        if (key(index) == key) return index
-    }
-    return -1
-}

@@ -432,6 +432,124 @@ public class UIKitLazyListTest {
     }
 
     @Test
+    public fun crossAxisResizeKeepsTheDeepStableKeyAnchor() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = FlareModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    items(count = 200, key = { it }) { index ->
+                        Text("Item $index", modifier = FlareModifier.None.height(if (index % 2 == 0) 36f else 64f))
+                    }
+                }
+            }
+
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("UIKit resize fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 200 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+            runBlocking { state.scrollToItem(index = 80, scrollOffset = 17f) }
+            awaitAppleUi("UIKit resize anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 80 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            scroll.setFrame(CGRectMake(0.0, 0.0, 220.0, 480.0))
+            scroll.setNeedsLayout()
+            awaitAppleUi("UIKit cross-axis resize changed the deep stable-key anchor.") {
+                scroll.layoutIfNeeded()
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 80 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun modelUpdateDuringDragPreservesSubsequentPhysicalScrollDelta() {
+        var items by mutableStateOf((0 until 100).toList())
+        val state = LazyListState()
+        val content: FlareContent = {
+            LazyColumn(
+                modifier = FlareModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                items(items = items, key = { it }) { item ->
+                    Text("Item $item", modifier = FlareModifier.None.height(if (item % 2 == 0) 36f else 64f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("UIKit drag-update fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 100
+            }
+            runBlocking { state.scrollToItem(index = 20, scrollOffset = 17f) }
+            awaitAppleUi("UIKit drag-update anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 20 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            val delegate = checkNotNull(scroll.delegate)
+            delegate.scrollViewWillBeginDragging(scroll)
+            val offsetAtUpdate = scroll.contentOffset.useContents { y }
+            items = listOf(-2, -1) + items
+            host.setContent(content)
+            scroll.setContentOffset(CGPointMake(0.0, offsetAtUpdate + 12.0), animated = false)
+            delegate.scrollViewDidEndDragging(scroll, willDecelerate = false)
+
+            awaitAppleUi("UIKit model update discarded the drag delta.") {
+                state.layoutInfo.totalItemsCount == 102 &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == 20 }
+                        ?.let { it.index == 22 && abs(it.offset + 29f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun contentModelUpdateKeepsTheRealizedNativeRoot() {
+        var label by mutableStateOf("Before")
+        val content: FlareContent = {
+            val labelSnapshot = label
+            LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                item(key = "stable", contentType = labelSnapshot, layoutVersion = Unit) {
+                    Text(labelSnapshot, modifier = FlareModifier.None.height(40f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            lateinit var originalRoot: UIStackView
+            awaitAppleUi("UIKit content-update fixture was not ready.") {
+                originalRoot = scroll.itemRoots().singleOrNull() ?: return@awaitAppleUi false
+                (originalRoot.arrangedSubviews.singleOrNull() as? UILabel)?.text == "Before"
+            }
+
+            label = "After"
+            host.setContent(content)
+
+            lateinit var updatedRoot: UIStackView
+            awaitAppleUi("UIKit content-only update did not reach the realized item.") {
+                updatedRoot = scroll.itemRoots().singleOrNull() ?: return@awaitAppleUi false
+                (updatedRoot.arrangedSubviews.singleOrNull() as? UILabel)?.text == "After"
+            }
+            assertTrue(updatedRoot === originalRoot, "UIKit recycled the native root for an in-place model update.")
+        }
+    }
+
+    @Test
     public fun stateScrollsToAnUnmeasuredItemWithOffsetAndReportsTheViewport() {
         val state = LazyListState()
         withLazyHost { host, _ ->

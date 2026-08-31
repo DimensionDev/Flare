@@ -117,7 +117,8 @@ private class SaveableLazyItemProvider(
     @Composable
     @FlareUiComposable
     override fun Item(index: Int) {
-        val stateKey = stateKeys.idFor(delegate.key(index))
+        val key = delegate.key(index)
+        val stateKey = stateKeys.idFor(delegate, index, key)
         stateHolder.SaveableStateProvider(stateKey) {
             delegate.Item(index)
         }
@@ -126,15 +127,32 @@ private class SaveableLazyItemProvider(
 
 private class LazySaveableKeyRegistry {
     private val stateIds = mutableMapOf<Any, Long>()
+    private val validatedIndices = mutableMapOf<Any, Int>()
     private var nextStateId: Long = 0L
 
-    fun idFor(key: Any): Long = stateIds.getOrPut(key) { nextStateId++ }
+    fun idFor(
+        provider: LazyItemProvider,
+        index: Int,
+        key: Any,
+    ): Long {
+        val previousIndex = validatedIndices[key]
+        val duplicateInCurrentProvider =
+            previousIndex != null &&
+                previousIndex != index &&
+                previousIndex in 0 until provider.itemCount &&
+                provider.key(previousIndex) == key
+        check(!duplicateInCurrentProvider) {
+            "Lazy list key $key occurs at both index $previousIndex and $index in one provider generation."
+        }
+        validatedIndices[key] = index
+        return stateIds.getOrPut(key) { nextStateId++ }
+    }
 
     fun removeMissingKeys(
         provider: LazyItemProvider,
         stateHolder: SaveableStateHolder,
     ) {
-        if (stateIds.isEmpty()) return
+        if (stateIds.isEmpty() || stateIds.size > MAX_EAGER_SAVEABLE_KEY_PRUNE_ITEMS) return
         val retainedKeys = mutableSetOf<Any>()
         repeat(provider.itemCount) { index ->
             val key = provider.key(index)
@@ -142,7 +160,9 @@ private class LazySaveableKeyRegistry {
         }
         val removed = stateIds.keys - retainedKeys
         removed.forEach { key ->
-            stateHolder.removeState(checkNotNull(stateIds.remove(key)))
+            val stateId = checkNotNull(stateIds.remove(key))
+            validatedIndices.remove(key)
+            stateHolder.removeState(stateId)
         }
     }
 }

@@ -1,7 +1,11 @@
 package dev.dimension.flare.ui.lazy
 
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 public class VariableExtentLayoutStateTest {
     @Test
@@ -108,4 +112,140 @@ public class VariableExtentLayoutStateTest {
         assertEquals(48.8, state.itemExtent(0))
         assertEquals(48.8, state.itemStart(1))
     }
+
+    @Test
+    public fun visibleRangeMatchesLinearOracleForSparseHeterogeneousExtents() {
+        val random = Random(0xF1A2E)
+
+        repeat(40) { scenario ->
+            val itemCount = random.nextInt(from = 1, until = 200)
+            val spacing = random.nextDouble(from = 0.0, until = 24.0)
+            val extents = MutableList(itemCount) { 48.0 }
+            val measuredIndices =
+                extents.indices
+                    .shuffled(random)
+                    .take(max(1, itemCount / 4))
+            measuredIndices.forEach { index ->
+                extents[index] = random.nextDouble(from = 1.0, until = 240.0)
+            }
+            val starts = extents.itemStarts(spacing)
+            val state =
+                VariableExtentLayoutState(
+                    defaultEstimatedExtent = 48.0,
+                    measurementTolerance = 0.0,
+                )
+            state.reset(itemCount, spacing, environment = "scenario-$scenario")
+            measuredIndices.shuffled(random).forEach { index ->
+                state.record(
+                    index = index,
+                    key = "item-$index",
+                    layoutVersion = Unit,
+                    contentType = index % 5,
+                    extent = extents[index],
+                )
+            }
+
+            repeat(50) {
+                val viewportStart =
+                    random.nextDouble(from = -100.0, until = state.contentExtent + 100.0)
+                val viewportEnd =
+                    random.nextDouble(from = -100.0, until = state.contentExtent + 100.0)
+                val overscan = random.nextDouble(from = 0.0, until = 100.0)
+                val queryStart = max(0.0, min(viewportStart, viewportEnd) - overscan)
+                val queryEnd = max(viewportStart, viewportEnd) + overscan
+
+                assertEquals(
+                    starts.indexAtOrBefore(queryStart)..starts.indexAtOrBefore(queryEnd),
+                    state.visibleRange(viewportStart, viewportEnd, overscan),
+                    "scenario=$scenario, viewport=$viewportStart..$viewportEnd, overscan=$overscan",
+                )
+            }
+        }
+    }
+
+    @Test
+    public fun visibleRangePreservesSpacingBoundariesAndEmptyState() {
+        val empty = VariableExtentLayoutState(defaultEstimatedExtent = 48.0)
+        empty.reset(itemCount = 0, spacing = 7.0, environment = Unit)
+        assertEquals(IntRange.EMPTY, empty.visibleRange(0.0, 1_000.0))
+
+        val state =
+            VariableExtentLayoutState(
+                defaultEstimatedExtent = 48.0,
+                measurementTolerance = 0.0,
+            )
+        state.reset(itemCount = 4, spacing = 7.0, environment = Unit)
+        listOf(10.0, 20.0, 5.0, 100.0).forEachIndexed { index, extent ->
+            state.record(index, "item-$index", Unit, null, extent)
+        }
+
+        assertEquals(0..0, state.visibleRange(10.0, 16.999))
+        assertEquals(0..1, state.visibleRange(10.0, 17.0))
+        assertEquals(1..2, state.visibleRange(50.0, 43.999))
+        assertEquals(0..3, state.visibleRange(56.0, 56.0, overscan = 1_000.0))
+    }
+
+    @Test
+    public fun sparseGeometrySupportsMaximumItemCountWithoutIndexOverflow() {
+        val itemCount = Int.MAX_VALUE
+        val lastIndex = itemCount - 1
+        val state =
+            VariableExtentLayoutState(
+                defaultEstimatedExtent = 48.0,
+                measurementTolerance = 0.0,
+            )
+        state.reset(itemCount, spacing = 1.0, environment = Unit)
+        state.record(0, "first", Unit, null, 96.0)
+        state.record(lastIndex, "last", Unit, null, 72.0)
+
+        val lastItemStart = lastIndex * 49.0 + 48.0
+        assertEquals(lastIndex..lastIndex, state.visibleRange(lastItemStart, Double.MAX_VALUE))
+        assertEquals(lastItemStart, state.itemStart(lastIndex))
+    }
+
+    @Test
+    public fun visibleRangeUsesOneFenwickDescentPerEndpoint() {
+        val itemCount = 1_000_000
+        val state =
+            VariableExtentLayoutState(
+                defaultEstimatedExtent = 48.0,
+                measurementTolerance = 0.0,
+            )
+        state.reset(itemCount, spacing = 3.0, environment = Unit)
+        listOf(0, 7, 1_024, 65_535, 500_000, itemCount - 1).forEach { index ->
+            state.record(index, "item-$index", Unit, null, 24.0 + index % 97)
+        }
+
+        val (range, nodeVisits) =
+            state.visibleRangeWithSearchNodeVisitsForTesting(
+                viewportStart = state.contentExtent * 0.45,
+                viewportEnd = state.contentExtent * 0.55,
+                overscan = 500.0,
+            )
+
+        assertEquals(
+            state.visibleRange(state.contentExtent * 0.45, state.contentExtent * 0.55, 500.0),
+            range,
+        )
+        assertTrue(nodeVisits <= 40, "Expected O(log N) node visits, but observed $nodeVisits")
+    }
+}
+
+private fun List<Double>.itemStarts(spacing: Double): List<Double> {
+    var start = 0.0
+    return map { extent ->
+        start.also { start += extent + spacing }
+    }
+}
+
+private fun List<Double>.indexAtOrBefore(offset: Double): Int {
+    var result = 0
+    forEachIndexed { index, start ->
+        if (start <= offset) {
+            result = index
+        } else {
+            return result
+        }
+    }
+    return result
 }

@@ -24,6 +24,8 @@ import kotlinx.coroutines.runBlocking
 import platform.AppKit.NSApplication
 import platform.AppKit.NSBackingStoreBuffered
 import platform.AppKit.NSScrollView
+import platform.AppKit.NSScrollViewDidEndLiveScrollNotification
+import platform.AppKit.NSScrollViewWillStartLiveScrollNotification
 import platform.AppKit.NSStackView
 import platform.AppKit.NSTextField
 import platform.AppKit.NSView
@@ -34,6 +36,7 @@ import platform.CoreFoundation.CFRunLoopRunInMode
 import platform.CoreFoundation.kCFRunLoopDefaultMode
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
+import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSThread
 import kotlin.math.abs
 import kotlin.test.Test
@@ -420,6 +423,125 @@ public class AppKitLazyListTest {
                         ?.offset
                         ?.let { abs(it + 17f) < 1f } == true
             }
+        }
+    }
+
+    @Test
+    public fun crossAxisResizeKeepsTheDeepStableKeyAnchor() {
+        val state = LazyListState()
+        withLazyHost { host, _ ->
+            host.setContent {
+                LazyColumn(
+                    modifier = FlareModifier.None.fillMaxSize(),
+                    state = state,
+                ) {
+                    items(count = 200, key = { it }) { index ->
+                        Text("Item $index", modifier = FlareModifier.None.height(if (index % 2 == 0) 36f else 64f))
+                    }
+                }
+            }
+
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit resize fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 200 && state.layoutInfo.visibleItems.isNotEmpty()
+            }
+            runBlocking { state.scrollToItem(index = 80, scrollOffset = 17f) }
+            awaitAppleUi("AppKit resize anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 80 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            scroll.setFrame(CGRectMake(0.0, 0.0, 220.0, 480.0))
+            scroll.needsLayout = true
+            awaitAppleUi("AppKit cross-axis resize changed the deep stable-key anchor.") {
+                scroll.layoutSubtreeIfNeeded()
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 80 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun modelUpdateDuringLiveScrollPreservesSubsequentPhysicalScrollDelta() {
+        var items by mutableStateOf((0 until 100).toList())
+        val state = LazyListState()
+        val content: FlareContent = {
+            LazyColumn(
+                modifier = FlareModifier.None.fillMaxSize(),
+                state = state,
+            ) {
+                items(items = items, key = { it }) { item ->
+                    Text("Item $item", modifier = FlareModifier.None.height(if (item % 2 == 0) 36f else 64f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            awaitAppleUi("AppKit live-scroll update fixture was not ready.") {
+                state.layoutInfo.totalItemsCount == 100
+            }
+            runBlocking { state.scrollToItem(index = 20, scrollOffset = 17f) }
+            awaitAppleUi("AppKit live-scroll update anchor did not settle.") {
+                state.layoutInfo.visibleItems
+                    .singleOrNull { it.key == 20 }
+                    ?.offset
+                    ?.let { abs(it + 17f) < 1f } == true
+            }
+
+            val notificationCenter = NSNotificationCenter.defaultCenter
+            notificationCenter.postNotificationName(NSScrollViewWillStartLiveScrollNotification, `object` = scroll)
+            val offsetAtUpdate = scroll.contentView().bounds.useContents { origin.y }
+            items = listOf(-2, -1) + items
+            host.setContent(content)
+            scroll.contentView().setBoundsOrigin(CGPointMake(0.0, offsetAtUpdate + 12.0))
+            scroll.reflectScrolledClipView(scroll.contentView())
+            notificationCenter.postNotificationName(NSScrollViewDidEndLiveScrollNotification, `object` = scroll)
+
+            awaitAppleUi("AppKit model update discarded the live-scroll delta.") {
+                state.layoutInfo.totalItemsCount == 102 &&
+                    state.layoutInfo.visibleItems
+                        .singleOrNull { it.key == 20 }
+                        ?.let { it.index == 22 && abs(it.offset + 29f) < 1f } == true
+            }
+        }
+    }
+
+    @Test
+    public fun contentModelUpdateKeepsTheRealizedNativeRoot() {
+        var label by mutableStateOf("Before")
+        val content: FlareContent = {
+            val labelSnapshot = label
+            LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                item(key = "stable", contentType = labelSnapshot, layoutVersion = Unit) {
+                    Text(labelSnapshot, modifier = FlareModifier.None.height(40f))
+                }
+            }
+        }
+
+        withLazyHost { host, _ ->
+            host.setContent(content)
+            val scroll = host.awaitScrollView()
+            lateinit var originalRoot: NSStackView
+            awaitAppleUi("AppKit content-update fixture was not ready.") {
+                originalRoot = scroll.itemRoots().singleOrNull() ?: return@awaitAppleUi false
+                (originalRoot.arrangedSubviews.singleOrNull() as? NSTextField)?.stringValue == "Before"
+            }
+
+            label = "After"
+            host.setContent(content)
+
+            lateinit var updatedRoot: NSStackView
+            awaitAppleUi("AppKit content-only update did not reach the realized item.") {
+                updatedRoot = scroll.itemRoots().singleOrNull() ?: return@awaitAppleUi false
+                (updatedRoot.arrangedSubviews.singleOrNull() as? NSTextField)?.stringValue == "After"
+            }
+            assertTrue(updatedRoot === originalRoot, "AppKit recycled the native root for an in-place model update.")
         }
     }
 

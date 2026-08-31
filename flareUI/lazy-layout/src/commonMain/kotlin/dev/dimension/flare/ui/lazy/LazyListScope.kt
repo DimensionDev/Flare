@@ -40,6 +40,10 @@ public interface LazyListScope {
     )
 }
 
+/**
+ * Adds [items] by reference without copying it. Treat the collection as immutable until a new
+ * provider generation is composed; replace the collection to publish an update atomically.
+ */
 public fun <T> LazyListScope.items(
     items: List<T>,
     key: (T) -> Any,
@@ -56,6 +60,7 @@ public fun <T> LazyListScope.items(
     )
 }
 
+/** Array variant of [items]; replace the array rather than mutating it in place. */
 public fun <T> LazyListScope.items(
     items: Array<T>,
     key: (T) -> Any,
@@ -72,6 +77,7 @@ public fun <T> LazyListScope.items(
     )
 }
 
+/** Indexed list variant of [items] with the same zero-copy collection contract. */
 public fun <T> LazyListScope.itemsIndexed(
     items: List<T>,
     key: (index: Int, item: T) -> Any,
@@ -88,6 +94,7 @@ public fun <T> LazyListScope.itemsIndexed(
     )
 }
 
+/** Indexed array variant of [items] with the same zero-copy collection contract. */
 public fun <T> LazyListScope.itemsIndexed(
     items: Array<T>,
     key: (index: Int, item: T) -> Any,

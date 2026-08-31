@@ -92,6 +92,103 @@ public class AndroidViewLazyListTest {
     }
 
     @Test
+    public fun stableItemIdSurvivesMoreThanFourThousandOtherKeys() {
+        withHost { host ->
+            host.setContent {
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                    items(count = 5_000, key = { index -> "item-$index" }) { index ->
+                        Text("Item $index")
+                    }
+                }
+            }
+            layout(host)
+
+            val recycler = host.getChildAt(0) as RecyclerView
+            val adapter = checkNotNull(recycler.adapter)
+            val originalId = adapter.getItemId(0)
+            repeat(4_999) { offset -> adapter.getItemId(offset + 1) }
+
+            assertTrue(adapter.hasStableIds())
+            assertEquals(originalId, adapter.getItemId(0))
+        }
+    }
+
+    @Test
+    public fun deepAnchorModelUpdateUsesNearbyKeyLookup() {
+        var generation by mutableStateOf(0)
+        var keyLookups = 0
+        withHost { host ->
+            host.setContent {
+                val generationSnapshot = generation
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                    items(
+                        count = 10_000,
+                        key = { index ->
+                            keyLookups += 1
+                            index
+                        },
+                        contentType = { generationSnapshot },
+                    ) { index ->
+                        Text("Item $index", modifier = FlareModifier.None.height(40f))
+                    }
+                }
+            }
+            layout(host)
+
+            val recycler = host.getChildAt(0) as RecyclerView
+            val layoutManager = recycler.layoutManager as LinearLayoutManager
+            layoutManager.scrollToPositionWithOffset(9_000, -17)
+            layout(host)
+
+            keyLookups = 0
+            generation = 1
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(32))
+            layout(host)
+
+            assertTrue("Deep anchor update resolved $keyLookups keys.", keyLookups < 500)
+            assertEquals(9_000, layoutManager.findFirstVisibleItemPosition())
+            assertEquals(-17, layoutManager.getDecoratedTop(checkNotNull(layoutManager.findViewByPosition(9_000))))
+        }
+    }
+
+    @Test
+    public fun largePrependUsesTheCountDeltaAnchorFastPath() {
+        var prependedItems by mutableStateOf(0)
+        var keyLookups = 0
+        withHost { host ->
+            host.setContent {
+                val prependedItemsSnapshot = prependedItems
+                LazyColumn(modifier = FlareModifier.None.fillMaxSize()) {
+                    items(
+                        count = 10_000 + prependedItemsSnapshot,
+                        key = { index ->
+                            keyLookups += 1
+                            index - prependedItemsSnapshot
+                        },
+                    ) { index ->
+                        Text("Item ${index - prependedItemsSnapshot}", modifier = FlareModifier.None.height(40f))
+                    }
+                }
+            }
+            layout(host)
+
+            val recycler = host.getChildAt(0) as RecyclerView
+            val layoutManager = recycler.layoutManager as LinearLayoutManager
+            layoutManager.scrollToPositionWithOffset(9_000, -17)
+            layout(host)
+
+            keyLookups = 0
+            prependedItems = 100
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(32))
+            layout(host)
+
+            assertTrue("Large prepend resolved $keyLookups keys.", keyLookups < 500)
+            assertEquals(9_100, layoutManager.findFirstVisibleItemPosition())
+            assertEquals(-17, layoutManager.getDecoratedTop(checkNotNull(layoutManager.findViewByPosition(9_100))))
+        }
+    }
+
+    @Test
     public fun visibleStableHolderRebindsContentWithoutRecreatingTheDataset() {
         var label by mutableStateOf("Before")
         withHost { host ->

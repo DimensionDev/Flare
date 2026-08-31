@@ -1,3 +1,5 @@
+@file:OptIn(dev.dimension.flare.ui.LowLevelFlareApi::class)
+
 package dev.dimension.flare.ui.lazy
 
 import androidx.compose.runtime.Composable
@@ -35,6 +37,42 @@ public interface LazyItemProvider {
     @Composable
     @FlareUiComposable
     public fun Item(index: Int)
+}
+
+/** Assigns renderer-safe identities to business keys for one renderer session. */
+internal class LazyItemIdentityRegistry {
+    private var idsByKey = mutableMapOf<Any, Long>()
+    private var keysById = mutableMapOf<Long, Any>()
+    private var nextId: Long = 0L
+
+    fun idFor(key: Any): Long {
+        idsByKey[key]?.let { return it }
+        check(nextId < Long.MAX_VALUE) {
+            "A lazy-list identity session exhausted the available renderer identities."
+        }
+        val id = nextId++
+        idsByKey[key] = id
+        keysById[id] = key
+        return id
+    }
+
+    /** Resolves a renderer identity without consulting a possibly newer provider generation. */
+    fun keyFor(id: Long): Any? = keysById[id]
+
+    fun removeMissingKeys(provider: LazyItemProvider) {
+        if (idsByKey.isEmpty()) return
+        val retainedIdsByKey = mutableMapOf<Any, Long>()
+        val retainedKeysById = mutableMapOf<Long, Any>()
+        repeat(provider.itemCount) { index ->
+            val key = provider.key(index)
+            idsByKey[key]?.let { id ->
+                retainedIdsByKey[key] = id
+                retainedKeysById[id] = key
+            }
+        }
+        idsByKey = retainedIdsByKey
+        keysById = retainedKeysById
+    }
 }
 
 /** Atomic model handed from the Flare composition to one platform collection renderer. */

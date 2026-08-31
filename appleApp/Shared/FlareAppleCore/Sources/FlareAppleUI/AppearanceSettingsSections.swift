@@ -191,6 +191,14 @@ public struct AppearanceDisplaySettingsSection: View {
                 Text("appearance_show_platform_logo_description", bundle: FlareAppleUILocalization.bundle)
             }
             Toggle(isOn: Binding(get: {
+                timelineAppearance.showEmojiReactions
+            }, set: { newValue in
+                presenter.state.updateShowEmojiReactions(value: newValue)
+            })) {
+                Text("appearance_show_reactions", bundle: FlareAppleUILocalization.bundle)
+                Text("appearance_show_reactions_description", bundle: FlareAppleUILocalization.bundle)
+            }
+            Toggle(isOn: Binding(get: {
                 timelineAppearance.showLinkPreview
             }, set: { newValue in
                 presenter.state.updateShowLinkPreview(value: newValue)

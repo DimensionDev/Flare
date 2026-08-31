@@ -450,6 +450,17 @@ private struct DisplayAppearanceOverrideGroup: View {
                 Text("appearance_show_platform_logo_description")
             }
             Toggle(isOn: Binding(get: {
+                timelineAppearance.showEmojiReactions
+            }, set: { value in
+                appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setShowEmojiReactions(
+                    patch: appearancePatch,
+                    value: value
+                )
+            })) {
+                Text("appearance_show_reactions")
+                Text("appearance_show_reactions_description")
+            }
+            Toggle(isOn: Binding(get: {
                 timelineAppearance.showLinkPreview
             }, set: { value in
                 appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setShowLinkPreview(

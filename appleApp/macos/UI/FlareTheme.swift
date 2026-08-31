@@ -55,6 +55,7 @@ private extension TimelineAppearance {
             videoAutoplay: videoAutoplay,
             showLinkPreview: showLinkPreview,
             compatLinkPreview: compatLinkPreview,
+            showEmojiReactions: showEmojiReactions,
             showNumbers: showNumbers,
             postActionStyle: postActionStyle,
             postActionLayout: postActionLayout,

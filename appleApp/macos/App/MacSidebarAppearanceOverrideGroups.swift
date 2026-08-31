@@ -142,6 +142,17 @@ struct MacSidebarDisplayAppearanceOverrideGroup: View {
             }
 
             Toggle(isOn: Binding(get: {
+                timelineAppearance.showEmojiReactions
+            }, set: { value in
+                appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setShowEmojiReactions(
+                    patch: appearancePatch,
+                    value: value
+                )
+            })) {
+                Text("appearance_show_reactions")
+            }
+
+            Toggle(isOn: Binding(get: {
                 timelineAppearance.showLinkPreview
             }, set: { value in
                 appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setShowLinkPreview(

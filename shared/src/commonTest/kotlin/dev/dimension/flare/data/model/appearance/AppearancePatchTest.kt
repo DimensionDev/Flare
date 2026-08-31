@@ -31,6 +31,7 @@ class AppearancePatchTest {
         assertFalse(TimelineAppearance.Default.expandContentWarning)
         assertEquals(TimelineMediaLayout.Grid, TimelineAppearance.Default.mediaLayout)
         assertEquals(true, TimelineAppearance.Default.limitMediaGridToNine)
+        assertEquals(true, TimelineAppearance.Default.showEmojiReactions)
     }
 
     @Test
@@ -59,6 +60,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.MediaLayout, TimelineMediaLayout.Carousel)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
+                .set(AppearanceKeys.ShowEmojiReactions, false)
                 .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.TimelineDisplayMode, TimelineDisplayMode.Gallery)
 
@@ -77,6 +79,7 @@ class AppearancePatchTest {
                 expandContentWarning = true,
                 mediaLayout = TimelineMediaLayout.Carousel,
                 limitMediaGridToNine = false,
+                showEmojiReactions = false,
                 postActionFixedWidth = false,
                 timelineDisplayMode = TimelineDisplayMode.Gallery,
             ),
@@ -89,18 +92,21 @@ class AppearancePatchTest {
         val globalPatch =
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, false)
+                .set(AppearanceKeys.ShowEmojiReactions, false)
                 .set(AppearanceKeys.ShowNumbers, false)
                 .set(AppearanceKeys.PostActionFixedWidth, false)
                 .set(AppearanceKeys.ExpandContentWarning, false)
         val timelinePatch =
             AppearancePatch.EMPTY
                 .set(AppearanceKeys.ShowMedia, true)
+                .set(AppearanceKeys.ShowEmojiReactions, true)
                 .set(AppearanceKeys.ExpandContentWarning, true)
 
         assertEquals(
             TimelineAppearance(
                 showMedia = true,
                 expandContentWarning = true,
+                showEmojiReactions = true,
                 showNumbers = false,
                 postActionFixedWidth = false,
             ),
@@ -156,6 +162,7 @@ class AppearancePatchTest {
                     appearancePatch =
                         AppearancePatch.EMPTY
                             .set(AppearanceKeys.ShowNumbers, false)
+                            .set(AppearanceKeys.ShowEmojiReactions, false)
                             .set(AppearanceKeys.ExpandContentWarning, true)
                             .set(AppearanceKeys.AbsoluteTimestamp, true),
                 ).toUiTimelineTabItem()
@@ -170,6 +177,7 @@ class AppearancePatchTest {
         assertEquals(
             TimelineAppearance(
                 showNumbers = false,
+                showEmojiReactions = false,
                 expandContentWarning = true,
                 absoluteTimestamp = true,
                 aiConfig = TimelineAppearance.AiConfig(translation = true),
@@ -190,6 +198,7 @@ class AppearancePatchTest {
                 AppearanceKeys.ExpandContentWarning,
                 AppearanceKeys.MediaLayout,
                 AppearanceKeys.LimitMediaGridToNine,
+                AppearanceKeys.ShowEmojiReactions,
                 AppearanceKeys.PostActionLayout,
                 AppearanceKeys.PostActionFixedWidth,
             )
@@ -248,6 +257,7 @@ class AppearancePatchTest {
                 .set(AppearanceKeys.ShowMedia, false)
                 .set(AppearanceKeys.ExpandContentWarning, true)
                 .set(AppearanceKeys.LimitMediaGridToNine, false)
+                .set(AppearanceKeys.ShowEmojiReactions, false)
                 .set(AppearanceKeys.VideoAutoplay, VideoAutoplay.ALWAYS)
                 .set(AppearanceKeys.PostActionStyle, PostActionStyle.Stretch)
                 .set(AppearanceKeys.PostActionFixedWidth, false)

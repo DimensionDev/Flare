@@ -444,11 +444,14 @@ public fun CommonStatusComponent(
                 )
             }
 
-            if (!isQuote && (item.emojiReactions.isNotEmpty() || item.sourceChannel != null)) {
+            val hasVisibleEmojiReactions =
+                appearanceSettings.showEmojiReactions && item.emojiReactions.isNotEmpty()
+            if (!isQuote && (hasVisibleEmojiReactions || item.sourceChannel != null)) {
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusReactionComponent(
                     data = item,
                     isDetail = isDetail,
+                    showEmojiReactions = hasVisibleEmojiReactions,
                 )
             }
 
@@ -621,6 +624,7 @@ private fun StatusQuoteComponent(
 private fun StatusReactionComponent(
     data: UiTimelineV2.Post,
     isDetail: Boolean,
+    showEmojiReactions: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -649,7 +653,7 @@ private fun StatusReactionComponent(
                 )
             }
         }
-        if (data.emojiReactions.isNotEmpty()) {
+        if (showEmojiReactions) {
             // the original FlowRow without overflow just call the
             // FlowRow with overflow, so suppress the deprecation
             // since the original one just call the FlowRow with overflow

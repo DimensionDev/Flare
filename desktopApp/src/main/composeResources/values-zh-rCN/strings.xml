@@ -378,6 +378,8 @@
     <string name="settings_appearance_absolute_timestamp_description">在内容上显示准确的具体时间</string>
     <string name="settings_appearance_show_platform_logo">显示来源平台图标</string>
     <string name="settings_appearance_show_platform_logo_description">显示每条内容的来源平台</string>
+    <string name="settings_appearance_show_reactions">显示回应</string>
+    <string name="settings_appearance_show_reactions_description">在帖子下方显示 Emoji 回应</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我们的 Telegram 群组</string>

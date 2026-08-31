@@ -83,6 +83,8 @@ public object AppearanceKeys {
 
     public object CompatLinkPreview : PerTimeline<Boolean>("timeline.compat_link_preview", false, Boolean.serializer())
 
+    public object ShowEmojiReactions : PerTimeline<Boolean>("timeline.show_emoji_reactions", true, Boolean.serializer())
+
     public object ShowNumbers : PerTimeline<Boolean>("timeline.show_numbers", true, Boolean.serializer())
 
     public object PostActionStyle : PerTimeline<AppearancePostActionStyle>(
@@ -139,6 +141,7 @@ public object AppearanceKeys {
             VideoAutoplay,
             ShowLinkPreview,
             CompatLinkPreview,
+            ShowEmojiReactions,
             ShowNumbers,
             PostActionStyle,
             PostActionLayout,

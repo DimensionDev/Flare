@@ -80,6 +80,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateCompatLinkPreview(value: Boolean) = update(AppearanceKeys.CompatLinkPreview, value)
 
+            override fun updateShowEmojiReactions(value: Boolean) = update(AppearanceKeys.ShowEmojiReactions, value)
+
             override fun updateInAppBrowser(value: Boolean) = update(AppearanceKeys.InAppBrowser, value)
 
             override fun updateShowMedia(value: Boolean) = update(AppearanceKeys.ShowMedia, value)
@@ -163,6 +165,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updateShowLinkPreview(value: Boolean)
 
         public fun updateCompatLinkPreview(value: Boolean)
+
+        public fun updateShowEmojiReactions(value: Boolean)
 
         public fun updateInAppBrowser(value: Boolean)
 

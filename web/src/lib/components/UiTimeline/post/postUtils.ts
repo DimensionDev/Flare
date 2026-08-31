@@ -23,6 +23,7 @@ export const defaultTimelineAppearance = {
 	postActionFixedWidth: true,
 	postActionStyle: 'LeftAligned',
 	showLinkPreview: true,
+	showEmojiReactions: true,
 	showMedia: true,
 	showNumbers: true,
 	showPlatformLogo: true,

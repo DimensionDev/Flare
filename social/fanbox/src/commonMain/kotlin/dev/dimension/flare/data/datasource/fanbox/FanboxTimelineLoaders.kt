@@ -118,7 +118,7 @@ internal class FanboxCreatorTimelineLoader(
         nextKey: String?,
     ): FanboxPostPage {
         val creatorId = creatorKey.resolveCreatorId() ?: return FanboxPostPage(emptyList(), null)
-        val pages = service.paginateCreatorPosts(creatorId = creatorId).body
+        val pages = service.paginateCreatorPosts(creatorId = creatorId).body.pageUrls
         val currentPage = nextKey ?: pages.firstOrNull()
         val nextPage =
             currentPage
@@ -140,7 +140,7 @@ internal class FanboxCreatorTimelineLoader(
                 maxId = cursor.maxId,
             )
         return FanboxPostPage(
-            items = response.body,
+            items = response.body.posts,
             nextKey = nextPage,
         )
     }

@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -136,6 +137,8 @@ internal fun FanboxPostDetailBody.toUiArticle(
                 body
                     ?.toArticleBlocks(
                         postId = id,
+                        postType = type,
+                        sourceUrl = sourceUrl,
                         sensitive = hasAdultContent,
                         imageHeaders = imageHeaders,
                     ).orEmpty()
@@ -341,14 +344,47 @@ private fun FanboxUserEntity.profileRoute(
 
 private fun FanboxPostDetailBody.BodyContent.toArticleBlocks(
     postId: String,
+    postType: String,
+    sourceUrl: String,
     sensitive: Boolean,
     imageHeaders: ImmutableMap<String, String>? = null,
 ): List<UiArticleBlock> {
+    if (postType == "entry" && !html.isNullOrBlank()) {
+        val htmlBlocks =
+            html.toArticleHtmlBlocks(
+                keyPrefix = "$postId:html",
+                sensitive = sensitive,
+                imageHeaders = imageHeaders,
+            )
+        if (htmlBlocks.isNotEmpty()) {
+            return htmlBlocks
+        }
+    }
+
+    if (postType == "video") {
+        val videoBlocks =
+            buildList<UiArticleBlock> {
+                text
+                    ?.takeIf { it.isNotBlank() }
+                    ?.toArticleTextBlock(key = "$postId:text")
+                    ?.let(::add)
+                video
+                    ?.toArticleEmbedBlock(
+                        key = "$postId:video",
+                        fallbackUrl = sourceUrl,
+                    )?.let(::add)
+            }
+        if (videoBlocks.isNotEmpty()) {
+            return videoBlocks
+        }
+    }
+
     if (blocks.isNotEmpty()) {
         return blocks.flatMapIndexed { index, block ->
             block.toArticleBlocks(
                 keyPrefix = "$postId:block:$index",
                 content = this,
+                sourceUrl = sourceUrl,
                 sensitive = sensitive,
                 imageHeaders = imageHeaders,
             )
@@ -381,6 +417,7 @@ private fun FanboxPostDetailBody.BodyContent.toArticleBlocks(
 private fun FanboxPostDetailBody.Block.toArticleBlocks(
     keyPrefix: String,
     content: FanboxPostDetailBody.BodyContent,
+    sourceUrl: String,
     sensitive: Boolean,
     imageHeaders: ImmutableMap<String, String>? = null,
 ): List<UiArticleBlock> {
@@ -389,6 +426,8 @@ private fun FanboxPostDetailBody.Block.toArticleBlocks(
             it.toArticleTextBlock(
                 key = keyPrefix,
                 headingLevel = type.toArticleHeadingLevel(),
+                styles = styles.orEmpty(),
+                links = links.orEmpty(),
             ),
         )
     }
@@ -417,8 +456,17 @@ private fun FanboxPostDetailBody.Block.toArticleBlocks(
             return listOf(
                 it.toArticleEmbedBlock(
                     key = "$keyPrefix:embed:${it.id}",
+                    fallbackUrl = sourceUrl,
                 ),
             )
+        }
+    embedId
+        ?.let(content.embedMap::get)
+        ?.toArticleEmbedBlock(
+            key = "$keyPrefix:embed:$embedId",
+            fallbackUrl = sourceUrl,
+        )?.let {
+            return listOf(it)
         }
     return emptyList()
 }
@@ -426,49 +474,147 @@ private fun FanboxPostDetailBody.Block.toArticleBlocks(
 private fun String.toArticleTextBlock(
     key: String,
     headingLevel: Int? = null,
+    styles: List<FanboxPostDetailBody.Style> = emptyList(),
+    links: List<FanboxPostDetailBody.Link> = emptyList(),
 ): UiArticleBlock.Text =
     UiArticleBlock.Text(
         key = key,
         content =
             RenderContent.Text(
-                runs = toArticleTextRuns().toImmutableList(),
+                runs = toArticleTextRuns(styles, links).toImmutableList(),
                 block = RenderBlockStyle(headingLevel = headingLevel),
             ),
     )
 
-private fun String.toArticleTextRuns(): List<RenderRun.Text> =
-    buildList {
-        var previousEnd = 0
-        FANBOX_ARTICLE_URL_REGEX.findAll(this@toArticleTextRuns).forEach { match ->
-            if (match.range.first > previousEnd) {
-                add(RenderRun.Text(text = substring(previousEnd, match.range.first)))
+private fun String.toArticleTextRuns(
+    styles: List<FanboxPostDetailBody.Style>,
+    links: List<FanboxPostDetailBody.Link>,
+): List<RenderRun.Text> {
+    val styleRanges =
+        styles.mapNotNull { style ->
+            val offset = style.offset ?: return@mapNotNull null
+            val spanLength = style.length ?: return@mapNotNull null
+            val type = style.type ?: return@mapNotNull null
+            fanboxTextRange(offset, spanLength, length)?.let { it to type }
+        }
+    val explicitLinkRanges =
+        links.mapNotNull { link ->
+            val offset = link.offset ?: return@mapNotNull null
+            val spanLength = link.length ?: return@mapNotNull null
+            link.url
+                ?.httpUrlOrNull()
+                ?.let { url -> fanboxTextRange(offset, spanLength, length)?.let { it to url } }
+        }
+    val detectedLinkRanges =
+        FANBOX_ARTICLE_URL_REGEX
+            .findAll(this)
+            .mapNotNull { match ->
+                match.value
+                    .trimEndUrlPunctuation()
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { url -> (match.range.first until match.range.first + url.length) to url }
+            }.toList()
+    val linkRanges = explicitLinkRanges + detectedLinkRanges
+    val boundaries =
+        buildSet {
+            add(0)
+            add(length)
+            (styleRanges + linkRanges).forEach { (range) ->
+                add(range.first)
+                add(range.last + 1)
             }
-            val rawUrl = match.value
-            val url = rawUrl.trimEndUrlPunctuation()
-            if (url.isNotEmpty()) {
-                add(
-                    RenderRun.Text(
-                        text = url,
-                        style = RenderTextStyle(link = url),
-                    ),
+        }.sorted()
+
+    return boundaries
+        .zipWithNext()
+        .mapNotNull { (start, endExclusive) ->
+            if (start >= endExclusive) {
+                return@mapNotNull null
+            }
+            var style =
+                RenderTextStyle(
+                    link = linkRanges.firstOrNull { (range) -> start in range }?.second,
                 )
+            styleRanges.forEach { (range, type) ->
+                if (start in range) {
+                    style = style.withFanboxStyle(type)
+                }
             }
-            val suffix = rawUrl.removePrefix(url)
-            if (suffix.isNotEmpty()) {
-                add(RenderRun.Text(text = suffix))
-            }
-            previousEnd = match.range.last + 1
-        }
-        if (previousEnd < this@toArticleTextRuns.length) {
-            add(RenderRun.Text(text = substring(previousEnd)))
-        }
-        if (isEmpty()) {
-            add(RenderRun.Text(text = this@toArticleTextRuns))
-        }
+            RenderRun.Text(
+                text = substring(start, endExclusive),
+                style = style,
+            )
+        }.ifEmpty { listOf(RenderRun.Text(text = this)) }
+}
+
+private fun fanboxTextRange(
+    offset: Int,
+    length: Int,
+    textLength: Int,
+): IntRange? {
+    if (offset < 0 || offset >= textLength || length <= 0) {
+        return null
+    }
+    val endExclusive = minOf(textLength.toLong(), offset.toLong() + length.toLong()).toInt()
+    return (offset until endExclusive).takeUnless { it.isEmpty() }
+}
+
+private fun RenderTextStyle.withFanboxStyle(type: String): RenderTextStyle =
+    when (type.lowercase()) {
+        "bold" -> copy(bold = true)
+        "italic" -> copy(italic = true)
+        "strike", "strikethrough" -> copy(strikethrough = true)
+        "underline" -> copy(underline = true)
+        "code", "monospace" -> copy(monospace = true, code = true)
+        else -> this
     }
 
 private fun String.trimEndUrlPunctuation(): String =
     trimEnd('.', ',', '!', '?', ';', ':', ')', ']', '}', '>', '。', '、', '，', '！', '？', '；', '：')
+
+private fun String.httpUrlOrNull(): String? =
+    trim().takeIf {
+        it.startsWith("https://", ignoreCase = true) || it.startsWith("http://", ignoreCase = true)
+    }
+
+private fun String.toArticleHtmlBlocks(
+    keyPrefix: String,
+    sensitive: Boolean,
+    imageHeaders: ImmutableMap<String, String>? = null,
+): List<UiArticleBlock> =
+    parseHtml(this)
+        .toUi()
+        .renderRuns
+        .mapIndexedNotNull { index, content ->
+            when (content) {
+                is RenderContent.Text -> {
+                    UiArticleBlock.Text(
+                        key = "$keyPrefix:$index",
+                        content = content,
+                    )
+                }
+
+                is RenderContent.BlockImage -> {
+                    content.url
+                        .takeIf { it.isNotBlank() }
+                        ?.let { url ->
+                            UiArticleBlock.Image(
+                                key = "$keyPrefix:image:$index",
+                                media =
+                                    UiMedia.Image(
+                                        url = url,
+                                        previewUrl = url,
+                                        description = null,
+                                        height = 0f,
+                                        width = 0f,
+                                        sensitive = sensitive,
+                                        customHeaders = imageHeaders,
+                                    ),
+                            )
+                        }
+                }
+            }
+        }
 
 private fun String.toArticleHeadingLevel(): Int? =
     when (this) {
@@ -552,10 +698,57 @@ private fun FanboxPostDetailBody.FileItem.articleFileExtension(): String =
         .orEmpty()
         .lowercase()
 
-private fun FanboxPostDetailBody.UrlEmbed.toArticleEmbedBlock(key: String): UiArticleBlock.Embed =
+private fun FanboxPostDetailBody.ProviderEmbed.toArticleEmbedBlock(
+    key: String,
+    fallbackUrl: String,
+): UiArticleBlock.Embed? {
+    val provider = serviceProvider?.trim()?.takeIf { it.isNotEmpty() }
+    val id = (videoId ?: contentId)?.trim()?.takeIf { it.isNotEmpty() }
+    if (provider == null && id == null) {
+        return null
+    }
+    return UiArticleBlock.Embed(
+        key = key,
+        url = fanboxProviderUrl(provider, id) ?: fallbackUrl,
+        title = provider?.toFanboxProviderTitle(),
+    )
+}
+
+private fun fanboxProviderUrl(
+    provider: String?,
+    contentId: String?,
+): String? {
+    val id = contentId ?: return null
+    id.httpUrlOrNull()?.let {
+        return it
+    }
+    return when (provider?.lowercase()) {
+        "youtube" -> "https://www.youtube.com/watch?v=$id"
+        "vimeo" -> "https://vimeo.com/$id"
+        "twitter" -> "https://x.com/i/web/status/$id"
+        "google_forms" -> "https://docs.google.com/forms/d/e/$id/viewform"
+        else -> null
+    }
+}
+
+private fun String.toFanboxProviderTitle(): String =
+    when (lowercase()) {
+        "youtube" -> "YouTube"
+        "vimeo" -> "Vimeo"
+        "twitter" -> "X / Twitter"
+        "soundcloud" -> "SoundCloud"
+        "google_forms" -> "Google Forms"
+        "fanbox" -> "pixivFANBOX"
+        else -> replace('_', ' ')
+    }
+
+private fun FanboxPostDetailBody.UrlEmbed.toArticleEmbedBlock(
+    key: String,
+    fallbackUrl: String,
+): UiArticleBlock.Embed =
     UiArticleBlock.Embed(
         key = key,
-        url = postInfo?.let { fanboxPostUrl(it.creatorId, it.id) },
+        url = url?.httpUrlOrNull() ?: postInfo?.let { fanboxPostUrl(it.creatorId, it.id) } ?: fallbackUrl,
         title = postInfo?.title,
         description = postInfo?.excerpt?.takeIf { it.isNotBlank() },
         imageUrl = postInfo?.cover?.url,

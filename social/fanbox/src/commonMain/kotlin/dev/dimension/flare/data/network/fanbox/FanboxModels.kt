@@ -123,14 +123,26 @@ internal data class FanboxPostListResponse(
 @Serializable
 internal data class FanboxCreatorPostListResponse(
     @SerialName("body")
-    val body: List<FanboxPostEntity> = emptyList(),
-)
+    val body: Body = Body(),
+) {
+    @Serializable
+    internal data class Body(
+        @SerialName("posts")
+        val posts: List<FanboxPostEntity> = emptyList(),
+    )
+}
 
 @Serializable
 internal data class FanboxCreatorPostPagesResponse(
     @SerialName("body")
-    val body: List<String> = emptyList(),
-)
+    val body: Body = Body(),
+) {
+    @Serializable
+    internal data class Body(
+        @SerialName("pageUrls")
+        val pageUrls: List<String> = emptyList(),
+    )
+}
 
 @Serializable
 internal data class FanboxPostSearchResponse(
@@ -202,8 +214,14 @@ internal data class FanboxPostDetailBody(
     internal data class BodyContent(
         @SerialName("text")
         val text: String? = null,
+        @SerialName("video")
+        val video: ProviderEmbed? = null,
+        @SerialName("html")
+        val html: String? = null,
         @SerialName("blocks")
         val blocks: List<Block> = emptyList(),
+        @SerialName("embedMap")
+        val embedMap: Map<String, ProviderEmbed> = emptyMap(),
         @SerialName("fileMap")
         val fileMap: Map<String, FileItem> = emptyMap(),
         @SerialName("imageMap")
@@ -228,6 +246,42 @@ internal data class FanboxPostDetailBody(
         val fileId: String? = null,
         @SerialName("urlEmbedId")
         val urlEmbedId: String? = null,
+        @SerialName("embedId")
+        val embedId: String? = null,
+        @SerialName("styles")
+        val styles: List<Style>? = null,
+        @SerialName("links")
+        val links: List<Link>? = null,
+    )
+
+    @Serializable
+    internal data class Style(
+        @SerialName("type")
+        val type: String? = null,
+        @SerialName("offset")
+        val offset: Int? = null,
+        @SerialName("length")
+        val length: Int? = null,
+    )
+
+    @Serializable
+    internal data class Link(
+        @SerialName("offset")
+        val offset: Int? = null,
+        @SerialName("length")
+        val length: Int? = null,
+        @SerialName("url")
+        val url: String? = null,
+    )
+
+    @Serializable
+    internal data class ProviderEmbed(
+        @SerialName("serviceProvider")
+        val serviceProvider: String? = null,
+        @SerialName("videoId")
+        val videoId: String? = null,
+        @SerialName("contentId")
+        val contentId: String? = null,
     )
 
     @Serializable
@@ -266,6 +320,8 @@ internal data class FanboxPostDetailBody(
         val id: String = "",
         @SerialName("type")
         val type: String = "",
+        @SerialName("url")
+        val url: String? = null,
         @SerialName("html")
         val html: String? = null,
         @SerialName("postInfo")

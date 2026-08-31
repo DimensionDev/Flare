@@ -40,6 +40,8 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         subtitleLabel.adjustsFontForContentSizeCategory = true
         addSubview(subtitleLabel)
 
+        isAccessibilityElement = true
+        accessibilityTraits = .button
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
         addGestureRecognizer(tap)
     }
@@ -70,6 +72,10 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         } else {
             subtitleLabel.text = data.url
         }
+        accessibilityLabel = [data.title, subtitleLabel.text, data.media?.accessibleDescription]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: ", ")
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -146,6 +152,12 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         guard let urlString = data?.url, let url = URL(string: urlString) else { return }
         onOpenURL?(url)
     }
+
+    override func accessibilityActivate() -> Bool {
+        guard data != nil else { return false }
+        onTapFired()
+        return true
+    }
 }
 
 // MARK: - StatusCompatCardUIView
@@ -188,6 +200,8 @@ final class StatusCompatCardUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         subtitleLabel.adjustsFontForContentSizeCategory = true
         addSubview(subtitleLabel)
 
+        isAccessibilityElement = true
+        accessibilityTraits = .button
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapFired))
         addGestureRecognizer(tap)
     }
@@ -211,6 +225,10 @@ final class StatusCompatCardUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         } else {
             subtitleLabel.text = data.url
         }
+        accessibilityLabel = [data.title, subtitleLabel.text, data.media?.accessibleDescription]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: ", ")
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -286,5 +304,11 @@ final class StatusCompatCardUIView: UIView, ManualLayoutMeasurable, TimelineHeig
     @objc private func onTapFired() {
         guard let urlString = data?.url, let url = URL(string: urlString) else { return }
         onOpenURL?(url)
+    }
+
+    override func accessibilityActivate() -> Bool {
+        guard data != nil else { return false }
+        onTapFired()
+        return true
     }
 }

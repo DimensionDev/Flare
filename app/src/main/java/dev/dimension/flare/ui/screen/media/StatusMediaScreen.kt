@@ -80,6 +80,11 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
@@ -120,6 +125,7 @@ import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
@@ -369,7 +375,7 @@ internal fun MediaViewerScreen(
                                                     url = imageUrl,
                                                     previewUrl = previewUrl,
                                                     customHeaders = media.customHeaders,
-                                                    description = media.description,
+                                                    description = media.accessibleDescription(),
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
                                                     },
@@ -396,7 +402,7 @@ internal fun MediaViewerScreen(
                                                         uri = media.url,
                                                         customHeaders = media.customHeaders,
                                                         previewUri = media.thumbnailUrl,
-                                                        contentDescription = media.description,
+                                                        contentDescription = media.accessibleDescription(),
                                                         modifier = Modifier.fillMaxSize(),
                                                         aspectRatio = media.aspectRatio,
                                                         autoPlay = true,
@@ -422,7 +428,7 @@ internal fun MediaViewerScreen(
                                                     uri = media.url,
                                                     customHeaders = media.customHeaders,
                                                     previewUri = null,
-                                                    contentDescription = media.description,
+                                                    contentDescription = media.accessibleDescription(),
                                                     autoPlay = false,
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
@@ -952,6 +958,8 @@ private fun MediaPageSlider(
     }
 
     val sliderPage = sliderValue.roundToInt().coerceIn(0, maxPage)
+    val positionLabel = stringResource(R.string.media_page_position)
+    val pageDescription = stringResource(R.string.media_page_of, sliderPage + 1, pageCount)
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -980,7 +988,13 @@ private fun MediaPageSlider(
             },
             valueRange = 0f..maxPage.toFloat(),
             steps = (pageCount - 2).coerceAtLeast(0),
-            modifier = Modifier.weight(1f),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .semantics {
+                        contentDescription = positionLabel
+                        stateDescription = pageDescription
+                    },
         )
         Text(
             text = pageCount.toString(),
@@ -998,6 +1012,7 @@ private fun PlayerControl(
     playbackSpeed: Float = NORMAL_PLAYBACK_SPEED,
 ) {
     val playPauseButtonState = rememberPlayPauseButtonState(player)
+    val playbackPositionLabel = stringResource(R.string.media_playback_position)
     var isLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(player) {
         while (!isLoaded) {
@@ -1082,7 +1097,14 @@ private fun PlayerControl(
                         } else {
                             FontAwesomeIcons.Solid.Pause
                         },
-                        contentDescription = null,
+                        contentDescription =
+                            stringResource(
+                                if (playPauseButtonState.showPlay) {
+                                    R.string.media_play
+                                } else {
+                                    R.string.media_pause
+                                },
+                            ),
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -1102,7 +1124,12 @@ private fun PlayerControl(
                         player.seekTo((player.duration * sliderValue).toLong())
                         isSliderChanging = false
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .semantics {
+                                contentDescription = playbackPositionLabel
+                            },
                 )
                 Text(time)
                 Spacer(Modifier.width(screenHorizontalPadding))
@@ -1250,11 +1277,22 @@ private fun SeekFeedbackOverlay(feedback: SeekFeedback?) {
 
 @Composable
 private fun SeekFeedbackContent(feedback: SeekFeedback) {
+    val description =
+        stringResource(
+            when (feedback) {
+                SeekFeedback.Backward -> R.string.media_seek_backward
+                SeekFeedback.Forward -> R.string.media_seek_forward
+            },
+        )
     Column(
         modifier =
             Modifier
                 .background(Color.Black.copy(alpha = 0.55f), CircleShape)
-                .padding(20.dp),
+                .padding(20.dp)
+                .semantics {
+                    contentDescription = description
+                    liveRegion = LiveRegionMode.Polite
+                },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

@@ -14,14 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.profile_open_user
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun CommonStatusHeaderComponent(
@@ -31,10 +35,15 @@ public fun CommonStatusHeaderComponent(
     leadingContent: @Composable (RowScope.() -> Unit)? = {
         AvatarComponent(
             data = data.avatar,
+            contentDescription =
+                stringResource(
+                    Res.string.profile_open_user,
+                    data.handle.canonical,
+                ),
             modifier =
                 Modifier
                     .pointerHoverIcon(PointerIcon.Hand)
-                    .clickable {
+                    .clickable(role = Role.Button) {
                         onUserClick(data.key)
                     },
         )

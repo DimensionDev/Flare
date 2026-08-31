@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -53,6 +54,11 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -70,10 +76,20 @@ import dev.dimension.flare.cancel
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.ImageClipboardManager
 import dev.dimension.flare.common.ImageDragAndDropTarget
+import dev.dimension.flare.compose_add_media
+import dev.dimension.flare.compose_add_poll_option
+import dev.dimension.flare.compose_change_visibility
 import dev.dimension.flare.compose_close_confirm_message
 import dev.dimension.flare.compose_close_confirm_title
 import dev.dimension.flare.compose_content_warning_hint
+import dev.dimension.flare.compose_disable_content_warning
+import dev.dimension.flare.compose_disable_poll
+import dev.dimension.flare.compose_edit_alt_text
+import dev.dimension.flare.compose_enable_content_warning
+import dev.dimension.flare.compose_enable_poll
+import dev.dimension.flare.compose_hide_emoji_picker
 import dev.dimension.flare.compose_hint
+import dev.dimension.flare.compose_image_no_alt
 import dev.dimension.flare.compose_media_sensitive
 import dev.dimension.flare.compose_poll_expiration_12_hours
 import dev.dimension.flare.compose_poll_expiration_1_day
@@ -87,6 +103,12 @@ import dev.dimension.flare.compose_poll_expiration_at
 import dev.dimension.flare.compose_poll_multiple_choice
 import dev.dimension.flare.compose_poll_option_hint
 import dev.dimension.flare.compose_poll_single_choice
+import dev.dimension.flare.compose_remove_media
+import dev.dimension.flare.compose_remove_poll_option
+import dev.dimension.flare.compose_select_accounts
+import dev.dimension.flare.compose_send
+import dev.dimension.flare.compose_show_emoji_picker
+import dev.dimension.flare.compose_video_no_alt
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.PostActionStyle
@@ -317,6 +339,8 @@ fun ComposeDialog(
                         val selectedProfiles = users.mapNotNull { it.takeSuccess() }
                         val accounts = accountUsers.mapNotNull { it.takeSuccess() }
                         if (accounts.isNotEmpty()) {
+                            val accountSelectorDescription =
+                                stringResource(Res.string.compose_select_accounts)
                             MenuFlyoutContainer(
                                 flyout = {
                                     accounts.forEach { data ->
@@ -337,6 +361,7 @@ fun ComposeDialog(
                                                     }
                                                     CheckBox(
                                                         checked = selected,
+                                                        modifier = Modifier.clearAndSetSemantics { },
                                                         onCheckStateChange = {
                                                             state.state.selectAccount(data.key)
                                                         },
@@ -366,6 +391,11 @@ fun ComposeDialog(
                                     content = {
                                         ComposeAccountSelector(
                                             selectedProfiles = selectedProfiles,
+                                            modifier =
+                                                Modifier.semantics {
+                                                    contentDescription =
+                                                        accountSelectorDescription
+                                                },
                                         )
                                     },
                                 )
@@ -503,10 +533,23 @@ fun ComposeDialog(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             mediaState.medias.forEach { (uri, altTextState) ->
+                                val editAltTextDescription =
+                                    stringResource(Res.string.compose_edit_alt_text)
+                                val mediaDescription =
+                                    altTextState.text
+                                        .toString()
+                                        .takeIf { it.isNotBlank() }
+                                        ?: stringResource(
+                                            if (uri.extension.lowercase() in videoExtensions) {
+                                                Res.string.compose_video_no_alt
+                                            } else {
+                                                Res.string.compose_image_no_alt
+                                            },
+                                        )
                                 Box {
                                     NetworkImage(
                                         model = uri.absolutePath,
-                                        contentDescription = altTextState.text.toString(),
+                                        contentDescription = mediaDescription,
                                         modifier =
                                             Modifier
                                                 .size(128.dp)
@@ -556,6 +599,12 @@ fun ComposeDialog(
                                                     onClick = {
                                                         isFlyoutVisible = true
                                                     },
+                                                    modifier =
+                                                        Modifier.semantics {
+                                                            contentDescription =
+                                                                editAltTextDescription
+                                                            role = Role.Button
+                                                        },
                                                 ) {
                                                     Text("ALT")
                                                 }
@@ -568,7 +617,7 @@ fun ComposeDialog(
                                         ) {
                                             FAIcon(
                                                 imageVector = FontAwesomeIcons.Solid.Xmark,
-                                                contentDescription = null,
+                                                contentDescription = stringResource(Res.string.compose_remove_media),
                                             )
                                         }
                                     }
@@ -582,17 +631,19 @@ fun ComposeDialog(
                                     Modifier
                                         .padding(horizontal = screenHorizontalPadding)
                                         .fillMaxWidth()
-                                        .clickable(
+                                        .toggleable(
+                                            value = mediaState.isMediaSensitive,
+                                            role = Role.Checkbox,
                                             interactionSource = sensitiveInteractionSource,
                                             indication = null,
-                                        ) {
-                                            mediaState.setMediaSensitive(!mediaState.isMediaSensitive)
-                                        },
+                                            onValueChange = mediaState::setMediaSensitive,
+                                        ),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 CheckBox(
                                     checked = mediaState.isMediaSensitive,
+                                    modifier = Modifier.clearAndSetSemantics { },
                                     onCheckStateChange = { mediaState.setMediaSensitive(it) },
 //                                    interactionSource = sensitiveInteractionSource,
                                 )
@@ -647,7 +698,7 @@ fun ComposeDialog(
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.Plus,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(Res.string.compose_add_poll_option),
                                     modifier = Modifier.size(16.dp),
                                 )
                             }
@@ -772,7 +823,7 @@ fun ComposeDialog(
                         ) {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.Image,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.compose_add_media),
                             )
                         }
                     }
@@ -788,11 +839,24 @@ fun ComposeDialog(
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.SquarePollHorizontal,
-                            contentDescription = null,
+                            contentDescription =
+                                stringResource(
+                                    if (it.enabled) {
+                                        Res.string.compose_disable_poll
+                                    } else {
+                                        Res.string.compose_enable_poll
+                                    },
+                                ),
                         )
                     }
                 }
                 state.state.visibilityState.onSuccess { visibilityState ->
+                    val visibilityName = stringResource(visibilityState.visibility.localName)
+                    val visibilityDescription =
+                        stringResource(
+                            Res.string.compose_change_visibility,
+                            visibilityName,
+                        )
                     MenuFlyoutContainer(
                         flyout = {
                             visibilityState.allVisibilities.forEach { visibility ->
@@ -830,7 +894,13 @@ fun ComposeDialog(
                             iconOnly = true,
                             modifier = Modifier.padding(4.dp),
                         ) {
-                            StatusVisibilityComponent(visibility = visibilityState.visibility)
+                            StatusVisibilityComponent(
+                                visibility = visibilityState.visibility,
+                                modifier =
+                                    Modifier.semantics {
+                                        contentDescription = visibilityDescription
+                                    },
+                            )
                         }
                     }
                 }
@@ -844,7 +914,14 @@ fun ComposeDialog(
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
-                            contentDescription = null,
+                            contentDescription =
+                                stringResource(
+                                    if (it.enabled) {
+                                        Res.string.compose_disable_content_warning
+                                    } else {
+                                        Res.string.compose_enable_content_warning
+                                    },
+                                ),
                         )
                     }
                 }
@@ -876,7 +953,14 @@ fun ComposeDialog(
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.FaceSmile,
-                                    contentDescription = null,
+                                    contentDescription =
+                                        stringResource(
+                                            if (isFlyoutVisible) {
+                                                Res.string.compose_hide_emoji_picker
+                                            } else {
+                                                Res.string.compose_show_emoji_picker
+                                            },
+                                        ),
                                 )
                             }
                         }
@@ -940,7 +1024,7 @@ fun ComposeDialog(
                 ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.PaperPlane,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.compose_send),
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -1030,7 +1114,14 @@ private fun PollOption(
                 iconOnly = true,
                 modifier = Modifier.padding(4.dp),
             ) {
-                FAIcon(imageVector = FontAwesomeIcons.Solid.Xmark, contentDescription = null)
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Xmark,
+                    contentDescription =
+                        stringResource(
+                            Res.string.compose_remove_poll_option,
+                            index + 1,
+                        ),
+                )
             }
         },
     )

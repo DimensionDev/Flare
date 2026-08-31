@@ -166,6 +166,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     private var actionsViewStorage: StatusActionsUIView?
     private var actionsContainerStorage: ActionsContainerView?
+    private let openPostAccessibilityButton = AccessibilityPassthroughButton(type: .custom)
 
     private var parentContainers: [ParentContainerView] = []
 
@@ -185,31 +186,49 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         tap.cancelsTouchesInView = false
         tap.delegate = self
         addGestureRecognizer(tap)
+
+        openPostAccessibilityButton.isAccessibilityElement = false
+        openPostAccessibilityButton.accessibilityLabel = String(
+            localized: "status_open_post",
+            defaultValue: "Open post"
+        )
+        openPostAccessibilityButton.accessibilityTraits = .button
+        openPostAccessibilityButton.addTarget(
+            self,
+            action: #selector(onRootTapped),
+            for: .primaryActionTriggered
+        )
+        addSubview(openPostAccessibilityButton)
     }
 
     private func setupAvatar(_ avatarView: AvatarUIView) {
         guard avatarView.gestureRecognizers?.isEmpty ?? true else { return }
         avatarView.isUserInteractionEnabled = true
+        avatarView.isAccessibilityElement = true
+        avatarView.accessibilityTraits = [.button, .image]
+        avatarView.onAccessibilityActivate = { [weak self] in
+            self?.onAvatarTapped()
+        }
         let tap = UITapGestureRecognizer(target: self, action: #selector(onAvatarTapped))
         avatarView.addGestureRecognizer(tap)
     }
 
     private func setupContentWarningToggle(_ contentWarningToggle: UIButton) {
-        guard contentWarningToggle.actions(forTarget: nil, forControlEvent: .touchUpInside)?.isEmpty ?? true else { return }
+        guard contentWarningToggle.actions(forTarget: nil, forControlEvent: .primaryActionTriggered)?.isEmpty ?? true else { return }
         contentWarningToggle.contentHorizontalAlignment = .leading
         contentWarningToggle.addAction(
             UIAction { [weak self] _ in self?.toggleExpand() },
-            for: .touchUpInside
+            for: .primaryActionTriggered
         )
     }
 
     private func setupExpandMoreButton(_ expandMoreButton: UIButton) {
-        guard expandMoreButton.actions(forTarget: nil, forControlEvent: .touchUpInside)?.isEmpty ?? true else { return }
+        guard expandMoreButton.actions(forTarget: nil, forControlEvent: .primaryActionTriggered)?.isEmpty ?? true else { return }
         expandMoreButton.contentHorizontalAlignment = .leading
         expandMoreButton.setTitle(String(localized: "mastodon_item_show_more"), for: .normal)
         expandMoreButton.addAction(
             UIAction { [weak self] _ in self?.expandOnly() },
-            for: .touchUpInside
+            for: .primaryActionTriggered
         )
     }
 
@@ -428,6 +447,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         )
         let signatureUnchanged = lastConfigureSignature == signature
         self.data = data
+        openPostAccessibilityButton.isAccessibilityElement = true
         if signatureUnchanged {
             forwardOpenURL()
             return
@@ -454,6 +474,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     func prepareForPoolRemoval() {
         data = nil
+        openPostAccessibilityButton.isAccessibilityElement = false
         lastConfigureSignature = nil
         lastPreparedFittingWidthKey = nil
         boundStatusKey = nil
@@ -473,6 +494,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         currentHeaderView?.removeFromSuperview()
         currentHeaderView = nil
         avatarViewStorage?.removeFromSuperview()
+        avatarViewStorage?.accessibilityLabel = nil
+        avatarViewStorage?.onAccessibilityActivate = nil
         wantsAvatar = false
 
         for parent in activeParents { parent.removeFromSuperview() }
@@ -549,6 +572,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
     override func layoutSubviews() {
         super.layoutSubviews()
         performLayout(width: bounds.width, assignFrames: true)
+        openPostAccessibilityButton.frame = bounds
     }
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -671,6 +695,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
             avatarView.set(url: user.avatar?.url, customHeaders: user.avatar?.customHeaders)
+            avatarView.accessibilityLabel = openProfileAccessibilityLabel(handle: user.handle.canonical)
             if avatarView.superview !== self { addSubview(avatarView) }
         } else if avatarViewStorage?.superview === self {
             avatarViewStorage?.removeFromSuperview()

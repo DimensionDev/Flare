@@ -11,20 +11,23 @@ public struct StatusTopMessageView: View {
     }
 
     public var body: some View {
-        HStack(spacing: 8) {
-            topMessage.icon.image
-            if let user = topMessage.user {
-                RichText(text: user.name)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            if let text = topMessage.type.localizedText {
-                Text(text)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .onTapGesture {
+        Button {
             topMessage.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+        } label: {
+            HStack(spacing: 8) {
+                topMessage.icon.image
+                    .accessibilityHidden(true)
+                if let user = topMessage.user {
+                    RichText(text: user.name)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let text = topMessage.type.localizedText {
+                    Text(text)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
         }
+        .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

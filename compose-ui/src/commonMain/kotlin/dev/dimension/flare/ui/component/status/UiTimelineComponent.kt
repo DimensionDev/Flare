@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -744,7 +745,7 @@ private fun TopMessageComponent(
                 },
             modifier =
                 Modifier
-                    .clickable {
+                    .clickable(role = Role.Button) {
                         data.onClicked.invoke(
                             ClickContext(
                                 launcher = {

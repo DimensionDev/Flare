@@ -24,5 +24,18 @@ public struct TranslateStatusComponent: View {
             default: EmptyView()
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: accessibilityLabel))
+    }
+
+    private var accessibilityLabel: String {
+        switch data {
+        case .failed:
+            String(localized: "translation_failed", defaultValue: "Translation failed")
+        case .translating:
+            String(localized: "translation_in_progress", defaultValue: "Translation in progress")
+        default:
+            String(localized: "translation_available", defaultValue: "Translation available")
+        }
     }
 }

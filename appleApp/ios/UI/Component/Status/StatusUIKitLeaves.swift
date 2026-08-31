@@ -3,9 +3,24 @@ import Kingfisher
 import KotlinSharedUI
 import FlareAppleCore
 
+/// Exposes an accessibility/keyboard action without intercepting pointer taps
+/// intended for the rich controls underneath it.
+final class AccessibilityPassthroughButton: UIButton {
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        false
+    }
+
+    override func accessibilityActivate() -> Bool {
+        sendActions(for: .primaryActionTriggered)
+        return true
+    }
+}
+
 // MARK: - AvatarUIView
 // Mirrors AvatarView.swift (NetworkImage + clipShape by avatarShape).
 final class AvatarUIView: UIView {
+    var onAccessibilityActivate: (() -> Void)?
+
     private let imageView: UIImageView = {
         let v = UIImageView()
         v.contentMode = .scaleAspectFill
@@ -59,6 +74,12 @@ final class AvatarUIView: UIView {
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         size
+    }
+
+    override func accessibilityActivate() -> Bool {
+        guard let onAccessibilityActivate else { return false }
+        onAccessibilityActivate()
+        return true
     }
 }
 
@@ -121,18 +142,32 @@ final class StatusVisibilityImageView: UIImageView {
         setContentHuggingPriority(.required, for: .horizontal)
         setContentCompressionResistancePriority(.required, for: .horizontal)
         tintColor = .secondaryLabel
+        isAccessibilityElement = true
+        accessibilityTraits = .staticText
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(visibility: UiTimelineV2.PostVisibility) {
         let icon: FontAwesomeIcon
         switch visibility {
-        case .public:    icon = .globe
-        case .home:      icon = .lockOpen
-        case .followers: icon = .lock
-        case .specified: icon = .at
-        case .channel:   icon = .tv
-        default:         icon = .globe
+        case .public:
+            icon = .globe
+            accessibilityLabel = String(localized: "status_visibility_public")
+        case .home:
+            icon = .lockOpen
+            accessibilityLabel = String(localized: "home_tab_home_title")
+        case .followers:
+            icon = .lock
+            accessibilityLabel = String(localized: "matrix_followers")
+        case .specified:
+            icon = .at
+            accessibilityLabel = String(localized: "status_visibility_specified")
+        case .channel:
+            icon = .tv
+            accessibilityLabel = String(localized: "channel_title")
+        default:
+            icon = .globe
+            accessibilityLabel = String(localized: "status_visibility_public")
         }
         image = UIImage(fontAwesome: icon)
     }
@@ -153,21 +188,37 @@ final class TranslateStatusStateView: UIView, ManualLayoutMeasurable, TimelineHe
         addSubview(langIcon)
         addSubview(stateIcon)
         addSubview(spinner)
+        isAccessibilityElement = true
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(state: TranslationDisplayState) {
         switch state {
         case .failed:
+            accessibilityLabel = String(
+                localized: "translation_failed",
+                defaultValue: "Translation failed"
+            )
+            accessibilityTraits = .staticText
             stateIcon.image = UIImage(fontAwesome: .circleExclamation)
             stateIcon.isHidden = false
             spinner.stopAnimating()
             spinner.isHidden = true
         case .translating:
+            accessibilityLabel = String(
+                localized: "translation_in_progress",
+                defaultValue: "Translation in progress"
+            )
+            accessibilityTraits = .updatesFrequently
             stateIcon.isHidden = true
             spinner.isHidden = false
             spinner.startAnimating()
         default:
+            accessibilityLabel = String(
+                localized: "translation_available",
+                defaultValue: "Translation available"
+            )
+            accessibilityTraits = .staticText
             stateIcon.isHidden = true
             spinner.stopAnimating()
             spinner.isHidden = true
@@ -214,6 +265,7 @@ final class TranslateStatusStateView: UIView, ManualLayoutMeasurable, TimelineHe
 // Mirror UserOnelineView.swift / UserCompatView.swift.
 
 final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding {
+    private static let avatarDimension: CGFloat = 44
     private let showsAvatar: Bool
     let avatar = AvatarUIView()
     let name = RichTextUIView()
@@ -274,7 +326,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
         let handleHeight = handleLabel.font?.lineHeight ?? 0
         let fittingWidth = width > 0 ? width : 1
         let trailingHeight = trailingView.map { $0.isHidden ? 0 : childHeight(of: $0, for: fittingWidth) } ?? 0
-        let avatarHeight: CGFloat = showsAvatar ? 20 : 0
+        let avatarHeight: CGFloat = showsAvatar ? Self.avatarDimension : 0
         return ceil(max(avatarHeight, nameHeight, handleHeight, trailingHeight))
     }
 
@@ -306,6 +358,10 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
             trailing.setContentCompressionResistancePriority(.required, for: .horizontal)
         }
         onTapped = onClicked
+        avatar.isAccessibilityElement = showsAvatar && onClicked != nil
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
+        avatar.accessibilityTraits = [.button, .image]
+        avatar.onAccessibilityActivate = onClicked
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -322,9 +378,14 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
         var leadingX: CGFloat = 0
         if showsAvatar {
             if assignFrames {
-                avatar.frame = CGRect(x: 0, y: (rowHeight - 20) / 2, width: 20, height: 20).integral
+                avatar.frame = CGRect(
+                    x: 0,
+                    y: (rowHeight - Self.avatarDimension) / 2,
+                    width: Self.avatarDimension,
+                    height: Self.avatarDimension
+                ).integral
             }
-            leadingX = 20 + edgeSpacing
+            leadingX = Self.avatarDimension + edgeSpacing
         }
 
         let trailingSize = preferredTrailingSize(height: rowHeight)
@@ -454,9 +515,24 @@ final class UserCompatUIView: UIStackView {
             trailingContainer.flareSyncArrangedSubviews([])
         }
         onTapped = onClicked
+        avatar.isAccessibilityElement = onClicked != nil
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
+        avatar.accessibilityTraits = [.button, .image]
+        avatar.onAccessibilityActivate = onClicked
     }
 
     @objc private func onTapFired() { onTapped?() }
+}
+
+func openProfileAccessibilityLabel(handle: String) -> String {
+    String(
+        format: String(
+            localized: "profile_open_user",
+            defaultValue: "Open profile for %@"
+        ),
+        locale: .current,
+        handle
+    )
 }
 
 // MARK: - StatusTopEndView
@@ -488,7 +564,7 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             UIAction { [weak self] _ in
                 self?.onInsightTapped?()
             },
-            for: .touchUpInside
+            for: .primaryActionTriggered
         )
         insightButton.setContentHuggingPriority(.required, for: .horizontal)
         insightButton.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -535,7 +611,7 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
             height = max(height, time.font?.lineHeight ?? 0)
         }
         if !insightButton.isHidden {
-            height = max(height, 16)
+            height = max(height, 44)
         }
         return ceil(height)
     }

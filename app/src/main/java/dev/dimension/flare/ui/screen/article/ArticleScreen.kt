@@ -81,6 +81,7 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -757,7 +758,7 @@ private fun ArticleImageBlock(
 ) {
     NetworkImage(
         model = media.url,
-        contentDescription = media.description,
+        contentDescription = media.accessibleDescription(),
         customHeaders = media.customHeaders,
         modifier =
             Modifier
@@ -792,7 +793,7 @@ private fun ArticleVideoBlock(
                 uri = media.url,
                 customHeaders = media.customHeaders,
                 previewUri = media.thumbnailUrl,
-                contentDescription = media.description,
+                contentDescription = media.accessibleDescription(),
                 modifier = Modifier.fillMaxSize(),
                 muted = true,
                 showControls = true,

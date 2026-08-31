@@ -3,6 +3,7 @@
 
     <string name="login_button">Log in</string>
     <string name="navigate_back">Go back</string>
+    <string name="open_navigation_menu">Open navigation menu</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>
@@ -38,6 +39,22 @@
     <string name="compose_poll_expiration_7_days">7 days</string>
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
+    <string name="compose_send">Send post</string>
+    <string name="compose_select_accounts">Select posting accounts</string>
+    <string name="compose_add_media">Add image or video</string>
+    <string name="compose_enable_poll">Add poll</string>
+    <string name="compose_disable_poll">Remove poll</string>
+    <string name="compose_add_poll_option">Add poll option</string>
+    <string name="compose_remove_poll_option">Remove poll option %1$d</string>
+    <string name="compose_change_visibility">Change post visibility. Current: %1$s</string>
+    <string name="compose_enable_content_warning">Add content warning</string>
+    <string name="compose_disable_content_warning">Remove content warning</string>
+    <string name="compose_show_emoji_picker">Show emoji picker</string>
+    <string name="compose_hide_emoji_picker">Hide emoji picker</string>
+    <string name="compose_edit_alt_text">Edit alternative text</string>
+    <string name="compose_remove_media">Remove media</string>
+    <string name="compose_image_no_alt">Image, no alternative text provided</string>
+    <string name="compose_video_no_alt">Video, no alternative text provided</string>
     <string name="compose_notification_title">Sending post</string>
     <string name="compose_notification_progress">Sending post</string>
     <string name="compose_notification_success">Post sent</string>
@@ -456,6 +473,13 @@
     <string name="media_download_started">Download started.</string>
     <string name="media_prepare_started">Preparing media…</string>
     <string name="media_alt_text">Alt text</string>
+    <string name="media_play">Play</string>
+    <string name="media_pause">Pause</string>
+    <string name="media_playback_position">Playback position</string>
+    <string name="media_page_position">Media position</string>
+    <string name="media_page_of">%1$d of %2$d</string>
+    <string name="media_seek_backward">Seek backward 5 seconds</string>
+    <string name="media_seek_forward">Seek forward 5 seconds</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 
     <string name="settings_side_panel_empty">By default, the side panel follows the current account\'s platform.</string>

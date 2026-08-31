@@ -49,6 +49,7 @@ struct StatusMediaView: View {
     var body: some View {
         mediaContent
         .blur(radius: isBlur ? 20 : 0)
+        .accessibilityHidden(isBlur)
         .overlay(
             alignment: isBlur ? .center : .topLeading
         ) {
@@ -72,6 +73,9 @@ struct StatusMediaView: View {
                     }
                     .backport
                     .glassProminentButtonStyle()
+                    .accessibilityLabel(
+                        Text("show_sensitive_media", bundle: FlareAppleUILocalization.bundle)
+                    )
                     .padding()
                 } else {
                     Button {
@@ -83,6 +87,9 @@ struct StatusMediaView: View {
                     }
                     .backport
                     .glassButtonStyle(fallbackStyle: .bordered)
+                    .accessibilityLabel(
+                        Text("hide_sensitive_media", bundle: FlareAppleUILocalization.bundle)
+                    )
                     .padding()
                 }
             } else {
@@ -229,6 +236,12 @@ struct StatusMediaView: View {
                     onMediaClicked(item, index)
                 }
             }
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction {
+                if !sensitive || !isBlur {
+                    onMediaClicked(item, index)
+                }
+            }
             .overlay {
                 if overflowCount > 0 {
                     MediaOverflowOverlay(count: overflowCount)
@@ -238,6 +251,11 @@ struct StatusMediaView: View {
             .overlay(alignment: .bottomTrailing) {
                 if let alt = item.description_, !alt.isEmpty {
                     AltTextOverlay(altText: alt)
+                }
+            }
+            .statusMediaKeyboardActivation(enabled: !sensitive || !isBlur) {
+                if !sensitive || !isBlur {
+                    onMediaClicked(item, index)
                 }
             }
             .if(!isBlur && timelineMediaActionHandler != nil) { view in
@@ -373,6 +391,9 @@ struct AltTextOverlay: View {
         .padding()
         .backport
         .glassButtonStyle(fallbackStyle: .bordered)
+        .accessibilityLabel(
+            Text("media_view_alt_text", bundle: FlareAppleUILocalization.bundle)
+        )
         .popover(isPresented: $showAltText) {
             Text(altText)
                 .padding()
@@ -382,7 +403,56 @@ struct AltTextOverlay: View {
     }
 }
 
+private extension View {
+    @ViewBuilder
+    func statusMediaKeyboardActivation(
+        enabled: Bool,
+        _ action: @escaping () -> Void
+    ) -> some View {
+        #if os(macOS)
+        self
+            .focusable(enabled)
+            .onKeyPress(.return) {
+                guard enabled else { return .ignored }
+                action()
+                return .handled
+            }
+            .onKeyPress(.space) {
+                guard enabled else { return .ignored }
+                action()
+                return .handled
+            }
+        #else
+        self
+        #endif
+    }
+}
+
 public extension UiMedia {
+    var accessibleDescription: String {
+        if let description = description_?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !description.isEmpty {
+            return description
+        }
+        switch onEnum(of: self) {
+        case .image, .gif:
+            return FlareAppleUILocalization.string(
+                "media_image_no_alt",
+                fallback: "Image, no alternative text provided"
+            )
+        case .video:
+            return FlareAppleUILocalization.string(
+                "media_video_no_alt",
+                fallback: "Video, no alternative text provided"
+            )
+        case .audio:
+            return FlareAppleUILocalization.string(
+                "media_audio_no_description",
+                fallback: "Audio, no description provided"
+            )
+        }
+    }
+
     var aspectRatio: CGFloat? {
         switch onEnum(of: self) {
         case .image(let image): return CGFloat(image.aspectRatio)

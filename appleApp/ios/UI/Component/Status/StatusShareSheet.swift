@@ -53,6 +53,7 @@ struct StatusShareSheet: View {
                             .padding()
                         Color.clear
                             .contentShape(Rectangle())
+                            .accessibilityHidden(true)
                             .onTapGesture {
                             }
                     }

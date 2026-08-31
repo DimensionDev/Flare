@@ -302,6 +302,9 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         control.configure(
             image: item.icon.flatMap { UIImage(fontAwesome: $0.fontAwesomeIcon) },
             title: title,
+            accessibilityLabel: item.text?.resolvedString
+                ?? String(localized: "more", defaultValue: "More"),
+            accessibilityValue: showNumbers ? item.count?.humanized : nil,
             tintColor: item.color?.uiColor ?? .secondaryLabel,
             font: actionFont,
             iconSize: actionIconSize,
@@ -332,6 +335,9 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
         control.configure(
             image: group.displayItem.icon.flatMap { UIImage(fontAwesome: $0.fontAwesomeIcon) },
             title: title,
+            accessibilityLabel: group.displayItem.text?.resolvedString
+                ?? String(localized: "more", defaultValue: "More"),
+            accessibilityValue: showNumbers ? group.displayItem.count?.humanized : nil,
             tintColor: group.displayItem.color?.uiColor ?? .secondaryLabel,
             font: actionFont,
             iconSize: actionIconSize,
@@ -525,30 +531,6 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         commonInit()
     }
 
-    convenience init(
-        image: UIImage?,
-        title: String?,
-        tintColor: UIColor,
-        font: UIFont,
-        iconSize: CGFloat,
-        minimumTextWidth: CGFloat?,
-        minimumIconOnlySize: CGFloat?,
-        usesExpandedHitArea: Bool
-    ) {
-        self.init(frame: .zero)
-        configure(
-            image: image,
-            title: title,
-            tintColor: tintColor,
-            font: font,
-            iconSize: iconSize,
-            minimumTextWidth: minimumTextWidth,
-            minimumIconOnlySize: minimumIconOnlySize,
-            usesExpandedHitArea: usesExpandedHitArea,
-            onTap: nil
-        )
-    }
-
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     private func commonInit() {
@@ -560,20 +542,26 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
 
         iconView.contentMode = .center
         iconView.isUserInteractionEnabled = false
+        iconView.isAccessibilityElement = false
         addSubview(iconView)
 
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.isUserInteractionEnabled = false
+        label.isAccessibilityElement = false
         addSubview(label)
 
-        addTarget(self, action: #selector(onTapped), for: .touchUpInside)
+        isAccessibilityElement = true
+
+        addTarget(self, action: #selector(onTapped), for: .primaryActionTriggered)
     }
 
     func configure(
         image: UIImage?,
         title: String?,
+        accessibilityLabel: String,
+        accessibilityValue: String?,
         tintColor: UIColor,
         font: UIFont,
         iconSize: CGFloat,
@@ -590,6 +578,9 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.currentSpacing = title != nil || minimumTextWidth != nil ? 2 : 0
         self.horizontalInset = usesExpandedHitArea ? 4 : 0
         self.verticalInset = usesExpandedHitArea ? 4 : 0
+        self.accessibilityLabel = accessibilityLabel
+        self.accessibilityValue = accessibilityValue
+        self.accessibilityTraits = .button
         menu = nil
         showsMenuAsPrimaryAction = false
 
@@ -618,6 +609,8 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         minimumIconOnlySize = nil
         horizontalInset = 0
         verticalInset = 0
+        accessibilityLabel = nil
+        accessibilityValue = nil
     }
 
     @objc private func onTapped() {

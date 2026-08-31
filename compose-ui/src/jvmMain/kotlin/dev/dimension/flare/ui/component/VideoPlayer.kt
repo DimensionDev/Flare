@@ -29,6 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onLayoutRectChanged
 import androidx.compose.ui.layout.onVisibilityChanged
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -189,11 +192,14 @@ public fun VideoPlayer(
                     val playerModifier =
                         Modifier
                             .clipToBounds()
-                            .let {
+                            .semantics {
+                                contentDescription?.let { this.contentDescription = it }
+                            }.let {
                                 if (onClick != null) {
                                     it.combinedClickable(
                                         onClick = onClick,
                                         onLongClick = onLongClick,
+                                        role = Role.Button,
                                     )
                                 } else {
                                     it

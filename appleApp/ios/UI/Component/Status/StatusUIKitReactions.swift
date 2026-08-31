@@ -56,7 +56,7 @@ final class StatusReactionUIView: UIView, ManualLayoutMeasurable, TimelineHeight
         overflowButton.titleLabel?.font = .preferredFont(forTextStyle: .caption1)
         overflowButton.titleLabel?.adjustsFontForContentSizeCategory = true
         overflowButton.contentHorizontalAlignment = .leading
-        overflowButton.addTarget(self, action: #selector(expand), for: .touchUpInside)
+        overflowButton.addTarget(self, action: #selector(expand), for: .primaryActionTriggered)
         overflowButton.isHidden = true
         addSubview(overflowButton)
     }
@@ -253,7 +253,7 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
             view.updateColors()
         }
         isAccessibilityElement = true
-        addTarget(self, action: #selector(handleTap), for: .touchUpInside)
+        addTarget(self, action: #selector(handleTap), for: .primaryActionTriggered)
     }
 
     required init?(coder: NSCoder) {

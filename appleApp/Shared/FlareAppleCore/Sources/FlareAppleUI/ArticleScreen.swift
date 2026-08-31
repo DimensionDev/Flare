@@ -403,7 +403,7 @@ private struct ArticleImageBlockView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text(media.description_ ?? FlareAppleUILocalization.string("Image", fallback: "Image")))
+        .accessibilityLabel(Text(verbatim: media.accessibleDescription))
     }
 }
 
@@ -412,17 +412,17 @@ private struct ArticleVideoBlockView: View {
     let onOpenMedia: (any UiMedia) -> Void
 
     var body: some View {
-        ArticleMediaFrame(aspectRatio: articleAspectRatio(media.aspectRatio)) {
-            MediaVideoView(data: media)
-        }
-            .contentShape(Rectangle())
-            .overlay {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        onOpenMedia(media)
-                    }
+        Button {
+            onOpenMedia(media)
+        } label: {
+            ArticleMediaFrame(aspectRatio: articleAspectRatio(media.aspectRatio)) {
+                MediaVideoView(data: media)
             }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: media.accessibleDescription))
     }
 }
 

@@ -19,14 +19,27 @@ public struct UserCompatView<TrailingContent: View>: View {
 
     public var body: some View {
         HStack(spacing: 8) {
+            if let onClicked {
+                Button(action: onClicked) {
+                    identityContent
+                }
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(verbatim: profileActionLabel))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                identityContent
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            trailing()
+        }
+        .lineLimit(1)
+    }
+
+    private var identityContent: some View {
+        HStack(spacing: 8) {
             AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                 .frame(width: 44, height: 44)
-                .if(onClicked != nil) { view in
-                    view
-                        .onTapGesture {
-                            onClicked?()
-                        }
-                }
             VStack(
                 alignment: .leading,
                 spacing: 0
@@ -36,16 +49,19 @@ public struct UserCompatView<TrailingContent: View>: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .if(onClicked != nil) { view in
-                view
-                    .onTapGesture {
-                        onClicked?()
-                    }
-            }
             .frame(maxWidth: .infinity, alignment: .leading)
-            trailing()
         }
-        .lineLimit(1)
+    }
+
+    private var profileActionLabel: String {
+        String(
+            format: String(
+                localized: "profile_open_user",
+                defaultValue: "Open profile for %@"
+            ),
+            locale: .current,
+            data.handle.canonical
+        )
     }
 }
 
@@ -54,6 +70,17 @@ public extension UserCompatView {
         self.init(data: data) {
             EmptyView()
         }
+    }
+
+    init(
+        data: UiProfile,
+        onClicked: @escaping () -> Void
+    ) where TrailingContent == EmptyView {
+        self.init(
+            data: data,
+            trailing: { EmptyView() },
+            onClicked: onClicked
+        )
     }
 }
 

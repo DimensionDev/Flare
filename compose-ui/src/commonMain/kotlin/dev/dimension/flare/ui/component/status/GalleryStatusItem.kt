@@ -23,9 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.feed_open_article
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
@@ -39,6 +42,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.theme.PlatformTheme
+import org.jetbrains.compose.resources.stringResource
 
 private val GalleryTileShape = RoundedCornerShape(12.dp)
 private const val GALLERY_TEXT_MAX_LINES = 5
@@ -192,13 +196,17 @@ private fun GalleryFeedTile(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearance = LocalTimelineAppearance.current
+    val openArticleLabel = stringResource(Res.string.feed_open_article)
     Column(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clip(GalleryTileShape)
                 .background(PlatformTheme.colorScheme.card)
-                .clickable {
+                .clickable(
+                    role = Role.Button,
+                    onClickLabel = openArticleLabel,
+                ) {
                     feed.onClicked.invoke(
                         ClickContext(launcher = { uriHandler.openUri(it) }),
                     )

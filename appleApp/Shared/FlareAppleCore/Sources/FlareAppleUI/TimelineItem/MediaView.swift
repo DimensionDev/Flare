@@ -39,6 +39,8 @@ public struct MediaView: View {
                 EmptyView()
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: data.accessibleDescription))
     }
 }
 

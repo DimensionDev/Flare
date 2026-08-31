@@ -129,6 +129,7 @@ struct RootView: View {
                                         Image(fontAwesome: .plus)
                                     }
                                     .buttonStyle(.plain)
+                                    .accessibilityLabel(Text("add_account"))
                                     Spacer()
                                         .frame(width: 16)
                                 }
@@ -364,6 +365,14 @@ private struct LoginExpiredToastView: View {
                 Image(fontAwesome: .xmark)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                Text(
+                    String(
+                        localized: "dismiss",
+                        defaultValue: "Dismiss"
+                    )
+                )
+            )
         }
         .padding(12)
         .frame(maxWidth: 520, alignment: .leading)

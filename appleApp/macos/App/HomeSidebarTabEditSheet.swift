@@ -335,6 +335,7 @@ private struct HomeSidebarGroupChildEditorRow: View {
             .buttonStyle(.borderless)
             .disabled(!canMoveUp)
             .help(Text("macos_action_move_up"))
+            .accessibilityLabel(Text("macos_action_move_up"))
 
             Button(action: onMoveDown) {
                 Image(systemName: "chevron.down")
@@ -342,6 +343,7 @@ private struct HomeSidebarGroupChildEditorRow: View {
             .buttonStyle(.borderless)
             .disabled(!canMoveDown)
             .help(Text("macos_action_move_down"))
+            .accessibilityLabel(Text("macos_action_move_down"))
 
             Button(role: .destructive, action: onDelete) {
                 Image(fontAwesome: .trash)
@@ -349,6 +351,7 @@ private struct HomeSidebarGroupChildEditorRow: View {
             }
             .buttonStyle(.borderless)
             .help(Text("delete"))
+            .accessibilityLabel(Text("delete"))
         }
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -75,6 +76,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -171,6 +175,8 @@ internal fun ComposeScreen(
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val selectAccountsLabel = stringResource(R.string.compose_select_accounts)
+    val editAltTextLabel = stringResource(R.string.compose_edit_alt_text)
     val state by producePresenter(key = "compose") {
         composePresenter(
             context = context,
@@ -272,7 +278,10 @@ internal fun ComposeScreen(
                     },
                     enabled = state.canSend,
                 ) {
-                    FAIcon(imageVector = FontAwesomeIcons.Solid.PaperPlane, contentDescription = null)
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.PaperPlane,
+                        contentDescription = stringResource(id = R.string.compose_send),
+                    )
                 }
             },
         )
@@ -336,6 +345,10 @@ internal fun ComposeScreen(
                                     onClick = {
                                         state.setShowAccountSelectMenu(true)
                                     },
+                                    modifier =
+                                        Modifier.semantics {
+                                            contentDescription = selectAccountsLabel
+                                        },
                                     shape = RoundedCornerShape(100),
                                     color = MaterialTheme.colorScheme.secondaryContainer,
                                 ) {
@@ -373,9 +386,7 @@ internal fun ComposeScreen(
                                             trailingIcon = {
                                                 Checkbox(
                                                     checked = selected,
-                                                    onCheckedChange = {
-                                                        state.state.selectAccount(user.key)
-                                                    },
+                                                    onCheckedChange = null,
                                                 )
                                             },
                                         )
@@ -471,10 +482,28 @@ internal fun ComposeScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             mediaState.medias.forEach { media ->
+                                val isVideo =
+                                    media.isVideo ?: remember(media.uri) {
+                                        runCatching { context.contentResolver.getType(media.uri) }
+                                            .getOrNull()
+                                            ?.startsWith("video/") == true
+                                    }
+                                val mediaDescription =
+                                    media.textState.text
+                                        .toString()
+                                        .takeIf { it.isNotBlank() }
+                                        ?: stringResource(
+                                            id =
+                                                if (isVideo) {
+                                                    R.string.compose_video_no_alt
+                                                } else {
+                                                    R.string.compose_image_no_alt
+                                                },
+                                        )
                                 Box {
                                     NetworkImage(
                                         model = media.url,
-                                        contentDescription = null,
+                                        contentDescription = mediaDescription,
                                         modifier =
                                             Modifier
                                                 .size(128.dp)
@@ -496,6 +525,10 @@ internal fun ComposeScreen(
                                                     onClick = {
                                                         showEditDialog = true
                                                     },
+                                                    modifier =
+                                                        Modifier.semantics {
+                                                            contentDescription = editAltTextLabel
+                                                        },
                                                     colors =
                                                         ButtonDefaults.textButtonColors(
                                                             containerColor = Color.Black.copy(alpha = 0.8f),
@@ -522,7 +555,7 @@ internal fun ComposeScreen(
                                                         icon = {
                                                             NetworkImage(
                                                                 model = media.url,
-                                                                contentDescription = null,
+                                                                contentDescription = mediaDescription,
                                                                 modifier =
                                                                     Modifier
                                                                         .size(128.dp)
@@ -567,7 +600,7 @@ internal fun ComposeScreen(
                                         ) {
                                             FAIcon(
                                                 imageVector = FontAwesomeIcons.Solid.Xmark,
-                                                contentDescription = null,
+                                                contentDescription = stringResource(id = R.string.compose_remove_media),
                                             )
                                         }
                                     }
@@ -581,18 +614,19 @@ internal fun ComposeScreen(
                                     Modifier
                                         .padding(horizontal = screenHorizontalPadding)
                                         .fillMaxWidth()
-                                        .clickable(
+                                        .toggleable(
+                                            value = mediaState.isMediaSensitive,
+                                            role = Role.Checkbox,
                                             interactionSource = sensitiveInteractionSource,
                                             indication = null,
-                                        ) {
-                                            mediaState.setMediaSensitive(!mediaState.isMediaSensitive)
-                                        },
+                                            onValueChange = mediaState::setMediaSensitive,
+                                        ),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Checkbox(
                                     checked = mediaState.isMediaSensitive,
-                                    onCheckedChange = { mediaState.setMediaSensitive(it) },
+                                    onCheckedChange = null,
                                     interactionSource = sensitiveInteractionSource,
                                 )
                                 Text(text = stringResource(id = R.string.compose_media_sensitive))
@@ -645,7 +679,7 @@ internal fun ComposeScreen(
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.Plus,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(id = R.string.compose_add_poll_option),
                                     modifier = Modifier.size(16.dp),
                                 )
                             }
@@ -755,7 +789,10 @@ internal fun ComposeScreen(
                             },
                             enabled = state.canMedia,
                         ) {
-                            FAIcon(imageVector = FontAwesomeIcons.Solid.Image, contentDescription = null)
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.Image,
+                                contentDescription = stringResource(id = R.string.compose_add_media),
+                            )
                         }
                     }
                 }
@@ -768,17 +805,34 @@ internal fun ComposeScreen(
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.SquarePollHorizontal,
-                            contentDescription = null,
+                            contentDescription =
+                                stringResource(
+                                    id =
+                                        if (it.enabled) {
+                                            R.string.compose_disable_poll
+                                        } else {
+                                            R.string.compose_enable_poll
+                                        },
+                                ),
                         )
                     }
                 }
                 state.state.visibilityState.onSuccess { visibilityState ->
+                    val visibilityName = stringResource(id = visibilityState.visibility.localName)
+                    val changeVisibilityLabel =
+                        stringResource(R.string.compose_change_visibility, visibilityName)
                     IconButton(
                         onClick = {
                             visibilityState.showVisibilityMenu()
                         },
                     ) {
-                        StatusVisibilityComponent(visibility = visibilityState.visibility)
+                        StatusVisibilityComponent(
+                            visibility = visibilityState.visibility,
+                            modifier =
+                                Modifier.semantics {
+                                    contentDescription = changeVisibilityLabel
+                                },
+                        )
                         FlareDropdownMenu(
                             expanded = visibilityState.showVisibilityMenu,
                             onDismissRequest = {
@@ -828,7 +882,15 @@ internal fun ComposeScreen(
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
-                            contentDescription = null,
+                            contentDescription =
+                                stringResource(
+                                    id =
+                                        if (it.enabled) {
+                                            R.string.compose_disable_content_warning
+                                        } else {
+                                            R.string.compose_enable_content_warning
+                                        },
+                                ),
                         )
                     }
                 }
@@ -841,7 +903,15 @@ internal fun ComposeScreen(
                         ) {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.FaceSmile,
-                                contentDescription = null,
+                                contentDescription =
+                                    stringResource(
+                                        id =
+                                            if (state.showEmojiMenu) {
+                                                R.string.compose_hide_emoji_picker
+                                            } else {
+                                                R.string.compose_show_emoji_picker
+                                            },
+                                    ),
                             )
                             if (state.showEmojiMenu) {
                                 Popup(
@@ -1057,7 +1127,14 @@ private fun PollOption(
                 onClick = onRemove,
                 enabled = index > 1,
             ) {
-                FAIcon(imageVector = FontAwesomeIcons.Solid.Xmark, contentDescription = null)
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Xmark,
+                    contentDescription =
+                        stringResource(
+                            id = R.string.compose_remove_poll_option,
+                            index + 1,
+                        ),
+                )
             }
         },
     )
@@ -1359,6 +1436,8 @@ private fun mediaPresenter(
                         MediaData(
                             uri = Uri.parse(item.cachePath),
                             textState = TextFieldState(item.altText.orEmpty()),
+                            isVideo =
+                                item.type == dev.dimension.flare.ui.model.UiDraftMediaType.VIDEO,
                         )
                     }.distinctBy {
                         it.uri
@@ -1387,6 +1466,7 @@ private fun mediaPresenter(
 private data class MediaData(
     val uri: Uri,
     val textState: TextFieldState = TextFieldState(),
+    val isVideo: Boolean? = null,
 ) {
     val url = uri.toString()
 }

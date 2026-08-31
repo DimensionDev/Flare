@@ -3,6 +3,7 @@ import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleCore
+import FlareAppleUI
 
 /// UIKit port of `FeedView`.
 ///
@@ -78,6 +79,8 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTap))
         addGestureRecognizer(tap)
+        isAccessibilityElement = true
+        accessibilityTraits = .button
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -364,6 +367,18 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
             mediaView.image = nil
         }
 
+        accessibilityLabel = [
+            data.source.name,
+            data.title,
+            data.description_,
+            data.media?.accessibleDescription,
+            translation.isHidden ? nil : translation.accessibilityLabel,
+            dateLabel.isHidden ? nil : (dateLabel.accessibilityLabel ?? dateLabel.text),
+        ]
+        .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+        .joined(separator: ", ")
+
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -388,6 +403,12 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
             self?.onOpenURL?(url)
             return .handled
         })))
+    }
+
+    override func accessibilityActivate() -> Bool {
+        guard data != nil else { return false }
+        onTap()
+        return true
     }
 }
 

@@ -16,11 +16,12 @@ public fun AvatarComponent(
     data: UiMedia.Image?,
     modifier: Modifier = Modifier,
     size: Dp = AvatarComponentDefaults.size,
+    contentDescription: String? = null,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
     NetworkImage(
         model = data?.url,
-        contentDescription = null,
+        contentDescription = contentDescription,
         customHeaders = data?.customHeaders,
         modifier =
             Modifier

@@ -42,6 +42,8 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         addSubview(textLabel)
 
         isUserInteractionEnabled = true
+        isAccessibilityElement = true
+        accessibilityTraits = .button
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapped))
         addGestureRecognizer(tap)
     }
@@ -84,6 +86,10 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         }
 
         iconView.tintColor = topMessageOnly ? .label : .secondaryLabel
+        accessibilityLabel = [message.user?.name.innerText, textLabel.text]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: ", ")
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -228,6 +234,12 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
             self?.onOpenURL?(url)
             return .handled
         })))
+    }
+
+    override func accessibilityActivate() -> Bool {
+        guard topMessage != nil else { return false }
+        onTapped()
+        return true
     }
 }
 

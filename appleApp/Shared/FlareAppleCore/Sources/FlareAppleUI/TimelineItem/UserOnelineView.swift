@@ -22,11 +22,17 @@ public struct UserOnelineView<TrailingContent: View>: View {
     public var body: some View {
         HStack(spacing: 4) {
             if showAvatar {
-                AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
-                    .frame(width: 20, height: 20)
-                    .onTapGesture {
-                        onClicked?()
+                if let onClicked {
+                    Button(action: onClicked) {
+                        AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
+                            .frame(width: 20, height: 20)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(verbatim: profileActionLabel))
+                } else {
+                    AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
+                        .frame(width: 20, height: 20)
+                }
             }
             HStack(spacing: 4) {
                 RichText(text: data.name)
@@ -38,6 +44,17 @@ public struct UserOnelineView<TrailingContent: View>: View {
             trailing()
         }
         .lineLimit(1)
+    }
+
+    private var profileActionLabel: String {
+        String(
+            format: String(
+                localized: "profile_open_user",
+                defaultValue: "Open profile for %@"
+            ),
+            locale: .current,
+            data.handle.canonical
+        )
     }
 }
 

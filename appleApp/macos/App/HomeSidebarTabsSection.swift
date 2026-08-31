@@ -131,6 +131,7 @@ struct HomeSidebarTabsSection: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "tab_settings_add_tab", bundle: .main))
+                .accessibilityLabel(Text("tab_settings_add_tab"))
                 .popover(item: $addPopover, arrowEdge: .trailing) { popover in
                     switch popover {
                     case .tab:
@@ -158,6 +159,7 @@ struct HomeSidebarTabsSection: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "done", bundle: .main))
+                .accessibilityLabel(Text("done"))
             } else {
                 Button {
                     editableTabs = liveTabs
@@ -168,6 +170,7 @@ struct HomeSidebarTabsSection: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "tab_settings_customize", bundle: .main))
+                .accessibilityLabel(Text("tab_settings_customize"))
             }
         }
     }
@@ -258,6 +261,12 @@ private struct HomeSidebarEditableGroupRow: View {
             .contextMenu {
                 contextMenu
             }
+            .accessibilityAction(named: Text("edit")) {
+                onEdit()
+            }
+            .accessibilityAction(named: Text("delete")) {
+                onDelete()
+            }
     }
 
     private var rowContent: some View {
@@ -278,6 +287,7 @@ private struct HomeSidebarEditableGroupRow: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
         }
     }
@@ -290,6 +300,7 @@ private struct HomeSidebarEditableGroupRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "edit", bundle: .main))
+            .accessibilityLabel(Text("edit"))
         } else {
             Image(fontAwesome: .pen)
                 .hidden()
@@ -305,6 +316,7 @@ private struct HomeSidebarEditableGroupRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "delete", bundle: .main))
+            .accessibilityLabel(Text("delete"))
         } else {
             Image(fontAwesome: .trash)
                 .hidden()
@@ -357,6 +369,7 @@ private struct HomeSidebarEditableTabRow: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
         }
         .contentShape(Rectangle())
@@ -378,6 +391,12 @@ private struct HomeSidebarEditableTabRow: View {
                 }
             }
         }
+        .accessibilityAction(named: Text("edit")) {
+            onEdit()
+        }
+        .accessibilityAction(named: Text("delete")) {
+            onDelete()
+        }
     }
 
     @ViewBuilder
@@ -388,6 +407,7 @@ private struct HomeSidebarEditableTabRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "edit", bundle: .main))
+            .accessibilityLabel(Text("edit"))
         } else {
             Image(fontAwesome: .pen)
                 .hidden()
@@ -403,6 +423,7 @@ private struct HomeSidebarEditableTabRow: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "delete", bundle: .main))
+            .accessibilityLabel(Text("delete"))
         } else {
             Image(fontAwesome: .trash)
                 .hidden()

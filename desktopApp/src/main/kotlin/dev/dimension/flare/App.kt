@@ -43,6 +43,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import compose.icons.FontAwesomeIcons
@@ -249,9 +253,17 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                         ) {
                                             AvatarComponent(
                                                 data = it.avatar,
+                                                contentDescription =
+                                                    stringResource(Res.string.home_open_account_menu),
                                                 modifier =
                                                     Modifier
-                                                        .clickable {
+                                                        .clickable(
+                                                            role = Role.Button,
+                                                            onClickLabel =
+                                                                stringResource(
+                                                                    Res.string.home_open_account_menu,
+                                                                ),
+                                                        ) {
                                                             isFlyoutVisible = !isFlyoutVisible
                                                         }.aspectRatio(1f),
                                             )
@@ -359,6 +371,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             },
                     )
                     NavigationItem(
+                        selected = selected,
                         onClick = {
                             if (selected) {
                                 state.scrollToTopRegistry.scrollToTop()
@@ -427,7 +440,10 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                 ).fillMaxWidth(0.66f)
                                 .aspectRatio(1f)
                                 .clip(CircleShape)
-                                .clickable {
+                                .clickable(
+                                    role = Role.Button,
+                                    onClickLabel = stringResource(Res.string.home_compose),
+                                ) {
                                     state.navigate(
                                         Route.Compose.New,
                                     )
@@ -444,6 +460,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 NavigationItem(
+                    selected = selected,
                     icon = {
                         Icon(
                             FontAwesomeIcons.Solid.Gear,
@@ -532,11 +549,16 @@ private fun NavigationItem(
     text: (@Composable () -> Unit)?,
     badge: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
+    selected: Boolean,
     modifier: Modifier = Modifier,
 ) {
     SubtleButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier =
+            modifier.semantics {
+                role = Role.Tab
+                this.selected = selected
+            },
     ) {
         Column(
             modifier =

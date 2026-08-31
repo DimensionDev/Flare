@@ -14,67 +14,73 @@ struct FeedView: View {
     }
     var body: some View {
         let desc = descriptionText
-        VStack(
-            alignment: .leading,
-            spacing: 4
-        ) {
-            HStack(spacing: 8) {
-                if let sourceIcon = data.source.icon, !sourceIcon.isEmpty {
-                    NetworkImage(data: sourceIcon)
-                        .frame(width: 20, height: 20)
-                }
-                Text(data.source.name)
-                    .font(.footnote)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer()
-                if data.translationDisplayState != .hidden {
-                    TranslateStatusComponent(data: data.translationDisplayState)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                if let date = data.actualCreatedAt {
-                    DateTimeText(data: date)
+        Button {
+            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+        } label: {
+            VStack(
+                alignment: .leading,
+                spacing: 4
+            ) {
+                HStack(spacing: 8) {
+                    if let sourceIcon = data.source.icon, !sourceIcon.isEmpty {
+                        NetworkImage(data: sourceIcon)
+                            .frame(width: 20, height: 20)
+                            .accessibilityHidden(true)
+                    }
+                    Text(data.source.name)
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            if let title = data.title {
-                Text(title)
-            }
-            if desc != nil || data.media != nil {
-                HStack(alignment: .top, spacing: 8) {
-                    if let desc {
-                        Text(desc)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    if data.translationDisplayState != .hidden {
+                        TranslateStatusComponent(data: data.translationDisplayState)
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                            .lineLimit(5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    if let image = data.media {
-                        if desc != nil {
-                            NetworkImage(data: image.url, customHeader: image.customHeaders)
-                                .frame(width: 80, height: 80)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        } else {
-                            Color.clear
-                                .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                                .frame(maxWidth: .infinity)
-                                .overlay {
-                                    NetworkImage(data: image.url, customHeader: image.customHeaders)
-                                        .allowsHitTesting(false)
-                                }
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
+                    if let date = data.actualCreatedAt {
+                        DateTimeText(data: date)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                if let title = data.title {
+                    Text(title)
+                }
+                if desc != nil || data.media != nil {
+                    HStack(alignment: .top, spacing: 8) {
+                        if let desc {
+                            Text(desc)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(5)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        if let image = data.media {
+                            if desc != nil {
+                                NetworkImage(data: image.url, customHeader: image.customHeaders)
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    .accessibilityLabel(Text(verbatim: image.accessibleDescription))
+                            } else {
+                                Color.clear
+                                    .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                                    .frame(maxWidth: .infinity)
+                                    .overlay {
+                                        NetworkImage(data: image.url, customHeader: image.customHeaders)
+                                            .allowsHitTesting(false)
+                                    }
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    .accessibilityLabel(Text(verbatim: image.accessibleDescription))
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-        }
     }
 }

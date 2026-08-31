@@ -33,7 +33,13 @@ struct TimelineScreen: View {
             data: presenter.state.listState,
             detailStatusKey: nil,
             key: presenter.key,
-            allowGalleryMode: allowGalleryMode
+            allowGalleryMode: allowGalleryMode,
+            outboxItems: Array(presenter.state.outboxItems),
+            onRetryOutbox: { presenter.state.retryOutbox(groupId: $0) },
+            onEditOutbox: {
+                MacComposeWindowCoordinator.shared.openDraft(groupId: $0, openWindow: openWindow)
+            },
+            onDeleteOutbox: { presenter.state.deleteOutbox(groupId: $0) }
         )
         .environment(\.timelineAppearance, tabItem.resolveTimelineAppearance(base: timelineAppearance))
         .refreshable {

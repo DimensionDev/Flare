@@ -50,6 +50,7 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.outboxItems
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.TimelineWithLazyListState
@@ -71,12 +72,13 @@ import org.jetbrains.compose.resources.stringResource
 internal fun DeckTimelineScreen(
     id: String,
     toTabSettings: () -> Unit,
+    onEditDraft: (String) -> Unit,
 ) {
     val tabState by producePresenter("deck_timeline_$id") {
         remember { HomeTabItemPresenter(id = id) }.invoke()
     }
     tabState.tabItem.onSuccess { tabItem ->
-        val timelineState = rememberTimelineItemPresenterWithLazyListState(tabItem)
+        val timelineState = rememberTimelineItemPresenterWithLazyListState(tabItem, isHomeTimeline = true)
         val isTopBarExpanded =
             remember(tabItem.id) { androidx.compose.runtime.mutableStateOf(true) }
         val timelineAppearance = LocalTimelineAppearance.current
@@ -108,6 +110,7 @@ internal fun DeckTimelineScreen(
                     onScrollToTop = {
                         isTopBarExpanded.value = true
                     },
+                    onEditDraft = onEditDraft,
                 )
                 AnimatedVisibility(
                     visible = isTopBarExpanded.value,
@@ -233,6 +236,7 @@ internal fun TimelineContent(
     header: @Composable (() -> Unit)? = null,
     onScrollToTop: (() -> Unit)? = null,
     allowGalleryMode: Boolean = false,
+    onEditDraft: (String) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     RegisterTabCallback(
@@ -273,6 +277,12 @@ internal fun TimelineContent(
                         header.invoke()
                     }
                 }
+                outboxItems(
+                    posts = state.outboxItems,
+                    onRetry = state::retryOutbox,
+                    onEdit = onEditDraft,
+                    onDelete = state::deleteOutbox,
+                )
                 status(state.listState)
             }
         }

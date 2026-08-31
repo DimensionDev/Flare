@@ -15,6 +15,10 @@ struct TimelinePagingView: View {
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
     let suppressInitialRefreshIndicator: Bool
+    let outboxItems: [UiOutboxPost]
+    let onRetryOutbox: (String) -> Void
+    let onEditOutbox: (String) -> Void
+    let onDeleteOutbox: (String) -> Void
 
     init(
         data: PagingState<UiTimelineV2>,
@@ -22,7 +26,11 @@ struct TimelinePagingView: View {
         key: String,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
-        suppressInitialRefreshIndicator: Bool = false
+        suppressInitialRefreshIndicator: Bool = false,
+        outboxItems: [UiOutboxPost] = [],
+        onRetryOutbox: @escaping (String) -> Void = { _ in },
+        onEditOutbox: @escaping (String) -> Void = { _ in },
+        onDeleteOutbox: @escaping (String) -> Void = { _ in }
     ) {
         self.data = data
         self.detailStatusKey = detailStatusKey
@@ -30,6 +38,10 @@ struct TimelinePagingView: View {
         self.topContentInset = topContentInset
         self.allowGalleryMode = allowGalleryMode
         self.suppressInitialRefreshIndicator = suppressInitialRefreshIndicator
+        self.outboxItems = outboxItems
+        self.onRetryOutbox = onRetryOutbox
+        self.onEditOutbox = onEditOutbox
+        self.onDeleteOutbox = onDeleteOutbox
     }
 
     var body: some View {
@@ -54,22 +66,38 @@ struct TimelinePagingView: View {
 
     @ViewBuilder
     private func content(columnCount: Int, availableWidth: CGFloat) -> some View {
-        if allowGalleryMode && timelineDisplayMode == .gallery {
-            MacGalleryTimelineMasonryView(
-                data: data,
-                columnCount: max(columnCount, 2),
-                availableWidth: availableWidth
-            )
-        } else if columnCount > 1 {
-            MacTimelineMasonryView(
-                data: data,
-                detailStatusKey: detailStatusKey,
-                columnCount: columnCount,
-                availableWidth: availableWidth
-            )
-        } else {
+        VStack(spacing: 0) {
             LazyVStack(spacing: 2) {
-                TimelinePagingContent(data: data, detailStatusKey: detailStatusKey)
+                ForEach(outboxItems, id: \.groupId) { post in
+                    OutboxPostView(
+                        post: post,
+                        onRetry: { onRetryOutbox(post.groupId) },
+                        onEdit: { onEditOutbox(post.groupId) },
+                        onDelete: { onDeleteOutbox(post.groupId) }
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 4)
+                }
+            }
+
+            if allowGalleryMode && timelineDisplayMode == .gallery {
+                MacGalleryTimelineMasonryView(
+                    data: data,
+                    columnCount: max(columnCount, 2),
+                    availableWidth: availableWidth
+                )
+            } else if columnCount > 1 {
+                MacTimelineMasonryView(
+                    data: data,
+                    detailStatusKey: detailStatusKey,
+                    columnCount: columnCount,
+                    availableWidth: availableWidth
+                )
+            } else {
+                LazyVStack(spacing: 2) {
+                    TimelinePagingContent(data: data, detailStatusKey: detailStatusKey)
+                }
             }
         }
     }

@@ -39,6 +39,9 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
                 navigate(Route.TabSettings)
             },
             uriHandler = uriHandler,
+            onEditDraft = { groupId ->
+                navigate(Route.Compose.Draft(draftGroupId = groupId))
+            },
         )
     }
     entry<Route.Timeline> { args ->
@@ -58,6 +61,9 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             },
             toTabSettings = {
                 navigate(Route.TabSettings)
+            },
+            onEditDraft = { groupId ->
+                navigate(Route.Compose.Draft(draftGroupId = groupId))
             },
         )
     }

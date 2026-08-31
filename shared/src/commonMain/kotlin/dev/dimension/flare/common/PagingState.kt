@@ -42,6 +42,7 @@ public sealed class PagingState<T> {
     public sealed class Success<T : Any> : PagingState<T>() {
         public abstract val itemCount: Int
         public abstract val isRefreshing: Boolean
+        public abstract val refreshError: Throwable?
         public abstract val appendState: LoadState
 
         public abstract operator fun get(index: Int): T?
@@ -61,6 +62,7 @@ public sealed class PagingState<T> {
             private val data: ImmutableList<T>,
             override val itemCount: Int = data.size,
             override val isRefreshing: Boolean = false,
+            override val refreshError: Throwable? = null,
             override val appendState: LoadState = LoadState.NotLoading(endOfPaginationReached = true),
             private val onRefresh: suspend () -> Unit = {},
             private val onRetry: () -> Unit = {},
@@ -93,6 +95,8 @@ public sealed class PagingState<T> {
                 get() = data.itemCount
             override val isRefreshing: Boolean
                 get() = data.isRefreshing
+            override val refreshError: Throwable?
+                get() = (data.loadState.refresh as? LoadState.Error)?.error
 
             override operator fun get(index: Int): T? =
                 if (index < 0 || index >= data.itemCount) {

@@ -24,7 +24,7 @@ class AppDatabaseMigration11To12Test {
                 val database =
                     Room
                         .databaseBuilder<AppDatabase>(name = path)
-                        .addMigrations(AppDatabase.MIGRATION_11_12)
+                        .addMigrations(AppDatabase.MIGRATION_11_12, AppDatabase.MIGRATION_12_13)
                         .setDriver(BundledSQLiteDriver())
                         .setQueryCoroutineContext(Dispatchers.Unconfined)
                         .build()
@@ -45,12 +45,18 @@ class AppDatabaseMigration11To12Test {
                 BundledSQLiteDriver().open(path).use { connection ->
                     connection.prepare("PRAGMA user_version").use { statement ->
                         assertEquals(true, statement.step())
-                        assertEquals(12L, statement.getLong(0))
+                        assertEquals(13L, statement.getLong(0))
                     }
-                    connection.prepare("SELECT identity_hash FROM room_master_table WHERE id = 42").use { statement ->
-                        assertEquals(true, statement.step())
-                        assertEquals(APP_DATABASE_IDENTITY_HASH, statement.getText(0))
-                    }
+                    connection
+                        .prepare(
+                            "SELECT progress_current, progress_max, remote_post_key IS NULL " +
+                                "FROM DbDraftTarget WHERE target_id = 'fixture-target'",
+                        ).use { statement ->
+                            assertEquals(true, statement.step())
+                            assertEquals(0L, statement.getLong(0))
+                            assertEquals(1L, statement.getLong(1))
+                            assertEquals(1L, statement.getLong(2))
+                        }
                 }
             } finally {
                 Files.deleteIfExists(databasePath)
@@ -66,6 +72,17 @@ class AppDatabaseMigration11To12Test {
             connection.execSQL("PRAGMA user_version = 11")
             connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
             connection.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES(42, '$APP_DATABASE_IDENTITY_HASH')")
+            connection.execSQL(
+                "INSERT INTO DbDraftGroup(group_id, content, created_at, updated_at) " +
+                    "VALUES ('fixture-group', '{}', 1000, 1000)",
+            )
+            connection.execSQL(
+                "INSERT INTO DbDraftTarget(" +
+                    "group_id, account_key, status, error_message, attempt_count, last_attempt_at, " +
+                    "created_at, updated_at, target_id" +
+                    ") VALUES ('fixture-group', 'user-0@fixture.example', 'SENDING', NULL, 1, 1000, " +
+                    "1000, 1000, 'fixture-target')",
+            )
             connection
                 .prepare(
                     "INSERT INTO DbAccount(account_key, credential_json, platform_type, last_active, sort_id) VALUES (?, ?, ?, ?, ?)",

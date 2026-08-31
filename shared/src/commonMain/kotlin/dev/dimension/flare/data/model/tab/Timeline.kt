@@ -662,6 +662,21 @@ internal class TimelineResolver(
             is UiGroupTimelineTabItem -> null
         }
 
+    fun resolveAccountKeys(item: UiTimelineTabItem): Set<MicroBlogKey> =
+        when (item) {
+            is UiSourceTimelineTabItem -> {
+                setOfNotNull(resolveAccountKey(item))
+            }
+
+            is UiGroupTimelineTabItem -> {
+                item.children
+                    .asSequence()
+                    .filter { it.enabled }
+                    .flatMap { resolveAccountKeys(it).asSequence() }
+                    .toSet()
+            }
+        }
+
     @OptIn(ExperimentalSerializationApi::class)
     fun resolveAccountKey(slot: TimelineSlot): MicroBlogKey? =
         when (val content = slot.content) {

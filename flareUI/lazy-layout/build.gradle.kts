@@ -19,6 +19,9 @@ kotlin {
         )
     }
     android {
+        androidResources {
+            enable = true
+        }
         withHostTest {
             isIncludeAndroidResources = true
         }

@@ -8,6 +8,7 @@ import dev.dimension.flare.ui.uikit.AbstractUIKitWidget
 import dev.dimension.flare.ui.uikit.UIKitBackend
 import platform.Foundation.setValue
 import platform.UIKit.UIImageView
+import platform.UIKit.UIViewContentMode
 
 /** Installs [ResourceImage] for the UIKit backend. */
 public object UIKitMokoResourcesRendererPlugin : FlareRendererPlugin<UIKitBackend> {
@@ -20,7 +21,9 @@ public object UIKitMokoResourcesRendererPlugin : FlareRendererPlugin<UIKitBacken
 
 private class UIKitResourceImageWidget :
     AbstractUIKitWidget<UIImageView>(
-        UIImageView(),
+        UIImageView().apply {
+            contentMode = UIViewContentMode.UIViewContentModeScaleAspectFit
+        },
     ),
     ResourceImageWidget {
     override fun setImage(value: FlareImage) {

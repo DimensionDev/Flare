@@ -23,6 +23,19 @@ struct FlareRoot: View {
     @StateObject private var navigationModel = HomeNavigationModel()
     @State var selectedTab: String?
     @State private var reloginRoute: Route?
+
+    private var singleColumnSecondaryRoutes: [Route] {
+        var routes: [Route] = []
+        if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
+            routes += data.data.cast(SecondaryTabsPresenter.Item.self).flatMap { item in
+                item.tabs.compactMap { route(for: $0) }
+            }
+        }
+        routes += SecondarySidebarStaticRoute.allCases
+            .filter { $0 != .agentHistory || aiAgentEnabledPresenter.state.enabled }
+            .map(\.route)
+        return routes
+    }
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
@@ -33,7 +46,9 @@ struct FlareRoot: View {
                         tabs: items,
                         selectedTab: $selectedTab,
                         notificationCount: Int(notificationBadgePresenter.state.count),
-                        navigationModel: navigationModel
+                        navigationModel: navigationModel,
+                        secondaryRoutes: singleColumnSecondaryRoutes,
+                        usesTabView: true
                     )
                 } else {
                     TabView(selection: $selectedTab) {
@@ -165,7 +180,9 @@ struct BackportFlareRoot: View {
                         tabs: items,
                         selectedTab: $selectedTab,
                         notificationCount: Int(notificationBadgePresenter.state.count),
-                        navigationModel: navigationModel
+                        navigationModel: navigationModel,
+                        secondaryRoutes: [],
+                        usesTabView: false
                     )
                 } else {
                     TabView(selection: $selectedTab) {
@@ -395,6 +412,8 @@ private struct SingleColumnFlareRoot: View {
     @Binding var selectedTab: String?
     let notificationCount: Int
     @ObservedObject var navigationModel: HomeNavigationModel
+    let secondaryRoutes: [Route]
+    let usesTabView: Bool
     @Environment(\.globalAppearance) private var globalAppearance
 
     private var activeTab: HomeTabsPresenterStateHomeTabs? {
@@ -480,7 +499,15 @@ private struct SingleColumnFlareRoot: View {
                 Divider()
 
                 HStack(spacing: 0) {
-                    if let activeRoute {
+                    if #available(iOS 18.0, *), usesTabView {
+                        SingleColumnTopLevelTabView(
+                            tabs: tabs,
+                            selectedTab: $selectedTab,
+                            secondaryRoutes: secondaryRoutes,
+                            showRightSidebar: showRightSidebar,
+                            navigationModel: navigationModel
+                        )
+                    } else if let activeRoute {
                         Router(
                             backStack: navigationModel.binding(for: activeRoute),
                             navigator: navigationModel.navigator
@@ -510,6 +537,92 @@ private struct SingleColumnFlareRoot: View {
                 selectedTab = tabs.first.map { homeTabKey($0) }
             }
         }
+    }
+}
+
+@available(iOS 18.0, *)
+private struct SingleColumnTopLevelTabView: View {
+    let tabs: [HomeTabsPresenterStateHomeTabs]
+    @Binding var selectedTab: String?
+    let secondaryRoutes: [Route]
+    let showRightSidebar: Bool
+    @ObservedObject var navigationModel: HomeNavigationModel
+
+    private var activeRoute: Route? {
+        navigationModel.selectedTopLevelRoute ??
+            tabs.first { homeTabKey($0) == selectedTab }.map(homeTabRoute) ??
+            tabs.first.map(homeTabRoute)
+    }
+
+    private var availableSecondaryRoutes: [Route] {
+        var routes = secondaryRoutes
+        if let selectedRoute = navigationModel.selectedTopLevelRoute,
+           !routes.contains(selectedRoute),
+           !tabs.contains(where: { homeTabRoute($0) == selectedRoute }) {
+            routes.append(selectedRoute)
+        }
+        return routes
+    }
+
+    private var selection: Binding<Route?> {
+        Binding(
+            get: { activeRoute },
+            set: { route in
+                guard let route else { return }
+                if let tab = tabs.first(where: { homeTabRoute($0) == route }) {
+                    navigationModel.selectTopLevel(nil)
+                    selectedTab = homeTabKey(tab)
+                } else {
+                    navigationModel.selectTopLevel(route)
+                }
+            }
+        )
+    }
+
+    var body: some View {
+        TabView(selection: selection) {
+            ForEach(tabs, id: \.name) { tab in
+                let route = homeTabRoute(tab)
+                Tab(value: route) {
+                    topLevelContent(route)
+                } label: {
+                    Label {
+                        Text(homeTabTitle(tab))
+                    } icon: {
+                        Image(fontAwesome: homeTabIcon(tab))
+                    }
+                }
+            }
+
+            ForEach(availableSecondaryRoutes, id: \.self) { route in
+                Tab(value: route) {
+                    topLevelContent(route)
+                } label: {
+                    Label("more", systemImage: "ellipsis")
+                }
+                .tabPlacement(.sidebarOnly)
+            }
+        }
+        .tabViewStyle(.tabBarOnly)
+        .introspect(.tabView, on: .iOS(.v18, .v26, .v27)) { tabBarController in
+            tabBarController.setTabBarHidden(true, animated: false)
+        }
+    }
+
+    @ViewBuilder
+    private func topLevelContent(_ route: Route) -> some View {
+        Router(
+            backStack: navigationModel.binding(for: route),
+            navigator: activeRoute == route ? navigationModel.navigator : nil
+        ) { onNavigate in
+            route.view(
+                onNavigate: onNavigate,
+                goBack: {},
+                showsSecondaryMenu: !showRightSidebar
+            )
+        }
+        .environment(\.horizontalSizeClass, .compact)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

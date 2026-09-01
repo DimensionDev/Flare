@@ -10,7 +10,7 @@ struct HomeTimelineScreen: View {
     let toServiceSelect: () -> Void
     let toCompose: () -> Void
     let toTabSetting: () -> Void
-    let toSecondaryMenu: () -> Void
+    let toSecondaryMenu: (() -> Void)?
     let onNavigate: (Route) -> Void
     @Environment(\.globalAppearance) private var globalAppearance
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -30,7 +30,7 @@ struct HomeTimelineScreen: View {
         toServiceSelect: @escaping () -> Void,
         toCompose: @escaping () -> Void,
         toTabSetting: @escaping () -> Void,
-        toSecondaryMenu: @escaping () -> Void,
+        toSecondaryMenu: (() -> Void)?,
         onNavigate: @escaping (Route) -> Void
     ) {
         self.toCompose = toCompose
@@ -62,11 +62,13 @@ struct HomeTimelineScreen: View {
                 if tabs.isEmpty {
                     ContentUnavailableView("tab_settings_title", systemImage: "square.grid.2x2")
                         .toolbar {
-                            ToolbarItem(placement: .topBarLeading) {
-                                Image(fontAwesome: .gear)
-                                    .onTapGesture {
-                                        toSecondaryMenu()
-                                    }
+                            if let toSecondaryMenu {
+                                ToolbarItem(placement: .topBarLeading) {
+                                    Image(fontAwesome: .gear)
+                                        .onTapGesture {
+                                            toSecondaryMenu()
+                                        }
+                                }
                             }
                             ToolbarItem(placement: .primaryAction) {
                                 Button {
@@ -248,24 +250,26 @@ struct HomeTimelineScreen: View {
 
     @ToolbarContentBuilder
     private var leadingToolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            StateView(state: activeAccountPresenter.state.user) { user in
-                if user.avatar == nil {
-                    Image(fontAwesome: .gear)
-                } else {
-                    if #available(iOS 26.0, *) {
-                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+        if let toSecondaryMenu {
+            ToolbarItem(placement: .topBarLeading) {
+                StateView(state: activeAccountPresenter.state.user) { user in
+                    if user.avatar == nil {
+                        Image(fontAwesome: .gear)
                     } else {
-                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                            .frame(width: 24, height: 24)
+                        if #available(iOS 26.0, *) {
+                            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                        } else {
+                            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                                .frame(width: 24, height: 24)
+                        }
                     }
+                } errorContent: { _ in
+                    Image(fontAwesome: .gear)
+                } loadingContent: {
+                    Image(fontAwesome: .gear)
+                }.onTapGesture {
+                    toSecondaryMenu()
                 }
-            } errorContent: { _ in
-                Image(fontAwesome: .gear)
-            } loadingContent: {
-                Image(fontAwesome: .gear)
-            }.onTapGesture {
-                toSecondaryMenu()
             }
         }
     }

@@ -39,7 +39,7 @@ struct FlareRoot: View {
                     TabView(selection: $selectedTab) {
                         ForEach(items, id: \.name) { tab in
                             Tab(value: homeTabKey(tab), role: homeTabRoute(tab) == .discover ? .some(.search) : .none) {
-                                Router(backStack: navigationModel.binding(for: homeTabKey(tab))) { onNavigate in
+                                Router(backStack: navigationModel.binding(for: homeTabRoute(tab))) { onNavigate in
                                     homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
                                 }
                             } label: {
@@ -170,7 +170,7 @@ struct BackportFlareRoot: View {
                 } else {
                     TabView(selection: $selectedTab) {
                         ForEach(items, id: \.name) { tab in
-                            Router(backStack: navigationModel.binding(for: homeTabKey(tab))) { onNavigate in
+                            Router(backStack: navigationModel.binding(for: homeTabRoute(tab))) { onNavigate in
                                 homeTabRoute(tab).view(onNavigate: onNavigate, goBack: {})
                             }
                             .tabItem {
@@ -374,14 +374,19 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
 
 @MainActor
 private final class HomeNavigationModel: ObservableObject {
-    @Published private var backStacks: [String: [Route]] = [:]
+    @Published private var backStacks: [Route: [Route]] = [:]
+    @Published private(set) var selectedTopLevelRoute: Route?
     let navigator = RouterNavigator()
 
-    func binding(for key: String) -> Binding<[Route]> {
+    func binding(for route: Route) -> Binding<[Route]> {
         Binding(
-            get: { self.backStacks[key] ?? [] },
-            set: { self.backStacks[key] = $0 }
+            get: { self.backStacks[route] ?? [] },
+            set: { self.backStacks[route] = $0 }
         )
+    }
+
+    func selectTopLevel(_ route: Route?) {
+        selectedTopLevelRoute = route
     }
 }
 
@@ -396,6 +401,10 @@ private struct SingleColumnFlareRoot: View {
         tabs.first { homeTabKey($0) == selectedTab } ?? tabs.first
     }
 
+    private var activeRoute: Route? {
+        navigationModel.selectedTopLevelRoute ?? activeTab.map(homeTabRoute)
+    }
+
     var body: some View {
         GeometryReader { proxy in
             let showRightSidebar = proxy.size.width >= 900
@@ -403,11 +412,12 @@ private struct SingleColumnFlareRoot: View {
                 VStack(spacing: 8) {
                     ForEach(tabs, id: \.name) { tab in
                         let key = homeTabKey(tab)
-                        let selected = key == activeTab.map { homeTabKey($0) }
+                        let selected = navigationModel.selectedTopLevelRoute == nil && key == activeTab.map { homeTabKey($0) }
                         Button {
                             if selected {
                                 NotificationCenter.default.post(name: .tabDoubleTapped, object: key)
                             } else {
+                                navigationModel.selectTopLevel(nil)
                                 selectedTab = key
                             }
                         } label: {
@@ -470,12 +480,16 @@ private struct SingleColumnFlareRoot: View {
                 Divider()
 
                 HStack(spacing: 0) {
-                    if let activeTab {
+                    if let activeRoute {
                         Router(
-                            backStack: navigationModel.binding(for: homeTabKey(activeTab)),
+                            backStack: navigationModel.binding(for: activeRoute),
                             navigator: navigationModel.navigator
                         ) { onNavigate in
-                            homeTabRoute(activeTab).view(onNavigate: onNavigate, goBack: {})
+                            activeRoute.view(
+                                onNavigate: onNavigate,
+                                goBack: {},
+                                showsSecondaryMenu: !showRightSidebar
+                            )
                         }
                         .environment(\.horizontalSizeClass, .compact)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -483,7 +497,9 @@ private struct SingleColumnFlareRoot: View {
 
                     if showRightSidebar {
                         Divider()
-                        SingleColumnSecondarySidebar(navigator: navigationModel.navigator)
+                        SingleColumnSecondarySidebar { route in
+                            navigationModel.selectTopLevel(route)
+                        }
                             .frame(width: 320)
                     }
                 }
@@ -498,7 +514,7 @@ private struct SingleColumnFlareRoot: View {
 }
 
 private struct SingleColumnSecondarySidebar: View {
-    @ObservedObject var navigator: RouterNavigator
+    let navigate: (Route) -> Void
     @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
     @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
@@ -521,7 +537,7 @@ private struct SingleColumnSecondarySidebar: View {
                 .textFieldStyle(.roundedBorder)
                 .submitLabel(.search)
                 .onSubmit {
-                    navigator.navigate(.search(searchAccount, searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)))
+                    navigate(.search(searchAccount, searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)))
                 }
                 .padding(16)
 
@@ -529,7 +545,7 @@ private struct SingleColumnSecondarySidebar: View {
                 if case .success(let loggedIn) = onEnum(of: loggedInPresenter.state.isLoggedIn),
                    !loggedIn.data.boolValue {
                     Button {
-                        navigator.navigate(.serviceSelect)
+                        navigate(.serviceSelect)
                     } label: {
                         Label("login_title", systemImage: "person.badge.plus")
                     }
@@ -542,7 +558,7 @@ private struct SingleColumnSecondarySidebar: View {
                                 ForEach(account.tabs, id: \.self) { tab in
                                     if let route = route(for: tab) {
                                         Button {
-                                            navigator.navigate(route)
+                                            navigate(route)
                                         } label: {
                                             Label {
                                                 Text(tab.title.text)
@@ -567,7 +583,7 @@ private struct SingleColumnSecondarySidebar: View {
                         route != .agentHistory || aiAgentEnabledPresenter.state.enabled
                     }, id: \.self) { item in
                         Button {
-                            navigator.navigate(item.route)
+                            navigate(item.route)
                         } label: {
                             Label {
                                 Text(item.title)

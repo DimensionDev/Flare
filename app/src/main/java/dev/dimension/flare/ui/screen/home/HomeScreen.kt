@@ -141,9 +141,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 val singleColumn =
                     globalAppearance.largeScreenLayoutMode == LargeScreenLayoutMode.SingleColumn &&
                         layoutType != NavigationSuiteType.NavigationBar
+                val hasRightSidebar = singleColumn && maxWidth >= 1024.dp
                 val showRightSidebar =
-                    singleColumn &&
-                        maxWidth >= 1024.dp &&
+                    hasRightSidebar &&
                         state.wideNavigationRailState.currentValue == WideNavigationRailValue.Collapsed
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
@@ -294,7 +294,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     secondaryItems = {
-                        if (layoutType != NavigationSuiteType.NavigationBar && !showRightSidebar) {
+                        if (layoutType != NavigationSuiteType.NavigationBar && !hasRightSidebar) {
                             item(
                                 selected = currentRoute is Route.DraftBox,
                                 onClick = {
@@ -358,7 +358,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                 )
                             }
                         }
-                        if (!showRightSidebar) {
+                        if (!hasRightSidebar) {
                             state.secondaryTabsState.onSuccess { secondaryTabs ->
                                 secondaryTabs.forEach { item ->
                                     expandableItem(
@@ -489,7 +489,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                 )
                             }
                         }
-                        if (!showRightSidebar) {
+                        if (!hasRightSidebar) {
                             item(
                                 selected = currentRoute is Route.Settings.Main,
                                 onClick = {
@@ -557,9 +557,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                         isLoggedIn = state.loggedInState.takeSuccess(),
                                         aiAgentEnabled = state.aiAgentEnabled,
                                         currentRoute =
-                                            state.topLevelBackStack.takeSuccess()?.currentKey
+                                            state.topLevelBackStack.takeSuccess()?.topLevelKey
                                                 ?: currentRoute,
-                                        navigate = state::navigateSecondary,
+                                        navigate = state::navigateTopLevel,
                                         modifier = Modifier.width(336.dp),
                                     )
                                 }
@@ -722,8 +722,8 @@ private fun presenter(uriHandler: UriHandler) =
                 )
             }
 
-            fun navigateSecondary(route: Route) {
-                topLevelBackStack.takeSuccess()?.add(route)
+            fun navigateTopLevel(route: Route) {
+                topLevelBackStack.takeSuccess()?.addTopLevel(route)
                 scope.launch {
                     wideNavigationRailState.collapse()
                 }

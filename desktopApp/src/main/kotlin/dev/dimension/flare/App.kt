@@ -539,7 +539,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                             secondaryTabs = state.items,
                                             isLoggedIn = state.isLoggedIn.takeSuccess(),
                                             aiAgentEnabled = state.aiAgentEnabled,
-                                            navigate = state::navigate,
+                                            navigate = state::navigateTopLevel,
                                             modifier = Modifier.width(336.dp),
                                         )
                                     }
@@ -744,6 +744,13 @@ private fun presenter(uriHandler: UriHandler) =
                 val route = getDirection(shortcut)
                 if (route != null) {
                     navigate(route)
+                }
+            }
+
+            fun navigateTopLevel(route: Route) {
+                when (route) {
+                    is Route.UrlRoute -> uriHandler.openUri(route.url)
+                    else -> topLevelBackStack.takeSuccess()?.pushTopLevel(route)
                 }
             }
 

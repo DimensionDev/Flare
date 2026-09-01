@@ -51,6 +51,8 @@ class LazyListDslTest {
                             contentUpdates += 1
                         }
 
+                        override fun deactivate() = Unit
+
                         override fun dispose() = Unit
                     }
             }
@@ -97,6 +99,8 @@ class LazyListDslTest {
                             }
                             contentUpdates += 1
                         }
+
+                        override fun deactivate() = Unit
 
                         override fun dispose() = Unit
                     }
@@ -761,6 +765,8 @@ private data object NoOpSubcompositions : FlareSubcompositionFactory {
     override fun create(root: FlareChildren): FlareSubcomposition =
         object : FlareSubcomposition {
             override fun setContent(content: FlareContent) = Unit
+
+            override fun deactivate() = Unit
 
             override fun dispose() = Unit
         }

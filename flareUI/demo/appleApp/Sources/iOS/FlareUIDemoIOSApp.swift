@@ -11,10 +11,10 @@ final class FlareUIDemoIOSApp: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         let host = FlareDemoHost()
-        let viewController = FlareUIKitDemoViewController(contentView: host.view)
-        let navigationController = UINavigationController(rootViewController: viewController)
         let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = navigationController
+        window.rootViewController = FlareUIKitDemoViewController(
+            contentViewController: host.viewController
+        )
         window.makeKeyAndVisible()
 
         self.host = host
@@ -29,33 +29,32 @@ final class FlareUIDemoIOSApp: UIResponder, UIApplicationDelegate {
 }
 
 private final class FlareUIKitDemoViewController: UIViewController {
-    private let contentView: UIView
+    private let contentViewController: UIViewController
 
-    init(contentView: UIView) {
-        self.contentView = contentView
+    init(contentViewController: UIViewController) {
+        self.contentViewController = contentViewController
         super.init(nibName: nil, bundle: nil)
-        title = "Flare UI · UIKit"
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("Use init(contentView:) instead")
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+
+        addChild(contentViewController)
+        let contentView = contentViewController.view!
         contentView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(contentView)
-
         NSLayoutConstraint.activate([
-            contentView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            contentView.bottomAnchor.constraint(
-                lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor,
-                constant: -24
-            ),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: view.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        contentViewController.didMove(toParent: self)
     }
 }

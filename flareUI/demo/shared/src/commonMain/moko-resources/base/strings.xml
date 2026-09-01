@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="catalog_title">Flare UI Catalog</string>
+    <string name="catalog_description">Choose a feature to compare its native rendering across backends.</string>
+    <string name="open_resources_feature">Foundation and resources</string>
+    <string name="resources_feature_description">Text, buttons, rows, generated strings, plurals, and images.</string>
+    <string name="open_lazy_layouts_feature">Lazy layouts</string>
+    <string name="lazy_layouts_feature_description">Virtualized rows and columns with stable keys.</string>
+    <string name="back_to_catalog">Back to catalog</string>
     <string name="demo_title">Flare UI renderer runtime</string>
     <string name="demo_description">One shared composition renders through the selected backend.</string>
     <string name="count_format">Count: %d</string>

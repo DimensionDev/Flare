@@ -34,6 +34,7 @@ kotlin {
                 export(project(":flare-runtime"))
                 export(project(":foundation"))
                 export(project(":flare-lazy-layout"))
+                export(project(":flare-navigation"))
                 export(project(":flare-resources-moko"))
             }
         }
@@ -43,12 +44,14 @@ kotlin {
             dependencies {
                 api(project(":foundation"))
                 api(project(":flare-lazy-layout"))
+                api(project(":flare-navigation"))
                 api(project(":flare-resources-moko"))
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
+                implementation(libs.androidx.fragment.ktx)
                 implementation(libs.compose.material3)
                 implementation(libs.compose.ui)
             }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Flare UI 演示</string>
+    <string name="android_view_backend">Android View 后端</string>
+    <string name="android_compose_backend">Android Compose 后端</string>
+    <string name="demo_title_android_view">Flare UI 演示：Android View</string>
+    <string name="demo_title_android_compose">Flare UI 演示：Android Compose</string>
+</resources>

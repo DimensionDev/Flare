@@ -42,6 +42,7 @@ android {
 dependencies {
     implementation(project(":demo:shared"))
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.material.components)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

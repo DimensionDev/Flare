@@ -49,6 +49,19 @@ targets:
             -Pmoko.resources.BUILT_PRODUCTS_DIR="$BUILT_PRODUCTS_DIR" \
             -Pmoko.resources.CONTENTS_FOLDER_PATH="$UNLOCALIZED_RESOURCES_FOLDER_PATH"
 
+  iOSDemoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/iOSUITests
+    dependencies:
+      - target: iOSDemo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.flareui.demo.ios.uitests
+        TEST_TARGET_NAME: iOSDemo
+
   macOSDemo:
     type: application
     platform: macOS
@@ -120,6 +133,11 @@ schemes:
             fi
       targets:
         iOSDemo: all
+        iOSDemoUITests: test
+    test:
+      config: Debug
+      targets:
+        - iOSDemoUITests
     run:
       config: Debug
     profile:

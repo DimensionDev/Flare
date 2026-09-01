@@ -9,12 +9,9 @@ func installFlareDemoContentView(
     rootView.addSubview(contentView)
 
     NSLayoutConstraint.activate([
-        contentView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 24),
-        contentView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -24),
-        contentView.topAnchor.constraint(equalTo: rootView.topAnchor, constant: 24),
-        contentView.bottomAnchor.constraint(
-            lessThanOrEqualTo: rootView.bottomAnchor,
-            constant: -24
-        ),
+        contentView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+        contentView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+        contentView.topAnchor.constraint(equalTo: rootView.topAnchor),
+        contentView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor),
     ])
 }

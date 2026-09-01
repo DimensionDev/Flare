@@ -102,9 +102,17 @@ public fun LazyStatusVerticalStaggeredGrid(
                 StaggeredGridCells.Adaptive(if (isWideViewport) 240.dp else 160.dp)
             }
 
-            columns != null -> columns
-            compactLayout -> StaggeredGridCells.Fixed(1)
-            else -> StaggeredGridCells.Adaptive(320.dp)
+            columns != null -> {
+                columns
+            }
+
+            compactLayout -> {
+                StaggeredGridCells.Fixed(1)
+            }
+
+            else -> {
+                StaggeredGridCells.Adaptive(320.dp)
+            }
         }
     val columnCount by remember(state, effectiveColumns) {
         snapshotFlow { state.layoutInfo.viewportSize.width }

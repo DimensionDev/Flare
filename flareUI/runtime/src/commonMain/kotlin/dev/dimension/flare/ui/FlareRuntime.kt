@@ -6,10 +6,10 @@ import androidx.compose.runtime.AbstractApplier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposableTargetMarker
 import androidx.compose.runtime.ComposeNode
-import androidx.compose.runtime.Composition
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.ReusableComposition
 import androidx.compose.runtime.Updater
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
@@ -46,6 +46,9 @@ public interface FlareSubcompositionFactory {
 @LowLevelFlareApi
 public interface FlareSubcomposition {
     public fun setContent(content: FlareContent)
+
+    /** Stops observations and remembered effects while preserving the emitted widget tree. */
+    public fun deactivate()
 
     public fun dispose()
 }
@@ -153,8 +156,8 @@ private class DefaultFlareSubcomposition(
     private val onDisposed: () -> Unit = {},
 ) : FlareSubcomposition {
     private val rootNode = RootRuntimeNode(root)
-    private val composition: Composition =
-        Composition(
+    private val composition: ReusableComposition =
+        ReusableComposition(
             applier = FlareApplier(rootNode),
             parent = parent,
         )
@@ -167,6 +170,11 @@ private class DefaultFlareSubcomposition(
                 content()
             }
         }
+    }
+
+    override fun deactivate() {
+        check(!disposed) { "FlareSubcomposition is already disposed." }
+        composition.deactivate()
     }
 
     override fun dispose() {

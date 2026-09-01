@@ -1,11 +1,11 @@
+@file:OptIn(dev.dimension.flare.ui.LowLevelFlareApi::class)
+
 package dev.dimension.flare.ui.demo
 
 import android.content.Context
 import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
@@ -15,11 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import dev.dimension.flare.ui.android.AndroidViewLazyLayoutRendererPlugin
+import dev.dimension.flare.ui.android.AndroidViewNavigationOwner
+import dev.dimension.flare.ui.android.AndroidViewNavigationRendererPlugin
 import dev.dimension.flare.ui.android.FlareAndroidViewHost
 import dev.dimension.flare.ui.android.createAndroidWidgetSystem
 import dev.dimension.flare.ui.compose.AndroidComposeLazyLayoutRendererPlugin
+import dev.dimension.flare.ui.compose.AndroidComposeNavigationRendererPlugin
 import dev.dimension.flare.ui.compose.FlareComposeHost
 import dev.dimension.flare.ui.compose.createAndroidComposeWidgetSystem
 import dev.dimension.flare.ui.resources.moko.AndroidComposeMokoResourcesRendererPlugin
@@ -28,8 +31,7 @@ import dev.dimension.flare.ui.resources.moko.AndroidViewMokoResourcesRendererPlu
 import dev.dimension.flare.ui.resources.moko.ProvideMokoResources
 
 /** Creates the demo with the Android View renderer backend. */
-public fun createAndroidViewDemoView(context: Context): View {
-    val padding = (24 * context.resources.displayMetrics.density).toInt()
+public fun createAndroidViewDemoView(context: FragmentActivity): View {
     val resolver = AndroidMokoResourceResolver(context)
     return FlareAndroidViewHost(
         context = context,
@@ -37,9 +39,10 @@ public fun createAndroidViewDemoView(context: Context): View {
             createAndroidWidgetSystem(
                 AndroidViewMokoResourcesRendererPlugin,
                 AndroidViewLazyLayoutRendererPlugin,
+                AndroidViewNavigationRendererPlugin,
             ),
+        nativeControllerOwner = AndroidViewNavigationOwner(context),
     ).apply {
-        setPadding(padding, padding, padding, padding)
         setContent {
             ProvideMokoResources(resolver) {
                 FlareDemoContent()
@@ -54,6 +57,7 @@ public fun createAndroidComposeDemoView(context: Context): View {
         createAndroidComposeWidgetSystem(
             AndroidComposeMokoResourcesRendererPlugin,
             AndroidComposeLazyLayoutRendererPlugin,
+            AndroidComposeNavigationRendererPlugin,
         )
     return ComposeView(context).apply {
         setContent {
@@ -71,12 +75,10 @@ public fun createAndroidComposeDemoView(context: Context): View {
                         lightColorScheme()
                     },
             ) {
-                Surface(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.padding(DEMO_CONTENT_PADDING)) {
-                        FlareComposeHost(widgetSystem = widgetSystem) {
-                            ProvideMokoResources(resolver) {
-                                FlareDemoContent()
-                            }
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    FlareComposeHost(widgetSystem = widgetSystem) {
+                        ProvideMokoResources(resolver) {
+                            FlareDemoContent()
                         }
                     }
                 }
@@ -84,5 +86,3 @@ public fun createAndroidComposeDemoView(context: Context): View {
         }
     }
 }
-
-private val DEMO_CONTENT_PADDING = 24.dp

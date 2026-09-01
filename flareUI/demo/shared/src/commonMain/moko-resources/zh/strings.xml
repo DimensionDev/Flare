@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="catalog_title">Flare UI 功能目录</string>
+    <string name="catalog_description">选择功能，对比它在不同原生后端中的渲染表现。</string>
+    <string name="open_resources_feature">基础组件与资源</string>
+    <string name="resources_feature_description">文本、按钮、行布局、生成字符串、复数与图片。</string>
+    <string name="open_lazy_layouts_feature">懒加载布局</string>
+    <string name="lazy_layouts_feature_description">使用稳定 key 的虚拟化行与列。</string>
+    <string name="back_to_catalog">返回功能目录</string>
     <string name="demo_title">Flare UI 渲染运行时</string>
     <string name="demo_description">同一份组合内容通过所选 backend 渲染。</string>
     <string name="count_format">计数：%d</string>

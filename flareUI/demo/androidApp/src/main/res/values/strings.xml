@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Flare UI Demo</string>
+    <string name="android_view_backend">Android View backend</string>
+    <string name="android_compose_backend">Android Compose backend</string>
+    <string name="demo_title_android_view">Flare UI Demo: Android View</string>
+    <string name="demo_title_android_compose">Flare UI Demo: Android Compose</string>
+</resources>

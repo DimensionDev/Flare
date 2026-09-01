@@ -4,6 +4,7 @@ package dev.dimension.flare.ui
 
 import androidx.compose.runtime.BroadcastFrameClock
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,6 +49,56 @@ class FlareRuntimeTest {
             assertEquals(emptyList(), itemRoot.widgets)
             assertEquals(listOf("dispose:leaf"), events)
         }
+    }
+
+    @Test
+    fun deactivatesSubcompositionEffectsWhilePreservingItsWidgetTree() {
+        val events = mutableListOf<String>()
+        val parentRoot = RecordingChildren()
+        val itemRoot = RecordingChildren()
+        val system = testWidgetSystem(events)
+        var activeEffects = 0
+        var disposedEffects = 0
+        lateinit var factory: FlareSubcompositionFactory
+        val content: (String) -> FlareContent = { label ->
+            {
+                DisposableEffect(Unit) {
+                    activeEffects += 1
+                    onDispose {
+                        activeEffects -= 1
+                        disposedEffects += 1
+                    }
+                }
+                TestLeaf(label)
+            }
+        }
+
+        HeadlessTestHost(parentRoot, system, TestBackend).use { host ->
+            host.setContent {
+                factory = rememberFlareSubcompositionFactory()
+            }
+            val itemComposition = factory.create(itemRoot)
+            itemComposition.setContent(content("first"))
+            val preservedWidget = itemRoot.widgets.single()
+            assertEquals(1, activeEffects)
+
+            itemComposition.deactivate()
+
+            assertEquals(0, activeEffects)
+            assertEquals(1, disposedEffects)
+            assertSame(preservedWidget, itemRoot.widgets.single())
+            assertEquals(emptyList(), events)
+
+            itemComposition.setContent(content("second"))
+
+            assertEquals(1, activeEffects)
+            assertEquals(1, itemRoot.widgets.size)
+            assertEquals("second", (itemRoot.widgets.single() as RecordingLeafWidget).renderedText)
+        }
+
+        assertEquals(0, activeEffects)
+        assertEquals(2, disposedEffects)
+        assertEquals(listOf("dispose:leaf", "dispose:leaf"), events)
     }
 
     @Test

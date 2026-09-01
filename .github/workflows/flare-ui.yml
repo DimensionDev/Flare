@@ -70,15 +70,20 @@ jobs:
             -destination "platform=macOS,arch=arm64" \
             -derivedDataPath "$RUNNER_TEMP/flare-ui-macos-ui-tests"
 
-      - name: Build UIKit demo
+      - name: Test UIKit demo navigation
         run: |
-          xcodebuild build \
+          destination_id="$(
+            xcrun simctl list devices available | \
+              sed -nE 's/.*iPhone[^\(]*\(([0-9A-F-]{36})\).*/\1/p' | \
+              head -n 1
+          )"
+          test -n "$destination_id"
+          xcodebuild test \
             -project flareUI/demo/appleApp/FlareUIDemo.xcodeproj \
             -scheme FlareUIDemo-iOS \
-            -sdk iphonesimulator \
-            -destination "generic/platform=iOS Simulator" \
+            -destination "id=$destination_id" \
             -derivedDataPath "$RUNNER_TEMP/flare-ui-ios-demo" \
-            CODE_SIGNING_ALLOWED=NO
+            -only-testing:iOSDemoUITests/FlareUIDemoNavigationTests
 
       - name: Build AppKit demo
         run: |

@@ -1,6 +1,7 @@
 [versions]
 agp = "9.3.0"
 androidx-activity = "1.7.0"
+androidx-fragment = "1.8.9"
 compileSdk = "37"
 compose-bom = "2026.06.01"
 java = "25"
@@ -10,11 +11,13 @@ kotlinx-coroutines = "1.11.0"
 material-components = "1.14.0"
 minSdk = "26"
 moko-resources = "0.26.4"
+navigation3 = "1.1.7"
 recyclerview = "1.4.0"
 robolectric = "4.16.1"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "androidx-activity" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -27,6 +30,8 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 material-components = { module = "com.google.android.material:material", version.ref = "material-components" }
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-resources" }
+navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 

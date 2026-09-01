@@ -20,7 +20,7 @@ final class FlareUIDemoMacApp: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let host = FlareDemoHost()
-        let viewController = FlareAppKitDemoViewController(contentView: host.view)
+        let viewController = FlareAppKitDemoViewController(contentViewController: host.viewController)
         let window = NSWindow(contentViewController: viewController)
         window.title = "Flare UI · AppKit"
         window.setContentSize(NSSize(width: 640, height: 480))
@@ -43,21 +43,22 @@ final class FlareUIDemoMacApp: NSObject, NSApplicationDelegate {
 }
 
 private final class FlareAppKitDemoViewController: NSViewController {
-    private let contentView: NSView
+    private let contentViewController: NSViewController
 
-    init(contentView: NSView) {
-        self.contentView = contentView
+    init(contentViewController: NSViewController) {
+        self.contentViewController = contentViewController
         super.init(nibName: nil, bundle: nil)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("Use init(contentView:) instead")
+        fatalError("Use init(contentViewController:) instead")
     }
 
     override func loadView() {
         let rootView = NSView()
-        installFlareDemoContentView(contentView, in: rootView)
+        addChild(contentViewController)
+        installFlareDemoContentView(contentViewController.view, in: rootView)
         view = rootView
     }
 }

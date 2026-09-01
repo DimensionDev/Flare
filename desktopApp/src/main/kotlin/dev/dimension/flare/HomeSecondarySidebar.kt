@@ -72,6 +72,7 @@ internal fun HomeSecondarySidebar(
             modifier =
                 modifier
                     .fillMaxHeight()
+                    .padding(LocalWindowPadding.current)
                     .verticalScroll(scrollState)
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),

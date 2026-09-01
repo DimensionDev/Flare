@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -19,9 +20,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,6 +60,7 @@ import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.home.SecondaryTabsPresenter
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import kotlinx.collections.immutable.ImmutableList
 
 private val SidebarHorizontalPadding = 16.dp
@@ -133,12 +137,36 @@ internal fun HomeSecondarySidebar(
             }
         }
 
-        accounts.forEach { account ->
+        accounts.forEachIndexed { accountIndex, account ->
             val expanded = expandedAccounts[account.accountType] == true
+            val tabs =
+                account.tabs.mapNotNull { tab ->
+                    getDirection(tab)?.let { route -> tab to route }
+                }
+            val joinsPrevious =
+                accountIndex > 0 &&
+                    !expanded &&
+                    expandedAccounts[accounts[accountIndex - 1].accountType] != true
+            val joinsNext =
+                accountIndex < accounts.lastIndex &&
+                    !expanded &&
+                    expandedAccounts[accounts[accountIndex + 1].accountType] != true
             item(key = "account-${account.accountType}") {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    NavigationDrawerItem(
-                        label = {
+                val headerShapes =
+                    when {
+                        joinsPrevious && joinsNext -> ListItemDefaults.segmentedShapes2(1, 3)
+                        joinsPrevious -> ListItemDefaults.segmentedShapes2(1, 2)
+                        joinsNext -> ListItemDefaults.segmentedShapes2(0, 2)
+                        else -> ListItemDefaults.segmentedShapes2(0, 1)
+                    }
+                Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                    SegmentedListItem(
+                        checked = expanded,
+                        onCheckedChange = {
+                            expandedAccounts[account.accountType] = it
+                        },
+                        shapes = headerShapes,
+                        content = {
                             Column {
                                 account.user.takeSuccess()?.let { user ->
                                     RichText(user.name, maxLines = 1)
@@ -150,16 +178,12 @@ internal fun HomeSecondarySidebar(
                                 }
                             }
                         },
-                        selected = expanded,
-                        onClick = {
-                            expandedAccounts[account.accountType] = !expanded
-                        },
-                        icon = {
+                        leadingContent = {
                             account.user.takeSuccess()?.let { user ->
                                 AvatarComponent(user.avatar)
                             }
                         },
-                        badge = {
+                        trailingContent = {
                             FAIcon(
                                 imageVector =
                                     if (expanded) {
@@ -173,30 +197,28 @@ internal fun HomeSecondarySidebar(
                         modifier = Modifier.padding(horizontal = SidebarHorizontalPadding),
                     )
                     AnimatedVisibility(expanded) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            account.tabs.forEach { tab ->
-                                getDirection(tab)?.let { route ->
-                                    NavigationDrawerItem(
-                                        label = {
-                                            dev.dimension.flare.ui.component
-                                                .Text(tab.title.asText())
-                                        },
-                                        selected = currentRoute == route,
-                                        onClick = { navigate(route) },
-                                        icon = {
-                                            TabIcon(
-                                                icon = tab.icon.asType(),
-                                                title = tab.title.asText(),
-                                                iconOnly = true,
-                                            )
-                                        },
-                                        modifier =
-                                            Modifier.padding(
-                                                start = SidebarHorizontalPadding + 24.dp,
-                                                end = SidebarHorizontalPadding,
-                                            ),
-                                    )
-                                }
+                        Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                            tabs.forEachIndexed { tabIndex, (tab, route) ->
+                                SegmentedListItem(
+                                    selected = currentRoute == route,
+                                    onClick = { navigate(route) },
+                                    shapes = ListItemDefaults.segmentedShapes2(tabIndex, tabs.size),
+                                    content = {
+                                        dev.dimension.flare.ui.component
+                                            .Text(tab.title.asText())
+                                    },
+                                    leadingContent = {
+                                        TabIcon(
+                                            icon = tab.icon.asType(),
+                                            title = tab.title.asText(),
+                                            iconOnly = true,
+                                        )
+                                    },
+                                    modifier = Modifier.padding(horizontal = SidebarHorizontalPadding),
+                                    contentPadding =
+                                        ListItemDefaults.ContentPadding
+                                            .plus(PaddingValues(start = 16.dp)),
+                                )
                             }
                         }
                     }

@@ -545,10 +545,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             openDrawer = state::openDrawer,
                                             navigate = state::navigate,
                                             onBack = state::goBack,
-                                            modifier =
-                                                Modifier
-                                                    .width(480.dp)
-                                                    .fillMaxHeight(),
+                                            modifier = Modifier.fillMaxSize(),
                                             singlePane = true,
                                         )
                                     }

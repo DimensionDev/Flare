@@ -522,10 +522,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                                 navigate = state::navigate,
                                                 replace = state::replace,
                                                 onBack = state::goBack,
-                                                modifier =
-                                                    Modifier
-                                                        .width(480.dp)
-                                                        .fillMaxHeight(),
+                                                modifier = Modifier.fillMaxSize(),
                                                 singlePane = true,
                                             )
                                         }

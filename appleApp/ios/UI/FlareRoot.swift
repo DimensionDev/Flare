@@ -478,8 +478,7 @@ private struct SingleColumnFlareRoot: View {
                             homeTabRoute(activeTab).view(onNavigate: onNavigate, goBack: {})
                         }
                         .environment(\.horizontalSizeClass, .compact)
-                        .frame(maxWidth: 480, maxHeight: .infinity)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
 
                     if showRightSidebar {

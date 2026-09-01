@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -141,10 +142,17 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 val singleColumn =
                     globalAppearance.largeScreenLayoutMode == LargeScreenLayoutMode.SingleColumn &&
                         layoutType != NavigationSuiteType.NavigationBar
-                val hasRightSidebar = singleColumn && maxWidth >= 1024.dp
-                val showRightSidebar =
-                    hasRightSidebar &&
-                        state.wideNavigationRailState.currentValue == WideNavigationRailValue.Collapsed
+                val hasRightSidebar = usesFixedSecondarySidebar(singleColumn, maxWidth)
+                val openDrawer = {
+                    if (!hasRightSidebar) {
+                        state.openDrawer()
+                    }
+                }
+                LaunchedEffect(hasRightSidebar) {
+                    if (hasRightSidebar) {
+                        state.wideNavigationRailState.collapse()
+                    }
+                }
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = state.wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
@@ -161,25 +169,23 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         ),
                     railHeader = {
                         if (layoutType == NavigationSuiteType.NavigationRail) {
-                            IconButton(
-                                onClick = {
-                                    state.openDrawer()
-                                },
-                                modifier =
-                                    Modifier
-                                        .padding(
-                                            horizontal = 24.dp,
-                                        ).padding(top = 12.dp, bottom = 4.dp),
-                            ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Bars,
-                                    contentDescription = null,
-                                )
+                            if (!hasRightSidebar) {
+                                IconButton(
+                                    onClick = openDrawer,
+                                    modifier =
+                                        Modifier
+                                            .padding(
+                                                horizontal = 24.dp,
+                                            ).padding(top = 12.dp, bottom = 4.dp),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Bars,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
 
-                            if (layoutType == NavigationSuiteType.NavigationRail &&
-                                state.canComposeState.takeSuccess() == true
-                            ) {
+                            if (state.canComposeState.takeSuccess() == true) {
                                 SharedTransitionLayout {
                                     AnimatedContent(
                                         state.wideNavigationRailState.currentValue,
@@ -542,7 +548,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     ) {
                                         Router(
                                             backStack = backStack,
-                                            openDrawer = state::openDrawer,
+                                            openDrawer = openDrawer,
                                             navigate = state::navigate,
                                             onBack = state::goBack,
                                             modifier = Modifier.fillMaxSize(),
@@ -550,7 +556,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                         )
                                     }
                                 }
-                                if (showRightSidebar) {
+                                if (hasRightSidebar) {
                                     VerticalDivider()
                                     HomeSecondarySidebar(
                                         secondaryTabs = state.secondaryTabsState,
@@ -567,7 +573,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         } else {
                             Router(
                                 backStack = backStack,
-                                openDrawer = state::openDrawer,
+                                openDrawer = openDrawer,
                                 navigate = state::navigate,
                                 onBack = state::goBack,
                             )
@@ -585,6 +591,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
             SplashScreen()
         }
 }
+
+internal fun usesFixedSecondarySidebar(
+    singleColumn: Boolean,
+    availableWidth: Dp,
+): Boolean = singleColumn && availableWidth >= 1024.dp
 
 internal fun getDirection(data: SecondaryTabsPresenter.Tab): Route? =
     when (val target = data.destination) {

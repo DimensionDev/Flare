@@ -21,6 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +57,10 @@ public class AndroidViewLazyListTest {
 
             val recycler = host.getChildAt(0) as RecyclerView
             assertEquals(RecyclerView.VERTICAL, (recycler.layoutManager as LinearLayoutManager).orientation)
+            assertTrue(recycler.isVerticalScrollBarEnabled)
+            assertFalse(recycler.isHorizontalScrollBarEnabled)
+            assertNotNull(recycler.verticalScrollbarThumbDrawable)
+            assertTrue(recycler.isScrollbarFadingEnabled)
             assertTrue(recycler.childCount in 1 until 10_000)
             assertEquals("Item 0", recycler.firstRenderedText())
         }
@@ -228,6 +234,10 @@ public class AndroidViewLazyListTest {
 
             val recycler = host.getChildAt(0) as RecyclerView
             assertEquals(RecyclerView.HORIZONTAL, (recycler.layoutManager as LinearLayoutManager).orientation)
+            assertFalse(recycler.isVerticalScrollBarEnabled)
+            assertTrue(recycler.isHorizontalScrollBarEnabled)
+            assertNotNull(recycler.horizontalScrollbarThumbDrawable)
+            assertTrue(recycler.isScrollbarFadingEnabled)
             assertTrue(recycler.childCount in 1 until 10_000)
             assertEquals("Item 0", recycler.firstRenderedText())
         }

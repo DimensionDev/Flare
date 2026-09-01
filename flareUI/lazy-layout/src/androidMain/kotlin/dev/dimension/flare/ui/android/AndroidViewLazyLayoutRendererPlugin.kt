@@ -5,6 +5,7 @@ package dev.dimension.flare.ui.android
 import android.content.Context
 import android.graphics.Rect
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -23,6 +24,7 @@ import dev.dimension.flare.ui.lazy.LazyListLayoutInfo
 import dev.dimension.flare.ui.lazy.LazyListOrientation
 import dev.dimension.flare.ui.lazy.LazyListScrollRequest
 import dev.dimension.flare.ui.lazy.LazyRealizedItemUpdate
+import dev.dimension.flare.ui.lazy.R
 import dev.dimension.flare.ui.lazy.findIndexByKey
 import kotlinx.coroutines.Dispatchers
 import kotlin.math.roundToInt
@@ -38,7 +40,11 @@ public object AndroidViewLazyLayoutRendererPlugin : FlareRendererPlugin<AndroidV
 
 private class AndroidViewLazyCollectionWidget(
     backend: AndroidViewBackend,
-) : AbstractAndroidWidget<RecyclerView>(RecyclerView(backend.context)),
+) : AbstractAndroidWidget<RecyclerView>(
+        LayoutInflater
+            .from(backend.context)
+            .inflate(R.layout.flare_lazy_recycler_view, null, false) as RecyclerView,
+    ),
     LazyCollectionWidget {
     private val density = view.resources.displayMetrics.density
     private val layoutManager = LinearLayoutManager(backend.context)
@@ -105,11 +111,10 @@ private class AndroidViewLazyCollectionWidget(
         current: LazyCollectionModel,
     ): LazyRealizedItemUpdate {
         val anchor = previous?.let(::captureAnchor)
-        layoutManager.orientation =
-            when (current.orientation) {
-                LazyListOrientation.Vertical -> RecyclerView.VERTICAL
-                LazyListOrientation.Horizontal -> RecyclerView.HORIZONTAL
-            }
+        val vertical = current.orientation == LazyListOrientation.Vertical
+        layoutManager.orientation = if (vertical) RecyclerView.VERTICAL else RecyclerView.HORIZONTAL
+        view.isVerticalScrollBarEnabled = vertical
+        view.isHorizontalScrollBarEnabled = !vertical
         spacingDecoration.orientation = current.orientation
         spacingDecoration.spacing = (current.spacing * density).roundToInt()
         lazyAdapter.update()

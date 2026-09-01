@@ -6,7 +6,9 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
+import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
+import dev.dimension.flare.data.network.misskey.api.model.NotesConversationRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -33,7 +35,7 @@ internal class StatusDetailRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
-        val result =
+        val (result, nextKey) =
             when (request) {
                 is PagingRequest.Append -> {
                     if (statusOnly) {
@@ -41,14 +43,10 @@ internal class StatusDetailRemoteMediator(
                             endOfPaginationReached = true,
                         )
                     }
-                    service
-                        .notesChildren(
-                            NotesChildrenRequest(
-                                noteId = statusKey.id,
-                                untilId = request.nextKey.takeIf { it.isNotEmpty() },
-                                limit = pageSize,
-                            ),
-                        )
+                    loadReplyPage(
+                        pageSize = pageSize,
+                        untilId = request.nextKey.takeIf { it.isNotEmpty() },
+                    )
                 }
 
                 is PagingRequest.Prepend -> {
@@ -64,9 +62,18 @@ internal class StatusDetailRemoteMediator(
                                 IPinRequest(noteId = statusKey.id),
                             )
                     if (statusOnly) {
-                        listOf(current)
+                        listOf(current) to null
                     } else {
-                        listOfNotNull(current.reply, current)
+                        val ancestors =
+                            service
+                                .notesConversation(
+                                    NotesConversationRequest(
+                                        noteId = statusKey.id,
+                                        limit = MAX_CONTEXT_NOTES,
+                                    ),
+                                ).asReversed()
+                                .ifEmpty { listOfNotNull(current.reply) }
+                        (ancestors + current).distinctBy { it.id } to ""
                     }
                 }
             }
@@ -75,12 +82,64 @@ internal class StatusDetailRemoteMediator(
             endOfPaginationReached = statusOnly || result.isEmpty(),
             data =
                 result.render(accountKey),
-            nextKey =
-                if (request == PagingRequest.Refresh) {
-                    ""
-                } else {
-                    result.lastOrNull()?.id
-                },
+            nextKey = nextKey,
         )
+    }
+
+    private suspend fun loadReplyPage(
+        pageSize: Int,
+        untilId: String?,
+    ): Pair<List<Note>, String?> {
+        val limit = pageSize.coerceIn(1, MAX_CONTEXT_NOTES)
+        val directChildren =
+            service.notesChildren(
+                NotesChildrenRequest(
+                    noteId = statusKey.id,
+                    untilId = untilId,
+                    limit = limit,
+                ),
+            )
+        val result = mutableListOf<Note>()
+        val visited = mutableSetOf(statusKey.id)
+        var nestedRequests = 0
+
+        suspend fun appendChildren(
+            parentId: String,
+            children: List<Note>,
+        ) {
+            for (child in children) {
+                if (result.size >= MAX_CONTEXT_NOTES) return
+                if (!visited.add(child.id)) continue
+                result += child
+                if (
+                    result.size >= MAX_CONTEXT_NOTES ||
+                    child.replyId != parentId ||
+                    child.repliesCount <= 0 ||
+                    nestedRequests >= MAX_NESTED_CONTEXT_REQUESTS
+                ) {
+                    continue
+                }
+                nestedRequests++
+                appendChildren(
+                    parentId = child.id,
+                    children =
+                        service.notesChildren(
+                            NotesChildrenRequest(
+                                noteId = child.id,
+                                limit = minOf(limit, MAX_CONTEXT_NOTES - result.size),
+                            ),
+                        ),
+                )
+            }
+        }
+
+        // ponytail: Bound recursive API work; raise the budgets only if real threads regularly exceed them.
+        appendChildren(statusKey.id, directChildren)
+        return result to directChildren.lastOrNull()?.id
+    }
+
+    private companion object {
+        const val MAX_CONTEXT_NOTES = 100
+        const val MAX_NESTED_CONTEXT_REQUESTS = 20
     }
 }

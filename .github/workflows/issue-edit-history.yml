@@ -1,0 +1,72 @@
+name: Restore Deleted Issue Content
+
+on:
+  issues:
+    types: [edited]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: restore-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restore content and lock original issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { issue, changes = {} } = context.payload;
+            const hasContent = value => /[\p{L}\p{N}\p{Extended_Pictographic}]/u.test(value ?? '');
+            const titleWasDeleted = changes.title && hasContent(changes.title.from) && !hasContent(issue.title);
+            const bodyWasDeleted = changes.body && hasContent(changes.body.from) && !hasContent(issue.body);
+            if (!titleWasDeleted && !bodyWasDeleted) return;
+
+            const marker = `<!-- issue-restore:${issue.id} -->`;
+            const fallbackTitle = `Restored issue #${issue.number}`;
+            const pendingBody = '_Content restoration pending._';
+            const footer = `\n\n---\n\nRestored from [#${issue.number}](${issue.html_url}).\n\n${marker}`;
+            let previousTitle = changes.title?.from ?? (hasContent(issue.title) ? issue.title : null);
+            let previousBody = changes.body?.from ?? (hasContent(issue.body) ? issue.body : null);
+
+            const restoredIssues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo,
+              creator: 'github-actions[bot]',
+              state: 'all',
+              per_page: 100,
+            });
+            const restoredIssue = restoredIssues.find(candidate => candidate.body?.includes(marker));
+
+            if (restoredIssue) {
+              if (previousTitle === null && restoredIssue.title !== fallbackTitle) previousTitle = restoredIssue.title;
+              if (previousBody === null && restoredIssue.body?.endsWith(footer)) {
+                const storedBody = restoredIssue.body.slice(0, -footer.length);
+                if (storedBody !== pendingBody) previousBody = storedBody;
+              }
+            }
+
+            const title = previousTitle ?? fallbackTitle;
+            const body = `${previousBody ?? pendingBody}${footer}`;
+
+            if (restoredIssue) {
+              await github.rest.issues.update({
+                ...context.repo,
+                issue_number: restoredIssue.number,
+                title,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                ...context.repo,
+                title,
+                body,
+              });
+            }
+
+            await github.rest.issues.lock({
+              ...context.repo,
+              issue_number: issue.number,
+            });

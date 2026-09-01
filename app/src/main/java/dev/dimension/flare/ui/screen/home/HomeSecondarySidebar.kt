@@ -156,7 +156,7 @@ internal fun HomeSecondarySidebar(
             }
             account.tabs.drop(1).forEach { tab ->
                 val route = getDirection(tab) ?: return@forEach
-                item(key = "${account.accountType}-$route") {
+                item {
                     NavigationDrawerItem(
                         label = {
                             dev.dimension.flare.ui.component

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +36,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CaretDown
+import compose.icons.fontawesomeicons.solid.CaretUp
 import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
@@ -68,6 +72,7 @@ internal fun HomeSecondarySidebar(
 ) {
     val accounts = secondaryTabs.takeSuccess().orEmpty()
     val searchAccount = accounts.firstOrNull()?.accountType ?: AccountType.Guest
+    val expandedAccounts = remember { mutableStateMapOf<AccountType, Boolean>() }
     var query by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     val submitSearch = {
@@ -129,54 +134,72 @@ internal fun HomeSecondarySidebar(
         }
 
         accounts.forEach { account ->
-            val profileRoute = account.tabs.firstOrNull()?.let(::getDirection)
+            val expanded = expandedAccounts[account.accountType] == true
             item(key = "account-${account.accountType}") {
-                NavigationDrawerItem(
-                    label = {
-                        Column {
-                            account.user.takeSuccess()?.let { user ->
-                                RichText(user.name, maxLines = 1)
-                                Text(
-                                    user.handle.canonical,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1,
-                                )
-                            }
-                        }
-                    },
-                    selected = profileRoute != null && currentRoute == profileRoute,
-                    onClick = { profileRoute?.let(navigate) },
-                    icon = {
-                        account.user.takeSuccess()?.let { user ->
-                            AvatarComponent(user.avatar)
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = SidebarHorizontalPadding),
-                )
-            }
-            account.tabs.drop(1).forEach { tab ->
-                val route = getDirection(tab) ?: return@forEach
-                item {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     NavigationDrawerItem(
                         label = {
-                            dev.dimension.flare.ui.component
-                                .Text(tab.title.asText())
+                            Column {
+                                account.user.takeSuccess()?.let { user ->
+                                    RichText(user.name, maxLines = 1)
+                                    Text(
+                                        user.handle.canonical,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1,
+                                    )
+                                }
+                            }
                         },
-                        selected = currentRoute == route,
-                        onClick = { navigate(route) },
+                        selected = expanded,
+                        onClick = {
+                            expandedAccounts[account.accountType] = !expanded
+                        },
                         icon = {
-                            TabIcon(
-                                icon = tab.icon.asType(),
-                                title = tab.title.asText(),
-                                iconOnly = true,
+                            account.user.takeSuccess()?.let { user ->
+                                AvatarComponent(user.avatar)
+                            }
+                        },
+                        badge = {
+                            FAIcon(
+                                imageVector =
+                                    if (expanded) {
+                                        FontAwesomeIcons.Solid.CaretUp
+                                    } else {
+                                        FontAwesomeIcons.Solid.CaretDown
+                                    },
+                                contentDescription = null,
                             )
                         },
-                        modifier =
-                            Modifier.padding(
-                                start = SidebarHorizontalPadding + 24.dp,
-                                end = SidebarHorizontalPadding,
-                            ),
+                        modifier = Modifier.padding(horizontal = SidebarHorizontalPadding),
                     )
+                    AnimatedVisibility(expanded) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            account.tabs.forEach { tab ->
+                                getDirection(tab)?.let { route ->
+                                    NavigationDrawerItem(
+                                        label = {
+                                            dev.dimension.flare.ui.component
+                                                .Text(tab.title.asText())
+                                        },
+                                        selected = currentRoute == route,
+                                        onClick = { navigate(route) },
+                                        icon = {
+                                            TabIcon(
+                                                icon = tab.icon.asType(),
+                                                title = tab.title.asText(),
+                                                iconOnly = true,
+                                            )
+                                        },
+                                        modifier =
+                                            Modifier.padding(
+                                                start = SidebarHorizontalPadding + 24.dp,
+                                                end = SidebarHorizontalPadding,
+                                            ),
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

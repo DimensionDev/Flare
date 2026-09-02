@@ -26,6 +26,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
@@ -236,7 +237,9 @@ internal fun Router(
     NavDisplay(
         sceneState = sceneState,
         navigationEventState = navigationEventState,
-        modifier = modifier,
+        // NavDisplay applies this modifier to AnimatedContent, while OverlayScenes stay outside it.
+        // Keep page transitions inside their pane without constraining fullscreen media dialogs.
+        modifier = modifier.clipToBounds(),
         transitionSpec = {
             if (
                 predictiveBackMotionState.ownsPostCommitTransition(

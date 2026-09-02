@@ -42,15 +42,15 @@ import compose.icons.fontawesomeicons.solid.LocationDot
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.profile_field_location
+import dev.dimension.flare.compose.ui.profile_field_verified_link
+import dev.dimension.flare.compose.ui.profile_field_website
 import dev.dimension.flare.compose.ui.profile_header_button_blocked
 import dev.dimension.flare.compose.ui.profile_header_button_follow
 import dev.dimension.flare.compose.ui.profile_header_button_following
 import dev.dimension.flare.compose.ui.profile_header_button_is_fans
 import dev.dimension.flare.compose.ui.profile_header_button_request_follow
 import dev.dimension.flare.compose.ui.profile_header_button_requested
-import dev.dimension.flare.compose.ui.profile_field_location
-import dev.dimension.flare.compose.ui.profile_field_verified_link
-import dev.dimension.flare.compose.ui.profile_field_website
 import dev.dimension.flare.compose.ui.profile_mark_bot
 import dev.dimension.flare.compose.ui.profile_mark_cat
 import dev.dimension.flare.compose.ui.profile_mark_locked
@@ -375,21 +375,21 @@ private fun ProfileHeaderSuccess(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            val icon =
+                            val (icon, iconDescriptionResource) =
                                 when (key) {
-                                    UiProfile.BottomContent.Iconify.Icon.Location -> FontAwesomeIcons.Solid.LocationDot
-                                    UiProfile.BottomContent.Iconify.Icon.Url -> FontAwesomeIcons.Solid.Globe
-                                    UiProfile.BottomContent.Iconify.Icon.Verify -> FontAwesomeIcons.Solid.CircleCheck
+                                    UiProfile.BottomContent.Iconify.Icon.Location -> {
+                                        FontAwesomeIcons.Solid.LocationDot to Res.string.profile_field_location
+                                    }
+
+                                    UiProfile.BottomContent.Iconify.Icon.Url -> {
+                                        FontAwesomeIcons.Solid.Globe to Res.string.profile_field_website
+                                    }
+
+                                    UiProfile.BottomContent.Iconify.Icon.Verify -> {
+                                        FontAwesomeIcons.Solid.CircleCheck to Res.string.profile_field_verified_link
+                                    }
                                 }
-                            val iconDescription =
-                                stringResource(
-                                    when (key) {
-                                        UiProfile.BottomContent.Iconify.Icon.Location -> Res.string.profile_field_location
-                                        UiProfile.BottomContent.Iconify.Icon.Url -> Res.string.profile_field_website
-                                        UiProfile.BottomContent.Iconify.Icon.Verify -> Res.string.profile_field_verified_link
-                                    },
-                                )
-                            FAIcon(icon, contentDescription = iconDescription)
+                            FAIcon(icon, contentDescription = stringResource(iconDescriptionResource))
                             RichText(text = value)
                         }
                     }

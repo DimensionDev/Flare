@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import FlareAppleCore
 
 public struct UserOnelineView<TrailingContent: View>: View {
     private let data: UiProfile
@@ -24,7 +25,9 @@ public struct UserOnelineView<TrailingContent: View>: View {
             if showAvatar {
                 AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
                     .frame(width: 20, height: 20)
-                    .accessibilityLabel(Text(verbatim: profileActionLabel))
+                    .accessibilityLabel(
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                    )
                     .onTapGesture {
                         onClicked?()
                     }
@@ -39,17 +42,6 @@ public struct UserOnelineView<TrailingContent: View>: View {
             trailing()
         }
         .lineLimit(1)
-    }
-
-    private var profileActionLabel: String {
-        String(
-            format: String(
-                localized: "profile_open_user",
-                defaultValue: "Open profile for %@"
-            ),
-            locale: .current,
-            data.handle.canonical
-        )
     }
 }
 

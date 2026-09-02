@@ -534,15 +534,15 @@ fun ComposeDialog(
                                     .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            mediaState.medias.forEach { (uri, altTextState) ->
+                            mediaState.medias.forEach { media ->
                                 val editAltTextDescription =
                                     stringResource(Res.string.compose_edit_alt_text)
                                 val mediaDescription =
-                                    altTextState.text
+                                    media.textState.text
                                         .toString()
                                         .takeIf { it.isNotBlank() }
                                         ?: stringResource(
-                                            if (uri.extension.lowercase() in videoExtensions) {
+                                            if (media.isVideo) {
                                                 Res.string.compose_video_no_alt
                                             } else {
                                                 Res.string.compose_image_no_alt
@@ -550,7 +550,7 @@ fun ComposeDialog(
                                         )
                                 Box {
                                     NetworkImage(
-                                        model = uri.absolutePath,
+                                        model = media.file.absolutePath,
                                         contentDescription = mediaDescription,
                                         modifier =
                                             Modifier
@@ -572,10 +572,11 @@ fun ComposeDialog(
                                                         horizontalAlignment = Alignment.End,
                                                     ) {
                                                         TextField(
-                                                            altTextState,
+                                                            media.textState,
                                                             modifier = Modifier.width(300.dp),
                                                             trailing = {
-                                                                val remainingLength = mediaState.altTextMaxLength - altTextState.text.length
+                                                                val remainingLength =
+                                                                    mediaState.altTextMaxLength - media.textState.text.length
                                                                 Text(
                                                                     remainingLength.toString(),
                                                                     color =
@@ -612,7 +613,7 @@ fun ComposeDialog(
                                         }
                                         Button(
                                             onClick = {
-                                                mediaState.removeMedia(uri)
+                                                mediaState.removeMedia(media.file)
                                             },
                                         ) {
                                             FAIcon(
@@ -1372,7 +1373,7 @@ private fun mediaPresenter(
         mutableStateOf(
             initialMedia
                 ?.takeIf { it.isFile }
-                ?.let { listOf(MediaData(it)) }
+                ?.let { listOf(createMediaData(it)) }
                 .orEmpty(),
         )
     }
@@ -1394,7 +1395,7 @@ private fun mediaPresenter(
                 (
                     medias +
                         uris.map {
-                            MediaData(it)
+                            createMediaData(it)
                         }
                 ).distinctBy {
                     it.file
@@ -1405,7 +1406,7 @@ private fun mediaPresenter(
             medias =
                 items
                     .map { item ->
-                        MediaData(
+                        createMediaData(
                             file = File(item.cachePath),
                             textState = TextFieldState(item.altText.orEmpty()),
                         )
@@ -1435,6 +1436,16 @@ private fun mediaPresenter(
 private data class MediaData(
     val file: File,
     val textState: TextFieldState = TextFieldState(),
+    val isVideo: Boolean,
+)
+
+private fun createMediaData(
+    file: File,
+    textState: TextFieldState = TextFieldState(),
+) = MediaData(
+    file = file,
+    textState = textState,
+    isVideo = file.extension.lowercase() in videoExtensions,
 )
 
 @Composable

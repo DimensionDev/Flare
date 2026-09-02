@@ -489,17 +489,6 @@ final class UserCompatUIView: UIStackView {
     @objc private func onTapFired() { onTapped?() }
 }
 
-func openProfileAccessibilityLabel(handle: String) -> String {
-    String(
-        format: String(
-            localized: "profile_open_user",
-            defaultValue: "Open profile for %@"
-        ),
-        locale: .current,
-        handle
-    )
-}
-
 // MARK: - StatusTopEndView
 // Mirrors `topEndContent` in StatusView.swift — visibility + translation state
 // + optional platform logo + timestamp in an HStack.

@@ -490,16 +490,13 @@ internal fun ComposeScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             mediaState.medias.forEach { media ->
-                                val isVideo = remember(media.uri) {
-                                    context.contentResolver.getType(media.uri)?.startsWith("video/") == true
-                                }
                                 val mediaDescription =
                                     media.textState.text
                                         .toString()
                                         .takeIf { it.isNotBlank() }
                                         ?: stringResource(
                                             id =
-                                                if (isVideo) {
+                                                if (media.isVideo) {
                                                     R.string.compose_video_no_alt
                                                 } else {
                                                     R.string.compose_image_no_alt
@@ -1199,7 +1196,7 @@ private fun composePresenter(
             .mapNotNull {
                 it.media
             }.map {
-                mediaPresenter(it, initialMedias)
+                mediaPresenter(context, it, initialMedias)
             }
 
     mediaState.onSuccess {
@@ -1398,13 +1395,14 @@ private fun contentWarningPresenter() =
 
 @Composable
 private fun mediaPresenter(
+    context: Context,
     config: ComposeConfig.Media,
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) = run {
     var medias by remember {
         mutableStateOf(
             initialMedias.map {
-                MediaData(it)
+                createMediaData(context, it)
             },
         )
     }
@@ -1426,7 +1424,7 @@ private fun mediaPresenter(
                 (
                     medias +
                         uris.map {
-                            MediaData(it)
+                            createMediaData(context, it)
                         }
                 ).distinctBy {
                     it.uri
@@ -1437,7 +1435,8 @@ private fun mediaPresenter(
             medias =
                 items
                     .map { item ->
-                        MediaData(
+                        createMediaData(
+                            context = context,
                             uri = Uri.parse(item.cachePath),
                             textState = TextFieldState(item.altText.orEmpty()),
                         )
@@ -1468,9 +1467,20 @@ private fun mediaPresenter(
 private data class MediaData(
     val uri: Uri,
     val textState: TextFieldState = TextFieldState(),
+    val isVideo: Boolean,
 ) {
     val url = uri.toString()
 }
+
+private fun createMediaData(
+    context: Context,
+    uri: Uri,
+    textState: TextFieldState = TextFieldState(),
+) = MediaData(
+    uri = uri,
+    textState = textState,
+    isVideo = context.contentResolver.getType(uri)?.startsWith("video/") == true,
+)
 
 @Composable
 private fun pollPresenter(config: ComposeConfig.Poll) =

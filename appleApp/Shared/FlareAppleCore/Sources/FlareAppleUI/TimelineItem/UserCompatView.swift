@@ -23,7 +23,9 @@ public struct UserCompatView<TrailingContent: View>: View {
                 .frame(width: 44, height: 44)
                 .if(onClicked != nil) { view in
                     view
-                        .accessibilityLabel(Text(verbatim: profileActionLabel))
+                        .accessibilityLabel(
+                            Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                        )
                         .onTapGesture {
                             onClicked?()
                         }
@@ -39,7 +41,9 @@ public struct UserCompatView<TrailingContent: View>: View {
             }
             .if(onClicked != nil) { view in
                 view
-                    .accessibilityLabel(Text(verbatim: profileActionLabel))
+                    .accessibilityLabel(
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                    )
                     .onTapGesture {
                         onClicked?()
                     }
@@ -48,17 +52,6 @@ public struct UserCompatView<TrailingContent: View>: View {
             trailing()
         }
         .lineLimit(1)
-    }
-
-    private var profileActionLabel: String {
-        String(
-            format: String(
-                localized: "profile_open_user",
-                defaultValue: "Open profile for %@"
-            ),
-            locale: .current,
-            data.handle.canonical
-        )
     }
 }
 

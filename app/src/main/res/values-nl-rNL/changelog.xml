@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versie %1$s:</span>
             <ul>
-                <li>Een optionele carrouselindeling toegevoegd voor berichten met meerdere media-items, globaal of per tijdlijn instelbaar.</li>
-                <li>Onderwerptijdlijnen uit Ontdekken op X en automatische linkvoorbeelden voor Bluesky-berichten toegevoegd.</li>
-                <li>De Galerijmodus ondersteunt nu berichtacties via lang indrukken of rechtsklikken op Android, iOS, macOS en Desktop.</li>
-                <li>De betrouwbaarheid van tijdlijnen en media is verbeterd, waaronder X-meldingen, paginering van Mastodon Ontdekken, de volgorde van reposts, Nostr-profielen, ingesloten RSS-video’s en de grootte van de iOS-galerij.</li>
+                <li>Profieltabbladen worden nu onafhankelijk geladen, en X-profielen kunnen Reposts, Hoogtepunten en Artikelen tonen wanneer beschikbaar.</li>
+                <li>Globale en tijdlijnspecifieke opties toegevoegd om emoji-reacties te verbergen.</li>
+                <li>Navigatie en toegankelijkheid verbeterd met vloeiendere voorspellende teruggebaren en schuifbare lange afbeeldingsbeschrijvingen.</li>
+                <li>De betrouwbaarheid van aanmelden bij Bluesky is verbeterd, het laden van FANBOX-inhoud is hersteld en Misskey-berichtdetails tonen nu het volledige gesprek.</li>
             </ul>
         ]]></string>
 </resources>

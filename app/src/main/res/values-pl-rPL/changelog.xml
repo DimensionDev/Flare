@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano opcjonalny układ karuzeli dla postów z wieloma elementami multimedialnymi, konfigurowany globalnie lub dla każdej osi czasu.</li>
-                <li>Dodano tematyczne osie czasu Odkrywaj w X i automatyczne podglądy linków w postach Bluesky.</li>
-                <li>Tryb Galerii obsługuje teraz działania na postach przez długie naciśnięcie lub kliknięcie prawym przyciskiem na Androidzie, iOS, macOS i komputerach.</li>
-                <li>Poprawiono niezawodność osi czasu i multimediów, w tym powiadomień X, stronicowania Odkrywaj w Mastodon, kolejności repostów, profili Nostr, osadzonych filmów RSS i rozmiarów Galerii w iOS.</li>
+                <li>Karty profilu są teraz ładowane niezależnie; profile X mogą wyświetlać Reposty, Wyróżnione i Artykuły, gdy są dostępne.</li>
+                <li>Dodano globalne i osobne dla każdej osi czasu opcje ukrywania reakcji emoji.</li>
+                <li>Ulepszono nawigację i dostępność dzięki płynniejszym predykcyjnym gestom wstecz oraz przewijanym długim opisom obrazów.</li>
+                <li>Poprawiono niezawodność logowania do Bluesky, przywrócono wczytywanie treści FANBOX, a szczegóły postów Misskey pokazują teraz całą rozmowę.</li>
             </ul>
         ]]></string>
 </resources>

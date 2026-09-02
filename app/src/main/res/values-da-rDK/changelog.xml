@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Tilføjet et valgfrit karrusellayout til opslag med flere medieelementer, som kan indstilles globalt eller pr. tidslinje.</li>
-                <li>Tilføjet emnetidslinjer fra Udforsk på X og automatiske linkforhåndsvisninger til Bluesky-opslag.</li>
-                <li>Galleritilstand understøtter nu opslagshandlinger med langt tryk eller højreklik på Android, iOS, macOS og Desktop.</li>
-                <li>Forbedret stabilitet for tidslinjer og medier, herunder X-notifikationer, sideindlæsning i Mastodon Udforsk, rækkefølgen af genopslag, Nostr-profiler, indlejrede RSS-videoer og størrelsen på iOS-galleriet.</li>
+                <li>Profilfaner indlæses nu uafhængigt, og X-profiler kan vise genopslag, højdepunkter og artikler, når de er tilgængelige.</li>
+                <li>Tilføjet globale og tidslinjespecifikke muligheder for at skjule emoji-reaktioner.</li>
+                <li>Forbedret navigation og tilgængelighed med mere flydende forudsigende tilbagebevægelser og rulbare lange billedbeskrivelser.</li>
+                <li>Forbedret pålideligheden af Bluesky-login, gendannet indlæsning af FANBOX-indhold og udvidet Misskey-opslagsdetaljer, så hele samtalen vises.</li>
             </ul>
         ]]></string>
 </resources>

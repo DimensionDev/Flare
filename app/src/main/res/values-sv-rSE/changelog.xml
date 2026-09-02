@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Lade till en valfri karusellayout för inlägg med flera medieobjekt, som kan ställas in globalt eller per tidslinje.</li>
-                <li>Lade till ämnestidslinjer från Utforska på X och automatiska länkförhandsvisningar för Bluesky-inlägg.</li>
-                <li>Galleriläget stöder nu inläggsåtgärder med långtryck eller högerklick på Android, iOS, macOS och dator.</li>
-                <li>Förbättrade tillförlitligheten för tidslinjer och media, inklusive X-aviseringar, sidindelning i Mastodon Utforska, ordningen på återpubliceringar, Nostr-profiler, inbäddade RSS-videor och storleken på iOS-galleriet.</li>
+                <li>Profilflikar läses nu in oberoende av varandra. X-profiler kan visa återpubliceringar, höjdpunkter och artiklar när de är tillgängliga.</li>
+                <li>Lade till globala och tidslinjespecifika alternativ för att dölja emoji-reaktioner.</li>
+                <li>Förbättrade navigering och tillgänglighet med smidigare förutsägande bakåtgest och rullningsbara långa bildbeskrivningar.</li>
+                <li>Förbättrade tillförlitligheten vid Bluesky-inloggning, återställde inläsning av FANBOX-innehåll och utökade Misskey-inläggsdetaljer så att hela konversationen visas.</li>
             </ul>
         ]]></string>
 </resources>

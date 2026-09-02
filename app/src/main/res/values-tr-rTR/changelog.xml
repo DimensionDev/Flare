@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Birden fazla medya öğesi içeren gönderiler için genel olarak veya zaman akışı başına yapılandırılabilen isteğe bağlı bir karusel düzeni eklendi.</li>
-                <li>X Keşfet konu zaman akışları ve Bluesky gönderileri için otomatik bağlantı önizlemeleri eklendi.</li>
-                <li>Galeri modu artık Android, iOS, macOS ve masaüstünde uzun basma veya sağ tıklamayla gönderi işlemlerini destekliyor.</li>
-                <li>X bildirimleri, Mastodon Keşfet sayfalaması, yeniden gönderi sıralaması, Nostr profilleri, gömülü RSS videoları ve iOS Galeri boyutlandırması dahil olmak üzere zaman akışı ve medya güvenilirliği iyileştirildi.</li>
+                <li>Profil sekmeleri artık birbirinden bağımsız yükleniyor; X profilleri, mevcut olduğunda Yeniden Gönderiler, Öne Çıkanlar ve Makaleleri gösterebiliyor.</li>
+                <li>Emoji tepkilerini gizlemek için genel ve zaman akışı başına seçenekler eklendi.</li>
+                <li>Daha akıcı tahmine dayalı geri hareketleri ve kaydırılabilir uzun görsel açıklamalarıyla gezinme ve erişilebilirlik iyileştirildi.</li>
+                <li>Bluesky oturum açma güvenilirliği iyileştirildi, FANBOX içeriğinin yüklenmesi düzeltildi ve Misskey gönderi ayrıntıları artık konuşmanın tamamını gösteriyor.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Tekrar hoş geldiniz!</string>

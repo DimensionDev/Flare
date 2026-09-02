@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versiunea %1$s:</span>
             <ul>
-                <li>A fost adăugat un aspect opțional de tip carusel pentru postările cu mai multe elemente media, configurabil global sau pentru fiecare cronologie.</li>
-                <li>Au fost adăugate cronologii tematice Descoperă în X și previzualizări automate ale linkurilor pentru postările Bluesky.</li>
-                <li>Modul Galerie acceptă acum acțiuni asupra postărilor prin apăsare lungă sau clic dreapta pe Android, iOS, macOS și Desktop.</li>
-                <li>A fost îmbunătățită fiabilitatea cronologiilor și conținutului media, inclusiv notificările X, paginarea Descoperă din Mastodon, ordinea redistribuirilor, profilurile Nostr, videoclipurile RSS încorporate și dimensionarea Galeriei pe iOS.</li>
+                <li>Filele profilului se încarcă acum independent; profilurile X pot afișa Redistribuiri, Evidențieri și Articole când sunt disponibile.</li>
+                <li>Au fost adăugate opțiuni globale și pentru fiecare cronologie pentru ascunderea reacțiilor emoji.</li>
+                <li>Navigarea și accesibilitatea au fost îmbunătățite prin gesturi predictive de revenire mai fluide și descrieri lungi ale imaginilor care pot fi derulate.</li>
+                <li>A fost îmbunătățită fiabilitatea autentificării Bluesky, a fost restaurată încărcarea conținutului FANBOX, iar detaliile postărilor Misskey afișează acum întreaga conversație.</li>
             </ul>
         ]]></string>
 </resources>

@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Přidáno volitelné karuselové rozvržení pro příspěvky s více médii, které lze nastavit globálně nebo pro každou časovou osu.</li>
-                <li>Přidány tematické časové osy Objevovat na X a automatické náhledy odkazů pro příspěvky Bluesky.</li>
-                <li>Režim Galerie nyní podporuje akce s příspěvky dlouhým stisknutím nebo kliknutím pravým tlačítkem v systémech Android, iOS, macOS a Desktop.</li>
-                <li>Zlepšena spolehlivost časových os a médií, včetně oznámení X, stránkování Mastodon Objevovat, řazení repostů, profilů Nostr, vložených videí RSS a rozměrů Galerie v iOS.</li>
+                <li>Karty profilů se nyní načítají nezávisle; profily na X mohou zobrazovat reposty, výběry a články, jsou-li dostupné.</li>
+                <li>Přidány globální možnosti i možnosti pro jednotlivé časové osy ke skrytí emoji reakcí.</li>
+                <li>Vylepšena navigace a přístupnost díky plynulejším prediktivním gestům zpět a možnosti posouvat dlouhé popisy obrázků.</li>
+                <li>Zlepšena spolehlivost přihlašování k Bluesky, obnoveno načítání obsahu FANBOX a podrobnosti příspěvků Misskey nyní zobrazují celou konverzaci.</li>
             </ul>
         ]]></string>
 </resources>

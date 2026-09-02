@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunto un layout a carosello opzionale per i post con più elementi multimediali, configurabile globalmente o per singola timeline.</li>
-                <li>Aggiunte le timeline tematiche Scopri di X e le anteprime automatiche dei link per i post di Bluesky.</li>
-                <li>La modalità Galleria ora supporta le azioni sui post tramite pressione prolungata o clic destro su Android, iOS, macOS e Desktop.</li>
-                <li>Migliorata l’affidabilità di timeline e contenuti multimediali, incluse le notifiche di X, la paginazione di Scopri su Mastodon, l’ordine dei repost, i profili Nostr, i video RSS incorporati e le dimensioni della Galleria su iOS.</li>
+                <li>Le schede dei profili ora si caricano in modo indipendente; i profili X possono mostrare Repost, In evidenza e Articoli quando disponibili.</li>
+                <li>Aggiunte opzioni globali e per singola timeline per nascondere le reazioni emoji.</li>
+                <li>Migliorate la navigazione e l’accessibilità con gesti Indietro predittivi più fluidi e descrizioni lunghe delle immagini scorrevoli.</li>
+                <li>Migliorata l’affidabilità dell’accesso a Bluesky, ripristinato il caricamento dei contenuti FANBOX e ampliati i dettagli dei post Misskey per mostrare l’intera conversazione.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bentornato!</string>

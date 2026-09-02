@@ -28,6 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.FAIcon
@@ -57,6 +63,32 @@ public fun StatusActionButton(
     val displayNumber =
         number?.takeIf {
             appearanceSettings.showNumbers && it.humanized.isNotEmpty()
+        }
+    val actionDescription = contentDescription?.takeIf { it.isNotBlank() }
+    val accessibilityDescription =
+        listOfNotNull(
+            actionDescription,
+            displayNumber?.humanized,
+        ).joinToString(separator = ", ")
+    val accessibilityModifier =
+        if (actionDescription != null) {
+            Modifier.clearAndSetSemantics {
+                this.contentDescription = accessibilityDescription
+                role = Role.Button
+                if (!enabled) {
+                    disabled()
+                }
+                onClick {
+                    if (enabled) {
+                        onClicked.invoke()
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+        } else {
+            Modifier
         }
     val actionIcon: @Composable () -> Unit = {
         if (!LocalIsScrollingInProgress.current) {
@@ -125,6 +157,7 @@ public fun StatusActionButton(
     Row(
         modifier =
             modifier
+                .then(accessibilityModifier)
                 .padding(vertical = 4.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),

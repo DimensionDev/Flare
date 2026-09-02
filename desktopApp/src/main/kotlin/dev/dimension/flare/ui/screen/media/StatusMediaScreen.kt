@@ -347,11 +347,12 @@ internal fun VideoItem(
                 fadeIn() togetherWith fadeOut()
             },
             modifier =
-                Modifier.clickable {
-                    showControls = !showControls
-                }.semantics {
-                    description?.let { contentDescription = it }
-                },
+                Modifier
+                    .clickable {
+                        showControls = !showControls
+                    }.semantics {
+                        description?.let { contentDescription = it }
+                    },
         ) { isLoading ->
             if (!isLoading) {
                 VideoPlayerSurface(

@@ -226,12 +226,19 @@ private fun DraftBoxItem(
                                 media.altText
                                     ?.takeIf { it.isNotBlank() }
                                     ?: when (media.type) {
-                                        UiDraftMediaType.IMAGE -> stringResource(R.string.compose_image_no_alt)
-                                        UiDraftMediaType.VIDEO -> stringResource(R.string.compose_video_no_alt)
-                                        UiDraftMediaType.OTHER ->
+                                        UiDraftMediaType.IMAGE -> {
+                                            stringResource(R.string.compose_image_no_alt)
+                                        }
+
+                                        UiDraftMediaType.VIDEO -> {
+                                            stringResource(R.string.compose_video_no_alt)
+                                        }
+
+                                        UiDraftMediaType.OTHER -> {
                                             media.fileName
                                                 ?.takeIf { it.isNotBlank() }
                                                 ?: stringResource(R.string.draft_box_attachment_no_description)
+                                        }
                                     }
                             when (media.type) {
                                 UiDraftMediaType.IMAGE -> {

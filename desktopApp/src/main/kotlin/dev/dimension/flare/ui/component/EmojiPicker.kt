@@ -25,9 +25,9 @@ import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.CaretUp
 import dev.dimension.flare.Res
 import dev.dimension.flare.collapsed
-import dev.dimension.flare.expanded
 import dev.dimension.flare.emoji_picker_recent
 import dev.dimension.flare.emoji_picker_search
+import dev.dimension.flare.expanded
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.model.UiEmoji

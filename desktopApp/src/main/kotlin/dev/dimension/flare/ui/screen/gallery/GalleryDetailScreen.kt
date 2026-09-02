@@ -44,9 +44,6 @@ import androidx.paging.LoadState
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.gallery_bookmarks
-import dev.dimension.flare.gallery_engagement
-import dev.dimension.flare.gallery_views
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
@@ -55,6 +52,9 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryOrientation
 import dev.dimension.flare.data.model.TimelineDisplayMode
+import dev.dimension.flare.gallery_bookmarks
+import dev.dimension.flare.gallery_engagement
+import dev.dimension.flare.gallery_views
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent

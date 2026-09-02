@@ -20,8 +20,8 @@ import dev.dimension.flare.agent_chat_input_placeholder
 import dev.dimension.flare.agent_chat_send
 import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.agent_chat_title
-import dev.dimension.flare.navigate_back
 import dev.dimension.flare.feature.agent.presenter.chat.GenericChatPresenter
+import dev.dimension.flare.navigate_back
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.agent.AgentChatScaffold
 import dev.dimension.flare.ui.component.agent.label

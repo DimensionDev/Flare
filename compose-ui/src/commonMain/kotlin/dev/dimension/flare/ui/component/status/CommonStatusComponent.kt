@@ -751,13 +751,21 @@ internal fun TranslationDisplayBadge(
 ) {
     val description =
         when (state) {
-            TranslationDisplayState.Translating ->
+            TranslationDisplayState.Translating -> {
                 stringResource(Res.string.translation_badge_translating)
-            TranslationDisplayState.Translated ->
+            }
+
+            TranslationDisplayState.Translated -> {
                 stringResource(Res.string.translation_badge_translated)
-            TranslationDisplayState.Failed ->
+            }
+
+            TranslationDisplayState.Failed -> {
                 stringResource(Res.string.translation_badge_failed)
-            TranslationDisplayState.Hidden -> null
+            }
+
+            TranslationDisplayState.Hidden -> {
+                null
+            }
         }
     Row(
         modifier =

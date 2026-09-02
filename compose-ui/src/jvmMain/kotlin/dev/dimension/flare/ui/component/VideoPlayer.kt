@@ -42,8 +42,8 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
-import org.koin.core.annotation.Single
 import org.jetbrains.compose.resources.stringResource
+import org.koin.core.annotation.Single
 import kotlin.math.roundToLong
 
 @OptIn(ExperimentalFoundationApi::class)

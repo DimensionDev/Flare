@@ -64,8 +64,8 @@ import dev.dimension.flare.compose.ui.nostr_login_qr_button
 import dev.dimension.flare.compose.ui.nostr_login_qr_hint
 import dev.dimension.flare.compose.ui.nostr_login_qr_link_label
 import dev.dimension.flare.compose.ui.nostr_login_qr_waiting
-import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_clear
+import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_detected_platform
 import dev.dimension.flare.compose.ui.service_select_detecting_platform
 import dev.dimension.flare.compose.ui.service_select_empty_message
@@ -200,9 +200,10 @@ public fun ServiceSelectionScreenContent(
                                 val detectingPlatformDescription =
                                     stringResource(Res.string.service_select_detecting_platform)
                                 PlatformCircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp).semantics {
-                                        contentDescription = detectingPlatformDescription
-                                    },
+                                    modifier =
+                                        Modifier.size(24.dp).semantics {
+                                            contentDescription = detectingPlatformDescription
+                                        },
                                 )
                             }
                     },

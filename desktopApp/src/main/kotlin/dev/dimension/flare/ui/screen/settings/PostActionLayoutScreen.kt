@@ -30,13 +30,13 @@ import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
-import dev.dimension.flare.more
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostActionLayoutConfig
 import dev.dimension.flare.data.datasource.microblog.PostActionLayoutHelpers
 import dev.dimension.flare.data.datasource.microblog.PostActionPlacement
 import dev.dimension.flare.data.model.appearance.AppearanceKeys
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.more
 import dev.dimension.flare.settings_post_action_family_block_user
 import dev.dimension.flare.settings_post_action_family_bookmark
 import dev.dimension.flare.settings_post_action_family_comment

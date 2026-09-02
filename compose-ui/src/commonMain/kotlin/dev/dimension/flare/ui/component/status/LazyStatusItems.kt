@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -129,7 +128,7 @@ public fun LazyStaggeredGridScope.status(
                         Modifier
                             .fillMaxSize()
 //                            .animateItem()
-                            .clickable(role = Role.Button) {
+                            .clickable {
                                 refresh()
                             },
                 )

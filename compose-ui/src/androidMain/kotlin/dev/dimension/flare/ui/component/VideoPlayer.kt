@@ -38,7 +38,6 @@ import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onLayoutRectChanged
 import androidx.compose.ui.layout.onVisibilityChanged
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntRect
@@ -257,7 +256,6 @@ public fun VideoPlayer(
                                     it.combinedClickable(
                                         onClick = onClick,
                                         onLongClick = onLongClick,
-                                        role = Role.Button,
                                     )
                                 } else {
                                     it

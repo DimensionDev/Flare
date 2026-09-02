@@ -43,7 +43,6 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
 
         isUserInteractionEnabled = true
         isAccessibilityElement = true
-        accessibilityTraits = .button
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTapped))
         addGestureRecognizer(tap)
     }
@@ -234,12 +233,6 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
             self?.onOpenURL?(url)
             return .handled
         })))
-    }
-
-    override func accessibilityActivate() -> Bool {
-        guard topMessage != nil else { return false }
-        onTapped()
-        return true
     }
 }
 

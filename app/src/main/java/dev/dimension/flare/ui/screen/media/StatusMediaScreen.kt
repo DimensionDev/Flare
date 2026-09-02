@@ -80,9 +80,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
@@ -1277,22 +1275,11 @@ private fun SeekFeedbackOverlay(feedback: SeekFeedback?) {
 
 @Composable
 private fun SeekFeedbackContent(feedback: SeekFeedback) {
-    val description =
-        stringResource(
-            when (feedback) {
-                SeekFeedback.Backward -> R.string.media_seek_backward
-                SeekFeedback.Forward -> R.string.media_seek_forward
-            },
-        )
     Column(
         modifier =
             Modifier
                 .background(Color.Black.copy(alpha = 0.55f), CircleShape)
-                .padding(20.dp)
-                .semantics {
-                    contentDescription = description
-                    liveRegion = LiveRegionMode.Polite
-                },
+                .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

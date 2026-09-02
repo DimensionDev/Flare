@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.compose.ui.Res
@@ -36,7 +35,7 @@ public fun UserCompat(
                     user.handle.canonical,
                 ),
             modifier =
-                Modifier.clickable(role = Role.Button) {
+                Modifier.clickable {
                     onUserClick.invoke(user.key)
                 },
         )
@@ -54,7 +53,7 @@ public fun UserCompat(
                 modifier =
                     Modifier
                         .weight(1f)
-                        .clickable(role = Role.Button) {
+                        .clickable {
                             onUserClick.invoke(user.key)
                         },
                 horizontalArrangement = Arrangement.spacedBy(4.dp),

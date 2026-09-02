@@ -63,7 +63,6 @@ private struct MediaItemSignature: Equatable {
 //   VideoPlayer Swift package; invoking the status-media viewer on tap is the
 //   authoritative play path, matching the SwiftUI tap-to-expand behaviour.
 final class MediaUIView: UIView {
-    var onAccessibilityActivate: (() -> Void)?
     private let imageView: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
@@ -119,7 +118,6 @@ final class MediaUIView: UIView {
         super.init(frame: frame)
         clipsToBounds = true
         isAccessibilityElement = true
-        accessibilityTraits = .button
         addSubview(background)
         addSubview(imageView)
         addSubview(playBadgeBg)
@@ -154,6 +152,7 @@ final class MediaUIView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     func set(media: UiMedia, cornerRadius: CGFloat) {
+        accessibilityLabel = media.accessibleDescription
         let signature = MediaItemSignature(media: media)
         if lastMediaSignature == signature {
             if lastCornerRadius != cornerRadius {
@@ -163,7 +162,6 @@ final class MediaUIView: UIView {
             return
         }
         lastMediaSignature = signature
-        accessibilityLabel = media.accessibleDescription
         lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
         imageView.kf.cancelDownloadTask()
@@ -184,17 +182,13 @@ final class MediaUIView: UIView {
     }
 
     func prepareForPoolRemoval() {
+        accessibilityLabel = nil
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
         lastMediaSignature = nil
         lastCornerRadius = nil
         detachAutoplayPlayer()
         setAutoplayOverlay(.idle, showsBadge: false)
-    }
-
-    override func accessibilityActivate() -> Bool {
-        onAccessibilityActivate?()
-        return onAccessibilityActivate != nil
     }
 
     func attachAutoplayPlayer(_ playerView: UIView) {
@@ -400,7 +394,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         addSubview(blurView)
 
         toggleButton.translatesAutoresizingMaskIntoConstraints = false
-        toggleButton.addTarget(self, action: #selector(toggleBlur), for: .primaryActionTriggered)
+        toggleButton.addTarget(self, action: #selector(toggleBlur), for: .touchUpInside)
         addSubview(toggleButton)
 
         NSLayoutConstraint.activate([
@@ -416,8 +410,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
             blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
             blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            toggleButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
-            toggleButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
         ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -905,8 +897,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
 
     private func updateBlurUI() {
         blurView.isHidden = !(sensitive && isBlurred)
-        grid.accessibilityElementsHidden = sensitive && isBlurred
-        carousel.accessibilityElementsHidden = sensitive && isBlurred
         NSLayoutConstraint.deactivate(toggleButtonPositionConstraints)
         toggleButtonPositionConstraints = []
         if !sensitive {
@@ -1005,9 +995,6 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
         super.init(frame: frame)
         clipsToBounds = true
         mediaView.translatesAutoresizingMaskIntoConstraints = false
-        mediaView.onAccessibilityActivate = { [weak self] in
-            self?.onCellTapped()
-        }
         addSubview(mediaView)
         NSLayoutConstraint.activate([
             mediaView.topAnchor.constraint(equalTo: topAnchor),
@@ -1054,7 +1041,6 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
 
     func prepareForPoolRemoval() {
         media = nil
-        mediaView.accessibilityLabel = nil
         altButton?.isHidden = true
         mediaView.prepareForPoolRemoval()
         isHidden = true
@@ -1182,9 +1168,7 @@ private final class AltTextButton: UIButton {
             localized: "media_view_alt_text",
             defaultValue: "View alternative text"
         )
-        widthAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        addTarget(self, action: #selector(showAlt), for: .primaryActionTriggered)
+        addTarget(self, action: #selector(showAlt), for: .touchUpInside)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -1281,7 +1265,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         cfg.imagePlacement = .leading
         cfg.imagePadding = 4
         showButton.configuration = cfg
-        showButton.addTarget(self, action: #selector(onShowTapped), for: .primaryActionTriggered)
+        showButton.addTarget(self, action: #selector(onShowTapped), for: .touchUpInside)
 
         addSubview(grid)
         addSubview(showButton)

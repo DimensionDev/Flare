@@ -70,7 +70,6 @@ struct MacMediaViewerScreen: View {
                     .disabled(!canGoToPreviousMedia)
                     .accessibilityLabel(Text(verbatim: "Previous media"))
                     .help(Text(verbatim: "Previous media"))
-                    .keyboardShortcut(.leftArrow, modifiers: [])
 
                     Button {
                         goToNextMedia()
@@ -80,7 +79,6 @@ struct MacMediaViewerScreen: View {
                     .disabled(!canGoToNextMedia)
                     .accessibilityLabel(Text(verbatim: "Next media"))
                     .help(Text(verbatim: "Next media"))
-                    .keyboardShortcut(.rightArrow, modifiers: [])
                 }
             }
 
@@ -562,7 +560,6 @@ private struct MacMediaViewerPage: View {
             mediaContent
         }
         .contentShape(Rectangle())
-        .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: media.accessibleDescription))
         .overlay(alignment: .bottomLeading) {
             imageLoadingProgressView

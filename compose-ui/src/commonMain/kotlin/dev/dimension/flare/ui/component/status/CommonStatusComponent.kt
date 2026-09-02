@@ -43,9 +43,8 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -206,10 +205,7 @@ public fun CommonStatusComponent(
                     if (isDetail || !isClickable) {
                         it
                     } else {
-                        it.clickable(
-                            onClickLabel = openPostLabel,
-                            role = Role.Button,
-                        ) {
+                        it.clickable(onClickLabel = openPostLabel) {
                             item.onClicked.invoke(
                                 ClickContext(
                                     launcher = { url ->
@@ -231,7 +227,7 @@ public fun CommonStatusComponent(
                             it.handle.canonical,
                         ),
                     modifier =
-                        Modifier.clickable(role = Role.Button) {
+                        Modifier.clickable {
                             it.onClicked.invoke(
                                 ClickContext(
                                     launcher = {
@@ -310,8 +306,7 @@ public fun CommonStatusComponent(
                                 ) {
                                     FAIcon(
                                         imageVector = FontAwesomeIcons.Solid.Robot,
-                                        contentDescription =
-                                            stringResource(Res.string.status_view_insight),
+                                        contentDescription = stringResource(Res.string.status_view_insight),
                                         modifier =
                                             Modifier
                                                 .size(PlatformTheme.typography.caption.fontSize.value.dp),
@@ -449,7 +444,7 @@ public fun CommonStatusComponent(
                                             PlatformTheme.shapes.medium
                                         },
                                 ).pointerHoverIcon(PointerIcon.Hand)
-                                .clickable(role = Role.Button) {
+                                .clickable {
                                     uriHandler.openUri(card.url)
                                 }.fillMaxWidth(),
                     )
@@ -522,8 +517,6 @@ internal fun StatusMediasComponent(
     onMediaClick: (UiMedia) -> Unit,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
-    val showMediaLabel = stringResource(resource = Res.string.show_media)
-    val hideMediaLabel = stringResource(resource = Res.string.hide_media)
     var showMedia by remember { mutableStateOf(false) }
     if (appearanceSettings.showMedia || showMedia) {
         if (!appearanceSettings.showMedia) {
@@ -531,17 +524,14 @@ internal fun StatusMediasComponent(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clickable(
-                            role = Role.Button,
-                            onClickLabel = hideMediaLabel,
-                        ) {
+                        .clickable {
                             showMedia = false
                         },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 FAIcon(
                     imageVector = FontAwesomeIcons.Solid.Image,
-                    contentDescription = null,
+                    contentDescription = stringResource(resource = Res.string.hide_media),
                     modifier =
                         Modifier
                             .size(12.dp),
@@ -549,7 +539,7 @@ internal fun StatusMediasComponent(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 PlatformText(
-                    text = hideMediaLabel,
+                    text = stringResource(resource = Res.string.hide_media),
                     style = PlatformTheme.typography.caption,
                     color = PlatformTheme.colorScheme.caption,
                 )
@@ -575,17 +565,14 @@ internal fun StatusMediasComponent(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable(
-                        role = Role.Button,
-                        onClickLabel = showMediaLabel,
-                    ) {
+                    .clickable {
                         showMedia = true
                     },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Image,
-                contentDescription = null,
+                contentDescription = stringResource(resource = Res.string.show_media),
                 modifier =
                     Modifier
                         .size(12.dp),
@@ -593,7 +580,7 @@ internal fun StatusMediasComponent(
             )
             Spacer(modifier = Modifier.width(4.dp))
             PlatformText(
-                text = showMediaLabel,
+                text = stringResource(resource = Res.string.show_media),
                 style = PlatformTheme.typography.caption,
                 color = PlatformTheme.colorScheme.caption,
             )
@@ -726,7 +713,7 @@ private fun StatusReactionComponent(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
-                                    .clickable(role = Role.Button) {
+                                    .clickable {
                                         reaction.onClicked.invoke(
                                             ClickContext(uriHandler::openUri),
                                         )
@@ -759,25 +746,17 @@ internal fun TranslationDisplayBadge(
 ) {
     val description =
         when (state) {
-            TranslationDisplayState.Translating -> {
+            TranslationDisplayState.Translating ->
                 stringResource(Res.string.translation_badge_translating)
-            }
-
-            TranslationDisplayState.Translated -> {
+            TranslationDisplayState.Translated ->
                 stringResource(Res.string.translation_badge_translated)
-            }
-
-            TranslationDisplayState.Failed -> {
+            TranslationDisplayState.Failed ->
                 stringResource(Res.string.translation_badge_failed)
-            }
-
-            TranslationDisplayState.Hidden -> {
-                null
-            }
+            TranslationDisplayState.Hidden -> null
         }
     Row(
         modifier =
-            modifier.clearAndSetSemantics {
+            modifier.semantics {
                 description?.let { contentDescription = it }
             },
         verticalAlignment = Alignment.CenterVertically,

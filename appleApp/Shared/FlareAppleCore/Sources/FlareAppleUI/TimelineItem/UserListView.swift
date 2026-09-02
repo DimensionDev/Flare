@@ -11,12 +11,7 @@ struct UserListView: View {
             ScrollView(.horizontal) {
                 HStack(spacing: 8) {
                     ForEach(data.users, id: \.key) { user in
-                        UserCompatView(
-                            data: user,
-                            onClicked: {
-                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                            }
-                        )
+                        UserCompatView(data: user)
                             .padding(8)
                             .frame(width: 280)
                             .clipShape(.rect(cornerRadius: 16))
@@ -24,6 +19,9 @@ struct UserListView: View {
                                 RoundedRectangle(cornerRadius: 16)
                                     .stroke(Color.flareSeparator, lineWidth: 1)
                             )
+                            .onTapGesture {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            }
                     }
                 }
             }

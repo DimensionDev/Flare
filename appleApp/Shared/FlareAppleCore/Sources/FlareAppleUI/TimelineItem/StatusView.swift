@@ -195,22 +195,20 @@ public struct StatusView: View {
                 spacing: 8,
             ) {
                 if showAsFullWidth, let user {
-                    Button {
-                        user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                    } label: {
-                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                            .frame(width: 44, height: 44)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(
-                        Text(
-                            verbatim: FlareAppleUILocalization.string(
-                                "profile_open_user",
-                                fallback: "Open profile for %@",
-                                arguments: [user.handle.canonical]
+                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                        .frame(width: 44, height: 44)
+                        .accessibilityLabel(
+                            Text(
+                                verbatim: FlareAppleUILocalization.string(
+                                    "profile_open_user",
+                                    fallback: "Open profile for %@",
+                                    arguments: [user.handle.canonical]
+                                )
                             )
                         )
-                    )
+                        .onTapGesture {
+                            user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                        }
                 }
                 VStack(
                     alignment: .leading,
@@ -499,38 +497,9 @@ public struct StatusView: View {
         }
         .contentShape(.rect)
         .if(isClickable) { view in
-            #if os(macOS)
-            view
-                .onTapGesture(perform: openPost)
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel(
-                    Text("status_open_post", bundle: FlareAppleUILocalization.bundle)
-                )
-                .accessibilityAddTraits(.isButton)
-                .accessibilityAction {
-                    openPost()
-                }
-                .focusable()
-                .onKeyPress(.return) {
-                    openPost()
-                    return .handled
-                }
-                .onKeyPress(.space) {
-                    openPost()
-                    return .handled
-                }
-            #else
-            view
-                .onTapGesture(perform: openPost)
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel(
-                    Text("status_open_post", bundle: FlareAppleUILocalization.bundle)
-                )
-                .accessibilityAddTraits(.isButton)
-                .accessibilityAction {
-                    openPost()
-                }
-            #endif
+            view.onTapGesture {
+                data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+            }
         }
         .onChange(of: data.renderHash) { _, _ in
             contentWarningExpanded = false
@@ -545,10 +514,6 @@ public struct StatusView: View {
             textExpanded = false
             overflowingTextIndexes.removeAll()
         }
-    }
-
-    private func openPost() {
-        data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
     }
     
     private func topEndContent(

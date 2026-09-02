@@ -763,14 +763,7 @@ private struct MacComposeMediaTile: View {
                 .padding(8)
             }
         }
-        .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: mediaDescription))
-        .accessibilityAction(named: Text("macos_compose_alt_text")) {
-            showPopOver = true
-        }
-        .accessibilityAction(named: Text("delete")) {
-            onRemove()
-        }
         .aspectRatio(1, contentMode: .fit)
         .contextMenu {
             Button {

@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -76,7 +75,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
@@ -386,7 +384,9 @@ internal fun ComposeScreen(
                                             trailingIcon = {
                                                 Checkbox(
                                                     checked = selected,
-                                                    onCheckedChange = null,
+                                                    onCheckedChange = {
+                                                        state.state.selectAccount(user.key)
+                                                    },
                                                 )
                                             },
                                         )
@@ -482,12 +482,9 @@ internal fun ComposeScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             mediaState.medias.forEach { media ->
-                                val isVideo =
-                                    media.isVideo ?: remember(media.uri) {
-                                        runCatching { context.contentResolver.getType(media.uri) }
-                                            .getOrNull()
-                                            ?.startsWith("video/") == true
-                                    }
+                                val isVideo = remember(media.uri) {
+                                    context.contentResolver.getType(media.uri)?.startsWith("video/") == true
+                                }
                                 val mediaDescription =
                                     media.textState.text
                                         .toString()
@@ -614,19 +611,18 @@ internal fun ComposeScreen(
                                     Modifier
                                         .padding(horizontal = screenHorizontalPadding)
                                         .fillMaxWidth()
-                                        .toggleable(
-                                            value = mediaState.isMediaSensitive,
-                                            role = Role.Checkbox,
+                                        .clickable(
                                             interactionSource = sensitiveInteractionSource,
                                             indication = null,
-                                            onValueChange = mediaState::setMediaSensitive,
-                                        ),
+                                        ) {
+                                            mediaState.setMediaSensitive(!mediaState.isMediaSensitive)
+                                        },
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Checkbox(
                                     checked = mediaState.isMediaSensitive,
-                                    onCheckedChange = null,
+                                    onCheckedChange = { mediaState.setMediaSensitive(it) },
                                     interactionSource = sensitiveInteractionSource,
                                 )
                                 Text(text = stringResource(id = R.string.compose_media_sensitive))
@@ -1436,8 +1432,6 @@ private fun mediaPresenter(
                         MediaData(
                             uri = Uri.parse(item.cachePath),
                             textState = TextFieldState(item.altText.orEmpty()),
-                            isVideo =
-                                item.type == dev.dimension.flare.ui.model.UiDraftMediaType.VIDEO,
                         )
                     }.distinctBy {
                         it.uri
@@ -1466,7 +1460,6 @@ private fun mediaPresenter(
 private data class MediaData(
     val uri: Uri,
     val textState: TextFieldState = TextFieldState(),
-    val isVideo: Boolean? = null,
 ) {
     val url = uri.toString()
 }

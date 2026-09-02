@@ -396,7 +396,6 @@ struct ComposeScreen: View {
             .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {
@@ -791,14 +790,14 @@ struct ComposeMediaItemView: View {
     let item: MediaItem
     var mediaViewModel: MediaViewModel
     @State private var showAltTextEditor = false
-
+    
     var body: some View {
         if let image = item.image {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 128, height: 128)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .cornerRadius(8)
                 .overlay(alignment: .bottomLeading) {
                     if mediaViewModel.enableAltText && !item.altText.isEmpty {
                         Text("ALT")
@@ -812,21 +811,24 @@ struct ComposeMediaItemView: View {
                             .padding(4)
                     }
                 }
-                .contentShape(RoundedRectangle(cornerRadius: 8))
                 .onTapGesture {
                     if mediaViewModel.enableAltText {
                         showAltTextEditor = true
                     }
                 }
                 .contextMenu {
-                    Button(action: removeMedia) {
+                    Button(action: {
+                        withAnimation {
+                            mediaViewModel.remove(item: item)
+                        }
+                    }, label: {
                         Label {
                             Text("delete")
                         } icon: {
                             Image(fontAwesome: .trash)
                         }
-                    }
-
+                    })
+                    
                     if mediaViewModel.enableAltText {
                         Button {
                             showAltTextEditor = true
@@ -838,36 +840,7 @@ struct ComposeMediaItemView: View {
                 .sheet(isPresented: $showAltTextEditor) {
                     AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
                 }
-                .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(verbatim: mediaDescription))
-                .accessibilityAddTraits(
-                    mediaViewModel.enableAltText ? [.isButton, .isImage] : [.isImage]
-                )
-                .accessibilityAction {
-                    if mediaViewModel.enableAltText {
-                        showAltTextEditor = true
-                    }
-                }
-                .accessibilityActions {
-                    if mediaViewModel.enableAltText {
-                        Button(
-                            String(
-                                localized: "compose_edit_alt_text",
-                                defaultValue: "Edit alternative text"
-                            )
-                        ) {
-                            showAltTextEditor = true
-                        }
-                    }
-                    Button(
-                        String(
-                            localized: "compose_remove_media",
-                            defaultValue: "Remove media"
-                        ),
-                        role: .destructive,
-                        action: removeMedia
-                    )
-                }
         }
     }
 
@@ -886,11 +859,5 @@ struct ComposeMediaItemView: View {
             localized: "media_image_no_alt",
             defaultValue: "Image, no alternative text provided"
         )
-    }
-
-    private func removeMedia() {
-        withAnimation {
-            mediaViewModel.remove(item: item)
-        }
     }
 }

@@ -28,10 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.FAIcon
@@ -84,20 +80,44 @@ public fun StatusActionButton(
             ) { color ->
                 FAIcon(
                     imageVector = icon,
-                    contentDescription = null,
+                    contentDescription = contentDescription,
                     modifier =
                         Modifier
-                            .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp),
+                            .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .clickable(
+                                onClick = onClicked,
+                                enabled = enabled,
+                                interactionSource = interactionSource,
+                                indication =
+                                    rippleIndication(
+                                        bounded = false,
+                                        radius = 20.dp,
+                                        color = Color.Unspecified,
+                                    ),
+                            ),
                     tint = color,
                 )
             }
         } else {
             FAIcon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = contentDescription,
                 modifier =
                     Modifier
-                        .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp),
+                        .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .clickable(
+                            onClick = onClicked,
+                            enabled = enabled,
+                            interactionSource = interactionSource,
+                            indication =
+                                rippleIndication(
+                                    bounded = false,
+                                    radius = 20.dp,
+                                    color = Color.Unspecified,
+                                ),
+                        ),
                 tint = color,
             )
         }
@@ -105,21 +125,7 @@ public fun StatusActionButton(
     Row(
         modifier =
             modifier
-                .pointerHoverIcon(PointerIcon.Hand)
-                .clickable(
-                    onClick = onClicked,
-                    enabled = enabled,
-                    role = Role.Button,
-                    interactionSource = interactionSource,
-                    indication =
-                        rippleIndication(
-                            bounded = false,
-                            radius = 20.dp,
-                            color = Color.Unspecified,
-                        ),
-                ).semantics {
-                    contentDescription?.let { this.contentDescription = it }
-                }.padding(vertical = 4.dp, horizontal = 4.dp),
+                .padding(vertical = 4.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -128,7 +134,6 @@ public fun StatusActionButton(
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Row(
-                    modifier = Modifier.clearAndSetSemantics {},
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     FAIcon(
@@ -140,7 +145,6 @@ public fun StatusActionButton(
                     PlatformText(
                         "0000",
                         color = Color.Transparent,
-                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
                 actionIcon()
@@ -156,12 +160,20 @@ public fun StatusActionButton(
                     PlatformText(
                         "0000",
                         color = Color.Transparent,
-                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
                 AnimatedNumber(
                     number = displayNumber,
                     color = color,
+                    modifier =
+                        Modifier
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .clickable(
+                                onClick = onClicked,
+                                enabled = enabled,
+                                interactionSource = interactionSource,
+                                indication = null,
+                            ),
                 )
             }
         }

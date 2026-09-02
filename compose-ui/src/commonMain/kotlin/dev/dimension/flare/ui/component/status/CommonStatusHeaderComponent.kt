@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.compose.ui.Res
@@ -43,7 +42,7 @@ public fun CommonStatusHeaderComponent(
             modifier =
                 Modifier
                     .pointerHoverIcon(PointerIcon.Hand)
-                    .clickable(role = Role.Button) {
+                    .clickable {
                         onUserClick(data.key)
                     },
         )

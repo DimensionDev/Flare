@@ -51,7 +51,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.times
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
@@ -348,12 +347,11 @@ internal fun VideoItem(
                 fadeIn() togetherWith fadeOut()
             },
             modifier =
-                Modifier
-                    .clickable(role = Role.Button) {
-                        showControls = !showControls
-                    }.semantics {
-                        description?.let { contentDescription = it }
-                    }.focusable(),
+                Modifier.clickable {
+                    showControls = !showControls
+                }.semantics {
+                    description?.let { contentDescription = it }
+                },
         ) { isLoading ->
             if (!isLoading) {
                 VideoPlayerSurface(

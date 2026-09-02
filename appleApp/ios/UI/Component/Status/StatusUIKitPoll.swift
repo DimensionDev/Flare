@@ -34,7 +34,7 @@ final class StatusPollUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         expiresAtTime.fullTime = true
 
         voteButton.setTitle(String(localized: "poll_vote"), for: .normal)
-        voteButton.addTarget(self, action: #selector(submitVote), for: .primaryActionTriggered)
+        voteButton.addTarget(self, action: #selector(submitVote), for: .touchUpInside)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -203,12 +203,8 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
         addSubview(checkmark)
 
         isAccessibilityElement = true
-        accessibilityTraits = .button
-        titleLabel.isAccessibilityElement = false
-        checkmark.isAccessibilityElement = false
-
         setSelected(false)
-        addTarget(self, action: #selector(onTapped), for: .primaryActionTriggered)
+        addTarget(self, action: #selector(onTapped), for: .touchUpInside)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
@@ -226,7 +222,6 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
         accessibilityValue = selected
             ? String(localized: "selected", defaultValue: "Selected")
             : String(localized: "not_selected", defaultValue: "Not selected")
-        accessibilityTraits = selected ? [.button, .selected] : .button
         bg.backgroundColor = selected
             ? UIColor.tintColor.withAlphaComponent(0.2)
             : .systemGroupedBackground
@@ -235,11 +230,6 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
     }
 
     @objc private func onTapped() { onToggle?(index) }
-
-    override func accessibilityActivate() -> Bool {
-        onTapped()
-        return true
-    }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -319,13 +309,7 @@ private final class PollOptionResultView: UIView, ManualLayoutMeasurable, Timeli
         addSubview(check)
         addSubview(pct)
         addSubview(progress)
-
         isAccessibilityElement = true
-        accessibilityTraits = .staticText
-        titleLabel.isAccessibilityElement = false
-        check.isAccessibilityElement = false
-        pct.isAccessibilityElement = false
-        progress.isAccessibilityElement = false
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 

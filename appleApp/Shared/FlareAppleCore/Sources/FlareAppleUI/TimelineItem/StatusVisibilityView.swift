@@ -10,25 +10,22 @@ public struct StatusVisibilityView: View {
     }
 
     public var body: some View {
-        Group {
-            switch data {
-            case .public:    Image(fontAwesome: .globe)
-            case .home:      Image(fontAwesome: .lockOpen)
-            case .followers: Image(fontAwesome: .lock)
-            case .specified: Image(fontAwesome: .at)
-            case .channel:   Image(fontAwesome: .tv)
-            }
-        }
-        .accessibilityLabel(Text(LocalizedStringKey(accessibilityKey), bundle: FlareAppleUILocalization.bundle))
-    }
-
-    private var accessibilityKey: String {
         switch data {
-        case .public: "status_visibility_public"
-        case .home: "home_tab_home_title"
-        case .followers: "matrix_followers"
-        case .specified: "status_visibility_specified"
-        case .channel: "channel_title"
+        case .public:
+            Image(fontAwesome: .globe)
+                .accessibilityLabel(Text("status_visibility_public", bundle: FlareAppleUILocalization.bundle))
+        case .home:
+            Image(fontAwesome: .lockOpen)
+                .accessibilityLabel(Text("home_tab_home_title", bundle: FlareAppleUILocalization.bundle))
+        case .followers:
+            Image(fontAwesome: .lock)
+                .accessibilityLabel(Text("matrix_followers", bundle: FlareAppleUILocalization.bundle))
+        case .specified:
+            Image(fontAwesome: .at)
+                .accessibilityLabel(Text("status_visibility_specified", bundle: FlareAppleUILocalization.bundle))
+        case .channel:
+            Image(fontAwesome: .tv)
+                .accessibilityLabel(Text("channel_title", bundle: FlareAppleUILocalization.bundle))
         }
     }
 }

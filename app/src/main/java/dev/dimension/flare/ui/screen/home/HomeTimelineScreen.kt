@@ -72,10 +72,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -141,7 +137,6 @@ internal fun HomeTimelineScreen(
     toTabSettings: () -> Unit,
     uriHandler: UriHandler,
 ) {
-    val openNavigationMenuLabel = stringResource(R.string.open_navigation_menu)
     val state by producePresenter(key = "home_timeline") {
         timelinePresenter()
     }
@@ -373,10 +368,6 @@ internal fun HomeTimelineScreen(
                                         onClick = {
                                             toQuickMenu.invoke()
                                         },
-                                        modifier =
-                                            Modifier.semantics {
-                                                contentDescription = openNavigationMenuLabel
-                                            },
                                     ) {
                                         AvatarComponent(
                                             it.avatar,
@@ -388,10 +379,6 @@ internal fun HomeTimelineScreen(
                                         onClick = {
                                             toQuickMenu.invoke()
                                         },
-                                        modifier =
-                                            Modifier.semantics {
-                                                contentDescription = openNavigationMenuLabel
-                                            },
                                     ) {
                                         FAIcon(
                                             imageVector = FontAwesomeIcons.Solid.Bars,
@@ -404,10 +391,6 @@ internal fun HomeTimelineScreen(
                                         onClick = {
                                             toQuickMenu.invoke()
                                         },
-                                        modifier =
-                                            Modifier.semantics {
-                                                contentDescription = openNavigationMenuLabel
-                                            },
                                     ) {
                                         FAIcon(
                                             imageVector = FontAwesomeIcons.Solid.Bars,
@@ -708,13 +691,7 @@ internal fun TimelineItemContent(
                                     state.newPostsCount,
                                     state.newPostsCount,
                                 )
-                            Text(
-                                text = newTootsText,
-                                modifier =
-                                    Modifier.semantics {
-                                        liveRegion = LiveRegionMode.Polite
-                                    },
-                            )
+                            Text(text = newTootsText)
                         }
                     }
                 }

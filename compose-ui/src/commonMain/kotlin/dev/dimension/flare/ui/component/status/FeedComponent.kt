@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.feed_open_article
@@ -37,11 +36,10 @@ internal fun FeedComponent(
     Column(
         modifier =
             Modifier
-                .clickable(
-                    role = Role.Button,
-                    onClickLabel = openArticleLabel,
-                ) {
-                    data.onClicked.invoke(ClickContext(uriHandler::openUri))
+                .clickable(onClickLabel = openArticleLabel) {
+                    data.onClicked.invoke(
+                        ClickContext(uriHandler::openUri),
+                    )
                 }.padding(
                     horizontal = screenHorizontalPadding,
                     vertical = 8.dp,

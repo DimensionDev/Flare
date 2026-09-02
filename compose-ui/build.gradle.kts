@@ -63,8 +63,6 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.uiTest)
             }
         }
         val androidMain by getting {
@@ -89,11 +87,6 @@ kotlin {
                     // https://github.com/kdroidFilter/ComposeMediaPlayer/blob/13cb1d94382f300d338c6ca3b9098c52b2b61d6a/mediaplayer/build.gradle.kts#L82
                     exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-test")
                 }
-            }
-        }
-        val jvmTest by getting {
-            dependencies {
-                implementation(compose.desktop.currentOs)
             }
         }
     }

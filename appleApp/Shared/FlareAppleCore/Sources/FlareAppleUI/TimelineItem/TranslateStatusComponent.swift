@@ -24,7 +24,6 @@ public struct TranslateStatusComponent: View {
             default: EmptyView()
             }
         }
-        .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: accessibilityLabel))
     }
 

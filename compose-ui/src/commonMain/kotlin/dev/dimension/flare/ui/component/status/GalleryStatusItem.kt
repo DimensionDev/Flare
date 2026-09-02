@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -203,10 +202,7 @@ private fun GalleryFeedTile(
                 .fillMaxWidth()
                 .clip(GalleryTileShape)
                 .background(PlatformTheme.colorScheme.card)
-                .clickable(
-                    role = Role.Button,
-                    onClickLabel = openArticleLabel,
-                ) {
+                .clickable(onClickLabel = openArticleLabel) {
                     feed.onClicked.invoke(
                         ClickContext(launcher = { uriHandler.openUri(it) }),
                     )

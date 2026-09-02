@@ -108,9 +108,6 @@ struct MediaViewerScreen<SupplementaryOverlay: View>: View {
                     ZStack(alignment: .bottom) {
                         LazyPager(data: medias, page: pagerSelectedIndex) { media in
                             mediaContent(media)
-                                .accessibilityElement(
-                                    children: media.isVideoMedia ? .contain : .ignore
-                                )
                                 .accessibilityLabel(Text(verbatim: media.accessibleDescription))
                                 .contextMenu {
                                     MediaViewerContextMenu(

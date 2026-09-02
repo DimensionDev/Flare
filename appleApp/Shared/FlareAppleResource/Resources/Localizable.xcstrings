@@ -69161,32 +69161,12 @@
         }
       }
     },
-    "compose_edit_alt_text" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit alternative text"
-          }
-        }
-      }
-    },
     "compose_language" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Post language"
-          }
-        }
-      }
-    },
-    "compose_remove_media" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove media"
           }
         }
       }
@@ -69367,16 +69347,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "View alternative text"
-          }
-        }
-      }
-    },
-    "open_navigation_menu" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open navigation menu"
           }
         }
       }
@@ -139945,16 +139915,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "貼文洞察"
-          }
-        }
-      }
-    },
-    "status_open_post" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open post"
           }
         }
       }

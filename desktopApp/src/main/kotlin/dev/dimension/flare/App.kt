@@ -43,10 +43,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import compose.icons.FontAwesomeIcons
@@ -258,7 +254,6 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                                 modifier =
                                                     Modifier
                                                         .clickable(
-                                                            role = Role.Button,
                                                             onClickLabel =
                                                                 stringResource(
                                                                     Res.string.home_open_account_menu,
@@ -371,7 +366,6 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             },
                     )
                     NavigationItem(
-                        selected = selected,
                         onClick = {
                             if (selected) {
                                 state.scrollToTopRegistry.scrollToTop()
@@ -440,10 +434,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                 ).fillMaxWidth(0.66f)
                                 .aspectRatio(1f)
                                 .clip(CircleShape)
-                                .clickable(
-                                    role = Role.Button,
-                                    onClickLabel = stringResource(Res.string.home_compose),
-                                ) {
+                                .clickable(onClickLabel = stringResource(Res.string.home_compose)) {
                                     state.navigate(
                                         Route.Compose.New,
                                     )
@@ -460,7 +451,6 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 NavigationItem(
-                    selected = selected,
                     icon = {
                         Icon(
                             FontAwesomeIcons.Solid.Gear,
@@ -549,16 +539,11 @@ private fun NavigationItem(
     text: (@Composable () -> Unit)?,
     badge: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
-    selected: Boolean,
     modifier: Modifier = Modifier,
 ) {
     SubtleButton(
         onClick = onClick,
-        modifier =
-            modifier.semantics {
-                role = Role.Tab
-                this.selected = selected
-            },
+        modifier = modifier,
     ) {
         Column(
             modifier =

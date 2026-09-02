@@ -58,7 +58,6 @@ public struct StatusPollView: View {
                                 : String(localized: "not_selected", defaultValue: "Not selected")
                         )
                     )
-                    .accessibilityAddTraits(selectedOption.contains(index) ? .isSelected : [])
                 } else {
                     VStack {
                         HStack {
@@ -80,7 +79,6 @@ public struct StatusPollView: View {
                             .tint(.accentColor)
                     }
                     .frame(maxWidth: .infinity)
-                    .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text(verbatim: option.title))
                     .accessibilityValue(
                         Text(

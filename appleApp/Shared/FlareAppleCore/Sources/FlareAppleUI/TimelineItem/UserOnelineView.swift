@@ -22,17 +22,12 @@ public struct UserOnelineView<TrailingContent: View>: View {
     public var body: some View {
         HStack(spacing: 4) {
             if showAvatar {
-                if let onClicked {
-                    Button(action: onClicked) {
-                        AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
-                            .frame(width: 20, height: 20)
-                    }
-                    .buttonStyle(.plain)
+                AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
+                    .frame(width: 20, height: 20)
                     .accessibilityLabel(Text(verbatim: profileActionLabel))
-                } else {
-                    AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
-                        .frame(width: 20, height: 20)
-                }
+                    .onTapGesture {
+                        onClicked?()
+                    }
             }
             HStack(spacing: 4) {
                 RichText(text: data.name)

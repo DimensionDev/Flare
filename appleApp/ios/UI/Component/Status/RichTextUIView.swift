@@ -1512,7 +1512,6 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
             localized: "media_image_no_alt",
             defaultValue: "Image, no alternative text provided"
         )
-        accessibilityTraits = href?.isEmpty == false ? [.image, .link] : .image
 
         if href?.isEmpty == false {
             isUserInteractionEnabled = true
@@ -1579,11 +1578,5 @@ private final class RichTextBlockImageView: UIView, RichTextFittingPreparing {
     @objc private func onTapped() {
         guard let href, let url = URL(string: href) else { return }
         onOpenURL?(url)
-    }
-
-    override func accessibilityActivate() -> Bool {
-        guard href?.isEmpty == false else { return false }
-        onTapped()
-        return true
     }
 }

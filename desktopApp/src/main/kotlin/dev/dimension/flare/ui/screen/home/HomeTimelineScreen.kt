@@ -4,7 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
@@ -298,10 +297,8 @@ internal fun HomeTimelineScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .pointerInput(Unit) {
-                                        detectTapGestures {
-                                            // Prevent pointer clicks from reaching the timeline.
-                                        }
+                                    .clickable {
+                                        // prevent click through
                                     },
                             enter = slideInVertically { -it },
                             exit = slideOutVertically { -it },

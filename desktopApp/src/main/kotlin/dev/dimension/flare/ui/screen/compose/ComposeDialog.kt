@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -54,10 +53,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Dp
@@ -361,7 +357,6 @@ fun ComposeDialog(
                                                     }
                                                     CheckBox(
                                                         checked = selected,
-                                                        modifier = Modifier.clearAndSetSemantics { },
                                                         onCheckStateChange = {
                                                             state.state.selectAccount(data.key)
                                                         },
@@ -393,8 +388,7 @@ fun ComposeDialog(
                                             selectedProfiles = selectedProfiles,
                                             modifier =
                                                 Modifier.semantics {
-                                                    contentDescription =
-                                                        accountSelectorDescription
+                                                    contentDescription = accountSelectorDescription
                                                 },
                                         )
                                     },
@@ -601,9 +595,7 @@ fun ComposeDialog(
                                                     },
                                                     modifier =
                                                         Modifier.semantics {
-                                                            contentDescription =
-                                                                editAltTextDescription
-                                                            role = Role.Button
+                                                            contentDescription = editAltTextDescription
                                                         },
                                                 ) {
                                                     Text("ALT")
@@ -631,19 +623,17 @@ fun ComposeDialog(
                                     Modifier
                                         .padding(horizontal = screenHorizontalPadding)
                                         .fillMaxWidth()
-                                        .toggleable(
-                                            value = mediaState.isMediaSensitive,
-                                            role = Role.Checkbox,
+                                        .clickable(
                                             interactionSource = sensitiveInteractionSource,
                                             indication = null,
-                                            onValueChange = mediaState::setMediaSensitive,
-                                        ),
+                                        ) {
+                                            mediaState.setMediaSensitive(!mediaState.isMediaSensitive)
+                                        },
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 CheckBox(
                                     checked = mediaState.isMediaSensitive,
-                                    modifier = Modifier.clearAndSetSemantics { },
                                     onCheckStateChange = { mediaState.setMediaSensitive(it) },
 //                                    interactionSource = sensitiveInteractionSource,
                                 )

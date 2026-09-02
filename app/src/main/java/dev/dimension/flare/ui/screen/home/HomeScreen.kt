@@ -44,8 +44,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -100,7 +98,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 @Composable
 internal fun HomeScreen(afterInit: () -> Unit) {
     val uriHandler = LocalUriHandler.current
-    val openNavigationMenuLabel = stringResource(R.string.open_navigation_menu)
     val state by producePresenter { presenter(uriHandler = uriHandler) }
     // The presenter is retained by a ViewModel, so keep its UI-owned handler current.
     SideEffect {
@@ -155,14 +152,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     Modifier
                                         .padding(
                                             horizontal = 24.dp,
-                                        ).padding(top = 12.dp, bottom = 4.dp)
-                                        .semantics {
-                                            contentDescription = openNavigationMenuLabel
-                                        },
+                                        ).padding(top = 12.dp, bottom = 4.dp),
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.Bars,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.open_navigation_menu),
                                 )
                             }
 

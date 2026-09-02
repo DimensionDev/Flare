@@ -49,7 +49,6 @@ struct StatusMediaView: View {
     var body: some View {
         mediaContent
         .blur(radius: isBlur ? 20 : 0)
-        .accessibilityHidden(isBlur)
         .overlay(
             alignment: isBlur ? .center : .topLeading
         ) {
@@ -236,12 +235,6 @@ struct StatusMediaView: View {
                     onMediaClicked(item, index)
                 }
             }
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAction {
-                if !sensitive || !isBlur {
-                    onMediaClicked(item, index)
-                }
-            }
             .overlay {
                 if overflowCount > 0 {
                     MediaOverflowOverlay(count: overflowCount)
@@ -251,11 +244,6 @@ struct StatusMediaView: View {
             .overlay(alignment: .bottomTrailing) {
                 if let alt = item.description_, !alt.isEmpty {
                     AltTextOverlay(altText: alt)
-                }
-            }
-            .statusMediaKeyboardActivation(enabled: !sensitive || !isBlur) {
-                if !sensitive || !isBlur {
-                    onMediaClicked(item, index)
                 }
             }
             .if(!isBlur && timelineMediaActionHandler != nil) { view in
@@ -400,31 +388,6 @@ struct AltTextOverlay: View {
                 .frame(width: 280)
                 .presentationCompactAdaptation(.popover)
         }
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func statusMediaKeyboardActivation(
-        enabled: Bool,
-        _ action: @escaping () -> Void
-    ) -> some View {
-        #if os(macOS)
-        self
-            .focusable(enabled)
-            .onKeyPress(.return) {
-                guard enabled else { return .ignored }
-                action()
-                return .handled
-            }
-            .onKeyPress(.space) {
-                guard enabled else { return .ignored }
-                action()
-                return .handled
-            }
-        #else
-        self
-        #endif
     }
 }
 

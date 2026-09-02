@@ -36,8 +36,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -110,20 +108,13 @@ internal fun StatusMediaComponent(
             appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
             data.size > 1
     val mediaContentModifier =
-        Modifier
-            .let {
-                if (hideSensitive && SystemUtils.isBlurSupported) {
-                    it.blur(32.dp)
-                } else {
-                    it
-                }
-            }.let {
-                if (hideSensitive) {
-                    it.clearAndSetSemantics { }
-                } else {
-                    it
-                }
+        Modifier.let {
+            if (hideSensitive && SystemUtils.isBlurSupported) {
+                it.blur(32.dp)
+            } else {
+                it
             }
+        }
     val showSensitiveMediaLabel = stringResource(Res.string.show_sensitive_media)
     val hideSensitiveMediaLabel = stringResource(Res.string.hide_sensitive_media)
     Box(
@@ -237,7 +228,7 @@ internal fun StatusMediaComponent(
                         }.let {
                             if (hideSensitive) {
                                 it
-                                    .clickable(role = Role.Button) {
+                                    .clickable {
                                         hideSensitive = false
                                     }.semantics {
                                         contentDescription = showSensitiveMediaLabel
@@ -412,14 +403,14 @@ private fun StatusMediaItem(
                 MediaItem(
                     media = media,
                     modifier =
-                        mediaModifier.clickable(role = Role.Button) {
+                        mediaModifier.clickable {
                             onMediaClick(media)
                         },
                     keepAspectRatio = keepAspectRatio,
                 )
             }
         }
-        if (!media.description.isNullOrBlank() && !hideSensitive) {
+        if (!media.description.isNullOrEmpty()) {
             PlatformFlyoutContainer(
                 modifier = Modifier.align(Alignment.BottomEnd),
                 content = { requestShowFlyout ->
@@ -435,7 +426,7 @@ private fun StatusMediaItem(
                                 ).padding(
                                     horizontal = 8.dp,
                                     vertical = 2.dp,
-                                ).clickable(role = Role.Button) {
+                                ).clickable {
                                     if (!requestShowFlyout.invoke()) {
                                         media.description?.let {
                                             uriHandler.openUri(DeeplinkRoute.Status.AltText(it).toUri())

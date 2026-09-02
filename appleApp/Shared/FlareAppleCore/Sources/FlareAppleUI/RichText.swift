@@ -31,7 +31,23 @@ public struct RichText: View {
                 case let textContent as PlatformTextTextContent:
                     renderBlock(textContent: textContent)
                 case let imageContent as PlatformTextBlockImageContent:
-                    renderBlockImage(imageContent)
+                    if let url = URL(string: imageContent.url) {
+                        KFImage(url)
+                            .flareBackgroundDecodeIfSupported()
+                            .loadDiskFileSynchronously(false)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .contentShape(Rectangle())
+                            .accessibilityLabel(
+                                Text("media_image_no_alt", bundle: FlareAppleUILocalization.bundle)
+                            )
+                            .onTapGesture {
+                                if let href = imageContent.href, let link = URL(string: href) {
+                                    openURL(link)
+                                }
+                            }
+                    }
                 default:
                     EmptyView()
                 }
@@ -56,38 +72,6 @@ public struct RichText: View {
 
     private var contents: [PlatformTextContent] {
         text.platformText.compactMap { $0 as? PlatformTextContent }
-    }
-
-    @ViewBuilder
-    private func renderBlockImage(_ content: PlatformTextBlockImageContent) -> some View {
-        if let url = URL(string: content.url) {
-            if let href = content.href, let link = URL(string: href) {
-                Button {
-                    openURL(link)
-                } label: {
-                    blockImage(url)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(
-                    Text("media_image_no_alt", bundle: FlareAppleUILocalization.bundle)
-                )
-            } else {
-                blockImage(url)
-                    .accessibilityLabel(
-                        Text("media_image_no_alt", bundle: FlareAppleUILocalization.bundle)
-                    )
-            }
-        }
-    }
-
-    private func blockImage(_ url: URL) -> some View {
-        KFImage(url)
-            .flareBackgroundDecodeIfSupported()
-            .loadDiskFileSynchronously(false)
-            .resizable()
-            .scaledToFit()
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .contentShape(Rectangle())
     }
 
     @ViewBuilder

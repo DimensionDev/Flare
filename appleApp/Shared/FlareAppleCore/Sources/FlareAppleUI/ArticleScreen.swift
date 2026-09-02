@@ -412,17 +412,18 @@ private struct ArticleVideoBlockView: View {
     let onOpenMedia: (any UiMedia) -> Void
 
     var body: some View {
-        Button {
-            onOpenMedia(media)
-        } label: {
-            ArticleMediaFrame(aspectRatio: articleAspectRatio(media.aspectRatio)) {
-                MediaVideoView(data: media)
-            }
-            .contentShape(Rectangle())
+        ArticleMediaFrame(aspectRatio: articleAspectRatio(media.aspectRatio)) {
+            MediaVideoView(data: media)
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: media.accessibleDescription))
+            .contentShape(Rectangle())
+            .overlay {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        onOpenMedia(media)
+                    }
+            }
+            .accessibilityLabel(Text(verbatim: media.accessibleDescription))
     }
 }
 

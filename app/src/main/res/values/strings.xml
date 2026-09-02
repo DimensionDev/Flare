@@ -478,8 +478,6 @@
     <string name="media_playback_position">Playback position</string>
     <string name="media_page_position">Media position</string>
     <string name="media_page_of">%1$d of %2$d</string>
-    <string name="media_seek_backward">Seek backward 5 seconds</string>
-    <string name="media_seek_forward">Seek forward 5 seconds</string>
     <string name="media_is_downloading">Media is still downloading. Try again in a moment.</string>
 
     <string name="settings_side_panel_empty">By default, the side panel follows the current account\'s platform.</string>

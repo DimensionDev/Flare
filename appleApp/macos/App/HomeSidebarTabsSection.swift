@@ -261,12 +261,6 @@ private struct HomeSidebarEditableGroupRow: View {
             .contextMenu {
                 contextMenu
             }
-            .accessibilityAction(named: Text("edit")) {
-                onEdit()
-            }
-            .accessibilityAction(named: Text("delete")) {
-                onDelete()
-            }
     }
 
     private var rowContent: some View {
@@ -287,7 +281,6 @@ private struct HomeSidebarEditableGroupRow: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
             }
         }
     }
@@ -369,7 +362,6 @@ private struct HomeSidebarEditableTabRow: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
             }
         }
         .contentShape(Rectangle())
@@ -390,12 +382,6 @@ private struct HomeSidebarEditableTabRow: View {
                     Image(fontAwesome: .trash)
                 }
             }
-        }
-        .accessibilityAction(named: Text("edit")) {
-            onEdit()
-        }
-        .accessibilityAction(named: Text("delete")) {
-            onDelete()
         }
     }
 

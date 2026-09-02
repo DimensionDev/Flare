@@ -5,7 +5,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -24,7 +23,6 @@ internal actual fun TimelineMediaMenuBox(
                 onLongClick = {
                     onExpandedChange(true)
                 },
-                role = Role.Button,
             ),
     ) {
         content()

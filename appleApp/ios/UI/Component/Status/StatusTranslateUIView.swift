@@ -66,11 +66,11 @@ final class StatusTranslateUIView: UIView, TimelineHeightProviding {
         clipsToBounds = false
         translateButton.setTitle(String(localized: "status_translate"), for: .normal)
         translateButton.contentHorizontalAlignment = .leading
-        translateButton.addTarget(self, action: #selector(toggleTranslate), for: .primaryActionTriggered)
+        translateButton.addTarget(self, action: #selector(toggleTranslate), for: .touchUpInside)
 
         tldrButton.setTitle(String(localized: "status_tldr"), for: .normal)
         tldrButton.contentHorizontalAlignment = .leading
-        tldrButton.addTarget(self, action: #selector(toggleSummary), for: .primaryActionTriggered)
+        tldrButton.addTarget(self, action: #selector(toggleSummary), for: .touchUpInside)
 
         addSubview(buttonRow)
         buttonRow.addSubview(translateButton)

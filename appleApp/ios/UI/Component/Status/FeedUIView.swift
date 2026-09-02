@@ -80,7 +80,6 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
         let tap = UITapGestureRecognizer(target: self, action: #selector(onTap))
         addGestureRecognizer(tap)
         isAccessibilityElement = true
-        accessibilityTraits = .button
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
@@ -403,12 +402,6 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
             self?.onOpenURL?(url)
             return .handled
         })))
-    }
-
-    override func accessibilityActivate() -> Bool {
-        guard data != nil else { return false }
-        onTap()
-        return true
     }
 }
 

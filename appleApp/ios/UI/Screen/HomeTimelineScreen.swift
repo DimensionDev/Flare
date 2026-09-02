@@ -63,17 +63,10 @@ struct HomeTimelineScreen: View {
                     ContentUnavailableView("tab_settings_title", systemImage: "square.grid.2x2")
                         .toolbar {
                             ToolbarItem(placement: .topBarLeading) {
-                                Button(action: toSecondaryMenu) {
-                                    Image(fontAwesome: .gear)
-                                }
-                                .accessibilityLabel(
-                                    Text(
-                                        String(
-                                            localized: "open_navigation_menu",
-                                            defaultValue: "Open navigation menu"
-                                        )
-                                    )
-                                )
+                                Image(fontAwesome: .gear)
+                                    .onTapGesture {
+                                        toSecondaryMenu()
+                                    }
                             }
                             ToolbarItem(placement: .primaryAction) {
                                 Button {
@@ -81,7 +74,6 @@ struct HomeTimelineScreen: View {
                                 } label: {
                                     Image(fontAwesome: .plus)
                                 }
-                                .accessibilityLabel(Text("tab_settings_add_tab"))
                             }
                         }
                 } else {
@@ -101,7 +93,6 @@ struct HomeTimelineScreen: View {
                                 } label: {
                                     Image(fontAwesome: .sliders)
                                 }
-                                .accessibilityLabel(Text("tab_settings_title"))
                                 composeToolbarButton
                             }
                         }
@@ -223,7 +214,6 @@ struct HomeTimelineScreen: View {
                                     } label: {
                                         Image(fontAwesome: .sliders)
                                     }
-                                    .accessibilityLabel(Text("tab_settings_title"))
                                 }
                             }
                             ToolbarItem(placement: .primaryAction) {
@@ -259,32 +249,24 @@ struct HomeTimelineScreen: View {
     @ToolbarContentBuilder
     private var leadingToolbarContent: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Button(action: toSecondaryMenu) {
-                StateView(state: activeAccountPresenter.state.user) { user in
-                    if user.avatar == nil {
-                        Image(fontAwesome: .gear)
+            StateView(state: activeAccountPresenter.state.user) { user in
+                if user.avatar == nil {
+                    Image(fontAwesome: .gear)
+                } else {
+                    if #available(iOS 26.0, *) {
+                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
                     } else {
-                        if #available(iOS 26.0, *) {
-                            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                        } else {
-                            AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
-                                .frame(width: 24, height: 24)
-                        }
+                        AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                            .frame(width: 24, height: 24)
                     }
-                } errorContent: { _ in
-                    Image(fontAwesome: .gear)
-                } loadingContent: {
-                    Image(fontAwesome: .gear)
                 }
+            } errorContent: { _ in
+                Image(fontAwesome: .gear)
+            } loadingContent: {
+                Image(fontAwesome: .gear)
+            }.onTapGesture {
+                toSecondaryMenu()
             }
-            .accessibilityLabel(
-                Text(
-                    String(
-                        localized: "open_navigation_menu",
-                        defaultValue: "Open navigation menu"
-                    )
-                )
-            )
         }
     }
 
@@ -303,7 +285,6 @@ struct HomeTimelineScreen: View {
                 Image(fontAwesome: .penToSquare)
                     .font(.title2)
             }
-            .accessibilityLabel(Text("compose_title_new"))
         }
     }
 }

@@ -463,7 +463,7 @@ public struct StatusActionIcon: View {
 
     public var body: some View {
         if let icon = icon {
-            icon.image.accessibilityHidden(true)
+            icon.image
         }
     }
 }

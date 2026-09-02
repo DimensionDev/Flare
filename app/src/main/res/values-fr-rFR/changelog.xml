@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s :</span>
             <ul>
-                <li>Ajout d’une disposition facultative en carrousel pour les publications contenant plusieurs médias, configurable globalement ou par fil.</li>
-                <li>Ajout des fils thématiques Découvrir de X et des aperçus automatiques des liens pour les publications Bluesky.</li>
-                <li>Le mode Galerie permet désormais d’accéder aux actions d’une publication par appui long ou clic droit sur Android, iOS, macOS et ordinateur.</li>
-                <li>Amélioration de la fiabilité des fils et des médias, notamment pour les notifications X, la pagination de Découvrir sur Mastodon, l’ordre des republications, les profils Nostr, les vidéos RSS intégrées et le dimensionnement de la Galerie sur iOS.</li>
+                <li>Les onglets de profil se chargent désormais indépendamment ; les profils X peuvent afficher les Republications, les Sélections et les Articles lorsqu’ils sont disponibles.</li>
+                <li>Ajout d’options globales et par fil pour masquer les réactions emoji.</li>
+                <li>Amélioration de la navigation et de l’accessibilité avec des gestes de retour prédictif plus fluides et le défilement des longues descriptions d’images.</li>
+                <li>Amélioration de la fiabilité de la connexion Bluesky, rétablissement du chargement du contenu FANBOX et affichage de la conversation complète dans le détail des publications Misskey.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Bon retour !</string>

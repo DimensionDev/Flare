@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added an optional carousel layout for posts with multiple media items, configurable globally or per timeline.</li>
-                <li>Added X Discover topic timelines and automatic link previews for Bluesky posts.</li>
-                <li>Gallery mode now supports long-press or right-click post actions on Android, iOS, macOS, and Desktop.</li>
-                <li>Improved feed and media reliability, including X notifications, Mastodon Discover pagination, repost ordering, Nostr profiles, RSS video embeds, and iOS Gallery sizing.</li>
+                <li>Profile tabs now load independently, and X profiles can show Reposts, Highlights, and Articles when available.</li>
+                <li>Added global and per-timeline options to hide emoji reactions.</li>
+                <li>Improved navigation and accessibility with smoother predictive-back gestures and scrollable long image descriptions.</li>
+                <li>Improved Bluesky login reliability, restored FANBOX content loading, and expanded Misskey post details to show the full conversation.</li>
             </ul>
         ]]></string>
 </resources>

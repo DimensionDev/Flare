@@ -3,10 +3,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Phiên bản %1$s:</span>
             <ul>
-                <li>Đã thêm bố cục băng chuyền tùy chọn cho bài đăng có nhiều mục đa phương tiện, có thể cấu hình chung hoặc theo từng dòng thời gian.</li>
-                <li>Đã thêm dòng thời gian chủ đề Khám phá của X và bản xem trước liên kết tự động cho bài đăng Bluesky.</li>
-                <li>Chế độ Thư viện hiện hỗ trợ thao tác bài đăng bằng cách nhấn giữ hoặc nhấp chuột phải trên Android, iOS, macOS và máy tính.</li>
-                <li>Cải thiện độ ổn định của dòng thời gian và nội dung đa phương tiện, bao gồm thông báo X, phân trang Khám phá của Mastodon, thứ tự đăng lại, hồ sơ Nostr, video RSS nhúng và kích thước Thư viện trên iOS.</li>
+                <li>Các thẻ hồ sơ giờ được tải độc lập; hồ sơ X có thể hiển thị Bài đăng lại, Nội dung nổi bật và Bài viết khi có.</li>
+                <li>Đã thêm tùy chọn chung và theo từng dòng thời gian để ẩn phản ứng emoji.</li>
+                <li>Cải thiện khả năng điều hướng và tiếp cận với cử chỉ quay lại dự đoán mượt hơn và phần mô tả hình ảnh dài có thể cuộn.</li>
+                <li>Cải thiện độ ổn định khi đăng nhập Bluesky, khôi phục việc tải nội dung FANBOX và mở rộng chi tiết bài đăng Misskey để hiển thị toàn bộ cuộc trò chuyện.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Chào mừng trở lại!</string>

@@ -5,10 +5,10 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionado um layout de carrossel opcional para publicações com várias mídias, configurável globalmente ou por timeline.</li>
-                <li>Adicionadas timelines de tópicos do Explorar do X e prévias automáticas de links para publicações do Bluesky.</li>
-                <li>O modo Galeria agora permite abrir ações de publicações com toque longo ou clique direito no Android, iOS, macOS e Desktop.</li>
-                <li>Melhorada a confiabilidade de timelines e mídia, incluindo notificações do X, paginação do Explorar no Mastodon, ordem de reposts, perfis do Nostr, vídeos RSS incorporados e dimensionamento da Galeria no iOS.</li>
+                <li>As abas de perfil agora carregam de forma independente; perfis do X podem mostrar Reposts, Destaques e Artigos quando disponíveis.</li>
+                <li>Adicionadas opções globais e por timeline para ocultar reações com emojis.</li>
+                <li>Melhoradas a navegação e a acessibilidade com gestos preditivos de voltar mais suaves e descrições longas de imagens com rolagem.</li>
+                <li>Melhorada a confiabilidade do login no Bluesky, restaurado o carregamento de conteúdo do FANBOX e ampliados os detalhes de posts do Misskey para mostrar toda a conversa.</li>
             </ul>
         ]]></string>
 </resources>

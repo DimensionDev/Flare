@@ -31312,181 +31312,181 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weergawe %@:\n• ’n Opsionele karrouseluitleg vir plasings met verskeie media-items is bygevoeg en kan wêreldwyd of per tydlyn ingestel word.\n• X Discover-onderwerptydlyne en outomatiese skakelvoorskoue vir Bluesky-plasings is bygevoeg.\n• Galerymodus ondersteun nou plasingaksies met langdruk of regsklik op Android, iOS, macOS en Desktop.\n• Die betroubaarheid van tydlyne en media is verbeter, insluitend X-kennisgewings, Mastodon Discover-bladsynavigasie, herplasingsvolgorde, Nostr-profiele, ingebedde RSS-video’s en iOS-galerygroottes."
+            "value" : "Weergawe %@:\n• Profieloortjies laai nou onafhanklik; X-profiele kan Herplasings, Hoogtepunte en Artikels wys wanneer beskikbaar, met ’n nuwe swiepbare ervaring op iOS.\n• Globale en tydlynspesifieke opsies is bygevoeg om emoji-reaksies te versteek, met duideliker, uitbreibare reaksie-uitlegte op Apple-platforms.\n• Die iOS-mediakyker is verbeter met op- of afswiep om toe te maak, stabieler voorskoue en beter hantering van hoë beelde.\n• Bluesky-aanmelding is betroubaarder, FANBOX-inhoud laai weer, en Misskey-plasingbesonderhede wys nou die volledige gesprek."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الإصدار %@:\n• تمت إضافة تخطيط دائري اختياري للمنشورات التي تحتوي على وسائط متعددة، ويمكن ضبطه بشكل عام أو لكل خط زمني.\n• تمت إضافة خطوط زمنية لمواضيع «استكشاف» في X ومعاينات تلقائية للروابط في منشورات Bluesky.\n• يدعم وضع المعرض الآن إجراءات المنشور بالضغط المطوّل أو النقر بزر الفأرة الأيمن على Android وiOS وmacOS وسطح المكتب.\n• تم تحسين موثوقية الخطوط الزمنية والوسائط، بما في ذلك إشعارات X، وترقيم صفحات «استكشاف» في Mastodon، وترتيب إعادة النشر، وملفات Nostr الشخصية، ومقاطع فيديو RSS المضمّنة، وأحجام معرض iOS."
+            "value" : "الإصدار %@:\n• يتم الآن تحميل علامات تبويب الملفات الشخصية بشكل مستقل؛ ويمكن لملفات X عرض إعادات النشر وأبرز المنشورات والمقالات عند توفرها، مع تجربة جديدة قابلة للسحب على iOS.\n• تمت إضافة خيارات عامة ولكل خط زمني لإخفاء تفاعلات الرموز التعبيرية، مع تخطيطات أوضح وقابلة للتوسيع للتفاعلات على منصات Apple.\n• تم تحسين عارض الوسائط على iOS بإمكانية السحب لأعلى أو لأسفل للإغلاق، ومعاينات أكثر ثباتًا، ودعم أفضل للصور الطويلة.\n• تحسّنت موثوقية تسجيل الدخول إلى Bluesky، وعاد تحميل محتوى FANBOX، وأصبحت تفاصيل منشورات Misskey تعرض المحادثة كاملة."
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Добавено е незадължително каруселно оформление за публикации с няколко мултимедийни елемента, което може да се настройва глобално или за всяка времева линия.\n• Добавени са тематични времеви линии в Discover на X и автоматични визуализации на връзки за публикации в Bluesky.\n• Режимът „Галерия“ вече поддържа действия с публикации чрез продължително натискане или щракване с десния бутон в Android, iOS, macOS и Desktop.\n• Подобрена е надеждността на времевите линии и мултимедията, включително известията в X, страниците в Mastodon Discover, подреждането на препубликациите, профилите в Nostr, вградените RSS видеоклипове и размерите на галерията в iOS."
+            "value" : "Версия %@:\n• Разделите в профилите вече се зареждат независимо; профилите в X могат да показват препубликации, акценти и статии, когато са налични, с нов интерфейс с плъзгане в iOS.\n• Добавени са глобални настройки и настройки за всяка времева линия за скриване на реакциите с емоджи, с по-ясни и разгъващи се оформления на реакциите в платформите на Apple.\n• Подобрен е прегледът на мултимедия в iOS с плъзгане нагоре или надолу за затваряне, по-стабилни визуализации и по-добра работа с високи изображения.\n• Подобрена е надеждността на влизането в Bluesky, възстановено е зареждането на съдържание от FANBOX, а подробностите за публикации в Misskey вече показват целия разговор."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versió %@:\n• S’ha afegit un disseny de carrusel opcional per a les publicacions amb diversos elements multimèdia, configurable globalment o per cronologia.\n• S’han afegit cronologies temàtiques de Descobreix d’X i previsualitzacions automàtiques d’enllaços per a les publicacions de Bluesky.\n• El mode Galeria ara admet accions sobre publicacions mitjançant una pulsació llarga o un clic dret a Android, iOS, macOS i l’escriptori.\n• S’ha millorat la fiabilitat de les cronologies i dels continguts multimèdia, incloent-hi les notificacions d’X, la paginació de Descobreix de Mastodon, l’ordre de les republicacions, els perfils de Nostr, els vídeos RSS incrustats i la mida de la Galeria d’iOS."
+            "value" : "Versió %@:\n• Les pestanyes dels perfils ara es carreguen de manera independent; els perfils d’X poden mostrar Republicacions, Destacats i Articles quan estiguin disponibles, amb una nova experiència lliscable a iOS.\n• S’han afegit opcions globals i per cronologia per amagar les reaccions amb emojis, amb dissenys de reaccions més clars i ampliables a les plataformes d’Apple.\n• S’ha millorat el visor multimèdia d’iOS amb lliscament amunt o avall per tancar-lo, previsualitzacions més estables i una millor gestió de les imatges altes.\n• S’ha millorat la fiabilitat de l’inici de sessió a Bluesky, s’ha restaurat la càrrega de contingut de FANBOX i els detalls de les publicacions de Misskey ara mostren tota la conversa."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verze %@:\n• Přidáno volitelné karuselové rozvržení pro příspěvky s více médii, které lze nastavit globálně nebo pro každou časovou osu.\n• Přidány tematické časové osy Objevovat na X a automatické náhledy odkazů pro příspěvky Bluesky.\n• Režim Galerie nyní podporuje akce s příspěvky dlouhým stisknutím nebo kliknutím pravým tlačítkem v systémech Android, iOS, macOS a Desktop.\n• Zlepšena spolehlivost časových os a médií, včetně oznámení X, stránkování Mastodon Objevovat, řazení repostů, profilů Nostr, vložených videí RSS a rozměrů Galerie v iOS."
+            "value" : "Verze %@:\n• Karty profilů se nyní načítají nezávisle; profily na X mohou zobrazovat reposty, výběry a články, jsou-li dostupné, a na iOS nabízí nové ovládání přejetím.\n• Přidány globální možnosti i možnosti pro jednotlivé časové osy ke skrytí emoji reakcí a přehlednější, rozbalitelné rozložení reakcí na platformách Apple.\n• Vylepšen prohlížeč médií v iOS: zavření přejetím nahoru nebo dolů, stabilnější náhledy a lepší zobrazení vysokých obrázků.\n• Zlepšena spolehlivost přihlašování k Bluesky, obnoveno načítání obsahu FANBOX a podrobnosti příspěvků Misskey nyní zobrazují celou konverzaci."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Tilføjet et valgfrit karrusellayout til opslag med flere medieelementer, som kan indstilles globalt eller pr. tidslinje.\n• Tilføjet emnetidslinjer fra Udforsk på X og automatiske linkforhåndsvisninger til Bluesky-opslag.\n• Galleritilstand understøtter nu opslagshandlinger med langt tryk eller højreklik på Android, iOS, macOS og Desktop.\n• Forbedret stabilitet for tidslinjer og medier, herunder X-notifikationer, sideindlæsning i Mastodon Udforsk, rækkefølgen af genopslag, Nostr-profiler, indlejrede RSS-videoer og størrelsen på iOS-galleriet."
+            "value" : "Version %@:\n• Profilfaner indlæses nu uafhængigt; X-profiler kan vise genopslag, højdepunkter og artikler, når de er tilgængelige, med en ny swipeoplevelse på iOS.\n• Tilføjet globale og tidslinjespecifikke muligheder for at skjule emoji-reaktioner samt tydeligere reaktionslayout, der kan udvides, på Apple-platforme.\n• Forbedret mediefremviseren på iOS med swipe op eller ned for at lukke, mere stabile forhåndsvisninger og bedre håndtering af høje billeder.\n• Forbedret pålideligheden af Bluesky-login, gendannet indlæsning af FANBOX-indhold og udvidet Misskey-opslagsdetaljer, så hele samtalen vises."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Ein optionales Karussell-Layout für Beiträge mit mehreren Medien wurde hinzugefügt und kann global oder pro Timeline konfiguriert werden.\n• Themen-Timelines aus „Entdecken“ bei X und automatische Linkvorschauen für Bluesky-Beiträge wurden hinzugefügt.\n• Der Galerie-Modus unterstützt jetzt Beitragsaktionen per langem Drücken oder Rechtsklick auf Android, iOS, macOS und Desktop.\n• Die Zuverlässigkeit von Timelines und Medien wurde verbessert, darunter X-Benachrichtigungen, die Paginierung in Mastodon „Entdecken“, die Reihenfolge von Reposts, Nostr-Profile, eingebettete RSS-Videos und die Größenberechnung der iOS-Galerie."
+            "value" : "Version %@:\n• Profil-Tabs werden jetzt unabhängig geladen; X-Profile können Reposts, Highlights und Artikel anzeigen, sofern verfügbar, mit einer neuen Wischbedienung auf iOS.\n• Globale und Timeline-spezifische Optionen zum Ausblenden von Emoji-Reaktionen sowie übersichtlichere, erweiterbare Reaktionslayouts auf Apple-Plattformen wurden hinzugefügt.\n• Der Medienbetrachter auf iOS wurde verbessert: Schließen durch Wischen nach oben oder unten, stabilere Vorschauen und bessere Darstellung hoher Bilder.\n• Die Zuverlässigkeit der Bluesky-Anmeldung wurde verbessert, das Laden von FANBOX-Inhalten wiederhergestellt und Misskey-Beitragsdetails zeigen jetzt die vollständige Unterhaltung."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έκδοση %@:\n• Προστέθηκε προαιρετική διάταξη καρουζέλ για αναρτήσεις με πολλά στοιχεία πολυμέσων, με δυνατότητα καθολικής ρύθμισης ή ανά χρονογραμμή.\n• Προστέθηκαν θεματικές χρονογραμμές Ανακάλυψης του X και αυτόματες προεπισκοπήσεις συνδέσμων για αναρτήσεις στο Bluesky.\n• Η λειτουργία Συλλογής υποστηρίζει πλέον ενέργειες ανάρτησης με παρατεταμένο πάτημα ή δεξί κλικ σε Android, iOS, macOS και Desktop.\n• Βελτιώθηκε η αξιοπιστία των χρονογραμμών και των πολυμέσων, συμπεριλαμβανομένων των ειδοποιήσεων X, της σελιδοποίησης Ανακάλυψης Mastodon, της σειράς αναδημοσιεύσεων, των προφίλ Nostr, των ενσωματωμένων βίντεο RSS και του μεγέθους Συλλογής στο iOS."
+            "value" : "Έκδοση %@:\n• Οι καρτέλες προφίλ φορτώνονται πλέον ανεξάρτητα· τα προφίλ X μπορούν να εμφανίζουν Αναδημοσιεύσεις, Επισημάνσεις και Άρθρα όταν είναι διαθέσιμα, με νέα εμπειρία σάρωσης στο iOS.\n• Προστέθηκαν καθολικές επιλογές και επιλογές ανά χρονογραμμή για απόκρυψη των αντιδράσεων emoji, με σαφέστερες, επεκτάσιμες διατάξεις αντιδράσεων στις πλατφόρμες Apple.\n• Βελτιώθηκε η προβολή πολυμέσων στο iOS με σάρωση προς τα πάνω ή κάτω για κλείσιμο, σταθερότερες προεπισκοπήσεις και καλύτερη διαχείριση ψηλών εικόνων.\n• Βελτιώθηκε η αξιοπιστία σύνδεσης στο Bluesky, αποκαταστάθηκε η φόρτωση περιεχομένου FANBOX και οι λεπτομέρειες αναρτήσεων Misskey εμφανίζουν πλέον ολόκληρη τη συζήτηση."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Added an optional carousel layout for posts with multiple media items, configurable globally or per timeline.\n• Added X Discover topic timelines and automatic link previews for Bluesky posts.\n• Gallery mode now supports long-press or right-click post actions on Android, iOS, macOS, and Desktop.\n• Improved feed and media reliability, including X notifications, Mastodon Discover pagination, repost ordering, Nostr profiles, RSS video embeds, and iOS Gallery sizing."
+            "value" : "Version %@:\n• Profile tabs now load independently; X profiles can show Reposts, Highlights, and Articles when available, with a new swipeable experience on iOS.\n• Added global and per-timeline options to hide emoji reactions, with clearer, expandable reaction layouts on Apple platforms.\n• Improved the iOS media viewer with swipe-up/down dismissal, more stable previews, and better handling of tall images.\n• Improved Bluesky login reliability, restored FANBOX content loading, and expanded Misskey post details to show the full conversation."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versio %@:\n• Lisättiin valinnainen karuselliasettelu useita mediasisältöjä sisältäville julkaisuille. Sen voi määrittää yleisesti tai aikajanakohtaisesti.\n• Lisättiin X:n Löydä-aiheaikajanat ja automaattiset linkkien esikatselut Bluesky-julkaisuihin.\n• Gallerianäkymä tukee nyt julkaisutoimintoja pitkällä painalluksella tai hiiren kakkospainikkeella Androidissa, iOS:ssä, macOS:ssä ja työpöydällä.\n• Aikajanojen ja median luotettavuutta parannettiin, mukaan lukien X-ilmoitukset, Mastodonin Löydä-näkymän sivutus, uudelleenjulkaisujen järjestys, Nostr-profiilit, upotetut RSS-videot ja iOS-gallerian mitoitus."
+            "value" : "Versio %@:\n• Profiilin välilehdet latautuvat nyt toisistaan riippumatta. X-profiileissa voidaan näyttää uudelleenjulkaisut, kohokohdat ja artikkelit, kun niitä on saatavilla, ja iOS:ssä on uusi pyyhkäistävä käyttökokemus.\n• Lisättiin yleiset ja aikajanakohtaiset valinnat emoji-reaktioiden piilottamiseen sekä selkeämmät ja laajennettavat reaktioasettelut Apple-alustoille.\n• iOS:n mediakatselinta parannettiin: sulkeminen pyyhkäisemällä ylös tai alas, vakaammat esikatselut ja parempi tuki korkeille kuville.\n• Bluesky-kirjautumisen luotettavuutta parannettiin, FANBOX-sisällön lataus palautettiin ja Misskey-julkaisun tiedot näyttävät nyt koko keskustelun."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ :\n• Ajout d’une disposition facultative en carrousel pour les publications contenant plusieurs médias, configurable globalement ou par fil.\n• Ajout des fils thématiques Découvrir de X et des aperçus automatiques des liens pour les publications Bluesky.\n• Le mode Galerie permet désormais d’accéder aux actions d’une publication par appui long ou clic droit sur Android, iOS, macOS et ordinateur.\n• Amélioration de la fiabilité des fils et des médias, notamment pour les notifications X, la pagination de Découvrir sur Mastodon, l’ordre des republications, les profils Nostr, les vidéos RSS intégrées et le dimensionnement de la Galerie sur iOS."
+            "value" : "Version %@ :\n• Les onglets de profil se chargent désormais indépendamment ; les profils X peuvent afficher les Republications, les Sélections et les Articles lorsqu’ils sont disponibles, avec une nouvelle navigation par balayage sur iOS.\n• Ajout d’options globales et par fil pour masquer les réactions emoji, avec des dispositions plus claires et extensibles sur les plateformes Apple.\n• Amélioration de la visionneuse multimédia sur iOS : balayage vers le haut ou le bas pour fermer, aperçus plus stables et meilleure gestion des images très hautes.\n• Amélioration de la fiabilité de la connexion Bluesky, rétablissement du chargement du contenu FANBOX et affichage de la conversation complète dans le détail des publications Misskey."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "גרסה %@:\n• נוספה פריסת קרוסלה אופציונלית לפוסטים עם כמה פריטי מדיה, שניתנת להגדרה כללית או לכל ציר זמן.\n• נוספו צירי זמן של נושאים מ״גילוי״ ב-X ותצוגות מקדימות אוטומטיות לקישורים בפוסטים של Bluesky.\n• מצב הגלריה תומך כעת בפעולות על פוסטים באמצעות לחיצה ממושכת או לחיצה ימנית ב-Android, ב-iOS, ב-macOS ובמחשב.\n• שופרה האמינות של צירי הזמן והמדיה, כולל התראות X, הדפדוף ב״גילוי״ של Mastodon, סדר הפוסטים החוזרים, פרופילי Nostr, סרטוני RSS מוטמעים וגודל הגלריה ב-iOS."
+            "value" : "גרסה %@:\n• כרטיסיות הפרופיל נטענות כעת בנפרד; פרופילים ב-X יכולים להציג פוסטים חוזרים, נקודות בולטות ומאמרים כשהם זמינים, עם חוויית החלקה חדשה ב-iOS.\n• נוספו אפשרויות כלליות ולכל ציר זמן להסתרת תגובות אימוג׳י, עם פריסות תגובות ברורות יותר הניתנות להרחבה בפלטפורמות Apple.\n• מציג המדיה ב-iOS שופר עם החלקה למעלה או למטה לסגירה, תצוגות מקדימות יציבות יותר וטיפול טוב יותר בתמונות גבוהות.\n• שופרה אמינות ההתחברות ל-Bluesky, שוחזרה טעינת תוכן FANBOX, ופרטי פוסטים ב-Misskey מציגים כעת את השיחה המלאה."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ verzió:\n• Opcionális körhinta-elrendezés került a több médiát tartalmazó bejegyzésekhez, amely globálisan vagy idővonalanként állítható.\n• X Felfedezés témájú idővonalak és automatikus hivatkozás-előnézetek kerültek a Bluesky-bejegyzésekhez.\n• A Galéria mód mostantól támogatja a bejegyzésműveleteket hosszú nyomással vagy jobb kattintással Androidon, iOS-en, macOS-en és asztali gépen.\n• Javult az idővonalak és a média megbízhatósága, többek között az X-értesítések, a Mastodon Felfedezés lapozása, az újraközlések sorrendje, a Nostr-profilok, a beágyazott RSS-videók és az iOS Galéria méretezése."
+            "value" : "%@ verzió:\n• A profillapok mostantól egymástól függetlenül töltődnek be; az X-profilok elérhetőség esetén megjeleníthetik az újraközléseket, a kiemeléseket és a cikkeket, iOS-en pedig új, lapozható élményt kaptak.\n• Globális és idővonalankénti lehetőségek kerültek az emoji-reakciók elrejtéséhez, az Apple-platformokon pedig áttekinthetőbb, kibővíthető reakcióelrendezések érhetők el.\n• Javult az iOS médiamegjelenítője: felfelé vagy lefelé húzással bezárható, stabilabbak az előnézetek, és jobban kezeli a magas képeket.\n• Megbízhatóbb lett a Bluesky-bejelentkezés, helyreállt a FANBOX-tartalmak betöltése, a Misskey-bejegyzések részletei pedig már a teljes beszélgetést megjelenítik."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versione %@:\n• Aggiunto un layout a carosello opzionale per i post con più elementi multimediali, configurabile globalmente o per singola timeline.\n• Aggiunte le timeline tematiche Scopri di X e le anteprime automatiche dei link per i post di Bluesky.\n• La modalità Galleria ora supporta le azioni sui post tramite pressione prolungata o clic destro su Android, iOS, macOS e Desktop.\n• Migliorata l’affidabilità di timeline e contenuti multimediali, incluse le notifiche di X, la paginazione di Scopri su Mastodon, l’ordine dei repost, i profili Nostr, i video RSS incorporati e le dimensioni della Galleria su iOS."
+            "value" : "Versione %@:\n• Le schede dei profili ora si caricano in modo indipendente; i profili X possono mostrare Repost, In evidenza e Articoli quando disponibili, con una nuova esperienza scorrevole su iOS.\n• Aggiunte opzioni globali e per singola timeline per nascondere le reazioni emoji, con layout delle reazioni più chiari ed espandibili sulle piattaforme Apple.\n• Migliorato il visualizzatore multimediale su iOS con chiusura tramite scorrimento verso l’alto o il basso, anteprime più stabili e una migliore gestione delle immagini alte.\n• Migliorata l’affidabilità dell’accesso a Bluesky, ripristinato il caricamento dei contenuti FANBOX e ampliati i dettagli dei post Misskey per mostrare l’intera conversazione."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン %@:\n• 複数のメディアを含む投稿向けに、全体またはタイムラインごとに設定できるカルーセルレイアウトを追加しました。\n• X の「話題を見つける」タイムラインと、Bluesky 投稿のリンクプレビュー自動生成を追加しました。\n• ギャラリーモードで、Android、iOS、macOS、デスクトップの長押しまたは右クリックから投稿操作を開けるようになりました。\n• X の通知、Mastodon の「見つける」のページ読み込み、リポスト順、Nostr プロフィール、RSS 動画埋め込み、iOS ギャラリーのサイズなど、タイムラインとメディアの安定性を改善しました。"
+            "value" : "バージョン %@:\n• プロフィールのタブを個別に読み込むようにしました。X のプロフィールでは、利用可能な場合にリポスト、ハイライト、記事を表示でき、iOS では新しいスワイプ操作に対応しました。\n• 絵文字リアクションを全体またはタイムラインごとに非表示にできるようにし、Apple プラットフォームではリアクションをより見やすく、展開可能なレイアウトに改善しました。\n• iOS のメディアビューアを改善し、上下どちらへのスワイプでも閉じられるようにしたほか、プレビューの安定性と縦長画像の表示を向上しました。\n• Bluesky のログイン安定性を改善し、FANBOX コンテンツの読み込みを復旧しました。また、Misskey の投稿詳細で会話全体を表示できるようにしました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버전 %@:\n• 여러 미디어가 포함된 게시물에 선택형 캐러셀 레이아웃을 추가했습니다. 전체 또는 타임라인별로 설정할 수 있습니다.\n• X 둘러보기 주제 타임라인과 Bluesky 게시물의 자동 링크 미리보기를 추가했습니다.\n• 이제 갤러리 모드에서 Android, iOS, macOS 및 데스크톱의 길게 누르기 또는 오른쪽 클릭으로 게시물 작업을 열 수 있습니다.\n• X 알림, Mastodon 둘러보기 페이지 로딩, 재게시 순서, Nostr 프로필, RSS 동영상 삽입 및 iOS 갤러리 크기 등 타임라인과 미디어 안정성을 개선했습니다."
+            "value" : "버전 %@:\n• 프로필 탭이 이제 각각 독립적으로 로드됩니다. X 프로필에서는 이용 가능한 경우 재게시, 하이라이트 및 아티클을 표시하며, iOS에는 새로운 스와이프 탐색을 추가했습니다.\n• 이모지 반응을 전체 또는 타임라인별로 숨기는 옵션을 추가하고, Apple 플랫폼의 반응 레이아웃을 더 명확하고 펼칠 수 있게 개선했습니다.\n• iOS 미디어 뷰어에 위아래 스와이프 닫기를 추가하고, 미리보기 안정성과 세로로 긴 이미지 처리를 개선했습니다.\n• Bluesky 로그인 안정성을 개선하고 FANBOX 콘텐츠 로딩을 복구했으며, Misskey 게시물 상세 화면에서 전체 대화를 표시하도록 확장했습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versjon %@:\n• Lagt til et valgfritt karuselloppsett for innlegg med flere medieelementer, som kan angis globalt eller per tidslinje.\n• Lagt til emnetidslinjer fra Utforsk på X og automatiske lenkeforhåndsvisninger for Bluesky-innlegg.\n• Gallerimodus støtter nå innleggshandlinger med langt trykk eller høyreklikk på Android, iOS, macOS og skrivebord.\n• Forbedret stabilitet for tidslinjer og medier, blant annet X-varsler, sideinndeling i Mastodon Utforsk, rekkefølgen på viderepubliseringer, Nostr-profiler, innebygde RSS-videoer og størrelsen på iOS-galleriet."
+            "value" : "Versjon %@:\n• Profilfaner lastes nå uavhengig av hverandre. X-profiler kan vise viderepubliseringer, høydepunkter og artikler når de er tilgjengelige, med en ny sveipbar opplevelse på iOS.\n• Lagt til globale og tidslinjespesifikke valg for å skjule emoji-reaksjoner, med tydeligere reaksjonsoppsett som kan utvides på Apple-plattformer.\n• Forbedret medievisningen på iOS med sveip opp eller ned for å lukke, mer stabile forhåndsvisninger og bedre håndtering av høye bilder.\n• Forbedret påliteligheten ved Bluesky-innlogging, gjenopprettet lasting av FANBOX-innhold og utvidet Misskey-innleggsdetaljer til å vise hele samtalen."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versie %@:\n• Een optionele carrouselindeling toegevoegd voor berichten met meerdere media-items, globaal of per tijdlijn instelbaar.\n• Onderwerptijdlijnen uit Ontdekken op X en automatische linkvoorbeelden voor Bluesky-berichten toegevoegd.\n• De Galerijmodus ondersteunt nu berichtacties via lang indrukken of rechtsklikken op Android, iOS, macOS en Desktop.\n• De betrouwbaarheid van tijdlijnen en media is verbeterd, waaronder X-meldingen, paginering van Mastodon Ontdekken, de volgorde van reposts, Nostr-profielen, ingesloten RSS-video’s en de grootte van de iOS-galerij."
+            "value" : "Versie %@:\n• Profieltabbladen worden nu onafhankelijk geladen; X-profielen kunnen Reposts, Hoogtepunten en Artikelen tonen wanneer beschikbaar, met een nieuwe veegervaring op iOS.\n• Globale en tijdlijnspecifieke opties toegevoegd om emoji-reacties te verbergen, met duidelijkere, uitklapbare reactielay-outs op Apple-platforms.\n• De mediaviewer op iOS is verbeterd met omhoog of omlaag vegen om te sluiten, stabielere voorbeelden en betere verwerking van hoge afbeeldingen.\n• De betrouwbaarheid van aanmelden bij Bluesky is verbeterd, het laden van FANBOX-inhoud is hersteld en Misskey-berichtdetails tonen nu het volledige gesprek."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wersja %@:\n• Dodano opcjonalny układ karuzeli dla postów z wieloma elementami multimedialnymi, konfigurowany globalnie lub dla każdej osi czasu.\n• Dodano tematyczne osie czasu Odkrywaj w X i automatyczne podglądy linków w postach Bluesky.\n• Tryb Galerii obsługuje teraz działania na postach przez długie naciśnięcie lub kliknięcie prawym przyciskiem na Androidzie, iOS, macOS i komputerach.\n• Poprawiono niezawodność osi czasu i multimediów, w tym powiadomień X, stronicowania Odkrywaj w Mastodon, kolejności repostów, profili Nostr, osadzonych filmów RSS i rozmiarów Galerii w iOS."
+            "value" : "Wersja %@:\n• Karty profilu są teraz ładowane niezależnie; profile X mogą wyświetlać Reposty, Wyróżnione i Artykuły, gdy są dostępne, a w iOS dodano nową obsługę przesuwania.\n• Dodano globalne i osobne dla każdej osi czasu opcje ukrywania reakcji emoji oraz czytelniejsze, rozwijane układy reakcji na platformach Apple.\n• Ulepszono przeglądarkę multimediów w iOS: zamykanie przesunięciem w górę lub w dół, stabilniejsze podglądy i lepsza obsługa wysokich obrazów.\n• Poprawiono niezawodność logowania do Bluesky, przywrócono wczytywanie treści FANBOX, a szczegóły postów Misskey pokazują teraz całą rozmowę."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Adicionado um esquema de carrossel opcional para publicações com vários elementos multimédia, configurável globalmente ou por cronologia.\n• Adicionadas cronologias de tópicos do Explorar do X e pré-visualizações automáticas de ligações para publicações do Bluesky.\n• O modo Galeria permite agora abrir ações das publicações com um toque prolongado ou clique direito no Android, iOS, macOS e computador.\n• Melhorada a fiabilidade das cronologias e dos conteúdos multimédia, incluindo notificações do X, paginação do Explorar no Mastodon, ordem das republicações, perfis Nostr, vídeos RSS incorporados e dimensionamento da Galeria no iOS."
+            "value" : "Versão %@:\n• Os separadores de perfil são agora carregados de forma independente; os perfis do X podem mostrar Republicações, Destaques e Artigos quando disponíveis, com uma nova experiência de deslize no iOS.\n• Adicionadas opções globais e por cronologia para ocultar reações emoji, com esquemas de reações mais claros e expansíveis nas plataformas Apple.\n• Melhorado o visualizador multimédia no iOS com deslize para cima ou para baixo para fechar, pré-visualizações mais estáveis e melhor tratamento de imagens altas.\n• Melhorada a fiabilidade do início de sessão no Bluesky, restaurado o carregamento de conteúdo FANBOX e expandidos os detalhes das publicações Misskey para mostrar toda a conversa."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Adicionado um layout de carrossel opcional para publicações com várias mídias, configurável globalmente ou por timeline.\n• Adicionadas timelines de tópicos do Explorar do X e prévias automáticas de links para publicações do Bluesky.\n• O modo Galeria agora permite abrir ações de publicações com toque longo ou clique direito no Android, iOS, macOS e Desktop.\n• Melhorada a confiabilidade de timelines e mídia, incluindo notificações do X, paginação do Explorar no Mastodon, ordem de reposts, perfis do Nostr, vídeos RSS incorporados e dimensionamento da Galeria no iOS."
+            "value" : "Versão %@:\n• As abas de perfil agora carregam de forma independente; perfis do X podem mostrar Reposts, Destaques e Artigos quando disponíveis, com uma nova experiência de navegação por gestos no iOS.\n• Adicionadas opções globais e por timeline para ocultar reações com emojis, com layouts de reações mais claros e expansíveis nas plataformas Apple.\n• Melhorado o visualizador de mídia no iOS com gesto para cima ou para baixo para fechar, prévias mais estáveis e melhor tratamento de imagens altas.\n• Melhorada a confiabilidade do login no Bluesky, restaurado o carregamento de conteúdo do FANBOX e ampliados os detalhes de posts do Misskey para mostrar toda a conversa."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versiunea %@:\n• A fost adăugat un aspect opțional de tip carusel pentru postările cu mai multe elemente media, configurabil global sau pentru fiecare cronologie.\n• Au fost adăugate cronologii tematice Descoperă în X și previzualizări automate ale linkurilor pentru postările Bluesky.\n• Modul Galerie acceptă acum acțiuni asupra postărilor prin apăsare lungă sau clic dreapta pe Android, iOS, macOS și Desktop.\n• A fost îmbunătățită fiabilitatea cronologiilor și conținutului media, inclusiv notificările X, paginarea Descoperă din Mastodon, ordinea redistribuirilor, profilurile Nostr, videoclipurile RSS încorporate și dimensionarea Galeriei pe iOS."
+            "value" : "Versiunea %@:\n• Filele profilului se încarcă acum independent; profilurile X pot afișa Redistribuiri, Evidențieri și Articole când sunt disponibile, cu o nouă experiență de glisare pe iOS.\n• Au fost adăugate opțiuni globale și pentru fiecare cronologie pentru ascunderea reacțiilor emoji, cu aspecte ale reacțiilor mai clare și extensibile pe platformele Apple.\n• Vizualizatorul media din iOS a fost îmbunătățit cu glisare în sus sau în jos pentru închidere, previzualizări mai stabile și o gestionare mai bună a imaginilor înalte.\n• A fost îmbunătățită fiabilitatea autentificării Bluesky, a fost restaurată încărcarea conținutului FANBOX, iar detaliile postărilor Misskey afișează acum întreaga conversație."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Добавлена необязательная карусельная раскладка для публикаций с несколькими медиафайлами, настраиваемая глобально или отдельно для каждой ленты.\n• Добавлены тематические ленты раздела «Обзор» в X и автоматические предпросмотры ссылок в публикациях Bluesky.\n• В режиме галереи теперь можно открывать действия с публикацией долгим нажатием или правой кнопкой мыши на Android, iOS, macOS и компьютере.\n• Повышена надёжность лент и мультимедиа, включая уведомления X, постраничную загрузку раздела «Обзор» в Mastodon, порядок репостов, профили Nostr, встроенные RSS-видео и размеры галереи в iOS."
+            "value" : "Версия %@:\n• Вкладки профиля теперь загружаются независимо; в профилях X при наличии отображаются репосты, избранное и статьи, а в iOS появилась новая навигация смахиванием.\n• Добавлены общие и отдельные для каждой ленты настройки скрытия эмодзи-реакций, а на платформах Apple раскладка реакций стала понятнее и получила возможность разворачивания.\n• Улучшен просмотр медиа в iOS: закрытие смахиванием вверх или вниз, более стабильные предпросмотры и лучшая поддержка высоких изображений.\n• Повышена надёжность входа в Bluesky, восстановлена загрузка контента FANBOX, а в деталях публикаций Misskey теперь отображается вся беседа."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Верзија %@:\n• Додат је опциони распоред вртешке за објаве са више медијских ставки, који се подешава глобално или по временској линији.\n• Додате су тематске временске линије „Откриј“ на X-у и аутоматски прегледи веза за Bluesky објаве.\n• Режим галерије сада подржава радње над објавама дугим притиском или десним кликом на Android-у, iOS-у, macOS-у и рачунару.\n• Побољшана је поузданост временских линија и медија, укључујући X обавештења, пагинацију Mastodon одељка „Откриј“, редослед поновних објава, Nostr профиле, уграђене RSS видео-снимке и величину iOS галерије."
+            "value" : "Верзија %@:\n• Картице профила се сада учитавају независно; X профили могу да прикажу поновне објаве, истакнуто и чланке када су доступни, уз ново искуство превлачења на iOS-у.\n• Додате су глобалне и опције по временској линији за скривање емоџи реакција, уз јасније, прошириве распореде реакција на Apple платформама.\n• Побољшан је iOS прегледач медија: затварање превлачењем нагоре или надоле, стабилнији прегледи и боље руковање високим сликама.\n• Побољшана је поузданост пријаве на Bluesky, враћено је учитавање FANBOX садржаја, а детаљи Misskey објава сада приказују цео разговор."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Lade till en valfri karusellayout för inlägg med flera medieobjekt, som kan ställas in globalt eller per tidslinje.\n• Lade till ämnestidslinjer från Utforska på X och automatiska länkförhandsvisningar för Bluesky-inlägg.\n• Galleriläget stöder nu inläggsåtgärder med långtryck eller högerklick på Android, iOS, macOS och dator.\n• Förbättrade tillförlitligheten för tidslinjer och media, inklusive X-aviseringar, sidindelning i Mastodon Utforska, ordningen på återpubliceringar, Nostr-profiler, inbäddade RSS-videor och storleken på iOS-galleriet."
+            "value" : "Version %@:\n• Profilflikar läses nu in oberoende av varandra. X-profiler kan visa återpubliceringar, höjdpunkter och artiklar när de är tillgängliga, med en ny svepbar upplevelse på iOS.\n• Lade till globala och tidslinjespecifika alternativ för att dölja emoji-reaktioner samt tydligare, expanderbara reaktionslayouter på Apple-plattformar.\n• Förbättrade medievisaren på iOS med svep uppåt eller nedåt för att stänga, stabilare förhandsvisningar och bättre hantering av höga bilder.\n• Förbättrade tillförlitligheten vid Bluesky-inloggning, återställde inläsning av FANBOX-innehåll och utökade Misskey-inläggsdetaljer så att hela konversationen visas."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sürüm %@:\n• Birden fazla medya öğesi içeren gönderiler için genel olarak veya zaman akışı başına yapılandırılabilen isteğe bağlı bir karusel düzeni eklendi.\n• X Keşfet konu zaman akışları ve Bluesky gönderileri için otomatik bağlantı önizlemeleri eklendi.\n• Galeri modu artık Android, iOS, macOS ve masaüstünde uzun basma veya sağ tıklamayla gönderi işlemlerini destekliyor.\n• X bildirimleri, Mastodon Keşfet sayfalaması, yeniden gönderi sıralaması, Nostr profilleri, gömülü RSS videoları ve iOS Galeri boyutlandırması dahil olmak üzere zaman akışı ve medya güvenilirliği iyileştirildi."
+            "value" : "Sürüm %@:\n• Profil sekmeleri artık birbirinden bağımsız yükleniyor; X profilleri, mevcut olduğunda Yeniden Gönderiler, Öne Çıkanlar ve Makaleleri gösterebiliyor ve iOS’ta yeni bir kaydırma deneyimi sunuyor.\n• Emoji tepkilerini gizlemek için genel ve zaman akışı başına seçenekler ile Apple platformlarında daha anlaşılır, genişletilebilir tepki düzenleri eklendi.\n• iOS medya görüntüleyici; yukarı veya aşağı kaydırarak kapatma, daha kararlı önizlemeler ve uzun görsellerin daha iyi işlenmesiyle iyileştirildi.\n• Bluesky oturum açma güvenilirliği iyileştirildi, FANBOX içeriğinin yüklenmesi düzeltildi ve Misskey gönderi ayrıntıları artık konuşmanın tamamını gösteriyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версія %@:\n• Додано необов’язкове карусельне компонування для дописів із кількома медіафайлами, яке можна налаштувати глобально або для кожної стрічки.\n• Додано тематичні стрічки «Огляд» у X та автоматичний попередній перегляд посилань у дописах Bluesky.\n• У режимі галереї тепер можна відкривати дії з дописом довгим натисканням або клацанням правою кнопкою на Android, iOS, macOS і комп’ютері.\n• Покращено надійність стрічок і медіа, зокрема сповіщень X, посторінкового завантаження «Огляду» в Mastodon, порядку репостів, профілів Nostr, вбудованих RSS-відео та розмірів галереї в iOS."
+            "value" : "Версія %@:\n• Вкладки профілю тепер завантажуються незалежно; у профілях X за наявності відображаються репости, вибране та статті, а в iOS з’явилася нова навігація свайпами.\n• Додано загальні й окремі для кожної стрічки налаштування приховування емодзі-реакцій, а на платформах Apple компонування реакцій стало зрозумілішим і розгортаним.\n• Покращено перегляд медіа в iOS: закриття свайпом угору або вниз, стабільніші попередні перегляди та краща підтримка високих зображень.\n• Підвищено надійність входу в Bluesky, відновлено завантаження вмісту FANBOX, а в деталях дописів Misskey тепер показується вся розмова."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phiên bản %@:\n• Đã thêm bố cục băng chuyền tùy chọn cho bài đăng có nhiều mục đa phương tiện, có thể cấu hình chung hoặc theo từng dòng thời gian.\n• Đã thêm dòng thời gian chủ đề Khám phá của X và bản xem trước liên kết tự động cho bài đăng Bluesky.\n• Chế độ Thư viện hiện hỗ trợ thao tác bài đăng bằng cách nhấn giữ hoặc nhấp chuột phải trên Android, iOS, macOS và máy tính.\n• Cải thiện độ ổn định của dòng thời gian và nội dung đa phương tiện, bao gồm thông báo X, phân trang Khám phá của Mastodon, thứ tự đăng lại, hồ sơ Nostr, video RSS nhúng và kích thước Thư viện trên iOS."
+            "value" : "Phiên bản %@:\n• Các thẻ hồ sơ giờ được tải độc lập; hồ sơ X có thể hiển thị Bài đăng lại, Nội dung nổi bật và Bài viết khi có, cùng trải nghiệm vuốt mới trên iOS.\n• Đã thêm tùy chọn chung và theo từng dòng thời gian để ẩn phản ứng emoji, với bố cục phản ứng rõ ràng hơn và có thể mở rộng trên các nền tảng Apple.\n• Cải thiện trình xem đa phương tiện trên iOS với thao tác vuốt lên hoặc xuống để đóng, bản xem trước ổn định hơn và khả năng xử lý ảnh dài tốt hơn.\n• Cải thiện độ ổn định khi đăng nhập Bluesky, khôi phục việc tải nội dung FANBOX và mở rộng chi tiết bài đăng Misskey để hiển thị toàn bộ cuộc trò chuyện."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 新增多媒体帖子的可选轮播布局，可全局设置或为每条时间线单独设置。\n• 新增 X 探索主题时间线和 Bluesky 帖子的自动链接预览。\n• 画廊模式现已支持在 Android、iOS、macOS 和桌面端通过长按或右键打开帖子操作。\n• 改进时间线和媒体稳定性，包括 X 通知、Mastodon 探索分页、转帖排序、Nostr 个人资料、RSS 视频嵌入和 iOS 画廊尺寸。"
+            "value" : "版本 %@：\n• 个人资料标签页现在可独立加载；X 个人资料会在可用时显示“转帖”“亮点”和“文章”，iOS 端还支持全新的滑动切换体验。\n• 新增全局及单条时间线隐藏 Emoji 回应的选项，并改进 Apple 平台的回应布局，内容更清晰且可展开查看更多。\n• 改进 iOS 媒体查看器：支持向上或向下滑动关闭，预览更稳定，并能更好地显示长图。\n• 提升 Bluesky 登录可靠性，恢复 FANBOX 内容加载，并让 Misskey 帖子详情显示完整对话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 新增多媒體貼文的可選輪播版面，可全域設定或為每條時間軸個別設定。\n• 新增 X 探索主題時間軸及 Bluesky 貼文的自動連結預覽。\n• 圖庫模式現在可在 Android、iOS、macOS 及桌面版透過長按或按右鍵開啟貼文操作。\n• 改善時間軸與媒體穩定性，包括 X 通知、Mastodon 探索分頁、轉貼排序、Nostr 個人檔案、RSS 影片嵌入及 iOS 圖庫尺寸。"
+            "value" : "版本 %@：\n• 個人檔案分頁現在可獨立載入；X 個人檔案會在可用時顯示「轉貼」、「亮點」和「文章」，iOS 端亦支援全新的滑動切換體驗。\n• 新增全域及個別時間軸隱藏 Emoji 回應的選項，並改善 Apple 平台的回應版面，內容更清晰且可展開查看更多。\n• 改善 iOS 媒體檢視器：支援向上或向下滑動關閉、預覽更穩定，並能更妥善地顯示長圖。\n• 提升 Bluesky 登入可靠性、恢復 FANBOX 內容載入，並讓 Misskey 貼文詳細資料顯示完整對話。"
           }
         }
       }

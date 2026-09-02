@@ -131,7 +131,7 @@ nucleus.application {
     }
     nativeDistributions {
         cleanupNativeLibs = true
-        enableAotCache = true
+        enableAotCache = false
         modules("jdk.localedata")
         homepage = "https://github.com/DimensionDev/Flare"
         // Higher compression level can cause laggy for linux AppImage

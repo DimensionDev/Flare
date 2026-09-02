@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.plus
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,11 +26,11 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -76,7 +74,6 @@ internal fun HomeSecondarySidebar(
 ) {
     val accounts = secondaryTabs.takeSuccess().orEmpty()
     val searchAccount = accounts.firstOrNull()?.accountType ?: AccountType.Guest
-    val expandedAccounts = remember { mutableStateMapOf<AccountType, Boolean>() }
     var query by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     val submitSearch = {
@@ -85,11 +82,20 @@ internal fun HomeSecondarySidebar(
         Unit
     }
     val contentPadding =
-        WindowInsets.systemBars
-            .union(WindowInsets.displayCutout)
+        WindowInsets.safeDrawing
             .only(WindowInsetsSides.End + WindowInsetsSides.Vertical)
             .asPaddingValues()
             .plus(PaddingValues(vertical = 16.dp))
+    val sidebarRoutes =
+        buildList<Triple<Int, ImageVector, Route>> {
+            add(Triple(R.string.draft_box_title, FontAwesomeIcons.Solid.PenToSquare, Route.DraftBox))
+            add(Triple(R.string.settings_rss_management_title, FontAwesomeIcons.Solid.SquareRss, Route.Rss.Sources))
+            add(Triple(R.string.settings_local_history_title, FontAwesomeIcons.Solid.ClockRotateLeft, Route.Settings.LocalHistory))
+            if (aiAgentEnabled) {
+                add(Triple(R.string.agent_history_title, FontAwesomeIcons.Solid.Robot, Route.Settings.AgentHistory))
+            }
+            add(Triple(R.string.settings_title, FontAwesomeIcons.Solid.Gear, Route.Settings.Main))
+        }
 
     LazyColumn(
         modifier = modifier.fillMaxHeight(),
@@ -136,35 +142,18 @@ internal fun HomeSecondarySidebar(
             }
         }
 
-        accounts.forEachIndexed { accountIndex, account ->
-            val expanded = expandedAccounts[account.accountType] == true
+        accounts.forEach { account ->
             val tabs =
                 account.tabs.mapNotNull { tab ->
                     getDirection(tab)?.let { route -> tab to route }
                 }
-            val joinsPrevious =
-                accountIndex > 0 &&
-                    !expanded &&
-                    expandedAccounts[accounts[accountIndex - 1].accountType] != true
-            val joinsNext =
-                accountIndex < accounts.lastIndex &&
-                    !expanded &&
-                    expandedAccounts[accounts[accountIndex + 1].accountType] != true
             item(key = "account-${account.accountType}") {
-                val headerShapes =
-                    when {
-                        joinsPrevious && joinsNext -> ListItemDefaults.segmentedShapes2(1, 3)
-                        joinsPrevious -> ListItemDefaults.segmentedShapes2(1, 2)
-                        joinsNext -> ListItemDefaults.segmentedShapes2(0, 2)
-                        else -> ListItemDefaults.segmentedShapes2(0, 1)
-                    }
+                var expanded by remember(account.accountType) { mutableStateOf(false) }
                 Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                     SegmentedListItem(
                         checked = expanded,
-                        onCheckedChange = {
-                            expandedAccounts[account.accountType] = it
-                        },
-                        shapes = headerShapes,
+                        onCheckedChange = { expanded = it },
+                        shapes = ListItemDefaults.segmentedShapes2(0, 1),
                         content = {
                             Column {
                                 account.user.takeSuccess()?.let { user ->
@@ -228,47 +217,15 @@ internal fun HomeSecondarySidebar(
         item {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }
-        item {
-            SidebarItem(
-                label = stringResource(R.string.draft_box_title),
-                selected = currentRoute is Route.DraftBox,
-                icon = FontAwesomeIcons.Solid.PenToSquare,
-                onClick = { navigate(Route.DraftBox) },
-            )
-        }
-        item {
-            SidebarItem(
-                label = stringResource(R.string.settings_rss_management_title),
-                selected = currentRoute is Route.Rss.Sources,
-                icon = FontAwesomeIcons.Solid.SquareRss,
-                onClick = { navigate(Route.Rss.Sources) },
-            )
-        }
-        item {
-            SidebarItem(
-                label = stringResource(R.string.settings_local_history_title),
-                selected = currentRoute is Route.Settings.LocalHistory,
-                icon = FontAwesomeIcons.Solid.ClockRotateLeft,
-                onClick = { navigate(Route.Settings.LocalHistory) },
-            )
-        }
-        if (aiAgentEnabled) {
-            item {
+        sidebarRoutes.forEach { (label, icon, route) ->
+            item(key = route) {
                 SidebarItem(
-                    label = stringResource(R.string.agent_history_title),
-                    selected = currentRoute is Route.Settings.AgentHistory,
-                    icon = FontAwesomeIcons.Solid.Robot,
-                    onClick = { navigate(Route.Settings.AgentHistory) },
+                    label = stringResource(label),
+                    selected = currentRoute == route,
+                    icon = icon,
+                    onClick = { navigate(route) },
                 )
             }
-        }
-        item {
-            SidebarItem(
-                label = stringResource(R.string.settings_title),
-                selected = currentRoute is Route.Settings.Main,
-                icon = FontAwesomeIcons.Solid.Gear,
-                onClick = { navigate(Route.Settings.Main) },
-            )
         }
     }
 }
@@ -277,7 +234,7 @@ internal fun HomeSecondarySidebar(
 private fun SidebarItem(
     label: String,
     selected: Boolean,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit,
 ) {
     NavigationDrawerItem(

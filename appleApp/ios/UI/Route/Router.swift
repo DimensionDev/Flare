@@ -10,7 +10,7 @@ struct Router<Root: View>: View {
     @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
     @State private var ownedBackStack: [Route] = []
     private let externalBackStack: Binding<[Route]>?
-    private let navigator: RouterNavigator?
+    private let routeRequest: Binding<Route?>?
     @State private var sheet: Route? = nil
     @State private var cover: Route? = nil
     @State private var alertRoute: Route? = nil
@@ -19,12 +19,12 @@ struct Router<Root: View>: View {
     
     init(
         backStack: Binding<[Route]>? = nil,
-        navigator: RouterNavigator? = nil,
+        routeRequest: Binding<Route?>? = nil,
         @ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root
     ) {
         self.root = root
         self.externalBackStack = backStack
-        self.navigator = navigator
+        self.routeRequest = routeRequest
         let handler = DeepLinkHandler()
         self._deepLinkHandler = .init(wrappedValue: handler)
         self._deepLinkPresenter = .init(wrappedValue: .init(presenter: DeepLinkPresenter(onRoute: { [weak handler] deeplinkRoute in
@@ -40,10 +40,6 @@ struct Router<Root: View>: View {
         externalBackStack ?? $ownedBackStack
     }
 
-    private var navigationRequests: AnyPublisher<Route, Never> {
-        navigator?.requests.eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
-    }
-    
     var body: some View {
         NavigationStack(path: backStack) {
             root({ route in
@@ -103,8 +99,10 @@ struct Router<Root: View>: View {
             let targetURL = url.openInFlareTargetURL ?? url
             deepLinkPresenter.state.handle(url: targetURL.absoluteString)
         }
-        .onReceive(navigationRequests) { route in
+        .onChange(of: routeRequest?.wrappedValue) { _, route in
+            guard let route else { return }
             navigate(route: route)
+            routeRequest?.wrappedValue = nil
         }
         .onAppear {
             deepLinkHandler.onRoute = { route in
@@ -170,15 +168,6 @@ struct Router<Root: View>: View {
         default:
             return false
         }
-    }
-}
-
-@MainActor
-final class RouterNavigator: ObservableObject {
-    fileprivate let requests = PassthroughSubject<Route, Never>()
-
-    func navigate(_ route: Route) {
-        requests.send(route)
     }
 }
 

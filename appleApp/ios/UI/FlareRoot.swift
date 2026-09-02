@@ -23,19 +23,6 @@ struct FlareRoot: View {
     @StateObject private var navigationModel = HomeNavigationModel()
     @State var selectedTab: String?
     @State private var reloginRoute: Route?
-
-    private var singleColumnSecondaryRoutes: [Route] {
-        var routes: [Route] = []
-        if case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) {
-            routes += data.data.cast(SecondaryTabsPresenter.Item.self).flatMap { item in
-                item.tabs.compactMap { route(for: $0) }
-            }
-        }
-        routes += SecondarySidebarStaticRoute.allCases
-            .filter { $0 != .agentHistory || aiAgentEnabledPresenter.state.enabled }
-            .map(\.route)
-        return routes
-    }
     
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
@@ -46,9 +33,7 @@ struct FlareRoot: View {
                         tabs: items,
                         selectedTab: $selectedTab,
                         notificationCount: Int(notificationBadgePresenter.state.count),
-                        navigationModel: navigationModel,
-                        secondaryRoutes: singleColumnSecondaryRoutes,
-                        usesTabView: true
+                        navigationModel: navigationModel
                     )
                 } else {
                     TabView(selection: $selectedTab) {
@@ -180,9 +165,7 @@ struct BackportFlareRoot: View {
                         tabs: items,
                         selectedTab: $selectedTab,
                         notificationCount: Int(notificationBadgePresenter.state.count),
-                        navigationModel: navigationModel,
-                        secondaryRoutes: [],
-                        usesTabView: false
+                        navigationModel: navigationModel
                     )
                 } else {
                     TabView(selection: $selectedTab) {
@@ -321,7 +304,7 @@ private struct SidebarRouteScreen: View {
     }
 }
 
-private enum SecondarySidebarStaticRoute: CaseIterable {
+enum SecondarySidebarStaticRoute: CaseIterable {
     case drafts
     case rssManagement
     case localHistory
@@ -393,7 +376,7 @@ private enum SecondarySidebarStaticRoute: CaseIterable {
 private final class HomeNavigationModel: ObservableObject {
     @Published private var backStacks: [Route: [Route]] = [:]
     @Published private(set) var selectedTopLevelRoute: Route?
-    let navigator = RouterNavigator()
+    @Published var routeRequest: Route?
 
     func binding(for route: Route) -> Binding<[Route]> {
         Binding(
@@ -412,16 +395,27 @@ private struct SingleColumnFlareRoot: View {
     @Binding var selectedTab: String?
     let notificationCount: Int
     @ObservedObject var navigationModel: HomeNavigationModel
-    let secondaryRoutes: [Route]
-    let usesTabView: Bool
+    @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
+    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @Environment(\.globalAppearance) private var globalAppearance
 
     private var activeTab: HomeTabsPresenterStateHomeTabs? {
         tabs.first { homeTabKey($0) == selectedTab } ?? tabs.first
     }
 
-    private var activeRoute: Route? {
-        navigationModel.selectedTopLevelRoute ?? activeTab.map(homeTabRoute)
+    private var accounts: [SecondaryTabsPresenter.Item] {
+        guard case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) else {
+            return []
+        }
+        return data.data.cast(SecondaryTabsPresenter.Item.self)
+    }
+
+    private var secondaryRoutes: [Route] {
+        accounts.flatMap { item in
+            item.tabs.compactMap { route(for: $0) }
+        } + SecondarySidebarStaticRoute.allCases
+            .filter { $0 != .agentHistory || aiAgentEnabledPresenter.state.enabled }
+            .map(\.route)
     }
 
     var body: some View {
@@ -474,7 +468,7 @@ private struct SingleColumnFlareRoot: View {
                     Spacer(minLength: 0)
                     if !showRightSidebar {
                         Button {
-                            navigationModel.navigator.navigate(.secondaryMenu)
+                            navigationModel.routeRequest = .secondaryMenu
                         } label: {
                             VStack(spacing: 4) {
                                 Image(fontAwesome: .ellipsis)
@@ -499,35 +493,22 @@ private struct SingleColumnFlareRoot: View {
                 Divider()
 
                 HStack(spacing: 0) {
-                    if #available(iOS 18.0, *), usesTabView {
-                        SingleColumnTopLevelTabView(
-                            tabs: tabs,
-                            selectedTab: $selectedTab,
-                            secondaryRoutes: secondaryRoutes,
-                            showRightSidebar: showRightSidebar,
-                            navigationModel: navigationModel
-                        )
-                    } else if let activeRoute {
-                        Router(
-                            backStack: navigationModel.binding(for: activeRoute),
-                            navigator: navigationModel.navigator
-                        ) { onNavigate in
-                            activeRoute.view(
-                                onNavigate: onNavigate,
-                                goBack: {},
-                                showsSecondaryMenu: !showRightSidebar
-                            )
-                        }
-                        .environment(\.horizontalSizeClass, .compact)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
+                    SingleColumnTopLevelTabView(
+                        tabs: tabs,
+                        selectedTab: $selectedTab,
+                        secondaryRoutes: secondaryRoutes,
+                        showRightSidebar: showRightSidebar,
+                        navigationModel: navigationModel
+                    )
 
                     if showRightSidebar {
                         Divider()
-                        SingleColumnSecondarySidebar { route in
-                            navigationModel.selectTopLevel(route)
-                        }
-                            .frame(width: 320)
+                        SingleColumnSecondarySidebar(
+                            accounts: accounts,
+                            aiAgentEnabled: aiAgentEnabledPresenter.state.enabled,
+                            navigate: { navigationModel.selectTopLevel($0) }
+                        )
+                        .frame(width: 320)
                     }
                 }
             }
@@ -540,7 +521,6 @@ private struct SingleColumnFlareRoot: View {
     }
 }
 
-@available(iOS 18.0, *)
 private struct SingleColumnTopLevelTabView: View {
     let tabs: [HomeTabsPresenterStateHomeTabs]
     @Binding var selectedTab: String?
@@ -583,29 +563,32 @@ private struct SingleColumnTopLevelTabView: View {
         TabView(selection: selection) {
             ForEach(tabs, id: \.name) { tab in
                 let route = homeTabRoute(tab)
-                Tab(value: route) {
-                    topLevelContent(route)
-                } label: {
-                    Label {
-                        Text(homeTabTitle(tab))
-                    } icon: {
-                        Image(fontAwesome: homeTabIcon(tab))
+                topLevelContent(route)
+                    .tabItem {
+                        Label {
+                            Text(homeTabTitle(tab))
+                        } icon: {
+                            Image(fontAwesome: homeTabIcon(tab))
+                        }
                     }
-                }
+                    .tag(Optional(route))
             }
 
             ForEach(availableSecondaryRoutes, id: \.self) { route in
-                Tab(value: route) {
-                    topLevelContent(route)
-                } label: {
-                    Label("more", systemImage: "ellipsis")
-                }
-                .tabPlacement(.sidebarOnly)
+                topLevelContent(route)
+                    .tabItem {
+                        Label("more", systemImage: "ellipsis")
+                    }
+                    .tag(Optional(route))
             }
         }
-        .tabViewStyle(.tabBarOnly)
-        .introspect(.tabView, on: .iOS(.v18, .v26, .v27)) { tabBarController in
-            tabBarController.setTabBarHidden(true, animated: false)
+        .toolbar(.hidden, for: .tabBar)
+        .introspect(.tabView, on: .iOS(.v17, .v18, .v26, .v27)) { tabBarController in
+            if #available(iOS 18.0, *) {
+                tabBarController.setTabBarHidden(true, animated: false)
+            } else {
+                tabBarController.tabBar.isHidden = true
+            }
         }
     }
 
@@ -613,7 +596,7 @@ private struct SingleColumnTopLevelTabView: View {
     private func topLevelContent(_ route: Route) -> some View {
         Router(
             backStack: navigationModel.binding(for: route),
-            navigator: activeRoute == route ? navigationModel.navigator : nil
+            routeRequest: activeRoute == route ? $navigationModel.routeRequest : nil
         ) { onNavigate in
             route.view(
                 onNavigate: onNavigate,
@@ -627,18 +610,11 @@ private struct SingleColumnTopLevelTabView: View {
 }
 
 private struct SingleColumnSecondarySidebar: View {
+    let accounts: [SecondaryTabsPresenter.Item]
+    let aiAgentEnabled: Bool
     let navigate: (Route) -> Void
-    @StateObject private var secondaryTabsPresenter = KotlinPresenter(presenter: SecondaryTabsPresenter())
     @StateObject private var loggedInPresenter = KotlinPresenter(presenter: LoggedInPresenter())
-    @StateObject private var aiAgentEnabledPresenter = KotlinPresenter(presenter: AiAgentEnabledPresenter())
     @State private var searchQuery = ""
-
-    private var accounts: [SecondaryTabsPresenter.Item] {
-        guard case .success(let data) = onEnum(of: secondaryTabsPresenter.state.items) else {
-            return []
-        }
-        return data.data.cast(SecondaryTabsPresenter.Item.self)
-    }
 
     private var searchAccount: AccountType {
         accounts.first?.accountType ?? AccountType.Guest.shared
@@ -667,33 +643,14 @@ private struct SingleColumnSecondarySidebar: View {
                 if !accounts.isEmpty {
                     Section("account_management_title") {
                         ForEach(Array(accounts.enumerated()), id: \.offset) { _, account in
-                            DisclosureGroup {
-                                ForEach(account.tabs, id: \.self) { tab in
-                                    if let route = route(for: tab) {
-                                        Button {
-                                            navigate(route)
-                                        } label: {
-                                            Label {
-                                                Text(tab.title.text)
-                                            } icon: {
-                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
-                                            }
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                            } label: {
-                                StateView(state: account.user) { user in
-                                    UserCompatView(data: user)
-                                }
-                            }
+                            SecondaryAccountDisclosure(account: account, onTabSelected: navigate)
                         }
                     }
                 }
 
                 Section {
                     ForEach(SecondarySidebarStaticRoute.allCases.filter { route in
-                        route != .agentHistory || aiAgentEnabledPresenter.state.enabled
+                        route != .agentHistory || aiAgentEnabled
                     }, id: \.self) { item in
                         Button {
                             navigate(item.route)

@@ -32,11 +32,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,11 +60,8 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
-import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.LocalWindowSizeClass
 import dev.dimension.flare.ui.component.platform.WindowSizeClass
-import dev.dimension.flare.ui.component.toImageVector
-import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -89,8 +84,6 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Badge
 import io.github.composefluent.component.Button
-import io.github.composefluent.component.CardExpanderItem
-import io.github.composefluent.component.Expander
 import io.github.composefluent.component.FlyoutContainer
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.Icon
@@ -182,65 +175,9 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                                                             ).verticalScroll(scrollableState),
                                                 ) {
                                                     state.items.onSuccess { items ->
-                                                        items.forEach { item ->
-                                                            item.user.onSuccess { user ->
-                                                                var isSubMenuExpanded by remember {
-                                                                    mutableStateOf(
-                                                                        false,
-                                                                    )
-                                                                }
-                                                                Expander(
-                                                                    expanded = isSubMenuExpanded,
-                                                                    onExpandedChanged = {
-                                                                        isSubMenuExpanded = it
-                                                                    },
-                                                                    heading = {
-                                                                        RichText(
-                                                                            text = user.name,
-                                                                            maxLines = 1,
-                                                                        )
-                                                                    },
-                                                                    caption = {
-                                                                        Text(
-                                                                            text = user.handle.canonical,
-                                                                            maxLines = 1,
-                                                                        )
-                                                                    },
-                                                                    icon = {
-                                                                        AvatarComponent(
-                                                                            data = user.avatar,
-                                                                            modifier =
-                                                                                Modifier
-                                                                                    .aspectRatio(1f),
-                                                                            size = 24.dp,
-                                                                        )
-                                                                    },
-                                                                ) {
-                                                                    item.tabs.forEach { shortcut ->
-                                                                        CardExpanderItem(
-                                                                            onClick = {
-                                                                                state.navigate(shortcut)
-                                                                                isFlyoutVisible = false
-                                                                            },
-                                                                            heading = {
-                                                                                dev.dimension.flare.ui.component.Text(
-                                                                                    shortcut.title.asText(),
-                                                                                )
-                                                                            },
-                                                                            icon = {
-                                                                                FAIcon(
-                                                                                    imageVector = shortcut.icon.toImageVector(),
-                                                                                    contentDescription = null,
-                                                                                    modifier =
-                                                                                        Modifier.size(
-                                                                                            16.dp,
-                                                                                        ),
-                                                                                )
-                                                                            },
-                                                                        )
-                                                                    }
-                                                                }
-                                                            }
+                                                        AccountShortcutList(items) { route ->
+                                                            state.navigate(route)
+                                                            isFlyoutVisible = false
                                                         }
                                                     }
                                                 }

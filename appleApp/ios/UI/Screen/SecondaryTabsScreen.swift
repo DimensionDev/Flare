@@ -36,26 +36,7 @@ struct SecondaryTabsScreen: View {
                 if !items.isEmpty {
                     Section {
                         ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                            DisclosureGroup {
-                                ForEach(item.tabs, id: \.self) { tab in
-                                    if let route = route(for: tab) {
-                                        Button {
-                                            onTabSelected(route)
-                                        } label: {
-                                            Label {
-                                                Text(tab.title.text)
-                                            } icon: {
-                                                Image(fontAwesome: tab.icon.fontAwesomeIcon)
-                                            }
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                            } label: {
-                                StateView(state: item.user) { user in
-                                    UserCompatView(data: user)
-                                }
-                            }
+                            SecondaryAccountDisclosure(account: item, onTabSelected: onTabSelected)
                         }
                     } header: {
                         Text("account_management_title")
@@ -64,43 +45,45 @@ struct SecondaryTabsScreen: View {
             }
 
             Section {
-                NavigationLink(value: Route.draftBox) {
-                    Label {
-                        Text("Drafts")
-                    } icon: {
-                        Image(fontAwesome: .penToSquare)
-                    }
-                }
-                NavigationLink(value: Route.rssManagement) {
-                    Label {
-                        Text("settings_rss_management_title")
-                    } icon: {
-                        Image(fontAwesome: .squareRss)
-                    }
-                }
-                NavigationLink(value: Route.localHostory) {
-                    Label {
-                        Text("local_history_title")
-                    } icon: {
-                        Image(fontAwesome: .clockRotateLeft)
-                    }
-                }
-                if aiAgentEnabledPresenter.state.enabled {
-                    NavigationLink(value: Route.agentHistory) {
+                ForEach(SecondarySidebarStaticRoute.allCases.filter { route in
+                    route != .agentHistory || aiAgentEnabledPresenter.state.enabled
+                }, id: \.self) { item in
+                    NavigationLink(value: item.route) {
                         Label {
-                            Text("agent_history_title")
+                            Text(item.title)
                         } icon: {
-                            Image(fontAwesome: .robot)
+                            Image(fontAwesome: item.icon)
                         }
                     }
                 }
-                NavigationLink(value: Route.settings) {
-                    Label {
-                        Text("settings_title")
-                    } icon: {
-                        Image(fontAwesome: .gear)
+            }
+        }
+    }
+}
+
+struct SecondaryAccountDisclosure: View {
+    let account: SecondaryTabsPresenter.Item
+    let onTabSelected: (Route) -> Void
+
+    var body: some View {
+        DisclosureGroup {
+            ForEach(account.tabs, id: \.self) { tab in
+                if let route = route(for: tab) {
+                    Button {
+                        onTabSelected(route)
+                    } label: {
+                        Label {
+                            Text(tab.title.text)
+                        } icon: {
+                            Image(fontAwesome: tab.icon.fontAwesomeIcon)
+                        }
                     }
+                    .buttonStyle(.plain)
                 }
+            }
+        } label: {
+            StateView(state: account.user) { user in
+                UserCompatView(data: user)
             }
         }
     }

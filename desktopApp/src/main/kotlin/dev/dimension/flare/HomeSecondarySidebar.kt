@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -44,6 +45,7 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -66,6 +68,16 @@ internal fun HomeSecondarySidebar(
         )
     }
     val scrollState = rememberScrollState()
+    val sidebarRoutes =
+        buildList<Triple<StringResource, ImageVector, Route>> {
+            add(Triple(Res.string.settings_draft_box_title, FontAwesomeIcons.Solid.PenToSquare, Route.DraftBox))
+            add(Triple(Res.string.settings_rss_management_title, FontAwesomeIcons.Solid.SquareRss, Route.RssList))
+            add(Triple(Res.string.settings_local_history_title, FontAwesomeIcons.Solid.ClockRotateLeft, Route.LocalCache))
+            if (aiAgentEnabled) {
+                add(Triple(Res.string.settings_agent_history_title, FontAwesomeIcons.Solid.Robot, Route.AgentHistory))
+            }
+            add(Triple(Res.string.home_settings, FontAwesomeIcons.Solid.Gear, Route.Settings))
+        }
 
     FlareScrollBar(scrollState) {
         Column(
@@ -105,69 +117,64 @@ internal fun HomeSecondarySidebar(
                 )
             }
 
-            accounts.forEach { account ->
-                var expanded by remember(account.accountType) { mutableStateOf(true) }
-                account.user.takeSuccess()?.let { user ->
-                    Expander(
-                        expanded = expanded,
-                        onExpandedChanged = { expanded = it },
-                        heading = {
-                            RichText(text = user.name, maxLines = 1)
-                        },
-                        caption = {
-                            Text(text = user.handle.canonical, maxLines = 1)
-                        },
-                        icon = {
-                            AvatarComponent(data = user.avatar, size = 24.dp)
-                        },
-                    ) {
-                        account.tabs.forEach { shortcut ->
-                            val route = getDirection(shortcut) ?: return@forEach
-                            CardExpanderItem(
-                                onClick = { navigate(route) },
-                                heading = {
-                                    dev.dimension.flare.ui.component
-                                        .Text(shortcut.title.asText())
-                                },
-                                icon = {
-                                    FAIcon(
-                                        imageVector = shortcut.icon.toImageVector(),
-                                        contentDescription = null,
-                                    )
-                                },
-                            )
-                        }
+            AccountShortcutList(
+                accounts = accounts,
+                initiallyExpanded = true,
+                navigate = navigate,
+            )
+
+            sidebarRoutes.forEach { (label, icon, route) ->
+                SidebarItem(
+                    label = stringResource(label),
+                    icon = icon,
+                    onClick = { navigate(route) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun AccountShortcutList(
+    accounts: List<SecondaryTabsPresenter.Item>,
+    initiallyExpanded: Boolean = false,
+    navigate: (Route) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        accounts.forEach { account ->
+            var expanded by remember(account.accountType) { mutableStateOf(initiallyExpanded) }
+            account.user.takeSuccess()?.let { user ->
+                Expander(
+                    expanded = expanded,
+                    onExpandedChanged = { expanded = it },
+                    heading = {
+                        RichText(text = user.name, maxLines = 1)
+                    },
+                    caption = {
+                        Text(text = user.handle.canonical, maxLines = 1)
+                    },
+                    icon = {
+                        AvatarComponent(data = user.avatar, size = 24.dp)
+                    },
+                ) {
+                    account.tabs.forEach { shortcut ->
+                        val route = getDirection(shortcut) ?: return@forEach
+                        CardExpanderItem(
+                            onClick = { navigate(route) },
+                            heading = {
+                                dev.dimension.flare.ui.component
+                                    .Text(shortcut.title.asText())
+                            },
+                            icon = {
+                                FAIcon(
+                                    imageVector = shortcut.icon.toImageVector(),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
                     }
                 }
             }
-
-            SidebarItem(
-                label = stringResource(Res.string.settings_draft_box_title),
-                icon = FontAwesomeIcons.Solid.PenToSquare,
-                onClick = { navigate(Route.DraftBox) },
-            )
-            SidebarItem(
-                label = stringResource(Res.string.settings_rss_management_title),
-                icon = FontAwesomeIcons.Solid.SquareRss,
-                onClick = { navigate(Route.RssList) },
-            )
-            SidebarItem(
-                label = stringResource(Res.string.settings_local_history_title),
-                icon = FontAwesomeIcons.Solid.ClockRotateLeft,
-                onClick = { navigate(Route.LocalCache) },
-            )
-            if (aiAgentEnabled) {
-                SidebarItem(
-                    label = stringResource(Res.string.settings_agent_history_title),
-                    icon = FontAwesomeIcons.Solid.Robot,
-                    onClick = { navigate(Route.AgentHistory) },
-                )
-            }
-            SidebarItem(
-                label = stringResource(Res.string.home_settings),
-                icon = FontAwesomeIcons.Solid.Gear,
-                onClick = { navigate(Route.Settings) },
-            )
         }
     }
 }
@@ -175,7 +182,7 @@ internal fun HomeSecondarySidebar(
 @Composable
 private fun SidebarItem(
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit,
 ) {
     CardExpanderItem(

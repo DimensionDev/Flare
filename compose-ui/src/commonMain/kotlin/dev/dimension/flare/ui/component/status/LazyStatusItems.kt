@@ -152,13 +152,12 @@ public fun LazyStaggeredGridScope.statusLoadingPlaceholders() {
 
 @Composable
 private fun TimelineAdaptiveCard(
-    modifier: Modifier = Modifier,
     index: Int,
     totalCount: Int,
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
         AdaptiveCard(

@@ -32,9 +32,15 @@ import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.compose_image_no_alt
+import dev.dimension.flare.compose_notification_error
+import dev.dimension.flare.compose_notification_progress
+import dev.dimension.flare.compose_video_no_alt
 import dev.dimension.flare.delete
+import dev.dimension.flare.draft_box_attachment_no_description
 import dev.dimension.flare.draft_box_edit
 import dev.dimension.flare.draft_box_empty
+import dev.dimension.flare.draft_box_posting_account
 import dev.dimension.flare.draft_box_retry
 import dev.dimension.flare.draft_box_send
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -141,20 +147,25 @@ private fun DraftBoxCard(
                         AvatarComponent(
                             data = account.avatar,
                             size = 22.dp,
+                            contentDescription =
+                                stringResource(
+                                    Res.string.draft_box_posting_account,
+                                    account.account.accountKey.toString(),
+                                ),
                         )
                     }
                 }
                 if (item.status == UiDraftStatus.FAILED) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.compose_notification_error),
                         tint = FluentTheme.colors.system.critical,
                         modifier = Modifier.align(Alignment.TopEnd),
                     )
                 } else if (item.status == UiDraftStatus.SENDING) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.ArrowUpFromBracket,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.compose_notification_progress),
                         tint = FluentTheme.colors.system.success,
                         modifier =
                             Modifier
@@ -187,11 +198,22 @@ private fun DraftBoxCard(
             if (item.medias.isNotEmpty()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item.medias.take(4).forEach { media ->
+                        val mediaDescription =
+                            media.altText
+                                ?.takeIf { it.isNotBlank() }
+                                ?: when (media.type) {
+                                    UiDraftMediaType.IMAGE -> stringResource(Res.string.compose_image_no_alt)
+                                    UiDraftMediaType.VIDEO -> stringResource(Res.string.compose_video_no_alt)
+                                    UiDraftMediaType.OTHER ->
+                                        media.fileName
+                                            ?.takeIf { it.isNotBlank() }
+                                            ?: stringResource(Res.string.draft_box_attachment_no_description)
+                                }
                         when (media.type) {
                             UiDraftMediaType.IMAGE -> {
                                 NetworkImage(
                                     model = media.cachePath,
-                                    contentDescription = null,
+                                    contentDescription = mediaDescription,
                                     modifier = Modifier.size(60.dp),
                                     contentScale = ContentScale.Crop,
                                 )
@@ -213,7 +235,7 @@ private fun DraftBoxCard(
                                             } else {
                                                 FontAwesomeIcons.Solid.Pen
                                             },
-                                        contentDescription = null,
+                                        contentDescription = mediaDescription,
                                         modifier = Modifier.align(Alignment.Center),
                                     )
                                 }

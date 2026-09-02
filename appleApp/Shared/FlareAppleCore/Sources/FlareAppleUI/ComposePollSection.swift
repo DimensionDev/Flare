@@ -202,6 +202,7 @@ public struct ComposePollSection: View {
                 } label: {
                     Image(fontAwesome: .plus)
                 }
+                .accessibilityLabel(Text("compose_add_poll_option", bundle: FlareAppleUILocalization.bundle))
                 .disabled(!viewModel.canAdd(maxChoices: maxChoices))
             }
 
@@ -220,6 +221,7 @@ public struct ComposePollSection: View {
                     } label: {
                         Image(fontAwesome: .deleteLeft)
                     }
+                    .accessibilityLabel(Text("compose_remove_poll_option", bundle: FlareAppleUILocalization.bundle))
                     .disabled(viewModel.choices.count <= ComposePollViewModel.minimumChoiceCount)
                 }
             }

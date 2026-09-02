@@ -139,6 +139,7 @@ struct EditListScreen: View {
                 } label: {
                     Image(fontAwesome: .xmark)
                 }
+                .accessibilityLabel(Text("Cancel"))
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {

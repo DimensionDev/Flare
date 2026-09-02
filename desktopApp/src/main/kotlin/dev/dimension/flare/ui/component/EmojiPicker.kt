@@ -24,6 +24,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.CaretUp
 import dev.dimension.flare.Res
+import dev.dimension.flare.collapsed
+import dev.dimension.flare.expanded
 import dev.dimension.flare.emoji_picker_recent
 import dev.dimension.flare.emoji_picker_search
 import dev.dimension.flare.model.AccountType
@@ -141,7 +143,14 @@ internal fun EmojiPicker(
                                             } else {
                                                 FontAwesomeIcons.Solid.CaretDown
                                             },
-                                            contentDescription = null,
+                                            contentDescription =
+                                                stringResource(
+                                                    if (expandedCategory.contains(category)) {
+                                                        Res.string.expanded
+                                                    } else {
+                                                        Res.string.collapsed
+                                                    },
+                                                ),
                                         )
                                     },
                                     modifier =

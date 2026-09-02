@@ -727,7 +727,14 @@ private fun GalleryMetadataItem(
     ) {
         FAIcon(
             imageVector = matrix.icon.toImageVector(),
-            contentDescription = null,
+            contentDescription =
+                stringResource(
+                    when (matrix.icon) {
+                        UiIcon.Eye -> R.string.gallery_views
+                        UiIcon.Heart -> R.string.gallery_bookmarks
+                        else -> R.string.gallery_engagement
+                    },
+                ),
             tint = color,
             modifier = Modifier.height(textStyle.fontSize.value.dp + 2.dp),
         )

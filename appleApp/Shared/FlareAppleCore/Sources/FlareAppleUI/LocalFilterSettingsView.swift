@@ -58,6 +58,7 @@ public struct LocalFilterSettingsView: View {
                 } label: {
                     Image(fontAwesome: .plus)
                 }
+                .accessibilityLabel(Text("add_filter", bundle: FlareAppleUILocalization.bundle))
             }
         }
         #endif

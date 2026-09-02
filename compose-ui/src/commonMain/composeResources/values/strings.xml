@@ -12,6 +12,13 @@
     <string name="profile_open_user">Open profile for %1$s</string>
     <string name="profile_picture">Profile picture for %1$s</string>
     <string name="profile_banner">Profile banner for %1$s</string>
+    <string name="profile_mark_verified">Verified profile</string>
+    <string name="profile_mark_cat">Cat account</string>
+    <string name="profile_mark_bot">Bot account</string>
+    <string name="profile_mark_locked">Locked profile</string>
+    <string name="profile_field_location">Location</string>
+    <string name="profile_field_website">Website</string>
+    <string name="profile_field_verified_link">Verified link</string>
 
     <string name="profile_header_button_follow">Follow</string>
     <string name="profile_header_button_request_follow">Request follow</string>
@@ -99,6 +106,8 @@
     <string name="media_view_alt_text">View alternative text</string>
     <string name="media_play_audio">Play audio</string>
     <string name="media_pause_audio">Pause audio</string>
+    <string name="media_play_video">Play video</string>
+    <string name="media_video_error">Video failed to load</string>
     <string name="media_audio_playback_position">Audio playback position</string>
     <string name="media_menu_download">Download</string>
     <string name="media_menu_download_all">Download all</string>
@@ -139,6 +148,7 @@
     <string name="favourite">Favorite</string>
     <string name="unfavourite">Unfavorite</string>
     <string name="more">More</string>
+    <string name="status_platform">Platform: %1$s</string>
     <string name="quote">Quote</string>
     <string name="reaction_add">Add reaction</string>
     <string name="reaction_remove">Remove reaction</string>
@@ -459,6 +469,8 @@
     <string name="tab_settings_drag">Drag</string>
     <string name="tab_settings_edit">Edit</string>
     <string name="tab_settings_remove">Remove</string>
+    <string name="feed_subscribe">Subscribe to feed</string>
+    <string name="feed_unsubscribe">Unsubscribe from feed</string>
     <string name="tab_settings_default">Default</string>
     <string name="tab_settings_list">List</string>
     <string name="tab_settings_feed">Feeds</string>
@@ -484,6 +496,11 @@
     <string name="service_select_welcome_message">Enter a server to get started.</string>
     <string name="service_select_welcome_hint">Flare supports Mastodon, Misskey, Bluesky, Nostr, and X.</string>
     <string name="service_select_welcome_list_hint">Or choose from these servers</string>
+    <string name="service_select_search">Search for server</string>
+    <string name="service_select_clear">Clear server</string>
+    <string name="service_select_detected_platform">Detected platform: %1$s</string>
+    <string name="service_select_unknown_platform">Unknown platform</string>
+    <string name="service_select_detecting_platform">Detecting platform</string>
     <string name="bluesky_login_username_hint">Username</string>
     <string name="bluesky_login_password_hint">Password</string>
     <string name="bluesky_login_auth_factor_token_hint">2FA token</string>

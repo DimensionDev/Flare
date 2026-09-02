@@ -396,6 +396,9 @@ struct ComposeScreen: View {
             .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
+        .accessibilityValue(
+            Text(isSelected ? String(localized: "selected") : String(localized: "not_selected"))
+        )
     }
 
     private func successProfiles<T>(from state: UiState<T>) -> [UiProfile] {

@@ -23,12 +23,14 @@ struct EditListMemberScreen: View {
                             } label: {
                                 Image(fontAwesome: .trash)
                             }
+                            .accessibilityLabel(Text("remove_member"))
                         } else {
                             Button {
                                 presenter.state.addMember(userKey: data.key)
                             } label: {
                                 Image(fontAwesome: .plus)
                             }
+                            .accessibilityLabel(Text("add_member"))
                         }
                     } onClicked: {
                         
@@ -51,6 +53,7 @@ struct EditListMemberScreen: View {
                 } label: {
                     Image(fontAwesome: .xmark)
                 }
+                .accessibilityLabel(Text("Cancel"))
             }
         }
         .navigationTitle("list_edit_member_title")

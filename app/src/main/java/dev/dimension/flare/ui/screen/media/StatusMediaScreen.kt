@@ -1288,7 +1288,13 @@ private fun SeekFeedbackContent(feedback: SeekFeedback) {
                 SeekFeedback.Backward -> FontAwesomeIcons.Solid.Backward
                 SeekFeedback.Forward -> FontAwesomeIcons.Solid.Forward
             },
-            contentDescription = null,
+            contentDescription =
+                stringResource(
+                    when (feedback) {
+                        SeekFeedback.Backward -> R.string.seek_backward_5_seconds
+                        SeekFeedback.Forward -> R.string.seek_forward_5_seconds
+                    },
+                ),
             modifier = Modifier.size(32.dp),
             tint = Color.White,
         )

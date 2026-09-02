@@ -111,7 +111,7 @@ internal fun LocalCacheSearchScreen(
                                     ) {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.Xmark,
-                                            contentDescription = null,
+                                            contentDescription = stringResource(R.string.clear_search),
                                         )
                                     }
                                 }

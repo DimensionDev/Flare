@@ -4,6 +4,11 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="refresh">Refresh</string>
+    <string name="expanded">Expanded</string>
+    <string name="collapsed">Collapsed</string>
+    <string name="gallery_views">Views</string>
+    <string name="gallery_bookmarks">Bookmarks</string>
+    <string name="gallery_engagement">Engagement</string>
 
     <string name="home_compose">Compose</string>
     <string name="home_login">Log in</string>
@@ -470,6 +475,7 @@
     <string name="compose_media_sensitive">Mark media as sensitive</string>
     <string name="compose_send">Send post</string>
     <string name="compose_select_accounts">Select posting accounts</string>
+    <string name="compose_select_accounts_current">Select posting accounts. Selected: %1$s</string>
     <string name="compose_add_media">Add image or video</string>
     <string name="compose_enable_poll">Add poll</string>
     <string name="compose_disable_poll">Remove poll</string>
@@ -506,6 +512,10 @@
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">URL</string>
+    <string name="rss_source_valid">RSS source valid</string>
+    <string name="rss_source_options_available">RSS source options available</string>
+    <string name="rss_source_invalid">RSS source invalid</string>
+    <string name="rss_source_checking">Checking RSS source</string>
     <string name="rss_title">Subscriptions</string>
     <string name="empty_rss_sources">No subscriptions</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub Host</string>
@@ -607,6 +617,8 @@
     <string name="draft_box_retry">Retry</string>
     <string name="draft_box_edit">Edit</string>
     <string name="draft_box_send">Send</string>
+    <string name="draft_box_posting_account">Posting account: %1$s</string>
+    <string name="draft_box_attachment_no_description">Attachment, no description provided</string>
 
     <string name="copied_to_clipboard">Copied to clipboard</string>
 

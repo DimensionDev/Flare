@@ -685,5 +685,8 @@ private struct HomeSidebarAddTabRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityValue(
+            Text(isSelected ? String(localized: "selected") : String(localized: "not_selected"))
+        )
     }
 }

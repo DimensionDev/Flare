@@ -98,6 +98,7 @@ import dev.dimension.flare.compose.ui.show_media
 import dev.dimension.flare.compose.ui.status_detail_tldr
 import dev.dimension.flare.compose.ui.status_detail_translate
 import dev.dimension.flare.compose.ui.status_open_post
+import dev.dimension.flare.compose.ui.status_platform
 import dev.dimension.flare.compose.ui.status_view_insight
 import dev.dimension.flare.compose.ui.translation_badge_failed
 import dev.dimension.flare.compose.ui.translation_badge_translated
@@ -274,7 +275,11 @@ public fun CommonStatusComponent(
                             if (appearanceSettings.showPlatformLogo) {
                                 FAIcon(
                                     imageVector = item.platformIcon.toImageVector(),
-                                    contentDescription = null,
+                                    contentDescription =
+                                        stringResource(
+                                            Res.string.status_platform,
+                                            item.platformId,
+                                        ),
                                     modifier =
                                         Modifier
                                             .size(PlatformTheme.typography.caption.fontSize.value.dp),

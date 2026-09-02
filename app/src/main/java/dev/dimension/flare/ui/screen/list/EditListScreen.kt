@@ -162,7 +162,7 @@ internal fun EditListScreen(
                                     if (state.avatar != null) {
                                         NetworkImage(
                                             model = state.avatar.toString(),
-                                            contentDescription = null,
+                                            contentDescription = stringResource(R.string.list_choose_image),
                                             modifier =
                                                 Modifier
                                                     .size(AvatarComponentDefaults.size)
@@ -175,7 +175,7 @@ internal fun EditListScreen(
                                                 if (avatar != null) {
                                                     NetworkImage(
                                                         model = avatar,
-                                                        contentDescription = null,
+                                                        contentDescription = stringResource(R.string.list_choose_image),
                                                         modifier =
                                                             Modifier
                                                                 .size(AvatarComponentDefaults.size)
@@ -184,7 +184,7 @@ internal fun EditListScreen(
                                                 } else {
                                                     FAIcon(
                                                         imageVector = FontAwesomeIcons.Solid.Rss,
-                                                        contentDescription = null,
+                                                        contentDescription = stringResource(R.string.list_choose_image),
                                                         modifier =
                                                             Modifier
                                                                 .size(AvatarComponentDefaults.size)

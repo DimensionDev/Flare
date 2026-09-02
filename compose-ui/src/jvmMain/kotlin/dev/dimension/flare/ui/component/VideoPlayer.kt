@@ -35,12 +35,15 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
 import io.github.composefluent.component.ProgressRing
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import org.koin.core.annotation.Single
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToLong
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -131,7 +134,7 @@ public fun VideoPlayer(
                 ) {
                     FAIcon(
                         FontAwesomeIcons.Solid.CirclePlay,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.media_play_video),
                         modifier =
                             Modifier
                                 .size(16.dp),

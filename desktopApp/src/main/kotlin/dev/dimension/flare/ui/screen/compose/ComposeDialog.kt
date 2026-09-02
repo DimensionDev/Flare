@@ -102,6 +102,7 @@ import dev.dimension.flare.compose_poll_single_choice
 import dev.dimension.flare.compose_remove_media
 import dev.dimension.flare.compose_remove_poll_option
 import dev.dimension.flare.compose_select_accounts
+import dev.dimension.flare.compose_select_accounts_current
 import dev.dimension.flare.compose_send
 import dev.dimension.flare.compose_show_emoji_picker
 import dev.dimension.flare.compose_video_no_alt
@@ -336,7 +337,14 @@ fun ComposeDialog(
                         val accounts = accountUsers.mapNotNull { it.takeSuccess() }
                         if (accounts.isNotEmpty()) {
                             val accountSelectorDescription =
-                                stringResource(Res.string.compose_select_accounts)
+                                if (selectedProfiles.isEmpty()) {
+                                    stringResource(Res.string.compose_select_accounts)
+                                } else {
+                                    stringResource(
+                                        Res.string.compose_select_accounts_current,
+                                        selectedProfiles.joinToString { it.handle.canonical },
+                                    )
+                                }
                             MenuFlyoutContainer(
                                 flyout = {
                                     accounts.forEach { data ->

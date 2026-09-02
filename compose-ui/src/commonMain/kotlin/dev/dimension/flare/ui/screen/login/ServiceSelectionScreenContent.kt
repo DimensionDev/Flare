@@ -36,6 +36,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -63,8 +65,13 @@ import dev.dimension.flare.compose.ui.nostr_login_qr_hint
 import dev.dimension.flare.compose.ui.nostr_login_qr_link_label
 import dev.dimension.flare.compose.ui.nostr_login_qr_waiting
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
+import dev.dimension.flare.compose.ui.service_select_clear
+import dev.dimension.flare.compose.ui.service_select_detected_platform
+import dev.dimension.flare.compose.ui.service_select_detecting_platform
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
+import dev.dimension.flare.compose.ui.service_select_search
+import dev.dimension.flare.compose.ui.service_select_unknown_platform
 import dev.dimension.flare.compose.ui.service_select_welcome_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
@@ -161,12 +168,12 @@ public fun ServiceSelectionScreenContent(
                             if (state.instanceInputState.text.any()) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.Xmark,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(Res.string.service_select_clear),
                                 )
                             } else {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.MagnifyingGlass,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(Res.string.service_select_search),
                                 )
                             }
                         }
@@ -177,17 +184,25 @@ public fun ServiceSelectionScreenContent(
                             .onSuccess {
                                 FAIcon(
                                     imageVector = it.platformIcon.toImageVector(),
-                                    contentDescription = null,
+                                    contentDescription =
+                                        stringResource(
+                                            Res.string.service_select_detected_platform,
+                                            it.platformId,
+                                        ),
                                     modifier = Modifier.size(24.dp),
                                 )
                             }.onError {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.CircleQuestion,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(Res.string.service_select_unknown_platform),
                                 )
                             }.onLoading {
+                                val detectingPlatformDescription =
+                                    stringResource(Res.string.service_select_detecting_platform)
                                 PlatformCircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(24.dp).semantics {
+                                        contentDescription = detectingPlatformDescription
+                                    },
                                 )
                             }
                     },

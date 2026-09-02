@@ -316,16 +316,20 @@ private struct RssCheckStateIndicator: View {
             case .rssFeed, .subscriptionInstance:
                 Image(fontAwesome: .circleCheck)
                     .foregroundStyle(.green)
+                    .accessibilityLabel(Text("rss_source_valid", bundle: FlareAppleUILocalization.bundle))
             case .rssHub, .rssSources:
                 Image(fontAwesome: .circleChevronDown)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("rss_source_options_available", bundle: FlareAppleUILocalization.bundle))
             }
         } errorContent: { _ in
             Image(fontAwesome: .circleExclamation)
                 .foregroundStyle(.red)
+                .accessibilityLabel(Text("rss_source_invalid", bundle: FlareAppleUILocalization.bundle))
         } loadingContent: {
             ProgressView()
                 .controlSize(.small)
+                .accessibilityLabel(Text("rss_source_checking", bundle: FlareAppleUILocalization.bundle))
         }
         .frame(width: 24)
     }
@@ -346,6 +350,7 @@ private struct SelectableRssSourceRow: View {
         }
         .padding(.vertical, 6)
         .contentShape(Rectangle())
+        .accessibilityValue(Text(verbatim: selectionDescription(isSelected)))
     }
 }
 
@@ -373,7 +378,14 @@ private struct SelectableSubscriptionTypeRow: View {
         }
         .padding(.vertical, 6)
         .contentShape(Rectangle())
+        .accessibilityValue(Text(verbatim: selectionDescription(isSelected)))
     }
+}
+
+private func selectionDescription(_ isSelected: Bool) -> String {
+    isSelected
+        ? FlareAppleUILocalization.string("selected", fallback: "Selected")
+        : FlareAppleUILocalization.string("not_selected", fallback: "Not selected")
 }
 
 private func labelForSubscriptionType(_ type: SubscriptionType) -> String {

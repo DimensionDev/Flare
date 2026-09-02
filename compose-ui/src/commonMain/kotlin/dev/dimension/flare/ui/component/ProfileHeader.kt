@@ -48,6 +48,13 @@ import dev.dimension.flare.compose.ui.profile_header_button_following
 import dev.dimension.flare.compose.ui.profile_header_button_is_fans
 import dev.dimension.flare.compose.ui.profile_header_button_request_follow
 import dev.dimension.flare.compose.ui.profile_header_button_requested
+import dev.dimension.flare.compose.ui.profile_field_location
+import dev.dimension.flare.compose.ui.profile_field_verified_link
+import dev.dimension.flare.compose.ui.profile_field_website
+import dev.dimension.flare.compose.ui.profile_mark_bot
+import dev.dimension.flare.compose.ui.profile_mark_cat
+import dev.dimension.flare.compose.ui.profile_mark_locked
+import dev.dimension.flare.compose.ui.profile_mark_verified
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformErrorButton
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
@@ -293,7 +300,7 @@ private fun ProfileHeaderSuccess(
                     UiProfile.Mark.Verified -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.CircleCheck,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.profile_mark_verified),
                             modifier =
                                 Modifier
                                     .size(12.dp),
@@ -304,7 +311,7 @@ private fun ProfileHeaderSuccess(
                     UiProfile.Mark.Cat -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Cat,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.profile_mark_cat),
                             tint = PlatformTheme.colorScheme.caption,
                             modifier =
                                 Modifier
@@ -315,7 +322,7 @@ private fun ProfileHeaderSuccess(
                     UiProfile.Mark.Bot -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Robot,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.profile_mark_bot),
                             tint = PlatformTheme.colorScheme.caption,
                             modifier =
                                 Modifier
@@ -326,7 +333,7 @@ private fun ProfileHeaderSuccess(
                     UiProfile.Mark.Locked -> {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Lock,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.profile_mark_locked),
                             tint = PlatformTheme.colorScheme.caption,
                             modifier =
                                 Modifier
@@ -374,7 +381,15 @@ private fun ProfileHeaderSuccess(
                                     UiProfile.BottomContent.Iconify.Icon.Url -> FontAwesomeIcons.Solid.Globe
                                     UiProfile.BottomContent.Iconify.Icon.Verify -> FontAwesomeIcons.Solid.CircleCheck
                                 }
-                            FAIcon(icon, contentDescription = null)
+                            val iconDescription =
+                                stringResource(
+                                    when (key) {
+                                        UiProfile.BottomContent.Iconify.Icon.Location -> Res.string.profile_field_location
+                                        UiProfile.BottomContent.Iconify.Icon.Url -> Res.string.profile_field_website
+                                        UiProfile.BottomContent.Iconify.Icon.Verify -> Res.string.profile_field_verified_link
+                                    },
+                                )
+                            FAIcon(icon, contentDescription = iconDescription)
                             RichText(text = value)
                         }
                     }

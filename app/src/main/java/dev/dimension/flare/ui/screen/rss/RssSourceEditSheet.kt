@@ -42,6 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -81,6 +83,10 @@ internal fun RssSourceEditSheet(
     initialUrl: String? = null,
 ) {
     val state by producePresenter("rss_source_edit_${id}_$initialUrl") { presenter(id, initialUrl) }
+    val rssSourceValid = stringResource(R.string.rss_source_valid)
+    val rssSourceOptionsAvailable = stringResource(R.string.rss_source_options_available)
+    val rssSourceInvalid = stringResource(R.string.rss_source_invalid)
+    val rssSourceChecking = stringResource(R.string.rss_source_checking)
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -128,7 +134,7 @@ internal fun RssSourceEditSheet(
                             is CheckRssSourcePresenter.State.RssState.RssFeed -> {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleCheck,
-                                    contentDescription = null,
+                                    contentDescription = rssSourceValid,
                                     modifier = Modifier.size(24.dp),
                                 )
                             }
@@ -136,7 +142,7 @@ internal fun RssSourceEditSheet(
                             CheckRssSourcePresenter.State.RssState.RssHub -> {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleChevronDown,
-                                    contentDescription = null,
+                                    contentDescription = rssSourceOptionsAvailable,
                                     modifier = Modifier.size(24.dp),
                                 )
                             }
@@ -144,7 +150,7 @@ internal fun RssSourceEditSheet(
                             is CheckRssSourcePresenter.State.RssState.RssSources -> {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleChevronDown,
-                                    contentDescription = null,
+                                    contentDescription = rssSourceOptionsAvailable,
                                     modifier = Modifier.size(24.dp),
                                 )
                             }
@@ -152,7 +158,7 @@ internal fun RssSourceEditSheet(
                             is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleCheck,
-                                    contentDescription = null,
+                                    contentDescription = rssSourceValid,
                                     modifier = Modifier.size(24.dp),
                                 )
                             }
@@ -160,13 +166,13 @@ internal fun RssSourceEditSheet(
                     }.onError {
                         FAIcon(
                             FontAwesomeIcons.Solid.CircleXmark,
-                            contentDescription = null,
+                            contentDescription = rssSourceInvalid,
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(24.dp),
                         )
                     }.onLoading {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(24.dp).semantics { contentDescription = rssSourceChecking },
                         )
                     }
             },
@@ -236,7 +242,7 @@ internal fun RssSourceEditSheet(
                                                 is CheckRssSourcePresenter.State.RssState.RssFeed -> {
                                                     FAIcon(
                                                         FontAwesomeIcons.Solid.CircleCheck,
-                                                        contentDescription = null,
+                                                        contentDescription = rssSourceValid,
                                                         modifier = Modifier.size(24.dp),
                                                     )
                                                 }
@@ -244,7 +250,7 @@ internal fun RssSourceEditSheet(
                                                 CheckRssSourcePresenter.State.RssState.RssHub -> {
                                                     FAIcon(
                                                         FontAwesomeIcons.Solid.CircleChevronDown,
-                                                        contentDescription = null,
+                                                        contentDescription = rssSourceOptionsAvailable,
                                                         modifier = Modifier.size(24.dp),
                                                     )
                                                 }
@@ -252,7 +258,7 @@ internal fun RssSourceEditSheet(
                                                 is CheckRssSourcePresenter.State.RssState.RssSources -> {
                                                     FAIcon(
                                                         FontAwesomeIcons.Solid.CircleChevronDown,
-                                                        contentDescription = null,
+                                                        contentDescription = rssSourceOptionsAvailable,
                                                         modifier = Modifier.size(24.dp),
                                                     )
                                                 }
@@ -260,7 +266,7 @@ internal fun RssSourceEditSheet(
                                                 is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                                     FAIcon(
                                                         FontAwesomeIcons.Solid.CircleCheck,
-                                                        contentDescription = null,
+                                                        contentDescription = rssSourceValid,
                                                         modifier = Modifier.size(24.dp),
                                                     )
                                                 }
@@ -268,19 +274,19 @@ internal fun RssSourceEditSheet(
                                         }.onError {
                                             FAIcon(
                                                 FontAwesomeIcons.Solid.CircleXmark,
-                                                contentDescription = null,
+                                                contentDescription = rssSourceInvalid,
                                                 tint = MaterialTheme.colorScheme.error,
                                                 modifier = Modifier.size(24.dp),
                                             )
                                         }.onLoading {
                                             CircularProgressIndicator(
-                                                modifier = Modifier.size(24.dp),
+                                                modifier = Modifier.size(24.dp).semantics { contentDescription = rssSourceChecking },
                                             )
                                         }
                                 } else {
                                     FAIcon(
                                         FontAwesomeIcons.Solid.CircleXmark,
-                                        contentDescription = null,
+                                        contentDescription = rssSourceInvalid,
                                         tint = MaterialTheme.colorScheme.error,
                                         modifier = Modifier.size(24.dp),
                                     )

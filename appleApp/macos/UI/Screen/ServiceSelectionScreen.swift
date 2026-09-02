@@ -112,6 +112,7 @@ struct ServiceSelectionScreen: View {
             .foregroundStyle(.secondary)
             .disabled(instanceInput.isEmpty)
             .help(instanceInput.isEmpty ? ServiceSelectCopy.search : ServiceSelectCopy.clear)
+            .accessibilityLabel(Text(instanceInput.isEmpty ? ServiceSelectCopy.search : ServiceSelectCopy.clear))
         }
     }
 
@@ -123,12 +124,22 @@ struct ServiceSelectionScreen: View {
                 Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
                     .resizable()
                     .scaledToFit()
+                    .accessibilityLabel(
+                        Text(
+                            verbatim: String(
+                                format: String(localized: "service_select_detected_platform"),
+                                success.data.platformId
+                            )
+                        )
+                    )
             case .loading:
                 ProgressView()
                     .controlSize(.small)
+                    .accessibilityLabel(Text("service_select_detecting_platform"))
             case .error:
                 Image(systemName: "questionmark.circle")
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("service_select_unknown_platform"))
             }
         }
         .animation(MacOSServiceSelectionAnimation.standard, value: platformIndicatorKey(state: state))

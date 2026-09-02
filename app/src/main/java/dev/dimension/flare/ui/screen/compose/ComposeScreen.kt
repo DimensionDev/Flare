@@ -173,7 +173,6 @@ internal fun ComposeScreen(
     onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val selectAccountsLabel = stringResource(R.string.compose_select_accounts)
     val editAltTextLabel = stringResource(R.string.compose_edit_alt_text)
     val state by producePresenter(key = "compose") {
         composePresenter(
@@ -338,6 +337,15 @@ internal fun ComposeScreen(
                         val selectedProfiles = selectedUsers.mapNotNull { it.takeSuccess() }
                         val accounts = accountUsers.mapNotNull { it.takeSuccess() }
                         if (accounts.isNotEmpty()) {
+                            val accountSelectorDescription =
+                                if (selectedProfiles.isEmpty()) {
+                                    stringResource(R.string.compose_select_accounts)
+                                } else {
+                                    stringResource(
+                                        R.string.compose_select_accounts_current,
+                                        selectedProfiles.joinToString { it.handle.canonical },
+                                    )
+                                }
                             Box {
                                 Surface(
                                     onClick = {
@@ -345,7 +353,7 @@ internal fun ComposeScreen(
                                     },
                                     modifier =
                                         Modifier.semantics {
-                                            contentDescription = selectAccountsLabel
+                                            contentDescription = accountSelectorDescription
                                         },
                                     shape = RoundedCornerShape(100),
                                     color = MaterialTheme.colorScheme.secondaryContainer,

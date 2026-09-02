@@ -56,6 +56,8 @@ import androidx.media3.ui.compose.state.rememberPresentationState
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableMap
@@ -63,6 +65,7 @@ import kotlinx.coroutines.android.awaitFrame
 import org.koin.compose.koinInject
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
+import org.jetbrains.compose.resources.stringResource
 
 private val audioAttributes by lazy {
     AudioAttributes
@@ -163,7 +166,7 @@ public fun VideoPlayer(
                 ) {
                     FAIcon(
                         FontAwesomeIcons.Solid.CirclePlay,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.media_play_video),
                         modifier =
                             Modifier
                                 .size(16.dp),

@@ -55,6 +55,7 @@ import dev.dimension.flare.compose.ui.media_menu_copy_link
 import dev.dimension.flare.compose.ui.media_menu_download
 import dev.dimension.flare.compose.ui.media_menu_download_all
 import dev.dimension.flare.compose.ui.media_menu_share_image
+import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.compose.ui.media_view_alt_text
 import dev.dimension.flare.compose.ui.show_sensitive_media
 import dev.dimension.flare.compose.ui.status_sensitive_media
@@ -667,7 +668,7 @@ public fun MediaItem(
                         ) {
                             FAIcon(
                                 FontAwesomeIcons.Solid.CirclePlay,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.media_play_video),
                                 modifier =
                                     Modifier
                                         .size(16.dp),
@@ -739,7 +740,7 @@ public fun MediaItem(
                     ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.CirclePlay,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.media_play_video),
                             modifier =
                                 Modifier
                                     .size(16.dp),

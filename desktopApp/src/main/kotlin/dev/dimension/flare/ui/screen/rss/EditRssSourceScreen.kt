@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -54,6 +56,10 @@ import dev.dimension.flare.rss_sources_rss_hub_host_hint
 import dev.dimension.flare.rss_sources_rss_hub_host_label
 import dev.dimension.flare.rss_sources_title_label
 import dev.dimension.flare.rss_sources_url_label
+import dev.dimension.flare.rss_source_checking
+import dev.dimension.flare.rss_source_invalid
+import dev.dimension.flare.rss_source_options_available
+import dev.dimension.flare.rss_source_valid
 import dev.dimension.flare.subscription_url_hint
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
@@ -102,6 +108,10 @@ fun EditRssSourceScreen(
         )
     val composeWindow = LocalComposeWindow.current
     val state by producePresenter("rss_source_edit_${id}_$initialUrl") { presenter(id, initialUrl) }
+    val rssSourceValid = stringResource(Res.string.rss_source_valid)
+    val rssSourceOptionsAvailable = stringResource(Res.string.rss_source_options_available)
+    val rssSourceInvalid = stringResource(Res.string.rss_source_invalid)
+    val rssSourceChecking = stringResource(Res.string.rss_source_checking)
 
     ContentDialog(
         title =
@@ -230,7 +240,7 @@ fun EditRssSourceScreen(
                                     is CheckRssSourcePresenter.State.RssState.RssFeed -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleCheck,
-                                            contentDescription = null,
+                                            contentDescription = rssSourceValid,
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -238,7 +248,7 @@ fun EditRssSourceScreen(
                                     CheckRssSourcePresenter.State.RssState.RssHub -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleChevronDown,
-                                            contentDescription = null,
+                                            contentDescription = rssSourceOptionsAvailable,
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -246,7 +256,7 @@ fun EditRssSourceScreen(
                                     is CheckRssSourcePresenter.State.RssState.RssSources -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleChevronDown,
-                                            contentDescription = null,
+                                            contentDescription = rssSourceOptionsAvailable,
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -254,7 +264,7 @@ fun EditRssSourceScreen(
                                     is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                         FAIcon(
                                             FontAwesomeIcons.Solid.CircleCheck,
-                                            contentDescription = null,
+                                            contentDescription = rssSourceValid,
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -262,13 +272,13 @@ fun EditRssSourceScreen(
                             }.onError {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.CircleXmark,
-                                    contentDescription = null,
+                                    contentDescription = rssSourceInvalid,
                                     tint = FluentTheme.colors.system.critical,
                                     modifier = Modifier.size(24.dp),
                                 )
                             }.onLoading {
                                 ProgressRing(
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(24.dp).semantics { contentDescription = rssSourceChecking },
                                 )
                             }
                     },
@@ -324,7 +334,7 @@ fun EditRssSourceScreen(
                                                         is CheckRssSourcePresenter.State.RssState.RssFeed -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleCheck,
-                                                                contentDescription = null,
+                                                                contentDescription = rssSourceValid,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
                                                         }
@@ -332,7 +342,7 @@ fun EditRssSourceScreen(
                                                         CheckRssSourcePresenter.State.RssState.RssHub -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleChevronDown,
-                                                                contentDescription = null,
+                                                                contentDescription = rssSourceOptionsAvailable,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
                                                         }
@@ -340,7 +350,7 @@ fun EditRssSourceScreen(
                                                         is CheckRssSourcePresenter.State.RssState.RssSources -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleChevronDown,
-                                                                contentDescription = null,
+                                                                contentDescription = rssSourceOptionsAvailable,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
                                                         }
@@ -348,7 +358,7 @@ fun EditRssSourceScreen(
                                                         is CheckRssSourcePresenter.State.RssState.SubscriptionInstance -> {
                                                             FAIcon(
                                                                 FontAwesomeIcons.Solid.CircleCheck,
-                                                                contentDescription = null,
+                                                                contentDescription = rssSourceValid,
                                                                 modifier = Modifier.size(24.dp),
                                                             )
                                                         }
@@ -356,19 +366,19 @@ fun EditRssSourceScreen(
                                                 }.onError {
                                                     FAIcon(
                                                         FontAwesomeIcons.Solid.CircleXmark,
-                                                        contentDescription = null,
+                                                        contentDescription = rssSourceInvalid,
                                                         tint = FluentTheme.colors.system.critical,
                                                         modifier = Modifier.size(24.dp),
                                                     )
                                                 }.onLoading {
                                                     CircularProgressIndicator(
-                                                        modifier = Modifier.size(24.dp),
+                                                        modifier = Modifier.size(24.dp).semantics { contentDescription = rssSourceChecking },
                                                     )
                                                 }
                                         } else {
                                             FAIcon(
                                                 FontAwesomeIcons.Solid.CircleXmark,
-                                                contentDescription = null,
+                                                contentDescription = rssSourceInvalid,
                                                 tint = FluentTheme.colors.system.critical,
                                                 modifier = Modifier.size(24.dp),
                                             )

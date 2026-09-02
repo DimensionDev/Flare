@@ -226,6 +226,7 @@ public struct StatusView: View {
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
                                             platformIcon: data.platformIcon,
+                                            platformId: data.platformId,
                                             createdAt: createdAt,
                                             accountType: accountType,
                                             statusKey: statusKey
@@ -239,6 +240,7 @@ public struct StatusView: View {
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
                                             platformIcon: data.platformIcon,
+                                            platformId: data.platformId,
                                             createdAt: createdAt,
                                             accountType: accountType,
                                             statusKey: statusKey
@@ -252,6 +254,7 @@ public struct StatusView: View {
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
                                             platformIcon: data.platformIcon,
+                                            platformId: data.platformId,
                                             createdAt: createdAt,
                                             accountType: accountType,
                                             statusKey: statusKey
@@ -520,6 +523,7 @@ public struct StatusView: View {
         visibility: UiTimelineV2.PostVisibility?,
         translationDisplayState: TranslationDisplayState,
         platformIcon: UiIcon,
+        platformId: String,
         createdAt: UiDateTime,
         accountType: AccountType,
         statusKey: MicroBlogKey
@@ -539,6 +543,17 @@ public struct StatusView: View {
                 Image(fontAwesome: platformIcon.fontAwesomeIcon)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel(
+                        Text(
+                            verbatim: String(
+                                format: FlareAppleUILocalization.string(
+                                    "status_platform",
+                                    fallback: "Platform: %@"
+                                ),
+                                platformId
+                            )
+                        )
+                    )
             }
             if !isDetail {
                 DateTimeText(data: createdAt)

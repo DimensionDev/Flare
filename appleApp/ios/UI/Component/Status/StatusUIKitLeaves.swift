@@ -619,8 +619,15 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         if showPlatformLogo {
             platformLogo.isHidden = false
             platformLogo.image = UIImage(fontAwesome: post.platformIcon.fontAwesomeIcon)
+            platformLogo.isAccessibilityElement = true
+            platformLogo.accessibilityLabel = String(
+                format: String(localized: "status_platform", defaultValue: "Platform: %@"),
+                post.platformId
+            )
         } else {
             platformLogo.isHidden = true
+            platformLogo.isAccessibilityElement = false
+            platformLogo.accessibilityLabel = nil
         }
 
         if isDetail {

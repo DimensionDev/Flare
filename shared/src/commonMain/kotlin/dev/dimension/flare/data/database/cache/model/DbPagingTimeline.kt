@@ -12,7 +12,6 @@ import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlin.time.Instant
-import kotlin.uuid.Uuid
 
 @Entity(
     indices = [
@@ -32,30 +31,30 @@ internal data class DbPagingTimeline(
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val message: UiTimelineV2.Message? = null,
     val messageRenderHash: Int? = message?.renderHash,
+    val semanticReferenceSignature: String = "",
+    val presentationReferenceSignature: String = "",
+    val contentRevision: Long = 0,
     @PrimaryKey
-    val _id: String = Uuid.random().toString(),
-)
+    val _id: String = createId(pagingKey, statusId),
+) {
+    internal companion object {
+        fun createId(
+            pagingKey: String,
+            statusId: String,
+        ): String = "${pagingKey.length}:$pagingKey$statusId"
+    }
+}
 
 @Entity(
     tableName = "timeline_item_presentation_reference",
+    primaryKeys = ["pagingKey", "statusId", "presentationType", "referenceStatusId"],
     indices = [
         Index(
-            value = ["pagingKey", "statusId"],
-        ),
-        Index(
-            value = [
-                "pagingKey",
-                "statusId",
-                "presentationType",
-                "referenceStatusId",
-            ],
-            unique = true,
+            value = ["referenceStatusId", "pagingKey", "statusId"],
         ),
     ],
 )
 internal data class DbTimelineItemPresentationReference(
-    @PrimaryKey
-    val _id: String,
     val pagingKey: String,
     val statusId: String,
     val referenceStatusId: String,

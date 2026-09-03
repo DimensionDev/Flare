@@ -68,6 +68,7 @@ public sealed class UiTimelineV2 {
                 .add(icon)
                 .add(type.renderSummaryHash())
                 .add(createdAt.value.toEpochMilliseconds())
+                .add(clickEvent)
                 .add(accountType)
                 .build()
         }
@@ -418,8 +419,11 @@ public sealed class UiTimelineV2 {
     }
 }
 
-internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 =
-    when (this) {
+internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 {
+    if (this.itemKey == itemKey) {
+        return this
+    }
+    return when (this) {
         is UiTimelineV2.Feed -> copy(itemKey = itemKey)
         is UiTimelineV2.Message -> copy(itemKey = itemKey)
         is UiTimelineV2.Post -> copy(itemKey = itemKey)
@@ -427,6 +431,7 @@ internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 =
         is UiTimelineV2.User -> copy(itemKey = itemKey)
         is UiTimelineV2.UserList -> copy(itemKey = itemKey)
     }
+}
 
 public fun UiTimelineV2.asTimelinePostItem(): UiTimelineV2.TimelinePostItem? =
     when (this) {

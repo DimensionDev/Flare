@@ -165,13 +165,11 @@ internal class MixedRemoteMediator(
                                             PagingResult(endOfPaginationReached = true)
                                         }
                                     val stagedItems =
-                                        result.data.map { item ->
-                                            TimelinePagingMapper.toDb(
-                                                data = item,
-                                                pagingKey = state.source.stagingKey,
-                                                sortId = timeSortId(item),
-                                            )
-                                        }
+                                        TimelinePagingMapper.toDb(
+                                            data = result.data,
+                                            pagingKey = state.source.stagingKey,
+                                            sortIds = result.data.map(::timeSortId),
+                                        )
                                     TimeSubResponse(state, result, stagedItems)
                                 }
                             }.awaitAll()

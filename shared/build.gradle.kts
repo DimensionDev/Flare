@@ -30,6 +30,7 @@ kotlin {
         )
     }
     android {
+        withHostTest {}
         withDeviceTest {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             execution = "HOST"
@@ -105,6 +106,13 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)
@@ -130,4 +138,62 @@ kotlin {
 
 room3 {
     schemaDirectory("$projectDir/schemas")
+}
+
+val runDatabaseBenchmark =
+    providers
+        .gradleProperty("runDatabaseBenchmark")
+        .map(String::toBoolean)
+        .orElse(false)
+
+tasks.withType<org.gradle.api.tasks.testing.AbstractTestTask>().configureEach {
+    if (runDatabaseBenchmark.get()) {
+        outputs.upToDateWhen { false }
+        testLogging.showStandardStreams = true
+    } else {
+        filter.excludeTestsMatching("*TimelineDatabaseBenchmarkTest*")
+    }
+}
+
+val sqliteBundledJvmNative = configurations.create("sqliteBundledJvmNative")
+dependencies.add(
+    sqliteBundledJvmNative.name,
+    "androidx.sqlite:sqlite-bundled-jvm:${libs.versions.sqlite.get()}",
+)
+
+val sqliteNativeLibrary =
+    when {
+        System.getProperty("os.name").startsWith("Mac") && System.getProperty("os.arch") in setOf("aarch64", "arm64") ->
+            "natives/osx_arm64" to "libsqliteJni.dylib"
+        System.getProperty("os.name").startsWith("Linux") && System.getProperty("os.arch") in setOf("aarch64", "arm64") ->
+            "natives/linux_arm64" to "libsqliteJni.so"
+        System.getProperty("os.name").startsWith("Linux") ->
+            "natives/linux_x64" to "libsqliteJni.so"
+        System.getProperty("os.name").startsWith("Windows") ->
+            "natives/windows_x64" to "sqliteJni.dll"
+        else -> null
+    }
+
+if (sqliteNativeLibrary != null) {
+    val extractSqliteBundledJvmNative =
+        tasks.register<org.gradle.api.tasks.Sync>("extractSqliteBundledJvmNative") {
+            from({ sqliteBundledJvmNative.files.map(::zipTree) }) {
+                include("${sqliteNativeLibrary.first}/${sqliteNativeLibrary.second}")
+            }
+            into(layout.buildDirectory.dir("sqlite-bundled-jvm-native"))
+        }
+
+    tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+        if (name == "testAndroidHostTest") {
+            dependsOn(extractSqliteBundledJvmNative)
+            systemProperty(
+                "androidx.sqlite.driver.bundled.path",
+                layout.buildDirectory
+                    .dir("sqlite-bundled-jvm-native/${sqliteNativeLibrary.first}")
+                    .get()
+                    .asFile.absolutePath,
+            )
+            systemProperty("androidx.sqlite.driver.bundled.name", sqliteNativeLibrary.second)
+        }
+    }
 }

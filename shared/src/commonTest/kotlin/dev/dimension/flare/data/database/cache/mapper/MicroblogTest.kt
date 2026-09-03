@@ -63,6 +63,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
@@ -488,16 +490,147 @@ class MicroblogTest : RobolectricTest() {
 
             assertEquals(
                 listOf(first.timeline.statusId),
-                loader.load(offset = 0, limit = 1).map { it.status.status.data.id },
+                loader.load(offset = 0, limit = 1).map { it.statusId },
             )
             assertEquals(
                 listOf(second.timeline.statusId),
-                loader.load(offset = 1, limit = 1).map { it.status.status.data.id },
+                loader.load(offset = 1, limit = 1).map { it.statusId },
             )
             assertEquals(
                 emptyList(),
-                loader.load(offset = 2, limit = 1).map { it.status.status.data.id },
+                loader.load(offset = 2, limit = 1).map { it.statusId },
             )
+        }
+
+    @Test
+    fun timelinePageCacheReusesUnchangedRowsAcrossSparseChanges() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "cache-account", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "cache-user", host = "test.com"), "Cache User")
+
+            suspend fun item(
+                index: Int,
+                text: String = "post-$index",
+                sortId: Long = (index + 1) * 10L,
+            ) = TimelinePagingMapper.toDb(
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "cache-status-$index", host = "test.com"),
+                    text = text,
+                ),
+                pagingKey = "home",
+                sortId = sortId,
+            )
+
+            saveToDatabase(db, List(4) { item(it) })
+            val loader = TimelineDbPageLoader(db, "home", TimelineDbPageCache())
+            val initial = loader.load(offset = 0, limit = 4)
+            val firstPost = initial[0].baseItem as UiTimelineV2.TimelinePostItem
+            val secondPost = initial[1].baseItem as UiTimelineV2.TimelinePostItem
+            assertSame(firstPost.post.user, secondPost.post.user)
+            assertSame(
+                initial[0].toUi(translationDisplayOptions()),
+                initial[0].toUi(translationDisplayOptions()),
+            )
+
+            saveToDatabase(db, listOf(item(index = 1, text = "updated")))
+            val afterStatusUpdate = loader.load(offset = 0, limit = 4)
+
+            assertSame(initial[0], afterStatusUpdate[0])
+            assertNotSame(initial[1], afterStatusUpdate[1])
+            assertSame(initial[2], afterStatusUpdate[2])
+            assertSame(initial[3], afterStatusUpdate[3])
+
+            db.translationDao().insert(
+                DbTranslation(
+                    entityType = TranslationEntityType.Status,
+                    entityKey = afterStatusUpdate[2].statusId,
+                    targetLanguage = Locale.language,
+                    sourceHash = "cache-reuse",
+                    status = TranslationStatus.Completed,
+                    payload = TranslationPayload(content = "translated".toUiPlainText()),
+                    updatedAt = 1L,
+                ),
+            )
+            val afterTranslation = loader.load(offset = 0, limit = 4)
+
+            assertSame(afterStatusUpdate[0], afterTranslation[0])
+            assertSame(afterStatusUpdate[1], afterTranslation[1])
+            assertNotSame(afterStatusUpdate[2], afterTranslation[2])
+            assertSame(afterStatusUpdate[3], afterTranslation[3])
+
+            saveToDatabase(db, listOf(item(index = -1, sortId = 5L)))
+            val afterTopInsert = loader.load(offset = 0, limit = 5)
+
+            assertEquals(
+                "cache-status--1",
+                afterTopInsert
+                    .first()
+                    .baseItem.statusKey.id,
+            )
+            afterTranslation.indices.forEach { index ->
+                assertSame(afterTranslation[index], afterTopInsert[index + 1])
+            }
+        }
+
+    @Test
+    fun timelinePageProjectionMatchesHydratedMapper() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "projection-account", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "projection-user", host = "test.com"), "Projection User")
+            val parent =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "projection-parent", host = "test.com"),
+                    text = "parent",
+                )
+            val quote =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "projection-quote", host = "test.com"),
+                    text = "quote",
+                )
+            val repost =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "projection-repost", host = "test.com"),
+                    text = "repost",
+                )
+            val root =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "projection-root", host = "test.com"),
+                    text = "root",
+                )
+            val mapped =
+                TimelinePagingMapper.toDb(
+                    timelinePostItem(
+                        post = root,
+                        inlineParents = listOf(parent),
+                        quotes = listOf(quote),
+                        repost = repost,
+                    ),
+                    pagingKey = "projection",
+                    sortId = 0,
+                )
+            saveToDatabase(db, listOf(mapped))
+
+            val options = translationDisplayOptions()
+            val hydrated = db.pagingTimelineDao().getTimelinePage("projection", offset = 0, limit = 1).single()
+            val expected = TimelinePagingMapper.toUi(hydrated, "projection", options)
+            val projected =
+                TimelineDbPageLoader(db, "projection", TimelineDbPageCache())
+                    .load(offset = 0, limit = 1)
+                    .single()
+                    .toUi(options)
+
+            assertEquals(expected, projected)
+            assertEquals(expected.renderHash, projected.renderHash)
         }
 
     @Test

@@ -1,16 +1,27 @@
 package dev.dimension.flare.data.database.cache.dao
 
 import androidx.room3.Dao
+import androidx.room3.Delete
 import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Update
+import androidx.room3.Upsert
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.model.ReferenceType
 
 @Dao
 internal interface StatusReferenceDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertAll(items: List<DbStatusReference>)
+
+    @Insert
+    suspend fun insertNew(items: List<DbStatusReference>)
+
+    @Update
+    suspend fun updateExisting(items: List<DbStatusReference>)
+
+    @Delete
+    suspend fun deleteItems(items: List<DbStatusReference>)
 
     @Query("DELETE FROM status_reference WHERE statusId = :statusId")
     suspend fun delete(statusId: String)
@@ -26,4 +37,7 @@ internal interface StatusReferenceDao {
 
     @Query("SELECT * FROM status_reference WHERE statusId = :statusId")
     suspend fun getByStatusId(statusId: String): List<DbStatusReference>
+
+    @Query("SELECT * FROM status_reference WHERE statusId IN (:statusIds)")
+    suspend fun getByStatusIds(statusIds: List<String>): List<DbStatusReference>
 }

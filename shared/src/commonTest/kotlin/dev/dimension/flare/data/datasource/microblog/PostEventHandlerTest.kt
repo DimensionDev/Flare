@@ -139,9 +139,8 @@ class PostEventHandlerTest : RobolectricTest() {
                     .pagingTimelineDao()
                     .getTimelinePageIdentities(pagingKey = "home", offset = 0, limit = 1)
                     .single()
-            assertNotEquals(beforeIdentity.rootRenderHash, afterIdentity.rootRenderHash)
+            assertNotEquals(beforeIdentity.contentRevision, afterIdentity.contentRevision)
             assertEquals(updatedPost.renderHash, saved.renderHash)
-            assertEquals(saved.renderHash, afterIdentity.rootRenderHash)
         }
 
     @Test

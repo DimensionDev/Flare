@@ -27,7 +27,7 @@ internal class TimelineRemoteMediator(
     private val refreshOnInitialize: suspend () -> Boolean = { true },
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
-        DbPagingTimelineWithStatus,
+        TimelinePageItem,
         DbPagingTimelineWithStatus,
     >(
         database = database,
@@ -65,7 +65,7 @@ internal class TimelineRemoteMediator(
 
     override suspend fun doLoad(
         loadType: LoadType,
-        state: PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>,
+        state: PagingState<OffsetFromStartPagingKey, TimelinePageItem>,
     ): MediatorResult {
         if (loadType == LoadType.PREPEND && suppressInitialPrepend) {
             suppressInitialPrepend = false
@@ -86,14 +86,13 @@ internal class TimelineRemoteMediator(
                 pageSize = pageSize,
                 request = request,
             )
+        val sortIdProvider = loader as? SortIdProvider
         val data =
-            result.data.map {
-                TimelinePagingMapper.toDb(
-                    data = it,
-                    pagingKey = pagingKey,
-                    sortId = (loader as? SortIdProvider)?.sortId(it),
-                )
-            }
+            TimelinePagingMapper.toDb(
+                data = result.data,
+                pagingKey = pagingKey,
+                sortIds = result.data.map { sortIdProvider?.sortId(it) },
+            )
         return PagingResult(
             data = data,
             nextKey = result.nextKey,
@@ -124,39 +123,58 @@ internal class TimelineRemoteMediator(
         request: PagingRequest,
         data: List<DbPagingTimelineWithStatus>,
     ) {
-        if (request is PagingRequest.Refresh) {
-            data
-                .groupBy { it.timeline.pagingKey }
-                .keys
-                .plus(loader.pagingKey)
-                .distinct()
-                .forEach { key ->
-                    database
-                        .pagingTimelineDao()
-                        .deletePresentationReferences(pagingKey = key)
-                    database
-                        .pagingTimelineDao()
-                        .delete(pagingKey = key)
-                }
-        }
-        if (request is PagingRequest.Prepend && loader.supportPrepend) {
-            // load current timeline caches
-            val currentCaches =
-                database
-                    .pagingTimelineDao()
-                    .getByPagingKey(pagingKey)
-                    .map {
-                        it.copy(
-                            sortId = SnowflakeIdGenerator.nextId(),
-                        )
+        val dataToSave =
+            if (request is PagingRequest.Prepend && loader.supportPrepend && data.isNotEmpty()) {
+                val minimumSortId = database.pagingTimelineDao().getMinSortId(pagingKey)
+                if (minimumSortId != null && minimumSortId >= Long.MIN_VALUE + data.size) {
+                    val firstSortId = minimumSortId - data.size
+                    data
+                        .sortedBy { it.timeline.sortId }
+                        .mapIndexed { index, item ->
+                            item.copy(timeline = item.timeline.copy(sortId = firstSortId + index))
+                        }
+                } else {
+                    if (minimumSortId != null) {
+                        val rebasedRows =
+                            database.pagingTimelineDao().getByPagingKey(pagingKey).map { row ->
+                                row.copy(sortId = SnowflakeIdGenerator.nextId())
+                            }
+                        database.pagingTimelineDao().insertAll(rebasedRows)
                     }
-            database.pagingTimelineDao().insertAll(
-                currentCaches,
-            )
+                    data
+                }
+            } else {
+                data
+            }
+        val staleTimeline =
+            if (request is PagingRequest.Refresh) {
+                val retainedStatusIds =
+                    dataToSave
+                        .groupBy { it.timeline.pagingKey }
+                        .mapValues { (_, rows) -> rows.mapTo(mutableSetOf()) { it.timeline.statusId } }
+                (retainedStatusIds.keys + loader.pagingKey).flatMap { key ->
+                    database
+                        .pagingTimelineDao()
+                        .getByPagingKey(key)
+                        .filter { it.statusId !in retainedStatusIds[key].orEmpty() }
+                }
+            } else {
+                emptyList()
+            }
+        saveToDatabase(database, dataToSave)
+        staleTimeline.groupBy { it.pagingKey }.forEach { (pagingKey, rows) ->
+            database
+                .pagingTimelineDao()
+                .deletePresentationReferences(
+                    pagingKey = pagingKey,
+                    statusIds = rows.map { it.statusId },
+                )
         }
-        saveToDatabase(database, data)
+        if (staleTimeline.isNotEmpty()) {
+            database.pagingTimelineDao().delete(staleTimeline)
+        }
         preTranslationService.enqueueStatuses(
-            data
+            dataToSave
                 .flatMap { item ->
                     listOfNotNull(item.status.status.data) +
                         item.status.references.mapNotNull { it.status?.data } +

@@ -265,6 +265,34 @@ class XQTTest {
     }
 
     @Test
+    fun renderContent_legacyTweetWithoutDisplayRange_decodesHtmlEntities() {
+        val tweet =
+            Tweet(
+                restId = "123",
+                legacy =
+                    TweetLegacy(
+                        idStr = "123",
+                        fullText = "A &amp; B",
+                        displayTextRange = emptyList(),
+                        entities = Entities(),
+                        createdAt = "Wed Oct 10 20:19:24 +0000 2018",
+                        favoriteCount = 0,
+                        favorited = false,
+                        isQuoteStatus = false,
+                        lang = "en",
+                        quoteCount = 0,
+                        replyCount = 0,
+                        retweetCount = 0,
+                        retweeted = false,
+                    ),
+            )
+
+        val result = tweet.renderContent(accountKey)
+
+        assertEquals("A & B", result.innerText)
+    }
+
+    @Test
     fun renderContent_noteTweet_rendersCorrectly() {
         val text = "Check out #Flare and @user at https://flare.app! It represents \$FLR. This is Bold and Italic text."
 
@@ -332,6 +360,48 @@ class XQTTest {
         assertTrue(result.innerText.contains("\$FLR"))
         assertTrue(textRuns.any { it.text == "Bold" && it.style.bold })
         assertTrue(textRuns.any { it.text == "Italic" && it.style.italic })
+    }
+
+    @Test
+    fun renderContent_noteTweet_decodesHtmlEntitiesWithoutShiftingEntities() {
+        val url = "https://t.co/xyz"
+        val text = "A &amp; B $url &lt;tag&gt; &#39;quoted&#39;"
+        val urlStart = text.indexOf(url)
+        val tweet =
+            Tweet(
+                restId = "123",
+                noteTweet =
+                    NoteTweet(
+                        isExpandable = true,
+                        noteTweetResults =
+                            NoteTweetResult(
+                                result =
+                                    NoteTweetResultData(
+                                        id = "note_id",
+                                        text = text,
+                                        entitySet =
+                                            Entities(
+                                                urls =
+                                                    listOf(
+                                                        XqtUrl(
+                                                            url = url,
+                                                            expandedUrl = "https://example.com",
+                                                            displayUrl = "example.com",
+                                                            indices = listOf(urlStart, urlStart + url.length),
+                                                        ),
+                                                    ),
+                                            ),
+                                    ),
+                            ),
+                    ),
+            )
+
+        val result = tweet.renderContent(accountKey)
+        val linkRun = result.allTextRuns().first { it.style.link != null }
+
+        assertEquals("A & B example.com <tag> 'quoted'", result.innerText)
+        assertEquals("example.com", linkRun.text)
+        assertEquals("https://example.com", linkRun.style.link)
     }
 
     @Test

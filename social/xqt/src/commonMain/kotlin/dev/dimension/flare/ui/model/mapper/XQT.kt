@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
+import com.fleeksoft.ksoup.parser.Parser
 import de.cketti.codepoints.codePointCount
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.Locale
@@ -1437,22 +1438,21 @@ internal fun Tweet.renderContent(
             legacy
                 ?.fullText
                 ?.let {
-                    if (legacy.displayTextRange.size == 2) {
-                        it
-                            .codePointSequence()
-                            .drop(legacy.displayTextRange[0])
-                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                            .flatMap { codePoint ->
-                                codePoint
-                                    .toChars()
-                                    .toList()
-                            }.joinToString("")
-                            .replace("&amp;", "&")
-                            .replace("&lt;", "<")
-                            .replace("&gt;", ">")
-                    } else {
-                        it
-                    }
+                    val displayText =
+                        if (legacy.displayTextRange.size == 2) {
+                            it
+                                .codePointSequence()
+                                .drop(legacy.displayTextRange[0])
+                                .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                                .flatMap { codePoint ->
+                                    codePoint
+                                        .toChars()
+                                        .toList()
+                                }.joinToString("")
+                        } else {
+                            it
+                        }
+                    displayText.decodeHtmlEntities()
                 }.orEmpty()
         return renderRichText(text, legacy?.entities, accountKey, sourceLanguages)
     } else {
@@ -1615,12 +1615,13 @@ internal fun Tweet.renderContent(
             text: String,
             style: RenderTextStyle = RenderTextStyle(),
         ) {
-            if (text.isEmpty()) return
+            val decodedText = text.decodeHtmlEntities()
+            if (decodedText.isEmpty()) return
             val lastRun = currentRuns.lastOrNull()
             if (lastRun is RenderRun.Text && lastRun.style == style) {
-                currentRuns[currentRuns.lastIndex] = lastRun.copy(text = lastRun.text + text)
+                currentRuns[currentRuns.lastIndex] = lastRun.copy(text = lastRun.text + decodedText)
             } else {
-                currentRuns.add(RenderRun.Text(text = text, style = style))
+                currentRuns.add(RenderRun.Text(text = decodedText, style = style))
             }
         }
 
@@ -1778,6 +1779,8 @@ private fun String.trimUrl(): String =
                 it
             }
         }
+
+private fun String.decodeHtmlEntities(): String = Parser.unescapeEntities(this, inAttribute = false)
 
 private fun renderRichText(
     text: String,

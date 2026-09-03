@@ -27,7 +27,7 @@ internal class TimelineRemoteMediator(
     private val refreshOnInitialize: suspend () -> Boolean = { true },
 ) : BasePagingRemoteMediator<
         OffsetFromStartPagingKey,
-        DbPagingTimelineWithStatus,
+        TimelinePageItem,
         DbPagingTimelineWithStatus,
     >(
         database = database,
@@ -65,7 +65,7 @@ internal class TimelineRemoteMediator(
 
     override suspend fun doLoad(
         loadType: LoadType,
-        state: PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>,
+        state: PagingState<OffsetFromStartPagingKey, TimelinePageItem>,
     ): MediatorResult {
         if (loadType == LoadType.PREPEND && suppressInitialPrepend) {
             suppressInitialPrepend = false

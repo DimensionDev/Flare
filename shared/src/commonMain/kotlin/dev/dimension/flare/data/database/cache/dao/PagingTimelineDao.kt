@@ -92,54 +92,101 @@ internal suspend fun PagingTimelineDao.getTimelinePageInCurrentTransaction(
     if (roots.isEmpty()) {
         return emptyList()
     }
-    val rootIds = roots.map { it.status.id }
-    val semanticReferences =
-        rootIds.chunked(QUERY_BATCH_SIZE).flatMap { getPageStatusReferences(it) }
-    val presentationReferences =
-        rootIds.chunked(QUERY_BATCH_SIZE).flatMap { getPagePresentationReferences(pagingKey, it) }
-    val rootStatuses = roots.associate { it.status.id to it.status }
-    val referencedStatusIds =
-        buildSet {
-            semanticReferences.mapTo(this) { it.referenceStatusId }
-            presentationReferences.mapTo(this) { it.referenceStatusId }
-        } - rootStatuses.keys
-    val statusById =
-        rootStatuses +
-            referencedStatusIds
-                .chunked(QUERY_BATCH_SIZE)
-                .flatMap { getPageStatuses(it) }
-                .associateBy { it.id }
-    val translationsByStatusId =
-        statusById.keys
-            .chunked(QUERY_BATCH_SIZE)
-            .flatMap { getPageTranslations(it) }
-            .groupBy { it.entityKey }
-    val hydratedStatusById =
-        statusById.mapValues { (_, status) -> status.withTranslations(translationsByStatusId) }
-    val semanticByRoot = semanticReferences.groupBy { it.statusId }
-    val presentationByRoot = presentationReferences.groupBy { it.statusId }
-    return roots.map { root ->
-        DbPagingTimelineWithStatus(
-            timeline = root.timeline,
-            status =
-                DbStatusWithReference(
-                    status = hydratedStatusById.getValue(root.status.id),
-                    references =
-                        semanticByRoot[root.status.id].orEmpty().map { reference ->
-                            DbStatusReferenceWithStatus(
-                                reference = reference,
-                                status = hydratedStatusById[reference.referenceStatusId],
-                            )
-                        },
-                ),
-            presentationReferences =
-                presentationByRoot[root.status.id].orEmpty().map { reference ->
+    val rootIds = ArrayList<String>(roots.size)
+    val statusById = LinkedHashMap<String, DbStatus>(roots.size * 4)
+    roots.forEach { root ->
+        rootIds += root.status.id
+        statusById[root.status.id] = root.status
+    }
+
+    val semanticReferences = ArrayList<DbStatusReference>()
+    val presentationReferences = ArrayList<DbTimelineItemPresentationReference>()
+    var batchStart = 0
+    while (batchStart < rootIds.size) {
+        val batchEnd = minOf(batchStart + QUERY_BATCH_SIZE, rootIds.size)
+        val batch = rootIds.subList(batchStart, batchEnd)
+        semanticReferences += getPageStatusReferences(batch)
+        presentationReferences += getPagePresentationReferences(pagingKey, batch)
+        batchStart = batchEnd
+    }
+
+    val referencedStatusIds = LinkedHashSet<String>(semanticReferences.size + presentationReferences.size)
+    semanticReferences.forEach { reference ->
+        if (reference.referenceStatusId !in statusById) {
+            referencedStatusIds += reference.referenceStatusId
+        }
+    }
+    presentationReferences.forEach { reference ->
+        if (reference.referenceStatusId !in statusById) {
+            referencedStatusIds += reference.referenceStatusId
+        }
+    }
+    val referencedIds = referencedStatusIds.toList()
+    batchStart = 0
+    while (batchStart < referencedIds.size) {
+        val batchEnd = minOf(batchStart + QUERY_BATCH_SIZE, referencedIds.size)
+        getPageStatuses(referencedIds.subList(batchStart, batchEnd)).forEach { status ->
+            statusById[status.id] = status
+        }
+        batchStart = batchEnd
+    }
+
+    val translationsByStatusId = HashMap<String, MutableList<DbTranslation>>()
+    val allStatusIds = statusById.keys.toList()
+    batchStart = 0
+    while (batchStart < allStatusIds.size) {
+        val batchEnd = minOf(batchStart + QUERY_BATCH_SIZE, allStatusIds.size)
+        getPageTranslations(allStatusIds.subList(batchStart, batchEnd)).forEach { translation ->
+            translationsByStatusId.getOrPut(translation.entityKey, ::ArrayList) += translation
+        }
+        batchStart = batchEnd
+    }
+
+    val hydratedStatusById = HashMap<String, DbStatusWithUser>(statusById.size)
+    statusById.forEach { (statusId, status) ->
+        hydratedStatusById[statusId] = status.withTranslations(translationsByStatusId)
+    }
+    val semanticByRoot = HashMap<String, MutableList<DbStatusReference>>()
+    semanticReferences.forEach { reference ->
+        semanticByRoot.getOrPut(reference.statusId, ::ArrayList) += reference
+    }
+    val presentationByRoot = HashMap<String, MutableList<DbTimelineItemPresentationReference>>()
+    presentationReferences.forEach { reference ->
+        presentationByRoot.getOrPut(reference.statusId, ::ArrayList) += reference
+    }
+
+    return ArrayList<DbPagingTimelineWithStatus>(roots.size).also { result ->
+        roots.forEach { root ->
+            val rootStatusId = root.status.id
+            val semantic = semanticByRoot[rootStatusId].orEmpty()
+            val hydratedSemantic = ArrayList<DbStatusReferenceWithStatus>(semantic.size)
+            semantic.forEach { reference ->
+                hydratedSemantic +=
+                    DbStatusReferenceWithStatus(
+                        reference = reference,
+                        status = hydratedStatusById[reference.referenceStatusId],
+                    )
+            }
+            val presentation = presentationByRoot[rootStatusId].orEmpty()
+            val hydratedPresentation = ArrayList<DbTimelineItemPresentationReferenceWithStatus>(presentation.size)
+            presentation.forEach { reference ->
+                hydratedPresentation +=
                     DbTimelineItemPresentationReferenceWithStatus(
                         reference = reference,
                         status = hydratedStatusById[reference.referenceStatusId],
                     )
-                },
-        )
+            }
+            result +=
+                DbPagingTimelineWithStatus(
+                    timeline = root.timeline,
+                    status =
+                        DbStatusWithReference(
+                            status = hydratedStatusById.getValue(rootStatusId),
+                            references = hydratedSemantic,
+                        ),
+                    presentationReferences = hydratedPresentation,
+                )
+        }
     }
 }
 

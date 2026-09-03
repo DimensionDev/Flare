@@ -67,7 +67,7 @@ class TimelineDbPageLoaderTransactionTest {
 
                 val loaded = TimelineDbPageLoader(database, "home", TimelineDbPageCache()).load(0, 1)
 
-                assertEquals(listOf(status.id), loaded.map { it.statusData.id })
+                assertEquals(listOf(status.id), loaded.map { it.statusId })
             } finally {
                 database.close()
                 deleteDatabaseFiles(databasePath)

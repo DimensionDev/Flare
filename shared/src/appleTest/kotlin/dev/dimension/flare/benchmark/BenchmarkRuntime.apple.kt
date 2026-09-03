@@ -14,10 +14,11 @@ internal actual val benchmarkPlatform: String =
         (if (Platform.isDebugBinary) "debug" else "release") +
         "-bundled-sqlite"
 
-internal actual fun collectLiveHeapBytes(): Long? {
+internal actual fun collectLiveHeapSnapshot(): LiveHeapSnapshot {
     GC.collect()
-    return GC.lastGCInfo
-        ?.memoryUsageAfter
-        ?.get("heap")
-        ?.totalObjectsSizeBytes
+    val info = GC.lastGCInfo
+    return LiveHeapSnapshot(
+        totalObjectsSizeBytes = info?.memoryUsageAfter?.get("heap")?.totalObjectsSizeBytes,
+        markedObjectCount = info?.markedCount,
+    )
 }

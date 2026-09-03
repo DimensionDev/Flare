@@ -30,35 +30,25 @@ internal fun UiTimelineV2.applyTranslation(
         return this
     }
     if (this is UiTimelineV2.TimelinePostItem) {
+        val translatedPost = post.applyTranslation(options, translations) as UiTimelineV2.Post
+        val translatedParents = presentation.inlineParents.mapTranslationIfChanged(options) { translations }
+        val translatedQuotes = presentation.quotes.mapTranslationIfChanged(options) { translations }
+        val translatedRepost = presentation.repost?.applyTranslation(options, translations) as? UiTimelineV2.Post
+        if (
+            translatedPost === post &&
+            translatedParents === presentation.inlineParents &&
+            translatedQuotes === presentation.quotes &&
+            translatedRepost === presentation.repost
+        ) {
+            return this
+        }
         return copy(
-            post =
-                post.applyTranslation(
-                    options = options,
-                    translations = translations,
-                ) as UiTimelineV2.Post,
+            post = translatedPost,
             presentation =
                 presentation.copy(
-                    inlineParents =
-                        presentation.inlineParents
-                            .map {
-                                it.applyTranslation(
-                                    options = options,
-                                    translations = translations,
-                                ) as UiTimelineV2.Post
-                            }.toPersistentList(),
-                    quotes =
-                        presentation.quotes
-                            .map {
-                                it.applyTranslation(
-                                    options = options,
-                                    translations = translations,
-                                ) as UiTimelineV2.Post
-                            }.toPersistentList(),
-                    repost =
-                        presentation.repost?.applyTranslation(
-                            options = options,
-                            translations = translations,
-                        ) as? UiTimelineV2.Post,
+                    inlineParents = translatedParents,
+                    quotes = translatedQuotes,
+                    repost = translatedRepost,
                 ),
         )
     }
@@ -76,21 +66,32 @@ internal fun UiTimelineV2.applyTranslation(
 
     return when (this) {
         is UiTimelineV2.Feed -> {
-            copy(
-                title =
-                    translation
-                        .takeIf { it?.status == TranslationStatus.Completed }
-                        ?.payload
-                        ?.title
-                        ?.raw ?: title,
-                description =
-                    translation
-                        .takeIf { it?.status == TranslationStatus.Completed }
-                        ?.payload
-                        ?.description
-                        ?.raw ?: description,
-                translationDisplayState = translation.toDisplayState(),
-            )
+            val translatedTitle =
+                translation
+                    .takeIf { it?.status == TranslationStatus.Completed }
+                    ?.payload
+                    ?.title
+                    ?.raw ?: title
+            val translatedDescription =
+                translation
+                    .takeIf { it?.status == TranslationStatus.Completed }
+                    ?.payload
+                    ?.description
+                    ?.raw ?: description
+            val displayState = translation.toDisplayState()
+            if (
+                translatedTitle == title &&
+                translatedDescription == description &&
+                displayState == translationDisplayState
+            ) {
+                this
+            } else {
+                copy(
+                    title = translatedTitle,
+                    description = translatedDescription,
+                    translationDisplayState = displayState,
+                )
+            }
         }
 
         is UiTimelineV2.Post -> {
@@ -136,18 +137,40 @@ internal fun UiTimelineV2.applyTranslation(
                             TranslationMenuAction.Translate
                         }
                     }
-                copy(
-                    content =
-                        translatedPayload?.let {
-                            content.copy(translation = it.content)
-                        } ?: content,
-                    contentWarning =
-                        translatedPayload?.let {
-                            contentWarning?.copy(translation = it.contentWarning)
-                        } ?: contentWarning,
-                    translationDisplayState = displayState,
-                    actions = actions.withTranslationMenuAction(menuAction, accountType, statusKey),
-                )
+                val translatedContent =
+                    translatedPayload
+                        ?.let { payload ->
+                            if (content.translation == payload.content) {
+                                content
+                            } else {
+                                content.copy(translation = payload.content)
+                            }
+                        } ?: content
+                val translatedWarning =
+                    translatedPayload
+                        ?.let { payload ->
+                            if (contentWarning?.translation == payload.contentWarning) {
+                                contentWarning
+                            } else {
+                                contentWarning?.copy(translation = payload.contentWarning)
+                            }
+                        } ?: contentWarning
+                val translatedActions = actions.withTranslationMenuAction(menuAction, accountType, statusKey)
+                if (
+                    translatedContent === content &&
+                    translatedWarning === contentWarning &&
+                    displayState == translationDisplayState &&
+                    translatedActions === actions
+                ) {
+                    this
+                } else {
+                    copy(
+                        content = translatedContent,
+                        contentWarning = translatedWarning,
+                        translationDisplayState = displayState,
+                        actions = translatedActions,
+                    )
+                }
             }
         }
 
@@ -161,6 +184,66 @@ internal fun UiTimelineV2.applyTranslation(
 
         is UiTimelineV2.UserList -> {
             this
+        }
+    }
+}
+
+/** Applies each status's own translation while preserving unchanged subtrees by reference. */
+internal fun UiTimelineV2.applyTranslation(
+    options: TranslationDisplayOptions,
+    translationsFor: (
+        accountType: dev.dimension.flare.model.AccountType,
+        statusKey: dev.dimension.flare.model.MicroBlogKey,
+    ) -> List<DbTranslation>,
+): UiTimelineV2 {
+    if (!options.translationEnabled) {
+        return this
+    }
+    return when (this) {
+        is UiTimelineV2.TimelinePostItem -> {
+            val translatedPost = post.applyTranslation(options, translationsFor(post.accountType, post.statusKey)) as UiTimelineV2.Post
+            val translatedParents =
+                presentation.inlineParents.mapTranslationIfChanged(options) {
+                    translationsFor(it.accountType, it.statusKey)
+                }
+            val translatedQuotes =
+                presentation.quotes.mapTranslationIfChanged(options) {
+                    translationsFor(it.accountType, it.statusKey)
+                }
+            val translatedRepost =
+                presentation.repost?.let {
+                    it.applyTranslation(options, translationsFor(it.accountType, it.statusKey)) as UiTimelineV2.Post
+                }
+            if (
+                translatedPost === post &&
+                translatedParents === presentation.inlineParents &&
+                translatedQuotes === presentation.quotes &&
+                translatedRepost === presentation.repost
+            ) {
+                this
+            } else {
+                copy(
+                    post = translatedPost,
+                    presentation =
+                        presentation.copy(
+                            inlineParents = translatedParents,
+                            quotes = translatedQuotes,
+                            repost = translatedRepost,
+                        ),
+                )
+            }
+        }
+
+        is UiTimelineV2.UserList -> {
+            val translatedPost =
+                post?.let {
+                    it.applyTranslation(options, translationsFor(it.accountType, it.statusKey)) as UiTimelineV2.Post
+                }
+            if (translatedPost === post) this else copy(post = translatedPost)
+        }
+
+        else -> {
+            applyTranslation(options, translationsFor(accountType, statusKey))
         }
     }
 }
@@ -179,10 +262,36 @@ internal fun UiProfile.applyTranslation(
                 it.sourceHash == payload.sourceHash(options.providerCacheKey)
         }
     val displayState = matchedTranslation.toDisplayState()
-    return copy(
-        description = matchedTranslation.takeIf { it?.status == TranslationStatus.Completed }?.payload?.description ?: description,
-        translationDisplayState = displayState,
-    )
+    val translatedDescription =
+        matchedTranslation.takeIf { it?.status == TranslationStatus.Completed }?.payload?.description ?: description
+    return if (translatedDescription == description && displayState == translationDisplayState) {
+        this
+    } else {
+        copy(
+            description = translatedDescription,
+            translationDisplayState = displayState,
+        )
+    }
+}
+
+private inline fun kotlinx.collections.immutable.ImmutableList<UiTimelineV2.Post>.mapTranslationIfChanged(
+    options: TranslationDisplayOptions,
+    translations: (UiTimelineV2.Post) -> List<DbTranslation>,
+): kotlinx.collections.immutable.ImmutableList<UiTimelineV2.Post> {
+    var result: MutableList<UiTimelineV2.Post>? = null
+    forEachIndexed { index, post ->
+        val translated = post.applyTranslation(options, translations(post)) as UiTimelineV2.Post
+        if (result != null) {
+            result.add(translated)
+        } else if (translated !== post) {
+            result =
+                ArrayList<UiTimelineV2.Post>(size).also { copy ->
+                    repeat(index) { copy += this[it] }
+                    copy += translated
+                }
+        }
+    }
+    return result?.toPersistentList() ?: this
 }
 
 internal fun UiTimelineV2.translationPayload(): TranslationPayload? =
@@ -273,22 +382,26 @@ private fun DbTranslation?.toDisplayState(): TranslationDisplayState =
         -> TranslationDisplayState.Hidden
     }
 
-private fun List<ActionMenu>.withTranslationMenuAction(
+private fun kotlinx.collections.immutable.ImmutableList<ActionMenu>.withTranslationMenuAction(
     action: TranslationMenuAction?,
     accountType: dev.dimension.flare.model.AccountType,
     statusKey: dev.dimension.flare.model.MicroBlogKey,
 ) = if (action == null) {
-    this.toPersistentList()
+    this
 } else if (accountType is AccountType.Specific) {
-    map { menu ->
-        menu.prependTranslationAction(
-            accountKey = accountType.accountKey,
-            statusKey = statusKey,
-            translationAction = action,
-        )
-    }.toPersistentList()
+    var changed = false
+    val mapped =
+        map { menu ->
+            menu
+                .prependTranslationAction(
+                    accountKey = accountType.accountKey,
+                    statusKey = statusKey,
+                    translationAction = action,
+                ).also { changed = changed || it !== menu }
+        }
+    if (!changed) this else mapped.toPersistentList()
 } else {
-    this.toPersistentList()
+    this
 }
 
 private fun ActionMenu.prependTranslationAction(
@@ -352,18 +465,17 @@ private fun ActionMenu.prependTranslationAction(
                         icon = UiIcon.Translate,
                         actionFamily = PostActionFamily.Translate,
                     )
+                if (
+                    actions.firstOrNull() == localAction &&
+                    actions.drop(1).none { it.isTranslationAction() }
+                ) {
+                    return this
+                }
                 copy(
                     actions =
                         (
                             listOf(localAction) +
-                                actions.filterNot {
-                                    (it as? ActionMenu.Item)?.text.let { text ->
-                                        val localized = text as? ActionMenu.Item.Text.Localized
-                                        localized?.type == ActionMenu.Item.Text.Localized.Type.RetryTranslation ||
-                                            localized?.type == ActionMenu.Item.Text.Localized.Type.Translate ||
-                                            localized?.type == ActionMenu.Item.Text.Localized.Type.ShowOriginal
-                                    }
-                                }
+                                actions.filterNot { it.isTranslationAction() }
                         ).toPersistentList(),
                 )
             } else {
@@ -377,6 +489,13 @@ private fun ActionMenu.prependTranslationAction(
             this
         }
     }
+
+private fun ActionMenu.isTranslationAction(): Boolean {
+    val localized = (this as? ActionMenu.Item)?.text as? ActionMenu.Item.Text.Localized
+    return localized?.type == ActionMenu.Item.Text.Localized.Type.RetryTranslation ||
+        localized?.type == ActionMenu.Item.Text.Localized.Type.Translate ||
+        localized?.type == ActionMenu.Item.Text.Localized.Type.ShowOriginal
+}
 
 private fun ActionMenu.Item.Text?.isMoreMenuText(): Boolean =
     (this as? ActionMenu.Item.Text.Localized)?.type == ActionMenu.Item.Text.Localized.Type.More

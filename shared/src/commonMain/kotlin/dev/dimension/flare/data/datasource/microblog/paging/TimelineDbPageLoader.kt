@@ -6,7 +6,8 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.dao.DbTimelinePageIdentity
 import dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
 import dev.dimension.flare.data.database.cache.dao.getTimelinePageInCurrentTransaction
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -18,6 +19,7 @@ import kotlinx.coroutines.sync.withLock
 internal class TimelineDbPageCache {
     private val mutex = Mutex()
     private var snapshot = Snapshot()
+    private val canonicalProfiles = HashMap<MicroBlogKey, UiProfile>()
 
     suspend fun hasCurrentWindowChanged(
         dao: PagingTimelineDao,
@@ -31,11 +33,9 @@ internal class TimelineDbPageCache {
                 dao.getTimelinePageIdentities(
                     pagingKey = pagingKey,
                     offset = 0,
-                    limit = snapshot.identities.size + 1,
+                    limit = snapshot.size + 1,
                 )
-            val currentWindow = identities.take(snapshot.identities.size)
-            val nextIdentity = identities.getOrNull(snapshot.identities.size)
-            currentWindow != snapshot.identities || nextIdentity != snapshot.nextIdentity
+            !snapshot.matches(identities)
         }
 
     suspend fun load(
@@ -43,7 +43,7 @@ internal class TimelineDbPageCache {
         pagingKey: String,
         offset: Int,
         limit: Int,
-    ): List<DbPagingTimelineWithStatus> =
+    ): List<TimelinePageItem> =
         mutex.withLock {
             database.withReadTransaction {
                 loadPage(
@@ -60,94 +60,176 @@ internal class TimelineDbPageCache {
         pagingKey: String,
         offset: Int,
         limit: Int,
-    ): List<DbPagingTimelineWithStatus> {
+    ): List<TimelinePageItem> {
         val identityRows =
             dao.getTimelinePageIdentities(
                 pagingKey = pagingKey,
                 offset = offset,
                 limit = limit + 1,
             )
-        val pageIdentities = identityRows.take(limit)
+        val pageSize = minOf(limit, identityRows.size)
+        val pageIdentities = ArrayList<DbTimelinePageIdentity>(pageSize)
+        repeat(pageSize) { pageIdentities += identityRows[it] }
         if (pageIdentities.isEmpty()) {
             if (offset == 0) {
-                snapshot =
-                    Snapshot(
-                        loaded = true,
-                        nextIdentity = identityRows.firstOrNull(),
-                    )
+                snapshot.replace(emptyList(), emptyList(), identityRows.firstOrNull())
+                canonicalProfiles.clear()
             }
             return emptyList()
         }
 
         if (offset == 0) {
-            val cachedByIdentity = snapshot.identities.zip(snapshot.data).toMap()
-            val reused = pageIdentities.map { cachedByIdentity[it] }
-            val firstDirty = reused.indexOfFirst { it == null }
+            var firstDirty = -1
+            var lastDirty = -1
+            pageIdentities.forEachIndexed { index, identity ->
+                if (snapshot[identity] == null) {
+                    if (firstDirty < 0) firstDirty = index
+                    lastDirty = index
+                }
+            }
             val data =
                 if (firstDirty < 0) {
-                    reused.filterNotNull()
+                    ArrayList<TimelinePageItem>(pageIdentities.size).also { result ->
+                        pageIdentities.forEach { identity -> result += checkNotNull(snapshot[identity]) }
+                    }
                 } else {
                     // ponytail: Split disjoint ranges only if a trace shows this span is too broad.
-                    val lastDirty = reused.indexOfLast { it == null }
                     val fetchedData =
-                        dao.getTimelinePageInCurrentTransaction(
+                        loadProjectedPage(
+                            dao = dao,
                             pagingKey = pagingKey,
                             offset = firstDirty,
                             limit = lastDirty - firstDirty + 1,
+                            identities = pageIdentities.subList(firstDirty, lastDirty + 1),
                         )
-                    reused.mapIndexed { index, cached ->
-                        if (index in firstDirty..lastDirty) {
-                            fetchedData[index - firstDirty]
-                        } else {
-                            checkNotNull(cached)
+                    ArrayList<TimelinePageItem>(pageIdentities.size).also { result ->
+                        pageIdentities.forEachIndexed { index, identity ->
+                            result +=
+                                if (index in firstDirty..lastDirty) {
+                                    fetchedData[index - firstDirty]
+                                } else {
+                                    checkNotNull(snapshot[identity])
+                                }
                         }
                     }
                 }
-            snapshot =
-                Snapshot(
-                    loaded = true,
-                    identities = pageIdentities.take(data.size),
-                    data = data,
-                    nextIdentity = identityRows.getOrNull(data.size),
-                )
+            val retainedIdentities =
+                if (data.size == pageIdentities.size) pageIdentities else pageIdentities.take(data.size)
+            snapshot.replace(
+                identities = retainedIdentities,
+                data = data,
+                nextIdentity = identityRows.getOrNull(data.size),
+            )
+            TimelinePagingMapper.rebuildCanonicalProfiles(data, canonicalProfiles)
             return data
         }
 
         val data =
-            dao.getTimelinePageInCurrentTransaction(
+            loadProjectedPage(
+                dao = dao,
                 pagingKey = pagingKey,
                 offset = offset,
                 limit = limit,
+                identities = pageIdentities,
             )
-        if (snapshot.data.size == offset && data.size == pageIdentities.size) {
-            snapshot =
-                Snapshot(
-                    loaded = true,
-                    identities = snapshot.identities + pageIdentities,
-                    data = snapshot.data + data,
-                    nextIdentity = identityRows.getOrNull(pageIdentities.size),
-                )
+        if (snapshot.size == offset && data.size == pageIdentities.size) {
+            snapshot.append(
+                identities = pageIdentities,
+                data = data,
+                nextIdentity = identityRows.getOrNull(pageIdentities.size),
+            )
         }
         return data
     }
 
-    private data class Snapshot(
-        val loaded: Boolean = false,
-        val identities: List<DbTimelinePageIdentity> = emptyList(),
-        val data: List<DbPagingTimelineWithStatus> = emptyList(),
-        val nextIdentity: DbTimelinePageIdentity? = null,
-    )
+    private suspend fun loadProjectedPage(
+        dao: PagingTimelineDao,
+        pagingKey: String,
+        offset: Int,
+        limit: Int,
+        identities: List<DbTimelinePageIdentity>,
+    ): List<TimelinePageItem> =
+        TimelinePagingMapper.toPageItems(
+            items = dao.getTimelinePageInCurrentTransaction(pagingKey, offset, limit),
+            identities = identities,
+            pagingKey = pagingKey,
+            canonicalProfiles = canonicalProfiles,
+        )
+
+    private class Snapshot {
+        var loaded: Boolean = false
+            private set
+        var size: Int = 0
+            private set
+        private var nextIdentity: DbTimelinePageIdentity? = null
+        private var segments = ArrayList<Segment>()
+        private var itemByIdentity = HashMap<DbTimelinePageIdentity, TimelinePageItem>()
+
+        operator fun get(identity: DbTimelinePageIdentity): TimelinePageItem? = itemByIdentity[identity]
+
+        fun replace(
+            identities: List<DbTimelinePageIdentity>,
+            data: List<TimelinePageItem>,
+            nextIdentity: DbTimelinePageIdentity?,
+        ) {
+            loaded = true
+            segments = ArrayList(1)
+            itemByIdentity = HashMap(data.size * 4 / 3 + 1)
+            size = 0
+            if (data.isNotEmpty()) {
+                append(identities, data, nextIdentity)
+            } else {
+                this.nextIdentity = nextIdentity
+            }
+        }
+
+        fun append(
+            identities: List<DbTimelinePageIdentity>,
+            data: List<TimelinePageItem>,
+            nextIdentity: DbTimelinePageIdentity?,
+        ) {
+            require(identities.size == data.size)
+            if (data.isNotEmpty()) {
+                segments += Segment(identities)
+                identities.forEachIndexed { index, identity -> itemByIdentity[identity] = data[index] }
+                size += data.size
+            }
+            this.nextIdentity = nextIdentity
+        }
+
+        fun matches(identityRows: List<DbTimelinePageIdentity>): Boolean {
+            if (identityRows.getOrNull(size) != nextIdentity) {
+                return false
+            }
+            if (identityRows.size < size) {
+                return false
+            }
+            var index = 0
+            segments.forEach { segment ->
+                segment.identities.forEach { identity ->
+                    if (identityRows[index++] != identity) {
+                        return false
+                    }
+                }
+            }
+            return true
+        }
+
+        private data class Segment(
+            val identities: List<DbTimelinePageIdentity>,
+        )
+    }
 }
 
 internal class TimelineDbPageLoader(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val pageCache: TimelineDbPageCache,
-) : OffsetFromStartPageLoader<DbPagingTimelineWithStatus> {
+) : OffsetFromStartPageLoader<TimelinePageItem> {
     override suspend fun load(
         offset: Int,
         limit: Int,
-    ): List<DbPagingTimelineWithStatus> =
+    ): List<TimelinePageItem> =
         pageCache.load(
             database = database,
             pagingKey = pagingKey,

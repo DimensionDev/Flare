@@ -21,7 +21,6 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.datasource.microblog.offsetPagingConfig
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
@@ -30,7 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.OffsetFromStartPagin
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
-import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
@@ -148,11 +147,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                                 .map { translationDisplayOptions ->
                                     withContext(PlatformDispatchers.IO) {
                                         pagingData.map { item ->
-                                            TimelinePagingMapper.toUi(
-                                                item = item,
-                                                pagingKey = remoteLoader.pagingKey,
-                                                translationDisplayOptions = translationDisplayOptions,
-                                            )
+                                            item.toUi(translationDisplayOptions)
                                         }
                                     }
                                 }
@@ -185,7 +180,7 @@ public open class TimelinePresenter : PresenterBase<TimelineState> {
                 emitAll(PagingData.emptyFlow(isError = true))
             }
 
-    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<DbPagingTimelineWithStatus>> =
+    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<TimelinePageItem>> =
         run {
             val allowLongText = allowLongTextTranslationDisplay(loader)
             val pageCache = TimelineDbPageCache()

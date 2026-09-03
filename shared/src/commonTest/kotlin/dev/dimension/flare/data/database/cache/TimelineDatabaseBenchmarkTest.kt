@@ -7,8 +7,10 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.benchmark.LiveHeapSnapshot
 import dev.dimension.flare.benchmark.benchmarkPlatform
 import dev.dimension.flare.benchmark.collectLiveHeapBytes
+import dev.dimension.flare.benchmark.collectLiveHeapSnapshot
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
@@ -30,6 +32,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -55,6 +58,7 @@ import kotlin.math.roundToLong
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 import kotlin.time.measureTime
@@ -109,7 +113,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                         val mapped = mapTimelineItems(initialUi, startIndex = 0)
                         database.connect { saveToDatabase(database, mapped) }
                         val page = loader.load(offset = 0, limit = PAGE_SIZE)
-                        retainedUi = page.map { TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions) }
+                        retainedUi = page.map { it.toUi(displayOptions) }
                         checksum = checksum * 31 + retainedUi.renderChecksum()
                     }
 
@@ -122,7 +126,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                             val mapped = mapTimelineItems(pageUi, startIndex)
                             database.connect { saveToDatabase(database, mapped) }
                             val page = loader.load(offset = startIndex, limit = PAGE_SIZE)
-                            val rendered = page.map { TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions) }
+                            val rendered = page.map { it.toUi(displayOptions) }
                             checksum = checksum * 31 + rendered.renderChecksum()
                         }
                     appendSamples[pageIndex] = elapsed.inWholeNanoseconds
@@ -132,14 +136,12 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                 var pagingSource = OffsetFromStartPagingSource(loader)
                 retainedUi =
                     loadLifecycleRefresh(pagingSource)
-                        .map { TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions) }
+                        .map { it.toUi(displayOptions) }
                 assertEquals(LIFECYCLE_ROWS, retainedUi.size)
                 val heapWithStablePrefix = collectLiveHeapBytes()
 
                 retainedUi =
-                    loadLifecycleRefresh(pagingSource).map {
-                        TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions)
-                    }
+                    loadLifecycleRefresh(pagingSource).map { it.toUi(displayOptions) }
 
                 val unchangedUi = createRealisticTimelineItems(startIndex = 0, count = PAGE_SIZE, revision = 0)
                 val unchangedSamples =
@@ -167,9 +169,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
 
                             pagingSource = OffsetFromStartPagingSource(loader)
                             retainedUi =
-                                loadLifecycleRefresh(pagingSource).map {
-                                    TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions)
-                                }
+                                loadLifecycleRefresh(pagingSource).map { it.toUi(displayOptions) }
                             assertEquals(LIFECYCLE_ROWS, retainedUi.size)
                             checksum = checksum * 31 + retainedUi.renderChecksum()
                         }
@@ -185,9 +185,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                         awaitLifecycleInvalidation(translationInvalidated)
                         pagingSource = OffsetFromStartPagingSource(loader)
                         retainedUi =
-                            loadLifecycleRefresh(pagingSource).map {
-                                TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions)
-                            }
+                            loadLifecycleRefresh(pagingSource).map { it.toUi(displayOptions) }
                         assertEquals(LIFECYCLE_ROWS, retainedUi.size)
                         checksum = checksum * 31 + retainedUi.renderChecksum()
                     }
@@ -201,9 +199,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                         awaitLifecycleInvalidation(insertInvalidated)
                         pagingSource = OffsetFromStartPagingSource(loader)
                         retainedUi =
-                            loadLifecycleRefresh(pagingSource).map {
-                                TimelinePagingMapper.toUi(it, LIFECYCLE_PAGING_KEY, displayOptions)
-                            }
+                            loadLifecycleRefresh(pagingSource).map { it.toUi(displayOptions) }
                         assertEquals(LIFECYCLE_ROWS + 1, retainedUi.size)
                         checksum = checksum * 31 + retainedUi.renderChecksum()
                     }
@@ -240,6 +236,81 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
             } finally {
                 database.close()
             }
+        }
+
+    /**
+     * Measures the post-GC Kotlin working set while a timeline grows without evicting old rows.
+     *
+     * Each checkpoint separates the database/page-cache graph from the final UI projection. A
+     * final series of same-size refreshes makes retained growth visible independently of transient
+     * allocation churn. On Kotlin/Native the reported value is
+     * `GC.lastGCInfo.memoryUsageAfter["heap"].totalObjectsSizeBytes`.
+     */
+    @Test
+    fun benchmarkTimelineKotlinMemory() =
+        runTest(timeout = 5.minutes) {
+            val processBaseline = collectStableLiveHeap()
+            val result = runTimelineKotlinMemoryScenario()
+            val refreshGuard = stableRefreshObjectGrowth(result.workingSet.refreshes)
+            if (refreshGuard.growth != null && refreshGuard.limit != null) {
+                assertTrue(
+                    refreshGuard.growth <= refreshGuard.limit,
+                    "Stable refresh retained ${refreshGuard.growth} objects; limit=${refreshGuard.limit}",
+                )
+            }
+
+            println("TIMELINE_KOTLIN_MEMORY_BENCHMARK version=$MEMORY_BENCHMARK_VERSION platform=$benchmarkPlatform")
+            println(
+                "config retained_row_checkpoints=${MEMORY_RETAINED_ROW_CHECKPOINTS.joinToString(",")} " +
+                    "page_size=$PAGE_SIZE users=$LIFECYCLE_USER_COUNT " +
+                    "semantic_references_per_root=$REFERENCES_PER_ROOT " +
+                    "presentation_references_per_root=$REFERENCES_PER_ROOT " +
+                    "payload_chars=$LIFECYCLE_PAYLOAD_CHARS " +
+                    "translated_root_stride=$LIFECYCLE_TRANSLATION_STRIDE " +
+                    "refresh_iterations=$MEMORY_REFRESH_ITERATIONS gc_samples=$MEMORY_GC_SAMPLES",
+            )
+            printHeapSnapshot("process_baseline", processBaseline)
+            printHeapSnapshot("database_open_warmed", result.databaseOpen)
+            printHeapSnapshot("database_seeded", result.databaseSeeded)
+            result.workingSet.checkpoints.forEach { checkpoint ->
+                printWorkingSetHeap(
+                    phase = "cache_only",
+                    retainedRows = checkpoint.retainedRows,
+                    snapshot = checkpoint.cacheOnly,
+                    databaseSeeded = result.databaseSeeded,
+                )
+                printWorkingSetHeap(
+                    phase = "cache_plus_ui",
+                    retainedRows = checkpoint.retainedRows,
+                    snapshot = checkpoint.cachePlusUi,
+                    databaseSeeded = result.databaseSeeded,
+                    cacheOnly = checkpoint.cacheOnly,
+                )
+            }
+            val firstRefreshBytes = result.workingSet.refreshes.bytesAt(0)
+            val firstRefreshObjects = result.workingSet.refreshes.objectsAt(0)
+            repeat(result.workingSet.refreshes.size) { index ->
+                val bytes = result.workingSet.refreshes.bytesAt(index)
+                val objects = result.workingSet.refreshes.objectsAt(index)
+                println(
+                    "memory name=live_heap_after_gc phase=stable_refresh " +
+                        "iteration=${index + 1} retained_rows=$MEMORY_ROWS " +
+                        "bytes=${bytes.asBenchmarkValue()} " +
+                        "marked_objects=${objects.asBenchmarkValue()} " +
+                        "delta_from_first_refresh_bytes=${
+                            difference(bytes, firstRefreshBytes).asBenchmarkValue()
+                        } " +
+                        "delta_from_first_refresh_objects=${
+                            difference(objects, firstRefreshObjects).asBenchmarkValue()
+                        }",
+                )
+            }
+            println(
+                "memory_guard name=stable_refresh_object_growth " +
+                    "growth_objects=${refreshGuard.growth.asBenchmarkValue()} " +
+                    "limit_objects=${refreshGuard.limit.asBenchmarkValue()}",
+            )
+            println("memory_checksum=${result.workingSet.checksum}")
         }
 
     @Test
@@ -314,6 +385,109 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                 database.close()
             }
         }
+
+    private suspend fun runTimelineKotlinMemoryScenario(): MemoryBenchmarkResult {
+        val database =
+            Room
+                .memoryDatabaseBuilder<CacheDatabase>()
+                .setDriver(createDatabaseDriver())
+                .setQueryCoroutineContext(PlatformDispatchers.IO)
+                .build()
+
+        try {
+            warmUpDatabase(database)
+            val databaseOpen = collectStableLiveHeap()
+            seedMemoryTimeline(database)
+            val databaseSeeded = collectStableLiveHeap()
+            val workingSet = benchmarkTimelineMemoryWorkingSet(database)
+            return MemoryBenchmarkResult(
+                databaseOpen = databaseOpen,
+                databaseSeeded = databaseSeeded,
+                workingSet = workingSet,
+            )
+        } finally {
+            database.close()
+        }
+    }
+
+    private suspend fun seedMemoryTimeline(database: CacheDatabase) {
+        var startIndex = 0
+        while (startIndex < MEMORY_ROWS) {
+            val count = minOf(PAGE_SIZE, MEMORY_ROWS - startIndex)
+            val uiItems = createRealisticTimelineItems(startIndex = startIndex, count = count, revision = 0)
+            val mapped = mapTimelineItems(uiItems, startIndex, MEMORY_PAGING_KEY)
+            database.connect { saveToDatabase(database, mapped) }
+            startIndex += count
+        }
+
+        val translations =
+            (0 until MEMORY_ROWS step LIFECYCLE_TRANSLATION_STRIDE).map { index ->
+                createRealisticTimelineItems(index, 1, revision = 0).single().post.completedTranslation(
+                    updatedAt = FIXED_EPOCH_MILLIS + 20_000 + index,
+                )
+            }
+        database.connect { database.translationDao().insertAll(translations) }
+    }
+
+    private suspend fun benchmarkTimelineMemoryWorkingSet(database: CacheDatabase): MemoryWorkingSetResult {
+        val loader =
+            TimelineDbPageLoader(
+                database = database,
+                pagingKey = MEMORY_PAGING_KEY,
+                pageCache = TimelineDbPageCache(),
+            )
+        val displayOptions =
+            TranslationDisplayOptions(
+                translationEnabled = true,
+                autoDisplayEnabled = true,
+                providerCacheKey = LIFECYCLE_TRANSLATION_PROVIDER,
+            )
+        val retainedUi = RetainedUiHolder()
+        val checkpoints = mutableListOf<MemoryWorkingSetCheckpoint>()
+        var loadedRows = 0
+        var checksum = 0L
+
+        MEMORY_RETAINED_ROW_CHECKPOINTS.forEach { targetRows ->
+            retainedUi.items = emptyList()
+            while (loadedRows < targetRows) {
+                val count = minOf(PAGE_SIZE, targetRows - loadedRows)
+                val page = loader.load(offset = loadedRows, limit = count)
+                assertEquals(count, page.size)
+                checksum = checksum * 31 + page.databaseChecksum()
+                loadedRows += page.size
+            }
+            val cacheOnly = collectStableLiveHeap()
+
+            retainedUi.items =
+                loader.load(offset = 0, limit = targetRows).map { it.toUi(displayOptions) }
+            assertEquals(targetRows, retainedUi.items.size)
+            checksum = checksum * 31 + retainedUi.items.renderChecksum()
+            val cachePlusUi = collectStableLiveHeap()
+
+            checkpoints +=
+                MemoryWorkingSetCheckpoint(
+                    retainedRows = targetRows,
+                    cacheOnly = cacheOnly,
+                    cachePlusUi = cachePlusUi,
+                )
+        }
+
+        val refreshBytes = LongArray(MEMORY_REFRESH_ITERATIONS) { MEMORY_UNAVAILABLE }
+        val refreshObjects = LongArray(MEMORY_REFRESH_ITERATIONS) { MEMORY_UNAVAILABLE }
+        repeat(MEMORY_REFRESH_ITERATIONS) { index ->
+            retainedUi.items =
+                loader.load(offset = 0, limit = MEMORY_ROWS).map { it.toUi(displayOptions) }
+            assertEquals(MEMORY_ROWS, retainedUi.items.size)
+            checksum = checksum * 31 + retainedUi.items.renderChecksum()
+            collectRefreshMeasurement(refreshBytes, refreshObjects, index)
+        }
+        checksum += retainedUi.items.size
+        return MemoryWorkingSetResult(
+            checkpoints = checkpoints,
+            refreshes = MemoryRefreshMeasurements(refreshBytes, refreshObjects),
+            checksum = checksum,
+        )
+    }
 
     private suspend fun warmUpDatabase(database: CacheDatabase) {
         val items = createTimelineItems(WARMUP_PAGING_KEY, startIndex = ROOT_ROWS, count = PAGE_SIZE)
@@ -469,13 +643,13 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
         val initial = loader.load(offset = 0, limit = ROOT_ROWS)
         assertEquals(ROOT_ROWS, initial.size)
 
-        lateinit var retainedRows: List<DbPagingTimelineWithStatus>
+        lateinit var retainedRows: List<TimelinePageItem>
         val samples =
             measureSamples(warmups = 1, iterations = WINDOW_MEASURE_ITERATIONS) {
                 retainedRows = loader.load(offset = 0, limit = PAGE_SIZE)
                 retainedRows
                     .fold(0L) { checksum, item ->
-                        checksum * 31 + item.timeline.sortId + item.status.references.size
+                        checksum * 31 + item.sortId + item.baseItem.renderHash
                     }
             }
         return StablePrefixBenchmarkResult(samples = samples, retainedRows = retainedRows)
@@ -525,7 +699,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                 }
             val mediator = TimelineRemoteMediator(loader, database, allowLongText = false)
             val state =
-                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                PagingState<OffsetFromStartPagingKey, TimelinePageItem>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = PAGE_SIZE),
@@ -586,10 +760,11 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
     private suspend fun mapTimelineItems(
         items: List<UiTimelineV2.TimelinePostItem>,
         startIndex: Int,
+        pagingKey: String = LIFECYCLE_PAGING_KEY,
     ): List<DbPagingTimelineWithStatus> =
         TimelinePagingMapper.toDb(
             data = items,
-            pagingKey = LIFECYCLE_PAGING_KEY,
+            pagingKey = pagingKey,
             sortIds = List(items.size) { index -> (startIndex + index).toLong() },
         )
 
@@ -709,9 +884,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
         )
     }
 
-    private suspend fun loadLifecycleRefresh(
-        source: OffsetFromStartPagingSource<DbPagingTimelineWithStatus>,
-    ): List<DbPagingTimelineWithStatus> {
+    private suspend fun loadLifecycleRefresh(source: OffsetFromStartPagingSource<TimelinePageItem>): List<TimelinePageItem> {
         val result =
             source.load(
                 PagingSource.LoadParams.Refresh<OffsetFromStartPagingKey>(
@@ -720,7 +893,7 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
                     placeholdersEnabled = false,
                 ),
             )
-        return assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>>(result).data
+        return assertIs<PagingSource.LoadResult.Page<OffsetFromStartPagingKey, TimelinePageItem>>(result).data
     }
 
     private suspend fun awaitLifecycleInvalidation(invalidated: CompletableDeferred<Unit>) {
@@ -731,6 +904,14 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
     }
 
     private fun List<UiTimelineV2>.renderChecksum(): Long = fold(size.toLong()) { checksum, item -> checksum * 31 + item.renderHash }
+
+    private fun List<TimelinePageItem>.databaseChecksum(): Long =
+        fold(size.toLong()) { checksum, item ->
+            checksum * 31 +
+                item.sortId +
+                item.baseItem.renderHash +
+                item.identity.contentRevision
+        }
 
     private fun createPost(
         index: Int,
@@ -817,6 +998,96 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
         println("memory name=live_heap_after_gc phase=$phase bytes=${bytes ?: "unavailable"}")
     }
 
+    private fun printWorkingSetHeap(
+        phase: String,
+        retainedRows: Int,
+        snapshot: LiveHeapSnapshot,
+        databaseSeeded: LiveHeapSnapshot,
+        cacheOnly: LiveHeapSnapshot? = null,
+    ) {
+        val deltaFromSeedBytes = difference(snapshot.totalObjectsSizeBytes, databaseSeeded.totalObjectsSizeBytes)
+        val deltaFromSeedObjects = difference(snapshot.markedObjectCount, databaseSeeded.markedObjectCount)
+        val uiIncrementBytes = difference(snapshot.totalObjectsSizeBytes, cacheOnly?.totalObjectsSizeBytes)
+        val uiIncrementObjects = difference(snapshot.markedObjectCount, cacheOnly?.markedObjectCount)
+        val uiDimensions =
+            if (cacheOnly == null) {
+                ""
+            } else {
+                " ui_increment_bytes=${uiIncrementBytes.asBenchmarkValue()} " +
+                    "ui_bytes_per_retained_row=${perRow(uiIncrementBytes, retainedRows).asBenchmarkValue()} " +
+                    "ui_increment_objects=${uiIncrementObjects.asBenchmarkValue()} " +
+                    "ui_objects_per_retained_row=${perRow(uiIncrementObjects, retainedRows).asBenchmarkValue()}"
+            }
+        println(
+            "memory name=live_heap_after_gc phase=$phase retained_rows=$retainedRows " +
+                "bytes=${snapshot.totalObjectsSizeBytes.asBenchmarkValue()} " +
+                "marked_objects=${snapshot.markedObjectCount.asBenchmarkValue()} " +
+                "delta_from_database_seed_bytes=${deltaFromSeedBytes.asBenchmarkValue()} " +
+                "bytes_per_retained_row=${perRow(deltaFromSeedBytes, retainedRows).asBenchmarkValue()} " +
+                "delta_from_database_seed_objects=${deltaFromSeedObjects.asBenchmarkValue()} " +
+                "objects_per_retained_row=${perRow(deltaFromSeedObjects, retainedRows).asBenchmarkValue()}" +
+                uiDimensions,
+        )
+    }
+
+    private fun printHeapSnapshot(
+        phase: String,
+        snapshot: LiveHeapSnapshot,
+    ) {
+        println(
+            "memory name=live_heap_after_gc phase=$phase " +
+                "bytes=${snapshot.totalObjectsSizeBytes.asBenchmarkValue()} " +
+                "marked_objects=${snapshot.markedObjectCount.asBenchmarkValue()}",
+        )
+    }
+
+    private fun collectStableLiveHeap(): LiveHeapSnapshot {
+        var minimum = collectLiveHeapSnapshot()
+        repeat(MEMORY_GC_SAMPLES - 1) {
+            val current = collectLiveHeapSnapshot()
+            val currentBytes = current.totalObjectsSizeBytes
+            val minimumBytes = minimum.totalObjectsSizeBytes
+            if (currentBytes != null && (minimumBytes == null || currentBytes < minimumBytes)) {
+                minimum = current
+            }
+        }
+        return minimum
+    }
+
+    private fun collectRefreshMeasurement(
+        bytes: LongArray,
+        objects: LongArray,
+        index: Int,
+    ) {
+        val snapshot = collectStableLiveHeap()
+        bytes[index] = snapshot.totalObjectsSizeBytes ?: MEMORY_UNAVAILABLE
+        objects[index] = snapshot.markedObjectCount ?: MEMORY_UNAVAILABLE
+    }
+
+    private fun stableRefreshObjectGrowth(refreshes: MemoryRefreshMeasurements): MemoryGrowthGuard {
+        val first = refreshes.objectsAt(0)
+        val last = refreshes.objectsAt(refreshes.size - 1)
+        if (first == null || last == null) {
+            return MemoryGrowthGuard(growth = null, limit = null)
+        }
+        return MemoryGrowthGuard(
+            growth = last - first,
+            limit = maxOf(MEMORY_REFRESH_OBJECT_GROWTH_FLOOR, first / MEMORY_REFRESH_OBJECT_GROWTH_DIVISOR),
+        )
+    }
+
+    private fun difference(
+        value: Long?,
+        baseline: Long?,
+    ): Long? = if (value == null || baseline == null) null else value - baseline
+
+    private fun perRow(
+        bytes: Long?,
+        rows: Int,
+    ): Long? = bytes?.div(rows)
+
+    private fun Long?.asBenchmarkValue(): String = this?.toString() ?: "unavailable"
+
     private fun Double.rounded(): Double = (this * 1_000.0).roundToLong() / 1_000.0
 
     private data class SeedResult(
@@ -844,15 +1115,59 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
 
     private data class StablePrefixBenchmarkResult(
         val samples: BenchmarkSamples,
-        val retainedRows: List<DbPagingTimelineWithStatus>,
+        val retainedRows: List<TimelinePageItem>,
     )
+
+    private class RetainedUiHolder {
+        var items: List<UiTimelineV2> = emptyList()
+    }
+
+    private data class MemoryBenchmarkResult(
+        val databaseOpen: LiveHeapSnapshot,
+        val databaseSeeded: LiveHeapSnapshot,
+        val workingSet: MemoryWorkingSetResult,
+    )
+
+    private data class MemoryWorkingSetResult(
+        val checkpoints: List<MemoryWorkingSetCheckpoint>,
+        val refreshes: MemoryRefreshMeasurements,
+        val checksum: Long,
+    )
+
+    private data class MemoryWorkingSetCheckpoint(
+        val retainedRows: Int,
+        val cacheOnly: LiveHeapSnapshot,
+        val cachePlusUi: LiveHeapSnapshot,
+    )
+
+    private data class MemoryGrowthGuard(
+        val growth: Long?,
+        val limit: Long?,
+    )
+
+    private data class MemoryRefreshMeasurements(
+        private val bytes: LongArray,
+        private val objects: LongArray,
+    ) {
+        val size: Int = bytes.size
+
+        init {
+            require(bytes.size == objects.size)
+        }
+
+        fun bytesAt(index: Int): Long? = bytes[index].takeUnless { it == MEMORY_UNAVAILABLE }
+
+        fun objectsAt(index: Int): Long? = objects[index].takeUnless { it == MEMORY_UNAVAILABLE }
+    }
 
     private companion object {
         const val BENCHMARK_VERSION = 3
         const val LIFECYCLE_BENCHMARK_VERSION = 3
+        const val MEMORY_BENCHMARK_VERSION = 1
         const val BENCHMARK_PAGING_KEY = "timeline-database-benchmark"
         const val WARMUP_PAGING_KEY = "timeline-database-benchmark-warmup"
         const val LIFECYCLE_PAGING_KEY = "timeline-lifecycle-benchmark"
+        const val MEMORY_PAGING_KEY = "timeline-kotlin-memory-benchmark"
         const val PREPEND_PAGING_KEY = "timeline-prepend-benchmark"
         const val LIFECYCLE_TRANSLATION_PROVIDER = "benchmark-provider-v1"
         const val BENCHMARK_HOST = "benchmark.invalid"
@@ -871,9 +1186,16 @@ class TimelineDatabaseBenchmarkTest : RobolectricTest() {
         const val MEASURE_ITERATIONS = 7
         const val REWRITE_ITERATIONS = 3
         const val WINDOW_MEASURE_ITERATIONS = 3
+        const val MEMORY_REFRESH_ITERATIONS = 5
+        const val MEMORY_GC_SAMPLES = 3
+        const val MEMORY_ROWS = 480
+        const val MEMORY_REFRESH_OBJECT_GROWTH_FLOOR = 1_000L
+        const val MEMORY_REFRESH_OBJECT_GROWTH_DIVISOR = 100L
+        const val MEMORY_UNAVAILABLE = Long.MIN_VALUE
         val PAGE_OFFSETS = listOf(0, 240, 480)
         val PAGE_WINDOW_LIMITS = listOf(20, 100, 500)
         val IDENTITY_LIMITS = listOf(20, 100, 500)
+        val MEMORY_RETAINED_ROW_CHECKPOINTS = listOf(20, 60, 120, 240, MEMORY_ROWS)
         val PAYLOAD_TEXT = "0123456789abcdef".repeat(PAYLOAD_CHARS / 16)
         val LIFECYCLE_PAYLOAD_TEXT = "timeline payload 0123456789abcdef ".repeat(LIFECYCLE_PAYLOAD_CHARS / 34)
     }

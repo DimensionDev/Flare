@@ -30,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.SortIdProvider
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePageItem
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -560,7 +561,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     }
                 }
             val state =
-                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                PagingState<OffsetFromStartPagingKey, TimelinePageItem>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = 1),
@@ -642,7 +643,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val mixed = MixedRemoteMediator(db, listOf(loader), TimelineMergePolicy.Time)
             val timelineRemoteMediator = TimelineRemoteMediator(loader = mixed, database = db, allowLongText = false)
             val state =
-                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                PagingState<OffsetFromStartPagingKey, TimelinePageItem>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = 20),
@@ -697,7 +698,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 }
             val mediator = TimelineRemoteMediator(loader = remoteLoader, database = db, allowLongText = false)
             val state =
-                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                PagingState<OffsetFromStartPagingKey, TimelinePageItem>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = 20),
@@ -738,7 +739,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 (
                     refreshed
                         .single()
-                        .status.status.data.content as UiTimelineV2.Feed
+                        .baseItem as UiTimelineV2.Feed
                 ).title,
             )
         }
@@ -772,7 +773,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     }
                 }
             val state =
-                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                PagingState<OffsetFromStartPagingKey, TimelinePageItem>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = 1),
@@ -858,7 +859,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                 }
             val mediator = TimelineRemoteMediator(loader = loader, database = db, allowLongText = false)
             val state =
-                PagingState<OffsetFromStartPagingKey, DbPagingTimelineWithStatus>(
+                PagingState<OffsetFromStartPagingKey, TimelinePageItem>(
                     pages = emptyList(),
                     anchorPosition = null,
                     config = PagingConfig(pageSize = 20),

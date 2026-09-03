@@ -5,7 +5,10 @@ import androidx.room3.useWriterConnection
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.PlatformDispatchers
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.createDatabaseDriver
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageCache
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineDbPageLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
@@ -182,6 +185,8 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
                         TimelinePagingMapper.toDb(item, PAGING_KEY, sortId = index.toLong())
                     }
                 database.connect { saveToDatabase(database, items) }
+                val pageLoader = TimelineDbPageLoader(database, PAGING_KEY, TimelineDbPageCache())
+                val projectedBefore = pageLoader.load(offset = 0, limit = items.size)
                 val identitiesBefore =
                     database
                         .pagingTimelineDao()
@@ -223,6 +228,23 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
                             ?.content
                     assertEquals(updatedQuote, semanticQuote)
                     assertEquals(updatedQuote, presentationQuote)
+                }
+                val projectedAfter = pageLoader.load(offset = 0, limit = items.size)
+                val displayOptions =
+                    TranslationDisplayOptions(
+                        translationEnabled = false,
+                        autoDisplayEnabled = false,
+                        providerCacheKey = "test",
+                    )
+                projectedAfter.forEachIndexed { index, item ->
+                    assertTrue(item !== projectedBefore[index])
+                    val rendered = item.toUi(displayOptions) as UiTimelineV2.TimelinePostItem
+                    assertEquals(
+                        "updated quote body",
+                        rendered.presentation.quotes
+                            .single()
+                            .content.original.raw,
+                    )
                 }
             } finally {
                 database.close()
